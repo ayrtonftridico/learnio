@@ -1,0 +1,437 @@
+[
+  {
+    "pregunta": "Um engenheiro de dados deseja identificar todas as tabelas, jobs e painéis downstream que dependem de uma tabela antes de excluí-la.\n\nQual recurso Unity Catalog deve ser usado?",
+    "opciones": [
+      {
+        "texto_opcion": "Linhagem de dados",
+        "es_correcta": true,
+        "explicacion": "O Lineage mostra fontes upstream e consumidores downstream, permitindo a análise de impacto antes das mudanças."
+      },
+      {
+        "texto_opcion": "Delta Sharing",
+        "es_correcta": false,
+        "explicacion": "Delta Sharing é usado para compartilhar dados entre organizações, não para rastrear dependências."
+      },
+      {
+        "texto_opcion": "Histórico da tabela (DESCRIBE HISTORY)",
+        "es_correcta": false,
+        "explicacion": "O histórico da tabela mostra versões/operações anteriores em uma única tabela, não dependências entre objetos."
+      },
+      {
+        "texto_opcion": "Sistema.information_schema",
+        "es_correcta": false,
+        "explicacion": "information_schema expõe metadados sobre objetos, não relacionamentos de linhagem, e é excluído da captura de linhagem."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Visão geral da linhagem"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa visualizar a linhagem de uma tabela em Catalog Explorer, mas recebe um erro informando que nenhuma informação de linhagem está disponível, mesmo que consultas tenham sido executadas recentemente.\n\nQual requisito provavelmente está faltando?",
+    "opciones": [
+      {
+        "texto_opcion": "A tabela deve ser registrada em um metastore Unity Catalog",
+        "es_correcta": true,
+        "explicacion": "A linhagem é capturada apenas para tabelas registradas em um metastore UC; tabelas não UC não mostrarão a linhagem, a menos que sejam adicionadas como metadados externos."
+      },
+      {
+        "texto_opcion": "O cluster deve estar executando Databricks Runtime 7.3 LTS",
+        "es_correcta": false,
+        "explicacion": "A linhagem de streaming requer DBR 11.3 LTS+, não 7.3 LTS, e este não é o requisito geral para captura de linhagem."
+      },
+      {
+        "texto_opcion": "A tabela deve usar o formato Parquet",
+        "es_correcta": false,
+        "explicacion": "O formato do arquivo não influencia se a linhagem é capturada."
+      },
+      {
+        "texto_opcion": "O workspace deve estar no nível Premium",
+        "es_correcta": false,
+        "explicacion": "A disponibilidade da linhagem depende do registro e das permissões de UC, e não apenas do nível de preços do workspace."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Requisitos"
+    ]
+  },
+  {
+    "pregunta": "Um usuário tem apenas `SELECT` em uma tabela `finance.sales.orders`, mas nenhum privilégio `BROWSE` no catálogo `finance`.\n\nO que acontece quando eles visualizam o gráfico de linhagem envolvendo esta tabela?",
+    "opciones": [
+      {
+        "texto_opcion": "A tabela aparece totalmente expandida com todos os nós downstream visíveis",
+        "es_correcta": false,
+        "explicacion": "Sem BROWSE no catálogo, o usuário não pode expandir ou ver conexões downstream da tabela."
+      },
+      {
+        "texto_opcion": "A tabela aparece como um nó mascarado que não pode ser expandido",
+        "es_correcta": true,
+        "explicacion": "Uma tabela que o usuário pode selecionar, mas não possui NAVEGAR no catálogo pai, aparece mascarada no gráfico de linhagem e não pode ser expandida."
+      },
+      {
+        "texto_opcion": "Um erro é gerado e todo o gráfico de linhagem falha ao carregar",
+        "es_correcta": false,
+        "explicacion": "O gráfico ainda carrega; apenas o nó específico é mascarado, em vez de causar uma falha total."
+      },
+      {
+        "texto_opcion": "A tabela é removida inteiramente do gráfico",
+        "es_correcta": false,
+        "explicacion": "O nó ainda aparece, mas mascarado, em vez de ser removido."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Permissões"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa a seguinte consulta:\n\n```sql\nCRIAR OU SUBSTITUIR TABELA car_features\nAS SELECT *, in1 + in2 AS premium_feature_set\nDE car_features_exterior\nJUNTE-SE a car_features_interior\nUSANDO (id, modelo);\n```\n\nQual afirmação sobre a linhagem da coluna resultante está correta?",
+    "opciones": [
+      {
+        "texto_opcion": "`premium_feature_set` registrará `in1` e `in2` como colunas de origem",
+        "es_correcta": true,
+        "explicacion": "A linhagem da coluna rastreia cada coluna de origem que contribuiu para uma coluna de destino derivada, portanto, in1 e in2 são registrados."
+      },
+      {
+        "texto_opcion": "Apenas `in1` será registrado como coluna de origem, pois aparece primeiro na expressão",
+        "es_correcta": false,
+        "explicacion": "Ambas as colunas contribuintes são rastreadas, não apenas a primeira referenciada."
+      },
+      {
+        "texto_opcion": "Nenhuma linhagem de coluna será capturada porque a consulta usa um JOIN",
+        "es_correcta": false,
+        "explicacion": "As junções são suportadas; a linhagem da coluna é capturada normalmente para consultas que combinam tabelas dessa maneira."
+      },
+      {
+        "texto_opcion": "A linhagem da coluna só será capturada no nível da tabela, não por coluna",
+        "es_correcta": false,
+        "explicacion": "Unity Catalog captura a linhagem até o nível da coluna individual para consultas como esta."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Linhagem em nível de coluna"
+    ]
+  },
+  {
+    "pregunta": "Qual dos seguintes cenários NÃO será capturado na linhagem em nível de coluna Unity Catalog?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma coluna derivada por meio de uma função definida pelo usuário (UDF)",
+        "es_correcta": true,
+        "explicacion": "As UDFs podem ocultar o mapeamento de colunas de origem para destino, de modo que a linhagem de colunas não é capturada para transformações que as utilizam."
+      },
+      {
+        "texto_opcion": "Uma coluna copiada diretamente via SELECT * de uma tabela UC para outra",
+        "es_correcta": false,
+        "explicacion": "Cópias diretas de colunas via SELECT entre tabelas UC cadastradas são capturadas normalmente."
+      },
+      {
+        "texto_opcion": "Uma coluna calculada usando uma expressão SQL CASE referenciando outras colunas",
+        "es_correcta": false,
+        "explicacion": "As expressões SQL padrão que fazem referência a colunas são rastreadas, diferentemente da lógica UDF opaca."
+      },
+      {
+        "texto_opcion": "Uma coluna produzida por um JOIN entre duas tabelas UC",
+        "es_correcta": false,
+        "explicacion": "As junções entre tabelas UC registradas são suportadas e a linhagem é capturada."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Limitações de linhagem em nível de coluna"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados quer perguntar, em linguagem natural: “Quais tabelas dependem de Revenue_fact?” diretamente dentro de Catalog Explorer sem escrever SQL nas tabelas do sistema.\n\nQual recurso eles devem usar?",
+    "opciones": [
+      {
+        "texto_opcion": "Código Genie com o comando `/getTableLineages`",
+        "es_correcta": true,
+        "explicacion": "Genie Code é o assistente de IA em Catalog Explorer que responde a perguntas de linhagem em linguagem natural usando comandos como /getTableLineages."
+      },
+      {
+        "texto_opcion": "O recurso de preenchimento automático do Databricks SQL Editor",
+        "es_correcta": false,
+        "explicacion": "O preenchimento automático auxilia na escrita da sintaxe SQL; não responde a questões de linhagem em linguagem natural."
+      },
+      {
+        "texto_opcion": "O comando SQL `DESCRIBE LINEAGE`",
+        "es_correcta": false,
+        "explicacion": "Não existe tal comando SQL para linhagem; a linhagem é visualizada por meio da interface do usuário, tabelas do sistema ou código Genie."
+      },
+      {
+        "texto_opcion": "Unity Catalog ABAC editor de políticas",
+        "es_correcta": false,
+        "explicacion": "As políticas ABAC governam o controle de acesso com base em atributos, não relacionados à consulta de linhagem em linguagem natural."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Código do Gênio"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja encontrar programaticamente todas as tabelas que foram lidas em `main.finance.revenue_raw` nos últimos 90 dias.\n\nQual abordagem eles deveriam usar?",
+    "opciones": [
+      {
+        "texto_opcion": "Consulta a filtragem `system.access.table_lineage` em `source_table_full_name` e `event_date`",
+        "es_correcta": true,
+        "explicacion": "table_lineage registra cada evento de leitura/gravação com nomes de tabelas de origem e destino e uma coluna de partição event_date, ideal para este filtro."
+      },
+      {
+        "texto_opcion": "Consultar `system.information_schema.tables`",
+        "es_correcta": false,
+        "explicacion": "information_schema descreve metadados de tabela (colunas, tipos), mas não registra relacionamentos de linhagem."
+      },
+      {
+        "texto_opcion": "Execute `DESCRIBE HISTORY main.finance.revenue_raw`",
+        "es_correcta": false,
+        "explicacion": "DESCRIBE HISTORY mostra o histórico de versão da própria tabela, e não quais tabelas downstream a consumiram."
+      },
+      {
+        "texto_opcion": "Consultar `system.access.audit`",
+        "es_correcta": false,
+        "explicacion": "O log de auditoria rastreia ações gerais no nível da conta, e não relacionamentos estruturados de linhagem entre tabelas."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Tabelas do sistema de linhagem"
+    ]
+  },
+  {
+    "pregunta": "Em `system.access.table_lineage`, uma linha tem `source_table_full_name` preenchido, mas `target_table_full_name` é NULL.\n\nQue tipo de evento esta linha representa?",
+    "opciones": [
+      {
+        "texto_opcion": "Um evento somente leitura",
+        "es_correcta": true,
+        "explicacion": "Quando source_type é NOT NULL e target_type é NULL, a linha representa um evento somente leitura na tabela de origem."
+      },
+      {
+        "texto_opcion": "Um evento somente gravação",
+        "es_correcta": false,
+        "explicacion": "Os eventos somente gravação têm o destino preenchido e a origem NULL — o oposto desta linha."
+      },
+      {
+        "texto_opcion": "Um evento combinado de leitura e gravação",
+        "es_correcta": false,
+        "explicacion": "Os eventos de leitura e gravação têm origem e destino preenchidos, o que não é o caso aqui."
+      },
+      {
+        "texto_opcion": "Um registro de linhagem inválido/corrompido",
+        "es_correcta": false,
+        "explicacion": "Este é um padrão normal e válido que documenta uma operação somente leitura, não um registro corrompido."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Esquema de tabelas do sistema"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe executa `INSERT INTO sales_summary VALUES (101, 'East', 4500)` para carregar um registro.\n\nO que acontecerá com a linha correspondente em `system.access.column_lineage`?",
+    "opciones": [
+      {
+        "texto_opcion": "Nenhuma linhagem de coluna será capturada porque o INSERT usa valores literais explícitos sem fonte",
+        "es_correcta": true,
+        "explicacion": "A linhagem da coluna registra apenas eventos com uma origem; inserções explícitas de VALUES não possuem coluna de origem, portanto nada é capturado."
+      },
+      {
+        "texto_opcion": "A linhagem da coluna será capturada com `source_column_name` definido com valores literais",
+        "es_correcta": false,
+        "explicacion": "Os valores literais não são colunas de origem, portanto, não podem preencher source_column_name."
+      },
+      {
+        "texto_opcion": "A linhagem da coluna será capturada, mas apenas no nível da tabela",
+        "es_correcta": false,
+        "explicacion": "A linhagem em nível de tabela em table_lineage ainda pode ser diferente, mas a questão diz respeito especificamente a column_lineage, que requer uma coluna de origem."
+      },
+      {
+        "texto_opcion": "A transação inteira falhará na validação",
+        "es_correcta": false,
+        "explicacion": "O INSERT é executado com sucesso; a captura de linhagem simplesmente não se aplica a este evento."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Esquema de tabelas do sistema"
+    ]
+  },
+  {
+    "pregunta": "Uma empresa ingere dados do Salesforce em uma tabela Unity Catalog usando um notebook personalizado (não Lakeflow Connect) e os dados são posteriormente consumidos por um painel do Tableau.\n\nQual afirmação sobre a captura desta linhagem de ponta a ponta está correta?",
+    "opciones": [
+      {
+        "texto_opcion": "Os objetos de metadados externos devem ser criados manualmente para Salesforce e Tableau e depois vinculados por meio de relacionamentos de linhagem",
+        "es_correcta": true,
+        "explicacion": "Como a ingestão não é via Lakeflow Connect, os sistemas externos devem ser registrados manualmente como objetos de metadados externos e conectados por meio de relacionamentos de linhagem via UI, API ou SDK."
+      },
+      {
+        "texto_opcion": "Unity Catalog detecta automaticamente Salesforce e Tableau sem qualquer configuração",
+        "es_correcta": false,
+        "explicacion": "A detecção automática de sistemas externos ocorre apenas por meio de pipelines de ingestão gerenciados Lakeflow Connect, e não de notebooks personalizados."
+      },
+      {
+        "texto_opcion": "A linhagem externa não pode ser capturada, a menos que os dados passem por um pipeline declarativo do Lakeflow Spark",
+        "es_correcta": false,
+        "explicacion": "A linhagem externa pode ser adicionada manualmente por meio de UI, API REST ou SDK, independentemente do tipo de pipeline."
+      },
+      {
+        "texto_opcion": "A linhagem externa requer a ativação de Delta Sharing primeiro",
+        "es_correcta": false,
+        "explicacion": "Delta Sharing não está relacionado à criação de objetos de metadados externos ou relacionamentos de linhagem."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Linhagem Externa"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja criar um relacionamento de linhagem downstream de uma tabela Unity Catalog para um objeto de metadados externo recém-registrado que representa um relatório do Power BI.\n\nQual privilégio é necessário na tabela UC de origem para fazer isso?",
+    "opciones": [
+      {
+        "texto_opcion": "SELECIONAR",
+        "es_correcta": true,
+        "explicacion": "A criação de um relacionamento downstream a partir de uma tabela UC requer privilégio SELECT (leitura) nessa tabela."
+      },
+      {
+        "texto_opcion": "MODIFICAR",
+        "es_correcta": false,
+        "explicacion": "MODIFY é necessário para criar um relacionamento upstream (onde a tabela é um destino de gravação), não downstream."
+      },
+      {
+        "texto_opcion": "CRIAR METADADOS EXTERNOS",
+        "es_correcta": false,
+        "explicacion": "CREATE EXTERNAL METADATA no metastore é necessário para criar o próprio objeto de metadados externos, não para vincular um downstream de tabela UC existente."
+      },
+      {
+        "texto_opcion": "NAVEGAR",
+        "es_correcta": false,
+        "explicacion": "BROWSE permite visualizar gráficos de linhagem, mas não é suficiente para criar um novo relacionamento de linhagem."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Permissões de linhagem externa"
+    ]
+  },
+  {
+    "pregunta": "Um auditor precisa consultar eventos históricos de linhagem que ocorreram há 14 meses para uma revisão de conformidade.\n\nQual limitação se aplica se eles tentarem consultar `system.access.table_lineage`?",
+    "opciones": [
+      {
+        "texto_opcion": "Os registros estarão faltando porque as tabelas do sistema retêm apenas uma janela contínua de 1 ano",
+        "es_correcta": true,
+        "explicacion": "As tabelas do sistema Lineage mantêm apenas uma janela de retenção contínua de 1 ano; eventos mais antigos que isso são removidos."
+      },
+      {
+        "texto_opcion": "Os registros estarão faltando porque as tabelas do sistema retêm apenas 30 dias de histórico",
+        "es_correcta": false,
+        "explicacion": "A janela de retenção para tabelas do sistema de linhagem é de 1 ano, não de 30 dias."
+      },
+      {
+        "texto_opcion": "Os registros ainda estarão totalmente disponíveis, pois as tabelas do sistema retêm os dados indefinidamente",
+        "es_correcta": false,
+        "explicacion": "Ao contrário de Catalog Explorer e da API Lineage, as tabelas do sistema não retêm a linhagem indefinidamente — apenas por 1 ano."
+      },
+      {
+        "texto_opcion": "A consulta falhará completamente porque as tabelas do sistema não podem ser consultadas em busca de dados históricos",
+        "es_correcta": false,
+        "explicacion": "A consulta será executada, mas as linhas anteriores à janela de retenção de 1 ano simplesmente não estarão presentes."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Retenção"
+    ]
+  },
+  {
+    "pregunta": "Qual das alternativas a seguir descreve com precisão a retenção de dados de linhagem em Catalog Explorer versus as tabelas do sistema Lineage?",
+    "opciones": [
+      {
+        "texto_opcion": "Catalog Explorer retém a linhagem indefinidamente a partir de 1º de setembro de 2024, enquanto as tabelas do sistema mantêm apenas uma janela contínua de 1 ano",
+        "es_correcta": true,
+        "explicacion": "Catalog Explorer e a API Lineage mantêm a linhagem indefinidamente a partir de 1º de setembro de 2024, enquanto as tabelas do sistema eliminam eventos com mais de 1 ano."
+      },
+      {
+        "texto_opcion": "Tanto Catalog Explorer quanto as tabelas do sistema retêm a linhagem indefinidamente",
+        "es_correcta": false,
+        "explicacion": "As tabelas do sistema são limitadas a uma janela contínua de 1 ano, ao contrário da retenção indefinida de Catalog Explorer."
+      },
+      {
+        "texto_opcion": "Tanto Catalog Explorer quanto as tabelas do sistema retêm apenas o último 1 ano de linhagem",
+        "es_correcta": false,
+        "explicacion": "Somente as tabelas do sistema são limitadas a 1 ano; Catalog Explorer mantém a linhagem indefinidamente a partir de 1º de setembro de 2024."
+      },
+      {
+        "texto_opcion": "Catalog Explorer retém 1 ano, enquanto as tabelas do sistema retêm a linhagem indefinidamente",
+        "es_correcta": false,
+        "explicacion": "Isto inverte o comportamento real de retenção das duas interfaces."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Retenção"
+    ]
+  },
+  {
+    "pregunta": "Um esquema chamado `sales_data` é renomeado para `sales_data_v2` e vários jobs downstream continuam lendo o esquema renomeado.\n\nO que acontece com a linhagem capturada anteriormente para tabelas neste esquema?",
+    "opciones": [
+      {
+        "texto_opcion": "A linhagem não é preservada durante a renomeação e os links de linhagem histórica são quebrados",
+        "es_correcta": true,
+        "explicacion": "A linhagem não é explicitamente preservada quando catálogos, esquemas, tabelas, visualizações ou colunas são renomeados."
+      },
+      {
+        "texto_opcion": "A linhagem é atualizada automaticamente para refletir o novo nome do esquema sem perda de dados",
+        "es_correcta": false,
+        "explicacion": "A renomeação quebra a continuidade da linhagem; ele não remapeia automaticamente a linhagem histórica para o novo nome."
+      },
+      {
+        "texto_opcion": "A operação de renomeação é bloqueada até que a linhagem seja migrada manualmente",
+        "es_correcta": false,
+        "explicacion": "Unity Catalog não bloqueia renomeações por motivos de linhagem; a linhagem simplesmente não é preservada."
+      },
+      {
+        "texto_opcion": "Somente quebras de linhagem em nível de coluna; a linhagem em nível de tabela permanece intacta",
+        "es_correcta": false,
+        "explicacion": "A limitação de renomeação aplica-se amplamente a catálogos, esquemas, tabelas, visualizações e colunas, não apenas a colunas."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Limitações"
+    ]
+  },
+  {
+    "pregunta": "Um job é executado usando `databricks jobs runs submit` (em vez de uma definição de job agendado) para executar um notebook que grava em uma tabela Unity Catalog.\n\nQual afirmação sobre a linhagem resultante está correta?",
+    "opciones": [
+      {
+        "texto_opcion": "A linhagem da tabela e da coluna ainda é capturada, mas a execução não aparecerá vinculada nas visualizações de linhagem",
+        "es_correcta": true,
+        "explicacion": "Para execuções enviadas por meio de envio de execuções (ou envio de spark), a linhagem de tabela/coluna subjacente ainda é capturada, mas a execução do job em si não aparece nas visualizações de linhagem."
+      },
+      {
+        "texto_opcion": "Nenhuma linhagem de qualquer tipo é capturada para jobs de envio de execuções",
+        "es_correcta": false,
+        "explicacion": "A linhagem de tabelas e colunas ainda é capturada; apenas o link de execução do job nas visualizações de linhagem está faltando."
+      },
+      {
+        "texto_opcion": "A captura de linhagem falha e a execução do job é revertida",
+        "es_correcta": false,
+        "explicacion": "As limitações de linhagem não causam falhas ou reversões de jobs; o job é concluído normalmente."
+      },
+      {
+        "texto_opcion": "A linhagem é totalmente capturada, incluindo o link de execução do job, idêntico a um job agendado",
+        "es_correcta": false,
+        "explicacion": "Ao contrário das execuções de job agendadas, as execuções de envio de jobs não mostram o link de execução de job nas visualizações de linhagem, mesmo que a linhagem de tabela/coluna seja capturada."
+      }
+    ],
+    "tags": [
+      "7.5",
+      "Limitações"
+    ]
+  }
+]

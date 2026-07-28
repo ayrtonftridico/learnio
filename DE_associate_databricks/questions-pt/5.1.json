@@ -1,0 +1,768 @@
+[
+  {
+    "pregunta": "Um engenheiro de dados cria uma pasta Git no Databricks acessando a barra lateral do Workspace e selecionando **Criar > pasta Git**. Eles fornecem um URL do GitHub e clicam em **Criar pasta Git**.\n\nQual é o objetivo principal de uma pasta Databricks Git?",
+    "opciones": [
+      {
+        "texto_opcion": "Um diretório de workspace nativo que espelha um Git repository remoto, permitindo operações de controle de versão diretamente no Databricks.",
+        "es_correcta": true,
+        "explicacion": "Uma pasta Git clona um repositório remoto no workspace do Databricks, permitindo ramificação, confirmação, extração, mesclagem e rebase da UI ou API."
+      },
+      {
+        "texto_opcion": "Um instantâneo somente leitura de um repository remoto armazenado em DBFS para importações de notebook.",
+        "es_correcta": false,
+        "explicacion": "Git folders são leitura-gravação e sincronizados bidirecionalmente com o controle remoto - eles não são instantâneos DBFS somente leitura."
+      },
+      {
+        "texto_opcion": "Um servidor Git gerenciado pelo Databricks que hospeda repositórios internamente sem exigir um provedor Git.",
+        "es_correcta": false,
+        "explicacion": "Os databricks Git folders requerem um provedor Git externo (GitHub, Azure DevOps, GitLab, etc.). O Databricks não hospeda Git repositories internamente."
+      },
+      {
+        "texto_opcion": "Uma pasta de workspace que implanta automaticamente notebooks em produção a cada salvamento.",
+        "es_correcta": false,
+        "explicacion": "Git folders fornece integração de controle de versão, não implantação automática. A implantação requer um pipeline Databricks Asset Bundles ou CI/CD."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Git Folders"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe migrou da estrutura de caminho herdada `/Repos/` para o novo layout do workspace do Databricks.\n\nQual prefixo de caminho é usado para Git folders no layout atual do workspace do Databricks?",
+    "opciones": [
+      {
+        "texto_opcion": "`/Workspace/Usuários/<e-mail>/`",
+        "es_correcta": true,
+        "explicacion": "O layout atual armazena Git folders em `/Workspace/Users/<email>/`. O antigo caminho `/Repos/` é a estrutura legada que foi substituída."
+      },
+      {
+        "texto_opcion": "`/Repos/<email>/`",
+        "es_correcta": false,
+        "explicacion": "Esta é a **antiga** estrutura de caminho herdada. O caminho recomendado atualmente é `/Workspace/Users/<email>/`."
+      },
+      {
+        "texto_opcion": "`/dbfs/git-folders/<e-mail>/`",
+        "es_correcta": false,
+        "explicacion": "Git folders são armazenados no sistema de arquivos do workspace do Databricks, não no DBFS. Não há caminho `/dbfs/git-folders/`."
+      },
+      {
+        "texto_opcion": "`/SharedWorkspace/Repos/<email>/`",
+        "es_correcta": false,
+        "explicacion": "Este caminho não existe no Databricks. Git folders compartilhado pode ser colocado em `/Workspace/Shared/`, não neste formato."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Git Folders"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa o seguinte comando cURL em um pipeline CI/CD:\n\n```bash\ncurl -X PATCH\\\n  \"${DATABRICKS_HOST}/api/2.0/repos/123456789\"\\\n  -H \"Autorização: Portador ${DATABRICKS_TOKEN}\" \\\n  -d '{\"ramo\": \"principal\"}'\n```\n\nO que esse comando faz?",
+    "opciones": [
+      {
+        "texto_opcion": "Alterna a pasta Git com ID `123456789` para o branch `main`, extraindo o commit mais recente do controle remoto.",
+        "es_correcta": true,
+        "explicacion": "`PATCH /api/2.0/repos/{repo_id}` com uma carga útil `branch` alterna a pasta Git do workspace para esse branch e a sincroniza com o commit remoto mais recente."
+      },
+      {
+        "texto_opcion": "Cria um novo repository chamado `main` no workspace do Databricks.",
+        "es_correcta": false,
+        "explicacion": "A criação de um repository usa `POST /api/2.0/repos`. `PATCH` em um ID de repositório existente atualiza seu branch ou tag, mas não cria um novo repositório."
+      },
+      {
+        "texto_opcion": "Mescla o branch `main` no branch atual da pasta Git.",
+        "es_correcta": false,
+        "explicacion": "A API Repos não suporta operações de mesclagem. A mesclagem é feita na UI do Databricks Git ou no provedor Git (GitHub/ADO)."
+      },
+      {
+        "texto_opcion": "Exclui todas as ramificações, exceto `main` no repository remoto.",
+        "es_correcta": false,
+        "explicacion": "A API Repos não pode gerenciar ramificações no repository remoto. Ele controla apenas qual ramificação a pasta Git do workspace está rastreando atualmente."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "API Repos"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa clonar programaticamente um GitHub repository em um workspace do Databricks. Qual chamada da API REST realiza isso corretamente?\n\n```json\nR: POST /api/2.0/repos\n    { \"url\": \"https://github.com/org/proj.git\", \"provedor\": \"gitHub\", \"caminho\": \"/Workspace/Users/user@co.com/proj\" }\n\nB: COLOQUE /api/2.0/repos\n    { \"url\": \"https://github.com/org/proj.git\", \"provedor\": \"gitHub\" }\n\nC: PATCH /api/2.0/repos/new\n    { \"url\": \"https://github.com/org/proj.git\" }\n\nD: POST /api/2.0/git/clone\n    { \"repository\": \"https://github.com/org/proj.git\" }\n```",
+    "opciones": [
+      {
+        "texto_opcion": "Opção A — `POST /api/2.0/repos` com `url`, `provider` e `path`.",
+        "es_correcta": true,
+        "explicacion": "`POST /api/2.0/repos` é o endpoint correto para clonar um repositório. Os campos obrigatórios são `url`, `provider` e `path` (destino do workspace)."
+      },
+      {
+        "texto_opcion": "Opção B — `PUT /api/2.0/repos` com `url` e `provider`.",
+        "es_correcta": false,
+        "explicacion": "`PUT` não é um verbo válido para a API Repos. O endpoint do clone é `POST /api/2.0/repos`. `path` também é necessário."
+      },
+      {
+        "texto_opcion": "Opção C — `PATCH /api/2.0/repos/new` com `url`.",
+        "es_correcta": false,
+        "explicacion": "`PATCH /api/2.0/repos/{repo_id}` atualiza um repositório **existente**. Você não pode usá-lo para criar um novo e `new` não é um ID de repositório válido."
+      },
+      {
+        "texto_opcion": "Opção D — `POST /api/2.0/git/clone`.",
+        "es_correcta": false,
+        "explicacion": "`/api/2.0/git/clone` não é um ponto final válido da API REST do Databricks. O endpoint correto é `/api/2.0/repos`."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "API Repos"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados usa o Databricks Python SDK para gerenciar Git folders. Revise o seguinte código:\n\n```píton\nde databricks.sdk importar WorkspaceClient\nw = WorkspaceClient()\nw.repos.update(repo_id=456, branch=\"release/v2.0\")\n```\n\nQual é o resultado da execução deste código?",
+    "opciones": [
+      {
+        "texto_opcion": "A pasta Git com ID `456` é alternada para o branch `release/v2.0`, sincronizando com seu commit remoto mais recente.",
+        "es_correcta": true,
+        "explicacion": "`w.repos.update(repo_id=..., branch=...)` chama `PATCH /api/2.0/repos/{repo_id}` nos bastidores, alternando a pasta do workspace para o branch especificado."
+      },
+      {
+        "texto_opcion": "Um novo branch chamado `release/v2.0` é criado no GitHub repository remoto.",
+        "es_correcta": false,
+        "explicacion": "A API Repos não pode criar ramificações em um repository remoto. A criação da ramificação deve ser feita no provedor Git ou por meio de comandos da CLI do Git."
+      },
+      {
+        "texto_opcion": "Todos os notebooks no repositório `456` são copiados para uma nova pasta chamada `release/v2.0`.",
+        "es_correcta": false,
+        "explicacion": "`w.repos.update()` altera o branch rastreado de uma pasta Git existente; ele não copia arquivos nem cria novas pastas."
+      },
+      {
+        "texto_opcion": "O código falha porque `branch` deve ser passado como um argumento posicional, não como um argumento de palavra-chave.",
+        "es_correcta": false,
+        "explicacion": "O SDK do Databricks `repos.update()` aceita `repo_id` e `branch` como argumentos de palavra-chave. Esta sintaxe é válida."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "SDK Python"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa mudar uma pasta Git do Databricks para rastrear uma versão marcada específica em vez de uma ramificação. Qual carga útil da API Repos consegue isso?\n\n```json\nR: { \"branch\": \"v1.5.0\" }\nB: { \"tag\": \"v1.5.0\" }\nC: { \"ref\": \"tags/v1.5.0\" }\nD: { \"commit\": \"v1.5.0\" }\n```",
+    "opciones": [
+      {
+        "texto_opcion": "`{ \"tag\": \"v1.5.0\" }`",
+        "es_correcta": true,
+        "explicacion": "O endpoint `PATCH /api/2.0/repos/{repo_id}` aceita uma chave `branch` ou uma chave `tag`. Para fixar em uma tag de lançamento, use `{ \"tag\": \"v1.5.0\" }`."
+      },
+      {
+        "texto_opcion": "`{ \"branch\": \"v1.5.0\" }`",
+        "es_correcta": false,
+        "explicacion": "Usar `branch` com um nome de tag falharia se `v1.5.0` não fosse um nome de branch real. As tags devem ser especificadas com a chave `tag`."
+      },
+      {
+        "texto_opcion": "`{ \"ref\": \"tags/v1.5.0\" }`",
+        "es_correcta": false,
+        "explicacion": "`ref` não é um campo válido na carga útil de atualização da API Repos. Apenas `branch` ou `tag` são aceitos."
+      },
+      {
+        "texto_opcion": "`{ \"commit\": \"v1.5.0\" }`",
+        "es_correcta": false,
+        "explicacion": "`commit` não é um campo válido para a operação de atualização. A API Repos usa `branch` ou `tag` para identificar a revisão."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "API Repos"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados abre a caixa de diálogo Git em um notebook do Databricks e deseja criar uma nova ramificação de recurso chamada `feature/data-quality` baseada em `main`.\n\nQual é a sequência correta de etapas da UI?",
+    "opciones": [
+      {
+        "texto_opcion": "Clique em **Criar ramificação** → insira `recurso/qualidade de dados` → selecione `principal` como ramificação base → clique em **Criar**.",
+        "es_correcta": true,
+        "explicacion": "O botão **Criar branch** da caixa de diálogo Git abre um formulário onde você insere o nome do branch e seleciona o branch base antes de clicar em **Criar**."
+      },
+      {
+        "texto_opcion": "Digite `git checkout -b feature/data-quality` na célula do notebook e execute-o.",
+        "es_correcta": false,
+        "explicacion": "A execução de comandos `git` nas células do notebook não tem efeito. Os comandos Git CLI devem ser executados a partir do terminal web em uma pasta Git com suporte CLI habilitado."
+      },
+      {
+        "texto_opcion": "Vá para **Configurações > Git** e adicione o nome do branch em **Ramos Gerenciados**.",
+        "es_correcta": false,
+        "explicacion": "Não há nenhuma configuração **Ramos Gerenciados** nas Configurações do Databricks. A criação da ramificação é feita por meio da caixa de diálogo Git ou do terminal Git CLI."
+      },
+      {
+        "texto_opcion": "Chame `POST /api/2.0/repos/{repo_id}/branches` com `{ \"name\": \"feature/data-quality\" }`.",
+        "es_correcta": false,
+        "explicacion": "A API Repos não possui um subendpoint `/branches`. A criação de ramificação remota é feita por meio da API do provedor Git ou da CLI do Git."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Filiais"
+    ]
+  },
+  {
+    "pregunta": "Dois engenheiros de dados compartilham uma pasta Git em `/Workspace/Shared/etl-project`. O engenheiro A muda a caixa de diálogo do Git de `main` para `feature/refactor`.\n\nO que acontece com o Engenheiro B, que também está com a pasta aberta?",
+    "opciones": [
+      {
+        "texto_opcion": "A visão da pasta do engenheiro B também muda para `feature/refactor`, porque Git folders compartilhado tem um único estado de ramificação compartilhada.",
+        "es_correcta": true,
+        "explicacion": "Uma pasta Git possui um único estado de ramificação compartilhado por todos os usuários com acesso. Quando um usuário muda de branch, ele muda para todos que usam aquela pasta."
+      },
+      {
+        "texto_opcion": "O engenheiro B permanece em `principal` porque cada usuário possui um estado de ramificação isolado dentro da mesma pasta.",
+        "es_correcta": false,
+        "explicacion": "Os databricks Git folders não fornecem isolamento de ramificação por usuário na mesma pasta. A ramificação é global para a pasta."
+      },
+      {
+        "texto_opcion": "O Engenheiro B recebe uma notificação de conflito de mesclagem e deve resolvê-la antes de continuar.",
+        "es_correcta": false,
+        "explicacion": "A troca de ramificações não aciona uma notificação de conflito de mesclagem para outros usuários. A ramificação simplesmente muda para toda a pasta compartilhada."
+      },
+      {
+        "texto_opcion": "O Databricks impede a troca de ramificação porque outro usuário está com a pasta aberta.",
+        "es_correcta": false,
+        "explicacion": "O Databricks não bloqueia as operações do Git quando vários usuários têm uma pasta aberta. Qualquer usuário com permissão pode mudar de branch a qualquer momento."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Filiais",
+      "Colaboração"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe de engenharia de dados segue as práticas recomendadas para colaboração de pastas Git do Databricks.\n\nQue abordagem a Databricks recomenda para evitar conflitos de gestão de filiais entre membros da equipe?",
+    "opciones": [
+      {
+        "texto_opcion": "Cada desenvolvedor clona o repository em sua própria pasta de workspace pessoal em `/Workspace/Users/<email>/`.",
+        "es_correcta": true,
+        "explicacion": "A Databricks recomenda que cada desenvolvedor tenha seu próprio clone de pasta Git. Isso evita que um usuário troque acidentalmente de ramificação para outros usuários."
+      },
+      {
+        "texto_opcion": "A equipe usa uma única pasta Git compartilhada e coordena as trocas de ramificação por meio de um canal do Slack.",
+        "es_correcta": false,
+        "explicacion": "Usar uma única pasta compartilhada é exatamente o antipadrão contra o qual o Databricks alerta. A coordenação manual é propensa a erros e não evita mudanças acidentais."
+      },
+      {
+        "texto_opcion": "Cada desenvolvedor cria um workspace separado do Databricks para seu job de recursos.",
+        "es_correcta": false,
+        "explicacion": "Criar workspaces separados por desenvolvedor é excessivo e caro. A abordagem correta são clones de pastas Git separados no mesmo workspace."
+      },
+      {
+        "texto_opcion": "A equipe usa bloqueio de ramificação por meio da API Repos para evitar trocas de ramificação não autorizadas.",
+        "es_correcta": false,
+        "explicacion": "A API Repos não possui um recurso de bloqueio de ramificação. A proteção de branch é gerenciada no provedor Git externo (por exemplo, regras de proteção de branch do GitHub)."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Filiais",
+      "Melhores Práticas"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa os seguintes comandos no terminal web do Databricks (Git CLI habilitado):\n\n```bash\ncd /Workspace/Users/alice@co.com/my-repo\ngit checkout -b recurso/camada de ingestão\ngit push -u recurso de origem/camada de ingestão\n```\n\nQual é o resultado?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma nova ramificação `feature/ingest-layer` é criada localmente e enviada para o Git repository remoto, com rastreamento configurado.",
+        "es_correcta": true,
+        "explicacion": "`git checkout -b` cria uma ramificação local e alterna para ela. `git push -u origin` envia-o para o controle remoto e define a referência de rastreamento upstream."
+      },
+      {
+        "texto_opcion": "Os comandos falham porque o Git CLI não tem suporte em notebooks do Databricks.",
+        "es_correcta": false,
+        "explicacion": "A CLI do Git é suportada pelo **terminal web** (não pelas células do notebook) em Git folders criado com a opção 'Ativar suporte à CLI do Git'. O caminho e os comandos são válidos."
+      },
+      {
+        "texto_opcion": "Uma nova ramificação é criada somente na área de job; o controle remoto não é atualizado porque o Databricks Git folders não pode enviar para o controle remoto repos.",
+        "es_correcta": false,
+        "explicacion": "Databricks Git folders com suporte CLI podem enviar para repositórios remotos usando comandos `git push` padrão, desde que as credenciais do Git estejam configuradas."
+      },
+      {
+        "texto_opcion": "O comando `git checkout -b` cria o branch, mas `git push` é bloqueado pelas políticas de segurança do Databricks.",
+        "es_correcta": false,
+        "explicacion": "Não existe uma política de segurança ao nível do Databricks que bloqueie o `git push` para usuários autorizados com credenciais Git válidas. Push funciona normalmente."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Filiais",
+      "CLI do Git"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados adiciona um novo notebook a uma pasta Git e modifica um script Python existente. Eles abrem a caixa de diálogo Git.\n\nQual afirmação descreve corretamente o comportamento do commit?",
+    "opciones": [
+      {
+        "texto_opcion": "Os arquivos modificados são destacados na caixa de diálogo do Git; o engenheiro insere uma mensagem de commit e clica em **Commit & Push** para enviar as alterações ao controle remoto.",
+        "es_correcta": true,
+        "explicacion": "A caixa de diálogo Git destaca todos os arquivos alterados. Uma mensagem de confirmação é necessária e **Commit & Push** prepara, confirma e envia em uma operação."
+      },
+      {
+        "texto_opcion": "O Databricks confirma automaticamente cada notebook salvo e envia para o controle remoto sem ação do usuário.",
+        "es_correcta": false,
+        "explicacion": "O Databricks não confirma automaticamente. Os engenheiros devem abrir manualmente a caixa de diálogo do Git, inserir uma mensagem e clicar em **Commit & Push**."
+      },
+      {
+        "texto_opcion": "O commit inclui células de saída do notebook por padrão ao usar o formato de origem `.py`.",
+        "es_correcta": false,
+        "explicacion": "As saídas do notebook NÃO são incluídas em commits para os formatos `.py`, `.scala`, `.sql` ou `.r`. Somente o formato `.ipynb` pode incluir saídas."
+      },
+      {
+        "texto_opcion": "Uma mensagem de commit é opcional; a caixa de diálogo gerará automaticamente uma com base nos nomes dos arquivos alterados.",
+        "es_correcta": false,
+        "explicacion": "Uma mensagem de confirmação é **obrigatória** na caixa de diálogo Databricks Git. A caixa de diálogo não permitirá o commit sem um."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Confirmações"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados salva um notebook no formato de origem `.py` e o envia para um Git repository. Posteriormente, um colega de equipe analisa o commit no GitHub.\n\nO que o colega de equipe verá na comparação de commit?",
+    "opciones": [
+      {
+        "texto_opcion": "Somente o código-fonte muda — nenhuma célula de saída do notebook é incluída no commit.",
+        "es_correcta": true,
+        "explicacion": "Quando salvo no formato de origem (`.py`, `.scala`, `.sql`, `.r`), o Databricks exclui as saídas do notebook dos commits por padrão. Apenas alterações de código aparecem na comparação."
+      },
+      {
+        "texto_opcion": "Ambas as alterações no código-fonte e todas as células de saída, incluindo tabelas e gráficos.",
+        "es_correcta": false,
+        "explicacion": "As células de saída são excluídas para notebooks no formato de origem. A inclusão de saídas requer salvar no formato `.ipynb` e ativar a opção de confirmação de saída."
+      },
+      {
+        "texto_opcion": "Um blob binário codificado em base64 que representa todo o estado do notebook.",
+        "es_correcta": false,
+        "explicacion": "Os commits do formato `.py` produzem uma comparação Python de texto simples que é legível por humanos. A codificação binária não é usada para notebooks no formato de origem."
+      },
+      {
+        "texto_opcion": "Nenhuma diferença é visível porque o Databricks criptografa o conteúdo do notebook confirmado.",
+        "es_correcta": false,
+        "explicacion": "Notebooks confirmados são arquivos de texto simples em seu Git repository sem criptografia. Eles são totalmente visíveis e diferenciáveis ​​em qualquer cliente Git."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Confirmações"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa os seguintes comandos da CLI do Git no terminal web do Databricks:\n\n```bash\ngit add notebooks/transform.py\ngit commit -m \"refator: optimize lógica de junção\"\ngit commit -m \"consertar: tratamento nulo correto\"\nrecurso de origem git push/camada prateada\n```\n\nQuantos commits aparecem no branch remoto `feature/silver-layer` depois disso?",
+    "opciones": [
+      {
+        "texto_opcion": "Dois commits — ambos os commits locais são enviados para o branch remoto em um único `git push`.",
+        "es_correcta": true,
+        "explicacion": "`git push` envia todos os commits locais não enviados para o remoto. Ambos os commits são testados localmente antes do push, então ambos aparecem no branch remoto."
+      },
+      {
+        "texto_opcion": "Um commit — `git push` compacta todos os commits locais em um único commit.",
+        "es_correcta": false,
+        "explicacion": "O `git push` padrão não esmaga commits. O esmagamento requer um rebase interativo (`git rebase -i`) antes do push."
+      },
+      {
+        "texto_opcion": "Zero commits — o `git add` preparou apenas um arquivo, então o segundo commit não tem conteúdo e é rejeitado.",
+        "es_correcta": false,
+        "explicacion": "O segundo `git commit` opera no arquivo já preparado de `git add`. Ambos os commits têm conteúdo e são válidos."
+      },
+      {
+        "texto_opcion": "O push falha porque você não pode fazer vários commits antes de enviar por push no Databricks.",
+        "es_correcta": false,
+        "explicacion": "A CLI do Databricks Git dá suporte à preparação de vários commits locais antes do push. Este é um workflow padrão do Git que funciona conforme o esperado."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Confirmações",
+      "CLI do Git"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja submeter apenas arquivos específicos de uma pasta Git com suporte CLI habilitado. Eles correm:\n\n```bash\ngit add src/ingest.py\ngit commit -m \"feat: adicionar módulo de ingestão\"\n```\n\nEles intencionalmente deixam `notebooks/scratch.py` sem teste. O que acontece com `notebooks/scratch.py`?",
+    "opciones": [
+      {
+        "texto_opcion": "Ela permanece como uma alteração não confirmada no diretório de job e não é incluída no commit.",
+        "es_correcta": true,
+        "explicacion": "`git add` prepara apenas o arquivo especificado. Arquivos não adicionados com `git add` permanecem como alterações não preparadas no diretório de job e são excluídos do commit."
+      },
+      {
+        "texto_opcion": "Ele é incluído automaticamente no commit porque o Databricks confirma todos os arquivos modificados por padrão.",
+        "es_correcta": false,
+        "explicacion": "A CLI do Git segue o comportamento padrão do Git. Somente arquivos explicitamente preparados com `git add` são incluídos no commit."
+      },
+      {
+        "texto_opcion": "Ele é excluído do diretório de job porque não foi testado.",
+        "es_correcta": false,
+        "explicacion": "Arquivos não testados nunca são excluídos por um `git commit`. Eles permanecem no diretório de job como alterações não confirmadas."
+      },
+      {
+        "texto_opcion": "A confirmação falha porque o Databricks exige que todos os arquivos modificados sejam preparados antes da confirmação.",
+        "es_correcta": false,
+        "explicacion": "A CLI do Databricks Git segue as regras padrão do Git. A preparação parcial é válida — apenas os arquivos preparados são confirmados."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Confirmações",
+      "CLI do Git"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa armazenar as alterações não confirmadas antes de mudar de ramificação. Qual comando Git CLI faz isso em um terminal web do Databricks?",
+    "opciones": [
+      {
+        "texto_opcion": "`git stash`",
+        "es_correcta": true,
+        "explicacion": "`git stash` salva alterações não confirmadas no diretório de job em uma pilha temporária, permitindo uma troca de branch limpa. As alterações podem ser restauradas posteriormente com `git stash pop`."
+      },
+      {
+        "texto_opcion": "`git commit --temp`",
+        "es_correcta": false,
+        "explicacion": "`--temp` não é um sinalizador `git commit` válido. A maneira correta de salvar temporariamente as alterações não confirmadas é `git stash`."
+      },
+      {
+        "texto_opcion": "`databricks repos stash --repo-id <id>`",
+        "es_correcta": false,
+        "explicacion": "A API Repos não possui uma operação stash. Stashing é uma operação padrão do Git CLI (`git stash`) executada no terminal web."
+      },
+      {
+        "texto_opcion": "`git save --branch-switch`",
+        "es_correcta": false,
+        "explicacion": "`git save` não é um comando Git válido. O comando correto é `git stash`."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Confirmações",
+      "CLI do Git"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa abrir uma solicitação pull para mesclar seu branch de recursos em `main`.\n\nQual ferramenta ou interface eles devem usar?",
+    "opciones": [
+      {
+        "texto_opcion": "A UI do provedor Git externo (por exemplo, GitHub, Azure DevOps, GitLab) — Databricks não tem API nativa para criar solicitações pull.",
+        "es_correcta": true,
+        "explicacion": "A criação e o gerenciamento de solicitações pull são feitos inteiramente no provedor Git externo. Databricks não fornece endpoint de criação de PR nativo."
+      },
+      {
+        "texto_opcion": "A caixa de diálogo Databricks Git clicando em **Nova solicitação pull** no menu kebab.",
+        "es_correcta": false,
+        "explicacion": "Não há opção **Nova solicitação pull** na caixa de diálogo Databricks Git. O menu kebab oferece Merge, Rebase e Reset – mas não criação de PR."
+      },
+      {
+        "texto_opcion": "`POST /api/2.0/repos/{repo_id}/pull-requests` com a ramificação de origem e destino.",
+        "es_correcta": false,
+        "explicacion": "A API Repos do Databricks não possui um endpoint `/pull-requests`. Os PRs são criados e gerenciados no provedor Git externo."
+      },
+      {
+        "texto_opcion": "`databricks repos pr create --source feature/my-branch --target main`",
+        "es_correcta": false,
+        "explicacion": "Não existe esse comando CLI do Databricks. O gerenciamento de solicitações pull está fora do escopo da CLI do Databricks e da API Repos."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Solicitações pull"
+    ]
+  },
+  {
+    "pregunta": "Depois que uma solicitação pull é mesclada em `main` no GitHub, um pipeline CI/CD deve sincronizar a pasta Git do Databricks de produção. Qual chamada de API Repos realiza isso?\n\n```\nR: POST /api/2.0/repos { \"branch\": \"main\" }\nB: PATCH /api/2.0/repos/{prod_repo_id} { \"branch\": \"main\" }\nC: GET /api/2.0/repos/{prod_repo_id}/sync\nD: PUT /api/2.0/repos/{prod_repo_id} { \"pull\": verdadeiro }\n```",
+    "opciones": [
+      {
+        "texto_opcion": "Opção B - `PATCH /api/2.0/repos/{prod_repo_id}` com `{ \"branch\": \"main\" }`.",
+        "es_correcta": true,
+        "explicacion": "`PATCH` em um repositório existente com `{ \"branch\": \"main\" }` puxa o commit mais recente em `main` para a pasta Git do workspace - sincronizando efetivamente após uma mesclagem de PR."
+      },
+      {
+        "texto_opcion": "Opção A — `POST /api/2.0/repos` com `{ \"branch\": \"main\" }`.",
+        "es_correcta": false,
+        "explicacion": "`POST /api/2.0/repos` cria uma **nova** pasta Git (clone). Ele não pode sincronizar um existente e esta carga não possui campos obrigatórios como `url` e `path`."
+      },
+      {
+        "texto_opcion": "Opção C — `GET /api/2.0/repos/{prod_repo_id}/sync`.",
+        "es_correcta": false,
+        "explicacion": "Não há sub-endpoint `/sync` na API Repos. As solicitações `GET` são somente leitura e não podem acionar uma sincronização."
+      },
+      {
+        "texto_opcion": "Opção D - `PUT /api/2.0/repos/{prod_repo_id}` com `{ \"pull\": true }`.",
+        "es_correcta": false,
+        "explicacion": "`PUT` não é um verbo HTTP válido para a API Repos. Também não há campo `pull`. O verbo correto é `PATCH`."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Solicitações pull",
+      "API Repos"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe de engenharia de dados tem este workflow:\n\n```\n1. Desenvolvedor envia branch de recursos para GitHub\n2. Abre PR do recurso → principal\n3. A equipe analisa e mescla o PR no GitHub\n4. O pipeline CI/CD é executado automaticamente\n5. O notebook do workspace de produção executa o novo código\n```\n\nOnde neste workflow o Databricks atua?",
+    "opciones": [
+      {
+        "texto_opcion": "Na etapa 4 — o pipeline CI/CD chama a API Repos para sincronizar a pasta Git de produção com o commit `main` mais recente.",
+        "es_correcta": true,
+        "explicacion": "As etapas 1 a 3 acontecem inteiramente no GitHub. Na etapa 4, a ferramenta CI/CD (por exemplo, GitHub Actions) chama `PATCH /api/2.0/repos/{id}` para sincronizar o workspace do Databricks com o `main` mesclado."
+      },
+      {
+        "texto_opcion": "Na etapa 2 — o Databricks cria a solicitação pull no GitHub por meio da API Repos.",
+        "es_correcta": false,
+        "explicacion": "Databricks não cria solicitações pull. Os PRs são criados no provedor Git (GitHub) pelo desenvolvedor."
+      },
+      {
+        "texto_opcion": "Na etapa 3 – o Databricks mescla a solicitação pull após a aprovação da revisão do código.",
+        "es_correcta": false,
+        "explicacion": "As mesclagens são realizadas no provedor Git, não pelo Databricks. Databricks não tem capacidade de mesclagem de PR."
+      },
+      {
+        "texto_opcion": "Na etapa 1 – o Databricks envia o branch de recursos para o GitHub automaticamente.",
+        "es_correcta": false,
+        "explicacion": "Enviar para o GitHub requer um **Commit & Push** explícito na caixa de diálogo do Git ou `git push` na CLI. Não é automático."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Solicitações pull",
+      "CI/CD"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados mescla uma ramificação de recurso em `main` usando a opção **Merge** da caixa de diálogo Databricks Git. Não há conflitos.\n\nO que acontece imediatamente após a fusão?",
+    "opciones": [
+      {
+        "texto_opcion": "A mesclagem é enviada para o Git repository remoto usando `git push`.",
+        "es_correcta": true,
+        "explicacion": "Quando não há conflitos, a operação de mesclagem do Databricks é concluída com um `git push` automático para o repository remoto."
+      },
+      {
+        "texto_opcion": "A mesclagem é salva localmente e o engenheiro deve clicar em **Push** separadamente.",
+        "es_correcta": false,
+        "explicacion": "Uma mesclagem sem conflitos na caixa de diálogo do Databricks Git é enviada automaticamente para o controle remoto. Nenhuma etapa de envio separada é necessária."
+      },
+      {
+        "texto_opcion": "A ramificação do recurso é excluída automaticamente do controle remoto após a mesclagem.",
+        "es_correcta": false,
+        "explicacion": "O Databricks não exclui ramificações automaticamente após uma mesclagem. A exclusão da ramificação deve ser feita manualmente no provedor Git ou por meio da CLI do Git."
+      },
+      {
+        "texto_opcion": "Uma solicitação pull é aberta automaticamente no provedor Git para revisar a mesclagem.",
+        "es_correcta": false,
+        "explicacion": "Databricks não cria solicitações pull. A mesclagem acontece diretamente na pasta Git do workspace, sem passar por um PR."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Mesclar"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa um `git pull` na caixa de diálogo do Git e vê um conflito de mesclagem em `notebooks/etl.py`. A caixa de diálogo Git mostra duas opções.\n\nQual abordagem de resolução **mantém apenas as alterações remotas e descarta todas as alterações locais**?",
+    "opciones": [
+      {
+        "texto_opcion": "Selecione **Aceitar todas as alterações recebidas**.",
+        "es_correcta": true,
+        "explicacion": "**Aceitar todas as alterações recebidas** aceita inteiramente a versão remota (recebida), descartando todas as alterações locais no arquivo em conflito."
+      },
+      {
+        "texto_opcion": "Selecione **Manter todas as alterações atuais**.",
+        "es_correcta": false,
+        "explicacion": "**Manter todas as alterações atuais** descarta a versão remota e mantém a versão local — o oposto do que é necessário."
+      },
+      {
+        "texto_opcion": "Clique em **Abortar** e puxe novamente.",
+        "es_correcta": false,
+        "explicacion": "**Abortar** cancela toda a operação e restaura o estado de pré-mesclagem. Não resolve o conflito em favor do controle remoto."
+      },
+      {
+        "texto_opcion": "Clique em **Continuar mesclagem** sem editar o arquivo.",
+        "es_correcta": false,
+        "explicacion": "Clicar em **Continuar mesclagem** sem resolver os marcadores de conflito primeiro falhará — o Git ainda vê os marcadores de conflito no arquivo."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Mesclar",
+      "Conflitos"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados vê o seguinte conteúdo em um arquivo em conflito após um `git pull`:\n\n```\n<<<<<<< CABEÇA\ndf = df.dropDuplicates([\"id\"])\n=======\ndf = df.dropDuplicates([\"id\", \"data_evento\"])\n>>>>>>> origem/principal\n```\n\nO engenheiro deseja manter a versão **remota**. Qual é a ação correta?",
+    "opciones": [
+      {
+        "texto_opcion": "Exclua os marcadores `<<<<<<< HEAD`, `=======`, `>>>>>>> origin/main` e mantenha apenas `df = df.dropDuplicates([\"id\", \"event_date\"])` e clique em **Marcar como resolvido**.",
+        "es_correcta": true,
+        "explicacion": "Para manter a versão remota, remova todos os marcadores de conflito e o bloco de código local (seção `HEAD`), deixando apenas a linha remota. Em seguida, marque como resolvido."
+      },
+      {
+        "texto_opcion": "Exclua apenas a linha `=======` e mantenha ambas as linhas de código.",
+        "es_correcta": false,
+        "explicacion": "Deixar ambas as linhas de código sem marcadores de conflito cria um erro de sintaxe. Você deve remover todos os marcadores de conflito e escolher exatamente uma versão."
+      },
+      {
+        "texto_opcion": "Clique em **Abortar** para descartar as alterações locais e, em seguida, extrair novamente.",
+        "es_correcta": false,
+        "explicacion": "**Abort** sai totalmente da mesclagem e retorna ao estado de pré-mesclagem — isso não resolve o conflito em favor do controle remoto."
+      },
+      {
+        "texto_opcion": "Exclua o bloco de versão remota (abaixo de `=======`) e mantenha a versão HEAD.",
+        "es_correcta": false,
+        "explicacion": "Isso manteria a versão **local** (`df.dropDuplicates([\"id\"])`), não a versão remota. O requisito é manter a versão remota."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Mesclar",
+      "Conflitos"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados usa **Rebase** em vez de **Merge** na caixa de diálogo Databricks Git.\n\nQual afirmação descreve corretamente a diferença entre essas duas operações?",
+    "opciones": [
+      {
+        "texto_opcion": "O rebase reproduz os commits no topo do branch de destino, criando um histórico linear; Merge cria um commit de mesclagem que preserva o histórico de ramificação.",
+        "es_correcta": true,
+        "explicacion": "`git rebase` reescreve o histórico de commits para um resultado linear. `git merge` cria um commit de mesclagem dedicado. Databricks recomenda mesclar para iniciantes em Git para evitar problemas de push forçado."
+      },
+      {
+        "texto_opcion": "O rebase é mais rápido porque exclui o branch de origem após integrar as alterações; A mesclagem preserva ambos os ramos.",
+        "es_correcta": false,
+        "explicacion": "Nem o rebase nem o merge excluem ramificações automaticamente. A diferença de velocidade não está relacionada à exclusão de ramificação."
+      },
+      {
+        "texto_opcion": "A mesclagem cria um histórico linear; O Rebase cria um commit de mesclagem com ambos os pais.",
+        "es_correcta": false,
+        "explicacion": "Isto é invertido. **Rebase** cria um histórico linear. **Merge** cria um commit de mesclagem com duas referências pai."
+      },
+      {
+        "texto_opcion": "Ambas as operações produzem resultados idênticos; a escolha é puramente cosmética.",
+        "es_correcta": false,
+        "explicacion": "Rebase e merge produzem gráficos de commit diferentes e têm implicações diferentes para requisitos de push forçado e segurança de ramificação compartilhada."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Mesclar"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados usa a opção **Reset** (Hard Reset) da caixa de diálogo Databricks Git.\n\nQual é o efeito de uma reinicialização total na filial atual?",
+    "opciones": [
+      {
+        "texto_opcion": "Todas as alterações locais não confirmadas são descartadas e a ramificação local é redefinida para corresponder à remota.",
+        "es_correcta": true,
+        "explicacion": "Hard Reset na caixa de diálogo Databricks Git executa `git reset --hard` para o HEAD remoto, descartando todas as alterações locais não confirmadas e sincronizando com o estado remoto."
+      },
+      {
+        "texto_opcion": "A ramificação é excluída da área de job local e do repository remoto.",
+        "es_correcta": false,
+        "explicacion": "Hard Reset não exclui ramificações. Ele apenas descarta alterações locais não confirmadas e alinha o estado local com o remoto."
+      },
+      {
+        "texto_opcion": "As alterações confirmadas, mas não enviadas, são revertidas e reorganizadas para um novo commit.",
+        "es_correcta": false,
+        "explicacion": "Hard Reset descarta alterações não confirmadas. Ele não os prepara para um novo commit ou reverte seletivamente os commits enviados."
+      },
+      {
+        "texto_opcion": "O último commit é desfeito, mas as alterações no arquivo são preservadas como edições não confirmadas.",
+        "es_correcta": false,
+        "explicacion": "Isso descreve uma **reinicialização suave** (`git reset --soft HEAD~1`), não uma reinicialização forçada. A reinicialização total descarta completamente todas as alterações locais."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Mesclar"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está configurando uma pasta Git com **sparse checkout** habilitado, especificando os padrões `[\"src/\", \"notebooks/\"]`.\n\nQual é o efeito do checkout esparso?",
+    "opciones": [
+      {
+        "texto_opcion": "Somente os diretórios `src/` e `notebooks/` do repository remoto são clonados no workspace, reduzindo o tempo de sincronização e armazenamento.",
+        "es_correcta": true,
+        "explicacion": "O checkout esparso clona apenas os subdiretórios especificados. Isso é útil para grandes repositórios que excedem os limites de 2 GB de memória/4 GB de disco do Databricks."
+      },
+      {
+        "texto_opcion": "Todo o repository é clonado, mas apenas `src/` e `notebooks/` são visíveis na interface do usuário do workspace do Databricks.",
+        "es_correcta": false,
+        "explicacion": "A verificação esparsa limita fisicamente o que é baixado, não apenas o que é exibido. Arquivos fora dos padrões não estão presentes no disco."
+      },
+      {
+        "texto_opcion": "Os padrões de checkout esparsos podem ser alterados a qualquer momento após a criação da pasta Git.",
+        "es_correcta": false,
+        "explicacion": "De acordo com a documentação do Databricks, os padrões de checkout esparsos não podem ser alterados após a criação da pasta Git. Uma nova pasta precisaria ser criada."
+      },
+      {
+        "texto_opcion": "A verificação esparsa só está disponível ao usar a CLI do Git, e não a interface de usuário padrão da pasta Git.",
+        "es_correcta": false,
+        "explicacion": "O check-out esparso pode ser configurado na caixa de diálogo da UI **Criar pasta Git**. Não é exclusivo da CLI do Git."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Git Folders"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa autenticar um pipeline GitHub Actions CI/CD para implantar em um workspace de produção do Databricks. A equipe de segurança não exige segredos duradouros armazenados no GitHub.\n\nQual método de autenticação eles devem usar?",
+    "opciones": [
+      {
+        "texto_opcion": "OIDC/Workload Identity Federation (`DATABRICKS_AUTH_TYPE: github-oidc`) — usa tokens de curta duração sem segredos armazenados.",
+        "es_correcta": true,
+        "explicacion": "A federação OIDC permite que GitHub Actions se autentique no Databricks usando tokens de curta duração emitidos pelo provedor de identidade do GitHub. Nenhum PAT ou segredo do cliente é armazenado nos segredos do GitHub."
+      },
+      {
+        "texto_opcion": "Token de acesso pessoal (PAT) armazenado como um segredo do GitHub Actions.",
+        "es_correcta": false,
+        "explicacion": "PATs são credenciais de longa duração. Armazená-los em segredos do GitHub não atende ao requisito de não ter segredos de longa duração."
+      },
+      {
+        "texto_opcion": "Codificando o token Databricks diretamente no arquivo de workflow `deploy.yml`.",
+        "es_correcta": false,
+        "explicacion": "Credenciais codificadas são uma vulnerabilidade crítica de segurança. Os tokens nos arquivos de workflow são visíveis no repository e nunca devem ser executados."
+      },
+      {
+        "texto_opcion": "Principal de serviço com um segredo do cliente armazenado em um arquivo `.env` confirmado no repository.",
+        "es_correcta": false,
+        "explicacion": "A confirmação de credenciais para um Git repository é um grande risco de segurança. Os segredos do cliente não devem ser comprometidos com o controle de origem."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "CI/CD",
+      "Autenticação"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe de engenharia de dados segue as práticas recomendadas do Databricks para CI/CD.\n\nQuais itens **NÃO** devem ser comprometidos com um Git repository? Selecione a resposta mais completa.",
+    "opciones": [
+      {
+        "texto_opcion": "Crie artefatos (arquivos `.jar`, `.whl`) e credenciais/segredos.",
+        "es_correcta": true,
+        "explicacion": "As práticas recomendadas do Databricks declaram explicitamente: NÃO comprometa artefatos de construção (use volumes Unity Catalog em vez disso) e NÃO comprometa credenciais (use segredos do Databricks via `dbutils.secrets.get(...)`)."
+      },
+      {
+        "texto_opcion": "Arquivos de origem do notebook (`.py`, `.sql`) e arquivos de configuração YAML.",
+        "es_correcta": false,
+        "explicacion": "Arquivos de origem do notebook e configurações YAML (como `databricks.yml`) **devem** ser enviados ao Git. Estes são os principais artefactos com versão num projeto Databricks."
+      },
+      {
+        "texto_opcion": "Arquivos de dados da tabela Delta armazenados em armazenamento em nuvem.",
+        "es_correcta": false,
+        "explicacion": "Os arquivos de dados da tabela Delta são armazenados em armazenamento em nuvem (S3, ADLS, GCS) e nunca são confirmados no Git. Eles não fazem parte do código repository."
+      },
+      {
+        "texto_opcion": "Scripts de transformação Python e arquivos de teste de unidade.",
+        "es_correcta": false,
+        "explicacion": "Scripts Python e testes unitários **devem** ser confirmados. Eles são artefatos de código básicos que se beneficiam do controle de versão e da revisão de código."
+      }
+    ],
+    "tags": [
+      "5.1",
+      "Melhores Práticas",
+      "Confirmações"
+    ]
+  }
+]

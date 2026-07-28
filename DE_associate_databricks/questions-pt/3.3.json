@@ -1,0 +1,901 @@
+[
+  {
+    "pregunta": "Um engenheiro de dados tem dois DataFrames:\n\n`orders_df` (10 milhões de linhas) e `customers_df` (500 linhas).\n\n```píton\nresultado = pedidos_df.join(customers_df, \"customer_id\", \"inner\")\n```\n\nQual estratégia de junção o Spark provavelmente usará automaticamente e por quê?",
+    "opciones": [
+      {
+        "texto_opcion": "Broadcast join — `customers_df` é pequeno o suficiente para caber em `spark.sql.autoBroadcastJoinThreshold`.",
+        "es_correcta": true,
+        "explicacion": "O Catalyst optimizer do Spark transmite automaticamente tabelas pequenas (limite padrão de 10 MB) para evitar shuffle."
+      },
+      {
+        "texto_opcion": "Junção de classificação e mesclagem - ambos os DataFrames são sempre classificados antes da junção.",
+        "es_correcta": false,
+        "explicacion": "A junção de classificação e mesclagem é a alternativa para junções grandes-grandes, não quando um lado é pequeno o suficiente para transmitir."
+      },
+      {
+        "texto_opcion": "Shuffle join de hash – o Spark prefere essa estratégia por padrão para todas as junções.",
+        "es_correcta": false,
+        "explicacion": "A shuffle join de hash não é a estratégia padrão; broadcast join é preferido quando um lado é pequeno."
+      },
+      {
+        "texto_opcion": "Junção cruzada – o Spark volta para a junção cruzada quando a contagem de linhas difere muito.",
+        "es_correcta": false,
+        "explicacion": "Uma junção cruzada ocorre apenas sem uma condição de junção; aqui é fornecida uma condição de igualdade em `customer_id`."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa:\n\n```píton\ndf = df_a.join(df_b, df_a.id == df_b.id, \"esquerda\")\n```\n\nO que está incluído no resultado?",
+    "opciones": [
+      {
+        "texto_opcion": "Todas as linhas de `df_a`, com colunas correspondentes de `df_b` ou nulas onde não existe correspondência.",
+        "es_correcta": true,
+        "explicacion": "Uma junção à esquerda preserva cada linha do DataFrame esquerdo, preenchendo colunas incomparáveis do lado direito com nulo."
+      },
+      {
+        "texto_opcion": "Somente linhas que existem em `df_a` e `df_b`.",
+        "es_correcta": false,
+        "explicacion": "Isso descreve uma junção interna, não uma junção à esquerda."
+      },
+      {
+        "texto_opcion": "Todas as linhas de `df_b`, com colunas correspondentes de `df_a` ou nulas onde não existe correspondência.",
+        "es_correcta": false,
+        "explicacion": "Isso descreve uma junção correta; aqui `df_a` é o lado esquerdo e é totalmente preservado."
+      },
+      {
+        "texto_opcion": "Todas as linhas de ambos os DataFrames, incluindo linhas sem correspondência de ambos os lados.",
+        "es_correcta": false,
+        "explicacion": "Isso descreve uma junção externa completa, não uma junção esquerda."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deve combinar `sales_2024_df` e `sales_2025_df`, que possuem esquemas idênticos, empilhando linhas de ambos em um DataFrame.\n\nQual método deve ser usado?",
+    "opciones": [
+      {
+        "texto_opcion": "`vendas_2024_df.union(vendas_2025_df)`",
+        "es_correcta": true,
+        "explicacion": "`union()` anexa linhas de um DataFrame a outro com base na posição da coluna, o que é apropriado para esquemas idênticos."
+      },
+      {
+        "texto_opcion": "`vendas_2024_df.join(vendas_2025_df, \"data\")`",
+        "es_correcta": false,
+        "explicacion": "`join()` combina colunas com base em uma chave; ele não empilha linhas."
+      },
+      {
+        "texto_opcion": "`vendas_2024_df.crossJoin(vendas_2025_df)`",
+        "es_correcta": false,
+        "explicacion": "Uma junção cruzada produz o produto cartesiano de linhas, não uma pilha por linha."
+      },
+      {
+        "texto_opcion": "`vendas_2024_df.merge(vendas_2025_df)`",
+        "es_correcta": false,
+        "explicacion": "`merge()` não é um método PySpark DataFrame."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa unir `transactions_df` e `accounts_df` em `account_id` e `region`, já que `account_id` por si só não é exclusivo entre regiões.\n\nQual código executa corretamente essa junção?",
+    "opciones": [
+      {
+        "texto_opcion": "```píton\ntransações_df.join(\n    contas_df,\n    [\"account_id\", \"região\"],\n    \"interior\"\n)\n```",
+        "es_correcta": true,
+        "explicacion": "Passar uma lista de nomes de colunas une todas as chaves listadas simultaneamente, o que é necessário quando uma única chave não é exclusiva."
+      },
+      {
+        "texto_opcion": "```píton\ntransações_df.join(\n    contas_df, \"account_id\"\n.join(accounts_df, \"região\")\n```",
+        "es_correcta": false,
+        "explicacion": "Isso une `accounts_df` duas vezes, produzindo colunas duplicadas e ambíguas em vez de uma única junção multichave."
+      },
+      {
+        "texto_opcion": "```píton\ntransações_df.join(\n    contas_df,\n    \"account_id\" e \"região\"\n)\n```",
+        "es_correcta": false,
+        "explicacion": "Usar `and` entre strings é avaliado como apenas `\"region\"` em Python, portanto, apenas uma chave é realmente usada."
+      },
+      {
+        "texto_opcion": "```píton\ntransações_df.union(contas_df)\n```",
+        "es_correcta": false,
+        "explicacion": "`union()` empilha linhas; ele não pode combinar colunas de dois DataFrames diferentes com base em chaves."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja encontrar todos os clientes em `customers_df` que nunca fizeram um pedido em `orders_df`.\n\nQual tipo de junção deve ser usado?",
+    "opciones": [
+      {
+        "texto_opcion": "Esquerda anti-junção.",
+        "es_correcta": true,
+        "explicacion": "Uma junção `left_anti` retorna apenas linhas da esquerda DataFrame que não têm correspondência na direita DataFrame."
+      },
+      {
+        "texto_opcion": "Semi-junção esquerda.",
+        "es_correcta": false,
+        "explicacion": "Uma junção `left_semi` retorna linhas à esquerda que possuem uma correspondência, o oposto do que é necessário aqui."
+      },
+      {
+        "texto_opcion": "Junção interna.",
+        "es_correcta": false,
+        "explicacion": "Uma junção interna retorna apenas linhas correspondentes, excluindo os clientes sem pedidos."
+      },
+      {
+        "texto_opcion": "Junção cruzada.",
+        "es_correcta": false,
+        "explicacion": "Uma junção cruzada produz todas as combinações de linhas e não está relacionada à localização de registros sem correspondência."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados une dois grandes DataFrames sem candidato a transmissão:\n\n```píton\nbig_a.join(big_b, \"id\")\n```\n\nQual estratégia física o Spark usa por padrão para essa junção de grande para grande porte?",
+    "opciones": [
+      {
+        "texto_opcion": "Junção de classificação e mesclagem.",
+        "es_correcta": true,
+        "explicacion": "Quando ambos os lados são grandes demais para serem transmitidos, a estratégia padrão do Spark embaralha e classifica ambos os lados e, em seguida, mescla as chaves correspondentes."
+      },
+      {
+        "texto_opcion": "Junção de hash de transmissão.",
+        "es_correcta": false,
+        "explicacion": "Broadcast joins exigem que um lado seja pequeno o suficiente para caber na memória de cada executor, o que não é o caso aqui."
+      },
+      {
+        "texto_opcion": "Junção de loop aninhado.",
+        "es_correcta": false,
+        "explicacion": "A junção de loop aninhada é normalmente usada para junções não-equivalentes ou junções cruzadas, e não para junções de igualdade padrão em tabelas grandes."
+      },
+      {
+        "texto_opcion": "Junção cartesiana.",
+        "es_correcta": false,
+        "explicacion": "Uma junção cartesiana/cruzada só acontece sem uma condição de igualdade; aqui é fornecida uma chave de junção explícita."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa o seguinte e obtém uma `AnalysisException: Reference 'id' is ambiguous`:\n\n```píton\ndf_a.join(df_b, df_a.id == df_b.id).select(\"id\")\n```\n\nQual é a melhor solução?",
+    "opciones": [
+      {
+        "texto_opcion": "Use a sintaxe de junção simplificada `df_a.join(df_b, \"id\")`, que mantém apenas uma coluna `id`.",
+        "es_correcta": true,
+        "explicacion": "A união em uma string de nome de coluna (em vez de uma condição de igualdade explícita) desduplica automaticamente a chave de junção no resultado."
+      },
+      {
+        "texto_opcion": "Adicione `.distinct()` após a junção para remover a coluna duplicada.",
+        "es_correcta": false,
+        "explicacion": "`distinct()` remove linhas duplicadas, não colunas duplicadas; isso não resolve a ambiguidade da coluna."
+      },
+      {
+        "texto_opcion": "Substitua `select(\"id\")` por `select(\"*\")`.",
+        "es_correcta": false,
+        "explicacion": "Selecionar todas as colunas não resolve a ambigüidade de fazer referência a `id` e ainda resulta em duas colunas `id`."
+      },
+      {
+        "texto_opcion": "Converta a coluna `id` para um tipo de dados diferente antes de ingressar.",
+        "es_correcta": false,
+        "explicacion": "A alteração do tipo de dados não resolve o problema subjacente de nomes de colunas duplicados após a junção."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa combinar `df_2024` e `df_2025`, que possuem as mesmas colunas, mas em uma ordem diferente.\n\nQual método empilha corretamente as linhas combinando os nomes das colunas em vez da posição?",
+    "opciones": [
+      {
+        "texto_opcion": "`df_2024.unionByName(df_2025)`",
+        "es_correcta": true,
+        "explicacion": "`unionByName()` resolve colunas por nome em vez de posição, evitando dados desalinhados quando a ordem das colunas é diferente."
+      },
+      {
+        "texto_opcion": "`df_2024.union(df_2025)`",
+        "es_correcta": false,
+        "explicacion": "`union()` resolve colunas puramente por posição, o que desalinharia os dados aqui, uma vez que a ordem das colunas é diferente."
+      },
+      {
+        "texto_opcion": "`df_2024.join(df_2025, how=\"externo\")`",
+        "es_correcta": false,
+        "explicacion": "Uma junção combina colunas com base em uma chave; ele não empilha linhas de dois DataFrames."
+      },
+      {
+        "texto_opcion": "`df_2024.concat(df_2025)`",
+        "es_correcta": false,
+        "explicacion": "`concat()` não é um método de nível DataFrame no PySpark para combinar DataFrames."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja gerar todas as combinações possíveis de linhas `products_df` com linhas `promotions_df` para um conjunto de dados de teste, independentemente de qualquer chave correspondente.\n\nQual junção deve ser usada?",
+    "opciones": [
+      {
+        "texto_opcion": "`produtos_df.crossJoin(promoções_df)`",
+        "es_correcta": true,
+        "explicacion": "`crossJoin()` produz o produto cartesiano, emparelhando cada linha de um DataFrame com cada linha do outro."
+      },
+      {
+        "texto_opcion": "`produtos_df.join (promoções_df, \"produto_id\", \"externo\")`",
+        "es_correcta": false,
+        "explicacion": "Uma junção externa retorna apenas linhas com base em correspondências de chave (mais linhas sem correspondência com nulos), e não em todas as combinações."
+      },
+      {
+        "texto_opcion": "`produtos_df.join(promoções_df, \"produto_id\", \"inner\")`",
+        "es_correcta": false,
+        "explicacion": "Uma junção interna restringe os resultados às chaves correspondentes, o oposto de gerar todas as combinações."
+      },
+      {
+        "texto_opcion": "`produtos_df.union(promoções_df)`",
+        "es_correcta": false,
+        "explicacion": "`union()` empilha linhas verticalmente; não produz combinações de linhas de dois DataFrames."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Amostra de `employees_df`:\n\n| emp_id | nome | id_depto |\n|--------|-------|-----|\n| 1 | Ana | 10 |\n| 2 | Luís | 20 |\n| 3 | Marta | NULO |\n\nAmostra de `departments_df`:\n\n| id_depto | nome_depto. |\n|--------|-----------|\n| 10 | Vendas |\n| 20 | TI |\n\nUm engenheiro de dados executa `employees_df.join(departments_df, \"dept_id\", \"left\")`. Quantas linhas aparecem no resultado e o que é `dept_name` para Marta?",
+    "opciones": [
+      {
+        "texto_opcion": "3 linhas; O `dept_name` de Marta é nulo.",
+        "es_correcta": true,
+        "explicacion": "Uma junção à esquerda mantém todas as linhas de `employees_df`; como o `dept_id` de Marta é nulo e não tem correspondência, `dept_name` se torna nulo."
+      },
+      {
+        "texto_opcion": "2 linhas; Marta foi excluída porque seu `dept_id` é nulo.",
+        "es_correcta": false,
+        "explicacion": "Uma junção à esquerda preserva todas as linhas do lado esquerdo, independentemente de a chave de junção corresponder, portanto Marta ainda está incluída."
+      },
+      {
+        "texto_opcion": "3 linhas; O `dept_name` de Marta é padronizado como uma string vazia.",
+        "es_correcta": false,
+        "explicacion": "O Spark preenche colunas sem correspondência com nulo, não com uma string vazia."
+      },
+      {
+        "texto_opcion": "4 linhas; uma linha extra é criada para o departamento sem correspondência.",
+        "es_correcta": false,
+        "explicacion": "Uma junção à esquerda nunca adiciona linhas além do que existe à esquerda DataFrame; apenas as linhas existentes são preservadas."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados une dois DataFrames onde a coluna de junção tem nomes diferentes (`cust_id` em `orders_df`, `customer_id` em `customers_df`):\n\n```píton\npedidos_df.join(\n    clientes_df,\n    pedidos_df.cust_id == clientes_df.customer_id,\n    \"interior\"\n)\n```\n\nQual é o resultado em relação às colunas de junção?",
+    "opciones": [
+      {
+        "texto_opcion": "Tanto `cust_id` quanto `customer_id` aparecem como colunas separadas na saída.",
+        "es_correcta": true,
+        "explicacion": "Ao unir uma expressão de igualdade explícita entre colunas com nomes diferentes, o Spark mantém ambas as colunas, pois não há ambigüidade para resolver."
+      },
+      {
+        "texto_opcion": "Apenas `cust_id` aparece; `customer_id` é descartado automaticamente.",
+        "es_correcta": false,
+        "explicacion": "O Spark não descarta nenhuma coluna automaticamente quando a expressão de junção usa dois nomes de coluna distintos."
+      },
+      {
+        "texto_opcion": "As colunas são mescladas em uma única coluna chamada `id`.",
+        "es_correcta": false,
+        "explicacion": "O Spark nunca renomeia ou mescla colunas de junção com um novo nome automaticamente."
+      },
+      {
+        "texto_opcion": "A junção falha porque os nomes das colunas não correspondem.",
+        "es_correcta": false,
+        "explicacion": "A união com uma condição de igualdade explícita funciona independentemente de os nomes das colunas corresponderem."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja identificar quais linhas `products_df` TÊM pelo menos uma linha correspondente em `inventory_df`, retornando apenas colunas de `products_df`.\n\nQual tipo de junção é mais apropriado?",
+    "opciones": [
+      {
+        "texto_opcion": "Semi-junção esquerda.",
+        "es_correcta": true,
+        "explicacion": "`left_semi` retorna linhas da esquerda DataFrame que correspondem à direita, sem incluir colunas do lado direito."
+      },
+      {
+        "texto_opcion": "Esquerda anti-junção.",
+        "es_correcta": false,
+        "explicacion": "`left_anti` retorna linhas sem correspondência, o oposto do que é necessário aqui."
+      },
+      {
+        "texto_opcion": "Junte-se à direita.",
+        "es_correcta": false,
+        "explicacion": "Uma junção à direita preserva todas as linhas de `inventory_df`, não apenas as linhas `products_df` correspondentes."
+      },
+      {
+        "texto_opcion": "Junção externa completa.",
+        "es_correcta": false,
+        "explicacion": "Uma junção externa completa incluiria linhas sem correspondência de ambos os lados e de todas as colunas, o que é mais do que o necessário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados força explicitamente um broadcast join:\n\n```píton\nde transmissão de importação de pyspark.sql.functions\nresultado = large_df.join(broadcast(small_df), \"id\")\n```\n\nQual é o principal risco desta abordagem?",
+    "opciones": [
+      {
+        "texto_opcion": "Se `small_df` for realmente grande, os executores podem ficar sem memória transmitindo-o para todos os nós.",
+        "es_correcta": true,
+        "explicacion": "A transmissão envia uma cópia completa do DataFrame para cada executor; se for maior que o esperado, isso poderá causar erros de falta de memória."
+      },
+      {
+        "texto_opcion": "A junção eliminará silenciosamente as linhas com chaves nulas.",
+        "es_correcta": false,
+        "explicacion": "Eliminar linhas de chave nula é um comportamento de junção interna padrão, não relacionado especificamente à transmissão."
+      },
+      {
+        "texto_opcion": "Broadcast joins sempre produzem resultados incorretos para junções internas.",
+        "es_correcta": false,
+        "explicacion": "Broadcast joins produzem o mesmo resultado lógico que outras estratégias de junção; eles apenas alteram a execução, não a correção."
+      },
+      {
+        "texto_opcion": "A dica `broadcast()` desativa o pushdown de predicado.",
+        "es_correcta": false,
+        "explicacion": "A transmissão e o pushdown de predicados são mecanismos de otimização não relacionados."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deve mesclar `df_a` e `df_b`, que possuem um número diferente de colunas, empilhando suas linhas.\n\nO que acontece se `df_a.union(df_b)` for executado?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma `AnalysisException` é gerada porque o número de colunas deve corresponder.",
+        "es_correcta": true,
+        "explicacion": "`union()` requer que ambos DataFrames tenham o mesmo número de colunas; uma incompatibilidade gera um erro de análise."
+      },
+      {
+        "texto_opcion": "O Spark preenche as colunas ausentes com null automaticamente.",
+        "es_correcta": false,
+        "explicacion": "`union()` não preenche automaticamente colunas ausentes; os esquemas já devem estar alinhados na contagem de colunas."
+      },
+      {
+        "texto_opcion": "As colunas extras do DataFrame maior são eliminadas silenciosamente.",
+        "es_correcta": false,
+        "explicacion": "O Spark não elimina colunas silenciosamente para fazer uma união funcionar; em vez disso, gera uma exceção."
+      },
+      {
+        "texto_opcion": "A operação é bem-sucedida e produz um DataFrame amplo com todas as colunas de ambos os lados.",
+        "es_correcta": false,
+        "explicacion": "`union()` empilha linhas sob colunas existentes por posição; não amplia o esquema."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa de todas as linhas de `current_inventory_df` e `new_shipments_df`, correspondidas em `sku`, incluindo linhas não correspondidas de ambos os lados com nulos preenchidos para colunas ausentes.\n\nQual tipo de junção deve ser usado?",
+    "opciones": [
+      {
+        "texto_opcion": "Junção externa completa.",
+        "es_correcta": true,
+        "explicacion": "Uma junção externa completa retorna todas as linhas de ambos os DataFrames, preenchendo colunas sem correspondência com nulo em ambos os lados."
+      },
+      {
+        "texto_opcion": "Junção interna.",
+        "es_correcta": false,
+        "explicacion": "Uma junção interna retorna apenas linhas presentes em ambos os DataFrames, excluindo linhas sem correspondência."
+      },
+      {
+        "texto_opcion": "Semi-junção esquerda.",
+        "es_correcta": false,
+        "explicacion": "Uma semi-junção à esquerda retorna apenas linhas correspondentes do lado esquerdo, sem colunas da direita e sem linhas não correspondidas."
+      },
+      {
+        "texto_opcion": "Esquerda anti-junção.",
+        "es_correcta": false,
+        "explicacion": "Uma anti-junção à esquerda retorna apenas linhas incomparáveis do lado esquerdo, e não todas as linhas de ambos os lados."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados percebe que uma junção é muito lenta e o Spark UI mostra uma grande confusão com distorção significativa de dados na chave de junção.\n\nQual abordagem tem maior probabilidade de melhorar o desempenho?",
+    "opciones": [
+      {
+        "texto_opcion": "Salgue a chave distorcida para distribuí-la por mais partições antes de ingressar.",
+        "es_correcta": true,
+        "explicacion": "Salting adiciona aleatoriedade a uma chave distorcida, espalhando as linhas da chave pesada por várias partições para equilibrar o shuffle."
+      },
+      {
+        "texto_opcion": "Mude a ordem de junção de `df_a.join(df_b)` para `df_b.join(df_a)`.",
+        "es_correcta": false,
+        "explicacion": "Simplesmente reverter a ordem de junção não resolve a data skew na própria chave de junção."
+      },
+      {
+        "texto_opcion": "Use `union()` em vez de `join()` para evitar o shuffle.",
+        "es_correcta": false,
+        "explicacion": "`union()` executa uma operação fundamentalmente diferente e não pode substituir uma junção baseada em chaves."
+      },
+      {
+        "texto_opcion": "Converta ambos os DataFrames em RDDs antes de ingressar.",
+        "es_correcta": false,
+        "explicacion": "A conversão para RDDs perde as otimizações do Catalyst e não resolve a distorção de chave."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "O que o código a seguir retorna?\n\n```píton\ndf_a.join(df_b, df_a.key == df_b.key, \"direita\")\n```",
+    "opciones": [
+      {
+        "texto_opcion": "Todas as linhas de `df_b`, com colunas `df_a` correspondentes ou nulas onde não há correspondência.",
+        "es_correcta": true,
+        "explicacion": "Uma junção à direita preserva cada linha do DataFrame direito (`df_b`), preenchendo colunas incomparáveis do lado esquerdo com nulo."
+      },
+      {
+        "texto_opcion": "Todas as linhas de `df_a`, com colunas `df_b` correspondentes ou nulas onde não há correspondência.",
+        "es_correcta": false,
+        "explicacion": "Isso descreve uma junção à esquerda; aqui `df_b` está no lado direito e é o que está totalmente preservado."
+      },
+      {
+        "texto_opcion": "Somente linhas presentes em ambos os DataFrames.",
+        "es_correcta": false,
+        "explicacion": "Isso descreve uma junção interna, não uma junção correta."
+      },
+      {
+        "texto_opcion": "Cada combinação de linhas de `df_a` e `df_b`.",
+        "es_correcta": false,
+        "explicacion": "Isso descreve uma junção cruzada; uma junção à direita usa a condição de igualdade em `key` para corresponder às linhas."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja remover linhas duplicadas após uma união de dois DataFrames com esquemas idênticos que podem se sobrepor.\n\nQual código consegue isso corretamente?",
+    "opciones": [
+      {
+        "texto_opcion": "`df_a.union(df_b).dropDuplicates()`",
+        "es_correcta": true,
+        "explicacion": "`union()` empilha as linhas e `dropDuplicates()` remove as linhas duplicadas exatas do resultado combinado."
+      },
+      {
+        "texto_opcion": "`df_a.join(df_b, how=\"inner\").distinct()`",
+        "es_correcta": false,
+        "explicacion": "Uma junção sem condição chave produz um produto cartesiano, que não é o mesmo que empilhar e desduplicar linhas."
+      },
+      {
+        "texto_opcion": "`df_a.union(df_b).distinct().join(df_b)`",
+        "es_correcta": false,
+        "explicacion": "Unir-se novamente após a desduplicação é desnecessário e reintroduziria linhas duplicadas ou incompatíveis."
+      },
+      {
+        "texto_opcion": "`df_a.unionAll(df_b)`",
+        "es_correcta": false,
+        "explicacion": "`unionAll()` é um alias para `union()` e não remove duplicatas por si só."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados aumenta `spark.sql.autoBroadcastJoinThreshold` de seu padrão para um valor mais alto antes de executar uma junção entre uma tabela de 50 MB e uma tabela de 2 GB.\n\nQual é o efeito mais provável?",
+    "opciones": [
+      {
+        "texto_opcion": "A tabela de 50 MB agora se qualifica para broadcast join, evitando um shuffle completo.",
+        "es_correcta": true,
+        "explicacion": "Aumentar o limite acima do tamanho da tabela menor permite que o optimizer transmita-o em vez de usar a junção sort-merge."
+      },
+      {
+        "texto_opcion": "Ambas as tabelas serão transmitidas para todos os executores.",
+        "es_correcta": false,
+        "explicacion": "Somente o lado abaixo da soleira é transmitido; a tabela de 2 GB permanece muito grande para ser transmitida."
+      },
+      {
+        "texto_opcion": "A junção muda automaticamente para uma junção cruzada.",
+        "es_correcta": false,
+        "explicacion": "A alteração do limite de transmissão não afeta o uso de uma junção cruzada; isso depende da condição de junção."
+      },
+      {
+        "texto_opcion": "A consulta falha porque o limite excede a memória do executor.",
+        "es_correcta": false,
+        "explicacion": "Aumentar o limite não causa falha automaticamente; simplesmente altera a estratégia de junção escolhida."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa desabilitar broadcast joins totalmente para uma consulta específica para forçar uma junção de classificação e mesclagem para teste.\n\nQual configuração consegue isso?",
+    "opciones": [
+      {
+        "texto_opcion": "`spark.conf.set(\"spark.sql.autoBroadcastJoinThreshold\", \"-1\")`",
+        "es_correcta": true,
+        "explicacion": "Definir o limite de transmissão como -1 desativa a transmissão automática, forçando o Spark a usar uma estratégia de junção baseada em shuffle."
+      },
+      {
+        "texto_opcion": "`spark.conf.set(\"spark.sql.shuffle.partitions\", \"-1\")`",
+        "es_correcta": false,
+        "explicacion": "Esta configuração controla o número de shuffle partitions, não se broadcast joins são usados."
+      },
+      {
+        "texto_opcion": "`spark.conf.set(\"spark.sql.join.preferSortMergeJoin\", \"true\")`",
+        "es_correcta": false,
+        "explicacion": "Esta não é uma propriedade de configuração válida ou padrão do Spark."
+      },
+      {
+        "texto_opcion": "`df.join(outro, \"id\").disableBroadcast()`",
+        "es_correcta": false,
+        "explicacion": "`disableBroadcast()` não é um método DataFrame real."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Amostra de `orders_df`:\n\n| id_pedido | ID_do_cliente |\n|----------|---------|\n| 1 | c1 |\n| 2 | c2 |\n| 3 | c1 |\n\nAmostra de `customers_df`:\n\n| ID_do_cliente | nome |\n|--------|------|\n| c1 | Ana |\n\nUm engenheiro de dados executa `orders_df.join(customers_df, \"cust_id\", \"inner\")`. Quantas linhas o resultado contém?",
+    "opciones": [
+      {
+        "texto_opcion": "2 linhas — apenas pedidos correspondentes a `c1`.",
+        "es_correcta": true,
+        "explicacion": "Uma junção interna mantém apenas as chaves correspondentes; apenas order_id 1 e 3 correspondem a `cust_id` c1, já que c2 não tem correspondência."
+      },
+      {
+        "texto_opcion": "3 linhas — todos os pedidos são mantidos independentemente da correspondência.",
+        "es_correcta": false,
+        "explicacion": "Uma junção interna exclui linhas sem correspondência; order_id 2 (`c2`) não tem correspondência e é descartado."
+      },
+      {
+        "texto_opcion": "1 linha — apenas o primeiro pedido correspondente é retornado.",
+        "es_correcta": false,
+        "explicacion": "Uma junção interna retorna todas as linhas correspondentes, não apenas a primeira encontrada."
+      },
+      {
+        "texto_opcion": "0 linhas — a junção falha porque falta `c2` em `customers_df`.",
+        "es_correcta": false,
+        "explicacion": "Chaves ausentes não causam falha na junção inteira; linhas com correspondências ainda são retornadas."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja unir `df_a` e `df_b` onde `df_a.amount` é maior que `df_b.threshold` (uma condição de não igualdade).\n\nQual código está correto?",
+    "opciones": [
+      {
+        "texto_opcion": "`df_a.join(df_b, df_a.amount > df_b.threshold)`",
+        "es_correcta": true,
+        "explicacion": "As condições de junção podem usar qualquer expressão booleana, incluindo comparações de não igualdade, como maior que."
+      },
+      {
+        "texto_opcion": "`df_a.join(df_b, \"valor > limite\")`",
+        "es_correcta": false,
+        "explicacion": "Passar uma string bruta como essa é tratado como um nome de coluna, não como uma expressão SQL, e gerará um erro."
+      },
+      {
+        "texto_opcion": "`df_a.join(df_b, [\"valor\", \"limite\"])`",
+        "es_correcta": false,
+        "explicacion": "Passar uma lista de nomes de colunas executa uma junção de igualdade nessas colunas, e não uma comparação maior que."
+      },
+      {
+        "texto_opcion": "Junções sem igualdade não são suportadas no PySpark.",
+        "es_correcta": false,
+        "explicacion": "O PySpark oferece suporte total a junções sem igualdade (theta) por meio de condições de junção baseadas em expressão."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja que o DataFrame final contenha `customers_df.id` de uma junção com `orders_df`, mas `orders_df` também tem uma coluna chamada `id` (uma entidade diferente) que deve ser mantida com um nome diferente.\n\nQual abordagem evita ambiguidade?",
+    "opciones": [
+      {
+        "texto_opcion": "Renomeie a coluna `id` de `orders_df` com `.withColumnRenamed(\"id\", \"order_id\")` antes de ingressar.",
+        "es_correcta": true,
+        "explicacion": "Renomear a coluna conflitante antes da junção evita ambiguidade, pois ambos os DataFrames terão nomes de coluna exclusivos."
+      },
+      {
+        "texto_opcion": "Execute `.distinct()` no resultado unido.",
+        "es_correcta": false,
+        "explicacion": "`distinct()` remove linhas duplicadas; não resolve conflitos de nomenclatura entre colunas."
+      },
+      {
+        "texto_opcion": "Converta ambas as colunas `id` para o mesmo tipo de dados.",
+        "es_correcta": false,
+        "explicacion": "A correspondência de tipos de dados não resolve o problema de duas colunas compartilharem o mesmo nome."
+      },
+      {
+        "texto_opcion": "Use `crossJoin()` em vez de `join()`.",
+        "es_correcta": false,
+        "explicacion": "Uma junção cruzada ainda inclui ambas as colunas `id` e não aborda a ambigüidade de nomenclatura; também altera completamente a semântica da junção."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está escolhendo entre junções `left_semi` e `inner` para filtrar linhas `products_df` que possuem linhas relacionadas em `sales_df`, sem precisar de nenhuma coluna de `sales_df`.\n\nQual afirmação os compara corretamente neste caso de uso?",
+    "opciones": [
+      {
+        "texto_opcion": "`left_semi` evita a duplicação de linhas quando um produto tem várias linhas de vendas correspondentes; `inner` duplicaria a linha do produto para cada correspondência.",
+        "es_correcta": true,
+        "explicacion": "Uma junção interna produz uma linha de saída por par correspondente, duplicando a linha esquerda para cada correspondência, enquanto `left_semi` retorna cada linha esquerda correspondente apenas uma vez."
+      },
+      {
+        "texto_opcion": "Ambos produzem resultados idênticos em todos os casos, portanto não há diferença prática.",
+        "es_correcta": false,
+        "explicacion": "Eles diferem quando uma linha da esquerda corresponde a várias linhas da direita: inner duplica a linha, left_semi não."
+      },
+      {
+        "texto_opcion": "`inner` funciona apenas com uma única chave de junção, enquanto `left_semi` suporta múltiplas chaves.",
+        "es_correcta": false,
+        "explicacion": "Ambos os tipos de junção suportam chaves de junção únicas ou múltiplas igualmente."
+      },
+      {
+        "texto_opcion": "`left_semi` inclui colunas de `sales_df`, enquanto `inner` não.",
+        "es_correcta": false,
+        "explicacion": "É o oposto: `left_semi` retorna apenas colunas do lado esquerdo, enquanto `inner` inclui colunas de ambos os lados."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa o seguinte e percebe que o resultado tem mais linhas do que o esperado:\n\n```píton\nresultado = df_a.join(df_b, \"id\")\n```\n\nQual é a causa mais provável?",
+    "opciones": [
+      {
+        "texto_opcion": "`df_b` contém valores `id` duplicados, fazendo com que cada correspondência em `df_a` seja duplicada para cada linha correspondente.",
+        "es_correcta": true,
+        "explicacion": "Quando a chave de junção não é exclusiva em um lado, cada combinação correspondente produz uma linha de saída separada, aumentando a contagem de linhas."
+      },
+      {
+        "texto_opcion": "O tipo de junção padrão é `outer`, o que sempre aumenta a contagem de linhas.",
+        "es_correcta": false,
+        "explicacion": "O tipo de junção padrão no PySpark é `inner`, não `outer`."
+      },
+      {
+        "texto_opcion": "`join()` sempre dobra a contagem de linhas, independentemente dos dados.",
+        "es_correcta": false,
+        "explicacion": "As alterações na contagem de linhas dependem da exclusividade e das correspondências da chave, e não de um comportamento de duplicação fixo."
+      },
+      {
+        "texto_opcion": "O Spark adiciona automaticamente um substituto de junção cruzada quando a contagem de linhas parece muito baixa.",
+        "es_correcta": false,
+        "explicacion": "O Spark não retorna silenciosamente para junções cruzadas; isso exigiria uma chamada `crossJoin()` explícita ou uma junção sem condição."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa combinar três DataFrames (`q1_df`, `q2_df`, `q3_df`) com esquemas idênticos em um único DataFrame empilhando linhas.\n\nQual código é correto e idiomático?",
+    "opciones": [
+      {
+        "texto_opcion": "`q1_df.union(q2_df).union(q3_df)`",
+        "es_correcta": true,
+        "explicacion": "Encadear chamadas `union()` é a maneira padrão de empilhar vários DataFrames com esquemas correspondentes."
+      },
+      {
+        "texto_opcion": "`q1_df.join(q2_df).join(q3_df)`",
+        "es_correcta": false,
+        "explicacion": "A união combina colunas com base em chaves; ele não empilha linhas e exigiria condições de junção."
+      },
+      {
+        "texto_opcion": "`[q1_df, q2_df, q3_df].union()`",
+        "es_correcta": false,
+        "explicacion": "`union()` não é um método em uma lista Python; deve ser chamado em DataFrame."
+      },
+      {
+        "texto_opcion": "`q1_df.crossJoin(q2_df).crossJoin(q3_df)`",
+        "es_correcta": false,
+        "explicacion": "As junções cruzadas produzem produtos cartesianos, não uma simples pilha de três DataFrames em linhas."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está depurando uma junção que deve retornar linhas onde `df_a.id` corresponde a `df_b.id` OU `df_a.alt_id` corresponde a `df_b.id`.\n\nQual código expressa corretamente essa condição?",
+    "opciones": [
+      {
+        "texto_opcion": "```píton\ndf_a.join(\n    df_b,\n    (df_a.id == df_b.id) |\n    (df_a.alt_id == df_b.id)\n)\n```",
+        "es_correcta": true,
+        "explicacion": "O operador `|` combina duas condições de igualdade com lógica OR dentro de uma única expressão de junção."
+      },
+      {
+        "texto_opcion": "```píton\ndf_a.join(df_b, [\"id\", \"alt_id\"])\n```",
+        "es_correcta": false,
+        "explicacion": "Passar uma lista de colunas requer que TODAS elas correspondam (lógica AND), não uma condição OR."
+      },
+      {
+        "texto_opcion": "```píton\ndf_a.join(df_b, \"id\").union(\n    df_a.join(df_b, \"alt_id\")\n)\n```",
+        "es_correcta": false,
+        "explicacion": "Isso produz linhas duplicadas para casos que correspondem a ambas as condições e não são equivalentes a uma única junção OR."
+      },
+      {
+        "texto_opcion": "```píton\ndf_a.join(df_b, df_a.id == df_b.id e df_a.alt_id == df_b.id)\n```",
+        "es_correcta": false,
+        "explicacion": "Usar a palavra-chave `and` do Python não funciona corretamente com expressões de coluna e também implica lógica AND, não OR."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja manter todas as colunas de `df_a` e `df_b` após uma junção interna em `id`, incluindo duas colunas `id` separadas, para fins de auditoria.\n\nQual sintaxe de junção preserva ambas as colunas `id` separadamente?",
+    "opciones": [
+      {
+        "texto_opcion": "`df_a.join(df_b, df_a[\"id\"] == df_b[\"id\"], \"inner\")`",
+        "es_correcta": true,
+        "explicacion": "Usar uma expressão explícita de igualdade de coluna (em vez de uma string ou lista de nomes) mantém ambas as colunas `id` na saída."
+      },
+      {
+        "texto_opcion": "`df_a.join(df_b, \"id\", \"inner\")`",
+        "es_correcta": false,
+        "explicacion": "A união em uma string de nome de coluna mescla a chave de junção em uma única coluna, eliminando a duplicata."
+      },
+      {
+        "texto_opcion": "`df_a.join(df_b, [\"id\"], \"inner\")`",
+        "es_correcta": false,
+        "explicacion": "Passar uma lista de nomes de colunas também mescla a chave de junção em uma única coluna, igual ao formato de string."
+      },
+      {
+        "texto_opcion": "`df_a.unionByName(df_b)`",
+        "es_correcta": false,
+        "explicacion": "`unionByName()` empilha linhas combinando nomes de colunas; ele não executa uma junção nem preserva duas colunas de ID separadas."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deve combinar `legacy_df` (sem uma coluna `region`) com `current_df` (que tem `region`) empilhando linhas, permitindo que a coluna ausente seja preenchida com nulo automaticamente.\n\nQual método lida com isso corretamente?",
+    "opciones": [
+      {
+        "texto_opcion": "`legacy_df.unionByName(current_df, permitirMissingColumns=True)`",
+        "es_correcta": true,
+        "explicacion": "Definir `allowMissingColumns=True` permite que `unionByName()` preencha as colunas ausentes em um DataFrame com null automaticamente."
+      },
+      {
+        "texto_opcion": "`legacy_df.union(current_df)`",
+        "es_correcta": false,
+        "explicacion": "`union()` requer que ambos DataFrames tenham o mesmo número de colunas e não preenche automaticamente as que faltam."
+      },
+      {
+        "texto_opcion": "`legacy_df.unionByName(current_df)`",
+        "es_correcta": false,
+        "explicacion": "Sem `allowMissingColumns=True`, `unionByName()` gera um erro se os conjuntos de colunas forem diferentes."
+      },
+      {
+        "texto_opcion": "`legacy_df.join(current_df, \"região\", \"externo\")`",
+        "es_correcta": false,
+        "explicacion": "Uma junção combina colunas com base em uma chave em vez de empilhar linhas e não produziria a união de linhas desejada."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa `df_a.crossJoin(df_b)` onde `df_a` tem 1.000 linhas e `df_b` tem 1.000 linhas.\n\nQuantas linhas o resultado contém e qual é a principal preocupação?",
+    "opciones": [
+      {
+        "texto_opcion": "1.000.000 de linhas; a principal preocupação é o crescimento explosivo no tamanho dos resultados e no custo computacional.",
+        "es_correcta": true,
+        "explicacion": "Uma junção cruzada multiplica a contagem de linhas (1.000 x 1.000), o que pode rapidamente se tornar muito caro em DataFrames maiores."
+      },
+      {
+        "texto_opcion": "2.000 linhas; a principal preocupação são nomes de colunas duplicados.",
+        "es_correcta": false,
+        "explicacion": "Uma junção cruzada produz o produto cartesiano (multiplicação), não uma simples adição de contagens de linhas."
+      },
+      {
+        "texto_opcion": "1.000 linhas; a principal preocupação é a falta de partidas.",
+        "es_correcta": false,
+        "explicacion": "Uma junção cruzada não está limitada a uma linha por linha esquerda; ele emparelha cada linha com todas as outras linhas."
+      },
+      {
+        "texto_opcion": "0 linhas, a menos que uma chave de junção seja especificada.",
+        "es_correcta": false,
+        "explicacion": "`crossJoin()` não requer ou usa uma chave de junção; sempre retorna o produto cartesiano completo."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  },
+  {
+    "pregunta": "Qual cenário justifica melhor o uso de uma anti-junção esquerda em vez de filtrar com uma subconsulta `NOT IN` no Spark SQL?",
+    "opciones": [
+      {
+        "texto_opcion": "Ao comparar DataFrames grandes, já que `left_anti` geralmente é optimized melhor pelo Catalyst do que subconsultas correlacionadas.",
+        "es_correcta": true,
+        "explicacion": "As anti-junções são normalmente traduzidas em planos físicos eficientes baseados em junções, enquanto as subconsultas `NOT IN` podem ser mais difíceis para o optimizer planejar com eficiência em escala."
+      },
+      {
+        "texto_opcion": "Quando os dois DataFrames possuem esquemas completamente diferentes, sem colunas comuns.",
+        "es_correcta": false,
+        "explicacion": "Uma junção (incluindo anti-junção) ainda requer uma chave comum para comparação; a incompatibilidade de esquema não está relacionada à escolha entre anti join e `NOT IN`."
+      },
+      {
+        "texto_opcion": "Quando são necessárias linhas duplicadas no resultado.",
+        "es_correcta": false,
+        "explicacion": "As anti-junções retornam cada linha esquerda sem correspondência exatamente uma vez; nenhuma das abordagens se destina a produzir duplicatas."
+      },
+      {
+        "texto_opcion": "Quando o lado direito DataFrame deve ser incluído na saída final.",
+        "es_correcta": false,
+        "explicacion": "As anti-junções excluem explicitamente as colunas do lado direito da saída, o oposto de incluí-las."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "DataFrame Junções"
+    ]
+  }
+]

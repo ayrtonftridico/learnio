@@ -1,0 +1,1083 @@
+[
+  {
+    "pregunta": "Um engenheiro de dados deseja começar a usar Declarative Automation Bundles para um novo projeto. Qual arquivo é **obrigatório** na raiz de cada projeto de bundle?",
+    "opciones": [
+      {
+        "texto_opcion": "`databricks.yml`",
+        "es_correcta": true,
+        "explicacion": "`databricks.yml` é o ponto de entrada obrigatório para cada pacote. Sem ele, a CLI não poderá descobrir ou processar o projeto. Todos os outros arquivos (`resources/`, `src/`) são convencionais, mas opcionais."
+      },
+      {
+        "texto_opcion": "`pacote.json`",
+        "es_correcta": false,
+        "explicacion": "Não há arquivo `bundle.json` na especificação do bundle. O arquivo raiz necessário é sempre `databricks.yml`."
+      },
+      {
+        "texto_opcion": "`pyproject.toml`",
+        "es_correcta": false,
+        "explicacion": "`pyproject.toml` é um arquivo de empacotamento Python, não uma configuração de bundle. `databricks.yml` é o arquivo necessário."
+      },
+      {
+        "texto_opcion": "`configurações.yaml`",
+        "es_correcta": false,
+        "explicacion": "`settings.yaml` não é um arquivo de pacote reconhecido. O nome de arquivo correto necessário é `databricks.yml`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Estrutura do pacote"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados tem o seguinte `databricks.yml` mínimo:\n\n```yaml\npacote:\n  nome: meu-etl-projeto\n```\n\nQual afirmação é verdadeira sobre esta configuração?",
+    "opciones": [
+      {
+        "texto_opcion": "É uma configuração de pacote válida — `bundle.name` é o único campo obrigatório.",
+        "es_correcta": true,
+        "explicacion": "`bundle.name` é o único campo obrigatório em um `databricks.yml`. Todas as outras chaves de nível superior (`destinos`, `recursos`, `variáveis`, etc.) são opcionais ou recomendadas, não obrigatórias."
+      },
+      {
+        "texto_opcion": "É inválido porque um bloco `targets` é necessário.",
+        "es_correcta": false,
+        "explicacion": "`targets` é recomendado, mas não obrigatório. Um pacote com apenas `bundle.name` é sintaticamente válido e pode ser implementado."
+      },
+      {
+        "texto_opcion": "É inválido porque um bloco `resources` é necessário.",
+        "es_correcta": false,
+        "explicacion": "`recursos` é recomendado, mas não obrigatório. O único campo obrigatório é `bundle.name`."
+      },
+      {
+        "texto_opcion": "É inválido porque `bundle.name` deve estar aninhado em `workspace`.",
+        "es_correcta": false,
+        "explicacion": "`bundle.name` é uma chave de nível superior em `bundle:`, não em `workspace:`. O YAML mostrado está estruturado corretamente."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Estrutura do pacote"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe de engenharia de dados organiza seu projeto de pacote conforme mostrado abaixo:\n\n```\nmeu-projeto/\n├── databricks.yml\n├── recursos/\n│ └── jobs/etl_job.yml\n├── fonte/\n│ └── notebooks/ingest.ipynb\n└── testes/\n    └── test_transform.py\n```\n\nQual pasta deve conter artefatos de construção como arquivos `.whl`, de acordo com as melhores práticas DABs?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma pasta `artifacts/` — e arquivos `.whl` NÃO devem ser enviados ao Git.",
+        "es_correcta": true,
+        "explicacion": "Artefatos de construção (`.whl`, `.jar`) vão em `artifacts/` por convenção e NÃO devem ser comprometidos com o Git. Eles são construídos durante CI/CD e carregados pelo comando `databricks bundle deploy`."
+      },
+      {
+        "texto_opcion": "A pasta `src/` — junto com notebooks de origem e scripts Python.",
+        "es_correcta": false,
+        "explicacion": "`src/` contém código fonte (notebooks, scripts Python). Artefatos compilados como arquivos `.whl` pertencem a `artifacts/` e não devem ser confirmados."
+      },
+      {
+        "texto_opcion": "A pasta `resources/` — incluída nas definições de recursos YAML.",
+        "es_correcta": false,
+        "explicacion": "`resources/` contém arquivos de configuração YAML que definem recursos do Databricks. Artefatos binários não pertencem a esse lugar."
+      },
+      {
+        "texto_opcion": "Qualquer pasta — desde que seu caminho seja referenciado em `databricks.yml`.",
+        "es_correcta": false,
+        "explicacion": "Embora as referências de caminho sejam importantes, a prática recomendada é explícita: `artifacts/` é o local convencional e os arquivos `.whl`/`.jar` NÃO devem ser enviados ao Git, independentemente do local."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Estrutura do pacote"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados analisa este snippet `databricks.yml`:\n\n```yaml\npacote:\n  nome: plataforma de dados\n\nincluem:\n  - recursos/jobs/*.yml\n  - recursos/pipelines/*.yml\n  -config/variáveis.yml\n```\n\nO que a chave `include` realiza?",
+    "opciones": [
+      {
+        "texto_opcion": "Mescla arquivos YAML adicionais na configuração do bundle no tempo de processamento, permitindo que o projeto seja dividido em vários arquivos.",
+        "es_correcta": true,
+        "explicacion": "`include` aceita padrões glob e mescla todos os arquivos YAML correspondentes no pacote no momento do processamento. Isso permite a estrutura modular do projeto sem colocar tudo em um arquivo."
+      },
+      {
+        "texto_opcion": "Importa módulos Python dos caminhos listados para uso em tarefas de notebook.",
+        "es_correcta": false,
+        "explicacion": "`include` é uma diretiva em nível YAML para mesclar arquivos de configuração, não um mecanismo de importação do Python. Não tem nada a ver com importações de módulos Python."
+      },
+      {
+        "texto_opcion": "Copia os arquivos listados no workspace do Databricks durante a implantação.",
+        "es_correcta": false,
+        "explicacion": "A cópia de arquivos para o workspace é controlada pelo comportamento `sync` da implantação do bundle. `include` mescla apenas o conteúdo da configuração YAML no momento da análise."
+      },
+      {
+        "texto_opcion": "Especifica quais tipos de recursos podem ser implementados pelo bundle.",
+        "es_correcta": false,
+        "explicacion": "`include` não é uma lista de permissões/filtro. É uma diretiva baseada em glob para mesclar arquivos YAML adicionais na configuração do bundle."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modularização"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define os seguintes alvos em `databricks.yml`:\n\n```yaml\ntargets:\n  dev:\n    default: true\n    mode: development\n    workspace:\n      host: https://dev-adb.net\n  prod:\n    mode: production\n    workspace:\n      host: https://prod-adb.net\n```\n\nO engenheiro executa `databricks bundle deploy` sem qualquer sinalizador `-t`. Qual workspace recebe a implantação?",
+    "opciones": [
+      {
+        "texto_opcion": "O workspace `dev` — porque `default: true` está definido no destino `dev`.",
+        "es_correcta": true,
+        "explicacion": "Quando `default: true` é definido em um destino, esse destino é usado quando nenhum sinalizador `-t` é fornecido. Apenas um alvo deve ter `default: true`."
+      },
+      {
+        "texto_opcion": "Ambos os workspaces — `bundle deploy` são implantados em todos os destinos definidos simultaneamente.",
+        "es_correcta": false,
+        "explicacion": "`databricks bundle deploy` é implantado em exatamente um destino por vez. Use diversas chamadas CLI para implantar em diversos ambientes."
+      },
+      {
+        "texto_opcion": "O workspace `prod` — os bundles sempre são padronizados para o destino do modo `produção`.",
+        "es_correcta": false,
+        "explicacion": "Não há regra de que o modo `produção` seja o padrão. O padrão é controlado explicitamente por `default: true` em um destino específico."
+      },
+      {
+        "texto_opcion": "Nenhum dos workspaces — o comando falha porque o sinalizador `-t` é necessário.",
+        "es_correcta": false,
+        "explicacion": "O sinalizador `-t` não é necessário quando um destino `default: true` é definido. O comando é bem-sucedido e é implementado no destino padrão."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Alvos"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados adiciona `mode: development` ao seu destino `dev`. Após a implantação, eles percebem que todos os nomes de seus jobs foram prefixados.\n\nQual prefixo `mode: development` adiciona automaticamente aos nomes dos recursos?",
+    "opciones": [
+      {
+        "texto_opcion": "`[dev <short_username>]` — por exemplo, `[dev alice]Meu job ETL`.",
+        "es_correcta": true,
+        "explicacion": "No modo de desenvolvimento, o Databricks acrescenta `[dev <workspace.current_user.short_name>]` a todos os nomes de recursos. Isso evita colisões de nomenclatura quando vários desenvolvedores implantam no mesmo workspace."
+      },
+      {
+        "texto_opcion": "`dev-` — um prefixo simples em minúsculas.",
+        "es_correcta": false,
+        "explicacion": "O prefixo é `[dev <short_username>]` entre colchetes, não um simples prefixo `dev-`."
+      },
+      {
+        "texto_opcion": "`[desenvolvimento]` — uma string literal fixa.",
+        "es_correcta": false,
+        "explicacion": "O prefixo inclui o nome abreviado do usuário de implantação, não uma string `[development]` fixa. Isso é intencional para que os recursos de cada desenvolvedor tenham nomes exclusivos."
+      },
+      {
+        "texto_opcion": "Nenhum prefixo é adicionado - a nomeação de recursos é sempre controlada pelo campo `name:` em YAML.",
+        "es_correcta": false,
+        "explicacion": "No `mode: development`, o Databricks adiciona automaticamente um prefixo específico do usuário aos nomes dos recursos, substituindo o campo base `name:`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modos de implantação"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados implanta um pacote com `mode: development`. Qual dos seguintes comportamentos este modo se aplica automaticamente?",
+    "opciones": [
+      {
+        "texto_opcion": "Todos os agendamentos e gatilhos de job são pausados automaticamente para evitar execuções acidentais de produção.",
+        "es_correcta": true,
+        "explicacion": "O modo de desenvolvimento pausa todos os agendamentos e gatilhos, permite execuções simultâneas de jobs, desativa o bloqueio de implantação e prefixa automaticamente nomes de recursos — tudo para oferecer suporte a iterações mais rápidas e sem riscos."
+      },
+      {
+        "texto_opcion": "Todos os pipelines DLT são definidos como `development: false` para impor padrões de produção.",
+        "es_correcta": false,
+        "explicacion": "O modo de desenvolvimento define pipelines DLT como `development: true` (não `false`). Definir `development: false` é o que o modo **produção** impõe."
+      },
+      {
+        "texto_opcion": "O bloqueio de implantação está habilitado para evitar implantações simultâneas.",
+        "es_correcta": false,
+        "explicacion": "O modo de desenvolvimento **desativa** o bloqueio de implantação para permitir uma iteração mais rápida. O bloqueio de implantação é ativado no modo **produção**."
+      },
+      {
+        "texto_opcion": "As substituições de cluster com `--cluster-id` são bloqueadas.",
+        "es_correcta": false,
+        "explicacion": "O modo de desenvolvimento **permite** substituições de cluster com `--cluster-id`. É o modo de **produção** que bloqueia substituições de cluster."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modos de implantação"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados implanta um pacote com `mode: produção` e especifica:\n\n```yaml\ntargets:\n  prod:\n    mode: production\n    idiota:\n      ramo: principal\n```\n\nO engenheiro está atualmente no branch `feature/hotfix`. O que acontece quando eles executam `databricks bundle deploy -t prod`?",
+    "opciones": [
+      {
+        "texto_opcion": "A implantação falha na validação porque o branch atual do Git (`feature/hotfix`) não corresponde ao branch necessário (`main`).",
+        "es_correcta": true,
+        "explicacion": "O modo de produção valida se o branch atual do Git corresponde ao valor `git.branch` especificado no destino. Isso evita implantações acidentais de filiais não principais."
+      },
+      {
+        "texto_opcion": "A implantação foi bem-sucedida porque `git.branch` é apenas consultivo e não bloqueia implantações.",
+        "es_correcta": false,
+        "explicacion": "`git.branch` em um destino de produção é obrigatório, não consultivo. A implantação falhará se as ramificações não corresponderem."
+      },
+      {
+        "texto_opcion": "A implantação foi bem-sucedida, mas é implantada a partir de `main` em vez da ramificação atual.",
+        "es_correcta": false,
+        "explicacion": "A CLI do bundle não alterna ramificações automaticamente. Se o branch atual não corresponder, a implantação será bloqueada."
+      },
+      {
+        "texto_opcion": "A implantação falha porque `git.branch` só é válido em `mode: development`.",
+        "es_correcta": false,
+        "explicacion": "`git.branch` é um recurso de modo de produção usado para impor qual branch pode ser usado para implantações de produção."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modos de implantação"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa ignorar a validação do branch Git para uma implantação emergencial de hotfix na produção. Qual comando consegue isso?",
+    "opciones": [
+      {
+        "texto_opcion": "`pacote databricks implantar -t prod --force`",
+        "es_correcta": true,
+        "explicacion": "O sinalizador `--force` ignora a verificação de branch do Git aplicada pelo modo de produção, permitindo a implantação de qualquer branch. Deve ser usado com moderação e apenas em emergências."
+      },
+      {
+        "texto_opcion": "`pacote databricks implantar -t prod --skip-git`",
+        "es_correcta": false,
+        "explicacion": "`--skip-git` não é um sinalizador válido para o comando bundle deploy. O sinalizador correto para ignorar a validação do branch Git é `--force`."
+      },
+      {
+        "texto_opcion": "`pacote databricks implantar -t prod --mode=override`",
+        "es_correcta": false,
+        "explicacion": "`--mode=override` não é uma opção CLI válida. Use `--force` para ignorar a validação do branch Git no modo de produção."
+      },
+      {
+        "texto_opcion": "`pacote databricks implantar -t prod --no-validate`",
+        "es_correcta": false,
+        "explicacion": "`--no-validate` não é um sinalizador de implantação de bundle válido. O sinalizador `--force` é a maneira correta de pular a validação do branch Git."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modos de implantação"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja que o modo de produção NÃO permita substituições de cluster. Eles acidentalmente executam:\n\n```bash\npacote de databricks implantar -t prod --cluster-id 9999-888888-wxyz789\n```\n\nQual é o resultado?",
+    "opciones": [
+      {
+        "texto_opcion": "O comando falha — o modo de produção não permite substituições de cluster com `--cluster-id`.",
+        "es_correcta": true,
+        "explicacion": "O modo de produção bloqueia explicitamente as substituições de cluster. Somente o modo de desenvolvimento permite que `--cluster-id` substitua as definições de cluster. Este é um recurso de segurança para garantir que o produto use especificações de cluster definidas corretamente."
+      },
+      {
+        "texto_opcion": "O comando é bem-sucedido e é implementado usando o cluster `9999-888888-wxyz789`.",
+        "es_correcta": false,
+        "explicacion": "O modo de produção bloqueia substituições `--cluster-id`. Esse comportamento é intencional para evitar alterações ad hoc no cluster em implantações de produção."
+      },
+      {
+        "texto_opcion": "O comando é bem-sucedido, mas ignora o sinalizador `--cluster-id` silenciosamente.",
+        "es_correcta": false,
+        "explicacion": "O comando não ignora silenciosamente o sinalizador – ele falha com um erro de validação."
+      },
+      {
+        "texto_opcion": "A substituição do cluster é aplicada somente à primeira tarefa do job.",
+        "es_correcta": false,
+        "explicacion": "A aplicação parcial de substituições de cluster não é a forma como o modo de produção funciona. Toda a substituição `--cluster-id` está bloqueada."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modos de implantação"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define as seguintes predefinições no destino `dev`:\n\n```yaml\ntargets:\n  dev:\n    mode: development\n    predefinições:\n      trigger_pause_status: PAUSADO\n      jobs_max_concurrent_runs: 10\n```\n\nUm job específico no pacote tem `max_concurrent_runs: 3`. Qual é o `max_concurrent_runs` efetivo desse job quando implantado em `dev`?",
+    "opciones": [
+      {
+        "texto_opcion": "3 — a configuração do recurso individual substitui a predefinição.",
+        "es_correcta": true,
+        "explicacion": "Precedência predefinida: configurações de recursos individuais (mais alta) > predefinições > padrões de modo (mais baixo). O `max_concurrent_runs: 3` do próprio job substitui o `jobs_max_concurrent_runs: 10` da predefinição."
+      },
+      {
+        "texto_opcion": "10 — a predefinição substitui as configurações individuais do job.",
+        "es_correcta": false,
+        "explicacion": "As predefinições NÃO substituem as configurações de recursos individuais. As configurações de recursos individuais sempre têm a prioridade mais alta."
+      },
+      {
+        "texto_opcion": "13 — os valores são somados quando ambos são especificados.",
+        "es_correcta": false,
+        "explicacion": "Os valores não são somados. A configuração de recurso individual (3) vence a predefinição (10)."
+      },
+      {
+        "texto_opcion": "1 — o modo de desenvolvimento sempre define execuções simultâneas como 1 por segurança.",
+        "es_correcta": false,
+        "explicacion": "O modo de desenvolvimento permite execuções simultâneas (não as restringe). O valor efetivo é determinado pela configuração de recurso individual, que é 3."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Predefinições personalizadas"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define o seguinte em `databricks.yml`:\n\n```yaml\nvariáveis:\n  nome_catálogo:\n    description: \"Catálogo de destino\"\n    padrão: \"dev_catalog\"\n    tipo: string\n```\n\nComo essa variável deve ser referenciada no parâmetro de tarefa do notebook de um job?",
+    "opciones": [
+      {
+        "texto_opcion": "`${var.catalog_name}`",
+        "es_correcta": true,
+        "explicacion": "Variáveis ​​personalizadas são sempre referenciadas usando a sintaxe de substituição `${var.<variable_name>}`. Isso funciona em qualquer lugar da configuração YAML."
+      },
+      {
+        "texto_opcion": "`${nome_do_catálogo}`",
+        "es_correcta": false,
+        "explicacion": "Sem o prefixo `var.`, `${catalog_name}` não é válido para variáveis personalizadas. As substituições integradas usam `${bundle.*}` ou `${workspace.*}` — variáveis ​​personalizadas sempre usam `${var.*}`."
+      },
+      {
+        "texto_opcion": "`$(nome_catálogo)`",
+        "es_correcta": false,
+        "explicacion": "As substituições de pacotes usam a sintaxe `${...}` entre colchetes, e não a sintaxe entre parênteses `$(...)`. O formato correto é `${var.catalog_name}`."
+      },
+      {
+        "texto_opcion": "`{{var.catalog_name}}`",
+        "es_correcta": false,
+        "explicacion": "Chave dupla `{{...}}` é a sintaxe do modelo Jinja, não a sintaxe do pacote Databricks. Variáveis ​​de pacote usam `${var.catalog_name}`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Variáveis"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define uma variável sem padrão:\n\n```yaml\nvariáveis:\n  senha_db:\n    descrição: \"Senha do banco de dados\"\n```\n\nO que acontece se o engenheiro executar `databricks bundle deploy -t prod` sem definir esta variável?",
+    "opciones": [
+      {
+        "texto_opcion": "A implantação falha — variáveis sem padrões devem ser definidas explicitamente via `--var`, uma variável de ambiente, o bloco `targets.variables` ou um arquivo `variable-overrides.json`.",
+        "es_correcta": true,
+        "explicacion": "Variáveis sem valor `default` devem ser fornecidas antes da implantação. Se nenhum valor for fornecido por meio de qualquer um dos quatro métodos, a CLI gerará um erro."
+      },
+      {
+        "texto_opcion": "A implantação foi bem-sucedida com `db_password` definido como uma string vazia.",
+        "es_correcta": false,
+        "explicacion": "A CLI não substitui strings vazias por variáveis ausentes. Uma variável não definida sem um padrão causa uma falha na implantação."
+      },
+      {
+        "texto_opcion": "A implantação foi bem-sucedida, mas a variável é ignorada na configuração final.",
+        "es_correcta": false,
+        "explicacion": "A falta de variáveis ​​obrigatórias causa uma falha na implantação, e não uma omissão silenciosa."
+      },
+      {
+        "texto_opcion": "A CLI solicita interativamente ao usuário que insira o valor.",
+        "es_correcta": false,
+        "explicacion": "A CLI do Databricks não solicita interativamente valores de variáveis. O valor deve ser fornecido por meio de um dos quatro métodos suportados antes de executar o comando."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Variáveis"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa configurar nomes de catálogo diferentes para três ambientes. Revise esta configuração:\n\n```yaml\nvariáveis:\n  nome_catálogo:\n    padrão: \"dev_catalog\"\n\ntargets:\n  dev:\n    variáveis:\n      nome_catálogo: dev_catalog\n  encenação:\n    variáveis:\n      nome_do_catálogo: staging_catalog\n  prod:\n    variáveis:\n      nome_catálogo: catálogo_produto\n```\n\nAo implantar em `staging`, qual valor `${var.catalog_name}` resolve?",
+    "opciones": [
+      {
+        "texto_opcion": "`staging_catalog` — a substituição no nível de destino entra em vigor.",
+        "es_correcta": true,
+        "explicacion": "Os valores de variáveis definidos em `targets.<target_name>.variables` substituem o `default` global. Ao implantar em `staging`, `catalog_name` resolve para `staging_catalog`."
+      },
+      {
+        "texto_opcion": "`dev_catalog` — o padrão global é sempre usado.",
+        "es_correcta": false,
+        "explicacion": "O padrão global só é usado quando nenhuma substituição no nível de destino é especificada. O alvo `staging` fornece seu próprio valor, que tem precedência."
+      },
+      {
+        "texto_opcion": "`prod_catalog` — variáveis de produção são sempre aplicadas como camada final.",
+        "es_correcta": false,
+        "explicacion": "Variáveis específicas do destino aplicam-se apenas ao seu próprio destino. A implantação em `staging` usa apenas os valores das variáveis ​​do destino `staging`."
+      },
+      {
+        "texto_opcion": "Um erro é gerado porque a mesma variável está definida em vários destinos.",
+        "es_correcta": false,
+        "explicacion": "Definir substituições de variáveis por destino é o padrão correto para isolamento de ambiente. Não causa erro."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Variáveis",
+      "Alvos"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados analisa esta nota da documentação:\n\n> Variáveis de pacote são **variáveis de tempo de implantação**. Eles são resolvidos quando você executa `databricks bundle deploy`, não no tempo de execução do job.\n\nUm job precisa de valores diferentes (por exemplo, uma data de execução) em cada execução. Como isso deve ser implementado?",
+    "opciones": [
+      {
+        "texto_opcion": "Use **parâmetros de job** — eles são passados em tempo de execução e podem variar de acordo com a execução.",
+        "es_correcta": true,
+        "explicacion": "As variáveis do bundle são incorporadas no momento da implementação e não podem ser alteradas entre as execuções. Parâmetros de job (`base_parameters` ou referências de valores dinâmicos) são a ferramenta correta para valores que variam por execução."
+      },
+      {
+        "texto_opcion": "Use `${var.run_date}` — as variáveis do pacote são reavaliadas em cada execução de job.",
+        "es_correcta": false,
+        "explicacion": "As variáveis do pacote são resolvidas **uma vez** no momento da implantação, não em cada execução de job. `${var.run_date}` seria corrigido para o valor no momento da última implantação."
+      },
+      {
+        "texto_opcion": "Defina `type: dynamic` na variável - isso permite a resolução em tempo de execução.",
+        "es_correcta": false,
+        "explicacion": "`type: dynamic` não é um tipo de variável válido em pacotes do Databricks. Os tipos válidos são `string`, `integer`, `boolean` e `complex`."
+      },
+      {
+        "texto_opcion": "Reimplante o pacote antes de cada execução com um sinalizador `--var` atualizado.",
+        "es_correcta": false,
+        "explicacion": "A reimplantação antes de cada execução é impraticável e anula a finalidade dos jobs agendados. Os parâmetros do job são a solução correta para variação em tempo de execução."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Variáveis"
+    ]
+  },
+  {
+    "pregunta": "Um pipeline CI/CD precisa substituir uma variável de bundle no momento da implantação sem modificar nenhum arquivo YAML. Qual comando faz isso?",
+    "opciones": [
+      {
+        "texto_opcion": "`pacote databricks implantar -t prod --var=\"catalog_name=prod_catalog\"`",
+        "es_correcta": true,
+        "explicacion": "O sinalizador `--var=\"key=value\"` é o método de maior prioridade para substituir valores de variáveis. Não requer alterações de YAML e é ideal para pipelines CI/CD."
+      },
+      {
+        "texto_opcion": "`pacote databricks implantar -t prod --set-variable catalog_name=prod_catalog`",
+        "es_correcta": false,
+        "explicacion": "`--set-variable` não é um sinalizador válido. O sinalizador correto é `--var=\"key=value\"`."
+      },
+      {
+        "texto_opcion": "`databricks bundle deploy -t prod -e catalog_name=prod_catalog`",
+        "es_correcta": false,
+        "explicacion": "`-e` não é o sinalizador correto para substituições de variáveis ​​do pacote. Use `--var=\"key=value\"` em vez disso."
+      },
+      {
+        "texto_opcion": "`databricks bundle deploy -t prod --params '{\"catalog_name\": \"prod_catalog\"}'`",
+        "es_correcta": false,
+        "explicacion": "`--params` com JSON é usado para parâmetros de execução de job, não para substituições de variáveis de pacote. O sinalizador correto é `--var=\"key=value\"`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Variáveis"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa definir uma variável de pacote usando uma variável de ambiente em um pipeline CI/CD do Linux. A variável é chamada `catalog_name`. Qual nome de variável de ambiente eles devem exportar?",
+    "opciones": [
+      {
+        "texto_opcion": "`BUNDLE_VAR_nome_catálogo`",
+        "es_correcta": true,
+        "explicacion": "Variáveis de ambiente de variáveis de pacote devem ser prefixadas com `BUNDLE_VAR_`. O nome completo é `BUNDLE_VAR_catalog_name`. Este é o segundo método de maior prioridade depois do sinalizador `--var`."
+      },
+      {
+        "texto_opcion": "`DATABRICKS_VAR_catalog_name`",
+        "es_correcta": false,
+        "explicacion": "O prefixo necessário é `BUNDLE_VAR_`, não `DATABRICKS_VAR_`. Somente variáveis ​​com o prefixo `BUNDLE_VAR_` são reconhecidas pelo pacote CLI."
+      },
+      {
+        "texto_opcion": "`DAB_catalog_name`",
+        "es_correcta": false,
+        "explicacion": "`DAB_` não é um prefixo reconhecido para variáveis de ambiente de variáveis de bundle. O prefixo correto é `BUNDLE_VAR_`."
+      },
+      {
+        "texto_opcion": "`nome_catálogo`",
+        "es_correcta": false,
+        "explicacion": "Variáveis de ambiente sem o prefixo `BUNDLE_VAR_` não são reconhecidas como substituições de variáveis de bundle. O nome completo deve ser `BUNDLE_VAR_catalog_name`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Variáveis"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define uma variável em quatro locais diferentes. Em que ordem eles são avaliados, da prioridade **mais alta** para a prioridade mais baixa?",
+    "opciones": [
+      {
+        "texto_opcion": "`--var` sinalizador → `BUNDLE_VAR_*` env var → `variable-overrides.json` → `targets.variables` em YAML",
+        "es_correcta": true,
+        "explicacion": "Esta é a ordem de prioridade correta, da mais alta para a mais baixa. O sinalizador CLI `--var` sempre vence; YAML `targets.variables` tem a prioridade mais baixa e é substituído por todos os outros métodos."
+      },
+      {
+        "texto_opcion": "`targets.variables` em YAML → `variable-overrides.json` → `BUNDLE_VAR_*` env var → `--var` sinalizador",
+        "es_correcta": false,
+        "explicacion": "Este é o inverso da ordem correta. `targets.variables` em YAML tem a prioridade mais baixa e `--var` tem a mais alta."
+      },
+      {
+        "texto_opcion": "`BUNDLE_VAR_*` env var → `--var` sinalizador → `variable-overrides.json` → `targets.variables` em YAML",
+        "es_correcta": false,
+        "explicacion": "O sinalizador `--var` tem prioridade mais alta que as variáveis de ambiente. A ordem correta é: `--var` > `BUNDLE_VAR_*` > `variable-overrides.json` > `targets.variables`."
+      },
+      {
+        "texto_opcion": "Todos os quatro métodos têm prioridade igual e o último avaliado vence.",
+        "es_correcta": false,
+        "explicacion": "Os quatro métodos têm uma ordem de prioridade estrita. Não existe o conceito de \"últimas vitórias avaliadas\" na resolução de variáveis ​​de pacote."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Variáveis"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados escreve o seguinte em `databricks.yml`:\n\n```yaml\nworkspace:\n  root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}\n```\n\nO usuário `alice@company.com` implanta no destino `dev` de um pacote chamado `data-platform`. Qual é o `root_path` resolvido?",
+    "opciones": [
+      {
+        "texto_opcion": "`/Workspace/Users/alice@company.com/.bundle/data-platform/dev`",
+        "es_correcta": true,
+        "explicacion": "`${workspace.current_user.userName}` resolve para o e-mail do usuário de implantação, `${bundle.name}` para o nome do pacote e `${bundle.target}` para o nome do destino. Isso cria um caminho exclusivo por usuário e ambiente."
+      },
+      {
+        "texto_opcion": "`/Workspace/Users/alice/.bundle/data-platform/dev`",
+        "es_correcta": false,
+        "explicacion": "`${workspace.current_user.userName}` resolve o endereço de e-mail completo, não o nome abreviado. `${workspace.current_user.short_name}` resolveria para `alice`."
+      },
+      {
+        "texto_opcion": "`/Workspace/Users/${workspace.current_user.userName}/.bundle/data-platform/dev`",
+        "es_correcta": false,
+        "explicacion": "As substituições são resolvidas no momento da implantação. A string literal `${workspace.current_user.userName}` não aparece no caminho resolvido."
+      },
+      {
+        "texto_opcion": "`/Workspace/Users/alice@company.com/.bundle/data-platform/production`",
+        "es_correcta": false,
+        "explicacion": "`${bundle.target}` resolve o nome da chave do destino conforme escrito em YAML - que é `dev`, não `produção`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Substituições"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja que um nome de esquema de pipeline reflita dinamicamente o destino de implantação atual. Eles escrevem:\n\n```yaml\nrecursos:\n  oleodutos:\n    meu_pipeline:\n      nome: meu_pipeline\n      esquema: pipeline_bundle_${bundle.target}\n```\n\nQuando implantado em `staging`, qual é o nome do esquema do pipeline?",
+    "opciones": [
+      {
+        "texto_opcion": "`pipeline_bundle_staging`",
+        "es_correcta": true,
+        "explicacion": "`${bundle.target}` resolve o nome do destino de implantação atual. Quando implantado com `-t staging`, ele resolve para `staging`, fornecendo o nome do esquema `pipeline_bundle_staging`."
+      },
+      {
+        "texto_opcion": "`pipeline_bundle_produção`",
+        "es_correcta": false,
+        "explicacion": "`${bundle.target}` resolve o nome exato da chave de destino em YAML, que é `staging` — não `production` (isso só se aplicaria se o destino fosse nomeado `production`)."
+      },
+      {
+        "texto_opcion": "`pipeline_bundle_${bundle.target}`",
+        "es_correcta": false,
+        "explicacion": "As substituições são resolvidas no momento da implantação. A sequência de substituição literal não permanece no valor resolvido."
+      },
+      {
+        "texto_opcion": "`pipeline_bundle_`",
+        "es_correcta": false,
+        "explicacion": "`${bundle.target}` sempre resolve para o nome do destino atual. Nunca é uma string vazia durante uma implantação."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Substituições"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa fazer referência ao ID de um job implantado chamado `etl_job` na configuração de outro recurso. Qual sintaxe de substituição está correta?",
+    "opciones": [
+      {
+        "texto_opcion": "`${resources.jobs.etl_job.id}`",
+        "es_correcta": true,
+        "explicacion": "As substituições de recursos nomeados seguem o padrão `${resources.<resource_type>.<resource_key>.<field>}`. Para o ID de um job, é `${resources.jobs.etl_job.id}`."
+      },
+      {
+        "texto_opcion": "`${jobs.etl_job.id}`",
+        "es_correcta": false,
+        "explicacion": "O caminho completo deve incluir o prefixo `resources.`: `${resources.jobs.etl_job.id}`. `${jobs.etl_job.id}` não é válido."
+      },
+      {
+        "texto_opcion": "`${var.etl_job_id}`",
+        "es_correcta": false,
+        "explicacion": "Variáveis personalizadas usam a sintaxe `${var.*}`. Mas o ID de um recurso implantado é referenciado por `${resources.jobs.etl_job.id}`, não por uma variável personalizada."
+      },
+      {
+        "texto_opcion": "`${bundle.jobs.etl_job.id}`",
+        "es_correcta": false,
+        "explicacion": "O prefixo correto para referências de recursos é `resources.*`, não `bundle.*`. A sintaxe correta é `${resources.jobs.etl_job.id}`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Substituições"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados grava a seguinte definição de job cluster em um arquivo de recurso de bundle:\n\n```yaml\njob_clusters:\n  -job_cluster_key: main_cluster\n    new_cluster:\n      spark_version: \"15.4.x-scala2.12\"\n      node_type_id: ${var.node_type}\n      num_workers: ${var.num_workers}\n```\n\nCom a configuração de destino `dev` `num_workers: 2` e a configuração `prod` `num_workers: 8`, quantos trabalhadores uma implantação `prod` cria?",
+    "opciones": [
+      {
+        "texto_opcion": "8 trabalhadores — a substituição da variável do destino `prod` é aplicada.",
+        "es_correcta": true,
+        "explicacion": "`${var.num_workers}` é resolvido no momento da implantação usando os valores das variáveis do destino ativo. Ao implantar em `prod`, `num_workers` é `8`."
+      },
+      {
+        "texto_opcion": "2 trabalhadores — a variável global padrão é sempre usada.",
+        "es_correcta": false,
+        "explicacion": "As substituições de variáveis no nível de destino têm precedência sobre o padrão global. A implantação em `prod` resolve `num_workers` para `8`."
+      },
+      {
+        "texto_opcion": "10 trabalhadores – os valores dev e prod são somados.",
+        "es_correcta": false,
+        "explicacion": "Os valores das variáveis não são somados entre os destinos. Somente o valor do alvo ativo é usado."
+      },
+      {
+        "texto_opcion": "A implantação falha porque `${var.num_workers}` não pode ser usado em uma definição de cluster.",
+        "es_correcta": false,
+        "explicacion": "As variáveis podem ser referenciadas em qualquer lugar no pacote YAML, incluindo definições de cluster. A sintaxe é válida."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Recursos",
+      "Variáveis"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados configura um pipeline DLT em um pacote com `mode: development` no destino de desenvolvimento. Eles NÃO definem explicitamente `development:` no YAML do pipeline.\n\nQual é a configuração de `desenvolvimento` do pipeline quando implantado em `dev`?",
+    "opciones": [
+      {
+        "texto_opcion": "`development: true` — é definido automaticamente por `mode: development`.",
+        "es_correcta": true,
+        "explicacion": "Um dos comportamentos automáticos do `mode: development` é definir todos os pipelines DLT como `development: true`. O engenheiro não precisa defini-lo explicitamente no YAML do pipeline."
+      },
+      {
+        "texto_opcion": "`development: false` — o padrão é sempre `false`, a menos que seja explicitamente definido.",
+        "es_correcta": false,
+        "explicacion": "Quando `mode: development` está ativo, o padrão para pipelines DLT muda para `development: true`, não `false`."
+      },
+      {
+        "texto_opcion": "`development: true` somente se o YAML do pipeline contiver `development: true` explicitamente.",
+        "es_correcta": false,
+        "explicacion": "`mode: development` aplica `development: true` automaticamente a todos os pipelines DLT, sem qualquer configuração explícita no YAML do pipeline."
+      },
+      {
+        "texto_opcion": "O campo `development` não é gerenciado pelos modos de pacote e deve sempre ser definido manualmente.",
+        "es_correcta": false,
+        "explicacion": "Os modos de implantação de pacote gerenciam explicitamente o sinalizador `development` em pipelines DLT. `mode: development` define como `true`; `mode: production` valida que é `false`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Recursos",
+      "Modos de implantação"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define um artefato em seu pacote:\n\n```yaml\nartefatos:\n  meu_pacote:\n    tipo: whl\n    caminho: ./src/my_package\n    build: \"pip wheel. --no-deps\"\n```\n\nQuando o Databricks cria e carrega esta roda para o workspace?",
+    "opciones": [
+      {
+        "texto_opcion": "Durante a implantação do pacote databricks — a roda é construída e carregada automaticamente antes da implantação do job.",
+        "es_correcta": true,
+        "explicacion": "`databricks bundle deploy` executa automaticamente o comando `build`, constrói a roda, carrega-a no workspace e implementa o job que faz referência a ela — tudo em uma única etapa."
+      },
+      {
+        "texto_opcion": "Durante a execução do job — a roda é construída no cluster em tempo de execução.",
+        "es_correcta": false,
+        "explicacion": "A construção do artefato acontece no momento da implantação, não no tempo de execução do job. A roda é pré-construída e carregada no workspace antes da execução do job."
+      },
+      {
+        "texto_opcion": "Somente quando `databricks bundle run` é executado.",
+        "es_correcta": false,
+        "explicacion": "A construção e o upload do artefato acontecem durante a `implantação do pacote`, não durante a `execução do pacote`."
+      },
+      {
+        "texto_opcion": "Somente depois de executar `databricks bundle build` separadamente.",
+        "es_correcta": false,
+        "explicacion": "Não é necessário nenhum comando separado `databricks bundle build`. `databricks bundle deploy` lida com o ciclo de vida completo de build-upload-deploy."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Artefatos"
+    ]
+  },
+  {
+    "pregunta": "Um pacote de produção precisa de jobs para ser executado como principal de serviço, não como desenvolvedor de implantação. O engenheiro acrescenta:\n\n```yaml\ntargets:\n  prod:\n    mode: production\n    run_as:\n      service_principal_name: \"prod-sp@empresa.com\"\n```\n\nO que a configuração `run_as` controla?",
+    "opciones": [
+      {
+        "texto_opcion": "A identidade usada para **executar** jobs e pipelines implantados, desacoplados da identidade do usuário de implantação.",
+        "es_correcta": true,
+        "explicacion": "`run_as` especifica quem executa os recursos implantados (jobs, pipelines). É independente de quem implanta o pacote. Esta é a abordagem recomendada para produção para evitar vincular jobs a contas de usuários individuais."
+      },
+      {
+        "texto_opcion": "A identidade usada para **implantar** o bundle no workspace.",
+        "es_correcta": false,
+        "explicacion": "`run_as` controla a identidade de execução (quem executa os jobs), não a identidade de implantação. A identidade de implementação é determinada pela configuração de autenticação CLI."
+      },
+      {
+        "texto_opcion": "O usuário que tem permissão para modificar o arquivo `databricks.yml`.",
+        "es_correcta": false,
+        "explicacion": "`run_as` é um conceito de controle de acesso do Databricks para identidade de execução de job, não para permissões do sistema de arquivos."
+      },
+      {
+        "texto_opcion": "O usuário mostrado na interface do usuário do Databricks como o proprietário do job.",
+        "es_correcta": false,
+        "explicacion": "Embora `run_as` afete a aparência de propriedade do job, seu objetivo principal é dissociar a identidade de execução da identidade do usuário de implantação para segurança e estabilidade."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Permissões"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define permissões globais em `databricks.yml`:\n\n```yaml\npermissões:\n  - nível: CAN_MANAGE\n    group_name: engenheiros de dados\n  - nível: CAN_RUN\n    group_name: analistas de dados\n```\n\nA quais recursos essas permissões se aplicam?",
+    "opciones": [
+      {
+        "texto_opcion": "Todos os recursos implantados pelo pacote — jobs, pipelines e outros objetos do Databricks.",
+        "es_correcta": true,
+        "explicacion": "As `permissões` de nível superior em `databricks.yml` são aplicadas a TODOS os recursos implantados pelo pacote. As permissões por recurso também podem ser definidas em definições de recursos individuais."
+      },
+      {
+        "texto_opcion": "Apenas para o próprio arquivo `databricks.yml` — não para recursos implantados.",
+        "es_correcta": false,
+        "explicacion": "As permissões do pacote aplicam-se aos recursos implantados do Databricks (jobs, pipelines, etc.), e não ao arquivo de configuração."
+      },
+      {
+        "texto_opcion": "Somente para o workspace — não para jobs ou pipelines individuais.",
+        "es_correcta": false,
+        "explicacion": "As permissões de pacote são aplicadas a recursos implantados individuais, não ao nível do workspace."
+      },
+      {
+        "texto_opcion": "Somente para o primeiro recurso definido em `resources.jobs`.",
+        "es_correcta": false,
+        "explicacion": "As permissões de nível superior se aplicam a TODOS os recursos implantados, não apenas ao primeiro job definido."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Permissões"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa:\n\n```bash\npacote de databricks validar -t prod\n```\n\nNenhuma implantação acontece. O que esse comando faz?",
+    "opciones": [
+      {
+        "texto_opcion": "Verifica a configuração do pacote em busca de erros de sintaxe, violações de esquema e resolução de variáveis sem implantar nada.",
+        "es_correcta": true,
+        "explicacion": "`databricks bundle validar` processa o YAML, resolve substituições e variáveis e valida a configuração em relação ao esquema do bundle — tudo isso sem fazer nenhuma alteração no workspace."
+      },
+      {
+        "texto_opcion": "Implanta para produção no modo de simulação, criando recursos, mas revertendo-os imediatamente.",
+        "es_correcta": false,
+        "explicacion": "`validate` não faz nenhuma alteração no workspace. É uma verificação de esquema e sintaxe puramente do lado do cliente."
+      },
+      {
+        "texto_opcion": "Valida se todos os jobs do pacote foram executados com êxito nas últimas 24 horas.",
+        "es_correcta": false,
+        "explicacion": "`bundle validar` verifica a sintaxe e o esquema YAML - não verifica o histórico de execução ou o status do job."
+      },
+      {
+        "texto_opcion": "Executa testes de unidade localizados na pasta `tests/` do projeto do bundle.",
+        "es_correcta": false,
+        "explicacion": "`bundle validar` valida apenas a configuração YAML. A execução de testes requer um `pytest` separado ou uma etapa semelhante no pipeline CI/CD."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Comandos CLI"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja preenchimento automático e validação do IDE para `databricks.yml`. Qual comando gera o arquivo de esquema necessário?",
+    "opciones": [
+      {
+        "texto_opcion": "`esquema do pacote databricks> bundle_config_schema.json`",
+        "es_correcta": true,
+        "explicacion": "`databricks bundle schema` gera o esquema JSON completo para a configuração do pacote. Redirecioná-lo para um arquivo permite que IDEs como o VS Code forneçam preenchimento automático e validação embutida."
+      },
+      {
+        "texto_opcion": "`pacote databricks validar --output-schema bundle_config_schema.json`",
+        "es_correcta": false,
+        "explicacion": "`validate` não produz um arquivo de esquema. O comando correto para geração de esquema é `databricks bundle schema`."
+      },
+      {
+        "texto_opcion": "`pacote databricks gera --schema`",
+        "es_correcta": false,
+        "explicacion": "`databricks bundle generate` gera YAML a partir de recursos de workspace existentes, não de um esquema JSON. Use `databricks bundle schema` para geração de esquema."
+      },
+      {
+        "texto_opcion": "`databricks pacote init --export-schema`",
+        "es_correcta": false,
+        "explicacion": "`bundle init` cria um novo projeto a partir de um modelo. Não exporta um esquema JSON. O comando correto é `databricks bundle schema`."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Comandos CLI"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa criar um novo projeto de pacote Databricks para um pipeline Delta Live Tables. Qual comando inicia a configuração interativa?",
+    "opciones": [
+      {
+        "texto_opcion": "`inicialização do pacote databricks`",
+        "es_correcta": true,
+        "explicacion": "`databricks bundle init` lança um prompt interativo para estruturar um projeto a partir de um modelo integrado. O modelo `dlt` está disponível para projetos DLT."
+      },
+      {
+        "texto_opcion": "`pacote databricks criar --template dlt`",
+        "es_correcta": false,
+        "explicacion": "`databricks bundle create` não é um comando válido. O andaime do projeto usa `databricks bundle init`."
+      },
+      {
+        "texto_opcion": "`pacote de databricks novo --type pipeline`",
+        "es_correcta": false,
+        "explicacion": "`databricks bundle new` não é um comando válido. Use `databricks bundle init`."
+      },
+      {
+        "texto_opcion": "`pacote databricks gera --from template:dlt`",
+        "es_correcta": false,
+        "explicacion": "`databricks bundle generate` cria YAML a partir de recursos de workspace existentes, não de um modelo. Use `databricks bundle init` para criação de projetos baseados em modelos."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Comandos CLI"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados tem jobs existentes implantados num workspace Databricks e pretende colocá-los sob gestão de pacotes. Qual comando CLI pode gerar a configuração YAML correspondente?",
+    "opciones": [
+      {
+        "texto_opcion": "`geração de pacote databricks`",
+        "es_correcta": true,
+        "explicacion": "`databricks bundle generate` inspeciona os recursos existentes do workspace e produz a configuração do pacote YAML correspondente. Esta é a maneira recomendada de integrar os recursos existentes no gerenciamento de pacotes."
+      },
+      {
+        "texto_opcion": "`importação de pacote databricks`",
+        "es_correcta": false,
+        "explicacion": "`databricks bundle import` não é um comando válido. Use `databricks bundle generate` para criar YAML a partir de recursos de workspace existentes."
+      },
+      {
+        "texto_opcion": "`databricks pacote init --from-workspace`",
+        "es_correcta": false,
+        "explicacion": "`bundle init` usa modelos para novos projetos, não para importar recursos existentes. Use `databricks bundle generate` em vez disso."
+      },
+      {
+        "texto_opcion": "`exportação de pacote databricks --jobs`",
+        "es_correcta": false,
+        "explicacion": "`databricks bundle export` não é um comando válido. Use `databricks bundle generate` para criar YAML a partir de recursos de workspace existentes."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Comandos CLI"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa `databricks bundle destroy -t dev`. Qual é o efeito deste comando?",
+    "opciones": [
+      {
+        "texto_opcion": "Todos os recursos do Databricks implantados pelo pacote no workspace `dev` são excluídos.",
+        "es_correcta": true,
+        "explicacion": "`databricks bundle destroy` remove todos os recursos que foram implantados pelo bundle no workspace de destino especificado. Esta é uma operação irreversível e deve ser usada com cautela."
+      },
+      {
+        "texto_opcion": "O `databricks.yml` e todos os arquivos YAML de recursos são excluídos do projeto local.",
+        "es_correcta": false,
+        "explicacion": "`bundle destroy` remove apenas recursos do Databricks implantados do workspace. Não modifica arquivos de projeto locais."
+      },
+      {
+        "texto_opcion": "A definição de destino `dev` foi removida de `databricks.yml`.",
+        "es_correcta": false,
+        "explicacion": "`bundle destroy` opera em recursos de workspace implantados, não em arquivos de configuração. O destino `dev` permanece definido em YAML."
+      },
+      {
+        "texto_opcion": "Todos os commits do Git feitos por implantações de bundle são revertidos.",
+        "es_correcta": false,
+        "explicacion": "`bundle destroy` não tem efeito no histórico do Git. Remove apenas recursos do workspace do Databricks (jobs, oleodutos, etc.)."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Comandos CLI"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está projetando o workflow CI/CD para um pacote. De acordo com as práticas recomendadas, o que deve acontecer quando uma **solicitação pull é aberta** em `main`?",
+    "opciones": [
+      {
+        "texto_opcion": "`databricks bundle activate -t staging` — valida a configuração sem implantar.",
+        "es_correcta": true,
+        "explicacion": "O padrão recomendado é: PR aberto → validar; mesclar para principal → implantar para teste; aprovação manual → implantar no prod. A validação no PR garante que erros de configuração sejam detectados antes da fusão."
+      },
+      {
+        "texto_opcion": "`databricks bundle deploy -t prod` — implantar na produção para validar o ambiente real.",
+        "es_correcta": false,
+        "explicacion": "Implantar em produção em cada PR é perigoso e vai contra o padrão de promoção encenada. Os PRs devem acionar apenas a validação, não a implantação de produção."
+      },
+      {
+        "texto_opcion": "`databricks bundle destroy -t staging` — limpe a preparação antes de validar o novo PR.",
+        "es_correcta": false,
+        "explicacion": "Destruir a preparação em cada PR interromperia qualquer job de preparação em andamento. A ação correta é `bundle validar`, não `bundle destroy`."
+      },
+      {
+        "texto_opcion": "`databricks bundle run my_etl_job` — execute o job de produção para testar de ponta a ponta.",
+        "es_correcta": false,
+        "explicacion": "Executar jobs de produção em cada PR não é o padrão correto. Valide no PR, implante para teste após a mesclagem e promova para produção após aprovação manual."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Melhores Práticas"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa adicionar um agendamento a um job em um pacote, mas NÃO deseja que ele seja pausado no destino `dev` (o comportamento padrão `mode: development`). Como eles podem evitar que a programação seja pausada?",
+    "opciones": [
+      {
+        "texto_opcion": "Defina `pause_status: UNPAUSED` explicitamente na definição de agendamento desse job.",
+        "es_correcta": true,
+        "explicacion": "As configurações de recursos individuais substituem os padrões e predefinições do modo. Definir `pause_status: UNPAUSED` em uma programação específica o isenta do comportamento de pausa automática do modo de desenvolvimento."
+      },
+      {
+        "texto_opcion": "Remova `mode: development` do destino - nenhum modo significa que não há pausa automática.",
+        "es_correcta": false,
+        "explicacion": "Embora a remoção do `mode: development` evitasse a pausa automática, também removeria todos os outros benefícios do modo de desenvolvimento. A solução direcionada é `pause_status: UNPAUSED` na programação específica."
+      },
+      {
+        "texto_opcion": "Defina `presets.trigger_pause_status: UNPAUSED` no destino para desbloquear todos os agendamentos.",
+        "es_correcta": false,
+        "explicacion": "Embora isso funcione para todos os cronogramas, é uma solução simples. Os padrões do modo de substituição das predefinições, mas a pergunta é sobre um job específico. A abordagem direcionada é `pause_status: UNPAUSED` na programação específica."
+      },
+      {
+        "texto_opcion": "Adicione `ignore_mode: true` à definição de agendamento.",
+        "es_correcta": false,
+        "explicacion": "`ignore_mode` não é um campo válido na especificação de agendamento do bundle. Use `pause_status: UNPAUSED` para substituir a pausa no nível do modo."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modos de implantação",
+      "Recursos"
+    ]
+  },
+  {
+    "pregunta": "Dois engenheiros de dados, Alice e Bob, implantam seu destino `dev` local do mesmo pacote no mesmo workspace compartilhado. Ambos usam `mode: development`.\n\nComo é que a Databricks evita que os seus recursos implantados colidam?",
+    "opciones": [
+      {
+        "texto_opcion": "Os nomes dos recursos são automaticamente prefixados com `[dev <short_username>]`, tornando as implantações de Alice e Bob nomeadas de forma exclusiva.",
+        "es_correcta": true,
+        "explicacion": "`mode: development` precede o nome abreviado do usuário de implantação em todos os nomes de recursos. O job de Alice se torna `[dev alice]My Job` e o de Bob se torna `[dev bob]My Job`, evitando colisões em um workspace compartilhado."
+      },
+      {
+        "texto_opcion": "O Databricks bloqueia o workspace para que apenas um desenvolvedor possa implantar por vez.",
+        "es_correcta": false,
+        "explicacion": "Na verdade, o modo de desenvolvimento **desativa** o bloqueio de implantação para permitir uma iteração mais rápida. O bloqueio não é usado para evitar colisões entre desenvolvedores."
+      },
+      {
+        "texto_opcion": "A implantação de cada desenvolvedor cria automaticamente um workspace separado.",
+        "es_correcta": false,
+        "explicacion": "O Databricks não cria novos workspaces por desenvolvedor. O prefixo específico do usuário nos nomes dos recursos é o que evita colisões dentro de um workspace compartilhado."
+      },
+      {
+        "texto_opcion": "A colisão de recursos é evitada usando `${workspace.current_user.userName}` no `root_path`.",
+        "es_correcta": false,
+        "explicacion": "Embora o uso de `${workspace.current_user.userName}` em `root_path` ajude a isolar caminhos de arquivos, a colisão de nomes de recursos é tratada especificamente pelo prefixo automático `[dev <username>]` no modo de desenvolvimento."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modos de implantação",
+      "Melhores Práticas"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados possui essa configuração de pacote. Revise-o com atenção:\n\n```yaml\npacote:\n  nome: pacote analítico\n\nvariáveis:\n  nome_do_ambiente:\n    padrão: \"dev\"\n\ntargets:\n  prod:\n    mode: production\n    workspace:\n      host: https://prod-adb.net\n    variáveis:\n      env_name: \"prod\"\n\nresources:\n  jobs:\n    trabalho_analítico:\n      name: \"Job de análise - ${var.env_name}\"\n      tarefas:\n        - task_key: executar\n          notebook_task:\n            notebook_path: ./src/analytics.py\n```\n\nQual é o nome do job quando implantado em `prod`?",
+    "opciones": [
+      {
+        "texto_opcion": "`Job de Analytics - prod`",
+        "es_correcta": true,
+        "explicacion": "O alvo `prod` substitui `env_name` por `\"prod\"`. `${var.env_name}` resolve para `prod` no momento da implantação, resultando no nome do job `Analytics Job - prod`."
+      },
+      {
+        "texto_opcion": "`Job de análise - dev`",
+        "es_correcta": false,
+        "explicacion": "O padrão global `dev` é substituído pelo `variables.env_name: \"prod\"` do alvo `prod`. O nome resolvido é `Analytics Job - prod`."
+      },
+      {
+        "texto_opcion": "`[dev alice]Job de Analytics - prod`",
+        "es_correcta": false,
+        "explicacion": "O prefixo `[dev <username>]` só é aplicado em `mode: development`. O destino `prod` usa `mode: production`, portanto nenhum prefixo automático é adicionado."
+      },
+      {
+        "texto_opcion": "`Job de análise - ${var.env_name}`",
+        "es_correcta": false,
+        "explicacion": "As substituições são resolvidas no momento da implantação. A string literal `${var.env_name}` não aparece no nome do job implantado."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Variáveis",
+      "Substituições"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados sênior diz: *\"Deveríamos colocar todas as definições de job em um único arquivo `databricks.yml` massivo.\"*\n\nUm engenheiro júnior discorda. Qual argumento suporta melhor o uso de arquivos YAML modulares com `include`?",
+    "opciones": [
+      {
+        "texto_opcion": "Os arquivos modulares permitem que os membros da equipe trabalhem em recursos individuais de forma independente, reduzam conflitos de mesclagem e mantenham cada arquivo focado em uma única preocupação.",
+        "es_correcta": true,
+        "explicacion": "A modularização com `include` permite o desenvolvimento paralelo (arquivos separados por recurso), diferenças mais claras na revisão de código e manutenção mais fácil — exatamente os mesmos benefícios de qualquer separação de interesses de engenharia de software."
+      },
+      {
+        "texto_opcion": "A diretiva `include` é necessária para pacotes com mais de 5 recursos — a CLI impõe um tamanho máximo de arquivo.",
+        "es_correcta": false,
+        "explicacion": "Não há limite de tamanho obrigatório que exija `include`. A modularização é uma prática recomendada, não um requisito técnico."
+      },
+      {
+        "texto_opcion": "A divisão de arquivos em `include` permite que cada arquivo use uma versão de esquema YAML diferente.",
+        "es_correcta": false,
+        "explicacion": "Todos os arquivos incluídos usam o mesmo esquema de configuração de bundle. `include` não habilita diferentes versões de esquema."
+      },
+      {
+        "texto_opcion": "O uso de `include` é necessário para implantações em `mode: produção`.",
+        "es_correcta": false,
+        "explicacion": "`include` não tem nada a ver com modos de implantação. O modo de produção funciona com ou sem arquivos modulares."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modularização",
+      "Melhores Práticas"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados analisa o seguinte e identifica o que está errado:\n\n```yaml\ntargets:\n  prod:\n    mode: production\n    run_as:\n      service_principal_name: \"prod-sp@empresa.com\"\n    workspace:\n      root_path: /Workspace/Users/alice@company.com/.bundle/my-bundle/prod\n```\n\nQue erro de validação `mode: production` gerará sobre esta configuração?",
+    "opciones": [
+      {
+        "texto_opcion": "O modo de produção valida que os caminhos do workspace NÃO são substituídos por caminhos específicos do usuário (`/Workspace/Users/<nome>/...`). Usar um caminho de usuário codificado viola esta regra.",
+        "es_correcta": true,
+        "explicacion": "O modo de produção exige que os caminhos do workspace sejam caminhos compartilhados/de nível de serviço, e não específicos do usuário. A codificação `alice@company.com` em `root_path` vincula o pacote de produção a um usuário específico, o que o modo de produção proíbe explicitamente."
+      },
+      {
+        "texto_opcion": "O modo de produção não permite que `run_as` seja definido — todos os jobs devem ser executados como o usuário de implantação.",
+        "es_correcta": false,
+        "explicacion": "Na verdade, o modo de produção **recomenda** e valida o uso de `run_as` com uma entidade de serviço. O erro é sobre o `root_path` específico do usuário."
+      },
+      {
+        "texto_opcion": "O modo de produção requer que `git.branch` seja especificado - implantar sem ele gera um erro.",
+        "es_correcta": false,
+        "explicacion": "`git.branch` no modo de produção é opcional. Especificá-lo permite a validação do branch, mas omiti-lo não causa erro."
+      },
+      {
+        "texto_opcion": "Nenhum erro — a configuração é válida para modo de produção.",
+        "es_correcta": false,
+        "explicacion": "O modo de produção gera um erro de validação para caminhos de workspace específicos do usuário. O `root_path` não deve fazer referência ao diretório de um usuário específico."
+      }
+    ],
+    "tags": [
+      "5.2",
+      "Modos de implantação",
+      "Melhores Práticas"
+    ]
+  }
+]

@@ -1,0 +1,872 @@
+[
+  {
+    "pregunta": "Um engenheiro de dados está projetando um job Lakeflow com as seguintes tarefas:\n- `ingest`: carrega dados brutos (sem dependências)\n- `validar`: depende de `ingerir`\n- `transform`: depende de `ingest`\n- `load`: depende de `validate` E `transform`\n\nQual afirmação descreve melhor como o Databricks executará esse job?",
+    "opciones": [
+      {
+        "texto_opcion": "`ingest` é executado primeiro, depois `validate` e `transform` são executados em paralelo e, em seguida, `load` é executado por último.",
+        "es_correcta": true,
+        "explicacion": "O Databricks executa tarefas upstream antes das tarefas downstream e executa tantas tarefas em paralelo quanto possível. `validate` e `transform` dependem apenas de `ingest`, portanto podem ser executados simultaneamente."
+      },
+      {
+        "texto_opcion": "`ingest` → `validate` → `transform` → `load` todos são executados sequencialmente.",
+        "es_correcta": false,
+        "explicacion": "Databricks paraleliza tarefas quando suas dependências permitem. `validate` e `transform` não dependem um do outro, então eles são executados simultaneamente."
+      },
+      {
+        "texto_opcion": "Todas as quatro tarefas são executadas em paralelo, pois Lakeflow Jobs maximiza a simultaneidade.",
+        "es_correcta": false,
+        "explicacion": "As tarefas só poderão ser executadas em paralelo se suas dependências upstream já tiverem sido concluídas. `validate` e `transform` devem esperar por `ingest`."
+      },
+      {
+        "texto_opcion": "`load` é executado primeiro para reservar a tabela de destino e, em seguida, as outras tarefas são executadas.",
+        "es_correcta": false,
+        "explicacion": "O Databricks sempre executa tarefas upstream antes das tarefas downstream. `load` não pode ser executado até que `validate` e `transform` sejam concluídos."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "DAG ordem de execução"
+    ]
+  },
+  {
+    "pregunta": "Qual das alternativas a seguir descreve corretamente um DAG no contexto de Lakeflow Jobs?",
+    "opciones": [
+      {
+        "texto_opcion": "Um gráfico acíclico direcionado onde os nós representam tarefas e as arestas representam dependências de ordem de execução.",
+        "es_correcta": true,
+        "explicacion": "Em Lakeflow Jobs, cada nó em DAG é uma tarefa e as arestas mostram quais tarefas devem ser concluídas antes que outras possam começar. Ciclos não são permitidos."
+      },
+      {
+        "texto_opcion": "Um gráfico cíclico direcionado que permite que as tarefas retornem aos estágios anteriores para novas tentativas.",
+        "es_correcta": false,
+        "explicacion": "DAGs são acíclicos — nenhum ciclo é permitido. A lógica de novas tentativas é tratada por meio de configurações de novas tentativas em tarefas individuais, e não pela criação de ciclos no gráfico."
+      },
+      {
+        "texto_opcion": "Uma lista sequencial de tarefas que sempre é executada uma de cada vez em uma ordem fixa.",
+        "es_correcta": false,
+        "explicacion": "Um DAG suporta execução paralela quando as tarefas não têm dependência mútua. Não está limitado à execução sequencial e de thread único."
+      },
+      {
+        "texto_opcion": "Um gráfico onde as arestas representam fluxos de dados entre tabelas Delta, não a ordenação de tarefas.",
+        "es_correcta": false,
+        "explicacion": "Em Lakeflow Jobs, as arestas DAG representam dependências de execução de tarefas (quais tarefas devem terminar antes que outras comecem), não a linhagem de dados entre tabelas."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Definição de DAG"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja que uma tarefa de `limpeza` seja executada mesmo quando uma tarefa de `carregamento` upstream falha. Qual condição `run_if` deve ser configurada em `cleanup`?",
+    "opciones": [
+      {
+        "texto_opcion": "`TUDO_DONE`",
+        "es_correcta": true,
+        "explicacion": "`ALL_DONE` executa a tarefa independentemente de as tarefas upstream terem sido bem-sucedidas ou falharem, tornando-o ideal para operações de limpeza."
+      },
+      {
+        "texto_opcion": "`TODOS_SUCESSO`",
+        "es_correcta": false,
+        "explicacion": "`ALL_SUCCESS` só executa a tarefa se todas as tarefas upstream foram bem-sucedidas. A limpeza seria ignorada se `load` falhar."
+      },
+      {
+        "texto_opcion": "`NONE_FAILED`",
+        "es_correcta": false,
+        "explicacion": "`NONE_FAILED` requer que nenhuma tarefa upstream falhou. Iria ignorar a `limpeza` se o `carregamento` falhasse."
+      },
+      {
+        "texto_opcion": "`AT_LEAST_ONE_SUCCEEDED`",
+        "es_correcta": false,
+        "explicacion": "`AT_LEAST_ONE_SUCCEEDED` requer que pelo menos uma tarefa upstream seja bem-sucedida. Se `load` falhar e for o único upstream, `cleanup` será ignorado."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "condições run_if"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define este YAML para um job Lakeflow:\n\n```yaml\ntarefas:\n  - task_key: extrair\n    notebook_task:\n      notebook_path: ./extract.py\n  - task_key: carregar\n    depende_de:\n      - task_key: extrair\n    run_if: ALL_SUCCESS\n    notebook_task:\n      notebook_path: ./load.py\n```\n\nO que acontece se a tarefa `extrair` falhar?",
+    "opciones": [
+      {
+        "texto_opcion": "A tarefa `load` é ignorada porque `run_if: ALL_SUCCESS` requer que todas as tarefas upstream sejam bem-sucedidas.",
+        "es_correcta": true,
+        "explicacion": "`ALL_SUCCESS` é a condição padrão e requer que todas as dependências upstream sejam bem-sucedidas. Uma tarefa `extract` com falha impedirá a execução de `load`."
+      },
+      {
+        "texto_opcion": "A tarefa `load` é executada de qualquer maneira porque o Databricks tenta novamente tarefas upstream com falha automaticamente.",
+        "es_correcta": false,
+        "explicacion": "As novas tentativas automáticas são configuradas separadamente por tarefa. Sem uma configuração de nova tentativa, uma `extração` com falha simplesmente faz com que o `load` seja ignorado em `ALL_SUCCESS`."
+      },
+      {
+        "texto_opcion": "Todo o job é cancelado imediatamente sem nenhuma avaliação adicional da tarefa.",
+        "es_correcta": false,
+        "explicacion": "O Databricks avalia a condição `run_if` de cada tarefa de forma independente. Outras tarefas que não dependem de `extract` ainda podem ser executadas."
+      },
+      {
+        "texto_opcion": "A tarefa `load` é executada porque `depends_on` controla apenas a ordem, não o controle de execução.",
+        "es_correcta": false,
+        "explicacion": "`depends_on` combinado com `run_if` bloqueia a execução. `ALL_SUCCESS` impede explicitamente a execução de tarefas downstream se alguma tarefa upstream falhar."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if ALL_SUCCESS"
+    ]
+  },
+  {
+    "pregunta": "Qual campo YAML é usado para especificar que uma tarefa só deve ser executada após a conclusão de duas outras tarefas?",
+    "opciones": [
+      {
+        "texto_opcion": "`depends_on` com uma lista de valores `task_key` upstream.",
+        "es_correcta": true,
+        "explicacion": "`depends_on` aceita uma lista de referências `task_key`. Todas as tarefas listadas devem satisfazer a condição `run_if` antes da execução da tarefa downstream."
+      },
+      {
+        "texto_opcion": "`requires` com uma lista de nomes de tarefas upstream.",
+        "es_correcta": false,
+        "explicacion": "`requires` não é um campo YAML Lakeflow Jobs válido. O campo correto é `depends_on`."
+      },
+      {
+        "texto_opcion": "`after` com uma lista de valores `task_key` upstream.",
+        "es_correcta": false,
+        "explicacion": "`after` não é um campo Lakeflow Jobs YAML válido. Use `depends_on` para especificar dependências de tarefas upstream."
+      },
+      {
+        "texto_opcion": "`pré-requisitos` listando os nomes das tarefas que devem ser concluídas primeiro.",
+        "es_correcta": false,
+        "explicacion": "`prerequisites` não é um campo YAML válido em Lakeflow Jobs. A chave correta é `depends_on`."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "depende_de YAML"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa executar condicionalmente uma tarefa de transformação somente quando uma tarefa de ingestão upstream adiciona novos dados. Qual recurso Lakeflow Jobs permite isso?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma **tarefa de condição If/else** que avalia uma expressão booleana para ramificar o DAG.",
+        "es_correcta": true,
+        "explicacion": "A tarefa de condição If/else avalia uma expressão booleana e roteia a execução para diferentes ramos do DAG, permitindo a execução condicional de tarefas downstream."
+      },
+      {
+        "texto_opcion": "Uma tarefa **Para cada condição** que itera nos registros ingeridos.",
+        "es_correcta": false,
+        "explicacion": "A tarefa For each serve para loop em uma matriz de entrada, não para ramificação condicional baseada em uma expressão booleana."
+      },
+      {
+        "texto_opcion": "Configurando `run_if: AT_LEAST_ONE_SUCCEEDED` na tarefa de transformação.",
+        "es_correcta": false,
+        "explicacion": "`AT_LEAST_ONE_SUCCEEDED` determina o status de sucesso do upstream, não as condições de nível de dados, como se novas linhas foram ingeridas."
+      },
+      {
+        "texto_opcion": "Um **gatilho** do tipo `file_arrival` na tarefa de transformação.",
+        "es_correcta": false,
+        "explicacion": "A chegada do arquivo é um tipo de gatilho no nível do job, não um mecanismo para ramificação condicional dentro do DAG de um job em execução."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Tarefa de condição if/else"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa o seguinte pacote YAML:\n\n```yaml\ntarefas:\n  - chave_tarefa: trabalho_a\n    notebook_task:\n      notebook_path: ./a.py\n  - chave_tarefa: trabalho_b\n    notebook_task:\n      notebook_path: ./b.py\n  - chave_tarefa: job_c\n    depende_de:\n      - chave_tarefa: trabalho_a\n      - chave_tarefa: trabalho_b\n    run_if: ALL_FAILED\n    notebook_task:\n      caminho_do_notebook: ./c.py\n```\n\n`job_a` falha e `job_b` é bem-sucedido. `job_c` é executado?",
+    "opciones": [
+      {
+        "texto_opcion": "Não — `ALL_FAILED` requer que todas as tarefas upstream tenham falhado, mas `job_b` foi bem-sucedido.",
+        "es_correcta": true,
+        "explicacion": "`ALL_FAILED` apenas aciona a tarefa quando TODAS as dependências upstream falharam. Como `job_b` foi bem-sucedido, a condição não foi atendida e `job_c` foi ignorado."
+      },
+      {
+        "texto_opcion": "Sim — porque pelo menos uma tarefa upstream (`job_a`) falhou.",
+        "es_correcta": false,
+        "explicacion": "Isso seria `AT_LEAST_ONE_FAILED`, não `ALL_FAILED`. `ALL_FAILED` requer que todas as tarefas upstream listadas tenham falhado."
+      },
+      {
+        "texto_opcion": "Sim - `ALL_DONE` e `ALL_FAILED` se comportam de forma idêntica.",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` é executado independentemente do resultado do upstream. `ALL_FAILED` só é executado quando todas as tarefas upstream falham - essas são condições distintas."
+      },
+      {
+        "texto_opcion": "Não — tarefas com `run_if: ALL_FAILED` só são válidas quando há uma única dependência upstream.",
+        "es_correcta": false,
+        "explicacion": "`ALL_FAILED` funciona com qualquer número de dependências upstream. Simplesmente exige que todos eles tenham falhado, independentemente da contagem."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if ALL_FAILED"
+    ]
+  },
+  {
+    "pregunta": "Qual é a condição `run_if` padrão quando uma tarefa tem dependências upstream em um job Lakeflow?",
+    "opciones": [
+      {
+        "texto_opcion": "`TODOS_SUCESSO`",
+        "es_correcta": true,
+        "explicacion": "`ALL_SUCCESS` é a condição padrão. Uma tarefa downstream só é executada quando todas as suas dependências upstream foram concluídas com êxito."
+      },
+      {
+        "texto_opcion": "`TUDO_DONE`",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` é executado independentemente do sucesso ou falha do upstream e deve ser configurado explicitamente. Não é o padrão."
+      },
+      {
+        "texto_opcion": "`NONE_FAILED`",
+        "es_correcta": false,
+        "explicacion": "`NONE_FAILED` deve ser definido explicitamente. O comportamento padrão requer que todos os upstreams sejam bem-sucedidos, que é `ALL_SUCCESS`."
+      },
+      {
+        "texto_opcion": "`AT_LEAST_ONE_SUCCEEDED`",
+        "es_correcta": false,
+        "explicacion": "`AT_LEAST_ONE_SUCCEEDED` não é o padrão. O padrão das tarefas é `ALL_SUCCESS`, o que significa que cada dependência upstream deve ser bem-sucedida."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if padrão"
+    ]
+  },
+  {
+    "pregunta": "Um job Lakeflow tem três tarefas paralelas (`branch_a`, `branch_b`, `branch_c`), todas alimentando uma tarefa final de `report`. O engenheiro deseja que o `relatório` seja executado enquanto pelo menos uma ramificação for bem-sucedida, mesmo que outras falhem. Qual condição `run_if` deve ser definida em `report`?",
+    "opciones": [
+      {
+        "texto_opcion": "`AT_LEAST_ONE_SUCCEEDED`",
+        "es_correcta": true,
+        "explicacion": "`AT_LEAST_ONE_SUCCEEDED` permite que a tarefa downstream seja executada quando pelo menos uma dependência upstream for concluída com êxito, mesmo se outras falharem."
+      },
+      {
+        "texto_opcion": "`TODOS_SUCESSO`",
+        "es_correcta": false,
+        "explicacion": "`ALL_SUCCESS` impediria a execução de `report` se qualquer ramificação falhasse, o que não atende ao requisito."
+      },
+      {
+        "texto_opcion": "`NONE_FAILED`",
+        "es_correcta": false,
+        "explicacion": "`NONE_FAILED` requer que nenhuma tarefa upstream falhou. Como algumas ramificações podem falhar, esta condição bloquearia o `report`."
+      },
+      {
+        "texto_opcion": "`TUDO_DONE`",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` funciona, mas é excessivamente permissivo — ele também executaria `report` mesmo se todas as ramificações falhassem. `AT_LEAST_ONE_SUCCEEDED` é o ajuste preciso."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if AT_LEAST_ONE_SUCCEEDED"
+    ]
+  },
+  {
+    "pregunta": "Qual dos seguintes tipos de tarefa NÃO é suportado nativamente em um Lakeflow Jobs DAG?",
+    "opciones": [
+      {
+        "texto_opcion": "Tarefa do consumidor Apache Kafka",
+        "es_correcta": true,
+        "explicacion": "As tarefas do consumidor Kafka não são um tipo de tarefa nativo Lakeflow Jobs. A ingestão do Kafka normalmente é tratada dentro de notebooks ou pipelines de streaming, não como um tipo de tarefa DAG independente."
+      },
+      {
+        "texto_opcion": "Tarefa de caderno",
+        "es_correcta": false,
+        "explicacion": "As tarefas do notebook são um tipo de tarefa nativa central em Lakeflow Jobs."
+      },
+      {
+        "texto_opcion": "tarefa dbt",
+        "es_correcta": false,
+        "explicacion": "dbt é um tipo de tarefa nativa suportada em Lakeflow Jobs."
+      },
+      {
+        "texto_opcion": "Tarefa de script Python",
+        "es_correcta": false,
+        "explicacion": "As tarefas de script Python são suportadas nativamente em Lakeflow Jobs juntamente com tarefas de notebooks, SQL, dbt e pipeline."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "tipos de tarefas"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja aplicar uma transformação a cada elemento de uma lista gerada dinamicamente retornada por uma tarefa upstream. Qual recurso Lakeflow Jobs eles devem usar?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma tarefa **Para cada condição** que percorre a matriz de entrada.",
+        "es_correcta": true,
+        "explicacion": "A tarefa For each adiciona lógica de loop a outra tarefa com base em uma matriz de entrada, que pode ser especificada manualmente ou gerada dinamicamente por uma tarefa upstream."
+      },
+      {
+        "texto_opcion": "Uma **tarefa de condição If/else** com diversas ramificações.",
+        "es_correcta": false,
+        "explicacion": "If/else é para ramificação condicional baseada em uma expressão booleana, não para iterar em uma lista de valores."
+      },
+      {
+        "texto_opcion": "Várias tarefas paralelas de notebook, cada uma codificada com um elemento diferente.",
+        "es_correcta": false,
+        "explicacion": "As tarefas codificadas não podem lidar com uma lista gerada dinamicamente. A tarefa For each foi projetada especificamente para esse padrão de iteração dinâmica."
+      },
+      {
+        "texto_opcion": "Configurando `run_if: ALL_DONE` em cada tarefa de transformação.",
+        "es_correcta": false,
+        "explicacion": "`run_if` controla as condições de execução, não a lógica de iteração. `ALL_DONE` não tem relação com o loop em uma lista."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Para cada tarefa"
+    ]
+  },
+  {
+    "pregunta": "Em uma definição YAML do Lakeflow Job, qual é o propósito de `task_key`?",
+    "opciones": [
+      {
+        "texto_opcion": "É um identificador exclusivo para a tarefa dentro do job, usado para referenciá-la nas listas `depends_on`.",
+        "es_correcta": true,
+        "explicacion": "`task_key` identifica exclusivamente cada tarefa na definição de job e é o valor referenciado em matrizes `depends_on` de outras tarefas para estabelecer bordas DAG."
+      },
+      {
+        "texto_opcion": "É a chave de criptografia usada para proteger os dados de saída da tarefa.",
+        "es_correcta": false,
+        "explicacion": "`task_key` é um identificador de string para referência de tarefas dentro de DAG, não um conceito de criptografia ou segurança."
+      },
+      {
+        "texto_opcion": "Ele mapeia a tarefa para uma chave de tabela Unity Catalog específica.",
+        "es_correcta": false,
+        "explicacion": "`task_key` é um identificador de nível DAG para ordenação de tarefas. Não tem relacionamento com chaves ou esquemas de tabela Unity Catalog."
+      },
+      {
+        "texto_opcion": "Ele define a prioridade de execução da tarefa em relação às tarefas irmãs.",
+        "es_correcta": false,
+        "explicacion": "A prioridade de execução em Lakeflow Jobs é determinada pela estrutura de dependência, não pelos valores `task_key`. `task_key` é simplesmente um rótulo exclusivo."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "chave_tarefa YAML"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados analisa este snippet YAML:\n\n```yaml\n- task_key: notificar\n  depende_de:\n    - task_key: carregar\n  run_if: NONE_FAILED\n  notebook_task:\n    notebook_path: ./notify.py\n```\n\n`load` foi ignorado porque sua dependência upstream falhou. O `notify` é executado?",
+    "opciones": [
+      {
+        "texto_opcion": "Não — uma tarefa ignorada conta como não tendo sido executada e `NONE_FAILED` requer que pelo menos uma tarefa upstream tenha sido executada (e nenhuma tenha falhado).",
+        "es_correcta": true,
+        "explicacion": "`NONE_FAILED` requer que nenhum upstream falhou E pelo menos um foi executado. Um `load` ignorado significa que ele não foi executado, portanto a condição não foi satisfeita."
+      },
+      {
+        "texto_opcion": "Sim — `NONE_FAILED` apenas verifica se nenhuma tarefa upstream falhou explicitamente e se uma tarefa ignorada não é uma falha.",
+        "es_correcta": false,
+        "explicacion": "`NONE_FAILED` requer que pelo menos uma tarefa upstream seja realmente executada. Uma tarefa ignorada não foi executada, portanto a condição não foi atendida."
+      },
+      {
+        "texto_opcion": "Sim — as tarefas ignoradas são tratadas como bem-sucedidas pelo agendador Lakeflow Jobs.",
+        "es_correcta": false,
+        "explicacion": "As tarefas ignoradas não são tratadas como bem-sucedidas. Eles estão em um estado SKIPPED que não satisfaz `ALL_SUCCESS` ou `NONE_FAILED`."
+      },
+      {
+        "texto_opcion": "Não — qualquer tarefa upstream ignorada aciona o comportamento `AT_LEAST_ONE_FAILED` automaticamente.",
+        "es_correcta": false,
+        "explicacion": "As tarefas ignoradas estão em um estado SKIPPED distinto, e não em um estado FAILED. Eles não acionam `AT_LEAST_ONE_FAILED`."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if NONE_FAILED"
+    ]
+  },
+  {
+    "pregunta": "Qual das alternativas a seguir é um caso de uso válido para um tipo de tarefa **Executar Job** em um Lakeflow Jobs DAG?",
+    "opciones": [
+      {
+        "texto_opcion": "Acionar um job separado e definido de forma independente no mesmo workspace como parte de uma orquestração maior DAG.",
+        "es_correcta": true,
+        "explicacion": "O tipo de tarefa Run Job permite que um job acione outro job dentro do workspace, permitindo a composição modular do pipeline dentro de um DAG."
+      },
+      {
+        "texto_opcion": "Reiniciar o job atual desde o início sem criar uma nova execução.",
+        "es_correcta": false,
+        "explicacion": "Executar Job aciona um job diferente, não o atual. A reinicialização automática não é um padrão DAG compatível."
+      },
+      {
+        "texto_opcion": "Executando uma consulta SQL armazenada em Unity Catalog.",
+        "es_correcta": false,
+        "explicacion": "A execução de uma consulta SQL é tratada por um tipo de tarefa SQL, não por uma tarefa Executar Job."
+      },
+      {
+        "texto_opcion": "Gerando um novo cluster para uma tarefa específica do notebook.",
+        "es_correcta": false,
+        "explicacion": "A configuração do cluster é definida no nível da tarefa ou do job, e não por meio de um tipo de tarefa Run Job."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Executar tipo de tarefa Job"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa configurar uma tarefa para que ela seja executada somente quando TODAS as suas dependências upstream falharem. Qual valor `run_if` deve ser usado?",
+    "opciones": [
+      {
+        "texto_opcion": "`ALL_FAILED`",
+        "es_correcta": true,
+        "explicacion": "`ALL_FAILED` aciona uma tarefa somente quando todas as dependências upstream falham, útil para tratamento de erros ou tarefas de fallback."
+      },
+      {
+        "texto_opcion": "`AT_LEAST_ONE_FAILED`",
+        "es_correcta": false,
+        "explicacion": "`AT_LEAST_ONE_FAILED` é executado quando qualquer upstream falha, não necessariamente todos eles."
+      },
+      {
+        "texto_opcion": "`NONE_FAILED`",
+        "es_correcta": false,
+        "explicacion": "`NONE_FAILED` é quase o oposto - ele é executado quando nenhuma tarefa upstream falha."
+      },
+      {
+        "texto_opcion": "`TUDO_DONE`",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` é executado independentemente de sucesso ou falha. Não exige especificamente que todas as tarefas tenham falhado."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if ALL_FAILED"
+    ]
+  },
+  {
+    "pregunta": "Na UI Lakeflow Jobs, qual elemento visual representa uma dependência de tarefa entre duas tarefas no DAG?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma linha direcionada (borda) desenhada da tarefa upstream para a tarefa downstream.",
+        "es_correcta": true,
+        "explicacion": "As dependências são representadas visualmente no job DAG como linhas direcionadas entre tarefas, mostrando o fluxo de execução de upstream para downstream."
+      },
+      {
+        "texto_opcion": "Uma codificação de cores compartilhada aplicada a tarefas no mesmo grupo de dependências.",
+        "es_correcta": false,
+        "explicacion": "As cores na UI refletem o status da tarefa (em execução, bem-sucedida, com falha), não o agrupamento de dependências."
+      },
+      {
+        "texto_opcion": "Um prefixo de numeração em cada tarefa indicando sua camada de execução.",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Jobs não usa prefixos numéricos para representar dependências. As arestas (linhas) entre os nós de tarefa representam dependências."
+      },
+      {
+        "texto_opcion": "Uma borda tracejada em torno de tarefas que compartilham uma configuração de cluster.",
+        "es_correcta": false,
+        "explicacion": "Bordas tracejadas não são usadas para representação de dependência na UI Lakeflow Jobs DAG."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "visualização DAG"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados adiciona uma nova tarefa a um job do Lakeflow sem o campo `depends_on`. Como o Databricks trata essa tarefa?",
+    "opciones": [
+      {
+        "texto_opcion": "Como uma tarefa raiz sem dependências upstream — ela pode ser executada imediatamente quando o job é iniciado.",
+        "es_correcta": true,
+        "explicacion": "Tarefas sem `depends_on` são tarefas raiz no DAG. Eles não têm dependências upstream e são elegíveis para execução assim que o job for acionado."
+      },
+      {
+        "texto_opcion": "Como última tarefa a ser executada, pois não possui posição definida no DAG.",
+        "es_correcta": false,
+        "explicacion": "As tarefas sem dependências são executadas primeiro e não por último. Eles são nós raiz no DAG."
+      },
+      {
+        "texto_opcion": "Como uma tarefa órfã que será ignorada durante cada execução de job.",
+        "es_correcta": false,
+        "explicacion": "Tarefas sem `depends_on` são tarefas raiz válidas e serão executadas; eles não são ignorados ou órfãos."
+      },
+      {
+        "texto_opcion": "O Databricks gera um erro de validação porque cada tarefa deve ter pelo menos uma dependência.",
+        "es_correcta": false,
+        "explicacion": "Tarefas raiz sem `depends_on` são explicitamente suportadas. Os jobs podem ter diversas tarefas raiz, e todas podem começar em paralelo."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "tarefa raiz sem dependências"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja garantir que uma tarefa `send_alert` seja executada somente quando pelo menos uma das três tarefas de agregação upstream falhar. Qual condição deve ser configurada?",
+    "opciones": [
+      {
+        "texto_opcion": "`AT_LEAST_ONE_FAILED`",
+        "es_correcta": true,
+        "explicacion": "`AT_LEAST_ONE_FAILED` aciona a tarefa downstream quando qualquer dependência upstream tem um status de falha, tornando-o ideal para alertar sobre falhas parciais."
+      },
+      {
+        "texto_opcion": "`ALL_FAILED`",
+        "es_correcta": false,
+        "explicacion": "`ALL_FAILED` só acionaria `send_alert` se todas as tarefas de agregação falhassem. O engenheiro deseja alertar sobre qualquer falha, não apenas sobre uma falha completa."
+      },
+      {
+        "texto_opcion": "`NONE_FAILED`",
+        "es_correcta": false,
+        "explicacion": "`NONE_FAILED` é o oposto do que é necessário - ele é executado quando nenhum upstream falhou."
+      },
+      {
+        "texto_opcion": "`TUDO_DONE`",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` sempre executaria `send_alert` independentemente de alguma tarefa falhar, gerando alertas falsos em execuções bem-sucedidas."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if AT_LEAST_ONE_FAILED"
+    ]
+  },
+  {
+    "pregunta": "Qual das seguintes afirmações sobre Lakeflow Jobs está correta?",
+    "opciones": [
+      {
+        "texto_opcion": "Um Job é o principal recurso para coordenar, agendar e executar operações; Tarefas são as unidades individuais de job dentro de um Job.",
+        "es_correcta": true,
+        "explicacion": "Em Lakeflow Jobs, um Job é o recurso de orquestração de nível superior e Tasks são os nós no DAG que executam o job real."
+      },
+      {
+        "texto_opcion": "Uma Tarefa é o recurso principal e um Job é uma subunidade que agrupa pipelines relacionados.",
+        "es_correcta": false,
+        "explicacion": "A hierarquia é invertida. Um job contém uma ou mais tarefas; e não o contrário."
+      },
+      {
+        "texto_opcion": "Gatilhos e Tarefas têm o mesmo conceito – ambos se referem à unidade de job em um DAG.",
+        "es_correcta": false,
+        "explicacion": "Um gatilho é um mecanismo que inicia a execução de um job com base em condições. Uma Tarefa é uma unidade de job dentro do Job. São conceitos distintos."
+      },
+      {
+        "texto_opcion": "Lakeflow Jobs suporta apenas tarefas de notebook; outros tipos de tarefas requerem um orquestrador separado.",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Jobs oferece suporte nativo a muitos tipos de tarefas: notebooks, SQL, scripts Python, dbt, Spark Declarative Pipelines, ML e tarefas Run Job."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Conceitos Lakeflow Jobs"
+    ]
+  },
+  {
+    "pregunta": "Revise esta definição de tarefa YAML:\n\n```yaml\n- chave_tarefa: audit_log\n  depende_de:\n    - chave_tarefa: transform_silver\n    - chave_tarefa: load_gold\n  run_if: AT_LEAST_ONE_SUCCEEDED\n  notebook_task:\n    notebook_path: ./audit.py\n```\n\n`transform_silver` foi bem-sucedido e `load_gold` falhou. O `audit_log` é executado?",
+    "opciones": [
+      {
+        "texto_opcion": "Sim - `AT_LEAST_ONE_SUCCEEDED` foi satisfeito porque `transform_silver` foi bem-sucedido.",
+        "es_correcta": true,
+        "explicacion": "`AT_LEAST_ONE_SUCCEEDED` requer apenas que uma única dependência upstream seja concluída com êxito. O sucesso de `transform_silver` satisfaz esta condição."
+      },
+      {
+        "texto_opcion": "Não - `load_gold` falhou, o que bloqueia a execução de todas as tarefas downstream.",
+        "es_correcta": false,
+        "explicacion": "Somente `ALL_SUCCESS` bloquearia aqui. `AT_LEAST_ONE_SUCCEEDED` permite explicitamente a execução downstream quando pelo menos um upstream é bem-sucedido."
+      },
+      {
+        "texto_opcion": "Não - `run_if: AT_LEAST_ONE_SUCCEEDED` requer que a maioria dos upstreams seja bem-sucedida.",
+        "es_correcta": false,
+        "explicacion": "`AT_LEAST_ONE_SUCCEEDED` significa que qualquer sucesso único é suficiente. Não há exigência de maioria ou quórum."
+      },
+      {
+        "texto_opcion": "Sim — mas apenas porque `load_gold` falhou; a tarefa com falha aciona a condição.",
+        "es_correcta": false,
+        "explicacion": "A condição é acionada pelo sucesso de `transform_silver`, não pela falha de `load_gold`. Uma tarefa com falha não contribui para `AT_LEAST_ONE_SUCCEEDED`."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if AT_LEAST_ONE_SUCCEEDED"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está construindo um job Lakeflow com as tarefas A, B, C e D. Eles precisam que C seja executado apenas se A for bem-sucedido, mas D deve ser executado depois de B, independentemente do resultado de B. Qual é a configuração correta?",
+    "opciones": [
+      {
+        "texto_opcion": "Defina `run_if: ALL_SUCCESS` em C (depende de A) e `run_if: ALL_DONE` em D (depende de B).",
+        "es_correcta": true,
+        "explicacion": "`ALL_SUCCESS` bloqueia C em A com sucesso. `ALL_DONE` garante que D seja executado após B, independentemente do resultado de B."
+      },
+      {
+        "texto_opcion": "Defina `run_if: ALL_SUCCESS` em C e D.",
+        "es_correcta": false,
+        "explicacion": "Definir `ALL_SUCCESS` em D bloquearia sua execução se B falhasse, o que contradiz o requisito de D sempre ser executado após B."
+      },
+      {
+        "texto_opcion": "Defina `run_if: ALL_DONE` em C e D.",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` em C permitiria que ele fosse executado mesmo se A falhasse. O requisito afirma que C só deve ser executado quando A for bem-sucedido."
+      },
+      {
+        "texto_opcion": "Defina `run_if: AT_LEAST_ONE_SUCCEEDED` em C e `run_if: NONE_FAILED` em D.",
+        "es_correcta": false,
+        "explicacion": "`NONE_FAILED` em D bloquearia se B falhasse, o que contradiz o requisito. `ALL_DONE` é a escolha correta para D."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "configuração run_if mista"
+    ]
+  },
+  {
+    "pregunta": "Qual é a relação entre **Declarative Automation Bundles (DABs)** e Lakeflow Jobs DAGs?",
+    "opciones": [
+      {
+        "texto_opcion": "DABs permite que os engenheiros definam Lakeflow Jobs, tarefas e suas dependências DAG em arquivos YAML para implantação como código controlada por versão.",
+        "es_correcta": true,
+        "explicacion": "Declarative Automation Bundles (anteriormente Databricks Asset Bundles) permite que o job completo DAG — incluindo tarefas, dependências e condições `run_if` — seja definido em `databricks.yml` e implantado através da CLI do Databricks."
+      },
+      {
+        "texto_opcion": "DABs são usados apenas para gerenciamento de esquema Unity Catalog e não têm relação com orquestração de tarefas.",
+        "es_correcta": false,
+        "explicacion": "DABs são a principal estrutura como código para definir e implantar Lakeflow Jobs, pipelines e outros recursos do Databricks — não apenas esquemas Unity Catalog."
+      },
+      {
+        "texto_opcion": "DABs substitui totalmente a UI Lakeflow Jobs; jobs só podem ser criados via YAML após ativar DABs.",
+        "es_correcta": false,
+        "explicacion": "DABs fornece uma alternativa como código para a UI. Tanto a UI quanto o DABs podem ser usados ​​para criar e gerenciar o Lakeflow Jobs."
+      },
+      {
+        "texto_opcion": "DABs é um SDK Python para enviar tarefas individuais programaticamente, sem definir DAGs.",
+        "es_correcta": false,
+        "explicacion": "DABs usam arquivos de configuração YAML, não chamadas Python SDK, e definem jobs inteiros, incluindo sua estrutura DAG completa."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "DABs e DAG como código"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja dividir um job do Lakeflow em um módulo reutilizável que outros jobs possam chamar. Qual tipo de tarefa consegue isso?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma tarefa **Run Job** que aciona o job do módulo por referência no workspace.",
+        "es_correcta": true,
+        "explicacion": "O tipo de tarefa Run Job aciona um job definido separadamente dentro do workspace, permitindo a composição de pipeline modular e reutilizável dentro do DAG de um job pai."
+      },
+      {
+        "texto_opcion": "Uma **tarefa de condição If/else** que faz referência às chaves de tarefa do outro job.",
+        "es_correcta": false,
+        "explicacion": "If/else é para ramificar a lógica dentro do DAG de um único job, não para chamar jobs externos."
+      },
+      {
+        "texto_opcion": "Um **Para cada tarefa** que itera no histórico de execução do job de destino.",
+        "es_correcta": false,
+        "explicacion": "Pois cada um serve para fazer um loop em matrizes de dados, não para invocar outros jobs."
+      },
+      {
+        "texto_opcion": "Uma **tarefa SQL** que executa um procedimento armazenado no esquema do job de destino.",
+        "es_correcta": false,
+        "explicacion": "As tarefas SQL executam consultas e procedimentos armazenados; eles não podem acionar outro job do Lakeflow."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Executar orquestração modular de tarefa de job"
+    ]
+  },
+  {
+    "pregunta": "Na UI Lakeflow Jobs, um engenheiro de dados deseja adicionar uma dependência entre duas tarefas existentes. Qual ação da UI realiza isso?",
+    "opciones": [
+      {
+        "texto_opcion": "Selecione a tarefa downstream, use o campo **Depende de** para adicionar a tarefa upstream e clique em **Salvar tarefa**.",
+        "es_correcta": true,
+        "explicacion": "O workflow da UI é: selecione a tarefa downstream → use o campo Depende de → adicione a tarefa upstream → escolha uma condição Executar se → Salvar tarefa."
+      },
+      {
+        "texto_opcion": "Selecione a tarefa upstream e arraste-a para o ícone da tarefa downstream.",
+        "es_correcta": false,
+        "explicacion": "Arrastar e soltar entre ícones de tarefas não é o método documentado para configurar dependências na UI Lakeflow Jobs. As dependências são definidas através do campo Depende de."
+      },
+      {
+        "texto_opcion": "Clique com o botão direito na tela DAG e selecione 'Adicionar borda' entre as duas tarefas.",
+        "es_correcta": false,
+        "explicacion": "Uma ação de clique com o botão direito do mouse em 'Adicionar borda' não está documentada para a UI Lakeflow Jobs. As dependências são configuradas por meio do campo Depende da tarefa."
+      },
+      {
+        "texto_opcion": "Edite a configuração JSON do job diretamente na visualização da tela para adicionar a dependência.",
+        "es_correcta": false,
+        "explicacion": "Embora a edição JSON seja possível por meio da API/CLI, a abordagem de UI padrão é usar o campo Depende no painel de configuração da tarefa."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Configuração de dependência da UI"
+    ]
+  },
+  {
+    "pregunta": "Qual afirmação descreve corretamente o que acontece com as tarefas B e C neste DAG quando a tarefa A (da qual B e C dependem) é bem-sucedida, mas a tarefa B falha?\n\n`A → B → D`\n`A → C → D`\n\n`D` tem `run_if: ALL_SUCCESS` e depende de B e C.",
+    "opciones": [
+      {
+        "texto_opcion": "C é executado (a falha de B não afeta C), mas D é ignorado porque B falhou e `ALL_SUCCESS` requer que todos os upstreams sejam bem-sucedidos.",
+        "es_correcta": true,
+        "explicacion": "C depende apenas de A, portanto é executado independentemente do resultado de B. D depende de B e C — porque B falhou, `ALL_SUCCESS` não foi satisfeito e D foi ignorado."
+      },
+      {
+        "texto_opcion": "C é ignorado porque B falhou e D também é ignorado.",
+        "es_correcta": false,
+        "explicacion": "C depende apenas de A (que teve sucesso), não de B. C não é afetado pela falha de B e funcionará normalmente."
+      },
+      {
+        "texto_opcion": "D é executado porque C foi bem-sucedido e `AT_LEAST_ONE_SUCCEEDED` foi satisfeito.",
+        "es_correcta": false,
+        "explicacion": "A condição de D é `ALL_SUCCESS`, não `AT_LEAST_ONE_SUCCEEDED`. Com B falhando, `ALL_SUCCESS` não é atendido e D é ignorado."
+      },
+      {
+        "texto_opcion": "Todo o job é interrompido imediatamente quando B falha, cancelando C e D.",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Jobs avalia as condições de cada tarefa de forma independente. Uma falha de tarefa não cancela imediatamente todas as outras tarefas — apenas as tarefas que não podem satisfazer suas condições `run_if` são ignoradas."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "DAG propagação downstream"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados define o seguinte YAML:\n\n```yaml\ntarefas:\n  - chave_tarefa: fonte_a\n    notebook_task:\n      notebook_path: ./source_a.py\n  - chave_tarefa: fonte_b\n    notebook_task:\n      notebook_path: ./source_b.py\n  - task_key: mesclar\n    depende_de:\n      - chave_tarefa: fonte_a\n      - chave_tarefa: fonte_b\n    notebook_task:\n      notebook_path: ./merge.py\n```\n\nNenhum `run_if` é especificado para `merge`. Quais tarefas são executadas em paralelo?",
+    "opciones": [
+      {
+        "texto_opcion": "`source_a` e `source_b` rodam em paralelo; `merge` é executado após a conclusão de ambos.",
+        "es_correcta": true,
+        "explicacion": "`source_a` e `source_b` são tarefas raiz sem dependências, portanto, são executadas simultaneamente. `merge` espera por ambos, usando a condição padrão `ALL_SUCCESS`."
+      },
+      {
+        "texto_opcion": "`source_a` é executado, depois `source_b` e depois `merge` — tudo sequencialmente.",
+        "es_correcta": false,
+        "explicacion": "Como `source_a` e `source_b` não têm dependência mútua, o Databricks os executa em paralelo, não sequencialmente."
+      },
+      {
+        "texto_opcion": "`source_a`, `source_b` e `merge` são todos executados em paralelo.",
+        "es_correcta": false,
+        "explicacion": "`merge` não pode ser executado em paralelo com suas tarefas upstream. Deve esperar que `source_a` e `source_b` sejam concluídos."
+      },
+      {
+        "texto_opcion": "Somente `source_a` é executado porque está listado primeiro no YAML.",
+        "es_correcta": false,
+        "explicacion": "A ordem YAML não controla a ordem de execução. A estrutura de dependência determina quais tarefas são executadas primeiro e quais podem ser executadas em paralelo."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "execução paralela DAG"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa de uma tarefa de `notificação` para ser executada após uma tarefa de `processo`, mas somente quando o `processo` NÃO falhou (pode ter sido ignorado ou bem-sucedido). Qual condição satisfaz esse requisito?",
+    "opciones": [
+      {
+        "texto_opcion": "`NONE_FAILED`",
+        "es_correcta": true,
+        "explicacion": "`NONE_FAILED` é acionado quando nenhuma tarefa upstream falhou, permitindo que a tarefa seja executada após sucessos e até mesmo tarefas ignoradas, mas bloqueando-a quando qualquer upstream falhar."
+      },
+      {
+        "texto_opcion": "`TODOS_SUCESSO`",
+        "es_correcta": false,
+        "explicacion": "`ALL_SUCCESS` bloquearia a `notificação` se o `processo` fosse ignorado. O requisito permite que a tarefa seja executada mesmo após um salto."
+      },
+      {
+        "texto_opcion": "`TUDO_DONE`",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` permitiria que a `notificação` fosse executada mesmo quando o `processo` falhasse, o que não é desejado."
+      },
+      {
+        "texto_opcion": "`AT_LEAST_ONE_SUCCEEDED`",
+        "es_correcta": false,
+        "explicacion": "`AT_LEAST_ONE_SUCCEEDED` requer que pelo menos um upstream tenha sido explicitamente bem-sucedido. Se `process` fosse ignorado (não tivesse êxito), esta condição não seria atendida."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "run_if NONE_FAILED"
+    ]
+  },
+  {
+    "pregunta": "Qual das alternativas a seguir descreve corretamente a estrutura de um job Lakeflow conforme definido em um pacote de automação declarativa (`databricks.yml`)?",
+    "opciones": [
+      {
+        "texto_opcion": "Os jobs são definidos em `resources.jobs`, cada um contendo uma lista de `tarefas` onde cada tarefa tem uma `task_key`, opcional `depends_on` e uma definição de tipo de tarefa.",
+        "es_correcta": true,
+        "explicacion": "Em DABs, a hierarquia é `pacote → recursos → jobs → [nome_do_trabalho] → tarefas → [chave_de_tarefa, depende_de, executar_if, tipo_de_tarefa]`."
+      },
+      {
+        "texto_opcion": "Os jobs são definidos em `pipelines.workflows` e as tarefas são aninhadas em `steps`.",
+        "es_correcta": false,
+        "explicacion": "`pipelines.workflows` e `steps` não são chaves DAB YAML válidas para Lakeflow Jobs. O caminho correto é `resources.jobs`."
+      },
+      {
+        "texto_opcion": "As tarefas são chaves de nível superior em `databricks.yml` e os jobs são inferidos automaticamente a partir das dependências das tarefas.",
+        "es_correcta": false,
+        "explicacion": "As tarefas são sempre aninhadas em uma definição de job em `resources.jobs`. Os jobs não são inferidos – eles devem ser definidos explicitamente."
+      },
+      {
+        "texto_opcion": "Os jobs são definidos em `orchestration.dag` e cada nó é mapeado para uma tarefa por meio de um campo `node_id`.",
+        "es_correcta": false,
+        "explicacion": "`orchestration.dag` e `node_id` não são chaves DAB YAML válidas. Use `resources.jobs` e `task_key`."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estrutura DAB YAML"
+    ]
+  },
+  {
+    "pregunta": "Um job Lakeflow tem tarefas em que `task_b` e `task_c` dependem de `task_a`. O engenheiro define `run_if: ALL_DONE` em `task_b` e `task_c`. `task_a` falha. O que acontece?",
+    "opciones": [
+      {
+        "texto_opcion": "Tanto `task_b` quanto `task_c` são executados porque `ALL_DONE` é acionado independentemente do resultado do upstream.",
+        "es_correcta": true,
+        "explicacion": "`ALL_DONE` significa que a tarefa é executada assim que suas dependências upstream são concluídas - independentemente de terem sido bem-sucedidas, falhadas ou ignoradas."
+      },
+      {
+        "texto_opcion": "Tanto `task_b` quanto `task_c` são ignorados porque uma falha no upstream impede qualquer execução downstream.",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` foi explicitamente projetado para ser executado mesmo quando os upstreams falham. Esta é a principal diferença de `ALL_SUCCESS`."
+      },
+      {
+        "texto_opcion": "`task_b` é executado, mas `task_c` é ignorado porque apenas uma ramificação pode ser executada após uma falha.",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` se aplica independentemente a cada tarefa. Tanto `task_b` quanto `task_c` serão executados — não há limitação de ramificação."
+      },
+      {
+        "texto_opcion": "Databricks gera um erro porque `ALL_DONE` não pode ser usado quando há apenas uma dependência upstream.",
+        "es_correcta": false,
+        "explicacion": "`ALL_DONE` é válido com qualquer número de dependências upstream, incluindo apenas uma. Nenhum erro é gerado."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "ALL_DONE com falha no upstream"
+    ]
+  },
+  {
+    "pregunta": "Qual afirmação sobre ciclos em um Lakeflow Jobs DAG está correta?",
+    "opciones": [
+      {
+        "texto_opcion": "Os ciclos não são permitidos — se a tarefa A depender da tarefa B e a tarefa B também depender da tarefa A, o Databricks rejeitará a configuração.",
+        "es_correcta": true,
+        "explicacion": "Um DAG é por definição acíclico. O Databricks impõe esta restrição e não conseguirá salvar ou validar qualquer configuração de job que contenha um ciclo de dependência."
+      },
+      {
+        "texto_opcion": "Os ciclos são permitidos entre tarefas no mesmo cluster para permitir loops iterativos de treinamento de ML.",
+        "es_correcta": false,
+        "explicacion": "Nenhum ciclo é permitido em Lakeflow Jobs DAGs, independentemente da configuração do cluster. A lógica iterativa é tratada pelos ciclos For each, não pelos ciclos DAG."
+      },
+      {
+        "texto_opcion": "Os ciclos são permitidos se ambas as tarefas usarem `run_if: ALL_DONE`.",
+        "es_correcta": false,
+        "explicacion": "As condições `run_if` não substituem a restrição acíclica. Os ciclos nunca são permitidos em um DAG, independentemente das condições."
+      },
+      {
+        "texto_opcion": "Os ciclos entre tarefas de notebook são permitidos, mas os ciclos entre tarefas SQL não.",
+        "es_correcta": false,
+        "explicacion": "A restrição acíclica aplica-se uniformemente a todos os tipos de tarefas. O tipo de tarefa não influencia se os ciclos são permitidos."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "DAG restrição acíclica"
+    ]
+  }
+]

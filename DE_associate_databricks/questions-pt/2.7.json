@@ -1,0 +1,1017 @@
+[
+  {
+    "pregunta": "Um engenheiro de dados precisa ingerir um despejo CSV histórico de 500 GB de um bucket S3 em uma tabela Delta. O arquivo não será alterado após o upload e o carregamento precisa ser executado uma vez.\n\nQual método de ingestão é mais adequado?",
+    "opciones": [
+      {
+        "texto_opcion": "Auto Loader com formato `cloudFiles`",
+        "es_correcta": false,
+        "explicacion": "Auto Loader é optimized para ingestão incremental contínua de novos arquivos, não para um carregamento histórico único."
+      },
+      {
+        "texto_opcion": "`COPY INTO` visando o caminho S3",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` é ideal para carregamentos em lote únicos ou idempotentes de armazenamento em nuvem. Ele ignora arquivos já carregados e requer configuração mínima."
+      },
+      {
+        "texto_opcion": "Conector gerenciado Lakeflow Connect",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect foi projetado para sistemas de origem SaaS/banco de dados com replicação contínua, não para carregamentos de arquivos S3 ad-hoc."
+      },
+      {
+        "texto_opcion": "JDBC leia com `spark.read.jdbc`",
+        "es_correcta": false,
+        "explicacion": "JDBC é para fontes de banco de dados relacionais. Este cenário envolve arquivos simples no armazenamento de objetos."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um pipeline de streaming deve ingerir milhões de pequenos arquivos JSON que chegam continuamente em ADLS Gen2 a cada poucos segundos. Novos campos de esquema podem aparecer sem aviso prévio.\n\nQual método de ingestão atende melhor a esse requisito?",
+    "opciones": [
+      {
+        "texto_opcion": "`COPY INTO` com `FORCE = TRUE`",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` é um comando em lote e não suporta streaming contínuo ou evolução automática de esquema."
+      },
+      {
+        "texto_opcion": "Auto Loader com `cloudFiles.schemaEvolutionMode = 'addNewColumns'`",
+        "es_correcta": true,
+        "explicacion": "Auto Loader (modo de notificação de arquivo ou listagem de diretório) lida com a chegada contínua de arquivos e evolui o esquema automaticamente quando novos campos aparecem."
+      },
+      {
+        "texto_opcion": "Lakeflow Connect com um conector de arquivo",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect tem como alvo SaaS estruturado ou fontes de banco de dados, e não fluxos de arquivos de armazenamento de objetos brutos."
+      },
+      {
+        "texto_opcion": "`spark.read.json` dentro de um job agendado",
+        "es_correcta": false,
+        "explicacion": "Uma leitura em lote agendada não pode reagir quase em tempo real aos arquivos que chegam a cada poucos segundos."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma empresa deseja replicar dados de um Salesforce CRM em Databricks para análise, com sincronizações diárias e governança integrada por meio de Unity Catalog.\n\nQual abordagem de ingestão o engenheiro de dados deve escolher?",
+    "opciones": [
+      {
+        "texto_opcion": "Auto Loader monitorando uma pasta de exportação do Salesforce",
+        "es_correcta": false,
+        "explicacion": "Auto Loader lê arquivos do armazenamento de objetos, não diretamente de APIs SaaS. Isto exigiria uma etapa intermediária de exportação."
+      },
+      {
+        "texto_opcion": "Conector JDBC apontando para o driver JDBC do Salesforce",
+        "es_correcta": false,
+        "explicacion": "O Salesforce não expõe um endpoint JDBC padrão para replicação em massa; esta abordagem é frágil e carece de características de governação."
+      },
+      {
+        "texto_opcion": "Conector gerenciado Lakeflow Connect para Salesforce",
+        "es_correcta": true,
+        "explicacion": "Lakeflow Connect fornece um conector Salesforce gerenciado com governança Unity Catalog nativa, sincronização incremental e sem código personalizado."
+      },
+      {
+        "texto_opcion": "`COPY INTO` dos CSVs de exportação do Salesforce",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` carrega arquivos do armazenamento em nuvem; ele não pode se conectar diretamente ao Salesforce e não oferece integração de governança."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deve carregar uma nova partição de arquivos Parquet do GCS em uma tabela Delta existente todas as noites. Os mesmos arquivos podem ser entregues novamente ocasionalmente e não devem criar duplicatas.\n\nQual método é mais adequado?",
+    "opciones": [
+      {
+        "texto_opcion": "Auto Loader com gatilho único",
+        "es_correcta": false,
+        "explicacion": "Auto Loader rastreia arquivos processados via checkpoint, mas é mais adequado para streaming contínuo ou incremental em vez de carregamentos em lote noturnos idempotentes."
+      },
+      {
+        "texto_opcion": "`COPY INTO` com opções padrão",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` é idempotente por design - ele pula arquivos já carregados. É a escolha correta para carregamentos noturnos em lote do armazenamento de objetos, onde arquivos duplicados podem aparecer."
+      },
+      {
+        "texto_opcion": "`spark.read.parquet` com `mode('overwrite')`",
+        "es_correcta": false,
+        "explicacion": "A substituição reescreve toda a tabela em cada execução e não protege contra entrega duplicada de arquivos."
+      },
+      {
+        "texto_opcion": "Lakeflow Connect com conector padrão GCS",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect foi projetado para sistemas de origem estruturados (bancos de dados, aplicativos SaaS), não para carregar partições Parquet de buckets GCS brutos."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "A equipe de engenharia de dados precisa ingerir eventos de sensores IoT com latência inferior a um minuto de um caminho ADLS para uma tabela Delta. O volume de dados é alto e o esquema é fixo.\n\nQual abordagem fornece a latência mais baixa?",
+    "opciones": [
+      {
+        "texto_opcion": "`COPY INTO` agendado a cada minuto",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` é uma operação em lote. Agendá-lo a cada minuto adiciona sobrecarga e não foi projetado para latência inferior a um minuto."
+      },
+      {
+        "texto_opcion": "Auto Loader em modo streaming com notificação de arquivo",
+        "es_correcta": true,
+        "explicacion": "Auto Loader no modo de notificação de arquivo detecta novos arquivos segundos após a chegada, tornando-o ideal para ingestão de IoT de baixa latência e alto volume."
+      },
+      {
+        "texto_opcion": "Lakeflow Connect com conector em tempo real",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect tem como alvo fontes de SaaS/banco de dados; ele não foi projetado para fluxos de arquivos IoT brutos de ADLS."
+      },
+      {
+        "texto_opcion": "JDBC pesquisa a cada 30 segundos",
+        "es_correcta": false,
+        "explicacion": "JDBC lê bancos de dados relacionais. Os dados do sensor IoT em ADLS não são uma fonte JDBC."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está escolhendo entre Auto Loader e `COPY INTO` para carregar arquivos do S3. Os dados chegam em grandes lotes mensalmente e é necessária uma semântica exatamente uma vez.\n\nQual afirmação descreve melhor as compensações?",
+    "opciones": [
+      {
+        "texto_opcion": "`COPY INTO` é melhor para streaming contínuo, mas não para lotes mensais.",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` é um comando em lote, não de streaming. É adequado para cargas limitadas e pouco frequentes."
+      },
+      {
+        "texto_opcion": "Auto Loader é necessário quando o número de arquivos excede 10.000 por lote.",
+        "es_correcta": false,
+        "explicacion": "Embora Auto Loader seja melhor dimensionado para contagens de arquivos muito grandes, o limite de 10.000 arquivos não é um requisito difícil; `COPY INTO` também pode lidar com grandes conjuntos de arquivos."
+      },
+      {
+        "texto_opcion": "`COPY INTO` fornece carregamento de arquivo idempotente exatamente uma vez e é adequado para lotes grandes e pouco frequentes.",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` registra quais arquivos foram carregados e ignora a reingestão deles, garantindo a semântica exatamente uma vez. Grandes lotes mensais são perfeitos."
+      },
+      {
+        "texto_opcion": "Auto Loader e `COPY INTO` são intercambiáveis para todos os cenários.",
+        "es_correcta": false,
+        "explicacion": "Auto Loader é optimized para pipelines de streaming incrementais; `COPY INTO` para carregamentos em lote limitados. Eles atendem a diferentes casos de uso."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe ingere arquivos JSON com estruturas profundamente aninhadas do Azure Blob Storage. Os analistas precisam de acesso a campos aninhados como colunas de primeira classe. O esquema é desconhecido antecipadamente.\n\nQual combinação é mais apropriada?",
+    "opciones": [
+      {
+        "texto_opcion": "`COPY INTO` com `FORMAT = 'JSON'` e definição manual de esquema",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` não infere ou evolui automaticamente o esquema para JSON profundamente aninhado; a definição manual do esquema anula o propósito quando o esquema é desconhecido."
+      },
+      {
+        "texto_opcion": "Auto Loader com `cloudFiles.inferColumnTypes = true` e evolução do esquema",
+        "es_correcta": true,
+        "explicacion": "Auto Loader pode inferir esquemas a partir de arquivos de amostra (incluindo JSON aninhado) e evoluí-los à medida que novos campos aparecem, tornando-o ideal para esquemas desconhecidos ou em mudança."
+      },
+      {
+        "texto_opcion": "JDBC leitura com desserialização JSON na camada de aplicação",
+        "es_correcta": false,
+        "explicacion": "JDBC tem como alvo bancos de dados relacionais; ele não pode ler arquivos JSON do Blob Storage."
+      },
+      {
+        "texto_opcion": "Lakeflow Connect com um conector Blob Storage",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect destina-se a fontes estruturadas de SaaS/banco de dados, não à ingestão de arquivos semiestruturados brutos."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro está ingerindo dados de um banco de dados PostgreSQL no Databricks. A tabela de origem possui 50 milhões de linhas e as atualizações acontecem ao longo do dia.\n\nQual abordagem o engenheiro deve usar para cargas diárias incrementais?",
+    "opciones": [
+      {
+        "texto_opcion": "Recarga completa `spark.read.jdbc` com `mode('overwrite')` todos os dias",
+        "es_correcta": false,
+        "explicacion": "Uma recarga completa de 50 milhões de linhas diariamente é ineficiente e cara; ele não é dimensionado para tabelas grandes."
+      },
+      {
+        "texto_opcion": "`COPY INTO` do PostgreSQL",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` lê do armazenamento de objetos em nuvem (S3/ADLS/GCS), não diretamente de um banco de dados PostgreSQL."
+      },
+      {
+        "texto_opcion": "Conector gerenciado Lakeflow Connect para PostgreSQL com CDC",
+        "es_correcta": true,
+        "explicacion": "Lakeflow Connect oferece suporte a conectores PostgreSQL gerenciados com captura de dados alterados, permitindo replicação incremental eficiente com governança Unity Catalog."
+      },
+      {
+        "texto_opcion": "Auto Loader monitorando um bucket de exportação do PostgreSQL",
+        "es_correcta": false,
+        "explicacion": "Auto Loader lê arquivos do armazenamento de objetos. Embora as exportações do PostgreSQL possam ser preparadas lá, isso adiciona complexidade desnecessária em comparação com Lakeflow Connect."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa de dar aos cientistas de dados externos (fora do workspace Databricks da empresa) acesso a uma tabela Gold curada sem copiar dados.\n\nQual abordagem de ingestão ou compartilhamento está correta?",
+    "opciones": [
+      {
+        "texto_opcion": "Exporte a tabela para S3 e faça com que os cientistas usem `COPY INTO`",
+        "es_correcta": false,
+        "explicacion": "A exportação cria cópias de dados sem governança; `COPY INTO` é um comando de ingestão, não um mecanismo de compartilhamento."
+      },
+      {
+        "texto_opcion": "Use Delta Sharing via Unity Catalog para compartilhar a tabela diretamente",
+        "es_correcta": true,
+        "explicacion": "Delta Sharing permite o compartilhamento de dados seguro, governado e entre organizações sem copiar dados. Os destinatários acessam tabelas Delta ativas por meio de um URL de compartilhamento."
+      },
+      {
+        "texto_opcion": "Grant usuários externos `SELECT` na tabela no metastore atual",
+        "es_correcta": false,
+        "explicacion": "Unity Catalog o acesso ao metastore tem escopo no workspace; usuários externos fora da organização não podem usar permissões GRANT internas."
+      },
+      {
+        "texto_opcion": "Use Auto Loader para enviar dados para um local externo",
+        "es_correcta": false,
+        "explicacion": "Auto Loader é uma ferramenta de ingestão (lê arquivos recebidos no Delta). Ele não envia nem compartilha dados com consumidores externos."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma empresa de manufatura coleta arquivos de log de máquina (CSV) em um servidor local. Os arquivos são sincronizados com o S3 a cada hora. Um novo conjunto de arquivos com os mesmos nomes pode substituir os mais antigos.\n\nQual método de ingestão lida com isso corretamente?",
+    "opciones": [
+      {
+        "texto_opcion": "Auto Loader com `cloudFiles.includeExistingFiles = true`",
+        "es_correcta": false,
+        "explicacion": "Auto Loader rastreia arquivos por hash de nome/caminho. Se os arquivos forem substituídos com o mesmo nome, ele não poderá reingeri-los, a menos que o checkpoint seja desmarcado."
+      },
+      {
+        "texto_opcion": "`COPY INTO` com `FORCE = TRUE`",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` com `FORCE = TRUE` ingere arquivos mesmo que eles tenham sido carregados anteriormente, o que é correto quando arquivos com o mesmo nome são substituídos por novo conteúdo."
+      },
+      {
+        "texto_opcion": "`COPY INTO` com opções de idempotência padrão",
+        "es_correcta": false,
+        "explicacion": "O padrão `COPY INTO` ignora nomes de arquivos já carregados. Se os arquivos substituídos compartilharem o mesmo nome, o novo conteúdo não será assimilado novamente."
+      },
+      {
+        "texto_opcion": "Lakeflow Connect com um conector padrão S3",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect tem como alvo fontes SaaS/DB estruturadas, não arquivos CSV brutos no S3."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Qual das opções a seguir melhor descreve quando um engenheiro de dados deve preferir **Lakeflow Connect** em vez de **Auto Loader**?",
+    "opciones": [
+      {
+        "texto_opcion": "Quando os dados de origem chegam como arquivos Parquet em ADLS",
+        "es_correcta": false,
+        "explicacion": "Os arquivos Parquet em ADLS são uma fonte baseada em arquivo - Auto Loader é a ferramenta certa, não Lakeflow Connect."
+      },
+      {
+        "texto_opcion": "Ao ingerir de um aplicativo SaaS como Salesforce, SAP ou ServiceNow",
+        "es_correcta": true,
+        "explicacion": "Lakeflow Connect fornece conectores gerenciados para SaaS e sistemas corporativos, lidando automaticamente com autenticação de API, paginação, sincronização incremental e governança Unity Catalog."
+      },
+      {
+        "texto_opcion": "Quando a evolução do esquema é necessária para arquivos JSON",
+        "es_correcta": false,
+        "explicacion": "A evolução do esquema para arquivos JSON é um recurso de Auto Loader, não de Lakeflow Connect."
+      },
+      {
+        "texto_opcion": "Quando um carregamento único de arquivo histórico do S3 é necessário",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` é a ferramenta apropriada para carregamentos em lote únicos do armazenamento de objetos em nuvem."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa o seguinte código:\n\n```píton\n(faísca.readStream\n  .formato('cloudFiles')\n  .option('cloudFiles.formato', 'csv')\n  .option('cloudFiles.schemaLocation', '/checkpoints/esquema')\n  .load('s3://landing/raw/')\n  .writeStream\n  .formato('delta')\n  .option('checkpointLocation', '/checkpoints/raw')\n  .start('/delta/raw')\n)\n```\n\nQue tipo de ingestão isso implementa?",
+    "opciones": [
+      {
+        "texto_opcion": "Carregamento em lote único com idempotência",
+        "es_correcta": false,
+        "explicacion": "`readStream` + `writeStream.start()` é um pipeline de streaming contínuo, não um carregamento em lote único."
+      },
+      {
+        "texto_opcion": "Ingestão incremental de streaming usando Auto Loader",
+        "es_correcta": true,
+        "explicacion": "`format('cloudFiles')` é o formato Auto Loader. Combinado com `readStream`/`writeStream`, este é um pipeline incremental contínuo que processa novos arquivos conforme eles chegam."
+      },
+      {
+        "texto_opcion": "`COPY INTO` com uma opção de formato CSV",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` é um comando SQL, não uma API de streaming PySpark. O formato `cloudFiles` é específico de Auto Loader."
+      },
+      {
+        "texto_opcion": "pipeline Lakeflow Connect para S3",
+        "es_correcta": false,
+        "explicacion": "Os pipelines Lakeflow Connect são configurados por meio da UI ou YAML, não por meio de `readStream.format('cloudFiles')`."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma organização tem requisitos rígidos de residência de dados: os dados ingeridos nunca devem sair da VPC corporativa. A fonte é um banco de dados MySQL interno.\n\nQual opção de ingestão é mais apropriada?",
+    "opciones": [
+      {
+        "texto_opcion": "Conector gerenciado Lakeflow Connect para MySQL",
+        "es_correcta": false,
+        "explicacion": "Os conectores Lakeflow Connect gerenciados podem rotear dados por meio da infraestrutura gerenciada pelo Databricks, o que pode violar os requisitos de residência de VPC."
+      },
+      {
+        "texto_opcion": "Ingestão JDBC por meio de um notebook em execução em um cluster na VPC do cliente",
+        "es_correcta": true,
+        "explicacion": "As leituras JDBC são executadas na computação dentro do plano de dados (VPC) do cliente. Os dados nunca saem da rede do cliente, satisfazendo os requisitos de residência."
+      },
+      {
+        "texto_opcion": "`COPY INTO` de uma exportação MySQL no S3",
+        "es_correcta": false,
+        "explicacion": "A preparação dos dados para o S3 primeiro não elimina as preocupações de residência — a etapa de exportação em si move os dados para fora dos limites da VPC."
+      },
+      {
+        "texto_opcion": "Auto Loader monitorando uma pasta de log de alterações do MySQL",
+        "es_correcta": false,
+        "explicacion": "Auto Loader lê arquivos do armazenamento de objetos; ele não pode se conectar diretamente a um banco de dados MySQL."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa ingerir dados de uma API REST que retorne respostas JSON paginadas. A API não é suportada por Lakeflow Connect.\n\nQual abordagem o engenheiro deve usar?",
+    "opciones": [
+      {
+        "texto_opcion": "Auto Loader com `cloudFiles.format = 'json'`",
+        "es_correcta": false,
+        "explicacion": "Auto Loader lê arquivos do armazenamento de objetos em nuvem. Não é possível chamar uma API REST diretamente."
+      },
+      {
+        "texto_opcion": "Notebook personalizado usando a biblioteca `requests` do Python, gravando resultados no Delta via PySpark",
+        "es_correcta": true,
+        "explicacion": "Quando não existe nenhum conector gerenciado, um notebook personalizado usando bibliotecas Python HTTP é a abordagem padrão. Os resultados podem ser gravados no Delta para processamento posterior."
+      },
+      {
+        "texto_opcion": "`COPY INTO` com `FORMAT = 'JSON'` apontando para o URL da API",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` lê de caminhos de armazenamento em nuvem (S3/ADLS/GCS), não de URLs HTTP."
+      },
+      {
+        "texto_opcion": "Conector JDBC com driver REST API",
+        "es_correcta": false,
+        "explicacion": "JDBC foi projetado para bancos de dados SQL. APIs REST requerem bibliotecas de cliente HTTP, não drivers JDBC."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Os seguintes requisitos de ingestão se aplicam:\n- Fonte: Google BigQuery\n- Volume: 200 milhões de linhas\n- Frequência: atualização completa diária\n- Governança: Unity Catalog\n\nQual método é mais apropriado?",
+    "opciones": [
+      {
+        "texto_opcion": "Auto Loader lendo arquivos de exportação do BigQuery do GCS",
+        "es_correcta": false,
+        "explicacion": "Esta abordagem requer um passo de exportação intermédio e não aproveita a governação do conector nativo."
+      },
+      {
+        "texto_opcion": "Conector gerenciado Lakeflow Connect para BigQuery",
+        "es_correcta": true,
+        "explicacion": "Lakeflow Connect fornece um conector gerenciado do BigQuery com governança Unity Catalog, gerenciando autenticação, volume e sincronização incremental/completa sem código personalizado."
+      },
+      {
+        "texto_opcion": "`COPY INTO` do BigQuery",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` lê do armazenamento de objetos em nuvem (S3/ADLS/GCS), não diretamente do BigQuery."
+      },
+      {
+        "texto_opcion": "JDBC leitura do BigQuery com conector Spark JDBC",
+        "es_correcta": false,
+        "explicacion": "Embora o BigQuery tenha um conector Spark, ele não possui governança Unity Catalog integrada e é mais difícil de gerenciar com 200 milhões de linhas em comparação com Lakeflow Connect."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deseja carregar arquivos Avro de ADLS em uma tabela Delta. Os arquivos chegam uma vez por dia e o engenheiro deseja evitar o reprocessamento dos arquivos já carregados.\n\nQual comando SQL o engenheiro deve usar?",
+    "opciones": [
+      {
+        "texto_opcion": "```sql\nCOPY INTO tabela_alvo\nDE 'abfss://container@storage.dfs.core.windows.net/avro/'\nARQUIVOFORMAT = AVRO;\n```",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` com `FILEFORMAT = AVRO` carrega arquivos Avro de forma idempotente - os arquivos já carregados são ignorados automaticamente."
+      },
+      {
+        "texto_opcion": "```sql\nINSERIR EM tabela_alvo\nSELECIONE * DE avro.`abfss://container@storage.dfs.core.windows.net/avro/`;\n```",
+        "es_correcta": false,
+        "explicacion": "Um `INSERT INTO` simples não rastreia quais arquivos foram carregados anteriormente e reinserirá os dados em cada execução."
+      },
+      {
+        "texto_opcion": "```sql\nCRIAR OU SUBSTITUIR TABELA target_table\nAS SELECT * FROM avro.`abfss://container@storage.dfs.core.windows.net/avro/`;\n```",
+        "es_correcta": false,
+        "explicacion": "`CREATE OR REPLACE TABLE` reescreve a tabela inteira em cada execução e não suporta carregamento incremental idempotente."
+      },
+      {
+        "texto_opcion": "```sql\nMERGE INTO target_table USANDO avro_source ON id = avro_source.id\nQUANDO NÃO CORRESPONDE INSERIR *;\n```",
+        "es_correcta": false,
+        "explicacion": "`MERGE` pode evitar duplicatas, mas requer uma referência de origem pré-carregada. Ele não rastreia inerentemente arquivos processados ​​como `COPY INTO` faz."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe de governação exige que todos os dados ingeridos de fontes de terceiros sejam catalogados automaticamente em Unity Catalog com linhagem ao nível da coluna.\n\nQual método de ingestão oferece suporte nativo a esse requisito?",
+    "opciones": [
+      {
+        "texto_opcion": "Notebooks PySpark personalizados gravando em tabelas Delta",
+        "es_correcta": false,
+        "explicacion": "Notebooks personalizados podem gravar em tabelas Unity Catalog, mas o rastreamento de linhagem em nível de coluna requer configuração explícita e não é automático."
+      },
+      {
+        "texto_opcion": "Lakeflow Connect com integração Unity Catalog",
+        "es_correcta": true,
+        "explicacion": "Lakeflow Connect integra-se nativamente com Unity Catalog, registrando automaticamente tabelas ingeridas e capturando linhagem no nível da coluna."
+      },
+      {
+        "texto_opcion": "`COPY INTO` com tabela de destino Unity Catalog",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` pode gravar em tabelas Unity Catalog, mas não captura automaticamente a linhagem em nível de coluna da fonte externa."
+      },
+      {
+        "texto_opcion": "Auto Loader gravando em uma tabela externa",
+        "es_correcta": false,
+        "explicacion": "Auto Loader preenche tabelas Delta, mas não registra automaticamente a linhagem em nível de coluna do sistema de origem externo."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe está escolhendo entre `COPY INTO` e Auto Loader. Seu pipeline processará até 100.000 arquivos por dia, chegando continuamente.\n\nQual afirmação é precisa?",
+    "opciones": [
+      {
+        "texto_opcion": "`COPY INTO` é preferido porque pode ser dimensionado para qualquer número de arquivos sem configuração.",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` lista todos os arquivos não processados em cada execução. Em contagens de arquivos muito altas, essa listagem pode se tornar um gargalo; O modo de notificação de arquivo do Auto Loader é mais escalonável."
+      },
+      {
+        "texto_opcion": "Auto Loader no modo de notificação de arquivo é melhor dimensionado para altas contagens de arquivos e chegada contínua.",
+        "es_correcta": true,
+        "explicacion": "O modo de notificação de arquivos do Auto Loader (usando eventos na nuvem) processa os arquivos conforme eles chegam, sem listagem completa de diretórios, dimensionando com eficiência para centenas de milhares de arquivos."
+      },
+      {
+        "texto_opcion": "Ambas as ferramentas têm as mesmas características de desempenho em escala.",
+        "es_correcta": false,
+        "explicacion": "Em contagens altas de arquivos, Auto Loader com notificação de arquivo é significativamente mais eficiente do que `COPY INTO` devido à descoberta orientada a eventos versus listagem completa de diretórios."
+      },
+      {
+        "texto_opcion": "Nenhuma das ferramentas suporta 100.000 arquivos por dia sem particionamento.",
+        "es_correcta": false,
+        "explicacion": "Auto Loader no modo de notificação de arquivo foi projetado para lidar exatamente com essa escala sem particionamento especial."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está projetando um pipeline da camada Bronze. Os dados brutos chegam como arquivos XML no GCS e devem ser preservados como estão, com transformação mínima.\n\nQual abordagem de ingestão é mais adequada para ingestão Bronze de XML?",
+    "opciones": [
+      {
+        "texto_opcion": "Lakeflow Connect com conector GCS",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect tem como alvo fontes estruturadas de SaaS/banco de dados. XML bruto no GCS requer ingestão baseada em arquivo."
+      },
+      {
+        "texto_opcion": "Auto Loader com `cloudFiles.format = 'binaryFile'` para preservar bytes brutos",
+        "es_correcta": true,
+        "explicacion": "Carregar XML como `binaryFile` preserva o conteúdo bruto na camada Bronze. A análise pode ser feita posteriormente no Silver, seguindo as práticas recomendadas do medalhão."
+      },
+      {
+        "texto_opcion": "`COPY INTO` com `FORMAT = 'XML'`",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` suporta formatos como CSV, JSON, Parquet, Avro e ORC — não XML. Os arquivos XML exigiriam um leitor personalizado."
+      },
+      {
+        "texto_opcion": "Conector JDBC com plugin de desserialização XML",
+        "es_correcta": false,
+        "explicacion": "JDBC conecta-se a bancos de dados relacionais; ele não pode ler arquivos XML do GCS."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa construir um pipeline que:\n1. Ingestões de um bucket S3\n2. Funciona a cada 15 minutos\n3. Não deve reprocessar arquivos\n4. Deve ser acionado em uma programação de job Lakeflow\n\nQual combinação está correta?",
+    "opciones": [
+      {
+        "texto_opcion": "Auto Loader com `trigger(processingTime='15 minutos')` dentro de um job de streaming",
+        "es_correcta": false,
+        "explicacion": "Isso funciona, mas executa um job de streaming de longa duração. A pergunta pede um job Lakeflow agendado, que mapeia melhor para uma abordagem em lote acionada."
+      },
+      {
+        "texto_opcion": "`COPY INTO` dentro de uma tarefa do notebook Lakeflow Job, agendada a cada 15 minutos",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` é idempotente (ignora arquivos já carregados) e é executado como um comando SQL de notebook dentro de um job Lakeflow agendado - a configuração mais simples e apropriada."
+      },
+      {
+        "texto_opcion": "Lakeflow Connect com intervalo de sincronização de 15 minutos",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect tem como alvo conectores SaaS/DB, não ingestão de arquivos S3 brutos."
+      },
+      {
+        "texto_opcion": "Auto Loader com `trigger(once=True)` dentro de um job Lakeflow, agendado a cada 15 minutos",
+        "es_correcta": false,
+        "explicacion": "Embora funcione, ele reinicia o contexto de streaming em cada execução. `COPY INTO` é mais simples e desenvolvido especificamente para carregamentos em lote agendados do armazenamento de objetos."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados observa que um comando `COPY INTO` está reingerindo arquivos que já foram carregados em uma execução anterior.\n\nQual é a causa mais provável?",
+    "opciones": [
+      {
+        "texto_opcion": "A tabela Delta de destino foi recriada com `CREATE OR REPLACE TABLE`",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` armazena a lista de arquivos carregados no log de transações Delta da tabela de destino. Se a tabela for descartada e recriada, esse histórico será perdido e todos os arquivos serão tratados como novos."
+      },
+      {
+        "texto_opcion": "Os arquivos de origem foram compactados com gzip",
+        "es_correcta": false,
+        "explicacion": "O formato de compactação não afeta o rastreamento de arquivos de `COPY INTO`. Ele oferece suporte a arquivos compactados com gzip sem problemas de reingestão."
+      },
+      {
+        "texto_opcion": "A opção `FORMAT` foi alterada entre as execuções",
+        "es_correcta": false,
+        "explicacion": "Alterar a opção de formato não redefine a lista de arquivos carregados armazenados no log de transações."
+      },
+      {
+        "texto_opcion": "O checkpoint Auto Loader foi excluído",
+        "es_correcta": false,
+        "explicacion": "Auto Loader usa checkpoints; `COPY INTO` usa o log de transações Delta. Excluir um checkpoint Auto Loader não afeta o comportamento de `COPY INTO`."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma startup deseja o pipeline mais simples possível para carregar arquivos CSV do S3 em uma tabela Delta sem infraestrutura de streaming. Eles esperam arquivos uma vez por semana.\n\nQual é a abordagem recomendada?",
+    "opciones": [
+      {
+        "texto_opcion": "Auto Loader pipeline de streaming com um gatilho de job Lakeflow",
+        "es_correcta": false,
+        "explicacion": "Auto Loader introduz complexidade de streaming (checkpoints, consultas de streaming) que é desnecessária para carregamentos em lote semanais."
+      },
+      {
+        "texto_opcion": "`COPY INTO` em um notebook SQL agendado",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` é a opção mais simples — sem streaming, sem gerenciamento de checkpoint, idempotência integrada. Perfeito para cargas de lote semanais com sobrecarga operacional mínima."
+      },
+      {
+        "texto_opcion": "Lakeflow Connect Conector S3 com sincronização semanal",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect foi projetado para fontes estruturadas de banco de dados/SaaS. Cargas CSV S3 brutas são melhor atendidas por `COPY INTO`."
+      },
+      {
+        "texto_opcion": "JDBC leitura em lote do S3",
+        "es_correcta": false,
+        "explicacion": "JDBC lê bancos de dados SQL. Os arquivos CSV S3 são armazenamento de objetos, não uma fonte acessível por JDBC."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa ingerir dados de um banco de dados Oracle local protegido por um firewall corporativo. Nenhuma conectividade direta com a Internet é permitida a partir do servidor de banco de dados.\n\nQual é a abordagem correta?",
+    "opciones": [
+      {
+        "texto_opcion": "Conector gerenciado Lakeflow Connect para Oracle",
+        "es_correcta": false,
+        "explicacion": "Os conectores Lakeflow Connect gerenciados são executados em infraestrutura gerenciada pelo Databricks e exigem conectividade com a Internet da fonte, que não está disponível aqui."
+      },
+      {
+        "texto_opcion": "JDBC leitura usando um cluster Databricks implantado na mesma rede VPC/local via VPN ou PrivateLink",
+        "es_correcta": true,
+        "explicacion": "Para fontes locais atrás de um firewall, um cluster Databricks no plano de dados do cliente (conectado via VPN ou PrivateLink) pode usar JDBC para chegar ao banco de dados sem exposição pública à Internet."
+      },
+      {
+        "texto_opcion": "Auto Loader monitorando uma pasta de exportação Oracle no S3",
+        "es_correcta": false,
+        "explicacion": "Isso exige que o servidor Oracle exporte arquivos para o S3, o que pode violar a restrição do firewall. Também adiciona complexidade desnecessária."
+      },
+      {
+        "texto_opcion": "`COPY INTO` da Oracle",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` lê do armazenamento de objetos em nuvem (S3/ADLS/GCS), não de bancos de dados locais."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deve escolher entre um **conector padrão** e um **conector gerenciado** em Lakeflow Connect.\n\nQual afirmação descreve corretamente a diferença?",
+    "opciones": [
+      {
+        "texto_opcion": "Os conectores padrão exigem computação gerenciada pelo cliente; conectores gerenciados são executados em computação gerenciada pelo Databricks.",
+        "es_correcta": true,
+        "explicacion": "Os conectores padrão usam a computação existente do cliente (clusters clássicos), enquanto os conectores gerenciados são executados na infraestrutura serverless gerenciada por Databricks, reduzindo a sobrecarga operacional."
+      },
+      {
+        "texto_opcion": "Os conectores gerenciados suportam apenas fontes baseadas em arquivo; conectores padrão suportam bancos de dados.",
+        "es_correcta": false,
+        "explicacion": "Ambos os tipos de conectores suportam fontes de banco de dados e SaaS. A distinção diz respeito à propriedade da computação, não ao tipo de origem."
+      },
+      {
+        "texto_opcion": "Suporte para conectores padrão Unity Catalog; conectores gerenciados não.",
+        "es_correcta": false,
+        "explicacion": "Ambos os tipos de conectores se integram ao Unity Catalog. A governança não está vinculada ao tipo de computação em Lakeflow Connect."
+      },
+      {
+        "texto_opcion": "Os conectores gerenciados só estão disponíveis para transferências de Databricks para Databricks.",
+        "es_correcta": false,
+        "explicacion": "Os conectores gerenciados oferecem suporte a uma ampla variedade de fontes externas, incluindo Salesforce, MySQL, PostgreSQL e outras, não apenas Databricks-to-Databricks."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados executa o seguinte comando:\n\n```sql\nCOPY INTO meu_catalog.meu_schema.events\nDE 's3://raw-bucket/events/'\nARQUIVOFORMAT = JSON\nCOPY_OPTIONS('mergeSchema' = 'true');\n```\n\nO que a opção `mergeSchema` permite?",
+    "opciones": [
+      {
+        "texto_opcion": "Ele mescla linhas duplicadas durante a ingestão.",
+        "es_correcta": false,
+        "explicacion": "`mergeSchema` é uma opção de evolução de esquema, não um recurso de desduplicação. A desduplicação requer `MERGE INTO` ou `dropDuplicates`."
+      },
+      {
+        "texto_opcion": "Ele permite que novas colunas em arquivos JSON recebidos sejam adicionadas ao esquema da tabela Delta de destino.",
+        "es_correcta": true,
+        "explicacion": "`mergeSchema = 'true'` em `COPY_OPTIONS` permite a evolução do esquema - novas colunas descobertas nos arquivos recebidos são automaticamente adicionadas à tabela de destino."
+      },
+      {
+        "texto_opcion": "Ele combina vários arquivos JSON em um único arquivo antes de carregar.",
+        "es_correcta": false,
+        "explicacion": "`mergeSchema` afeta apenas a evolução do esquema. A consolidação de arquivos é uma preocupação separada tratada por `OPTIMIZE` ou `COMPACT`."
+      },
+      {
+        "texto_opcion": "Ele mescla os dados recebidos com a tabela de destino usando uma chave primária.",
+        "es_correcta": false,
+        "explicacion": "A fusão baseada em chave requer `MERGE INTO`. `mergeSchema` controla apenas se o esquema da tabela pode evoluir para incluir novas colunas."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe deve ingerir 10 TB de dados históricos do Parquet do S3 como uma migração única, seguida por cargas incrementais diárias contínuas.\n\nQual estratégia de ingestão deve ser usada para cada fase?",
+    "opciones": [
+      {
+        "texto_opcion": "Histórico: Auto Loader com `trigger(once=True)`. Incremental: `COPY INTO` programado diariamente.",
+        "es_correcta": false,
+        "explicacion": "Embora isso possa funcionar, `COPY INTO` é mais simples que Auto Loader para a fase histórica. Para incrementais, Auto Loader é mais adequado que `COPY INTO` em escala."
+      },
+      {
+        "texto_opcion": "Histórico: `COPY INTO`. Incremental: Auto Loader no modo streaming.",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` é ideal para a migração histórica limitada (idempotente, simples). Auto Loader no modo de streaming lida com arquivos incrementais diários contínuos com eficiência."
+      },
+      {
+        "texto_opcion": "Histórico: Lakeflow Connect. Incremental: pesquisa JDBC.",
+        "es_correcta": false,
+        "explicacion": "Nenhuma das ferramentas é apropriada aqui. Lakeflow Connect tem como alvo fontes de banco de dados/SaaS; JDBC lê bancos de dados, não arquivos Parquet no S3."
+      },
+      {
+        "texto_opcion": "Histórico: `spark.read.parquet` com substituição. Incremental: `COPY INTO` com `FORCE = TRUE`.",
+        "es_correcta": false,
+        "explicacion": "`FORCE = TRUE` ingere todos os arquivos a cada execução, anulando o propósito de cargas incrementais. `spark.read.parquet` com overwrite também reescreve a tabela completa a cada vez."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deve ingerir dados do **Snowflake** no Databricks com sincronização incremental e governança Unity Catalog.\n\nQual opção de ingestão o engenheiro deve selecionar?",
+    "opciones": [
+      {
+        "texto_opcion": "`COPY INTO` dos arquivos de exportação do Snowflake no S3",
+        "es_correcta": false,
+        "explicacion": "Essa abordagem requer orquestração manual de exportação do Snowflake para o S3. Acrescenta complexidade operacional e carece de governança nativa."
+      },
+      {
+        "texto_opcion": "Conector gerenciado Lakeflow Connect para Snowflake",
+        "es_correcta": true,
+        "explicacion": "Lakeflow Connect fornece um conector Snowflake gerenciado com sincronização incremental e integração Unity Catalog nativa, eliminando código de exportação/carregamento personalizado."
+      },
+      {
+        "texto_opcion": "JDBC leia Snowflake com marca d’água incremental em um notebook",
+        "es_correcta": false,
+        "explicacion": "JDBC pode se conectar ao Snowflake, mas requer lógica de marca d'água manual e não fornece integração de linhagem Unity Catalog."
+      },
+      {
+        "texto_opcion": "Auto Loader monitorando uma pasta de compartilhamento de dados do Snowflake",
+        "es_correcta": false,
+        "explicacion": "Auto Loader lê arquivos do armazenamento de objetos em nuvem. Ele não pode ser integrado diretamente a um compartilhamento de dados Snowflake."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está selecionando um método de ingestão. Os requisitos são:\n- Fonte: banco de dados relacional (MySQL)\n- Volume: pequeno (<1 milhão de linhas)\n- Frequência: ad hoc, sob demanda\n- Não é necessário pipeline contínuo\n\nQual método é mais simples para este caso de uso?",
+    "opciones": [
+      {
+        "texto_opcion": "Conector gerenciado Lakeflow Connect com gatilho sob demanda",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect foi projetado para pipelines gerenciados e recorrentes. Ele introduz mais sobrecarga de configuração do que o necessário para uma consulta ad hoc simples."
+      },
+      {
+        "texto_opcion": "`spark.read.jdbc` em um notebook, escrevendo os resultados para Delta",
+        "es_correcta": true,
+        "explicacion": "Para leituras ad-hoc pequenas e pouco frequentes de um banco de dados relacional, uma simples leitura de notebook JDBC é a abordagem mais pragmática — sem necessidade de infraestrutura de pipeline."
+      },
+      {
+        "texto_opcion": "Auto Loader com `trigger(once=True)` direcionado ao MySQL",
+        "es_correcta": false,
+        "explicacion": "Auto Loader lê arquivos do armazenamento de objetos, não de bancos de dados. Ele não pode se conectar diretamente ao MySQL."
+      },
+      {
+        "texto_opcion": "`COPY INTO` do MySQL",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` lê caminhos de armazenamento de objetos em nuvem (S3/ADLS/GCS). Não pode ler diretamente de um banco de dados MySQL."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Auto Loader pode operar em dois modos de descoberta de arquivos. Um engenheiro de dados deve escolher entre eles para um intervalo com mais de 1 milhão de arquivos existentes.\n\nQual modo é recomendado e por quê?",
+    "opciones": [
+      {
+        "texto_opcion": "Modo de listagem de diretório — verifica todos os arquivos em cada gatilho e é mais simples de configurar.",
+        "es_correcta": false,
+        "explicacion": "O modo de listagem de diretório lista todos os arquivos em cada ciclo de disparo. Com mais de 1 milhão de arquivos, isso se torna lento e caro."
+      },
+      {
+        "texto_opcion": "Modo de notificação de arquivos – usa eventos de armazenamento em nuvem e pode ser dimensionado para milhões de arquivos sem listagem completa de diretórios.",
+        "es_correcta": true,
+        "explicacion": "O modo de notificação de arquivo assina eventos de nuvem (S3 EventBridge, ADLS Event Grid) e é acionado apenas em novos eventos de arquivo, tornando-o altamente escalável para grandes buckets."
+      },
+      {
+        "texto_opcion": "Modo de listagem de diretório — é o único modo que oferece suporte à evolução do esquema.",
+        "es_correcta": false,
+        "explicacion": "Ambos os modos suportam a evolução do esquema. A diferença é o mecanismo de descoberta de arquivos, não a manipulação de esquemas."
+      },
+      {
+        "texto_opcion": "Modo de notificação de arquivo – não requer um local de checkpoint.",
+        "es_correcta": false,
+        "explicacion": "Ambos os modos Auto Loader requerem um local de checkpoint para rastrear arquivos processados e manter a semântica exatamente uma vez."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa ingerir dados de um bucket S3 (arquivos CSV) e de uma organização Salesforce na mesma tabela Delta Bronze.\n\nQual é a abordagem recomendada?",
+    "opciones": [
+      {
+        "texto_opcion": "Use Auto Loader para ambas as fontes na mesma consulta de streaming.",
+        "es_correcta": false,
+        "explicacion": "Auto Loader lê arquivos do armazenamento em nuvem. Ele não pode se conectar diretamente ao Salesforce."
+      },
+      {
+        "texto_opcion": "Use `COPY INTO` para ambas as fontes em um único comando.",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` lê apenas caminhos de armazenamento de objetos em nuvem. Não é possível ingerir do Salesforce."
+      },
+      {
+        "texto_opcion": "Use Auto Loader para arquivos CSV S3 e Lakeflow Connect para Salesforce; mesclar as saídas na tabela Bronze.",
+        "es_correcta": true,
+        "explicacion": "Cada tipo de origem tem sua ferramenta mais adequada: Auto Loader para ingestão S3 baseada em arquivo, Lakeflow Connect para SaaS (Salesforce). As saídas podem ser gravadas nas mesmas tabelas Bronze ou em tabelas separadas."
+      },
+      {
+        "texto_opcion": "Use Lakeflow Connect para ambos, pois suporta todos os tipos de fontes.",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect não oferece suporte à ingestão de arquivo S3 bruto como tipo de origem. Destina-se a SaaS estruturados e conectores de banco de dados."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados deve ingerir dados de um servidor SFTP que não seja compatível com nenhum conector Lakeflow Connect. Os arquivos chegam diariamente em formato CSV.\n\nQual é o padrão recomendado?",
+    "opciones": [
+      {
+        "texto_opcion": "Use `COPY INTO` com um prefixo de caminho SFTP",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` suporta apenas caminhos de armazenamento de objetos em nuvem (S3, ADLS, GCS). Não é possível conectar-se a servidores SFTP."
+      },
+      {
+        "texto_opcion": "Prepare os arquivos do SFTP para S3/ADLS primeiro e depois use `COPY INTO` ou Auto Loader para ingerir",
+        "es_correcta": true,
+        "explicacion": "O padrão padrão para protocolos não suportados é preparar primeiro os arquivos para o armazenamento de objetos em nuvem (usando um script de transferência personalizado ou uma ferramenta de terceiros) e, em seguida, aplicar a ingestão padrão do Databricks."
+      },
+      {
+        "texto_opcion": "Use JDBC com um driver SFTP JDBC",
+        "es_correcta": false,
+        "explicacion": "SFTP é um protocolo de transferência de arquivos, não um banco de dados SQL. Os drivers JDBC não são aplicáveis."
+      },
+      {
+        "texto_opcion": "Auto Loader com `cloudFiles.format = 'sftp'`",
+        "es_correcta": false,
+        "explicacion": "Auto Loader não suporta `sftp` como formato cloudFiles. Ele suporta apenas armazenamento de objetos em nuvem (S3/ADLS/GCS)."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados analisa este código:\n\n```píton\ndf = spark.read.format('jdbc') \\\n    .option('url', 'jdbc:postgresql://host:5432/db') \\\n    .option('dbtable', 'pedidos') \\\n    .option('usuário', 'etl_user') \\\n    .option('senha', dbutils.secrets.get('escopo', 'pg_pass')) \\\n    .option('numPartições', 8) \\\n    .carregar()\n\ndf.write.format('delta').mode('append').save('/bronze/orders')\n```\n\nQual preocupação o engenheiro deve abordar antes de promover isso para produção?",
+    "opciones": [
+      {
+        "texto_opcion": "A opção `numPartitions` é inválida para leituras JDBC.",
+        "es_correcta": false,
+        "explicacion": "`numPartitions` é uma opção de leitura JDBC válida que controla o paralelismo. É amplamente utilizado na ingestão de produção JDBC."
+      },
+      {
+        "texto_opcion": "O código não inclui `partitionColumn`, `lowerBound` ou `upperBound`, portanto, todas as 8 partições lerão a tabela completa em série.",
+        "es_correcta": true,
+        "explicacion": "Sem `partitionColumn`, `lowerBound` e `upperBound`, o Spark não pode dividir a leitura entre partições. Todos os dados são carregados por uma única conexão, tornando `numPartitions` ineficaz."
+      },
+      {
+        "texto_opcion": "Usar `dbutils.secrets` não é permitido nas opções JDBC.",
+        "es_correcta": false,
+        "explicacion": "`dbutils.secrets.get` é a forma recomendada de recuperar credenciais no Databricks. É totalmente suportado nas opções JDBC."
+      },
+      {
+        "texto_opcion": "`mode('append')` causará duplicatas nas repetições.",
+        "es_correcta": false,
+        "explicacion": "Embora o modo de acréscimo não desduplica, esta é uma opção de design. A preocupação específica aqui é a configuração do paralelismo, que afeta o desempenho, mas não a correção."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados está escolhendo um método de ingestão. A matriz de decisão mostra:\n\n| Critério | Valor |\n|--------------------|-----|\n| Fonte | Parquet em ADLS |\n| Volume | 10 milhões de linhas/dia |\n| Latência necessária.       | < 5 minutos |\n| Mudanças de esquema | Ocasional |\n| Governança | Unity Catalog |\n\nQual método de ingestão é mais adequado?",
+    "opciones": [
+      {
+        "texto_opcion": "Lakeflow Connect com conector ADLS",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect tem como alvo fontes de banco de dados/SaaS. Arquivos Raw Parquet em ADLS são uma fonte baseada em arquivo melhor tratada por Auto Loader."
+      },
+      {
+        "texto_opcion": "`COPY INTO` agendado a cada 5 minutos",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` é um comando em lote. A latência inferior a 5 minutos com alto volume e alterações ocasionais de esquema é melhor atendida por Auto Loader no modo de streaming."
+      },
+      {
+        "texto_opcion": "Auto Loader no modo de notificação de arquivo com `schemaEvolutionMode = 'addNewColumns'`, gravando na tabela Unity Catalog Delta",
+        "es_correcta": true,
+        "explicacion": "Auto Loader (notificação de arquivo) atende a todos os critérios: < latência de 5 minutos, alta escalabilidade de volume, suporte à evolução de esquema e grava diretamente em tabelas Unity Catalog."
+      },
+      {
+        "texto_opcion": "JDBC leitura de ADLS com conector Spark",
+        "es_correcta": false,
+        "explicacion": "JDBC lê bancos de dados SQL. Os arquivos ADLS Parquet são armazenamento de objetos, não uma fonte JDBC."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Um engenheiro de dados precisa aplicar mascaramento de coluna em campos PII durante a ingestão para que os consumidores downstream nunca vejam os valores brutos.\n\nEm qual camada e com qual ferramenta isso deve ser implementado?",
+    "opciones": [
+      {
+        "texto_opcion": "No comando `COPY INTO` usando uma cláusula `MASK`",
+        "es_correcta": false,
+        "explicacion": "`COPY INTO` não suporta mascaramento de coluna embutida. Ele carrega dados brutos como estão dos arquivos de origem."
+      },
+      {
+        "texto_opcion": "Nas opções Auto Loader `cloudFiles` usando `maskColumns`",
+        "es_correcta": false,
+        "explicacion": "Auto Loader não possui a opção `maskColumns` integrada. Ele ingere dados brutos; o mascaramento deve ser aplicado após a ingestão."
+      },
+      {
+        "texto_opcion": "Após a ingestão, aplicando políticas de mascaramento de coluna Unity Catalog na tabela Delta de destino",
+        "es_correcta": true,
+        "explicacion": "O recurso de mascaramento de coluna do Unity Catalog aplica funções de mascaramento a colunas confidenciais no momento da consulta, controlando o acesso para todos os consumidores downstream, independentemente do método de ingestão."
+      },
+      {
+        "texto_opcion": "No momento da configuração Lakeflow Connect usando a alternância do filtro PII",
+        "es_correcta": false,
+        "explicacion": "Lakeflow Connect não expõe uma alternância de filtro PII para mascaramento de coluna. A governança de mascaramento de dados é um recurso Unity Catalog aplicado após a ingestão."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  },
+  {
+    "pregunta": "Uma equipe de engenharia de dados deseja automatizar a ingestão para que um job do Lakeflow seja acionado sempre que novos arquivos cheguem a um bucket do S3.\n\nQue tipo de gatilho e método de ingestão eles devem usar?",
+    "opciones": [
+      {
+        "texto_opcion": "Gatilho programado a cada 1 minuto + `COPY INTO`",
+        "es_correcta": false,
+        "explicacion": "Uma programação de 1 minuto se aproxima da chegada do arquivo, mas não é orientada por eventos. O verdadeiro acionamento de chegada de arquivo requer um tipo de acionador diferente."
+      },
+      {
+        "texto_opcion": "Gatilho de chegada de arquivo no caminho S3 + tarefa de notebook `COPY INTO` ou Auto Loader",
+        "es_correcta": true,
+        "explicacion": "Lakeflow Jobs suporta um gatilho de chegada de arquivo que detecta novos arquivos em um caminho de armazenamento em nuvem e inicia o job automaticamente. Emparelhado com `COPY INTO` ou Auto Loader, isso permite a ingestão orientada a eventos."
+      },
+      {
+        "texto_opcion": "Gatilho de atualização de tabela + conector Lakeflow Connect",
+        "es_correcta": false,
+        "explicacion": "Um gatilho de atualização de tabela é acionado quando uma tabela Delta é alterada, não quando os arquivos chegam ao S3. Lakeflow Connect também não lê arquivos S3 brutos."
+      },
+      {
+        "texto_opcion": "Gatilho contínuo + tarefa de notebook JDBC",
+        "es_correcta": false,
+        "explicacion": "JDBC lê bancos de dados, não arquivos S3. Um gatilho contínuo executa o job constantemente, em vez de responder a eventos de chegada de arquivos."
+      }
+    ],
+    "tags": [
+      "2.7",
+      "Escolhendo o método de ingestão correto"
+    ]
+  }
+]
