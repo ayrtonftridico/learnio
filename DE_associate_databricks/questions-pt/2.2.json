@@ -3,24 +3,24 @@
     "pregunta": "Um engenheiro de dados configura Auto Loader para ingerir arquivos JSON do armazenamento em nuvem. Qual string de formato `spark.readStream` é necessária?",
     "opciones": [
       {
-        "texto_opcion": "`cloudFiles`",
+        "texto_opcion": "`cloudFiles`.",
         "es_correcta": true,
         "explicacion": "Auto Loader usa `format('cloudFiles')` como a string de formato em `spark.readStream`. Este é o ponto de entrada para todas as funcionalidades do Auto Loader."
       },
       {
-        "texto_opcion": "`autoLoader`",
+        "texto_opcion": "`delta`, `delta` lê tabelas Delta, não arquivos brutos da.",
+        "es_correcta": false,
+        "explicacion": "`delta` lê tabelas Delta, não arquivos brutos da nuvem. Auto Loader usa `cloudFiles` para ingerir do armazenamento de objetos em nuvem."
+      },
+      {
+        "texto_opcion": "`autoLoader`, não há string de formato `autoLoader`.",
         "es_correcta": false,
         "explicacion": "Não há string de formato `autoLoader`. O formato correto é `cloudFiles`."
       },
       {
-        "texto_opcion": "`json`",
+        "texto_opcion": "`json`, `json` lê arquivos em modo lote com `spark.read`.",
         "es_correcta": false,
         "explicacion": "`json` lê arquivos em modo lote com `spark.read`. Para ingestão de streaming Auto Loader, `cloudFiles` é necessário com `cloudFiles.format` definido como `json`."
-      },
-      {
-        "texto_opcion": "`delta`",
-        "es_correcta": false,
-        "explicacion": "`delta` lê tabelas Delta, não arquivos brutos da nuvem. Auto Loader usa `cloudFiles` para ingerir do armazenamento de objetos em nuvem."
       }
     ],
     "tags": [
@@ -32,14 +32,14 @@
     "pregunta": "Um engenheiro de dados escreve o seguinte pipeline Auto Loader:\n\n```píton\nspark.readStream.format('cloudFiles') \\\n    .option('cloudFiles.formato', 'json') \\\n    .option('cloudFiles.schemaLocation', '/schema/events') \\\n    .load('/desembarque/eventos') \\\n    .writeStream\\\n    .option('checkpointLocation', '/chk/events') \\\n    .start('/bronze/eventos')\n```\n\nQual é o propósito de `cloudFiles.schemaLocation`?",
     "opciones": [
       {
-        "texto_opcion": "Ele persiste o esquema inferido no disco para que Auto Loader possa reutilizá-lo e evoluí-lo nas reinicializações.",
-        "es_correcta": true,
-        "explicacion": "Auto Loader infere o esquema na primeira execução e o salva em `schemaLocation`. Nas execuções subsequentes, ele lê a partir daí em vez de inferir novamente, permitindo um acompanhamento consistente da evolução do esquema."
-      },
-      {
-        "texto_opcion": "Define o caminho de saída onde a tabela Bronze Delta será armazenada.",
+        "texto_opcion": "Define o caminho de saída onde a tabela Bronze Delta será armazenada",
         "es_correcta": false,
         "explicacion": "O caminho de saída é definido em `.start('/bronze/events')`. `schemaLocation` armazena apenas metadados de esquema."
+      },
+      {
+        "texto_opcion": "Ele define o caminho onde Auto Loader grava as informações de deslocamento do checkpoint",
+        "es_correcta": false,
+        "explicacion": "Os deslocamentos dos checkpoints são armazenados em `checkpointLocation`. O `schemaLocation` armazena apenas arquivos de esquema inferidos."
       },
       {
         "texto_opcion": "Ele valida os arquivos recebidos em um esquema fixo e rejeita os arquivos que não correspondem.",
@@ -47,9 +47,9 @@
         "explicacion": "A validação/aplicação do esquema é controlada por `cloudFiles.schemaEvolutionMode`, não por `schemaLocation`. A localização do esquema é para persistência, não para aplicação."
       },
       {
-        "texto_opcion": "Ele define o caminho onde Auto Loader grava as informações de deslocamento do checkpoint.",
-        "es_correcta": false,
-        "explicacion": "Os deslocamentos dos checkpoints são armazenados em `checkpointLocation`. O `schemaLocation` armazena apenas arquivos de esquema inferidos."
+        "texto_opcion": "Ele persiste o esquema inferido no disco para que Auto Loader possa reutilizá-lo e evoluí-lo nas.",
+        "es_correcta": true,
+        "explicacion": "Auto Loader infere o esquema na primeira execução e o salva em `schemaLocation`. Nas execuções subsequentes, ele lê a partir daí em vez de inferir novamente, permitindo um acompanhamento consistente da evolução do esquema."
       }
     ],
     "tags": [
@@ -61,24 +61,24 @@
     "pregunta": "Auto Loader está ingerindo arquivos JSON com `cloudFiles.schemaEvolutionMode` definido como seu valor padrão. Uma nova coluna `desconto` aparece nos arquivos recebidos que não estavam no esquema original. O que acontece?",
     "opciones": [
       {
-        "texto_opcion": "O fluxo falha no primeiro microlote que contém a nova coluna; após a reinicialização, Auto Loader evolui o esquema para incluir `discount`.",
-        "es_correcta": true,
-        "explicacion": "O modo padrão é `addNewColumns`. Auto Loader detecta a nova coluna, falha no fluxo para acionar um replanejamento e, na reinicialização, incorpora a nova coluna no esquema."
-      },
-      {
-        "texto_opcion": "A nova coluna é eliminada silenciosamente e o processamento continua sem interrupção.",
+        "texto_opcion": "A nova coluna é eliminada silenciosamente e o processamento continua sem interrupção",
         "es_correcta": false,
         "explicacion": "Esse é o comportamento de `cloudFiles.schemaEvolutionMode = 'none'`, não o padrão. Por padrão, Auto Loader adiciona novas colunas e reinicia."
       },
       {
-        "texto_opcion": "A nova coluna é capturada em uma coluna `_rescued_data` automaticamente.",
+        "texto_opcion": "O fluxo continua sem interrupção e a nova coluna é adicionada ao esquema imediatamente",
+        "es_correcta": false,
+        "explicacion": "Auto Loader não pode adicionar uma nova coluna no meio do fluxo sem replanejar. Ele deve falhar e reiniciar para incorporar a nova coluna ao esquema."
+      },
+      {
+        "texto_opcion": "A nova coluna é capturada em uma coluna `_rescued_data` automaticamente",
         "es_correcta": false,
         "explicacion": "O comportamento `_rescued_data` requer `cloudFiles.schemaEvolutionMode = 'rescue'` e configuração de `rescuedDataColumn`. Não é o padrão."
       },
       {
-        "texto_opcion": "O fluxo continua sem interrupção e a nova coluna é adicionada ao esquema imediatamente.",
-        "es_correcta": false,
-        "explicacion": "Auto Loader não pode adicionar uma nova coluna no meio do fluxo sem replanejar. Ele deve falhar e reiniciar para incorporar a nova coluna ao esquema."
+        "texto_opcion": "O fluxo falha no primeiro microlote que contém a nova coluna; após a reinicialização.",
+        "es_correcta": true,
+        "explicacion": "O modo padrão é `addNewColumns`. Auto Loader detecta a nova coluna, falha no fluxo para acionar um replanejamento e, na reinicialização, incorpora a nova coluna no esquema."
       }
     ],
     "tags": [
@@ -90,22 +90,22 @@
     "pregunta": "Qual opção Auto Loader controla como as alterações de esquema nos arquivos de origem são tratadas?",
     "opciones": [
       {
-        "texto_opcion": "`cloudFiles.schemaEvolutionMode`",
+        "texto_opcion": "`cloudFiles.schemaEvolutionMode`.",
         "es_correcta": true,
         "explicacion": "`cloudFiles.schemaEvolutionMode` controla como Auto Loader reage às mudanças de esquema: `addNewColumns` (padrão), `rescue`, `failOnNewColumns` ou `none`."
       },
       {
-        "texto_opcion": "`cloudFiles.schemaLocation`",
+        "texto_opcion": "`cloudFiles.schemaLocation`, `schemaLocation` é o caminho.",
         "es_correcta": false,
         "explicacion": "`schemaLocation` é o caminho onde o esquema é persistido, não o modo que controla como as alterações são tratadas."
       },
       {
-        "texto_opcion": "`cloudFiles.inferColumnTypes`",
+        "texto_opcion": "`cloudFiles.inferColumnTypes`, `inferColumnTypes` controla se.",
         "es_correcta": false,
         "explicacion": "`inferColumnTypes` controla se Auto Loader infere tipos precisos (por exemplo, `INT` em vez de `STRING`). Ele não controla o comportamento de evolução do esquema."
       },
       {
-        "texto_opcion": "`cloudFiles.schemaHints`",
+        "texto_opcion": "`cloudFiles.schemaHints`, `schemaHints` permite substituir.",
         "es_correcta": false,
         "explicacion": "`schemaHints` permite substituir manualmente o tipo inferido de colunas específicas. Não controla o modo de evolução."
       }
@@ -119,17 +119,17 @@
     "pregunta": "Um engenheiro de dados define `cloudFiles.schemaEvolutionMode = 'rescue'` e `rescuedDataColumn = '_rescued'`. Uma nova coluna `promo_code` chega em um arquivo JSON. O que acontece com os dados em `promo_code`?",
     "opciones": [
       {
-        "texto_opcion": "Os dados `promo_code` são capturados como JSON dentro da coluna `_rescued` sem adicioná-los ao esquema principal.",
+        "texto_opcion": "Os dados `promo_code` são capturados como JSON dentro da coluna `_rescued` sem adicioná-los ao.",
         "es_correcta": true,
         "explicacion": "No modo `rescue`, colunas desconhecidas não são adicionadas ao esquema. Em vez disso, seus dados são armazenados como JSON no `rescuedDataColumn` configurado, mantendo o esquema principal estável."
       },
       {
-        "texto_opcion": "O stream falha e reinicia com `promo_code` adicionado ao esquema principal.",
+        "texto_opcion": "O stream falha e reinicia com `promo_code` adicionado ao esquema principal",
         "es_correcta": false,
         "explicacion": "Esse é o comportamento do modo padrão `addNewColumns`. No modo `rescue` o fluxo não falha — novas colunas vão para a coluna de resgate."
       },
       {
-        "texto_opcion": "Os dados `promo_code` são descartados silenciosamente.",
+        "texto_opcion": "Os dados `promo_code` são descartados silenciosamente, os dados não são eliminados no modo `rescue`.",
         "es_correcta": false,
         "explicacion": "Os dados não são eliminados no modo `rescue`. Ele é preservado em `rescuedDataColumn` como JSON."
       },
@@ -148,24 +148,24 @@
     "pregunta": "O que a opção `rescuedDataColumn` captura em Auto Loader?",
     "opciones": [
       {
-        "texto_opcion": "Campos ausentes no esquema, campos com tipos incompatíveis e campos com nomes sem correspondência de maiúsculas e minúsculas.",
+        "texto_opcion": "Campos ausentes no esquema, campos com tipos incompatíveis e campos com nomes sem.",
         "es_correcta": true,
         "explicacion": "`rescuedDataColumn` captura todos os dados que não puderam ser analisados ​​no esquema definido: colunas desconhecidas, incompatibilidades de tipo e incompatibilidades de distinção entre maiúsculas e minúsculas em nomes de campos."
       },
       {
-        "texto_opcion": "Somente campos com incompatibilidades de tipo de dados entre origem e esquema.",
-        "es_correcta": false,
-        "explicacion": "`rescuedDataColumn` captura mais do que incompatibilidades de tipo - ele também captura colunas desconhecidas e nomes de campos com incompatibilidade de maiúsculas e minúsculas."
-      },
-      {
-        "texto_opcion": "Linhas inteiras que não foram analisadas como JSON válido.",
+        "texto_opcion": "Linhas inteiras que não foram analisadas como JSON válido, linhas completamente malformadas (JSON inválido).",
         "es_correcta": false,
         "explicacion": "Linhas completamente malformadas (JSON inválido) resultam em valores `nulos` nas colunas e não são capturadas em `rescuedDataColumn`."
       },
       {
-        "texto_opcion": "Linhas duplicadas detectadas durante a ingestão.",
+        "texto_opcion": "Linhas duplicadas detectadas durante a ingestão, `rescuedDataColumn` trata de incompatibilidades de.",
         "es_correcta": false,
         "explicacion": "`rescuedDataColumn` trata de incompatibilidades de esquema, não de desduplicação. Auto Loader não desduplica registros."
+      },
+      {
+        "texto_opcion": "Somente campos com incompatibilidades de tipo de dados entre origem e esquema",
+        "es_correcta": false,
+        "explicacion": "`rescuedDataColumn` captura mais do que incompatibilidades de tipo - ele também captura colunas desconhecidas e nomes de campos com incompatibilidade de maiúsculas e minúsculas."
       }
     ],
     "tags": [
@@ -177,14 +177,9 @@
     "pregunta": "Um engenheiro de dados usa `schemaHints` em Auto Loader da seguinte forma:\n\n```píton\n.option('cloudFiles.schemaHints', 'quantidade DOUBLE, event_ts TIMESTAMP')\n```\n\nQual é o efeito desta configuração?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader usa `DOUBLE` para `amount` e `TIMESTAMP` para `event_ts`, substituindo a inferência automática de tipo para essas colunas.",
-        "es_correcta": true,
-        "explicacion": "`schemaHints` permite que os engenheiros especifiquem manualmente os tipos de colunas onde a inferência automática produziria o tipo errado (por exemplo, inferir `STRING` em vez de `TIMESTAMP`)."
-      },
-      {
-        "texto_opcion": "Auto Loader ignora todas as outras colunas não listadas em `schemaHints`.",
+        "texto_opcion": "Auto Loader desativa a evolução do esquema para todo o fluxo, a evolução do esquema é controlada por.",
         "es_correcta": false,
-        "explicacion": "`schemaHints` substitui apenas os tipos das colunas especificadas. Todas as outras colunas ainda são inferidas normalmente."
+        "explicacion": "A evolução do esquema é controlada por `cloudFiles.schemaEvolutionMode`, não por `schemaHints`. Definir dicas não afeta o modo de evolução."
       },
       {
         "texto_opcion": "Auto Loader impõe um esquema fixo apenas com colunas `amount` e `event_ts`, rejeitando todas as outras.",
@@ -192,9 +187,14 @@
         "explicacion": "`schemaHints` não é aplicação de esquema. Ele apenas define dicas de tipo para colunas nomeadas, enquanto ainda permite que outras colunas sejam inferidas."
       },
       {
-        "texto_opcion": "Auto Loader desativa a evolução do esquema para todo o fluxo.",
+        "texto_opcion": "Auto Loader ignora todas as outras colunas não listadas em `schemaHints`",
         "es_correcta": false,
-        "explicacion": "A evolução do esquema é controlada por `cloudFiles.schemaEvolutionMode`, não por `schemaHints`. Definir dicas não afeta o modo de evolução."
+        "explicacion": "`schemaHints` substitui apenas os tipos das colunas especificadas. Todas as outras colunas ainda são inferidas normalmente."
+      },
+      {
+        "texto_opcion": "Auto Loader usa `DOUBLE` para `amount` e `TIMESTAMP` para `event_ts`.",
+        "es_correcta": true,
+        "explicacion": "`schemaHints` permite que os engenheiros especifiquem manualmente os tipos de colunas onde a inferência automática produziria o tipo errado (por exemplo, inferir `STRING` em vez de `TIMESTAMP`)."
       }
     ],
     "tags": [
@@ -206,19 +206,19 @@
     "pregunta": "Auto Loader gerencia dois esquemas separados ao ingerir em uma tabela Delta. O que eles são?",
     "opciones": [
       {
+        "texto_opcion": "O esquema inferido do primeiro arquivo e o esquema inferido do arquivo mais recente.",
+        "es_correcta": false,
+        "explicacion": "Auto Loader mantém um único esquema em evolução em `schemaLocation`, não duas versões históricas separadas."
+      },
+      {
         "texto_opcion": "O esquema armazenado em `cloudFiles.schemaLocation` e o esquema da tabela Delta de destino.",
         "es_correcta": true,
         "explicacion": "Auto Loader rastreia seu próprio esquema inferido em `schemaLocation`. A tabela Delta possui seu próprio esquema. Quando Auto Loader evolui seu esquema, a tabela Delta também deve ser atualizada separadamente — elas não evoluem juntas automaticamente."
       },
       {
-        "texto_opcion": "O esquema dos arquivos de origem e o esquema do diretório do checkpoint.",
+        "texto_opcion": "O esquema dos arquivos de origem e o esquema do diretório do checkpoint",
         "es_correcta": false,
         "explicacion": "O checkpoint armazena o progresso do deslocamento, não as informações do esquema. Os dois esquemas são o esquema Auto Loader (em `schemaLocation`) e o esquema da tabela Delta de destino."
-      },
-      {
-        "texto_opcion": "O esquema inferido do primeiro arquivo e o esquema inferido do arquivo mais recente.",
-        "es_correcta": false,
-        "explicacion": "Auto Loader mantém um único esquema em evolução em `schemaLocation`, não duas versões históricas separadas."
       },
       {
         "texto_opcion": "O esquema de leitura e o esquema de gravação definidos na consulta de streaming.",
@@ -235,24 +235,24 @@
     "pregunta": "Auto Loader evoluiu seu esquema para incluir uma nova coluna `region`. A tabela Delta de destino não possui esta coluna. O que acontece quando o fluxo tenta escrever?",
     "opciones": [
       {
-        "texto_opcion": "A gravação falha, a menos que a evolução do esquema da tabela Delta seja habilitada com `mergeSchema = true` ou a coluna seja adicionada via DDL.",
-        "es_correcta": true,
-        "explicacion": "Auto Loader e a tabela Delta evoluem de forma independente. Quando Auto Loader adiciona uma nova coluna, a tabela Delta deve ser atualizada separadamente — habilitando `mergeSchema` na gravação ou executando `ALTER TABLE ... ADD COLUMN`."
-      },
-      {
-        "texto_opcion": "A nova coluna é adicionada automaticamente à tabela Delta porque Auto Loader gerencia o esquema de destino.",
+        "texto_opcion": "O fluxo reverte para o esquema anterior onde `region` não existia, auto Loader não reverte esquemas, auto Loader não reverte esquemas.",
         "es_correcta": false,
-        "explicacion": "Auto Loader não evolui automaticamente a tabela Delta de destino. Os dois esquemas são independentes e devem ser gerenciados separadamente."
+        "explicacion": "Auto Loader não reverte esquemas. Depois que um esquema evolui em `schemaLocation`, ele permanece evoluído. A gravação falha até que a tabela Delta seja atualizada."
       },
       {
-        "texto_opcion": "Os dados da coluna `region` são eliminados e a gravação é bem-sucedida com o esquema Delta existente.",
+        "texto_opcion": "Os dados da coluna `region` são eliminados e a gravação é bem-sucedida com o esquema Delta existente",
         "es_correcta": false,
         "explicacion": "O Spark não elimina colunas silenciosamente durante a gravação. A incompatibilidade de esquema causa uma falha, a menos que `mergeSchema` esteja habilitado."
       },
       {
-        "texto_opcion": "O fluxo reverte para o esquema anterior onde `region` não existia.",
+        "texto_opcion": "A nova coluna é adicionada automaticamente à tabela Delta porque Auto Loader gerencia o esquema de destino",
         "es_correcta": false,
-        "explicacion": "Auto Loader não reverte esquemas. Depois que um esquema evolui em `schemaLocation`, ele permanece evoluído. A gravação falha até que a tabela Delta seja atualizada."
+        "explicacion": "Auto Loader não evolui automaticamente a tabela Delta de destino. Os dois esquemas são independentes e devem ser gerenciados separadamente."
+      },
+      {
+        "texto_opcion": "A gravação falha, a menos que a evolução do esquema da tabela Delta seja habilitada com `mergeSchema = true` ou a coluna.",
+        "es_correcta": true,
+        "explicacion": "Auto Loader e a tabela Delta evoluem de forma independente. Quando Auto Loader adiciona uma nova coluna, a tabela Delta deve ser atualizada separadamente — habilitando `mergeSchema` na gravação ou executando `ALTER TABLE ... ADD COLUMN`."
       }
     ],
     "tags": [
@@ -269,17 +269,17 @@
         "explicacion": "A listagem de diretórios verifica todo o diretório em cada gatilho. A notificação de arquivos usa eventos de armazenamento em nuvem (SNS, Event Grid) para detectar novos arquivos sem verificação – mais eficiente em grande escala."
       },
       {
-        "texto_opcion": "Modo em lote e modo de streaming.",
+        "texto_opcion": "Modo em lote e modo de streaming, lote e streaming descrevem.",
         "es_correcta": false,
         "explicacion": "Lote e streaming descrevem paradigmas de processamento, não mecanismos de detecção de arquivos Auto Loader. Os modos de detecção são listagem de diretórios e notificação de arquivos."
       },
       {
-        "texto_opcion": "Modo push e modo pull.",
+        "texto_opcion": "Modo push e modo pull, empurrar/puxar não é a terminologia.",
         "es_correcta": false,
         "explicacion": "Empurrar/puxar não é a terminologia usada por Auto Loader. Os dois modos são listagem de diretórios e notificação de arquivos."
       },
       {
-        "texto_opcion": "Modo polling e modo orientado a eventos.",
+        "texto_opcion": "Modo polling e modo orientado a eventos, embora conceitualmente precisa",
         "es_correcta": false,
         "explicacion": "Embora conceitualmente precisa, a terminologia oficial do Databricks é modo de listagem de diretórios e modo de notificação de arquivos."
       }
@@ -293,24 +293,24 @@
     "pregunta": "Uma equipe ingere 10 milhões de pequenos arquivos JSON por dia do S3. Eles percebem que Auto Loader é lento e gera altos custos de API S3 LIST. Que alteração de configuração eles deveriam fazer?",
     "opciones": [
       {
-        "texto_opcion": "Mude para o modo de notificação de arquivo usando `cloudFiles.useNotifications = true` para detectar novos arquivos por meio de eventos S3 em vez da listagem de diretórios.",
-        "es_correcta": true,
-        "explicacion": "O modo de notificação de arquivos assina notificações de eventos S3 (via SNS/SQS) e recebe eventos quando novos arquivos chegam, eliminando operações LIST dispendiosas em milhões de arquivos."
-      },
-      {
-        "texto_opcion": "Aumente o intervalo de disparo para reduzir a frequência com que Auto Loader verifica o diretório.",
+        "texto_opcion": "Aumente o intervalo de disparo para reduzir a frequência com que Auto Loader verifica o diretório, um intervalo de acionamento mais longo reduz a frequência",
         "es_correcta": false,
         "explicacion": "Um intervalo de acionamento mais longo reduz a frequência, mas não reduz o custo por verificação — cada chamada LIST ainda verifica todos os 10 milhões de arquivos. O modo de notificação de arquivo elimina totalmente as chamadas LIST."
       },
       {
-        "texto_opcion": "Habilite `cloudFiles.inferColumnTypes = true` para acelerar a inferência de esquema.",
-        "es_correcta": false,
-        "explicacion": "`inferColumnTypes` afeta a precisão da inferência de tipo, não o desempenho da descoberta de arquivos ou os custos da API LIST."
+        "texto_opcion": "Mude para o modo de notificação de arquivo usando `cloudFiles.useNotifications = true` para detectar novos arquivos por meio.",
+        "es_correcta": true,
+        "explicacion": "O modo de notificação de arquivos assina notificações de eventos S3 (via SNS/SQS) e recebe eventos quando novos arquivos chegam, eliminando operações LIST dispendiosas em milhões de arquivos."
       },
       {
-        "texto_opcion": "Defina `cloudFiles.schemaEvolutionMode = 'none'` para ignorar as verificações de esquema e melhorar o rendimento.",
+        "texto_opcion": "Defina `cloudFiles.schemaEvolutionMode = 'none'` para ignorar as verificações de esquema e melhorar o rendimento",
         "es_correcta": false,
         "explicacion": "O modo de evolução do esquema afeta como as alterações do esquema são tratadas, e não como os arquivos são descobertos. Não reduz os custos da API LIST."
+      },
+      {
+        "texto_opcion": "Habilite `cloudFiles.inferColumnTypes = true` para acelerar a inferência de esquema, `inferColumnTypes` afeta a precisão da inferência de tipo",
+        "es_correcta": false,
+        "explicacion": "`inferColumnTypes` afeta a precisão da inferência de tipo, não o desempenho da descoberta de arquivos ou os custos da API LIST."
       }
     ],
     "tags": [
@@ -322,24 +322,24 @@
     "pregunta": "Um engenheiro de dados fornece a seguinte configuração Auto Loader:\n\n```píton\n.option('cloudFiles.schemaEvolutionMode', 'failOnNewColumns')\n```\n\nUma nova coluna `campaign_id` aparece nos arquivos recebidos. O que acontece?",
     "opciones": [
       {
-        "texto_opcion": "O fluxo falha imediatamente com um erro indicando que uma nova coluna foi detectada.",
-        "es_correcta": true,
-        "explicacion": "O modo `failOnNewColumns` faz com que o fluxo gere um erro quando qualquer coluna não presente no esquema atual é detectada, exigindo intervenção manual antes de reiniciar."
-      },
-      {
-        "texto_opcion": "A nova coluna é adicionada ao esquema e o fluxo continua.",
-        "es_correcta": false,
-        "explicacion": "Esse é o comportamento do modo `addNewColumns`. `failOnNewColumns` impede explicitamente adições automáticas de esquema."
-      },
-      {
-        "texto_opcion": "Os dados `campaign_id` são capturados em `rescuedDataColumn`.",
+        "texto_opcion": "Os dados `campaign_id` são capturados em `rescuedDataColumn`",
         "es_correcta": false,
         "explicacion": "O comportamento de resgate requer `cloudFiles.schemaEvolutionMode = 'rescue'`. No modo `failOnNewColumns` o fluxo falha em vez de resgatar os dados."
       },
       {
-        "texto_opcion": "A nova coluna é ignorada silenciosamente e somente as colunas de esquema existentes são gravadas.",
+        "texto_opcion": "A nova coluna é ignorada silenciosamente e somente as colunas de esquema.",
         "es_correcta": false,
         "explicacion": "Ignorar silenciosamente é o comportamento do modo `none`. `failOnNewColumns` gera um erro explícito em vez de ignorar a nova coluna."
+      },
+      {
+        "texto_opcion": "O fluxo falha imediatamente com um erro indicando que uma nova coluna foi.",
+        "es_correcta": true,
+        "explicacion": "O modo `failOnNewColumns` faz com que o fluxo gere um erro quando qualquer coluna não presente no esquema atual é detectada, exigindo intervenção manual antes de reiniciar."
+      },
+      {
+        "texto_opcion": "A nova coluna é adicionada ao esquema e o fluxo continua",
+        "es_correcta": false,
+        "explicacion": "Esse é o comportamento do modo `addNewColumns`. `failOnNewColumns` impede explicitamente adições automáticas de esquema."
       }
     ],
     "tags": [
@@ -351,19 +351,19 @@
     "pregunta": "Em qual versão Databricks Runtime o suporte automático para **alargamento de tipo** foi introduzido em Auto Loader?",
     "opciones": [
       {
+        "texto_opcion": "Databricks Runtime 14,3 LTS e superior, dBR 14.3 LTS é uma versão principal do LTS",
+        "es_correcta": false,
+        "explicacion": "DBR 14.3 LTS é uma versão principal do LTS, mas a ampliação automática de tipo em Auto Loader foi introduzida no DBR 16.4."
+      },
+      {
         "texto_opcion": "Databricks Runtime 16.4 e superior.",
         "es_correcta": true,
         "explicacion": "O alargamento automático de tipo em Auto Loader (por exemplo, INT → DOUBLE) foi introduzido no DBR 16.4 e requer a configuração `cloudFiles.schemaEvolutionMode = 'addNewColumnsWithTypeWidening'`."
       },
       {
-        "texto_opcion": "Databricks Runtime 12,2 LTS e superior.",
+        "texto_opcion": "Databricks Runtime 12,2 LTS e superior, o DBR 12.2 LTS introduziu vários recursos.",
         "es_correcta": false,
         "explicacion": "O DBR 12.2 LTS introduziu vários recursos Delta Lake, mas não a ampliação automática de tipo em Auto Loader."
-      },
-      {
-        "texto_opcion": "Databricks Runtime 14,3 LTS e superior.",
-        "es_correcta": false,
-        "explicacion": "DBR 14.3 LTS é uma versão principal do LTS, mas a ampliação automática de tipo em Auto Loader foi introduzida no DBR 16.4."
       },
       {
         "texto_opcion": "Todas as versões Databricks Runtime suportam ampliação de tipo por padrão.",
@@ -380,24 +380,24 @@
     "pregunta": "Um engenheiro de dados define a seguinte opção no DBR 16.4:\n\n```píton\n.option('cloudFiles.schemaEvolutionMode', 'addNewColumnsWithTypeWidening')\n```\n\nUm arquivo recebido contém uma coluna `price` que foi anteriormente inferida como `INT`, mas agora contém `9,99`. O que acontece?",
     "opciones": [
       {
+        "texto_opcion": "O fluxo falha porque as alterações de tipo não são suportadas mesmo no modo de ampliação de tipo",
+        "es_correcta": false,
+        "explicacion": "`addNewColumnsWithTypeWidening` suporta especificamente promoções seguras de ampliação de tipo. O fluxo não falha em alterações de tipo compatíveis."
+      },
+      {
         "texto_opcion": "O esquema amplia automaticamente `price` de `INT` para `DOUBLE` sem interromper o fluxo.",
         "es_correcta": true,
         "explicacion": "`addNewColumnsWithTypeWidening` permite promoções de tipo seguro (INT → LONG, INT → DOUBLE, FLOAT → DOUBLE) automaticamente no DBR 16.4+, sem falhar no stream."
       },
       {
-        "texto_opcion": "O fluxo falha porque as alterações de tipo não são suportadas mesmo no modo de ampliação de tipo.",
-        "es_correcta": false,
-        "explicacion": "`addNewColumnsWithTypeWidening` suporta especificamente promoções seguras de ampliação de tipo. O fluxo não falha em alterações de tipo compatíveis."
-      },
-      {
-        "texto_opcion": "O valor `9.99` é truncado para `9` para caber no esquema `INT` existente.",
-        "es_correcta": false,
-        "explicacion": "Auto Loader não trunca valores. Sem alargamento, falharia ou resgataria os dados; com o alargamento ativado, promove o tipo com segurança."
-      },
-      {
         "texto_opcion": "Os dados da coluna `price` são movidos para `rescuedDataColumn` até que o esquema seja atualizado manualmente.",
         "es_correcta": false,
         "explicacion": "O comportamento de resgate se aplica a alterações de tipo incompatíveis ou colunas desconhecidas. Com `addNewColumnsWithTypeWidening`, as alterações de tipo compatíveis são tratadas automaticamente por meio da ampliação do esquema."
+      },
+      {
+        "texto_opcion": "O valor `9.99` é truncado para `9` para caber no esquema `INT` existente, auto Loader não trunca valores.",
+        "es_correcta": false,
+        "explicacion": "Auto Loader não trunca valores. Sem alargamento, falharia ou resgataria os dados; com o alargamento ativado, promove o tipo com segurança."
       }
     ],
     "tags": [
@@ -409,24 +409,24 @@
     "pregunta": "Ao usar Auto Loader, o que acontece quando uma coluna é **renomeada** nos arquivos de origem?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader trata a coluna renomeada como uma nova coluna e preenche a coluna antiga com `NULL` para novas linhas.",
-        "es_correcta": true,
-        "explicacion": "Auto Loader não consegue detectar renomeações — ele as vê como uma nova coluna aparecendo e a antiga desaparecendo. A coluna antiga permanece no esquema com `NULL` para novas linhas e a coluna renomeada é adicionada."
+        "texto_opcion": "Auto Loader mescla nomes de colunas novos e antigos em uma única coluna usando uma operação de união.",
+        "es_correcta": false,
+        "explicacion": "Não há comportamento de união/mesclagem para colunas renomeadas. Auto Loader simplesmente adiciona o novo nome como uma nova coluna e define o nome antigo como `NULL` para novos registros."
       },
       {
-        "texto_opcion": "Auto Loader detecta automaticamente a renomeação e atualiza o esquema de acordo.",
+        "texto_opcion": "Auto Loader detecta automaticamente a renomeação e atualiza o esquema de acordo",
         "es_correcta": false,
         "explicacion": "Auto Loader não possui capacidade de detecção de renomeação. Ele compara nomes de colunas e trata uma coluna renomeada como uma nova coluna desconhecida."
       },
       {
-        "texto_opcion": "O fluxo falha com um erro de incompatibilidade de esquema que requer intervenção manual.",
-        "es_correcta": false,
-        "explicacion": "Com o modo `addNewColumns` padrão, o fluxo falha e reinicia para adicionar o novo nome da coluna - mas não o reconhece como uma renomeação, ele o trata como adição + exclusão suave."
+        "texto_opcion": "Auto Loader trata a coluna renomeada como uma nova coluna e preenche a coluna antiga com `NULL` para.",
+        "es_correcta": true,
+        "explicacion": "Auto Loader não consegue detectar renomeações — ele as vê como uma nova coluna aparecendo e a antiga desaparecendo. A coluna antiga permanece no esquema com `NULL` para novas linhas e a coluna renomeada é adicionada."
       },
       {
-        "texto_opcion": "Auto Loader mescla nomes de colunas novos e antigos em uma única coluna usando uma operação de união.",
+        "texto_opcion": "O fluxo falha com um erro de incompatibilidade de esquema que requer intervenção manual",
         "es_correcta": false,
-        "explicacion": "Não há comportamento de união/mesclagem para colunas renomeadas. Auto Loader simplesmente adiciona o novo nome como uma nova coluna e define o nome antigo como `NULL` para novos registros."
+        "explicacion": "Com o modo `addNewColumns` padrão, o fluxo falha e reinicia para adicionar o novo nome da coluna - mas não o reconhece como uma renomeação, ele o trata como adição + exclusão suave."
       }
     ],
     "tags": [
@@ -438,17 +438,17 @@
     "pregunta": "O que acontece com uma coluna que é **descartada** dos arquivos de origem ao usar Auto Loader?",
     "opciones": [
       {
-        "texto_opcion": "Colunas eliminadas são tratadas como exclusões reversíveis – novas linhas têm `NULL` nessa coluna, mas a coluna permanece no esquema.",
+        "texto_opcion": "Colunas eliminadas são tratadas como exclusões reversíveis – novas linhas têm `NULL` nessa coluna.",
         "es_correcta": true,
         "explicacion": "Auto Loader não remove colunas do esquema quando elas desaparecem dos arquivos de origem. Novas linhas terão `NULL` para campos ausentes, preservando a estabilidade do esquema."
       },
       {
-        "texto_opcion": "A coluna é imediatamente removida do esquema Auto Loader e da tabela Delta de destino.",
+        "texto_opcion": "A coluna é imediatamente removida do esquema Auto Loader e da tabela Delta de destino",
         "es_correcta": false,
         "explicacion": "Auto Loader nunca remove colunas do esquema automaticamente. A remoção exigiria `ALTER TABLE DROP COLUMN` manual na tabela Delta."
       },
       {
-        "texto_opcion": "O fluxo falha porque o esquema de origem não corresponde mais ao esquema armazenado.",
+        "texto_opcion": "O fluxo falha porque o esquema de origem não corresponde mais ao esquema armazenado",
         "es_correcta": false,
         "explicacion": "Auto Loader lida com colunas ausentes normalmente escrevendo `NULL` para esses campos. Ele não falha quando os arquivos de origem param de incluir uma coluna vista anteriormente."
       },
@@ -467,7 +467,7 @@
     "pregunta": "Um engenheiro de dados configura Auto Loader com `cloudFiles.schemaEvolutionMode = 'rescue'` e `rescuedDataColumn = '_rescued'`. Um arquivo recebido possui um campo `Amount` (A maiúsculo), mas o esquema define `amount` (minúsculas). O que acontece com o campo `Valor`?",
     "opciones": [
       {
-        "texto_opcion": "O valor `Amount` é capturado em `_rescued` como JSON porque Auto Loader trata os nomes dos campos como diferenciando maiúsculas de minúsculas.",
+        "texto_opcion": "O valor `Amount` é capturado em `_rescued` como JSON porque Auto Loader trata os nomes dos campos como diferenciando.",
         "es_correcta": true,
         "explicacion": "`rescuedDataColumn` captura nomes de campos com incompatibilidade de maiúsculas e minúsculas. Como `Amount` ≠ `amount` na comparação que diferencia maiúsculas de minúsculas de Auto Loader, o valor vai para `_rescued` em vez de para a coluna `amount`."
       },
@@ -477,12 +477,12 @@
         "explicacion": "Auto Loader realiza correspondência de nomes de campos com distinção entre maiúsculas e minúsculas. `Amount` e `amount` são tratados como campos diferentes."
       },
       {
-        "texto_opcion": "O fluxo falha porque a incompatibilidade de maiúsculas e minúsculas é tratada como uma incompatibilidade de esquema.",
+        "texto_opcion": "O fluxo falha porque a incompatibilidade de maiúsculas e minúsculas é tratada como uma incompatibilidade de esquema, no modo `rescue`",
         "es_correcta": false,
         "explicacion": "No modo `rescue`, incompatibilidades de casos não causam falha no fluxo. Os dados incompatíveis são roteados para `rescuedDataColumn`."
       },
       {
-        "texto_opcion": "As colunas `amount` e `Amount` são adicionadas ao esquema.",
+        "texto_opcion": "As colunas `amount` e `Amount` são adicionadas ao esquema, no modo `rescue`, colunas novas/desconhecidas não são adicionadas ao esquema.",
         "es_correcta": false,
         "explicacion": "No modo `rescue`, colunas novas/desconhecidas não são adicionadas ao esquema. Os dados `Amount` vão para `_rescued`."
       }
@@ -496,7 +496,12 @@
     "pregunta": "Um engenheiro de dados precisa ingerir arquivos JSON onde `event_time` é consistentemente inferido como `STRING`, mas deveria ser `TIMESTAMP`. Qual opção corrige isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "`.option('cloudFiles.schemaHints', 'event_time TIMESTAMP')`",
+        "texto_opcion": "`.option('cloudFiles.inferColumnTypes', 'true')`",
+        "es_correcta": false,
+        "explicacion": "`inferColumnTypes` permite uma inferência de tipo mais precisa em toda a amostra, mas ainda pode inferir `STRING` para formatos de carimbo de data/hora ambíguos. `schemaHints` fornece controle explícito."
+      },
+      {
+        "texto_opcion": "`.option('cloudFiles.schemaHints', 'event_time TIMESTAMP')`.",
         "es_correcta": true,
         "explicacion": "`schemaHints` substitui o tipo inferido de Auto Loader para colunas específicas. Definir `event_time TIMESTAMP` força Auto Loader a usar `TIMESTAMP` em vez do `STRING` inferido."
       },
@@ -504,11 +509,6 @@
         "texto_opcion": "`.option('cloudFiles.schemaEvolutionMode', 'addNewColumnsWithTypeWidening')`",
         "es_correcta": false,
         "explicacion": "A ampliação de tipo lida com promoções automáticas de tipos numéricos (INT → DOUBLE). Ele não converte `STRING` em `TIMESTAMP` — isso requer `schemaHints`."
-      },
-      {
-        "texto_opcion": "`.option('cloudFiles.inferColumnTypes', 'true')`",
-        "es_correcta": false,
-        "explicacion": "`inferColumnTypes` permite uma inferência de tipo mais precisa em toda a amostra, mas ainda pode inferir `STRING` para formatos de carimbo de data/hora ambíguos. `schemaHints` fornece controle explícito."
       },
       {
         "texto_opcion": "`.option('cloudFiles.schemaLocation', '/schema/events')`",
@@ -525,19 +525,19 @@
     "pregunta": "Que tipo de alteração de esquema **NÃO** é tratada por Auto Loader e requer uma atualização manual do esquema antes que o fluxo possa continuar?",
     "opciones": [
       {
-        "texto_opcion": "Digite alterações que não sejam de ampliação segura, como `STRING` para `INT` ou `DOUBLE` para `STRING`.",
+        "texto_opcion": "Colunas desaparecendo dos arquivos de origem, colunas eliminadas são tratadas como.",
+        "es_correcta": false,
+        "explicacion": "Colunas eliminadas são tratadas como exclusões suaves – novas linhas recebem `NULL` para campos ausentes. Nenhuma intervenção manual é necessária."
+      },
+      {
+        "texto_opcion": "Digite alterações que não sejam de ampliação segura.",
         "es_correcta": true,
         "explicacion": "Auto Loader suporta apenas ampliação de tipo seguro (por exemplo, INT → DOUBLE em DBR 16.4+). Alterações de tipo incompatíveis, como STRING → INT, exigem a atualização manual do esquema antes de reiniciar o fluxo."
       },
       {
-        "texto_opcion": "Novas colunas aparecendo nos arquivos de origem.",
+        "texto_opcion": "Novas colunas aparecendo nos arquivos de origem, novas colunas são tratadas automaticamente.",
         "es_correcta": false,
         "explicacion": "Novas colunas são tratadas automaticamente pelo modo `addNewColumns` (padrão) — o fluxo falha e reinicia com a nova coluna adicionada."
-      },
-      {
-        "texto_opcion": "Colunas desaparecendo dos arquivos de origem.",
-        "es_correcta": false,
-        "explicacion": "Colunas eliminadas são tratadas como exclusões suaves – novas linhas recebem `NULL` para campos ausentes. Nenhuma intervenção manual é necessária."
       },
       {
         "texto_opcion": "Colunas que aparecem com nomes sem correspondência entre maiúsculas e minúsculas.",
@@ -554,24 +554,24 @@
     "pregunta": "Um engenheiro de dados usa Auto Loader com `rescuedDataColumn` configurado. Um arquivo recebido contém um campo `price` como `STRING`, mas o esquema define `price` como `INT`. O que acontece?",
     "opciones": [
       {
-        "texto_opcion": "O valor incompatível de `preço` é capturado em `rescuedDataColumn` e o fluxo continua.",
+        "texto_opcion": "O fluxo falha com um erro de incompatibilidade de tipo",
+        "es_correcta": false,
+        "explicacion": "Com `rescuedDataColumn` configurado, incompatibilidades de tipo não falham no fluxo - elas são capturadas na coluna de resgate."
+      },
+      {
+        "texto_opcion": "O valor incompatível de `preço` é capturado em `rescuedDataColumn` e o.",
         "es_correcta": true,
         "explicacion": "Quando `rescuedDataColumn` é configurado, valores incompatíveis com o tipo são armazenados lá como JSON em vez de falhar no fluxo. A coluna `price` na saída será `NULL` para essas linhas."
       },
       {
-        "texto_opcion": "O fluxo falha com um erro de incompatibilidade de tipo.",
+        "texto_opcion": "A linha inteira é eliminada da saída, as linhas não são descartadas.",
         "es_correcta": false,
-        "explicacion": "Com `rescuedDataColumn` configurado, incompatibilidades de tipo não falham no fluxo - elas são capturadas na coluna de resgate."
+        "explicacion": "As linhas não são descartadas. O campo incompatível vai para `rescuedDataColumn` e o resto da linha é escrito normalmente."
       },
       {
         "texto_opcion": "Auto Loader converte automaticamente o valor `STRING` para `INT`.",
         "es_correcta": false,
         "explicacion": "Auto Loader não realiza conversão automática de tipos incompatíveis. Valores incompatíveis vão para `rescuedDataColumn`."
-      },
-      {
-        "texto_opcion": "A linha inteira é eliminada da saída.",
-        "es_correcta": false,
-        "explicacion": "As linhas não são descartadas. O campo incompatível vai para `rescuedDataColumn` e o resto da linha é escrito normalmente."
       }
     ],
     "tags": [
@@ -583,14 +583,9 @@
     "pregunta": "Um engenheiro de dados está ingerindo arquivos Avro com Auto Loader. O esquema Avro evolui para adicionar um novo campo. Qual configuração lida corretamente com isso com Auto Loader?",
     "opciones": [
       {
-        "texto_opcion": "```píton\nspark.readStream.format('cloudFiles')\n    .option('cloudFiles.formato', 'avro')\n    .option('cloudFiles.schemaLocation', '/schema/avro')\n    .option('cloudFiles.schemaEvolutionMode', 'addNewColumns')\n    .load('/desembarque/avro')\n```",
+        "texto_opcion": "```píton\nspark.readStream.format\n    .option\n    .option\n    .option\n    .load\n```.",
         "es_correcta": true,
         "explicacion": "Auto Loader suporta Avro com `cloudFiles.format = 'avro'`. Combinado com um modo de evolução `schemaLocation` e `addNewColumns`, novos campos Avro são tratados automaticamente."
-      },
-      {
-        "texto_opcion": "```píton\nspark.readStream.format('avro')\n    .option('schemaEvolutionMode', 'addNewColumns')\n    .load('/desembarque/avro')\n```",
-        "es_correcta": false,
-        "explicacion": "`format('avro')` lê Avro em modo batch sem os recursos de evolução de esquema de Auto Loader. Auto Loader requer `format('cloudFiles')` com `cloudFiles.format = 'avro'`."
       },
       {
         "texto_opcion": "```píton\nspark.readStream.format('cloudFiles')\n    .option('cloudFiles.formato', 'avro')\n    .option('mergeSchema', 'true')\n    .load('/desembarque/avro')\n```",
@@ -601,6 +596,11 @@
         "texto_opcion": "```píton\nspark.read.format('cloudFiles')\n    .option('cloudFiles.formato', 'avro')\n    .option('cloudFiles.schemaLocation', '/schema/avro')\n    .load('/desembarque/avro')\n```",
         "es_correcta": false,
         "explicacion": "`spark.read` é o modo em lote - a evolução do esquema de streaming de Auto Loader requer `spark.readStream`."
+      },
+      {
+        "texto_opcion": "```píton\nspark.readStream.format('avro')\n    .option('schemaEvolutionMode', 'addNewColumns')\n    .load('/desembarque/avro')\n```",
+        "es_correcta": false,
+        "explicacion": "`format('avro')` lê Avro em modo batch sem os recursos de evolução de esquema de Auto Loader. Auto Loader requer `format('cloudFiles')` com `cloudFiles.format = 'avro'`."
       }
     ],
     "tags": [
@@ -612,7 +612,7 @@
     "pregunta": "Qual das opções a seguir descreve corretamente a diferença entre o modo **listagem de diretórios** e **notificação de arquivos** em Auto Loader?",
     "opciones": [
       {
-        "texto_opcion": "A listagem de diretórios verifica o diretório completo em cada gatilho; a notificação de arquivos usa eventos de armazenamento em nuvem para detectar apenas novos arquivos.",
+        "texto_opcion": "A listagem de diretórios verifica o diretório completo em cada gatilho.",
         "es_correcta": true,
         "explicacion": "A listagem de diretórios é simples, mas cara em escala (chamadas de API LIST em todos os arquivos). A notificação de arquivos configura assinaturas de eventos na nuvem (SNS, Event Grid) e recebe eventos apenas para novos arquivos, tornando-a eficiente para milhões de arquivos."
       },
@@ -627,7 +627,7 @@
         "explicacion": "Isto é invertido. A notificação de arquivos usa eventos na nuvem em tempo real; a listagem de diretórios verifica (lista) o diretório em cada gatilho."
       },
       {
-        "texto_opcion": "Ambos os modos são equivalentes em desempenho – a escolha é apenas uma questão de custo.",
+        "texto_opcion": "Ambos os modos são equivalentes em desempenho – a escolha é apenas uma questão de custo, eles não são equivalentes em desempenho.",
         "es_correcta": false,
         "explicacion": "Eles não são equivalentes em desempenho. Em milhões de arquivos, a listagem de diretórios gera uma enorme sobrecarga da API LIST; a notificação de arquivo elimina isso completamente."
       }
@@ -641,22 +641,22 @@
     "pregunta": "Um engenheiro de dados configura um esquema imutável em Auto Loader fornecendo um esquema explícito. Novos arquivos chegam com uma coluna adicional `loyalty_points`. O que acontece?",
     "opciones": [
       {
-        "texto_opcion": "Os dados `loyalty_points` são capturados em `rescuedDataColumn` se configurados, ou ignorados silenciosamente se `rescuedDataColumn` não estiver definido.",
+        "texto_opcion": "Os dados `loyalty_points` são capturados em `rescuedDataColumn` se configurados.",
         "es_correcta": true,
         "explicacion": "Quando um esquema explícito é fornecido, ele é tratado como imutável — Auto Loader não adicionará novas colunas. Campos desconhecidos vão para `rescuedDataColumn` se configurados, caso contrário, eles serão descartados."
       },
       {
-        "texto_opcion": "Auto Loader substitui o esquema explícito e adiciona `loyalty_points` para corresponder à fonte.",
+        "texto_opcion": "Auto Loader substitui o esquema explícito e adiciona `loyalty_points` para corresponder à fonte",
         "es_correcta": false,
         "explicacion": "Um esquema fornecido explicitamente é tratado como imutável. Auto Loader não o substitui para adicionar novas colunas dos arquivos de origem."
       },
       {
-        "texto_opcion": "O fluxo falha porque o esquema de origem não corresponde ao esquema definido.",
+        "texto_opcion": "O fluxo falha porque o esquema de origem não corresponde ao esquema definido",
         "es_correcta": false,
         "explicacion": "Colunas extras na origem não causam falha quando um esquema explícito é definido. Eles são tratados por `rescuedDataColumn` ou descartados silenciosamente."
       },
       {
-        "texto_opcion": "Auto Loader registra um aviso e continua, adicionando `loyalty_points` ao esquema após 3 ocorrências.",
+        "texto_opcion": "Auto Loader registra um aviso e continua, adicionando `loyalty_points` ao esquema após 3 ocorrências",
         "es_correcta": false,
         "explicacion": "Não há adição de esquema baseado em limite. Com um esquema imutável explícito, novas colunas nunca são adicionadas, independentemente da frequência com que aparecem."
       }
@@ -675,12 +675,12 @@
         "explicacion": "`mergeSchema = true` na gravação Delta permite a evolução do esquema no lado da tabela Delta. Quando Auto Loader adiciona uma nova coluna, o esquema da tabela Delta é atualizado para incluí-la automaticamente."
       },
       {
-        "texto_opcion": "Ele mescla linhas duplicadas na tabela Delta durante a gravação.",
+        "texto_opcion": "Ele mescla linhas duplicadas na tabela Delta durante a gravação, `mergeSchema` é uma opção de evolução de esquema",
         "es_correcta": false,
         "explicacion": "`mergeSchema` é uma opção de evolução de esquema, não uma opção de desduplicação. Não tem efeito em linhas duplicadas."
       },
       {
-        "texto_opcion": "Ele mescla o esquema Auto Loader `schemaLocation` com o esquema da tabela Delta em cada microlote.",
+        "texto_opcion": "Ele mescla o esquema Auto Loader `schemaLocation` com o esquema da tabela Delta em cada microlote",
         "es_correcta": false,
         "explicacion": "`mergeSchema` diz ao gravador Delta para aceitar novas colunas — ele não executa uma mesclagem explícita entre dois arquivos de esquema."
       },
@@ -699,24 +699,24 @@
     "pregunta": "Um engenheiro de dados executa um stream Auto Loader por 2 semanas sem problemas. A equipe de origem renomeia a coluna `user_id` para `userId` em todos os novos arquivos. O engenheiro não faz nada. Qual é o estado da tabela Delta após uma semana de novos arquivos?",
     "opciones": [
       {
-        "texto_opcion": "A tabela possui `user_id` (NULL para novas linhas) e `userId` (NULL para linhas antigas) como colunas separadas.",
-        "es_correcta": true,
-        "explicacion": "Auto Loader trata a renomeação como uma nova coluna (`userId`) sendo adicionada e a coluna antiga (`user_id`) sendo descartada. As linhas antigas possuem `NULL` em `userId`; novas linhas têm `NULL` em `user_id`."
-      },
-      {
         "texto_opcion": "A tabela possui apenas `userId` porque Auto Loader concluiu automaticamente a renomeação.",
         "es_correcta": false,
         "explicacion": "Auto Loader não consegue detectar renomeações. Não é possível renomear retroativamente a coluna na tabela Delta."
       },
       {
-        "texto_opcion": "O stream falhou no primeiro arquivo com `userId` e nenhum novo dado foi gravado.",
-        "es_correcta": false,
-        "explicacion": "Com o modo `addNewColumns` padrão, o stream falha e reinicia para adicionar `userId`. Ele não para permanentemente – ele é retomado após a reinicialização."
+        "texto_opcion": "A tabela possui `user_id` e `userId` como colunas separadas.",
+        "es_correcta": true,
+        "explicacion": "Auto Loader trata a renomeação como uma nova coluna (`userId`) sendo adicionada e a coluna antiga (`user_id`) sendo descartada. As linhas antigas possuem `NULL` em `userId`; novas linhas têm `NULL` em `user_id`."
       },
       {
-        "texto_opcion": "A tabela possui apenas `user_id` porque Auto Loader ignora renomeações de colunas.",
+        "texto_opcion": "A tabela possui apenas `user_id` porque Auto Loader ignora renomeações de colunas",
         "es_correcta": false,
         "explicacion": "Auto Loader não ignora o novo nome da coluna — ele adiciona `userId` como uma nova coluna. Tanto `user_id` quanto `userId` terminam no esquema."
+      },
+      {
+        "texto_opcion": "O stream falhou no primeiro arquivo com `userId` e nenhum novo dado foi gravado",
+        "es_correcta": false,
+        "explicacion": "Com o modo `addNewColumns` padrão, o stream falha e reinicia para adicionar `userId`. Ele não para permanentemente – ele é retomado após a reinicialização."
       }
     ],
     "tags": [
@@ -728,24 +728,24 @@
     "pregunta": "Qual das alternativas a seguir é a maneira correta de configurar Auto Loader para ingerir arquivos CSV com uma linha de cabeçalho e inferir tipos de coluna com precisão?",
     "opciones": [
       {
-        "texto_opcion": "```píton\nspark.readStream.format('cloudFiles')\n    .option('cloudFiles.formato', 'csv')\n    .option('cabeçalho', 'verdadeiro')\n    .option('cloudFiles.inferColumnTypes', 'true')\n    .option('cloudFiles.schemaLocation', '/schema/csv')\n    .load('/desembarque/csv')\n```",
-        "es_correcta": true,
-        "explicacion": "Auto Loader para CSV requer `cloudFiles.format = 'csv'`, `header = 'true'` para tratar a primeira linha como nomes de colunas e `cloudFiles.inferColumnTypes = 'true'` para inferência de tipo precisa além de `STRING`."
-      },
-      {
-        "texto_opcion": "```píton\nspark.readStream.format('csv')\n    .option('cabeçalho', 'verdadeiro')\n    .option('inferSchema', 'true')\n    .load('/desembarque/csv')\n```",
+        "texto_opcion": "```píton\nspark.readStream.format('csv')\n    .option\n    .option\n    .load\n```",
         "es_correcta": false,
         "explicacion": "`format('csv')` com `inferSchema` é um padrão de leitura em lote. Auto Loader requer `format('cloudFiles')` com `cloudFiles.format = 'csv'`."
       },
       {
-        "texto_opcion": "```píton\nspark.readStream.format('cloudFiles')\n    .option('cloudFiles.formato', 'csv')\n    .option('inferSchema', 'true')\n    .option('cloudFiles.schemaLocation', '/schema/csv')\n    .load('/desembarque/csv')\n```",
-        "es_correcta": false,
-        "explicacion": "A opção correta para inferência de tipo Auto Loader é `cloudFiles.inferColumnTypes`, não `inferSchema`. A última é uma opção do Spark em lote e é ignorada por Auto Loader."
+        "texto_opcion": "```píton\nspark.readStream.format\n    .option\n    .option\n    .option\n    .option\n    .load\n```.",
+        "es_correcta": true,
+        "explicacion": "Auto Loader para CSV requer `cloudFiles.format = 'csv'`, `header = 'true'` para tratar a primeira linha como nomes de colunas e `cloudFiles.inferColumnTypes = 'true'` para inferência de tipo precisa além de `STRING`."
       },
       {
-        "texto_opcion": "```píton\nspark.read.format('cloudFiles')\n    .option('cloudFiles.formato', 'csv')\n    .option('cabeçalho', 'verdadeiro')\n    .option('cloudFiles.inferColumnTypes', 'true')\n    .load('/desembarque/csv')\n```",
+        "texto_opcion": "```píton\nspark.read.format('cloudFiles')\n    .option('cloudFiles.formato', 'csv')\n    .option('cabeçalho'",
         "es_correcta": false,
         "explicacion": "`spark.read` é o modo em lote. A evolução do esquema Auto Loader e o rastreamento incremental de arquivos requerem `spark.readStream`."
+      },
+      {
+        "texto_opcion": "```píton\nspark.readStream.format\n    .option\n    .option\n    .option\n    .load\n```",
+        "es_correcta": false,
+        "explicacion": "A opção correta para inferência de tipo Auto Loader é `cloudFiles.inferColumnTypes`, não `inferSchema`. A última é uma opção do Spark em lote e é ignorada por Auto Loader."
       }
     ],
     "tags": [
@@ -757,7 +757,7 @@
     "pregunta": "Qual é a principal diferença entre como **streaming tables** e **Spark Structured Streaming** lidam com alterações de esquema de Auto Loader?",
     "opciones": [
       {
-        "texto_opcion": "Streaming tables reiniciam automaticamente nas alterações de esquema; O streaming estruturado falha e requer uma reinicialização manual do usuário.",
+        "texto_opcion": "Streaming tables reiniciam automaticamente nas alterações de esquema; O streaming estruturado falha e requer uma.",
         "es_correcta": true,
         "explicacion": "Em Lakeflow Spark Declarative Pipelines, streaming tables lidam com a evolução do esquema automaticamente, incluindo reinicializações. Com o streaming estruturado bruto, o usuário deve reiniciar manualmente a consulta após uma alteração de esquema."
       },
@@ -772,7 +772,7 @@
         "explicacion": "A atualização completa é necessária apenas para determinadas alterações, como incompatibilidades de tipo. As adições de novas colunas são tratadas sem atualização completa em ambas, embora o mecanismo de reinicialização seja diferente."
       },
       {
-        "texto_opcion": "Não há diferença — ambos usam o mesmo mecanismo de checkpoint subjacente para alterações de esquema.",
+        "texto_opcion": "Não há diferença — ambos usam o mesmo mecanismo de checkpoint subjacente para alterações de esquema",
         "es_correcta": false,
         "explicacion": "Embora ambos usem checkpoints para rastreamento de deslocamento, o tratamento de alterações de esquema é diferente: reinicialização automática de streaming tables, streaming estruturado requer reinicialização manual."
       }
@@ -786,24 +786,24 @@
     "pregunta": "Um engenheiro de dados precisa de Auto Loader para ingerir arquivos de um caminho onde novos arquivos chegam continuamente, mas também precisa da capacidade de **reprocessar arquivos específicos** de 3 meses atrás devido a um bug. Qual afirmação está correta?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader não pode reprocessar arquivos já processados por padrão; COPY INTO com caminhos de arquivo específicos deve ser usado para reprocessamento direcionado junto com o fluxo Auto Loader.",
-        "es_correcta": true,
-        "explicacion": "O checkpoint Auto Loader impede a releitura de arquivos já processados. Para o reprocessamento direcionado de arquivos históricos específicos, COPY INTO com caminhos explícitos é a abordagem complementar recomendada."
+        "texto_opcion": "Use `.option('cloudFiles.maxFilesPerTrigger', '1')` para desacelerar o processamento e incluir arquivos mais antigos.",
+        "es_correcta": false,
+        "explicacion": "`maxFilesPerTrigger` limita quantos novos arquivos são processados por microlote. Isso não faz com que Auto Loader reprocesse arquivos já ingeridos."
       },
       {
-        "texto_opcion": "Exclua o diretório do checkpoint e reinicie Auto Loader — ele reprocessará todos os arquivos desde o início.",
+        "texto_opcion": "Exclua o diretório do checkpoint e reinicie Auto Loader — ele reprocessará todos os arquivos desde o início",
         "es_correcta": false,
         "explicacion": "A exclusão do checkpoint reprocessa TODOS os arquivos, não apenas os específicos de 3 meses atrás. Este não é um reprocessamento direcionado e pode causar duplicatas."
       },
       {
-        "texto_opcion": "Defina `cloudFiles.schemaEvolutionMode = 'rescue'` para permitir o reprocessamento de arquivos históricos.",
-        "es_correcta": false,
-        "explicacion": "`schemaEvolutionMode` controla o comportamento de mudança de esquema, não o reprocessamento de arquivos. Não tem efeito sobre quais arquivos Auto Loader são lidos."
+        "texto_opcion": "Auto Loader não pode reprocessar arquivos já processados por padrão; COPY INTO com caminhos de arquivo específicos deve ser.",
+        "es_correcta": true,
+        "explicacion": "O checkpoint Auto Loader impede a releitura de arquivos já processados. Para o reprocessamento direcionado de arquivos históricos específicos, COPY INTO com caminhos explícitos é a abordagem complementar recomendada."
       },
       {
-        "texto_opcion": "Use `.option('cloudFiles.maxFilesPerTrigger', '1')` para desacelerar o processamento e incluir arquivos mais antigos.",
+        "texto_opcion": "Defina `cloudFiles.schemaEvolutionMode = 'rescue'` para permitir o reprocessamento de arquivos históricos",
         "es_correcta": false,
-        "explicacion": "`maxFilesPerTrigger` limita quantos novos arquivos são processados por microlote. Isso não faz com que Auto Loader reprocesse arquivos já ingeridos."
+        "explicacion": "`schemaEvolutionMode` controla o comportamento de mudança de esquema, não o reprocessamento de arquivos. Não tem efeito sobre quais arquivos Auto Loader são lidos."
       }
     ],
     "tags": [
@@ -815,22 +815,22 @@
     "pregunta": "Um engenheiro de dados configura Auto Loader sem fornecer um esquema explícito e sem definir `cloudFiles.schemaLocation`. Qual é a consequência?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader reinfere o esquema do zero a cada reinicialização, o que pode causar inconsistências se os arquivos de origem forem alterados.",
-        "es_correcta": true,
-        "explicacion": "Sem `schemaLocation`, Auto Loader não pode persistir o esquema inferido. Em cada reinicialização, ele faz uma nova amostragem dos arquivos para inferir o esquema, o que pode produzir um esquema diferente se novos arquivos chegarem."
-      },
-      {
-        "texto_opcion": "O fluxo falha imediatamente porque `cloudFiles.schemaLocation` é uma opção obrigatória.",
+        "texto_opcion": "O fluxo falha imediatamente porque `cloudFiles.schemaLocation` é uma opção obrigatória",
         "es_correcta": false,
         "explicacion": "`cloudFiles.schemaLocation` é fortemente recomendado, mas não estritamente obrigatório. Sem ele, Auto Loader infere o esquema todas as vezes, mas não falha na inicialização."
       },
       {
-        "texto_opcion": "Auto Loader lê o esquema da tabela Delta de destino automaticamente.",
+        "texto_opcion": "Auto Loader lê o esquema da tabela Delta de destino automaticamente, auto Loader não lê o esquema da tabela de destino.",
         "es_correcta": false,
         "explicacion": "Auto Loader não lê o esquema da tabela de destino. A inferência de esquema é baseada na amostragem de arquivos de origem, não no destino."
       },
       {
-        "texto_opcion": "Todas as colunas são inferidas como do tipo `STRING`, independentemente dos dados reais.",
+        "texto_opcion": "Auto Loader reinfere o esquema do zero a cada reinicialização.",
+        "es_correcta": true,
+        "explicacion": "Sem `schemaLocation`, Auto Loader não pode persistir o esquema inferido. Em cada reinicialização, ele faz uma nova amostragem dos arquivos para inferir o esquema, o que pode produzir um esquema diferente se novos arquivos chegarem."
+      },
+      {
+        "texto_opcion": "Todas as colunas são inferidas como do tipo `STRING`, independentemente dos dados reais",
         "es_correcta": false,
         "explicacion": "Inferir todas as colunas como `STRING` é o comportamento quando `cloudFiles.inferColumnTypes` é `false` (padrão para alguns formatos). Não é causado pela ausência de `schemaLocation`."
       }
@@ -844,22 +844,22 @@
     "pregunta": "Qual das seguintes afirmações sobre `cloudFiles.inferColumnTypes` está correta?",
     "opciones": [
       {
-        "texto_opcion": "Quando definido como `true`, Auto Loader faz amostras de arquivos de origem para inferir tipos precisos como `INT`, `DOUBLE` e `TIMESTAMP` em vez de usar como padrão `STRING`.",
+        "texto_opcion": "Quando definido como `true`, Auto Loader faz amostras de arquivos de origem para inferir tipos precisos como `INT`.",
         "es_correcta": true,
         "explicacion": "Por padrão, Auto Loader infere a maioria das colunas JSON/CSV como `STRING` por segurança. Definir `cloudFiles.inferColumnTypes = true` permite inferência de tipo baseada em amostragem para tipos mais precisos."
       },
       {
-        "texto_opcion": "Quando definido como `true`, Auto Loader lê todos os arquivos no diretório para determinar os tipos de colunas.",
+        "texto_opcion": "Quando definido como `true`, Auto Loader lê todos os arquivos no diretório para determinar os tipos de colunas",
         "es_correcta": false,
         "explicacion": "Auto Loader amostra um subconjunto de arquivos para inferência de tipo, não todos os arquivos. Ler todos os arquivos seria proibitivamente caro em grande escala."
       },
       {
-        "texto_opcion": "É equivalente a `schemaHints` — ambos substituem tipos inferidos para colunas específicas.",
+        "texto_opcion": "É equivalente a `schemaHints` — ambos substituem tipos inferidos para colunas específicas",
         "es_correcta": false,
         "explicacion": "`inferColumnTypes` permite inferência baseada em amostragem globalmente. `schemaHints` substitui manualmente os tipos de colunas nomeadas. Eles servem a propósitos diferentes."
       },
       {
-        "texto_opcion": "Defini-lo como `true` desativa a evolução do esquema porque o esquema fica fixo após a inferência.",
+        "texto_opcion": "Defini-lo como `true` desativa a evolução do esquema porque o esquema fica fixo após a inferência",
         "es_correcta": false,
         "explicacion": "`inferColumnTypes` afeta apenas como os tipos são inferidos inicialmente. A evolução do esquema ainda é controlada de forma independente por `cloudFiles.schemaEvolutionMode`."
       }
@@ -873,24 +873,24 @@
     "pregunta": "Um engenheiro de dados executa o seguinte fluxo Auto Loader:\n\n```píton\nspark.readStream.format('cloudFiles') \\\n    .option('cloudFiles.formato', 'json') \\\n    .option('cloudFiles.schemaLocation', '/esquema/pedidos') \\\n    .option('cloudFiles.schemaEvolutionMode', 'addNewColumns') \\\n    .load('/desembarque/pedidos') \\\n    .writeStream\\\n    .option('checkpointLocation', '/chk/pedidos') \\\n    .formato('delta') \\\n    .start('/bronze/pedidos')\n```\n\nApós 10 dias, o engenheiro exclui o diretório `schemaLocation`, mas mantém o checkpoint. O que acontece na reinicialização?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader reinfere o esquema amostrando arquivos e grava um novo esquema em `schemaLocation`, mas o checkpoint ainda impede o reprocessamento de arquivos já ingeridos.",
+        "texto_opcion": "O fluxo falha permanentemente porque o local do esquema e o checkpoint sempre devem existir juntos, eles são independentes.",
+        "es_correcta": false,
+        "explicacion": "Eles são independentes. Auto Loader pode reconstruir a localização do esquema a partir da amostragem do arquivo. O stream será reiniciado com sucesso."
+      },
+      {
+        "texto_opcion": "Auto Loader reinfere o esquema amostrando arquivos e grava um novo esquema em `schemaLocation`.",
         "es_correcta": true,
         "explicacion": "O checkpoint e a localização do esquema são independentes. A exclusão de `schemaLocation` força a reinferência do esquema, mas os deslocamentos do checkpoint estão intactos, portanto os arquivos já processados ​​não são reprocessados."
       },
       {
-        "texto_opcion": "O fluxo falha permanentemente porque o local do esquema e o checkpoint sempre devem existir juntos.",
+        "texto_opcion": "O fluxo continua usando o último esquema conhecido armazenado em cache na memória do driver",
         "es_correcta": false,
-        "explicacion": "Eles são independentes. Auto Loader pode reconstruir a localização do esquema a partir da amostragem do arquivo. O stream será reiniciado com sucesso."
+        "explicacion": "A memória do driver não é persistente nas reinicializações. Sem `schemaLocation`, Auto Loader deve inferir novamente o esquema dos arquivos de origem."
       },
       {
         "texto_opcion": "Todos os arquivos são reprocessados desde o início porque a exclusão de `schemaLocation` redefine o estado do stream.",
         "es_correcta": false,
         "explicacion": "O progresso do fluxo é rastreado pelo checkpoint, não pelo `schemaLocation`. Excluir apenas `schemaLocation` não redefine os deslocamentos do arquivo."
-      },
-      {
-        "texto_opcion": "O fluxo continua usando o último esquema conhecido armazenado em cache na memória do driver.",
-        "es_correcta": false,
-        "explicacion": "A memória do driver não é persistente nas reinicializações. Sem `schemaLocation`, Auto Loader deve inferir novamente o esquema dos arquivos de origem."
       }
     ],
     "tags": [
@@ -902,7 +902,7 @@
     "pregunta": "Um engenheiro de dados precisa impor um esquema estrito nos arquivos JSON recebidos e garantir que quaisquer dados que não correspondam ao esquema sejam capturados para revisão, em vez de causar falhas. Qual combinação de opções consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "`cloudFiles.schemaEvolutionMode = 'rescue'` e `rescuedDataColumn = '_rescued_data'`",
+        "texto_opcion": "`cloudFiles.schemaEvolutionMode = 'rescue'` e `rescuedDataColumn = '_rescued_data'`.",
         "es_correcta": true,
         "explicacion": "O modo `rescue` mantém o esquema fixo e roteia quaisquer dados não conformes (novas colunas, incompatibilidades de tipo, incompatibilidades de maiúsculas e minúsculas) para `_rescued_data` como JSON, permitindo revisão sem falhas de fluxo."
       },
@@ -931,22 +931,22 @@
     "pregunta": "Qual dos seguintes modos de evolução de esquema Auto Loader deixa o esquema **completamente inalterado** e descarta silenciosamente dados de colunas desconhecidas?",
     "opciones": [
       {
-        "texto_opcion": "`nenhum`",
+        "texto_opcion": "`nenhum`.",
         "es_correcta": true,
         "explicacion": "No modo `none`, o esquema é tratado como imutável. Colunas desconhecidas de arquivos de origem são descartadas silenciosamente — sem falha, sem resgate, sem atualização de esquema."
       },
       {
-        "texto_opcion": "`resgate`",
+        "texto_opcion": "`resgate`, no modo `rescue`, colunas desconhecidas não são.",
         "es_correcta": false,
         "explicacion": "No modo `rescue`, colunas desconhecidas não são eliminadas — seus dados são capturados em `rescuedDataColumn`. O esquema permanece estável, mas os dados são preservados."
       },
       {
-        "texto_opcion": "`failOnNewColumns`",
+        "texto_opcion": "`failOnNewColumns`, `failOnNewColumns` interrompe o fluxo com.",
         "es_correcta": false,
         "explicacion": "`failOnNewColumns` interrompe o fluxo com um erro quando colunas desconhecidas aparecem. Ele não descarta dados silenciosamente."
       },
       {
-        "texto_opcion": "`adicionarNovasColunas`",
+        "texto_opcion": "`adicionarNovasColunas`, `addNewColumns` é o modo padrão —.",
         "es_correcta": false,
         "explicacion": "`addNewColumns` é o modo padrão — ele evolui o esquema para incluir novas colunas. Não os descarta nem os ignora."
       }
@@ -960,22 +960,22 @@
     "pregunta": "Um engenheiro de dados está configurando Auto Loader pela primeira vez em um diretório com 500.000 arquivos existentes. Qual modo de detecção de arquivos o Databricks recomenda para esta escala e por quê?",
     "opciones": [
       {
-        "texto_opcion": "Modo de notificação de arquivos – usa eventos de armazenamento em nuvem para detectar novos arquivos sem listar todos os 500.000 arquivos existentes em cada gatilho.",
+        "texto_opcion": "Modo de notificação de arquivos – usa eventos de armazenamento em nuvem para detectar novos arquivos sem listar todos os.",
         "es_correcta": true,
         "explicacion": "Com mais de 500.000 arquivos, a listagem de diretórios gera chamadas caras da API LIST em cada gatilho. O modo de notificação de arquivos assina eventos na nuvem e processa apenas notificações de novos arquivos, reduzindo drasticamente os custos e a latência da API da nuvem."
       },
       {
-        "texto_opcion": "Modo de listagem de diretórios — é mais confiável porque sempre tem uma visão completa de todos os arquivos.",
+        "texto_opcion": "Modo de listagem de diretórios — é mais confiável porque sempre tem uma visão completa de todos os arquivos",
         "es_correcta": false,
         "explicacion": "A listagem de diretórios é confiável, mas não recomendada nesta escala devido aos altos custos da API LIST e ao desempenho lento ao verificar centenas de milhares de arquivos."
       },
       {
-        "texto_opcion": "Qualquer um dos modos equivale a 500.000 arquivos – escolha com base na preferência.",
+        "texto_opcion": "Qualquer um dos modos equivale a 500.000 arquivos – escolha com base na preferência, em grande escala, em grande escala",
         "es_correcta": false,
         "explicacion": "Em grande escala, o modo de notificação de arquivos supera significativamente a listagem de diretórios. Eles não são equivalentes em desempenho ou custo."
       },
       {
-        "texto_opcion": "COPY INTO deve ser usado em vez de Auto Loader nesta contagem de arquivos.",
+        "texto_opcion": "COPY INTO deve ser usado em vez de Auto Loader nesta contagem de arquivos, cOPY INTO é recomendado para milhares de arquivos.",
         "es_correcta": false,
         "explicacion": "COPY INTO é recomendado para milhares de arquivos. Com 500.000 arquivos, Auto Loader é a ferramenta apropriada — especificamente com modo de notificação de arquivo."
       }
@@ -989,12 +989,12 @@
     "pregunta": "Um engenheiro de dados deseja usar `from_json` dentro de um pipeline declarativo Lakeflow Spark e fazer com que ele se comporte como Auto Loader com evolução de esquema. Qual configuração permite isso?",
     "opciones": [
       {
-        "texto_opcion": "Passe `schema=None` e defina `schemaLocationKey` (e opcionalmente `schemaEvolutionMode`) como opções diretamente dentro da chamada `from_json`.",
+        "texto_opcion": "Passe `schema=None` e defina `schemaLocationKey` como opções diretamente dentro da chamada `from_json`.",
         "es_correcta": true,
         "explicacion": "Nos pipelines declarativos do Lakeflow Spark, passar `schema=None` mais um `schemaLocationKey` exclusivo diretamente na chamada `from_json` permite a inferência automática de esquema. A adição de `schemaEvolutionMode` controla como as novas colunas são tratadas, espelhando o comportamento Auto Loader."
       },
       {
-        "texto_opcion": "`from_json` suporta nativamente a evolução do esquema sem qualquer configuração adicional.",
+        "texto_opcion": "`from_json` suporta nativamente a evolução do esquema sem qualquer configuração adicional",
         "es_correcta": false,
         "explicacion": "`from_json` não oferece suporte à evolução do esquema por padrão - requer um esquema explícito e falha quando o esquema muda. A combinação `schema=None` + `schemaLocationKey` está disponível apenas dentro dos pipelines declarativos do Lakeflow Spark."
       },
@@ -1004,7 +1004,7 @@
         "explicacion": "Estas são propriedades reais da tabela DLT, mas controlam o comportamento da tabela Delta (mapeamento de colunas), não a evolução do esquema `from_json`. As opções corretas são passadas como um terceiro argumento dentro do próprio `from_json`, não como `table_properties`."
       },
       {
-        "texto_opcion": "`from_json` usa automaticamente o checkpoint Auto Loader para rastreamento de esquema quando dentro de um pipeline.",
+        "texto_opcion": "`from_json` usa automaticamente o checkpoint Auto Loader para rastreamento de esquema quando dentro de um pipeline, `from_json` é uma função de análise",
         "es_correcta": false,
         "explicacion": "`from_json` é uma função de análise, não um conector de origem. Ele não usa checkpoints ou mecanismo de rastreamento de esquema Auto Loader por si só. O rastreamento do esquema é tratado internamente pelo pipeline por meio de `schemaLocationKey`."
       }

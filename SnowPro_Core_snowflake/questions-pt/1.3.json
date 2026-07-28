@@ -3,22 +3,22 @@
     "pregunta": "Uma plataforma de viagens (painéis quase em tempo real, região sudeste) deve: descrever como o Snowflake armazena fisicamente as linhas da tabela no disco. Qual opção se adapta melhor?",
     "opciones": [
       {
-        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB) dentro de cada partição",
-        "es_correcta": true,
-        "explicacion": "Micro-partitions são as unidades de armazenamento e poda do Snowflake."
-      },
-      {
-        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação",
+        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação, snowflake usa micro-partitions compactado, não arquivos de linha.",
         "es_correcta": false,
         "explicacion": "Snowflake usa micro-partitions compactado, não arquivos de linha."
       },
       {
-        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico",
+        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico, as tabelas relacionais usam micro-partitions, não um blob JSON.",
         "es_correcta": false,
         "explicacion": "As tabelas relacionais usam micro-partitions, não um blob JSON."
       },
       {
-        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente",
+        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB).",
+        "es_correcta": true,
+        "explicacion": "Micro-partitions são as unidades de armazenamento e poda do Snowflake."
+      },
+      {
+        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente, o armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente.",
         "es_correcta": false,
         "explicacion": "O armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente."
       }
@@ -32,6 +32,16 @@
     "pregunta": "Revisão de incidente (eastus): filtre FACT_EVENTS WHERE event_date = '2026-07-01' em uma grande tabela de fatos. Selecione o design mais apropriado.",
     "opciones": [
       {
+        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições.",
+        "es_correcta": true,
+        "explicacion": "A remoção de partições evita a varredura de partições fora do intervalo de predicados."
+      },
+      {
+        "texto_opcion": "Os usuários devem listar manualmente os arquivos a serem removidos",
+        "es_correcta": false,
+        "explicacion": "Optimizer remove automaticamente usando metadados."
+      },
+      {
         "texto_opcion": "A verificação completa da tabela é sempre necessária, independentemente dos filtros",
         "es_correcta": false,
         "explicacion": "A remoção reduz as partições verificadas quando os metadados permitem."
@@ -40,16 +50,6 @@
         "texto_opcion": "A poda requer um clustering key em cada tabela por padrão",
         "es_correcta": false,
         "explicacion": "A remoção usa metadados micro-partition; clustering melhora a organização."
-      },
-      {
-        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições irrelevantes",
-        "es_correcta": true,
-        "explicacion": "A remoção de partições evita a varredura de partições fora do intervalo de predicados."
-      },
-      {
-        "texto_opcion": "Os usuários devem listar manualmente os arquivos a serem removidos",
-        "es_correcta": false,
-        "explicacion": "Optimizer remove automaticamente usando metadados."
       }
     ],
     "tags": [
@@ -71,7 +71,7 @@
         "explicacion": "As tabelas externas se comportam de maneira diferente; clustering é para tabelas nativas."
       },
       {
-        "texto_opcion": "Defina CLUSTER BY (customer_id, event_time) ou permita cluster automático quando houver suporte",
+        "texto_opcion": "Defina CLUSTER BY ou permita cluster automático quando houver suporte.",
         "es_correcta": true,
         "explicacion": "O cluster coloca linhas relacionadas para melhorar a eliminação de partições ao longo do tempo."
       },
@@ -90,24 +90,24 @@
     "pregunta": "os dados carregados classificados pela data do arquivo de carregamento mostram uma boa remoção em load_date sem chave explícita. Contexto: seguradora, janelas de lote por hora.",
     "opciones": [
       {
-        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos filtros de consulta",
-        "es_correcta": true,
-        "explicacion": "A ordem de inserção pode gerar limites de partição benéficos antes do clustering explícito."
-      },
-      {
-        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística",
+        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER, o clustering está relacionado ao layout dos dados",
         "es_correcta": false,
-        "explicacion": "Estatísticas/metadados ainda são importantes para otimização."
+        "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
       },
       {
-        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta",
+        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta, a ordem aleatória geralmente prejudica a poda.",
         "es_correcta": false,
         "explicacion": "A ordem aleatória geralmente prejudica a poda."
       },
       {
-        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER",
+        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística, estatísticas/metadados ainda são importantes para otimização.",
         "es_correcta": false,
-        "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
+        "explicacion": "Estatísticas/metadados ainda são importantes para otimização."
+      },
+      {
+        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos.",
+        "es_correcta": true,
+        "explicacion": "A ordem de inserção pode gerar limites de partição benéficos antes do clustering explícito."
       }
     ],
     "tags": [
@@ -119,14 +119,14 @@
     "pregunta": "Cenário de concessionária de energia — pesquisas de pontos de alta cardinalidade em colunas UUID com remoção de partição deficiente. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para consultas pontuais seletivas",
-        "es_correcta": true,
-        "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
-      },
-      {
-        "texto_opcion": "Use apenas estágio externo CSV",
+        "texto_opcion": "Use apenas estágio externo CSV, o tipo de estágio não substitui a.",
         "es_correcta": false,
         "explicacion": "O tipo de estágio não substitui a otimização de pesquisa para pesquisas de pontos."
+      },
+      {
+        "texto_opcion": "Desative micro-partitions para tabelas UUID, não suportado/desejado.",
+        "es_correcta": false,
+        "explicacion": "Não suportado/desejado."
       },
       {
         "texto_opcion": "Force CLUSTER BY somente no UUID sempre sem análise de compensação",
@@ -134,9 +134,9 @@
         "explicacion": "Chaves aleatórias de alta cardinalidade podem não agrupar bem; SOS pode se encaixar melhor."
       },
       {
-        "texto_opcion": "Desative micro-partitions para tabelas UUID",
-        "es_correcta": false,
-        "explicacion": "Não suportado/desejado."
+        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para.",
+        "es_correcta": true,
+        "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
       }
     ],
     "tags": [
@@ -148,7 +148,7 @@
     "pregunta": "Uma transportadora logística (consultas interativas em subsegundos, região eastus) deve: a consulta analítica seleciona 3 de 200 colunas de uma ampla tabela de fatos. Qual opção se adapta melhor?",
     "opciones": [
       {
-        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias",
+        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias.",
         "es_correcta": true,
         "explicacion": "A remoção de colunas reduz o IO nas partições."
       },
@@ -163,7 +163,7 @@
         "explicacion": "O armazenamento colunar oferece suporte à remoção de colunas."
       },
       {
-        "texto_opcion": "Armazene cada coluna em uma conta separada",
+        "texto_opcion": "Armazene cada coluna em uma conta separada, não é design de floco de neve.",
         "es_correcta": false,
         "explicacion": "Não é design de floco de neve."
       }
@@ -177,7 +177,7 @@
     "pregunta": "Revisão de incidentes (Europa Ocidental): muitas pequenas inserções criam numerosos micro-partitions minúsculos que prejudicam o desempenho. Selecione o design mais apropriado.",
     "opciones": [
       {
-        "texto_opcion": "Elimine metadados de cluster para consolidar partições instantaneamente",
+        "texto_opcion": "Elimine metadados de cluster para consolidar partições instantaneamente, não mescla partições físicas de maneira significativa.",
         "es_correcta": false,
         "explicacion": "Não mescla partições físicas de maneira significativa."
       },
@@ -187,12 +187,12 @@
         "explicacion": "Inserções linha por linha criam sobrecarga e pequenas partições."
       },
       {
-        "texto_opcion": "Carregamentos em lote e tamanhos de arquivo apropriados; considere estratégias de reagrupamento ou recarga",
+        "texto_opcion": "Carregamentos em lote e tamanhos de arquivo apropriados.",
         "es_correcta": true,
         "explicacion": "Muitas inserções pequenas podem criar um layout de partição abaixo do ideal."
       },
       {
-        "texto_opcion": "Desative a compactação para mesclar partições",
+        "texto_opcion": "Desative a compactação para mesclar partições, a configuração de compactação não mescla partições.",
         "es_correcta": false,
         "explicacion": "A configuração de compactação não mescla partições."
       }
@@ -206,24 +206,24 @@
     "pregunta": "Cenário da seguradora – mantenha o cluster sem operações RECLUSTER manuais. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Use clustering automático (serviço de recclustering) em tabelas clusterizadas quando habilitado",
+        "texto_opcion": "Use clustering automático em tabelas clusterizadas quando habilitado.",
         "es_correcta": true,
         "explicacion": "Snowflake pode reorganizar automaticamente micro-partitions para clustering keys."
+      },
+      {
+        "texto_opcion": "Execute VACUUM FULL como PostgreSQL todas as noites, snowflake usa reclustering/clustering automático, não PG VACUUM.",
+        "es_correcta": false,
+        "explicacion": "Snowflake usa reclustering/clustering automático, não PG VACUUM."
+      },
+      {
+        "texto_opcion": "Recrie a conta diariamente para desfragmentar selected to meet the stated constraints.",
+        "es_correcta": false,
+        "explicacion": "Extremo e incorreto."
       },
       {
         "texto_opcion": "O clustering automático é sempre executado em todas as tabelas externas por padrão",
         "es_correcta": false,
         "explicacion": "O clustering automático se aplica a tabelas clusterizadas nativas por configuração."
-      },
-      {
-        "texto_opcion": "Execute VACUUM FULL como PostgreSQL todas as noites",
-        "es_correcta": false,
-        "explicacion": "Snowflake usa reclustering/clustering automático, não PG VACUUM."
-      },
-      {
-        "texto_opcion": "Recrie a conta diariamente para desfragmentar",
-        "es_correcta": false,
-        "explicacion": "Extremo e incorreto."
       }
     ],
     "tags": [
@@ -235,24 +235,24 @@
     "pregunta": "UPDATE modifica muitas linhas nas partições de uma tabela grande. Contexto: prestador de cuidados de saúde, aproximadamente 200 milhões de linhas/dia.",
     "opciones": [
       {
-        "texto_opcion": "Floco de neve cria novo micro-partitions; partições inalteradas podem ser compartilhadas via copy-on-write",
-        "es_correcta": true,
-        "explicacion": "DML reescreve partições afetadas; partições inalteradas podem permanecer compartilhadas."
-      },
-      {
-        "texto_opcion": "UPDATE sempre duplica todo o armazenamento da tabela imediatamente",
+        "texto_opcion": "UPDATE sempre duplica todo o armazenamento da tabela imediatamente, somente as partições afetadas são reescritas.",
         "es_correcta": false,
         "explicacion": "Somente as partições afetadas são reescritas."
       },
       {
-        "texto_opcion": "UPDATE não é permitido em tabelas clusterizadas",
-        "es_correcta": false,
-        "explicacion": "DML é permitido; a manutenção do cluster continua."
+        "texto_opcion": "Floco de neve cria novo micro-partitions; partições inalteradas podem ser.",
+        "es_correcta": true,
+        "explicacion": "DML reescreve partições afetadas; partições inalteradas podem permanecer compartilhadas."
       },
       {
-        "texto_opcion": "UPDATE edita linhas no mesmo arquivo de partição imutável",
+        "texto_opcion": "UPDATE edita linhas no mesmo arquivo de partição imutável, micro-partitions são imutáveis, micro-partitions são imutáveis; alterações gravam novas partições.",
         "es_correcta": false,
         "explicacion": "Micro-partitions são imutáveis; alterações gravam novas partições."
+      },
+      {
+        "texto_opcion": "UPDATE não é permitido em tabelas clusterizadas, dML é permitido; a manutenção do cluster continua, dML é permitido; a manutenção do cluster continua.",
+        "es_correcta": false,
+        "explicacion": "DML é permitido; a manutenção do cluster continua."
       }
     ],
     "tags": [
@@ -264,17 +264,7 @@
     "pregunta": "precisa de tabelas Iceberg de formato aberto consultadas no Snowflake sem importação completa. Contexto: plataforma IoT industrial, residência estrita no GDPR.",
     "opciones": [
       {
-        "texto_opcion": "Use tabelas externas/tabelas Iceberg apontando para cloud storage com integração de catálogo",
-        "es_correcta": true,
-        "explicacion": "Tabelas externas/Iceberg consultam arquivos existentes com diferentes características de otimização."
-      },
-      {
-        "texto_opcion": "IMPORT forces todos os dados externos apenas em VARIANT",
-        "es_correcta": false,
-        "explicacion": "Tabelas externas podem mapear colunas estruturadas."
-      },
-      {
-        "texto_opcion": "Tabelas nativas micro-partition e tabelas externas sempre compartilham garantias de remoção idênticas",
+        "texto_opcion": "Tabelas nativas micro-partition e tabelas externas sempre compartilham.",
         "es_correcta": false,
         "explicacion": "As tabelas externas dependem do layout do arquivo e dos metadados externos."
       },
@@ -282,6 +272,16 @@
         "texto_opcion": "Tabelas externas armazenam dados dentro dos Serviços Cloud",
         "es_correcta": false,
         "explicacion": "Os dados permanecem no armazenamento externo/do cliente."
+      },
+      {
+        "texto_opcion": "Use tabelas externas/tabelas Iceberg apontando para cloud storage com.",
+        "es_correcta": true,
+        "explicacion": "Tabelas externas/Iceberg consultam arquivos existentes com diferentes características de otimização."
+      },
+      {
+        "texto_opcion": "IMPORT forces todos os dados externos apenas em VARIANT",
+        "es_correcta": false,
+        "explicacion": "Tabelas externas podem mapear colunas estruturadas."
       }
     ],
     "tags": [
@@ -293,24 +293,24 @@
     "pregunta": "Cenário de empresa de streaming de mídia — optimizer escolhe ordem de junção ineficiente em tabelas grandes. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Desative os serviços em nuvem para que o warehouse adivinhe a cardinalidade",
-        "es_correcta": false,
-        "explicacion": "Optimizer depende de metadados de serviços em nuvem."
-      },
-      {
-        "texto_opcion": "As estatísticas exigem ANALYZE TABLE manual em cada inserção no Snowflake, como alguns RDBMS sempre",
-        "es_correcta": false,
-        "explicacion": "Snowflake automatiza grande parte da manutenção de estatísticas."
-      },
-      {
-        "texto_opcion": "Garantir coleta/manutenção e revisão automática de estatísticas Query Profile",
+        "texto_opcion": "Garantir coleta/manutenção e revisão automática de estatísticas Query Profile.",
         "es_correcta": true,
         "explicacion": "Snowflake mantém estatísticas de tabela para orientar a otimização."
       },
       {
-        "texto_opcion": "Exclua INFORMATION_SCHEMA para atualizar as estatísticas",
+        "texto_opcion": "Exclua INFORMATION_SCHEMA para atualizar as estatísticas selected to meet the stated constraints adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Destrutivo e errado."
+      },
+      {
+        "texto_opcion": "Desative os serviços em nuvem para que o warehouse adivinhe a cardinalidade, optimizer depende de metadados de serviços em nuvem.",
+        "es_correcta": false,
+        "explicacion": "Optimizer depende de metadados de serviços em nuvem."
+      },
+      {
+        "texto_opcion": "As estatísticas exigem ANALYZE TABLE manual em cada inserção no Snowflake, como alguns RDBMS sempre, snowflake automatiza grande parte da manutenção de estatísticas.",
+        "es_correcta": false,
+        "explicacion": "Snowflake automatiza grande parte da manutenção de estatísticas."
       }
     ],
     "tags": [
@@ -322,12 +322,12 @@
     "pregunta": "Para uma carga de trabalho de concessionária de energia com dados históricos em escala de petabytes: pré-calcule agregações caras e atualizadas automaticamente para painéis. Melhor escolha?",
     "opciones": [
       {
-        "texto_opcion": "Exporte agregados para e-mail todas as noites",
+        "texto_opcion": "Exporte agregados para e-mail todas as noites, não é um recurso de banco de dados.",
         "es_correcta": false,
         "explicacion": "Não é um recurso de banco de dados."
       },
       {
-        "texto_opcion": "Use a listagem de arquivos de teste como agregação materializada",
+        "texto_opcion": "Use a listagem de arquivos de teste como agregação materializada, lIST mostra arquivos",
         "es_correcta": false,
         "explicacion": "LIST mostra arquivos, não resultados de consulta agregados."
       },
@@ -337,7 +337,7 @@
         "explicacion": "As visões padrão são lógicas, a menos que sejam materializadas."
       },
       {
-        "texto_opcion": "Crie um materialized view (quando suportado) para armazenar resultados pré-agregados",
+        "texto_opcion": "Crie um materialized view (quando suportado) para armazenar resultados pré-agregados.",
         "es_correcta": true,
         "explicacion": "Materialized views persistem resultados pré-computados com custos de manutenção."
       }
@@ -351,22 +351,22 @@
     "pregunta": "Cenário da plataforma de viagem — descreva como o Snowflake armazena fisicamente as linhas da tabela no disco. O que eles deveriam implementar? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB) dentro de cada partição",
-        "es_correcta": true,
-        "explicacion": "Micro-partitions são as unidades de armazenamento e poda do Snowflake."
-      },
-      {
-        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente",
+        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente, o armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente.",
         "es_correcta": false,
         "explicacion": "O armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente."
       },
       {
-        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico",
+        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico, as tabelas relacionais usam micro-partitions, não um blob JSON.",
         "es_correcta": false,
         "explicacion": "As tabelas relacionais usam micro-partitions, não um blob JSON."
       },
       {
-        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação",
+        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB).",
+        "es_correcta": true,
+        "explicacion": "Micro-partitions são as unidades de armazenamento e poda do Snowflake."
+      },
+      {
+        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação, snowflake usa micro-partitions compactado, não arquivos de linha.",
         "es_correcta": false,
         "explicacion": "Snowflake usa micro-partitions compactado, não arquivos de linha."
       }
@@ -385,7 +385,7 @@
         "explicacion": "A remoção usa metadados micro-partition; clustering melhora a organização."
       },
       {
-        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições irrelevantes",
+        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições.",
         "es_correcta": true,
         "explicacion": "A remoção de partições evita a varredura de partições fora do intervalo de predicados."
       },
@@ -414,7 +414,12 @@
         "explicacion": "Um armazém maior não corrige limites de partição inadequados."
       },
       {
-        "texto_opcion": "Defina CLUSTER BY (customer_id, event_time) ou permita cluster automático quando houver suporte",
+        "texto_opcion": "Converta tabela em tabela externa para obter clustering automaticamente",
+        "es_correcta": false,
+        "explicacion": "As tabelas externas se comportam de maneira diferente; clustering é para tabelas nativas."
+      },
+      {
+        "texto_opcion": "Defina CLUSTER BY ou permita cluster automático quando houver suporte.",
         "es_correcta": true,
         "explicacion": "O cluster coloca linhas relacionadas para melhorar a eliminação de partições ao longo do tempo."
       },
@@ -422,11 +427,6 @@
         "texto_opcion": "Desative micro-partitions para usar armazenamento heap",
         "es_correcta": false,
         "explicacion": "Snowflake sempre usa micro-partitions para tabelas nativas."
-      },
-      {
-        "texto_opcion": "Converta tabela em tabela externa para obter clustering automaticamente",
-        "es_correcta": false,
-        "explicacion": "As tabelas externas se comportam de maneira diferente; clustering é para tabelas nativas."
       }
     ],
     "tags": [
@@ -438,22 +438,22 @@
     "pregunta": "Revisão de incidente (australiaeast): os dados carregados classificados por data do arquivo de carregamento mostram uma boa remoção em load_date sem chave explícita. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística",
+        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística, estatísticas/metadados ainda são importantes para otimização.",
         "es_correcta": false,
         "explicacion": "Estatísticas/metadados ainda são importantes para otimização."
       },
       {
-        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta",
+        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta, a ordem aleatória geralmente prejudica a poda.",
         "es_correcta": false,
         "explicacion": "A ordem aleatória geralmente prejudica a poda."
       },
       {
-        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos filtros de consulta",
+        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos.",
         "es_correcta": true,
         "explicacion": "A ordem de inserção pode gerar limites de partição benéficos antes do clustering explícito."
       },
       {
-        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER",
+        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER, o clustering está relacionado ao layout dos dados",
         "es_correcta": false,
         "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
       }
@@ -467,17 +467,17 @@
     "pregunta": "Revisão de incidentes (norte da Europa): pesquisas de pontos de alta cardinalidade em colunas UUID com remoção de partição deficiente. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Desative micro-partitions para tabelas UUID",
+        "texto_opcion": "Desative micro-partitions para tabelas UUID, não suportado/desejado.",
         "es_correcta": false,
         "explicacion": "Não suportado/desejado."
       },
       {
-        "texto_opcion": "Use apenas estágio externo CSV",
+        "texto_opcion": "Use apenas estágio externo CSV, o tipo de estágio não substitui a.",
         "es_correcta": false,
         "explicacion": "O tipo de estágio não substitui a otimização de pesquisa para pesquisas de pontos."
       },
       {
-        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para consultas pontuais seletivas",
+        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para.",
         "es_correcta": true,
         "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
       },
@@ -496,24 +496,24 @@
     "pregunta": "Revisão de incidentes (westeurope): consulta analítica seleciona 3 de 200 colunas de uma ampla tabela de fatos. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
     "opciones": [
       {
+        "texto_opcion": "Armazene cada coluna em uma conta separada, não é design de floco de neve.",
+        "es_correcta": false,
+        "explicacion": "Não é design de floco de neve."
+      },
+      {
         "texto_opcion": "Snowflake deve ler todas as 200 colunas para cada SELECT",
         "es_correcta": false,
         "explicacion": "O armazenamento colunar oferece suporte à remoção de colunas."
       },
       {
-        "texto_opcion": "Armazene cada coluna em uma conta separada",
-        "es_correcta": false,
-        "explicacion": "Não é design de floco de neve."
-      },
-      {
-        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias",
-        "es_correcta": true,
-        "explicacion": "A remoção de colunas reduz o IO nas partições."
-      },
-      {
         "texto_opcion": "Converta todas as colunas em VARIANT para podar melhor",
         "es_correcta": false,
         "explicacion": "VARIANT linhas largas podem prejudicar a poda/seletividade."
+      },
+      {
+        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias.",
+        "es_correcta": true,
+        "explicacion": "A remoção de colunas reduz o IO nas partições."
       }
     ],
     "tags": [
@@ -525,14 +525,14 @@
     "pregunta": "Para uma carga de trabalho de transportadora logística com dados históricos em escala de petabytes: muitas inserções pequenas criam numerosos micro-partitions minúsculos que prejudicam o desempenho. Melhor escolha (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Elimine metadados de cluster para consolidar partições instantaneamente",
+        "texto_opcion": "Desative a compactação para mesclar partições, a configuração de compactação não mescla partições.",
         "es_correcta": false,
-        "explicacion": "Não mescla partições físicas de maneira significativa."
+        "explicacion": "A configuração de compactação não mescla partições."
       },
       {
-        "texto_opcion": "Carregamentos em lote e tamanhos de arquivo apropriados; considere estratégias de reagrupamento ou recarga",
-        "es_correcta": true,
-        "explicacion": "Muitas inserções pequenas podem criar um layout de partição abaixo do ideal."
+        "texto_opcion": "Elimine metadados de cluster para consolidar partições instantaneamente, não mescla partições físicas de maneira significativa.",
+        "es_correcta": false,
+        "explicacion": "Não mescla partições físicas de maneira significativa."
       },
       {
         "texto_opcion": "Insira uma linha por instrução INSERT intencionalmente para eficiência de ETL",
@@ -540,9 +540,9 @@
         "explicacion": "Inserções linha por linha criam sobrecarga e pequenas partições."
       },
       {
-        "texto_opcion": "Desative a compactação para mesclar partições",
-        "es_correcta": false,
-        "explicacion": "A configuração de compactação não mescla partições."
+        "texto_opcion": "Carregamentos em lote e tamanhos de arquivo apropriados.",
+        "es_correcta": true,
+        "explicacion": "Muitas inserções pequenas podem criar um layout de partição abaixo do ideal."
       }
     ],
     "tags": [
@@ -554,22 +554,22 @@
     "pregunta": "mantenha o clustering sem operações RECLUSTER manuais. Contexto: seguradora, residência estrita no GDPR. Conjunto de restrições nº 2.",
     "opciones": [
       {
+        "texto_opcion": "Execute VACUUM FULL como PostgreSQL todas as noites, snowflake usa reclustering/clustering automático, não PG VACUUM.",
+        "es_correcta": false,
+        "explicacion": "Snowflake usa reclustering/clustering automático, não PG VACUUM."
+      },
+      {
         "texto_opcion": "O clustering automático é sempre executado em todas as tabelas externas por padrão",
         "es_correcta": false,
         "explicacion": "O clustering automático se aplica a tabelas clusterizadas nativas por configuração."
       },
       {
-        "texto_opcion": "Execute VACUUM FULL como PostgreSQL todas as noites",
-        "es_correcta": false,
-        "explicacion": "Snowflake usa reclustering/clustering automático, não PG VACUUM."
-      },
-      {
-        "texto_opcion": "Use clustering automático (serviço de recclustering) em tabelas clusterizadas quando habilitado",
+        "texto_opcion": "Use clustering automático em tabelas clusterizadas quando habilitado.",
         "es_correcta": true,
         "explicacion": "Snowflake pode reorganizar automaticamente micro-partitions para clustering keys."
       },
       {
-        "texto_opcion": "Recrie a conta diariamente para desfragmentar",
+        "texto_opcion": "Recrie a conta diariamente para desfragmentar configured end-to-end for this workload.",
         "es_correcta": false,
         "explicacion": "Extremo e incorreto."
       }
@@ -583,24 +583,24 @@
     "pregunta": "Para uma carga de trabalho de mercado online com janelas em lote por hora: UPDATE modifica muitas linhas em partições em uma tabela grande. Melhor escolha (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "UPDATE não é permitido em tabelas clusterizadas",
+        "texto_opcion": "UPDATE não é permitido em tabelas clusterizadas, dML é permitido; a manutenção do cluster continua, dML é permitido; a manutenção do cluster continua.",
         "es_correcta": false,
         "explicacion": "DML é permitido; a manutenção do cluster continua."
       },
       {
-        "texto_opcion": "UPDATE edita linhas no mesmo arquivo de partição imutável",
+        "texto_opcion": "Floco de neve cria novo micro-partitions; partições inalteradas podem ser.",
+        "es_correcta": true,
+        "explicacion": "DML reescreve partições afetadas; partições inalteradas podem permanecer compartilhadas."
+      },
+      {
+        "texto_opcion": "UPDATE edita linhas no mesmo arquivo de partição imutável, micro-partitions são imutáveis, micro-partitions são imutáveis; alterações gravam novas partições.",
         "es_correcta": false,
         "explicacion": "Micro-partitions são imutáveis; alterações gravam novas partições."
       },
       {
-        "texto_opcion": "UPDATE sempre duplica todo o armazenamento da tabela imediatamente",
+        "texto_opcion": "UPDATE sempre duplica todo o armazenamento da tabela imediatamente, somente as partições afetadas são reescritas.",
         "es_correcta": false,
         "explicacion": "Somente as partições afetadas são reescritas."
-      },
-      {
-        "texto_opcion": "Floco de neve cria novo micro-partitions; partições inalteradas podem ser compartilhadas via copy-on-write",
-        "es_correcta": true,
-        "explicacion": "DML reescreve partições afetadas; partições inalteradas podem permanecer compartilhadas."
       }
     ],
     "tags": [
@@ -612,14 +612,9 @@
     "pregunta": "Cenário de transportadora logística - precisa de tabelas Iceberg de formato aberto consultadas no Snowflake sem importação completa. O que eles deveriam implementar? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Use tabelas externas/tabelas Iceberg apontando para cloud storage com integração de catálogo",
-        "es_correcta": true,
-        "explicacion": "Tabelas externas/Iceberg consultam arquivos existentes com diferentes características de otimização."
-      },
-      {
-        "texto_opcion": "Tabelas nativas micro-partition e tabelas externas sempre compartilham garantias de remoção idênticas",
+        "texto_opcion": "Tabelas externas armazenam dados dentro dos Serviços Cloud",
         "es_correcta": false,
-        "explicacion": "As tabelas externas dependem do layout do arquivo e dos metadados externos."
+        "explicacion": "Os dados permanecem no armazenamento externo/do cliente."
       },
       {
         "texto_opcion": "IMPORT forces todos os dados externos apenas em VARIANT",
@@ -627,9 +622,14 @@
         "explicacion": "Tabelas externas podem mapear colunas estruturadas."
       },
       {
-        "texto_opcion": "Tabelas externas armazenam dados dentro dos Serviços Cloud",
+        "texto_opcion": "Tabelas nativas micro-partition e tabelas externas sempre compartilham.",
         "es_correcta": false,
-        "explicacion": "Os dados permanecem no armazenamento externo/do cliente."
+        "explicacion": "As tabelas externas dependem do layout do arquivo e dos metadados externos."
+      },
+      {
+        "texto_opcion": "Use tabelas externas/tabelas Iceberg apontando para cloud storage com.",
+        "es_correcta": true,
+        "explicacion": "Tabelas externas/Iceberg consultam arquivos existentes com diferentes características de otimização."
       }
     ],
     "tags": [
@@ -641,9 +641,9 @@
     "pregunta": "Revisão de incidente (eastus): optimizer escolhe ordem de junção ineficiente em tabelas grandes. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Garantir coleta/manutenção e revisão automática de estatísticas Query Profile",
-        "es_correcta": true,
-        "explicacion": "Snowflake mantém estatísticas de tabela para orientar a otimização."
+        "texto_opcion": "Exclua INFORMATION_SCHEMA para atualizar as estatísticas adopted as the standard used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Destrutivo e errado."
       },
       {
         "texto_opcion": "As estatísticas exigem ANALYZE TABLE manual em cada inserção no Snowflake, como alguns RDBMS sempre",
@@ -651,12 +651,12 @@
         "explicacion": "Snowflake automatiza grande parte da manutenção de estatísticas."
       },
       {
-        "texto_opcion": "Exclua INFORMATION_SCHEMA para atualizar as estatísticas",
-        "es_correcta": false,
-        "explicacion": "Destrutivo e errado."
+        "texto_opcion": "Garantir coleta/manutenção e revisão automática de estatísticas Query Profile.",
+        "es_correcta": true,
+        "explicacion": "Snowflake mantém estatísticas de tabela para orientar a otimização."
       },
       {
-        "texto_opcion": "Desative os serviços em nuvem para que o warehouse adivinhe a cardinalidade",
+        "texto_opcion": "Desative os serviços em nuvem para que o warehouse adivinhe a cardinalidade, optimizer depende de metadados de serviços em nuvem.",
         "es_correcta": false,
         "explicacion": "Optimizer depende de metadados de serviços em nuvem."
       }
@@ -670,24 +670,24 @@
     "pregunta": "Cenário de varejista global: pré-computação de agregações caras e atualizadas automaticamente para painéis. O que eles deveriam implementar? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Crie apenas visualização padrão e espere sempre pré-agregação física automática",
-        "es_correcta": false,
-        "explicacion": "As visões padrão são lógicas, a menos que sejam materializadas."
-      },
-      {
-        "texto_opcion": "Use a listagem de arquivos de teste como agregação materializada",
-        "es_correcta": false,
-        "explicacion": "LIST mostra arquivos, não resultados de consulta agregados."
-      },
-      {
-        "texto_opcion": "Exporte agregados para e-mail todas as noites",
+        "texto_opcion": "Exporte agregados para e-mail todas as noites, não é um recurso de banco de dados.",
         "es_correcta": false,
         "explicacion": "Não é um recurso de banco de dados."
       },
       {
-        "texto_opcion": "Crie um materialized view (quando suportado) para armazenar resultados pré-agregados",
+        "texto_opcion": "Use a listagem de arquivos de teste como agregação materializada, lIST mostra arquivos",
+        "es_correcta": false,
+        "explicacion": "LIST mostra arquivos, não resultados de consulta agregados."
+      },
+      {
+        "texto_opcion": "Crie um materialized view (quando suportado) para armazenar resultados pré-agregados.",
         "es_correcta": true,
         "explicacion": "Materialized views persistem resultados pré-computados com custos de manutenção."
+      },
+      {
+        "texto_opcion": "Crie apenas visualização padrão e espere sempre pré-agregação física automática",
+        "es_correcta": false,
+        "explicacion": "As visões padrão são lógicas, a menos que sejam materializadas."
       }
     ],
     "tags": [
@@ -699,24 +699,24 @@
     "pregunta": "Cenário de fintech de pagamentos – descreva como o Snowflake armazena fisicamente as linhas da tabela no disco. O que eles deveriam implementar? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente",
+        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico, as tabelas relacionais usam micro-partitions, não um blob JSON.",
         "es_correcta": false,
-        "explicacion": "O armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente."
+        "explicacion": "As tabelas relacionais usam micro-partitions, não um blob JSON."
       },
       {
-        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação",
-        "es_correcta": false,
-        "explicacion": "Snowflake usa micro-partitions compactado, não arquivos de linha."
-      },
-      {
-        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB) dentro de cada partição",
+        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB).",
         "es_correcta": true,
         "explicacion": "Micro-partitions são as unidades de armazenamento e poda do Snowflake."
       },
       {
-        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico",
+        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação, snowflake usa micro-partitions compactado, não arquivos de linha.",
         "es_correcta": false,
-        "explicacion": "As tabelas relacionais usam micro-partitions, não um blob JSON."
+        "explicacion": "Snowflake usa micro-partitions compactado, não arquivos de linha."
+      },
+      {
+        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente, o armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente.",
+        "es_correcta": false,
+        "explicacion": "O armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente."
       }
     ],
     "tags": [
@@ -743,7 +743,7 @@
         "explicacion": "A remoção reduz as partições verificadas quando os metadados permitem."
       },
       {
-        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições irrelevantes",
+        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições.",
         "es_correcta": true,
         "explicacion": "A remoção de partições evita a varredura de partições fora do intervalo de predicados."
       }
@@ -757,6 +757,11 @@
     "pregunta": "Uma plataforma IoT industrial (consultas interativas em menos de um segundo, região sudeste) deve: as consultas são filtradas por customer_id e event_time, mas a remoção é ruim após muitas inserções. Qual opção se adapta melhor? Conjunto de restrições nº 3.",
     "opciones": [
       {
+        "texto_opcion": "Desative micro-partitions para usar armazenamento heap",
+        "es_correcta": false,
+        "explicacion": "Snowflake sempre usa micro-partitions para tabelas nativas."
+      },
+      {
         "texto_opcion": "Converta tabela em tabela externa para obter clustering automaticamente",
         "es_correcta": false,
         "explicacion": "As tabelas externas se comportam de maneira diferente; clustering é para tabelas nativas."
@@ -767,12 +772,7 @@
         "explicacion": "Um armazém maior não corrige limites de partição inadequados."
       },
       {
-        "texto_opcion": "Desative micro-partitions para usar armazenamento heap",
-        "es_correcta": false,
-        "explicacion": "Snowflake sempre usa micro-partitions para tabelas nativas."
-      },
-      {
-        "texto_opcion": "Defina CLUSTER BY (customer_id, event_time) ou permita cluster automático quando houver suporte",
+        "texto_opcion": "Defina CLUSTER BY ou permita cluster automático quando houver suporte.",
         "es_correcta": true,
         "explicacion": "O cluster coloca linhas relacionadas para melhorar a eliminação de partições ao longo do tempo."
       }
@@ -786,24 +786,24 @@
     "pregunta": "Para uma carga de trabalho de empresa de streaming de mídia com aproximadamente 5 TB/dia: os dados carregados classificados por data do arquivo de carregamento mostram uma boa remoção em load_date sem chave explícita. Melhor escolha (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER",
-        "es_correcta": false,
-        "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
-      },
-      {
-        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística",
+        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística, estatísticas/metadados ainda são importantes para otimização.",
         "es_correcta": false,
         "explicacion": "Estatísticas/metadados ainda são importantes para otimização."
       },
       {
-        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos filtros de consulta",
+        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta, a ordem aleatória geralmente prejudica a poda.",
+        "es_correcta": false,
+        "explicacion": "A ordem aleatória geralmente prejudica a poda."
+      },
+      {
+        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos.",
         "es_correcta": true,
         "explicacion": "A ordem de inserção pode gerar limites de partição benéficos antes do clustering explícito."
       },
       {
-        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta",
+        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER, o clustering está relacionado ao layout dos dados",
         "es_correcta": false,
-        "explicacion": "A ordem aleatória geralmente prejudica a poda."
+        "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
       }
     ],
     "tags": [
@@ -815,24 +815,24 @@
     "pregunta": "Revisão de incidentes (westeurope): pesquisas de pontos de alta cardinalidade em colunas UUID com remoção de partição deficiente. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
     "opciones": [
       {
+        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para.",
+        "es_correcta": true,
+        "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
+      },
+      {
+        "texto_opcion": "Use apenas estágio externo CSV, o tipo de estágio não substitui a.",
+        "es_correcta": false,
+        "explicacion": "O tipo de estágio não substitui a otimização de pesquisa para pesquisas de pontos."
+      },
+      {
         "texto_opcion": "Force CLUSTER BY somente no UUID sempre sem análise de compensação",
         "es_correcta": false,
         "explicacion": "Chaves aleatórias de alta cardinalidade podem não agrupar bem; SOS pode se encaixar melhor."
       },
       {
-        "texto_opcion": "Desative micro-partitions para tabelas UUID",
+        "texto_opcion": "Desative micro-partitions para tabelas UUID, não suportado/desejado.",
         "es_correcta": false,
         "explicacion": "Não suportado/desejado."
-      },
-      {
-        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para consultas pontuais seletivas",
-        "es_correcta": true,
-        "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
-      },
-      {
-        "texto_opcion": "Use apenas estágio externo CSV",
-        "es_correcta": false,
-        "explicacion": "O tipo de estágio não substitui a otimização de pesquisa para pesquisas de pontos."
       }
     ],
     "tags": [
@@ -844,7 +844,17 @@
     "pregunta": "Revisão de incidentes (norte da Europa): consulta analítica seleciona 3 de 200 colunas de uma ampla tabela de fatos. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias",
+        "texto_opcion": "Converta todas as colunas em VARIANT para podar melhor",
+        "es_correcta": false,
+        "explicacion": "VARIANT linhas largas podem prejudicar a poda/seletividade."
+      },
+      {
+        "texto_opcion": "Armazene cada coluna em uma conta separada, não é design de floco de neve.",
+        "es_correcta": false,
+        "explicacion": "Não é design de floco de neve."
+      },
+      {
+        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias.",
         "es_correcta": true,
         "explicacion": "A remoção de colunas reduz o IO nas partições."
       },
@@ -852,16 +862,6 @@
         "texto_opcion": "Snowflake deve ler todas as 200 colunas para cada SELECT",
         "es_correcta": false,
         "explicacion": "O armazenamento colunar oferece suporte à remoção de colunas."
-      },
-      {
-        "texto_opcion": "Converta todas as colunas em VARIANT para podar melhor",
-        "es_correcta": false,
-        "explicacion": "VARIANT linhas largas podem prejudicar a poda/seletividade."
-      },
-      {
-        "texto_opcion": "Armazene cada coluna em uma conta separada",
-        "es_correcta": false,
-        "explicacion": "Não é design de floco de neve."
       }
     ],
     "tags": [
@@ -873,12 +873,12 @@
     "pregunta": "Revisão de incidentes (australiaeast): muitas pequenas inserções criam numerosos pequenos micro-partitions prejudicando o desempenho. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Desative a compactação para mesclar partições",
+        "texto_opcion": "Desative a compactação para mesclar partições, a configuração de compactação não mescla partições.",
         "es_correcta": false,
         "explicacion": "A configuração de compactação não mescla partições."
       },
       {
-        "texto_opcion": "Carregamentos em lote e tamanhos de arquivo apropriados; considere estratégias de reagrupamento ou recarga",
+        "texto_opcion": "Carregamentos em lote e tamanhos de arquivo apropriados.",
         "es_correcta": true,
         "explicacion": "Muitas inserções pequenas podem criar um layout de partição abaixo do ideal."
       },
@@ -888,7 +888,7 @@
         "explicacion": "Inserções linha por linha criam sobrecarga e pequenas partições."
       },
       {
-        "texto_opcion": "Elimine metadados de cluster para consolidar partições instantaneamente",
+        "texto_opcion": "Elimine metadados de cluster para consolidar partições instantaneamente, não mescla partições físicas de maneira significativa.",
         "es_correcta": false,
         "explicacion": "Não mescla partições físicas de maneira significativa."
       }
@@ -902,14 +902,14 @@
     "pregunta": "Cenário de fintech de pagamentos – mantenha o clustering sem operações manuais de RECLUSTER. O que eles deveriam implementar? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Recrie a conta diariamente para desfragmentar",
+        "texto_opcion": "O clustering automático é sempre executado em todas as tabelas externas por padrão",
         "es_correcta": false,
-        "explicacion": "Extremo e incorreto."
+        "explicacion": "O clustering automático se aplica a tabelas clusterizadas nativas por configuração."
       },
       {
-        "texto_opcion": "Use clustering automático (serviço de recclustering) em tabelas clusterizadas quando habilitado",
-        "es_correcta": true,
-        "explicacion": "Snowflake pode reorganizar automaticamente micro-partitions para clustering keys."
+        "texto_opcion": "Recrie a conta diariamente para desfragmentar prioritized for operational.",
+        "es_correcta": false,
+        "explicacion": "Extremo e incorreto."
       },
       {
         "texto_opcion": "Execute VACUUM FULL como PostgreSQL todas as noites",
@@ -917,9 +917,9 @@
         "explicacion": "Snowflake usa reclustering/clustering automático, não PG VACUUM."
       },
       {
-        "texto_opcion": "O clustering automático é sempre executado em todas as tabelas externas por padrão",
-        "es_correcta": false,
-        "explicacion": "O clustering automático se aplica a tabelas clusterizadas nativas por configuração."
+        "texto_opcion": "Use clustering automático em tabelas clusterizadas quando habilitado.",
+        "es_correcta": true,
+        "explicacion": "Snowflake pode reorganizar automaticamente micro-partitions para clustering keys."
       }
     ],
     "tags": [
@@ -931,24 +931,24 @@
     "pregunta": "Para uma carga de trabalho de transportadora logística com dados históricos em escala de petabytes: UPDATE modifica muitas linhas em partições em uma tabela grande. Melhor escolha (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Floco de neve cria novo micro-partitions; partições inalteradas podem ser compartilhadas via copy-on-write",
+        "texto_opcion": "UPDATE sempre duplica todo o armazenamento da tabela imediatamente, somente as partições afetadas são reescritas.",
+        "es_correcta": false,
+        "explicacion": "Somente as partições afetadas são reescritas."
+      },
+      {
+        "texto_opcion": "Floco de neve cria novo micro-partitions; partições inalteradas podem ser.",
         "es_correcta": true,
         "explicacion": "DML reescreve partições afetadas; partições inalteradas podem permanecer compartilhadas."
       },
       {
-        "texto_opcion": "UPDATE edita linhas no mesmo arquivo de partição imutável",
-        "es_correcta": false,
-        "explicacion": "Micro-partitions são imutáveis; alterações gravam novas partições."
-      },
-      {
-        "texto_opcion": "UPDATE não é permitido em tabelas clusterizadas",
+        "texto_opcion": "UPDATE não é permitido em tabelas clusterizadas, dML é permitido; a manutenção do cluster continua, dML é permitido; a manutenção do cluster continua.",
         "es_correcta": false,
         "explicacion": "DML é permitido; a manutenção do cluster continua."
       },
       {
-        "texto_opcion": "UPDATE sempre duplica todo o armazenamento da tabela imediatamente",
+        "texto_opcion": "UPDATE edita linhas no mesmo arquivo de partição imutável, micro-partitions são imutáveis, micro-partitions são imutáveis; alterações gravam novas partições.",
         "es_correcta": false,
-        "explicacion": "Somente as partições afetadas são reescritas."
+        "explicacion": "Micro-partitions são imutáveis; alterações gravam novas partições."
       }
     ],
     "tags": [
@@ -960,12 +960,12 @@
     "pregunta": "Cenário da operadora de telecomunicações - precisa de tabelas Iceberg de formato aberto consultadas no Snowflake sem importação completa. O que eles deveriam implementar? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Tabelas nativas micro-partition e tabelas externas sempre compartilham garantias de remoção idênticas",
+        "texto_opcion": "Tabelas nativas micro-partition e tabelas externas sempre compartilham.",
         "es_correcta": false,
         "explicacion": "As tabelas externas dependem do layout do arquivo e dos metadados externos."
       },
       {
-        "texto_opcion": "Use tabelas externas/tabelas Iceberg apontando para cloud storage com integração de catálogo",
+        "texto_opcion": "Use tabelas externas/tabelas Iceberg apontando para cloud storage com.",
         "es_correcta": true,
         "explicacion": "Tabelas externas/Iceberg consultam arquivos existentes com diferentes características de otimização."
       },
@@ -989,24 +989,24 @@
     "pregunta": "Revisão de incidente (brasilsul): optimizer escolhe ordem de junção ineficiente em tabelas grandes. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Desative os serviços em nuvem para que o warehouse adivinhe a cardinalidade",
-        "es_correcta": false,
-        "explicacion": "Optimizer depende de metadados de serviços em nuvem."
-      },
-      {
-        "texto_opcion": "Exclua INFORMATION_SCHEMA para atualizar as estatísticas",
+        "texto_opcion": "Exclua INFORMATION_SCHEMA para atualizar as estatísticas used as the main path in this architecture adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Destrutivo e errado."
       },
       {
-        "texto_opcion": "Garantir coleta/manutenção e revisão automática de estatísticas Query Profile",
+        "texto_opcion": "As estatísticas exigem ANALYZE TABLE manual em cada inserção no Snowflake, como alguns RDBMS sempre, snowflake automatiza grande parte da manutenção de estatísticas.",
+        "es_correcta": false,
+        "explicacion": "Snowflake automatiza grande parte da manutenção de estatísticas."
+      },
+      {
+        "texto_opcion": "Garantir coleta/manutenção e revisão automática de estatísticas Query Profile.",
         "es_correcta": true,
         "explicacion": "Snowflake mantém estatísticas de tabela para orientar a otimização."
       },
       {
-        "texto_opcion": "As estatísticas exigem ANALYZE TABLE manual em cada inserção no Snowflake, como alguns RDBMS sempre",
+        "texto_opcion": "Desative os serviços em nuvem para que o warehouse adivinhe a cardinalidade, optimizer depende de metadados de serviços em nuvem.",
         "es_correcta": false,
-        "explicacion": "Snowflake automatiza grande parte da manutenção de estatísticas."
+        "explicacion": "Optimizer depende de metadados de serviços em nuvem."
       }
     ],
     "tags": [
@@ -1018,7 +1018,7 @@
     "pregunta": "Para uma carga de trabalho de plataforma de viagens com aproximadamente 200 milhões de linhas/dia: pré-calcule agregações caras e atualizadas automaticamente para painéis. Melhor escolha (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Exporte agregados para e-mail todas as noites",
+        "texto_opcion": "Exporte agregados para e-mail todas as noites, não é um recurso de banco de dados.",
         "es_correcta": false,
         "explicacion": "Não é um recurso de banco de dados."
       },
@@ -1028,12 +1028,12 @@
         "explicacion": "As visões padrão são lógicas, a menos que sejam materializadas."
       },
       {
-        "texto_opcion": "Crie um materialized view (quando suportado) para armazenar resultados pré-agregados",
+        "texto_opcion": "Crie um materialized view (quando suportado) para armazenar resultados pré-agregados.",
         "es_correcta": true,
         "explicacion": "Materialized views persistem resultados pré-computados com custos de manutenção."
       },
       {
-        "texto_opcion": "Use a listagem de arquivos de teste como agregação materializada",
+        "texto_opcion": "Use a listagem de arquivos de teste como agregação materializada, lIST mostra arquivos",
         "es_correcta": false,
         "explicacion": "LIST mostra arquivos, não resultados de consulta agregados."
       }
@@ -1047,22 +1047,22 @@
     "pregunta": "Cenário da plataforma de viagem — descreva como o Snowflake armazena fisicamente as linhas da tabela no disco. O que eles deveriam implementar? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente",
+        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente, o armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente.",
         "es_correcta": false,
         "explicacion": "O armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente."
       },
       {
-        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico",
+        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico, as tabelas relacionais usam micro-partitions, não um blob JSON.",
         "es_correcta": false,
         "explicacion": "As tabelas relacionais usam micro-partitions, não um blob JSON."
       },
       {
-        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação",
+        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação, snowflake usa micro-partitions compactado, não arquivos de linha.",
         "es_correcta": false,
         "explicacion": "Snowflake usa micro-partitions compactado, não arquivos de linha."
       },
       {
-        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB) dentro de cada partição",
+        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB).",
         "es_correcta": true,
         "explicacion": "Micro-partitions são as unidades de armazenamento e poda do Snowflake."
       }
@@ -1076,9 +1076,9 @@
     "pregunta": "Para uma carga de trabalho de mercado online com aproximadamente 5 TB/dia: filtre FACT_EVENTS WHERE event_date = '2026-07-01' em uma grande tabela de fatos. Melhor escolha (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "A verificação completa da tabela é sempre necessária, independentemente dos filtros",
-        "es_correcta": false,
-        "explicacion": "A remoção reduz as partições verificadas quando os metadados permitem."
+        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições.",
+        "es_correcta": true,
+        "explicacion": "A remoção de partições evita a varredura de partições fora do intervalo de predicados."
       },
       {
         "texto_opcion": "Os usuários devem listar manualmente os arquivos a serem removidos",
@@ -1086,14 +1086,14 @@
         "explicacion": "Optimizer remove automaticamente usando metadados."
       },
       {
-        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições irrelevantes",
-        "es_correcta": true,
-        "explicacion": "A remoção de partições evita a varredura de partições fora do intervalo de predicados."
-      },
-      {
         "texto_opcion": "A poda requer um clustering key em cada tabela por padrão",
         "es_correcta": false,
         "explicacion": "A remoção usa metadados micro-partition; clustering melhora a organização."
+      },
+      {
+        "texto_opcion": "A verificação completa da tabela é sempre necessária, independentemente dos filtros",
+        "es_correcta": false,
+        "explicacion": "A remoção reduz as partições verificadas quando os metadados permitem."
       }
     ],
     "tags": [
@@ -1105,14 +1105,9 @@
     "pregunta": "Cenário de concessionária de energia - as consultas são filtradas por customer_id e event_time, mas a remoção é ruim após muitas inserções. O que eles deveriam implementar? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Defina CLUSTER BY (customer_id, event_time) ou permita cluster automático quando houver suporte",
-        "es_correcta": true,
-        "explicacion": "O cluster coloca linhas relacionadas para melhorar a eliminação de partições ao longo do tempo."
-      },
-      {
-        "texto_opcion": "Converta tabela em tabela externa para obter clustering automaticamente",
+        "texto_opcion": "Aumente apenas o tamanho do armazém e ignore o layout dos dados",
         "es_correcta": false,
-        "explicacion": "As tabelas externas se comportam de maneira diferente; clustering é para tabelas nativas."
+        "explicacion": "Um armazém maior não corrige limites de partição inadequados."
       },
       {
         "texto_opcion": "Desative micro-partitions para usar armazenamento heap",
@@ -1120,9 +1115,14 @@
         "explicacion": "Snowflake sempre usa micro-partitions para tabelas nativas."
       },
       {
-        "texto_opcion": "Aumente apenas o tamanho do armazém e ignore o layout dos dados",
+        "texto_opcion": "Converta tabela em tabela externa para obter clustering automaticamente",
         "es_correcta": false,
-        "explicacion": "Um armazém maior não corrige limites de partição inadequados."
+        "explicacion": "As tabelas externas se comportam de maneira diferente; clustering é para tabelas nativas."
+      },
+      {
+        "texto_opcion": "Defina CLUSTER BY ou permita cluster automático quando houver suporte.",
+        "es_correcta": true,
+        "explicacion": "O cluster coloca linhas relacionadas para melhorar a eliminação de partições ao longo do tempo."
       }
     ],
     "tags": [
@@ -1134,24 +1134,24 @@
     "pregunta": "Cenário de fintech de pagamentos – os dados carregados classificados por data do arquivo de carregamento mostram uma boa remoção em load_date sem chave explícita. O que eles deveriam implementar? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos filtros de consulta",
-        "es_correcta": true,
-        "explicacion": "A ordem de inserção pode gerar limites de partição benéficos antes do clustering explícito."
-      },
-      {
-        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta",
+        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER, o clustering está relacionado ao layout dos dados",
         "es_correcta": false,
-        "explicacion": "A ordem aleatória geralmente prejudica a poda."
+        "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
       },
       {
-        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística",
+        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística, estatísticas/metadados ainda são importantes para otimização.",
         "es_correcta": false,
         "explicacion": "Estatísticas/metadados ainda são importantes para otimização."
       },
       {
-        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER",
+        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta, a ordem aleatória geralmente prejudica a poda.",
         "es_correcta": false,
-        "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
+        "explicacion": "A ordem aleatória geralmente prejudica a poda."
+      },
+      {
+        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos.",
+        "es_correcta": true,
+        "explicacion": "A ordem de inserção pode gerar limites de partição benéficos antes do clustering explícito."
       }
     ],
     "tags": [
@@ -1163,14 +1163,9 @@
     "pregunta": "Cenário de estúdio de jogos – pesquisas de pontos de alta cardinalidade em colunas UUID com remoção de partição deficiente. O que eles deveriam implementar? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Desative micro-partitions para tabelas UUID",
-        "es_correcta": false,
-        "explicacion": "Não suportado/desejado."
-      },
-      {
-        "texto_opcion": "Use apenas estágio externo CSV",
-        "es_correcta": false,
-        "explicacion": "O tipo de estágio não substitui a otimização de pesquisa para pesquisas de pontos."
+        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para.",
+        "es_correcta": true,
+        "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
       },
       {
         "texto_opcion": "Force CLUSTER BY somente no UUID sempre sem análise de compensação",
@@ -1178,9 +1173,14 @@
         "explicacion": "Chaves aleatórias de alta cardinalidade podem não agrupar bem; SOS pode se encaixar melhor."
       },
       {
-        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para consultas pontuais seletivas",
-        "es_correcta": true,
-        "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
+        "texto_opcion": "Use apenas estágio externo CSV, o tipo de estágio não substitui a.",
+        "es_correcta": false,
+        "explicacion": "O tipo de estágio não substitui a otimização de pesquisa para pesquisas de pontos."
+      },
+      {
+        "texto_opcion": "Desative micro-partitions para tabelas UUID, não suportado/desejado.",
+        "es_correcta": false,
+        "explicacion": "Não suportado/desejado."
       }
     ],
     "tags": [
@@ -1192,12 +1192,12 @@
     "pregunta": "Cenário da plataforma de viagens – a consulta analítica seleciona 3 de 200 colunas de uma ampla tabela de fatos. O que eles deveriam implementar? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Armazene cada coluna em uma conta separada",
+        "texto_opcion": "Armazene cada coluna em uma conta separada, não é design de floco de neve.",
         "es_correcta": false,
         "explicacion": "Não é design de floco de neve."
       },
       {
-        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias",
+        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias.",
         "es_correcta": true,
         "explicacion": "A remoção de colunas reduz o IO nas partições."
       },
@@ -1221,17 +1221,17 @@
     "pregunta": "Cenário de fintech de pagamentos – muitas pequenas inserções criam vários pequenos micro-partitions prejudicando o desempenho. O que eles deveriam implementar? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Elimine metadados de cluster para consolidar partições instantaneamente",
+        "texto_opcion": "Elimine metadados de cluster para consolidar partições instantaneamente, não mescla partições físicas de maneira significativa.",
         "es_correcta": false,
         "explicacion": "Não mescla partições físicas de maneira significativa."
       },
       {
-        "texto_opcion": "Desative a compactação para mesclar partições",
+        "texto_opcion": "Desative a compactação para mesclar partições, a configuração de compactação não mescla partições.",
         "es_correcta": false,
         "explicacion": "A configuração de compactação não mescla partições."
       },
       {
-        "texto_opcion": "Carregamentos em lote e tamanhos de arquivo apropriados; considere estratégias de reagrupamento ou recarga",
+        "texto_opcion": "Carregamentos em lote e tamanhos de arquivo apropriados.",
         "es_correcta": true,
         "explicacion": "Muitas inserções pequenas podem criar um layout de partição abaixo do ideal."
       },
@@ -1250,19 +1250,19 @@
     "pregunta": "Um mercado online (painéis quase em tempo real, região eastus) deve: manter o clustering sem operações manuais de RECLUSTER. Qual opção se adapta melhor? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Recrie a conta diariamente para desfragmentar",
+        "texto_opcion": "Recrie a conta diariamente para desfragmentar as the default production choice here.",
         "es_correcta": false,
         "explicacion": "Extremo e incorreto."
       },
       {
-        "texto_opcion": "Execute VACUUM FULL como PostgreSQL todas as noites",
-        "es_correcta": false,
-        "explicacion": "Snowflake usa reclustering/clustering automático, não PG VACUUM."
-      },
-      {
-        "texto_opcion": "Use clustering automático (serviço de recclustering) em tabelas clusterizadas quando habilitado",
+        "texto_opcion": "Use clustering automático em tabelas clusterizadas quando habilitado.",
         "es_correcta": true,
         "explicacion": "Snowflake pode reorganizar automaticamente micro-partitions para clustering keys."
+      },
+      {
+        "texto_opcion": "Execute VACUUM FULL como PostgreSQL todas as noites, snowflake usa reclustering/clustering.",
+        "es_correcta": false,
+        "explicacion": "Snowflake usa reclustering/clustering automático, não PG VACUUM."
       },
       {
         "texto_opcion": "O clustering automático é sempre executado em todas as tabelas externas por padrão",
@@ -1279,24 +1279,24 @@
     "pregunta": "Para uma carga de trabalho de uma seguradora com dados históricos em escala de petabytes: UPDATE modifica muitas linhas em partições em uma tabela grande. Melhor escolha (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "UPDATE sempre duplica todo o armazenamento da tabela imediatamente",
+        "texto_opcion": "UPDATE edita linhas no mesmo arquivo de partição imutável, micro-partitions são imutáveis, micro-partitions são imutáveis; alterações gravam novas partições.",
         "es_correcta": false,
-        "explicacion": "Somente as partições afetadas são reescritas."
+        "explicacion": "Micro-partitions são imutáveis; alterações gravam novas partições."
       },
       {
-        "texto_opcion": "UPDATE não é permitido em tabelas clusterizadas",
-        "es_correcta": false,
-        "explicacion": "DML é permitido; a manutenção do cluster continua."
-      },
-      {
-        "texto_opcion": "Floco de neve cria novo micro-partitions; partições inalteradas podem ser compartilhadas via copy-on-write",
+        "texto_opcion": "Floco de neve cria novo micro-partitions; partições inalteradas podem ser.",
         "es_correcta": true,
         "explicacion": "DML reescreve partições afetadas; partições inalteradas podem permanecer compartilhadas."
       },
       {
-        "texto_opcion": "UPDATE edita linhas no mesmo arquivo de partição imutável",
+        "texto_opcion": "UPDATE não é permitido em tabelas clusterizadas, dML é permitido; a manutenção do cluster continua, dML é permitido; a manutenção do cluster continua.",
         "es_correcta": false,
-        "explicacion": "Micro-partitions são imutáveis; alterações gravam novas partições."
+        "explicacion": "DML é permitido; a manutenção do cluster continua."
+      },
+      {
+        "texto_opcion": "UPDATE sempre duplica todo o armazenamento da tabela imediatamente, somente as partições afetadas são reescritas.",
+        "es_correcta": false,
+        "explicacion": "Somente as partições afetadas são reescritas."
       }
     ],
     "tags": [
@@ -1318,12 +1318,12 @@
         "explicacion": "Os dados permanecem no armazenamento externo/do cliente."
       },
       {
-        "texto_opcion": "Use tabelas externas/tabelas Iceberg apontando para cloud storage com integração de catálogo",
+        "texto_opcion": "Use tabelas externas/tabelas Iceberg apontando para cloud storage com.",
         "es_correcta": true,
         "explicacion": "Tabelas externas/Iceberg consultam arquivos existentes com diferentes características de otimização."
       },
       {
-        "texto_opcion": "Tabelas nativas micro-partition e tabelas externas sempre compartilham garantias de remoção idênticas",
+        "texto_opcion": "Tabelas nativas micro-partition e tabelas externas sempre compartilham.",
         "es_correcta": false,
         "explicacion": "As tabelas externas dependem do layout do arquivo e dos metadados externos."
       }
@@ -1337,7 +1337,7 @@
     "pregunta": "Revisão de incidente (sudestesia): optimizer escolhe ordem de junção ineficiente em tabelas grandes. Selecione o design mais apropriado. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Exclua INFORMATION_SCHEMA para atualizar as estatísticas",
+        "texto_opcion": "Exclua INFORMATION_SCHEMA para atualizar as estatísticas adopted as the standard configured end-to-end for this workload.",
         "es_correcta": false,
         "explicacion": "Destrutivo e errado."
       },
@@ -1347,14 +1347,14 @@
         "explicacion": "Snowflake automatiza grande parte da manutenção de estatísticas."
       },
       {
-        "texto_opcion": "Desative os serviços em nuvem para que o warehouse adivinhe a cardinalidade",
-        "es_correcta": false,
-        "explicacion": "Optimizer depende de metadados de serviços em nuvem."
-      },
-      {
-        "texto_opcion": "Garantir coleta/manutenção e revisão automática de estatísticas Query Profile",
+        "texto_opcion": "Garantir coleta/manutenção e revisão automática de estatísticas Query Profile.",
         "es_correcta": true,
         "explicacion": "Snowflake mantém estatísticas de tabela para orientar a otimização."
+      },
+      {
+        "texto_opcion": "Desative os serviços em nuvem para que o warehouse adivinhe a cardinalidade, optimizer depende de metadados de serviços em nuvem.",
+        "es_correcta": false,
+        "explicacion": "Optimizer depende de metadados de serviços em nuvem."
       }
     ],
     "tags": [
@@ -1366,17 +1366,17 @@
     "pregunta": "Para uma carga de trabalho de plataforma IoT industrial com aproximadamente 50.000 eventos/s: pré-calcule agregações caras e atualizadas automaticamente para painéis. Melhor escolha (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Exporte agregados para e-mail todas as noites",
+        "texto_opcion": "Exporte agregados para e-mail todas as noites, não é um recurso de banco de dados.",
         "es_correcta": false,
         "explicacion": "Não é um recurso de banco de dados."
       },
       {
-        "texto_opcion": "Use a listagem de arquivos de teste como agregação materializada",
+        "texto_opcion": "Use a listagem de arquivos de teste como agregação materializada, lIST mostra arquivos",
         "es_correcta": false,
         "explicacion": "LIST mostra arquivos, não resultados de consulta agregados."
       },
       {
-        "texto_opcion": "Crie um materialized view (quando suportado) para armazenar resultados pré-agregados",
+        "texto_opcion": "Crie um materialized view (quando suportado) para armazenar resultados pré-agregados.",
         "es_correcta": true,
         "explicacion": "Materialized views persistem resultados pré-computados com custos de manutenção."
       },
@@ -1395,22 +1395,22 @@
     "pregunta": "Para uma carga de trabalho de plataforma IoT industrial com aproximadamente 5 TB/dia: descreva como o Snowflake armazena fisicamente as linhas da tabela no disco. Melhor escolha (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico",
+        "texto_opcion": "Todas as tabelas armazenadas como um único documento JSON monolítico, as tabelas relacionais usam micro-partitions, não um blob JSON.",
         "es_correcta": false,
         "explicacion": "As tabelas relacionais usam micro-partitions, não um blob JSON."
       },
       {
-        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB) dentro de cada partição",
+        "texto_opcion": "As linhas são armazenadas em colunas compactadas imutáveis micro-partitions (~50-500 MB).",
         "es_correcta": true,
         "explicacion": "Micro-partitions são as unidades de armazenamento e poda do Snowflake."
       },
       {
-        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente",
+        "texto_opcion": "Micro-partitions são armazenados apenas no SSD do armazém permanentemente, o armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente.",
         "es_correcta": false,
         "explicacion": "O armazenamento durável está no armazenamento de objetos; cache dos armazéns temporariamente."
       },
       {
-        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação",
+        "texto_opcion": "Uma linha por arquivo em ordem aleatória sem compactação, snowflake usa micro-partitions compactado, não arquivos de linha.",
         "es_correcta": false,
         "explicacion": "Snowflake usa micro-partitions compactado, não arquivos de linha."
       }
@@ -1439,7 +1439,7 @@
         "explicacion": "Optimizer remove automaticamente usando metadados."
       },
       {
-        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições irrelevantes",
+        "texto_opcion": "Snowflake usa metadados mínimo/máximo por micro-partition para pular partições.",
         "es_correcta": true,
         "explicacion": "A remoção de partições evita a varredura de partições fora do intervalo de predicados."
       }
@@ -1453,14 +1453,9 @@
     "pregunta": "Cenário da seguradora – as consultas são filtradas por customer_id e event_time, mas a remoção é ruim após muitas inserções. O que eles deveriam implementar? Conjunto de restrições nº 5.",
     "opciones": [
       {
-        "texto_opcion": "Converta tabela em tabela externa para obter clustering automaticamente",
-        "es_correcta": false,
-        "explicacion": "As tabelas externas se comportam de maneira diferente; clustering é para tabelas nativas."
-      },
-      {
-        "texto_opcion": "Desative micro-partitions para usar armazenamento heap",
-        "es_correcta": false,
-        "explicacion": "Snowflake sempre usa micro-partitions para tabelas nativas."
+        "texto_opcion": "Defina CLUSTER BY ou permita cluster automático quando houver suporte.",
+        "es_correcta": true,
+        "explicacion": "O cluster coloca linhas relacionadas para melhorar a eliminação de partições ao longo do tempo."
       },
       {
         "texto_opcion": "Aumente apenas o tamanho do armazém e ignore o layout dos dados",
@@ -1468,9 +1463,14 @@
         "explicacion": "Um armazém maior não corrige limites de partição inadequados."
       },
       {
-        "texto_opcion": "Defina CLUSTER BY (customer_id, event_time) ou permita cluster automático quando houver suporte",
-        "es_correcta": true,
-        "explicacion": "O cluster coloca linhas relacionadas para melhorar a eliminação de partições ao longo do tempo."
+        "texto_opcion": "Desative micro-partitions para usar armazenamento heap",
+        "es_correcta": false,
+        "explicacion": "Snowflake sempre usa micro-partitions para tabelas nativas."
+      },
+      {
+        "texto_opcion": "Converta tabela em tabela externa para obter clustering automaticamente",
+        "es_correcta": false,
+        "explicacion": "As tabelas externas se comportam de maneira diferente; clustering é para tabelas nativas."
       }
     ],
     "tags": [
@@ -1482,24 +1482,24 @@
     "pregunta": "Para uma carga de trabalho de concessionária de energia com dados históricos em escala de petabytes: os dados carregados classificados por data do arquivo de carregamento mostram uma boa remoção em load_date sem chave explícita. Melhor escolha (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos filtros de consulta",
-        "es_correcta": true,
-        "explicacion": "A ordem de inserção pode gerar limites de partição benéficos antes do clustering explícito."
-      },
-      {
-        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta",
+        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER, o clustering está relacionado ao layout dos dados",
         "es_correcta": false,
-        "explicacion": "A ordem aleatória geralmente prejudica a poda."
+        "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
       },
       {
-        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística",
+        "texto_opcion": "O clustering natural substitui a necessidade de qualquer estatística, estatísticas/metadados ainda são importantes para otimização.",
         "es_correcta": false,
         "explicacion": "Estatísticas/metadados ainda são importantes para otimização."
       },
       {
-        "texto_opcion": "Clustering natural requer armazém MULTI_CLUSTER",
+        "texto_opcion": "Ordem de inserção aleatória sempre optimizes todos os padrões de consulta, a ordem aleatória geralmente prejudica a poda.",
         "es_correcta": false,
-        "explicacion": "O clustering está relacionado ao layout dos dados, não ao recurso de vários clusters."
+        "explicacion": "A ordem aleatória geralmente prejudica a poda."
+      },
+      {
+        "texto_opcion": "O Snowflake pode obter clustering natural quando a ordem de carregamento se alinha aos.",
+        "es_correcta": true,
+        "explicacion": "A ordem de inserção pode gerar limites de partição benéficos antes do clustering explícito."
       }
     ],
     "tags": [
@@ -1516,19 +1516,19 @@
         "explicacion": "Chaves aleatórias de alta cardinalidade podem não agrupar bem; SOS pode se encaixar melhor."
       },
       {
-        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para consultas pontuais seletivas",
-        "es_correcta": true,
-        "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
-      },
-      {
-        "texto_opcion": "Desative micro-partitions para tabelas UUID",
+        "texto_opcion": "Desative micro-partitions para tabelas UUID, não suportado/desejado.",
         "es_correcta": false,
         "explicacion": "Não suportado/desejado."
       },
       {
-        "texto_opcion": "Use apenas estágio externo CSV",
+        "texto_opcion": "Use apenas estágio externo CSV, o tipo de estágio não substitui a.",
         "es_correcta": false,
         "explicacion": "O tipo de estágio não substitui a otimização de pesquisa para pesquisas de pontos."
+      },
+      {
+        "texto_opcion": "Habilite o Search Optimization Service na tabela/colunas para.",
+        "es_correcta": true,
+        "explicacion": "A Otimização de Pesquisa adiciona estruturas auxiliares para aceleração de pesquisa de pontos."
       }
     ],
     "tags": [
@@ -1550,12 +1550,12 @@
         "explicacion": "O armazenamento colunar oferece suporte à remoção de colunas."
       },
       {
-        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias",
+        "texto_opcion": "Colunar micro-partitions permite a leitura apenas das colunas obrigatórias.",
         "es_correcta": true,
         "explicacion": "A remoção de colunas reduz o IO nas partições."
       },
       {
-        "texto_opcion": "Armazene cada coluna em uma conta separada",
+        "texto_opcion": "Armazene cada coluna em uma conta separada, não é design de floco de neve.",
         "es_correcta": false,
         "explicacion": "Não é design de floco de neve."
       }

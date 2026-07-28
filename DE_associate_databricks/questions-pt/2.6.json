@@ -3,9 +3,9 @@
     "pregunta": "Um engenheiro de dados carrega um arquivo JSON onde cada registro contém um objeto aninhado. Após o carregamento, eles executam:\n\n```píton\ndf = spark.read.format(\"json\").load(\"/data/events\")\ndf.printSchema()\n```\n\nO que o Spark faz com o objeto JSON aninhado por padrão?",
     "opciones": [
       {
-        "texto_opcion": "O Spark infere automaticamente o objeto aninhado como um campo `StructType`.",
-        "es_correcta": true,
-        "explicacion": "O leitor JSON do Spark realiza inferência de esquema e mapeia objetos JSON aninhados para `StructType`, preservando a hierarquia."
+        "texto_opcion": "O Spark gera um erro de análise porque não há suporte para objetos aninhados.",
+        "es_correcta": false,
+        "explicacion": "O leitor JSON do Spark oferece suporte total a objetos e matrizes aninhados."
       },
       {
         "texto_opcion": "O Spark nivela todos os campos aninhados em colunas de nível superior.",
@@ -13,14 +13,14 @@
         "explicacion": "O Spark não é nivelado automaticamente. O nivelamento requer `select` explícito com notação de ponto ou expansão `*`."
       },
       {
+        "texto_opcion": "O Spark infere automaticamente o objeto aninhado como um campo `StructType`.",
+        "es_correcta": true,
+        "explicacion": "O leitor JSON do Spark realiza inferência de esquema e mapeia objetos JSON aninhados para `StructType`, preservando a hierarquia."
+      },
+      {
         "texto_opcion": "O Spark armazena o objeto aninhado como uma coluna de string JSON bruta.",
         "es_correcta": false,
         "explicacion": "O armazenamento de strings brutas requer `format('text')`. O leitor JSON analisa a estrutura por padrão."
-      },
-      {
-        "texto_opcion": "O Spark gera um erro de análise porque não há suporte para objetos aninhados.",
-        "es_correcta": false,
-        "explicacion": "O leitor JSON do Spark oferece suporte total a objetos e matrizes aninhados."
       }
     ],
     "tags": [
@@ -32,22 +32,22 @@
     "pregunta": "Um engenheiro de dados possui um DataFrame com este esquema:\n\n```\nraiz\n |-- id_pedido: string\n |-- cliente: struct<nome:string, cidade:string>\n```\n\nQual expressão extrai corretamente o campo `cidade`?",
     "opciones": [
       {
-        "texto_opcion": "`df.select(\"cliente.cidade\")`",
+        "texto_opcion": "`df.select(\"cliente.cidade\")`.",
         "es_correcta": true,
         "explicacion": "A notação de ponto dentro de um caminho de coluna de string é a maneira padrão de acessar campos struct aninhados no Spark."
       },
       {
-        "texto_opcion": "`df.select(\"cliente[cidade]\")`",
+        "texto_opcion": "`df.select(\"cliente[cidade]\")`, a notação de colchetes com.",
         "es_correcta": false,
         "explicacion": "A notação de colchetes com uma chave de string é para tipos de mapas, não para estruturas."
       },
       {
-        "texto_opcion": "`df.select(col(\"cliente\").cidade)`",
+        "texto_opcion": "`df.select(col(\"cliente\").cidade)`, objetos de coluna não expõem.",
         "es_correcta": false,
         "explicacion": "Objetos de coluna não expõem campos struct como atributos Python. Use `col(\"customer.city\")` em vez disso."
       },
       {
-        "texto_opcion": "`df.select(explode(\"cliente\"))`",
+        "texto_opcion": "`df.select(explode(\"cliente\"))`, `explode` é para arrays e.",
         "es_correcta": false,
         "explicacion": "`explode` é para arrays e mapas, não para estruturas."
       }
@@ -61,24 +61,24 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```píton\ndf = spark.read.format(\"json\").load(\"/data/logs\")\ndf2 = df.select(\"metadados.*\")\n```\n\nO que `metadados.*` faz?",
     "opciones": [
       {
-        "texto_opcion": "Expande todos os campos da estrutura `metadados` em colunas separadas de nível superior.",
-        "es_correcta": true,
-        "explicacion": "O operador `.*` em uma coluna struct promove todos os seus campos filhos para o nível superior do DataFrame."
-      },
-      {
-        "texto_opcion": "Retorna a coluna `metadados` como uma única string JSON.",
+        "texto_opcion": "Gera um erro porque `*` não é válido dentro de um caminho de coluna",
         "es_correcta": false,
-        "explicacion": "Para serializar uma estrutura de volta para JSON você precisa de `to_json(col('metadata'))`, não de `.*`."
+        "explicacion": "`struct.*` é uma sintaxe válida do Spark SQL e funciona em expressões de string SQL e `select`."
       },
       {
-        "texto_opcion": "Filtra linhas onde `metadados` não são nulos.",
+        "texto_opcion": "Filtra linhas onde `metadados` não são nulos, `.*` executa expansão de campo, não filtragem nula.",
         "es_correcta": false,
         "explicacion": "`.*` executa expansão de campo, não filtragem nula."
       },
       {
-        "texto_opcion": "Gera um erro porque `*` não é válido dentro de um caminho de coluna.",
+        "texto_opcion": "Retorna a coluna `metadados` como uma única string JSON, para serializar uma estrutura de volta para JSON você.",
         "es_correcta": false,
-        "explicacion": "`struct.*` é uma sintaxe válida do Spark SQL e funciona em expressões de string SQL e `select`."
+        "explicacion": "Para serializar uma estrutura de volta para JSON você precisa de `to_json(col('metadata'))`, não de `.*`."
+      },
+      {
+        "texto_opcion": "Expande todos os campos da estrutura `metadados` em colunas separadas de.",
+        "es_correcta": true,
+        "explicacion": "O operador `.*` em uma coluna struct promove todos os seus campos filhos para o nível superior do DataFrame."
       }
     ],
     "tags": [
@@ -90,24 +90,24 @@
     "pregunta": "Um conjunto de dados JSON possui um campo de matriz `tags`. Um engenheiro de dados precisa de uma linha por tag por evento. Qual função eles deveriam usar?",
     "opciones": [
       {
-        "texto_opcion": "`explodir(col(\"tags\"))`",
+        "texto_opcion": "`explodir(col(\"tags\"))`.",
         "es_correcta": true,
         "explicacion": "`explode` gera uma linha por elemento do array, que é exatamente o que é necessário para desaninhar o array `tags`."
       },
       {
-        "texto_opcion": "`posexplode(col(\"tags\"))`",
+        "texto_opcion": "`lista_coletada(col(\"tags\"))`, `collect_list` agrega valores.",
+        "es_correcta": false,
+        "explicacion": "`collect_list` agrega valores em um array — o oposto do que é necessário."
+      },
+      {
+        "texto_opcion": "`posexplode(col(\"tags\"))`, `posexplode` também retorna o.",
         "es_correcta": false,
         "explicacion": "`posexplode` também retorna o índice do elemento — útil quando a posição é importante, mas não é obrigatório aqui."
       },
       {
-        "texto_opcion": "`achatar(col(\"tags\"))`",
+        "texto_opcion": "`achatar(col(\"tags\"))`, `flatten` mescla arrays aninhados em.",
         "es_correcta": false,
         "explicacion": "`flatten` mescla arrays aninhados em um único array; não gera linhas."
-      },
-      {
-        "texto_opcion": "`lista_coletada(col(\"tags\"))`",
-        "es_correcta": false,
-        "explicacion": "`collect_list` agrega valores em um array — o oposto do que é necessário."
       }
     ],
     "tags": [
@@ -119,22 +119,22 @@
     "pregunta": "Um engenheiro de dados precisa analisar uma string JSON armazenada em uma coluna `payload` com esquema `STRUCT<event:STRING, ts:TIMESTAMP>`. Qual código está correto?\n\n```píton\nde pyspark.sql.functions importar from_json\nde pyspark.sql.types importar StructType, StructField, StringType, TimestampType\n```",
     "opciones": [
       {
-        "texto_opcion": "```píton\nesquema = StructType([StructField(\"evento\", StringType()), StructField(\"ts\", TimestampType())])\ndf.select(from_json(col(\"carga útil\"), esquema).alias(\"analisado\"))\n```",
-        "es_correcta": true,
-        "explicacion": "`from_json` analisa uma coluna de string JSON usando um esquema fornecido, produzindo uma coluna struct."
-      },
-      {
-        "texto_opcion": "```píton\ndf.select(col(\"carga útil\").cast(\"struct<evento:string,ts:timestamp>\"))\n```",
+        "texto_opcion": "```píton\ndf.select.cast)\n```, você não pode converter uma string para um tipo struct diretamente com `.cast()`. `from_json` é obrigatório.",
         "es_correcta": false,
         "explicacion": "Você não pode converter uma string para um tipo struct diretamente com `.cast()`. `from_json` é obrigatório."
       },
       {
-        "texto_opcion": "```píton\ndf.select(json_tuple(col(\"carga útil\"), \"evento\", \"ts\"))\n```",
+        "texto_opcion": "```píton\ndf.select(json_tuple(col(\"carga útil\"), \"evento\", \"ts\"))\n```, `json_tuple` extrai campos como strings simples sem conversão de tipo.",
         "es_correcta": false,
         "explicacion": "`json_tuple` extrai campos como strings simples sem conversão de tipo - não equivalente a uma estrutura digitada."
       },
       {
-        "texto_opcion": "```píton\ndf.select(get_json_object(col(\"carga útil\"), \"$\").alias(\"analisado\"))\n```",
+        "texto_opcion": "```píton\nesquema = StructType), StructField)])\ndf.select, esquema).alias)\n```.",
+        "es_correcta": true,
+        "explicacion": "`from_json` analisa uma coluna de string JSON usando um esquema fornecido, produzindo uma coluna struct."
+      },
+      {
+        "texto_opcion": "```píton\ndf.select, \"$\").alias)\n```, `get_json_object` extrai um único caminho escalar como uma string, não uma estrutura digitada completa.",
         "es_correcta": false,
         "explicacion": "`get_json_object` extrai um único caminho escalar como uma string, não uma estrutura digitada completa."
       }
@@ -153,12 +153,7 @@
         "explicacion": "Por padrão, o Spark espera um registro JSON por linha. `multiLine=True` permite registros que abrangem várias linhas."
       },
       {
-        "texto_opcion": "Adicione `.option(\"inferSchema\", True)` antes de `.load()`.",
-        "es_correcta": false,
-        "explicacion": "`inferSchema` controla a inferência de tipo, não a análise multilinha."
-      },
-      {
-        "texto_opcion": "Mude para `format(\"text\")` e analise manualmente.",
+        "texto_opcion": "Mude para `format(\"text\")` e analise manualmente, isso funciona",
         "es_correcta": false,
         "explicacion": "Isso funciona, mas é desnecessário; a opção `multiLine` do leitor JSON é a solução correta e mais simples."
       },
@@ -166,6 +161,11 @@
         "texto_opcion": "Adicione `.option(\"wholeFile\", True)` antes de `.load()`.",
         "es_correcta": false,
         "explicacion": "`wholeFile` não é uma opção válida do leitor Spark JSON. A opção correta é `multiLine`."
+      },
+      {
+        "texto_opcion": "Adicione `.option(\"inferSchema\", True)` antes de `.load()`.",
+        "es_correcta": false,
+        "explicacion": "`inferSchema` controla a inferência de tipo, não a análise multilinha."
       }
     ],
     "tags": [
@@ -177,24 +177,24 @@
     "pregunta": "Um engenheiro de dados consulta uma coluna VARIANT no Databricks SQL:\n\n```sql\nSELECIONE event_data:user_id::STRING AS user_id\nDE raw_events\n```\n\nO que a parte `::STRING` faz?",
     "opciones": [
       {
+        "texto_opcion": "Apelida o campo extraído como `STRING`",
+        "es_correcta": false,
+        "explicacion": "`AS user_id` fornece o alias; `::STRING` é o tipo convertido."
+      },
+      {
         "texto_opcion": "Converte o valor VARIANT extraído em um tipo STRING.",
         "es_correcta": true,
         "explicacion": "Na sintaxe VARIANT, `::TYPE` é o operador de conversão que converte o valor semiestruturado em uma coluna SQL digitada."
       },
       {
-        "texto_opcion": "Filtra linhas onde `user_id` é uma string.",
-        "es_correcta": false,
-        "explicacion": "`::TYPE` executa uma conversão, não um filtro. Use uma cláusula `WHERE` para filtrar por tipo."
-      },
-      {
-        "texto_opcion": "Concatena `user_id` com uma string vazia.",
+        "texto_opcion": "Concatena `user_id` com uma string vazia",
         "es_correcta": false,
         "explicacion": "`::` é o operador de conversão VARIANT, não a concatenação de strings."
       },
       {
-        "texto_opcion": "Apelida o campo extraído como `STRING`.",
+        "texto_opcion": "Filtra linhas onde `user_id` é uma string",
         "es_correcta": false,
-        "explicacion": "`AS user_id` fornece o alias; `::STRING` é o tipo convertido."
+        "explicacion": "`::TYPE` executa uma conversão, não um filtro. Use uma cláusula `WHERE` para filtrar por tipo."
       }
     ],
     "tags": [
@@ -206,22 +206,22 @@
     "pregunta": "Qual tipo de dados do Databricks foi projetado para armazenar dados semiestruturados com campos flexíveis e sem esquema que podem ser consultados diretamente com expressões de caminho?",
     "opciones": [
       {
-        "texto_opcion": "`VARIANTE`",
+        "texto_opcion": "`VARIANTE`.",
         "es_correcta": true,
         "explicacion": "VARIANT é o tipo nativo do Databricks para dados semiestruturados, permitindo extração flexível de campos sem pré-definir um esquema."
       },
       {
-        "texto_opcion": "`MAP<STRING, STRING>`",
+        "texto_opcion": "`MAP<STRING, STRING>`, mAP requer tipos de valores uniformes.",
         "es_correcta": false,
         "explicacion": "MAP requer tipos de valores uniformes e não oferece suporte a estruturas heterogêneas aninhadas como VARIANT."
       },
       {
-        "texto_opcion": "`ESTRUTURA`",
+        "texto_opcion": "`ESTRUTURA`, sTRUCT requer um esquema fixo e definido no.",
         "es_correcta": false,
         "explicacion": "STRUCT requer um esquema fixo e definido no momento da criação - não sem esquema."
       },
       {
-        "texto_opcion": "`STRING`",
+        "texto_opcion": "`STRING`, sTRING armazena texto bruto, sTRING armazena texto bruto.",
         "es_correcta": false,
         "explicacion": "STRING armazena texto bruto. A extração de caminho requer funções de análise como `get_json_object`, ao contrário de VARIANT."
       }
@@ -240,12 +240,12 @@
         "explicacion": "A notação de caminho de dois pontos em VARIANT suporta encadeamento para percorrer objetos aninhados. `::STRING` lança o valor final extraído."
       },
       {
-        "texto_opcion": "Todo o objeto `details` como uma STRING.",
+        "texto_opcion": "Todo o objeto `details` como uma STRING, `event_data:details` extrai `details`.",
         "es_correcta": false,
         "explicacion": "`event_data:details` extrai `details`. A etapa adicional `:location` detalha seu campo `location`."
       },
       {
-        "texto_opcion": "Uma concatenação de nomes de campos `detalhes` e `localização`.",
+        "texto_opcion": "Uma concatenação de nomes de campos `detalhes` e `localização`",
         "es_correcta": false,
         "explicacion": "A sintaxe de dois pontos é a navegação de caminho em VARIANT, não a concatenação de strings."
       },
@@ -264,24 +264,24 @@
     "pregunta": "Um engenheiro de dados deseja armazenar respostas brutas da API (JSON com esquemas imprevisíveis) em uma tabela Delta para processamento posterior. Qual tipo de coluna é mais apropriado?",
     "opciones": [
       {
-        "texto_opcion": "`VARIANTE`",
-        "es_correcta": true,
-        "explicacion": "VARIANT foi desenvolvido especificamente para armazenar dados semiestruturados com esquemas em evolução ou desconhecidos, evitando definições de estrutura rígidas."
-      },
-      {
-        "texto_opcion": "`STRING`",
-        "es_correcta": false,
-        "explicacion": "STRING funcionaria, mas consultar campos aninhados requer `get_json_object` em cada acesso - VARIANT é mais eficiente e ergonômico."
-      },
-      {
-        "texto_opcion": "`BINÁRIO`",
+        "texto_opcion": "`BINÁRIO`, bINARY armazena bytes brutos sem recursos.",
         "es_correcta": false,
         "explicacion": "BINARY armazena bytes brutos sem recursos integrados de extração de caminho."
       },
       {
-        "texto_opcion": "`STRUCT<dados:STRING>`",
+        "texto_opcion": "`STRING`, sTRING funcionaria, mas consultar campos aninhados.",
+        "es_correcta": false,
+        "explicacion": "STRING funcionaria, mas consultar campos aninhados requer `get_json_object` em cada acesso - VARIANT é mais eficiente e ergonômico."
+      },
+      {
+        "texto_opcion": "`STRUCT<dados:STRING>`, uma STRUCT envolvendo uma STRING.",
         "es_correcta": false,
         "explicacion": "Uma STRUCT envolvendo uma STRING ainda requer análise manual e não fornece extração de caminho de VARIANT."
+      },
+      {
+        "texto_opcion": "`VARIANTE`.",
+        "es_correcta": true,
+        "explicacion": "VARIANT foi desenvolvido especificamente para armazenar dados semiestruturados com esquemas em evolução ou desconhecidos, evitando definições de estrutura rígidas."
       }
     ],
     "tags": [
@@ -293,22 +293,22 @@
     "pregunta": "Um engenheiro de dados lê um conjunto de dados JSON e percebe que muitas colunas contêm `nulo` porque alguns registros têm campos extras, outros não. O engenheiro deseja que a inferência de esquema capture todos os campos possíveis. Qual opção ajuda?\n\n```píton\ndf = spark.read.format(\"json\")\n```",
     "opciones": [
       {
+        "texto_opcion": "Adicione `.option(\"mode\", \"PERMISSIVE\")` para capturar todos os campos",
+        "es_correcta": false,
+        "explicacion": "O modo `PERMISSIVE` lida com registros malformados, não com campos opcionais esparsos."
+      },
+      {
         "texto_opcion": "Adicione `.option(\"columnNameOfCorruptRecord\", \"_corrupt\")` e experimente mais registros.",
         "es_correcta": false,
         "explicacion": "`columnNameOfCorruptRecord` captura linhas malformadas, não faltando campos de esquema."
       },
       {
-        "texto_opcion": "Adicione `.option(\"samplingRatio\", 1.0)` para que todos os registros sejam usados para inferência de esquema.",
+        "texto_opcion": "Adicione `.option` para que todos os registros sejam usados para inferência de esquema.",
         "es_correcta": true,
         "explicacion": "Por padrão, o Spark amostra uma fração de linhas. Definir `samplingRatio=1.0` força a varredura de todas as linhas, capturando todos os campos opcionais."
       },
       {
-        "texto_opcion": "Adicione `.option(\"mode\", \"PERMISSIVE\")` para capturar todos os campos.",
-        "es_correcta": false,
-        "explicacion": "O modo `PERMISSIVE` lida com registros malformados, não com campos opcionais esparsos."
-      },
-      {
-        "texto_opcion": "Adicione `.option(\"inferSchema\", False)` para evitar colunas nulas.",
+        "texto_opcion": "Adicione `.option(\"inferSchema\", False)` para evitar colunas nulas",
         "es_correcta": false,
         "explicacion": "Desabilitar `inferSchema` lê tudo como STRING e não resolve o problema de campo esparso."
       }
@@ -322,24 +322,24 @@
     "pregunta": "Um engenheiro de dados executa o seguinte código:\n\n```píton\nde pyspark.sql.functions importar get_json_object\ndf.select(get_json_object(col(\"carga útil\"), \"\\$.address.zip\")).show()\n```\n\nO que `.address.zip` representa?",
     "opciones": [
       {
+        "texto_opcion": "Um caminho do sistema de arquivos dentro do documento JSON, `$` é o símbolo raiz JSONPath",
+        "es_correcta": false,
+        "explicacion": "`$` é o símbolo raiz JSONPath, não um indicador de caminho de arquivo."
+      },
+      {
         "texto_opcion": "Uma expressão JSONPath navegando para o campo `zip` dentro de `address`.",
         "es_correcta": true,
         "explicacion": "`get_json_object` usa a sintaxe JSONPath. `$` é a raiz, `.address.zip` atravessa o caminho aninhado."
       },
       {
-        "texto_opcion": "Uma referência de coluna SQL usando notação de ponto.",
-        "es_correcta": false,
-        "explicacion": "Esta é a notação JSONPath, não a notação de ponto SQL. `get_json_object` requer strings JSONPath."
-      },
-      {
-        "texto_opcion": "Um padrão regex para extrair códigos postais.",
+        "texto_opcion": "Um padrão regex para extrair códigos postais, `get_json_object` usa JSONPath",
         "es_correcta": false,
         "explicacion": "`get_json_object` usa JSONPath, não regex. Use `regexp_extract` para extração baseada em regex."
       },
       {
-        "texto_opcion": "Um caminho do sistema de arquivos dentro do documento JSON.",
+        "texto_opcion": "Uma referência de coluna SQL usando notação de ponto, esta é a notação JSONPath",
         "es_correcta": false,
-        "explicacion": "`$` é o símbolo raiz JSONPath, não um indicador de caminho de arquivo."
+        "explicacion": "Esta é a notação JSONPath, não a notação de ponto SQL. `get_json_object` requer strings JSONPath."
       }
     ],
     "tags": [
@@ -351,9 +351,9 @@
     "pregunta": "Uma tabela Delta possui uma coluna `VARIANT` `event`. Um engenheiro de dados deseja linhas onde o campo `status` dentro de `event` seja igual a `'error'`. Qual SQL está correto?",
     "opciones": [
       {
-        "texto_opcion": "`SELECT * FROM registra WHERE evento:status::STRING = 'erro'`",
-        "es_correcta": true,
-        "explicacion": "A navegação por caminho de dois pontos extrai o campo de VARIANT e `::STRING` o lança para comparação."
+        "texto_opcion": "`SELECT * FROM registra WHERE evento['status'] = 'erro'`",
+        "es_correcta": false,
+        "explicacion": "A notação de colchetes é para tipos de MAP. VARIANT usa sintaxe de caminho de dois pontos."
       },
       {
         "texto_opcion": "`SELECT * FROM logs WHERE event.status = 'error'`",
@@ -361,14 +361,14 @@
         "explicacion": "A notação de ponto é para colunas STRUCT. VARIANT requer sintaxe de caminho baseada em dois pontos."
       },
       {
+        "texto_opcion": "`SELECT * FROM registra WHERE evento:status::STRING = 'erro'`.",
+        "es_correcta": true,
+        "explicacion": "A navegação por caminho de dois pontos extrai o campo de VARIANT e `::STRING` o lança para comparação."
+      },
+      {
         "texto_opcion": "`SELECT * FROM logs WHERE get_json_object(event, '$.status') = 'error'`",
         "es_correcta": false,
         "explicacion": "`get_json_object` funciona em colunas STRING, não em colunas VARIANT."
-      },
-      {
-        "texto_opcion": "`SELECT * FROM registra WHERE evento['status'] = 'erro'`",
-        "es_correcta": false,
-        "explicacion": "A notação de colchetes é para tipos de MAP. VARIANT usa sintaxe de caminho de dois pontos."
       }
     ],
     "tags": [
@@ -380,24 +380,24 @@
     "pregunta": "Um engenheiro de dados ingere arquivos CSV que às vezes contêm um blob JSON em uma única coluna `meta`. Eles precisam do campo `region` desse blob como uma coluna digitada. Qual abordagem está correta?",
     "opciones": [
       {
-        "texto_opcion": "Use `from_json(col(\"meta\"), schema)` com um `StructType` definindo `region`.",
-        "es_correcta": true,
-        "explicacion": "`from_json` analisa uma coluna de string JSON usando um esquema explícito, produzindo uma estrutura digitada a partir da qual `region` pode ser acessada."
-      },
-      {
-        "texto_opcion": "Transmita `meta` para `STRUCT<region:STRING>` usando `.cast()`.",
+        "texto_opcion": "Transmita `meta` para `STRUCT<region:STRING>` usando `.cast()`, o Spark não suporta a conversão direta de STRING para.",
         "es_correcta": false,
         "explicacion": "O Spark não suporta a conversão direta de STRING para STRUCT. `from_json` é obrigatório."
       },
       {
-        "texto_opcion": "Use `explode(col(\"meta\"))` para expandir o JSON.",
+        "texto_opcion": "Use `schema_of_json(col(\"meta\"))` para extrair `region`, `schema_of_json` retorna o esquema inferido como uma string -.",
+        "es_correcta": false,
+        "explicacion": "`schema_of_json` retorna o esquema inferido como uma string - ele não analisa dados. É usado para construir strings de esquema, não para extrair valores."
+      },
+      {
+        "texto_opcion": "Use `explode(col(\"meta\"))` para expandir o JSON, `explode` opera em arrays e mapas, não em strings JSON.",
         "es_correcta": false,
         "explicacion": "`explode` opera em arrays e mapas, não em strings JSON."
       },
       {
-        "texto_opcion": "Use `schema_of_json(col(\"meta\"))` para extrair `region`.",
-        "es_correcta": false,
-        "explicacion": "`schema_of_json` retorna o esquema inferido como uma string - ele não analisa dados. É usado para construir strings de esquema, não para extrair valores."
+        "texto_opcion": "Use `from_json(col(\"meta\"), schema)` com um `StructType` definindo `region`.",
+        "es_correcta": true,
+        "explicacion": "`from_json` analisa uma coluna de string JSON usando um esquema explícito, produzindo uma estrutura digitada a partir da qual `region` pode ser acessada."
       }
     ],
     "tags": [
@@ -409,24 +409,24 @@
     "pregunta": "Um engenheiro de dados lê um arquivo JSON e deseja capturar registros malformados sem falhar no job. Qual modo de leitura eles devem usar?\n\n```píton\ndf = spark.read.format(\"json\").option(\"modo\", ???).load(\"/dados/raw\")\n```",
     "opciones": [
       {
-        "texto_opcion": "`PERMISSIVO`",
-        "es_correcta": true,
-        "explicacion": "PERMISSIVE (o padrão) armazena registros malformados em uma coluna `_corrupt_record` em vez de falhar no job."
-      },
-      {
-        "texto_opcion": "`DROPMALFORMADO`",
-        "es_correcta": false,
-        "explicacion": "`DROPMALFORMED` descarta silenciosamente linhas incorretas - não as captura."
-      },
-      {
-        "texto_opcion": "`FALHA RÁPIDA`",
+        "texto_opcion": "`FALHA RÁPIDA`, `FAILFAST` lança imediatamente uma exceção no.",
         "es_correcta": false,
         "explicacion": "`FAILFAST` lança imediatamente uma exceção no primeiro registro malformado."
       },
       {
-        "texto_opcion": "`RESGATE`",
+        "texto_opcion": "`DROPMALFORMADO`, `DROPMALFORMED` descarta silenciosamente.",
+        "es_correcta": false,
+        "explicacion": "`DROPMALFORMED` descarta silenciosamente linhas incorretas - não as captura."
+      },
+      {
+        "texto_opcion": "`RESGATE`, `RESCUE` é o recurso de coluna de dados resgatados.",
         "es_correcta": false,
         "explicacion": "`RESCUE` é o recurso de coluna de dados resgatados de Auto Loader, não um modo de leitura padrão do Spark JSON."
+      },
+      {
+        "texto_opcion": "`PERMISSIVO`.",
+        "es_correcta": true,
+        "explicacion": "PERMISSIVE (o padrão) armazena registros malformados em uma coluna `_corrupt_record` em vez de falhar no job."
       }
     ],
     "tags": [
@@ -438,22 +438,22 @@
     "pregunta": "Um engenheiro de dados precisa converter uma coluna struct `address` de volta em uma string JSON para exportação downstream. Qual função está correta?",
     "opciones": [
       {
-        "texto_opcion": "`to_json(col(\"endereço\"))`",
+        "texto_opcion": "`to_json(col(\"endereço\"))`.",
         "es_correcta": true,
         "explicacion": "`to_json` serializa uma coluna struct, array ou map em uma string JSON, que é o inverso de `from_json`."
       },
       {
-        "texto_opcion": "`cast(col(\"endereço\"), \"string\")`",
+        "texto_opcion": "`cast(col(\"endereço\"), \"string\")`, a conversão de uma.",
         "es_correcta": false,
         "explicacion": "A conversão de uma estrutura para STRING produz um formato interno do Spark como `[val1, val2]`, não JSON válido."
       },
       {
-        "texto_opcion": "`json_tuple(col(\"endereço\"))`",
+        "texto_opcion": "`json_tuple(col(\"endereço\"))`, `json_tuple` extrai campos de.",
         "es_correcta": false,
         "explicacion": "`json_tuple` extrai campos de uma string JSON - ele não serializa uma estrutura."
       },
       {
-        "texto_opcion": "`esquema_of_json(col(\"endereço\"))`",
+        "texto_opcion": "`esquema_of_json(col(\"endereço\"))`, `schema_of_json` retorna uma.",
         "es_correcta": false,
         "explicacion": "`schema_of_json` retorna uma string de esquema, não um valor serializado JSON."
       }
@@ -467,24 +467,24 @@
     "pregunta": "Um engenheiro de dados tem uma coluna de array `items` do tipo `ARRAY<STRUCT<name:STRING, qty:INT>>`. Qual código extrai o `nome` de cada elemento após explodir?\n\n```píton\nde pyspark.sql.functions importar explodir, col\n```",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf.select(explode(col(\"items\")).alias(\"item\")).select(col(\"item.nome\"))\n```",
-        "es_correcta": true,
-        "explicacion": "`explode` produz uma linha struct por elemento; a notação de ponto então acessa o campo `name` da estrutura resultante."
-      },
-      {
         "texto_opcion": "```píton\ndf.select(explode(col(\"items.nome\")))\n```",
         "es_correcta": false,
         "explicacion": "`items.name` em um ARRAY<STRUCT> retorna um ARRAY<STRING>; você precisaria explodir isso, não a estrutura."
       },
       {
-        "texto_opcion": "```píton\ndf.select(flatten(col(\"items\")).alias(\"item\")).select(\"item.nome\")\n```",
-        "es_correcta": false,
-        "explicacion": "`flatten` mescla arrays aninhados - não gera linhas a partir de um array de estruturas de nível único."
+        "texto_opcion": "```píton\ndf.select).alias(\"item\")).select)\n```.",
+        "es_correcta": true,
+        "explicacion": "`explode` produz uma linha struct por elemento; a notação de ponto então acessa o campo `name` da estrutura resultante."
       },
       {
         "texto_opcion": "```píton\ndf.select(col(\"itens[0].nome\"))\n```",
         "es_correcta": false,
         "explicacion": "O acesso ao índice recupera apenas o primeiro elemento. `explode` é necessário para gerar uma linha por elemento."
+      },
+      {
+        "texto_opcion": "```píton\ndf.select).alias(\"item\")).select\n```",
+        "es_correcta": false,
+        "explicacion": "`flatten` mescla arrays aninhados - não gera linhas a partir de um array de estruturas de nível único."
       }
     ],
     "tags": [
@@ -496,17 +496,17 @@
     "pregunta": "Um engenheiro de dados precisa ler apenas o primeiro elemento de uma coluna de array `scores` do tipo `ARRAY<INT>`. Qual expressão está correta?",
     "opciones": [
       {
-        "texto_opcion": "`col(\"pontuações\")[0]`",
+        "texto_opcion": "`col(\"pontuações\")[0]`.",
         "es_correcta": true,
         "explicacion": "O Spark oferece suporte ao acesso ao índice inteiro baseado em 0 em colunas de array usando notação de colchetes em um objeto Column."
       },
       {
-        "texto_opcion": "`col(\"pontuações\").primeiro()`",
+        "texto_opcion": "`col(\"pontuações\").primeiro()`, objetos de coluna não possuem.",
         "es_correcta": false,
         "explicacion": "Objetos de coluna não possuem método `.first()`. `first()` é uma função de agregação DataFrame."
       },
       {
-        "texto_opcion": "`element_at(col(\"pontuações\"), 0)`",
+        "texto_opcion": "`element_at(col(\"pontuações\"), 0)`, `element_at` usa indexação.",
         "es_correcta": false,
         "explicacion": "`element_at` usa indexação baseada em 1 no Spark SQL - o índice 0 retornaria nulo ou geraria um erro."
       },
@@ -525,17 +525,17 @@
     "pregunta": "Um engenheiro de dados usa Auto Loader para ingerir arquivos JSON. Alguns registros possuem campos que não estão presentes no esquema definido. Qual recurso Auto Loader captura esses campos extras sem alterações de esquema?\n\n```píton\nspark.readStream.format(\"cloudFiles\")\n    .option(\"cloudFiles.formato\", \"json\")\n```",
     "opciones": [
       {
-        "texto_opcion": "A coluna de dados resgatados (`_rescued_data`), habilitada com a opção `rescuedDataColumn`.",
+        "texto_opcion": "A coluna de dados resgatados, habilitada com a opção `rescuedDataColumn`.",
         "es_correcta": true,
         "explicacion": "A coluna de dados resgatada de Auto Loader armazena todos os campos que não se enquadram no esquema - incluindo chaves extras/inesperadas - como uma string JSON."
       },
       {
-        "texto_opcion": "Evolução do esquema, acionada pela configuração `mergeSchema=True`.",
+        "texto_opcion": "Evolução do esquema, acionada pela configuração `mergeSchema=True`",
         "es_correcta": false,
         "explicacion": "`mergeSchema` adiciona novas colunas ao esquema ao longo do tempo, mas não captura valores na mesma execução."
       },
       {
-        "texto_opcion": "O modo PERMISSIVE armazena campos extras em `_corrupt_record`.",
+        "texto_opcion": "O modo PERMISSIVE armazena campos extras em `_corrupt_record`",
         "es_correcta": false,
         "explicacion": "`_corrupt_record` captura JSON malformado, registros não válidos com campos extras."
       },
@@ -554,17 +554,17 @@
     "pregunta": "Um engenheiro de dados deseja verificar o esquema inferido de uma string JSON de amostra sem ler um arquivo completo. Qual função ajuda?\n\n```píton\namostra = '{\"id\": 1, \"tags\": [\"a\", \"b\"]}'\n```",
     "opciones": [
       {
-        "texto_opcion": "`esquema_of_json(amostra)`",
+        "texto_opcion": "`esquema_of_json(amostra)`.",
         "es_correcta": true,
         "explicacion": "`schema_of_json` retorna uma string de esquema estilo DDL inferida da amostra JSON fornecida - útil para construir strings de esquema dinamicamente."
       },
       {
-        "texto_opcion": "`from_json(lit(amostra), 'auto')`",
+        "texto_opcion": "`from_json(lit(amostra), 'auto')`, `from_json` requer um.",
         "es_correcta": false,
         "explicacion": "`from_json` requer um esquema explícito; `'auto'` não é um argumento de esquema válido."
       },
       {
-        "texto_opcion": "`get_json_object(lit(amostra), '$')`",
+        "texto_opcion": "`get_json_object(lit(amostra), '$')`, `get_json_object` extrai um.",
         "es_correcta": false,
         "explicacion": "`get_json_object` extrai um valor em um caminho - não infere nem retorna um esquema."
       },
@@ -583,24 +583,24 @@
     "pregunta": "Um engenheiro de dados precisa ler uma pasta de arquivos JSON onde arquivos diferentes têm esquemas diferentes e deseja que todos os campos de todos os arquivos sejam um DataFrame. Qual opção permite isso?\n\n```píton\ndf = spark.read.format(\"json\").load(\"/dados/misto\")\n```",
     "opciones": [
       {
-        "texto_opcion": "Adicione `.option(\"mergeSchema\", True)`.",
-        "es_correcta": true,
-        "explicacion": "`mergeSchema=True` une os esquemas de todos os arquivos, adicionando valores nulos onde um arquivo não possui um campo específico."
-      },
-      {
-        "texto_opcion": "Adicione `.option(\"inferSchema\", True)`.",
-        "es_correcta": false,
-        "explicacion": "`inferSchema=True` infere tipos, mas o padrão é amostragem - não necessariamente mescla esquemas entre arquivos."
-      },
-      {
-        "texto_opcion": "Adicione `.option(\"multiLine\", True)`.",
+        "texto_opcion": "Adicione `.option(\"multiLine\", True)`",
         "es_correcta": false,
         "explicacion": "`multiLine` aborda registros JSON multilinhas, não diferenças de esquema entre arquivos."
+      },
+      {
+        "texto_opcion": "Adicione `.option(\"inferSchema\", True)`",
+        "es_correcta": false,
+        "explicacion": "`inferSchema=True` infere tipos, mas o padrão é amostragem - não necessariamente mescla esquemas entre arquivos."
       },
       {
         "texto_opcion": "Adicione `.option(\"recursiveFileLookup\", True)`.",
         "es_correcta": false,
         "explicacion": "`recursiveFileLookup` descobre arquivos em subdiretórios aninhados - não mescla esquemas."
+      },
+      {
+        "texto_opcion": "Adicione `.option(\"mergeSchema\", True)`.",
+        "es_correcta": true,
+        "explicacion": "`mergeSchema=True` une os esquemas de todos os arquivos, adicionando valores nulos onde um arquivo não possui um campo específico."
       }
     ],
     "tags": [
@@ -612,7 +612,7 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```píton\nde pyspark.sql.functions importar arrays_zip, col\ndf.select(arrays_zip(col(\"nomes\"), col(\"pontuações\")).alias(\"zipado\"))\n```\n\nO que `arrays_zip` produz?",
     "opciones": [
       {
-        "texto_opcion": "Uma matriz de estruturas que emparelham elementos de `nomes` e `pontuações` por posição.",
+        "texto_opcion": "Uma matriz de estruturas que emparelham elementos de `nomes` e `pontuações`.",
         "es_correcta": true,
         "explicacion": "`arrays_zip` combina vários arrays do mesmo comprimento elemento a elemento em um array de estruturas."
       },
@@ -622,12 +622,12 @@
         "explicacion": "A concatenação é feita com `array_union` ou `concat`. `arrays_zip` emparelha elementos por índice."
       },
       {
-        "texto_opcion": "Uma junção cruzada de todos os elementos de ambas as matrizes.",
+        "texto_opcion": "Uma junção cruzada de todos os elementos de ambas as matrizes",
         "es_correcta": false,
         "explicacion": "`arrays_zip` é posicional (elemento 0 com elemento 0), não um produto vetorial."
       },
       {
-        "texto_opcion": "Um mapa de chaves de `nomes` para valores de `pontuações`.",
+        "texto_opcion": "Um mapa de chaves de `nomes` para valores de `pontuações`",
         "es_correcta": false,
         "explicacion": "Use `map_from_arrays` para criar um mapa. `arrays_zip` produz um array de estruturas."
       }
@@ -641,7 +641,12 @@
     "pregunta": "Uma coluna VARIANT `payload` pode ou não conter um campo `price`. Um engenheiro de dados deseja `NULL` para preços ausentes, em vez de um erro. Qual SQL lida com isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "`SELECIONE carga útil:preço::DOUBLE AS preço dos pedidos`",
+        "texto_opcion": "`SELECT COALESCE(carga:preço, 0)::DOUBLE AS preço dos pedidos`",
+        "es_correcta": false,
+        "explicacion": "`COALESCE` substitui um padrão para NULLs, que altera os valores ausentes para 0 - essa é uma escolha de lógica de negócios, não necessária para segurança nula."
+      },
+      {
+        "texto_opcion": "`SELECIONE carga útil:preço::DOUBLE AS preço dos pedidos`.",
         "es_correcta": true,
         "explicacion": "A extração do caminho VARIANT retorna NULL quando o campo está ausente - nenhum tratamento especial de nulo é necessário."
       },
@@ -651,12 +656,7 @@
         "explicacion": "`TRY_CAST` é usado para conversão segura de valores digitados. O acesso ao caminho VARIANT já retorna NULL para caminhos ausentes."
       },
       {
-        "texto_opcion": "`SELECT COALESCE(carga:preço, 0)::DOUBLE AS preço dos pedidos`",
-        "es_correcta": false,
-        "explicacion": "`COALESCE` substitui um padrão para NULLs, que altera os valores ausentes para 0 - essa é uma escolha de lógica de negócios, não necessária para segurança nula."
-      },
-      {
-        "texto_opcion": "`SELECT IF(carga útil:preço NÃO É NULO, carga útil:preço::DOUBLE, NULL) AS preço FROM pedidos`",
+        "texto_opcion": "`SELECT IF(carga útil:preço NÃO É NULO, carga útil:preço::DOUBLE",
         "es_correcta": false,
         "explicacion": "A condicional é redundante — o acesso ao caminho VARIANT já retorna NULL naturalmente quando o campo está ausente."
       }
@@ -670,14 +670,9 @@
     "pregunta": "Um engenheiro de dados possui um campo JSON aninhado `event.user.address.country` e precisa dele como uma coluna de nível superior. Qual código PySpark está correto?",
     "opciones": [
       {
-        "texto_opcion": "`df.select(col(\"event.user.address.country\").alias(\"país\"))`",
-        "es_correcta": true,
-        "explicacion": "O Spark oferece suporte à notação de ponto encadeado em colunas de estrutura aninhadas. Cada ponto atravessa um nível de estrutura."
-      },
-      {
-        "texto_opcion": "`df.select(col(\"evento\")[\"usuário\"][\"endereço\"][\"país\"].alias(\"país\"))`",
+        "texto_opcion": "`df.withColumn(\"país\", col(\"evento\").user.address.country)`",
         "es_correcta": false,
-        "explicacion": "A notação de colchetes com chaves de string funciona para tipos MAP, não para colunas STRUCT aninhadas."
+        "explicacion": "O encadeamento de atributos Python em objetos Column não é compatível. Use notação de ponto de string: `col(\"event.user.address.country\")`."
       },
       {
         "texto_opcion": "`df.select(get_json_object(col(\"evento\"), \"$.user.address.country\").alias(\"país\"))`",
@@ -685,9 +680,14 @@
         "explicacion": "`get_json_object` funciona em colunas STRING contendo JSON. Após a análise, `event` é um STRUCT, não uma string."
       },
       {
-        "texto_opcion": "`df.withColumn(\"país\", col(\"evento\").user.address.country)`",
+        "texto_opcion": "`df.select(col(\"evento\")[\"usuário\"][\"endereço\"][\"país\"].alias(\"país\"))`",
         "es_correcta": false,
-        "explicacion": "O encadeamento de atributos Python em objetos Column não é compatível. Use notação de ponto de string: `col(\"event.user.address.country\")`."
+        "explicacion": "A notação de colchetes com chaves de string funciona para tipos MAP, não para colunas STRUCT aninhadas."
+      },
+      {
+        "texto_opcion": "`df.select(col(\"event.user.address.country\").alias(\"país\"))`.",
+        "es_correcta": true,
+        "explicacion": "O Spark oferece suporte à notação de ponto encadeado em colunas de estrutura aninhadas. Cada ponto atravessa um nível de estrutura."
       }
     ],
     "tags": [
@@ -699,7 +699,7 @@
     "pregunta": "Um engenheiro de dados lê um arquivo de matriz JSON (nível superior `[...]`) em vez de JSON delimitado por nova linha. A leitura não retorna nenhuma linha. Quais são as duas opções juntas que corrigem isso?\n\n```píton\nspark.read.format(\"json\")\n```",
     "opciones": [
       {
-        "texto_opcion": "`.option(\"multiLine\", True)` e `.option(\"inferSchema\", True)`",
+        "texto_opcion": "`.option(\"multiLine\", True)` e `.option(\"inferSchema\", True)`.",
         "es_correcta": true,
         "explicacion": "`multiLine=True` é a correção essencial - ele diz ao Spark para ler o arquivo inteiro como um único documento JSON em vez de linha por linha, o que permite analisar o array de nível superior e retornar linhas. `inferSchema=True` está incluído para detectar automaticamente os tipos de colunas dos elementos do array; sem ele, o Spark ainda lê as linhas, mas retorna todas as colunas como strings."
       },

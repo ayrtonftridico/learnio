@@ -3,24 +3,24 @@
     "pregunta": "Gaming studio scenario — enforce least privilege for analysts querying curated tables. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account",
-        "es_correcta": false,
-        "explicacion": "Violates least privilege and manageability."
-      },
-      {
-        "texto_opcion": "Use shared user account for all employees",
+        "texto_opcion": "Use shared user account for all employees, breaks auditability and RBAC.",
         "es_correcta": false,
         "explicacion": "Breaks auditability and RBAC."
       },
       {
-        "texto_opcion": "Grant privileges to roles; assign roles to users; avoid granting privileges directly to users",
-        "es_correcta": true,
-        "explicacion": "Snowflake RBAC best practice uses role hierarchy and role grants."
+        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account, violates least privilege and manageability.",
+        "es_correcta": false,
+        "explicacion": "Violates least privilege and manageability."
       },
       {
-        "texto_opcion": "Disable roles and use only network policies",
+        "texto_opcion": "Disable roles and use only network policies, network policy complements but does not replace RBAC.",
         "es_correcta": false,
         "explicacion": "Network policy complements but does not replace RBAC."
+      },
+      {
+        "texto_opcion": "Grant privileges to roles; assign roles to users.",
+        "es_correcta": true,
+        "explicacion": "Snowflake RBAC best practice uses role hierarchy and role grants."
       }
     ],
     "tags": [
@@ -32,22 +32,22 @@
     "pregunta": "role ANALYST inherits READER base privileges automatically. Context: travel platform, petabyte-scale historical data.",
     "opciones": [
       {
-        "texto_opcion": "Grant USER to ROLE only for hierarchy",
+        "texto_opcion": "Grant USER to ROLE only for hierarchy, hierarchy is role-to-role or role-to-user assignments.",
         "es_correcta": false,
         "explicacion": "Hierarchy is role-to-role or role-to-user assignments."
       },
       {
-        "texto_opcion": "Create circular role grants intentionally",
+        "texto_opcion": "Create circular role grants intentionally, circular grants are problematic.",
         "es_correcta": false,
         "explicacion": "Circular grants are problematic."
       },
       {
-        "texto_opcion": "Use warehouse as parent of database role",
+        "texto_opcion": "Use warehouse as parent of database role, incorrect object hierarchy.",
         "es_correcta": false,
         "explicacion": "Incorrect object hierarchy."
       },
       {
-        "texto_opcion": "Grant role READER to role ANALYST (GRANT ROLE reader TO ROLE analyst)",
+        "texto_opcion": "Grant role READER to role ANALYST.",
         "es_correcta": true,
         "explicacion": "Role-to-role grants build privilege inheritance."
       }
@@ -61,6 +61,16 @@
     "pregunta": "transfer responsibility for schema objects when team changes. Context: energy utility, hourly batch windows.",
     "opciones": [
       {
+        "texto_opcion": "Ownership is stored on the warehouse",
+        "es_correcta": false,
+        "explicacion": "Ownership applies to securable objects like tables/schemas."
+      },
+      {
+        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and.",
+        "es_correcta": true,
+        "explicacion": "OWNERSHIP controls full object control and grant capability."
+      },
+      {
         "texto_opcion": "SELECT privilege alone allows changing table DDL",
         "es_correcta": false,
         "explicacion": "DDL typically requires ownership or appropriate privilege."
@@ -69,16 +79,6 @@
         "texto_opcion": "Share ownership cannot be transferred",
         "es_correcta": false,
         "explicacion": "Ownership transfer supported per object types."
-      },
-      {
-        "texto_opcion": "Ownership is stored on the warehouse",
-        "es_correcta": false,
-        "explicacion": "Ownership applies to securable objects like tables/schemas."
-      },
-      {
-        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and manage object",
-        "es_correcta": true,
-        "explicacion": "OWNERSHIP controls full object control and grant capability."
       }
     ],
     "tags": [
@@ -90,14 +90,9 @@
     "pregunta": "A logistics carrier (~50,000 events/s, region westeurope) must: auto-grant SELECT on new tables in ANALYTICS schema to ROLE BI. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Re-run GRANT on every new table manually only",
+        "texto_opcion": "Re-run GRANT on every new table manually only, future grants automate new objects.",
         "es_correcta": false,
         "explicacion": "Future grants automate new objects."
-      },
-      {
-        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi",
-        "es_correcta": true,
-        "explicacion": "Future grants apply to objects created after grant definition."
       },
       {
         "texto_opcion": "Future grants apply retroactively to all existing tables always",
@@ -108,6 +103,11 @@
         "texto_opcion": "GRANT ON FUTURE DATABASES to role without schema scope",
         "es_correcta": false,
         "explicacion": "Future grants specify object type and container scope."
+      },
+      {
+        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi.",
+        "es_correcta": true,
+        "explicacion": "Future grants apply to objects created after grant definition."
       }
     ],
     "tags": [
@@ -119,22 +119,22 @@
     "pregunta": "For a travel platform workload with near-real-time dashboards: distinguish ACCOUNTADMIN from SYSADMIN responsibilities. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "ACCOUNTADMIN should run all daily ETL",
+        "texto_opcion": "ACCOUNTADMIN should run all daily ETL, over-privileged; use custom roles for workloads.",
         "es_correcta": false,
         "explicacion": "Over-privileged; use custom roles for workloads."
       },
       {
-        "texto_opcion": "SYSADMIN cannot create warehouses",
+        "texto_opcion": "SYSADMIN cannot create warehouses, sYSADMIN manages many resources",
         "es_correcta": false,
         "explicacion": "SYSADMIN manages many resources including warehouses."
       },
       {
-        "texto_opcion": "ACCOUNTADMIN manages account-level config; SYSADMIN owns most objects and warehouses",
+        "texto_opcion": "ACCOUNTADMIN manages account-level config.",
         "es_correcta": true,
         "explicacion": "Built-in roles separate account governance from object administration."
       },
       {
-        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience",
+        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience, dangerous over-permission.",
         "es_correcta": false,
         "explicacion": "Dangerous over-permission."
       }
@@ -177,24 +177,24 @@
     "pregunta": "Incident review (eastus): user cannot see tables despite SELECT on table grant. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Grant USAGE on warehouse instead of schema",
-        "es_correcta": false,
-        "explicacion": "Warehouse USAGE does not replace schema visibility."
-      },
-      {
         "texto_opcion": "Grant only SELECT without schema USAGE always works",
         "es_correcta": false,
         "explicacion": "Container USAGE is required."
       },
       {
+        "texto_opcion": "Grant USAGE on warehouse instead of schema",
+        "es_correcta": false,
+        "explicacion": "Warehouse USAGE does not replace schema visibility."
+      },
+      {
+        "texto_opcion": "Grant USAGE on database and schema containing the table.",
+        "es_correcta": true,
+        "explicacion": "USAGE on parent containers is required to resolve objects."
+      },
+      {
         "texto_opcion": "Make table PUBLIC without schema USAGE",
         "es_correcta": false,
         "explicacion": "Still need schema/database visibility."
-      },
-      {
-        "texto_opcion": "Grant USAGE on database and schema containing the table",
-        "es_correcta": true,
-        "explicacion": "USAGE on parent containers is required to resolve objects."
       }
     ],
     "tags": [
@@ -206,24 +206,24 @@
     "pregunta": "A logistics carrier (sub-second interactive queries, region southeastasia) must: create least-privilege role for Snowpipe loader service. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Create custom role with minimal privileges (stage, pipe, table INSERT, file format USAGE)",
-        "es_correcta": true,
-        "explicacion": "Service roles should grant only required object privileges."
-      },
-      {
-        "texto_opcion": "Use SECURITYADMIN only role for data loading",
-        "es_correcta": false,
-        "explicacion": "Wrong role purpose."
-      },
-      {
-        "texto_opcion": "Grant OWNERSHIP on account to loader role",
+        "texto_opcion": "Grant OWNERSHIP on account to loader role, extreme over-permission.",
         "es_correcta": false,
         "explicacion": "Extreme over-permission."
       },
       {
-        "texto_opcion": "Use ACCOUNTADMIN for Snowpipe service user",
+        "texto_opcion": "Use SECURITYADMIN only role for data loading as the primary design for.",
+        "es_correcta": false,
+        "explicacion": "Wrong role purpose."
+      },
+      {
+        "texto_opcion": "Use ACCOUNTADMIN for Snowpipe service user applied across environments.",
         "es_correcta": false,
         "explicacion": "Excessive privileges."
+      },
+      {
+        "texto_opcion": "Create custom role with minimal privileges.",
+        "es_correcta": true,
+        "explicacion": "Service roles should grant only required object privileges."
       }
     ],
     "tags": [
@@ -235,14 +235,14 @@
     "pregunta": "Healthcare provider scenario — user has multiple roles; need to use ANALYST privileges this session. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Role choice stored in client Excel settings",
-        "es_correcta": false,
-        "explicacion": "Set in session via SQL or connection parameter."
+        "texto_opcion": "USE ROLE analyst (or set DEFAULT ROLE / SECONDARY ROLES per.",
+        "es_correcta": true,
+        "explicacion": "Session active role determines effective privileges."
       },
       {
-        "texto_opcion": "Warehouse selection automatically picks role",
+        "texto_opcion": "Role choice stored in client Excel settings, set in session via SQL or connection parameter.",
         "es_correcta": false,
-        "explicacion": "Independent session settings."
+        "explicacion": "Set in session via SQL or connection parameter."
       },
       {
         "texto_opcion": "All roles always active with full union without configuration",
@@ -250,9 +250,9 @@
         "explicacion": "Secondary roles optional; primary role is explicit."
       },
       {
-        "texto_opcion": "USE ROLE analyst (or set DEFAULT ROLE / SECONDARY ROLES per session needs)",
-        "es_correcta": true,
-        "explicacion": "Session active role determines effective privileges."
+        "texto_opcion": "Warehouse selection automatically picks role, independent session settings.",
+        "es_correcta": false,
+        "explicacion": "Independent session settings."
       }
     ],
     "tags": [
@@ -264,24 +264,24 @@
     "pregunta": "A healthcare provider (~50,000 events/s, region southeastasia) must: centralize grant management on sensitive schema. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Any user with SELECT can grant to others in managed schema",
-        "es_correcta": false,
-        "explicacion": "Contradicts managed access control."
-      },
-      {
-        "texto_opcion": "Enable managed access schema where only schema owner manages object grants",
-        "es_correcta": true,
-        "explicacion": "Managed access restricts grant option on objects in schema."
-      },
-      {
-        "texto_opcion": "Managed access removes need for roles",
+        "texto_opcion": "Managed access removes need for roles, roles still receive grants from owner.",
         "es_correcta": false,
         "explicacion": "Roles still receive grants from owner."
       },
       {
-        "texto_opcion": "Disable all grants in managed access schema",
+        "texto_opcion": "Disable all grants in managed access schema, owner still manages grants centrally.",
         "es_correcta": false,
         "explicacion": "Owner still manages grants centrally."
+      },
+      {
+        "texto_opcion": "Any user with SELECT can grant to others in managed schema, contradicts managed access control.",
+        "es_correcta": false,
+        "explicacion": "Contradicts managed access control."
+      },
+      {
+        "texto_opcion": "Enable managed access schema where only schema owner manages.",
+        "es_correcta": true,
+        "explicacion": "Managed access restricts grant option on objects in schema."
       }
     ],
     "tags": [
@@ -293,24 +293,24 @@
     "pregunta": "For a payments fintech workload with ~50,000 events/s: review who can read PII columns in COMPLIANCE schema. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Only Fail-safe stores grant metadata",
+        "texto_opcion": "Only Fail-safe stores grant metadata, grants visible via information.",
         "es_correcta": false,
         "explicacion": "Grants visible via information schema/account usage."
       },
       {
-        "texto_opcion": "Export grants to CSV from laptop cache",
-        "es_correcta": false,
-        "explicacion": "Use Snowflake audit views."
-      },
-      {
-        "texto_opcion": "Disable query history to hide grants",
+        "texto_opcion": "Disable query history to hide grants, opposite of audit goal.",
         "es_correcta": false,
         "explicacion": "Opposite of audit goal."
       },
       {
-        "texto_opcion": "Query ACCOUNT_USAGE / INFORMATION_SCHEMA grant views (e.g., GRANTS_TO_ROLES) with appropriate admin role",
+        "texto_opcion": "Query ACCOUNT_USAGE / INFORMATION_SCHEMA grant views (e.g.",
         "es_correcta": true,
         "explicacion": "Account usage views audit RBAC assignments."
+      },
+      {
+        "texto_opcion": "Export grants to CSV from laptop cache, use Snowflake audit views.",
+        "es_correcta": false,
+        "explicacion": "Use Snowflake audit views."
       }
     ],
     "tags": [
@@ -322,24 +322,24 @@
     "pregunta": "For a travel platform workload with petabyte-scale historical data: prepare role to create outbound share to partner. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Grant CREATE SHARE privilege and USAGE on shared database/objects to dedicated sharing role",
-        "es_correcta": true,
-        "explicacion": "Sharing requires explicit privileges on objects included in share."
-      },
-      {
-        "texto_opcion": "IMPORTED privileges grant CREATE SHARE on consumer",
+        "texto_opcion": "Any SELECT privilege auto-creates provider share, cREATE SHARE and provider setup required.",
         "es_correcta": false,
-        "explicacion": "Consumer receives imported privileges differently."
+        "explicacion": "CREATE SHARE and provider setup required."
       },
       {
-        "texto_opcion": "PUBLIC role creates shares by default",
+        "texto_opcion": "PUBLIC role creates shares by default, sharing is controlled privileged operation, sharing is controlled privileged operation.",
         "es_correcta": false,
         "explicacion": "Sharing is controlled privileged operation."
       },
       {
-        "texto_opcion": "Any SELECT privilege auto-creates provider share",
+        "texto_opcion": "IMPORTED privileges grant CREATE SHARE on consumer, consumer receives imported privileges differently.",
         "es_correcta": false,
-        "explicacion": "CREATE SHARE and provider setup required."
+        "explicacion": "Consumer receives imported privileges differently."
+      },
+      {
+        "texto_opcion": "Grant CREATE SHARE privilege and USAGE on shared database/objects to.",
+        "es_correcta": true,
+        "explicacion": "Sharing requires explicit privileges on objects included in share."
       }
     ],
     "tags": [
@@ -351,22 +351,22 @@
     "pregunta": "Incident review (westeurope): enforce least privilege for analysts querying curated tables. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Grant privileges to roles; assign roles to users; avoid granting privileges directly to users",
+        "texto_opcion": "Grant privileges to roles; assign roles to users.",
         "es_correcta": true,
         "explicacion": "Snowflake RBAC best practice uses role hierarchy and role grants."
       },
       {
-        "texto_opcion": "Disable roles and use only network policies",
+        "texto_opcion": "Disable roles and use only network policies, network policy complements but does not replace RBAC.",
         "es_correcta": false,
         "explicacion": "Network policy complements but does not replace RBAC."
       },
       {
-        "texto_opcion": "Use shared user account for all employees",
+        "texto_opcion": "Use shared user account for all employees, breaks auditability and RBAC.",
         "es_correcta": false,
         "explicacion": "Breaks auditability and RBAC."
       },
       {
-        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account",
+        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account, violates least privilege and manageability.",
         "es_correcta": false,
         "explicacion": "Violates least privilege and manageability."
       }
@@ -380,24 +380,24 @@
     "pregunta": "Incident review (northeurope): role ANALYST inherits READER base privileges automatically. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Grant role READER to role ANALYST (GRANT ROLE reader TO ROLE analyst)",
-        "es_correcta": true,
-        "explicacion": "Role-to-role grants build privilege inheritance."
-      },
-      {
-        "texto_opcion": "Use warehouse as parent of database role",
-        "es_correcta": false,
-        "explicacion": "Incorrect object hierarchy."
-      },
-      {
-        "texto_opcion": "Create circular role grants intentionally",
+        "texto_opcion": "Create circular role grants intentionally, circular grants are problematic.",
         "es_correcta": false,
         "explicacion": "Circular grants are problematic."
       },
       {
-        "texto_opcion": "Grant USER to ROLE only for hierarchy",
+        "texto_opcion": "Use warehouse as parent of database role, incorrect object hierarchy.",
+        "es_correcta": false,
+        "explicacion": "Incorrect object hierarchy."
+      },
+      {
+        "texto_opcion": "Grant USER to ROLE only for hierarchy, hierarchy is role-to-role or role-to-user assignments.",
         "es_correcta": false,
         "explicacion": "Hierarchy is role-to-role or role-to-user assignments."
+      },
+      {
+        "texto_opcion": "Grant role READER to role ANALYST.",
+        "es_correcta": true,
+        "explicacion": "Role-to-role grants build privilege inheritance."
       }
     ],
     "tags": [
@@ -409,6 +409,11 @@
     "pregunta": "A healthcare provider (sub-second interactive queries, region southeastasia) must: transfer responsibility for schema objects when team changes. Which option fits best? Constraint set #2.",
     "opciones": [
       {
+        "texto_opcion": "Ownership is stored on the warehouse",
+        "es_correcta": false,
+        "explicacion": "Ownership applies to securable objects like tables/schemas."
+      },
+      {
         "texto_opcion": "SELECT privilege alone allows changing table DDL",
         "es_correcta": false,
         "explicacion": "DDL typically requires ownership or appropriate privilege."
@@ -419,12 +424,7 @@
         "explicacion": "Ownership transfer supported per object types."
       },
       {
-        "texto_opcion": "Ownership is stored on the warehouse",
-        "es_correcta": false,
-        "explicacion": "Ownership applies to securable objects like tables/schemas."
-      },
-      {
-        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and manage object",
+        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and.",
         "es_correcta": true,
         "explicacion": "OWNERSHIP controls full object control and grant capability."
       }
@@ -438,7 +438,7 @@
     "pregunta": "Incident review (westeurope): auto-grant SELECT on new tables in ANALYTICS schema to ROLE BI. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Re-run GRANT on every new table manually only",
+        "texto_opcion": "Re-run GRANT on every new table manually only, future grants automate new objects.",
         "es_correcta": false,
         "explicacion": "Future grants automate new objects."
       },
@@ -453,7 +453,7 @@
         "explicacion": "Future grants specify object type and container scope."
       },
       {
-        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi",
+        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi.",
         "es_correcta": true,
         "explicacion": "Future grants apply to objects created after grant definition."
       }
@@ -467,22 +467,22 @@
     "pregunta": "A media streaming company (near-real-time dashboards, region australiaeast) must: distinguish ACCOUNTADMIN from SYSADMIN responsibilities. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "SYSADMIN cannot create warehouses",
+        "texto_opcion": "SYSADMIN cannot create warehouses, sYSADMIN manages many resources",
         "es_correcta": false,
         "explicacion": "SYSADMIN manages many resources including warehouses."
       },
       {
-        "texto_opcion": "ACCOUNTADMIN should run all daily ETL",
+        "texto_opcion": "ACCOUNTADMIN should run all daily ETL, over-privileged; use custom roles for workloads.",
         "es_correcta": false,
         "explicacion": "Over-privileged; use custom roles for workloads."
       },
       {
-        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience",
+        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience, dangerous over-permission.",
         "es_correcta": false,
         "explicacion": "Dangerous over-permission."
       },
       {
-        "texto_opcion": "ACCOUNTADMIN manages account-level config; SYSADMIN owns most objects and warehouses",
+        "texto_opcion": "ACCOUNTADMIN manages account-level config.",
         "es_correcta": true,
         "explicacion": "Built-in roles separate account governance from object administration."
       }
@@ -496,14 +496,14 @@
     "pregunta": "Incident review (northeurope): allow role to read but not modify table SALES.FACT_ORDERS. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "GRANT OPERATE on table for SELECT queries",
-        "es_correcta": false,
-        "explicacion": "OPERATE applies to warehouses/pipes/tasks contexts."
-      },
-      {
         "texto_opcion": "GRANT SELECT ON TABLE sales.fact_orders TO ROLE ...",
         "es_correcta": true,
         "explicacion": "SELECT grants read access without DML/DDL."
+      },
+      {
+        "texto_opcion": "GRANT USAGE ON TABLE for read access",
+        "es_correcta": false,
+        "explicacion": "USAGE on table is not read privilege; USAGE on schema/db required plus SELECT on table."
       },
       {
         "texto_opcion": "GRANT MONITOR on table to read rows",
@@ -511,9 +511,9 @@
         "explicacion": "MONITOR is for operational visibility, not row read."
       },
       {
-        "texto_opcion": "GRANT USAGE ON TABLE for read access",
+        "texto_opcion": "GRANT OPERATE on table for SELECT queries",
         "es_correcta": false,
-        "explicacion": "USAGE on table is not read privilege; USAGE on schema/db required plus SELECT on table."
+        "explicacion": "OPERATE applies to warehouses/pipes/tasks contexts."
       }
     ],
     "tags": [
@@ -535,7 +535,7 @@
         "explicacion": "Still need schema/database visibility."
       },
       {
-        "texto_opcion": "Grant USAGE on database and schema containing the table",
+        "texto_opcion": "Grant USAGE on database and schema containing the table.",
         "es_correcta": true,
         "explicacion": "USAGE on parent containers is required to resolve objects."
       },
@@ -554,24 +554,24 @@
     "pregunta": "For a energy utility workload with ~50,000 events/s: create least-privilege role for Snowpipe loader service. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Grant OWNERSHIP on account to loader role",
+        "texto_opcion": "Use ACCOUNTADMIN for Snowpipe service user applied across environments.",
         "es_correcta": false,
-        "explicacion": "Extreme over-permission."
+        "explicacion": "Excessive privileges."
       },
       {
-        "texto_opcion": "Create custom role with minimal privileges (stage, pipe, table INSERT, file format USAGE)",
-        "es_correcta": true,
-        "explicacion": "Service roles should grant only required object privileges."
-      },
-      {
-        "texto_opcion": "Use SECURITYADMIN only role for data loading",
+        "texto_opcion": "Use SECURITYADMIN only role for data loading selected to meet the.",
         "es_correcta": false,
         "explicacion": "Wrong role purpose."
       },
       {
-        "texto_opcion": "Use ACCOUNTADMIN for Snowpipe service user",
+        "texto_opcion": "Grant OWNERSHIP on account to loader role, extreme over-permission.",
         "es_correcta": false,
-        "explicacion": "Excessive privileges."
+        "explicacion": "Extreme over-permission."
+      },
+      {
+        "texto_opcion": "Create custom role with minimal privileges.",
+        "es_correcta": true,
+        "explicacion": "Service roles should grant only required object privileges."
       }
     ],
     "tags": [
@@ -583,24 +583,24 @@
     "pregunta": "For a insurance carrier workload with ~200 million rows/day: user has multiple roles; need to use ANALYST privileges this session. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Role choice stored in client Excel settings",
+        "texto_opcion": "Role choice stored in client Excel settings, set in session via SQL or connection parameter.",
         "es_correcta": false,
         "explicacion": "Set in session via SQL or connection parameter."
+      },
+      {
+        "texto_opcion": "USE ROLE analyst (or set DEFAULT ROLE / SECONDARY ROLES per.",
+        "es_correcta": true,
+        "explicacion": "Session active role determines effective privileges."
+      },
+      {
+        "texto_opcion": "Warehouse selection automatically picks role, independent session settings.",
+        "es_correcta": false,
+        "explicacion": "Independent session settings."
       },
       {
         "texto_opcion": "All roles always active with full union without configuration",
         "es_correcta": false,
         "explicacion": "Secondary roles optional; primary role is explicit."
-      },
-      {
-        "texto_opcion": "USE ROLE analyst (or set DEFAULT ROLE / SECONDARY ROLES per session needs)",
-        "es_correcta": true,
-        "explicacion": "Session active role determines effective privileges."
-      },
-      {
-        "texto_opcion": "Warehouse selection automatically picks role",
-        "es_correcta": false,
-        "explicacion": "Independent session settings."
       }
     ],
     "tags": [
@@ -612,22 +612,22 @@
     "pregunta": "centralize grant management on sensitive schema. Context: industrial IoT platform, near-real-time dashboards. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Disable all grants in managed access schema",
+        "texto_opcion": "Disable all grants in managed access schema, owner still manages grants centrally.",
         "es_correcta": false,
         "explicacion": "Owner still manages grants centrally."
       },
       {
-        "texto_opcion": "Managed access removes need for roles",
+        "texto_opcion": "Managed access removes need for roles, roles still receive grants from owner.",
         "es_correcta": false,
         "explicacion": "Roles still receive grants from owner."
       },
       {
-        "texto_opcion": "Any user with SELECT can grant to others in managed schema",
+        "texto_opcion": "Any user with SELECT can grant to others in managed schema, contradicts managed access control.",
         "es_correcta": false,
         "explicacion": "Contradicts managed access control."
       },
       {
-        "texto_opcion": "Enable managed access schema where only schema owner manages object grants",
+        "texto_opcion": "Enable managed access schema where only schema owner manages.",
         "es_correcta": true,
         "explicacion": "Managed access restricts grant option on objects in schema."
       }
@@ -641,22 +641,22 @@
     "pregunta": "review who can read PII columns in COMPLIANCE schema. Context: online marketplace, hourly batch windows. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Only Fail-safe stores grant metadata",
+        "texto_opcion": "Only Fail-safe stores grant metadata, grants visible via information.",
         "es_correcta": false,
         "explicacion": "Grants visible via information schema/account usage."
       },
       {
-        "texto_opcion": "Query ACCOUNT_USAGE / INFORMATION_SCHEMA grant views (e.g., GRANTS_TO_ROLES) with appropriate admin role",
+        "texto_opcion": "Query ACCOUNT_USAGE / INFORMATION_SCHEMA grant views (e.g.",
         "es_correcta": true,
         "explicacion": "Account usage views audit RBAC assignments."
       },
       {
-        "texto_opcion": "Export grants to CSV from laptop cache",
+        "texto_opcion": "Export grants to CSV from laptop cache, use Snowflake audit views.",
         "es_correcta": false,
         "explicacion": "Use Snowflake audit views."
       },
       {
-        "texto_opcion": "Disable query history to hide grants",
+        "texto_opcion": "Disable query history to hide grants, opposite of audit goal.",
         "es_correcta": false,
         "explicacion": "Opposite of audit goal."
       }
@@ -670,24 +670,24 @@
     "pregunta": "For a healthcare provider workload with petabyte-scale historical data: prepare role to create outbound share to partner. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "PUBLIC role creates shares by default",
-        "es_correcta": false,
-        "explicacion": "Sharing is controlled privileged operation."
+        "texto_opcion": "Grant CREATE SHARE privilege and USAGE on shared database/objects to.",
+        "es_correcta": true,
+        "explicacion": "Sharing requires explicit privileges on objects included in share."
       },
       {
-        "texto_opcion": "Any SELECT privilege auto-creates provider share",
+        "texto_opcion": "Any SELECT privilege auto-creates provider share, cREATE SHARE and provider setup required.",
         "es_correcta": false,
         "explicacion": "CREATE SHARE and provider setup required."
       },
       {
-        "texto_opcion": "IMPORTED privileges grant CREATE SHARE on consumer",
+        "texto_opcion": "PUBLIC role creates shares by default, sharing is controlled privileged operation, sharing is controlled privileged operation.",
         "es_correcta": false,
-        "explicacion": "Consumer receives imported privileges differently."
+        "explicacion": "Sharing is controlled privileged operation."
       },
       {
-        "texto_opcion": "Grant CREATE SHARE privilege and USAGE on shared database/objects to dedicated sharing role",
-        "es_correcta": true,
-        "explicacion": "Sharing requires explicit privileges on objects included in share."
+        "texto_opcion": "IMPORTED privileges grant CREATE SHARE on consumer, consumer receives imported privileges differently.",
+        "es_correcta": false,
+        "explicacion": "Consumer receives imported privileges differently."
       }
     ],
     "tags": [
@@ -699,24 +699,24 @@
     "pregunta": "enforce least privilege for analysts querying curated tables. Context: energy utility, hourly batch windows. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Grant privileges to roles; assign roles to users; avoid granting privileges directly to users",
-        "es_correcta": true,
-        "explicacion": "Snowflake RBAC best practice uses role hierarchy and role grants."
-      },
-      {
-        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account",
+        "texto_opcion": "Use shared user account for all employees, breaks auditability and RBAC.",
         "es_correcta": false,
-        "explicacion": "Violates least privilege and manageability."
+        "explicacion": "Breaks auditability and RBAC."
       },
       {
-        "texto_opcion": "Disable roles and use only network policies",
+        "texto_opcion": "Disable roles and use only network policies, network policy complements but does not replace RBAC.",
         "es_correcta": false,
         "explicacion": "Network policy complements but does not replace RBAC."
       },
       {
-        "texto_opcion": "Use shared user account for all employees",
+        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account, violates least privilege and manageability.",
         "es_correcta": false,
-        "explicacion": "Breaks auditability and RBAC."
+        "explicacion": "Violates least privilege and manageability."
+      },
+      {
+        "texto_opcion": "Grant privileges to roles; assign roles to users.",
+        "es_correcta": true,
+        "explicacion": "Snowflake RBAC best practice uses role hierarchy and role grants."
       }
     ],
     "tags": [
@@ -728,24 +728,24 @@
     "pregunta": "A energy utility (~5 TB/day, region eastus) must: role ANALYST inherits READER base privileges automatically. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Grant role READER to role ANALYST (GRANT ROLE reader TO ROLE analyst)",
-        "es_correcta": true,
-        "explicacion": "Role-to-role grants build privilege inheritance."
-      },
-      {
-        "texto_opcion": "Grant USER to ROLE only for hierarchy",
+        "texto_opcion": "Grant USER to ROLE only for hierarchy, hierarchy is role-to-role or role-to-user assignments.",
         "es_correcta": false,
         "explicacion": "Hierarchy is role-to-role or role-to-user assignments."
       },
       {
-        "texto_opcion": "Create circular role grants intentionally",
+        "texto_opcion": "Use warehouse as parent of database role, incorrect object hierarchy.",
+        "es_correcta": false,
+        "explicacion": "Incorrect object hierarchy."
+      },
+      {
+        "texto_opcion": "Create circular role grants intentionally, circular grants are problematic.",
         "es_correcta": false,
         "explicacion": "Circular grants are problematic."
       },
       {
-        "texto_opcion": "Use warehouse as parent of database role",
-        "es_correcta": false,
-        "explicacion": "Incorrect object hierarchy."
+        "texto_opcion": "Grant role READER to role ANALYST.",
+        "es_correcta": true,
+        "explicacion": "Role-to-role grants build privilege inheritance."
       }
     ],
     "tags": [
@@ -757,9 +757,14 @@
     "pregunta": "For a logistics carrier workload with petabyte-scale historical data: transfer responsibility for schema objects when team changes. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "SELECT privilege alone allows changing table DDL",
+        "texto_opcion": "Ownership is stored on the warehouse",
         "es_correcta": false,
-        "explicacion": "DDL typically requires ownership or appropriate privilege."
+        "explicacion": "Ownership applies to securable objects like tables/schemas."
+      },
+      {
+        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and.",
+        "es_correcta": true,
+        "explicacion": "OWNERSHIP controls full object control and grant capability."
       },
       {
         "texto_opcion": "Share ownership cannot be transferred",
@@ -767,14 +772,9 @@
         "explicacion": "Ownership transfer supported per object types."
       },
       {
-        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and manage object",
-        "es_correcta": true,
-        "explicacion": "OWNERSHIP controls full object control and grant capability."
-      },
-      {
-        "texto_opcion": "Ownership is stored on the warehouse",
+        "texto_opcion": "SELECT privilege alone allows changing table DDL",
         "es_correcta": false,
-        "explicacion": "Ownership applies to securable objects like tables/schemas."
+        "explicacion": "DDL typically requires ownership or appropriate privilege."
       }
     ],
     "tags": [
@@ -786,24 +786,24 @@
     "pregunta": "A media streaming company (near-real-time dashboards, region westeurope) must: auto-grant SELECT on new tables in ANALYTICS schema to ROLE BI. Which option fits best? Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "GRANT ON FUTURE DATABASES to role without schema scope",
+        "es_correcta": false,
+        "explicacion": "Future grants specify object type and container scope."
+      },
+      {
         "texto_opcion": "Future grants apply retroactively to all existing tables always",
         "es_correcta": false,
         "explicacion": "Future grants affect new objects, not existing unless granted."
       },
       {
-        "texto_opcion": "Re-run GRANT on every new table manually only",
-        "es_correcta": false,
-        "explicacion": "Future grants automate new objects."
-      },
-      {
-        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi",
+        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi.",
         "es_correcta": true,
         "explicacion": "Future grants apply to objects created after grant definition."
       },
       {
-        "texto_opcion": "GRANT ON FUTURE DATABASES to role without schema scope",
+        "texto_opcion": "Re-run GRANT on every new table manually only, future grants automate new objects.",
         "es_correcta": false,
-        "explicacion": "Future grants specify object type and container scope."
+        "explicacion": "Future grants automate new objects."
       }
     ],
     "tags": [
@@ -815,22 +815,22 @@
     "pregunta": "Incident review (northeurope): distinguish ACCOUNTADMIN from SYSADMIN responsibilities. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "SYSADMIN cannot create warehouses",
-        "es_correcta": false,
-        "explicacion": "SYSADMIN manages many resources including warehouses."
-      },
-      {
-        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience",
-        "es_correcta": false,
-        "explicacion": "Dangerous over-permission."
-      },
-      {
-        "texto_opcion": "ACCOUNTADMIN manages account-level config; SYSADMIN owns most objects and warehouses",
+        "texto_opcion": "ACCOUNTADMIN manages account-level config.",
         "es_correcta": true,
         "explicacion": "Built-in roles separate account governance from object administration."
       },
       {
-        "texto_opcion": "ACCOUNTADMIN should run all daily ETL",
+        "texto_opcion": "SYSADMIN cannot create warehouses, sYSADMIN manages many resources",
+        "es_correcta": false,
+        "explicacion": "SYSADMIN manages many resources including warehouses."
+      },
+      {
+        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience, dangerous over-permission.",
+        "es_correcta": false,
+        "explicacion": "Dangerous over-permission."
+      },
+      {
+        "texto_opcion": "ACCOUNTADMIN should run all daily ETL, over-privileged; use custom roles for workloads.",
         "es_correcta": false,
         "explicacion": "Over-privileged; use custom roles for workloads."
       }
@@ -844,14 +844,14 @@
     "pregunta": "A travel platform (sub-second interactive queries, region eastus) must: allow role to read but not modify table SALES.FACT_ORDERS. Which option fits best? Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "GRANT SELECT ON TABLE sales.fact_orders TO ROLE ...",
+        "es_correcta": true,
+        "explicacion": "SELECT grants read access without DML/DDL."
+      },
+      {
         "texto_opcion": "GRANT USAGE ON TABLE for read access",
         "es_correcta": false,
         "explicacion": "USAGE on table is not read privilege; USAGE on schema/db required plus SELECT on table."
-      },
-      {
-        "texto_opcion": "GRANT OPERATE on table for SELECT queries",
-        "es_correcta": false,
-        "explicacion": "OPERATE applies to warehouses/pipes/tasks contexts."
       },
       {
         "texto_opcion": "GRANT MONITOR on table to read rows",
@@ -859,9 +859,9 @@
         "explicacion": "MONITOR is for operational visibility, not row read."
       },
       {
-        "texto_opcion": "GRANT SELECT ON TABLE sales.fact_orders TO ROLE ...",
-        "es_correcta": true,
-        "explicacion": "SELECT grants read access without DML/DDL."
+        "texto_opcion": "GRANT OPERATE on table for SELECT queries",
+        "es_correcta": false,
+        "explicacion": "OPERATE applies to warehouses/pipes/tasks contexts."
       }
     ],
     "tags": [
@@ -878,7 +878,7 @@
         "explicacion": "Still need schema/database visibility."
       },
       {
-        "texto_opcion": "Grant USAGE on database and schema containing the table",
+        "texto_opcion": "Grant USAGE on database and schema containing the table.",
         "es_correcta": true,
         "explicacion": "USAGE on parent containers is required to resolve objects."
       },
@@ -902,22 +902,22 @@
     "pregunta": "Logistics carrier scenario — create least-privilege role for Snowpipe loader service. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Grant OWNERSHIP on account to loader role",
+        "texto_opcion": "Grant OWNERSHIP on account to loader role, extreme over-permission, extreme over-permission.",
         "es_correcta": false,
         "explicacion": "Extreme over-permission."
       },
       {
-        "texto_opcion": "Use SECURITYADMIN only role for data loading",
+        "texto_opcion": "Use SECURITYADMIN only role for data loading as the primary design for.",
         "es_correcta": false,
         "explicacion": "Wrong role purpose."
       },
       {
-        "texto_opcion": "Use ACCOUNTADMIN for Snowpipe service user",
+        "texto_opcion": "Use ACCOUNTADMIN for Snowpipe service user selected to meet the stated constraints.",
         "es_correcta": false,
         "explicacion": "Excessive privileges."
       },
       {
-        "texto_opcion": "Create custom role with minimal privileges (stage, pipe, table INSERT, file format USAGE)",
+        "texto_opcion": "Create custom role with minimal privileges.",
         "es_correcta": true,
         "explicacion": "Service roles should grant only required object privileges."
       }
@@ -931,24 +931,24 @@
     "pregunta": "Travel platform scenario — user has multiple roles; need to use ANALYST privileges this session. What should they implement? Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "USE ROLE analyst (or set DEFAULT ROLE / SECONDARY ROLES per.",
+        "es_correcta": true,
+        "explicacion": "Session active role determines effective privileges."
+      },
+      {
         "texto_opcion": "All roles always active with full union without configuration",
         "es_correcta": false,
         "explicacion": "Secondary roles optional; primary role is explicit."
       },
       {
-        "texto_opcion": "Warehouse selection automatically picks role",
-        "es_correcta": false,
-        "explicacion": "Independent session settings."
-      },
-      {
-        "texto_opcion": "Role choice stored in client Excel settings",
+        "texto_opcion": "Role choice stored in client Excel settings, set in session via SQL or connection parameter.",
         "es_correcta": false,
         "explicacion": "Set in session via SQL or connection parameter."
       },
       {
-        "texto_opcion": "USE ROLE analyst (or set DEFAULT ROLE / SECONDARY ROLES per session needs)",
-        "es_correcta": true,
-        "explicacion": "Session active role determines effective privileges."
+        "texto_opcion": "Warehouse selection automatically picks role, independent session settings.",
+        "es_correcta": false,
+        "explicacion": "Independent session settings."
       }
     ],
     "tags": [
@@ -960,24 +960,24 @@
     "pregunta": "A media streaming company (~5 TB/day, region eastus) must: centralize grant management on sensitive schema. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Managed access removes need for roles",
+        "texto_opcion": "Disable all grants in managed access schema, owner still manages grants centrally.",
         "es_correcta": false,
-        "explicacion": "Roles still receive grants from owner."
+        "explicacion": "Owner still manages grants centrally."
       },
       {
-        "texto_opcion": "Any user with SELECT can grant to others in managed schema",
-        "es_correcta": false,
-        "explicacion": "Contradicts managed access control."
-      },
-      {
-        "texto_opcion": "Enable managed access schema where only schema owner manages object grants",
+        "texto_opcion": "Enable managed access schema where only schema owner manages.",
         "es_correcta": true,
         "explicacion": "Managed access restricts grant option on objects in schema."
       },
       {
-        "texto_opcion": "Disable all grants in managed access schema",
+        "texto_opcion": "Any user with SELECT can grant to others in managed schema, contradicts managed access control.",
         "es_correcta": false,
-        "explicacion": "Owner still manages grants centrally."
+        "explicacion": "Contradicts managed access control."
+      },
+      {
+        "texto_opcion": "Managed access removes need for roles, roles still receive grants from owner.",
+        "es_correcta": false,
+        "explicacion": "Roles still receive grants from owner."
       }
     ],
     "tags": [
@@ -989,22 +989,22 @@
     "pregunta": "Insurance carrier scenario — review who can read PII columns in COMPLIANCE schema. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Query ACCOUNT_USAGE / INFORMATION_SCHEMA grant views (e.g., GRANTS_TO_ROLES) with appropriate admin role",
+        "texto_opcion": "Query ACCOUNT_USAGE / INFORMATION_SCHEMA grant views (e.g.",
         "es_correcta": true,
         "explicacion": "Account usage views audit RBAC assignments."
       },
       {
-        "texto_opcion": "Only Fail-safe stores grant metadata",
+        "texto_opcion": "Only Fail-safe stores grant metadata, grants visible via information.",
         "es_correcta": false,
         "explicacion": "Grants visible via information schema/account usage."
       },
       {
-        "texto_opcion": "Export grants to CSV from laptop cache",
+        "texto_opcion": "Export grants to CSV from laptop cache, use Snowflake audit views.",
         "es_correcta": false,
         "explicacion": "Use Snowflake audit views."
       },
       {
-        "texto_opcion": "Disable query history to hide grants",
+        "texto_opcion": "Disable query history to hide grants, opposite of audit goal.",
         "es_correcta": false,
         "explicacion": "Opposite of audit goal."
       }
@@ -1018,24 +1018,24 @@
     "pregunta": "Incident review (northeurope): prepare role to create outbound share to partner. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "IMPORTED privileges grant CREATE SHARE on consumer",
+        "texto_opcion": "Any SELECT privilege auto-creates provider share, cREATE SHARE and provider setup required.",
+        "es_correcta": false,
+        "explicacion": "CREATE SHARE and provider setup required."
+      },
+      {
+        "texto_opcion": "IMPORTED privileges grant CREATE SHARE on consumer, consumer receives imported privileges differently.",
         "es_correcta": false,
         "explicacion": "Consumer receives imported privileges differently."
       },
       {
-        "texto_opcion": "PUBLIC role creates shares by default",
-        "es_correcta": false,
-        "explicacion": "Sharing is controlled privileged operation."
-      },
-      {
-        "texto_opcion": "Grant CREATE SHARE privilege and USAGE on shared database/objects to dedicated sharing role",
+        "texto_opcion": "Grant CREATE SHARE privilege and USAGE on shared database/objects to.",
         "es_correcta": true,
         "explicacion": "Sharing requires explicit privileges on objects included in share."
       },
       {
-        "texto_opcion": "Any SELECT privilege auto-creates provider share",
+        "texto_opcion": "PUBLIC role creates shares by default, sharing is controlled privileged operation, sharing is controlled privileged operation.",
         "es_correcta": false,
-        "explicacion": "CREATE SHARE and provider setup required."
+        "explicacion": "Sharing is controlled privileged operation."
       }
     ],
     "tags": [
@@ -1047,22 +1047,22 @@
     "pregunta": "Online marketplace scenario — enforce least privilege for analysts querying curated tables. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use shared user account for all employees",
+        "texto_opcion": "Use shared user account for all employees, breaks auditability and RBAC.",
         "es_correcta": false,
         "explicacion": "Breaks auditability and RBAC."
       },
       {
-        "texto_opcion": "Disable roles and use only network policies",
+        "texto_opcion": "Disable roles and use only network policies, network policy complements but does not replace RBAC.",
         "es_correcta": false,
         "explicacion": "Network policy complements but does not replace RBAC."
       },
       {
-        "texto_opcion": "Grant privileges to roles; assign roles to users; avoid granting privileges directly to users",
+        "texto_opcion": "Grant privileges to roles; assign roles to users.",
         "es_correcta": true,
         "explicacion": "Snowflake RBAC best practice uses role hierarchy and role grants."
       },
       {
-        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account",
+        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account, violates least privilege and manageability.",
         "es_correcta": false,
         "explicacion": "Violates least privilege and manageability."
       }
@@ -1076,24 +1076,24 @@
     "pregunta": "Online marketplace scenario — role ANALYST inherits READER base privileges automatically. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Grant role READER to role ANALYST (GRANT ROLE reader TO ROLE analyst)",
-        "es_correcta": true,
-        "explicacion": "Role-to-role grants build privilege inheritance."
-      },
-      {
-        "texto_opcion": "Create circular role grants intentionally",
-        "es_correcta": false,
-        "explicacion": "Circular grants are problematic."
-      },
-      {
-        "texto_opcion": "Use warehouse as parent of database role",
+        "texto_opcion": "Use warehouse as parent of database role, incorrect object hierarchy.",
         "es_correcta": false,
         "explicacion": "Incorrect object hierarchy."
       },
       {
-        "texto_opcion": "Grant USER to ROLE only for hierarchy",
+        "texto_opcion": "Grant USER to ROLE only for hierarchy, hierarchy is role-to-role or role-to-user assignments.",
         "es_correcta": false,
         "explicacion": "Hierarchy is role-to-role or role-to-user assignments."
+      },
+      {
+        "texto_opcion": "Grant role READER to role ANALYST.",
+        "es_correcta": true,
+        "explicacion": "Role-to-role grants build privilege inheritance."
+      },
+      {
+        "texto_opcion": "Create circular role grants intentionally, circular grants are problematic.",
+        "es_correcta": false,
+        "explicacion": "Circular grants are problematic."
       }
     ],
     "tags": [
@@ -1105,6 +1105,11 @@
     "pregunta": "Incident review (southeastasia): transfer responsibility for schema objects when team changes. Select the most appropriate design. Constraint set #4.",
     "opciones": [
       {
+        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and.",
+        "es_correcta": true,
+        "explicacion": "OWNERSHIP controls full object control and grant capability."
+      },
+      {
         "texto_opcion": "Share ownership cannot be transferred",
         "es_correcta": false,
         "explicacion": "Ownership transfer supported per object types."
@@ -1113,11 +1118,6 @@
         "texto_opcion": "SELECT privilege alone allows changing table DDL",
         "es_correcta": false,
         "explicacion": "DDL typically requires ownership or appropriate privilege."
-      },
-      {
-        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and manage object",
-        "es_correcta": true,
-        "explicacion": "OWNERSHIP controls full object control and grant capability."
       },
       {
         "texto_opcion": "Ownership is stored on the warehouse",
@@ -1134,7 +1134,7 @@
     "pregunta": "Healthcare provider scenario — auto-grant SELECT on new tables in ANALYTICS schema to ROLE BI. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Re-run GRANT on every new table manually only",
+        "texto_opcion": "Re-run GRANT on every new table manually only, future grants automate new objects.",
         "es_correcta": false,
         "explicacion": "Future grants automate new objects."
       },
@@ -1149,7 +1149,7 @@
         "explicacion": "Future grants affect new objects, not existing unless granted."
       },
       {
-        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi",
+        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi.",
         "es_correcta": true,
         "explicacion": "Future grants apply to objects created after grant definition."
       }
@@ -1163,24 +1163,24 @@
     "pregunta": "A payments fintech (strict GDPR residency, region eastus) must: distinguish ACCOUNTADMIN from SYSADMIN responsibilities. Which option fits best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience",
-        "es_correcta": false,
-        "explicacion": "Dangerous over-permission."
-      },
-      {
-        "texto_opcion": "SYSADMIN cannot create warehouses",
-        "es_correcta": false,
-        "explicacion": "SYSADMIN manages many resources including warehouses."
-      },
-      {
-        "texto_opcion": "ACCOUNTADMIN manages account-level config; SYSADMIN owns most objects and warehouses",
+        "texto_opcion": "ACCOUNTADMIN manages account-level config.",
         "es_correcta": true,
         "explicacion": "Built-in roles separate account governance from object administration."
       },
       {
-        "texto_opcion": "ACCOUNTADMIN should run all daily ETL",
+        "texto_opcion": "ACCOUNTADMIN should run all daily ETL, over-privileged; use custom roles for workloads.",
         "es_correcta": false,
         "explicacion": "Over-privileged; use custom roles for workloads."
+      },
+      {
+        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience, dangerous over-permission.",
+        "es_correcta": false,
+        "explicacion": "Dangerous over-permission."
+      },
+      {
+        "texto_opcion": "SYSADMIN cannot create warehouses, sYSADMIN manages many resources",
+        "es_correcta": false,
+        "explicacion": "SYSADMIN manages many resources including warehouses."
       }
     ],
     "tags": [
@@ -1192,14 +1192,9 @@
     "pregunta": "A payments fintech (near-real-time dashboards, region westeurope) must: allow role to read but not modify table SALES.FACT_ORDERS. Which option fits best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "GRANT SELECT ON TABLE sales.fact_orders TO ROLE ...",
-        "es_correcta": true,
-        "explicacion": "SELECT grants read access without DML/DDL."
-      },
-      {
-        "texto_opcion": "GRANT MONITOR on table to read rows",
+        "texto_opcion": "GRANT USAGE ON TABLE for read access",
         "es_correcta": false,
-        "explicacion": "MONITOR is for operational visibility, not row read."
+        "explicacion": "USAGE on table is not read privilege; USAGE on schema/db required plus SELECT on table."
       },
       {
         "texto_opcion": "GRANT OPERATE on table for SELECT queries",
@@ -1207,9 +1202,14 @@
         "explicacion": "OPERATE applies to warehouses/pipes/tasks contexts."
       },
       {
-        "texto_opcion": "GRANT USAGE ON TABLE for read access",
+        "texto_opcion": "GRANT MONITOR on table to read rows",
         "es_correcta": false,
-        "explicacion": "USAGE on table is not read privilege; USAGE on schema/db required plus SELECT on table."
+        "explicacion": "MONITOR is for operational visibility, not row read."
+      },
+      {
+        "texto_opcion": "GRANT SELECT ON TABLE sales.fact_orders TO ROLE ...",
+        "es_correcta": true,
+        "explicacion": "SELECT grants read access without DML/DDL."
       }
     ],
     "tags": [
@@ -1221,11 +1221,6 @@
     "pregunta": "For a online marketplace workload with petabyte-scale historical data: user cannot see tables despite SELECT on table grant. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Grant USAGE on database and schema containing the table",
-        "es_correcta": true,
-        "explicacion": "USAGE on parent containers is required to resolve objects."
-      },
-      {
         "texto_opcion": "Grant only SELECT without schema USAGE always works",
         "es_correcta": false,
         "explicacion": "Container USAGE is required."
@@ -1234,6 +1229,11 @@
         "texto_opcion": "Grant USAGE on warehouse instead of schema",
         "es_correcta": false,
         "explicacion": "Warehouse USAGE does not replace schema visibility."
+      },
+      {
+        "texto_opcion": "Grant USAGE on database and schema containing the table.",
+        "es_correcta": true,
+        "explicacion": "USAGE on parent containers is required to resolve objects."
       },
       {
         "texto_opcion": "Make table PUBLIC without schema USAGE",
@@ -1250,24 +1250,24 @@
     "pregunta": "For a energy utility workload with ~50,000 events/s: create least-privilege role for Snowpipe loader service. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Create custom role with minimal privileges (stage, pipe, table INSERT, file format USAGE)",
-        "es_correcta": true,
-        "explicacion": "Service roles should grant only required object privileges."
-      },
-      {
-        "texto_opcion": "Use SECURITYADMIN only role for data loading",
-        "es_correcta": false,
-        "explicacion": "Wrong role purpose."
-      },
-      {
-        "texto_opcion": "Use ACCOUNTADMIN for Snowpipe service user",
+        "texto_opcion": "Use ACCOUNTADMIN for Snowpipe service user applied across environments.",
         "es_correcta": false,
         "explicacion": "Excessive privileges."
       },
       {
-        "texto_opcion": "Grant OWNERSHIP on account to loader role",
+        "texto_opcion": "Grant OWNERSHIP on account to loader role, extreme over-permission.",
         "es_correcta": false,
         "explicacion": "Extreme over-permission."
+      },
+      {
+        "texto_opcion": "Create custom role with minimal privileges.",
+        "es_correcta": true,
+        "explicacion": "Service roles should grant only required object privileges."
+      },
+      {
+        "texto_opcion": "Use SECURITYADMIN only role for data loading adopted as the standard.",
+        "es_correcta": false,
+        "explicacion": "Wrong role purpose."
       }
     ],
     "tags": [
@@ -1279,7 +1279,7 @@
     "pregunta": "For a travel platform workload with near-real-time dashboards: user has multiple roles; need to use ANALYST privileges this session. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "USE ROLE analyst (or set DEFAULT ROLE / SECONDARY ROLES per session needs)",
+        "texto_opcion": "USE ROLE analyst (or set DEFAULT ROLE / SECONDARY ROLES per.",
         "es_correcta": true,
         "explicacion": "Session active role determines effective privileges."
       },
@@ -1289,12 +1289,12 @@
         "explicacion": "Secondary roles optional; primary role is explicit."
       },
       {
-        "texto_opcion": "Role choice stored in client Excel settings",
+        "texto_opcion": "Role choice stored in client Excel settings, set in session via SQL or connection parameter.",
         "es_correcta": false,
         "explicacion": "Set in session via SQL or connection parameter."
       },
       {
-        "texto_opcion": "Warehouse selection automatically picks role",
+        "texto_opcion": "Warehouse selection automatically picks role, independent session settings.",
         "es_correcta": false,
         "explicacion": "Independent session settings."
       }
@@ -1308,24 +1308,24 @@
     "pregunta": "Incident review (australiaeast): centralize grant management on sensitive schema. Select the most appropriate design. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Disable all grants in managed access schema",
-        "es_correcta": false,
-        "explicacion": "Owner still manages grants centrally."
-      },
-      {
-        "texto_opcion": "Any user with SELECT can grant to others in managed schema",
-        "es_correcta": false,
-        "explicacion": "Contradicts managed access control."
-      },
-      {
-        "texto_opcion": "Managed access removes need for roles",
+        "texto_opcion": "Managed access removes need for roles, roles still receive grants from owner.",
         "es_correcta": false,
         "explicacion": "Roles still receive grants from owner."
       },
       {
-        "texto_opcion": "Enable managed access schema where only schema owner manages object grants",
+        "texto_opcion": "Any user with SELECT can grant to others in managed schema, contradicts managed access control.",
+        "es_correcta": false,
+        "explicacion": "Contradicts managed access control."
+      },
+      {
+        "texto_opcion": "Enable managed access schema where only schema owner manages.",
         "es_correcta": true,
         "explicacion": "Managed access restricts grant option on objects in schema."
+      },
+      {
+        "texto_opcion": "Disable all grants in managed access schema, owner still manages grants centrally.",
+        "es_correcta": false,
+        "explicacion": "Owner still manages grants centrally."
       }
     ],
     "tags": [
@@ -1337,22 +1337,22 @@
     "pregunta": "Energy utility scenario — review who can read PII columns in COMPLIANCE schema. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Query ACCOUNT_USAGE / INFORMATION_SCHEMA grant views (e.g., GRANTS_TO_ROLES) with appropriate admin role",
+        "texto_opcion": "Query ACCOUNT_USAGE / INFORMATION_SCHEMA grant views (e.g.",
         "es_correcta": true,
         "explicacion": "Account usage views audit RBAC assignments."
       },
       {
-        "texto_opcion": "Only Fail-safe stores grant metadata",
+        "texto_opcion": "Only Fail-safe stores grant metadata, grants visible via information.",
         "es_correcta": false,
         "explicacion": "Grants visible via information schema/account usage."
       },
       {
-        "texto_opcion": "Disable query history to hide grants",
+        "texto_opcion": "Disable query history to hide grants, opposite of audit goal.",
         "es_correcta": false,
         "explicacion": "Opposite of audit goal."
       },
       {
-        "texto_opcion": "Export grants to CSV from laptop cache",
+        "texto_opcion": "Export grants to CSV from laptop cache, use Snowflake audit views.",
         "es_correcta": false,
         "explicacion": "Use Snowflake audit views."
       }
@@ -1366,22 +1366,22 @@
     "pregunta": "Incident review (brazilsouth): prepare role to create outbound share to partner. Select the most appropriate design. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "PUBLIC role creates shares by default",
+        "texto_opcion": "PUBLIC role creates shares by default, sharing is controlled privileged operation, sharing is controlled privileged operation.",
         "es_correcta": false,
         "explicacion": "Sharing is controlled privileged operation."
       },
       {
-        "texto_opcion": "IMPORTED privileges grant CREATE SHARE on consumer",
+        "texto_opcion": "IMPORTED privileges grant CREATE SHARE on consumer, consumer receives imported privileges differently.",
         "es_correcta": false,
         "explicacion": "Consumer receives imported privileges differently."
       },
       {
-        "texto_opcion": "Grant CREATE SHARE privilege and USAGE on shared database/objects to dedicated sharing role",
+        "texto_opcion": "Grant CREATE SHARE privilege and USAGE on shared database/objects to.",
         "es_correcta": true,
         "explicacion": "Sharing requires explicit privileges on objects included in share."
       },
       {
-        "texto_opcion": "Any SELECT privilege auto-creates provider share",
+        "texto_opcion": "Any SELECT privilege auto-creates provider share, cREATE SHARE and provider setup required.",
         "es_correcta": false,
         "explicacion": "CREATE SHARE and provider setup required."
       }
@@ -1395,22 +1395,22 @@
     "pregunta": "For a global retailer workload with strict GDPR residency: enforce least privilege for analysts querying curated tables. Best choice (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account",
+        "texto_opcion": "Grant ALL PRIVILEGES directly to every user account, violates least privilege and manageability.",
         "es_correcta": false,
         "explicacion": "Violates least privilege and manageability."
       },
       {
-        "texto_opcion": "Use shared user account for all employees",
+        "texto_opcion": "Use shared user account for all employees, breaks auditability and RBAC.",
         "es_correcta": false,
         "explicacion": "Breaks auditability and RBAC."
       },
       {
-        "texto_opcion": "Disable roles and use only network policies",
+        "texto_opcion": "Disable roles and use only network policies, network policy complements but does not replace RBAC.",
         "es_correcta": false,
         "explicacion": "Network policy complements but does not replace RBAC."
       },
       {
-        "texto_opcion": "Grant privileges to roles; assign roles to users; avoid granting privileges directly to users",
+        "texto_opcion": "Grant privileges to roles; assign roles to users.",
         "es_correcta": true,
         "explicacion": "Snowflake RBAC best practice uses role hierarchy and role grants."
       }
@@ -1424,22 +1424,22 @@
     "pregunta": "For a payments fintech workload with near-real-time dashboards: role ANALYST inherits READER base privileges automatically. Best choice (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Use warehouse as parent of database role",
+        "texto_opcion": "Use warehouse as parent of database role, incorrect object hierarchy.",
         "es_correcta": false,
         "explicacion": "Incorrect object hierarchy."
       },
       {
-        "texto_opcion": "Grant USER to ROLE only for hierarchy",
+        "texto_opcion": "Grant USER to ROLE only for hierarchy, hierarchy is role-to-role or role-to-user assignments.",
         "es_correcta": false,
         "explicacion": "Hierarchy is role-to-role or role-to-user assignments."
       },
       {
-        "texto_opcion": "Grant role READER to role ANALYST (GRANT ROLE reader TO ROLE analyst)",
+        "texto_opcion": "Grant role READER to role ANALYST.",
         "es_correcta": true,
         "explicacion": "Role-to-role grants build privilege inheritance."
       },
       {
-        "texto_opcion": "Create circular role grants intentionally",
+        "texto_opcion": "Create circular role grants intentionally, circular grants are problematic.",
         "es_correcta": false,
         "explicacion": "Circular grants are problematic."
       }
@@ -1453,6 +1453,11 @@
     "pregunta": "Global retailer scenario — transfer responsibility for schema objects when team changes. What should they implement? Constraint set #5.",
     "opciones": [
       {
+        "texto_opcion": "Ownership is stored on the warehouse",
+        "es_correcta": false,
+        "explicacion": "Ownership applies to securable objects like tables/schemas."
+      },
+      {
         "texto_opcion": "Share ownership cannot be transferred",
         "es_correcta": false,
         "explicacion": "Ownership transfer supported per object types."
@@ -1463,12 +1468,7 @@
         "explicacion": "DDL typically requires ownership or appropriate privilege."
       },
       {
-        "texto_opcion": "Ownership is stored on the warehouse",
-        "es_correcta": false,
-        "explicacion": "Ownership applies to securable objects like tables/schemas."
-      },
-      {
-        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and manage object",
+        "texto_opcion": "Transfer OWNERSHIP privilege; owner role can grant and.",
         "es_correcta": true,
         "explicacion": "OWNERSHIP controls full object control and grant capability."
       }
@@ -1482,9 +1482,14 @@
     "pregunta": "A insurance carrier (~200 million rows/day, region northeurope) must: auto-grant SELECT on new tables in ANALYTICS schema to ROLE BI. Which option fits best? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi",
-        "es_correcta": true,
-        "explicacion": "Future grants apply to objects created after grant definition."
+        "texto_opcion": "Future grants apply retroactively to all existing tables always",
+        "es_correcta": false,
+        "explicacion": "Future grants affect new objects, not existing unless granted."
+      },
+      {
+        "texto_opcion": "Re-run GRANT on every new table manually only, future grants automate new objects.",
+        "es_correcta": false,
+        "explicacion": "Future grants automate new objects."
       },
       {
         "texto_opcion": "GRANT ON FUTURE DATABASES to role without schema scope",
@@ -1492,14 +1497,9 @@
         "explicacion": "Future grants specify object type and container scope."
       },
       {
-        "texto_opcion": "Re-run GRANT on every new table manually only",
-        "es_correcta": false,
-        "explicacion": "Future grants automate new objects."
-      },
-      {
-        "texto_opcion": "Future grants apply retroactively to all existing tables always",
-        "es_correcta": false,
-        "explicacion": "Future grants affect new objects, not existing unless granted."
+        "texto_opcion": "GRANT SELECT ON FUTURE TABLES IN SCHEMA analytics TO ROLE bi.",
+        "es_correcta": true,
+        "explicacion": "Future grants apply to objects created after grant definition."
       }
     ],
     "tags": [
@@ -1511,22 +1511,22 @@
     "pregunta": "Logistics carrier scenario — distinguish ACCOUNTADMIN from SYSADMIN responsibilities. What should they implement? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience",
+        "texto_opcion": "PUBLIC role should have ACCOUNTADMIN for convenience, dangerous over-permission.",
         "es_correcta": false,
         "explicacion": "Dangerous over-permission."
       },
       {
-        "texto_opcion": "SYSADMIN cannot create warehouses",
+        "texto_opcion": "SYSADMIN cannot create warehouses, sYSADMIN manages many resources",
         "es_correcta": false,
         "explicacion": "SYSADMIN manages many resources including warehouses."
       },
       {
-        "texto_opcion": "ACCOUNTADMIN manages account-level config; SYSADMIN owns most objects and warehouses",
+        "texto_opcion": "ACCOUNTADMIN manages account-level config.",
         "es_correcta": true,
         "explicacion": "Built-in roles separate account governance from object administration."
       },
       {
-        "texto_opcion": "ACCOUNTADMIN should run all daily ETL",
+        "texto_opcion": "ACCOUNTADMIN should run all daily ETL, over-privileged; use custom roles for workloads.",
         "es_correcta": false,
         "explicacion": "Over-privileged; use custom roles for workloads."
       }
@@ -1540,14 +1540,9 @@
     "pregunta": "Incident review (northeurope): allow role to read but not modify table SALES.FACT_ORDERS. Select the most appropriate design. Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "GRANT OPERATE on table for SELECT queries",
+        "texto_opcion": "GRANT MONITOR on table to read rows",
         "es_correcta": false,
-        "explicacion": "OPERATE applies to warehouses/pipes/tasks contexts."
-      },
-      {
-        "texto_opcion": "GRANT USAGE ON TABLE for read access",
-        "es_correcta": false,
-        "explicacion": "USAGE on table is not read privilege; USAGE on schema/db required plus SELECT on table."
+        "explicacion": "MONITOR is for operational visibility, not row read."
       },
       {
         "texto_opcion": "GRANT SELECT ON TABLE sales.fact_orders TO ROLE ...",
@@ -1555,9 +1550,14 @@
         "explicacion": "SELECT grants read access without DML/DDL."
       },
       {
-        "texto_opcion": "GRANT MONITOR on table to read rows",
+        "texto_opcion": "GRANT USAGE ON TABLE for read access",
         "es_correcta": false,
-        "explicacion": "MONITOR is for operational visibility, not row read."
+        "explicacion": "USAGE on table is not read privilege; USAGE on schema/db required plus SELECT on table."
+      },
+      {
+        "texto_opcion": "GRANT OPERATE on table for SELECT queries",
+        "es_correcta": false,
+        "explicacion": "OPERATE applies to warehouses/pipes/tasks contexts."
       }
     ],
     "tags": [

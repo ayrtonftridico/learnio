@@ -3,22 +3,22 @@
     "pregunta": "dbt project review — a finance mart with strict SLAs. model SQL must read another dbt model `stg_orders`. What should the team do?",
     "opciones": [
       {
-        "texto_opcion": "Use source() for another dbt model",
+        "texto_opcion": "Use source() for another dbt model, source() is for raw sources, not dbt models.",
         "es_correcta": false,
         "explicacion": "source() is for raw sources, not dbt models."
       },
       {
-        "texto_opcion": "Hardcode `analytics.stg_orders`",
+        "texto_opcion": "Hardcode `analytics.stg_orders`, bypasses environment routing and lineage.",
         "es_correcta": false,
         "explicacion": "Bypasses environment routing and lineage."
       },
       {
-        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`",
+        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`.",
         "es_correcta": true,
         "explicacion": "ref() resolves dependencies and builds the DAG with environment-aware relations."
       },
       {
-        "texto_opcion": "Copy stg_orders SQL inline",
+        "texto_opcion": "Copy stg_orders SQL inline, breaks modularity and lineage, breaks modularity and lineage.",
         "es_correcta": false,
         "explicacion": "Breaks modularity and lineage."
       }
@@ -32,22 +32,22 @@
     "pregunta": "For a BigQuery analytics repo with nightly jobs: model reads raw landing table loaded by ELT outside dbt. Best practice?",
     "opciones": [
       {
-        "texto_opcion": "ref('raw_orders') without a model",
+        "texto_opcion": "ref('raw_orders') without a model, ref expects a dbt model, ref expects a dbt model, not external raw table.",
         "es_correcta": false,
         "explicacion": "ref expects a dbt model, not external raw table."
       },
       {
-        "texto_opcion": "Hardcode database.schema.table only",
+        "texto_opcion": "Hardcode database.schema.table only, loses source freshness and lineage in docs.",
         "es_correcta": false,
         "explicacion": "Loses source freshness and lineage in docs."
       },
       {
-        "texto_opcion": "Create empty model with no SQL",
+        "texto_opcion": "Create empty model with no SQL, does not define the external, does not define the external table as a source.",
         "es_correcta": false,
         "explicacion": "Does not define the external table as a source."
       },
       {
-        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declared in sources YAML",
+        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declared in sources YAML.",
         "es_correcta": true,
         "explicacion": "source() references declared sources and enables freshness tests."
       }
@@ -61,24 +61,24 @@
     "pregunta": "only downstream of `stg_customers` changed and must rebuild. Context: a multi-environment dbt Cloud job.",
     "opciones": [
       {
-        "texto_opcion": "--select +stg_customers only upstream",
+        "texto_opcion": "--select +stg_customers only upstream, wrong direction, wrong direction; need downstream + suffix.",
         "es_correcta": false,
         "explicacion": "Wrong direction; need downstream + suffix."
       },
       {
-        "texto_opcion": "Run `dbt run --select stg_customers+`",
+        "texto_opcion": "Manually run warehouse SQL per table, outside dbt orchestration.",
+        "es_correcta": false,
+        "explicacion": "Outside dbt orchestration."
+      },
+      {
+        "texto_opcion": "Run `dbt run --select stg_customers+`.",
         "es_correcta": true,
         "explicacion": "+ selects downstream dependents in the DAG."
       },
       {
-        "texto_opcion": "dbt run without select every time",
+        "texto_opcion": "dbt run without select every time, rebuilds entire project unnecessarily.",
         "es_correcta": false,
         "explicacion": "Rebuilds entire project unnecessarily."
-      },
-      {
-        "texto_opcion": "Manually run warehouse SQL per table",
-        "es_correcta": false,
-        "explicacion": "Outside dbt orchestration."
       }
     ],
     "tags": [
@@ -90,22 +90,22 @@
     "pregunta": "fix requires rebuilding a mart and all its parents. Context: a BigQuery analytics repo.",
     "opciones": [
       {
-        "texto_opcion": "Run `dbt run --select +fct_orders`",
+        "texto_opcion": "Run `dbt run --select +fct_orders`.",
         "es_correcta": true,
         "explicacion": "+ prefix selects upstream ancestors of the model."
       },
       {
-        "texto_opcion": "Drop child models first manually",
+        "texto_opcion": "Drop child models first manually, risky; selector handles order.",
         "es_correcta": false,
         "explicacion": "Risky; selector handles order."
       },
       {
-        "texto_opcion": "dbt test only",
+        "texto_opcion": "dbt test only, does not rebuild models; not the best fit here.",
         "es_correcta": false,
         "explicacion": "Does not rebuild models."
       },
       {
-        "texto_opcion": "--select fct_orders+ for parents",
+        "texto_opcion": "--select fct_orders+ for parents, suffix + is downstream",
         "es_correcta": false,
         "explicacion": "Suffix + is downstream; prefix + is upstream."
       }
@@ -119,24 +119,24 @@
     "pregunta": "dbt project review — a finance mart with strict SLAs. run staging folder and exclude deprecated models tagged legacy. What should the team do?",
     "opciones": [
       {
-        "texto_opcion": "Exclude by renaming files randomly",
-        "es_correcta": false,
-        "explicacion": "Not declarative."
-      },
-      {
-        "texto_opcion": "Run entire project always",
+        "texto_opcion": "Run entire project always as the primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Wastes compute."
       },
       {
-        "texto_opcion": "Use only model name with no path/tag",
+        "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`.",
+        "es_correcta": true,
+        "explicacion": "Graph operators combine path, tag, and exclude filters."
+      },
+      {
+        "texto_opcion": "Use only model name with no path/tag, harder to maintain at scale.",
         "es_correcta": false,
         "explicacion": "Harder to maintain at scale."
       },
       {
-        "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`",
-        "es_correcta": true,
-        "explicacion": "Graph operators combine path, tag, and exclude filters."
+        "texto_opcion": "Exclude by renaming files randomly configured end-to-end as the primary.",
+        "es_correcta": false,
+        "explicacion": "Not declarative."
       }
     ],
     "tags": [
@@ -148,22 +148,22 @@
     "pregunta": "dbt project review — a medallion lakehouse built with dbt. intermediate logic used once should not materialize. What should the team do?",
     "opciones": [
       {
-        "texto_opcion": "Use seeds for intermediates",
-        "es_correcta": false,
-        "explicacion": "Wrong tool for transforms."
-      },
-      {
-        "texto_opcion": "Materialize every step as table",
+        "texto_opcion": "Materialize every step as table, table sprawl and cost, table sprawl and cost.",
         "es_correcta": false,
         "explicacion": "Table sprawl and cost."
       },
       {
-        "texto_opcion": "Duplicate SQL in five models",
+        "texto_opcion": "Use seeds for intermediates, wrong tool for transforms, wrong tool for transforms.",
+        "es_correcta": false,
+        "explicacion": "Wrong tool for transforms."
+      },
+      {
+        "texto_opcion": "Duplicate SQL in five models configured end-to-end for this workload.",
         "es_correcta": false,
         "explicacion": "Maintenance burden."
       },
       {
-        "texto_opcion": "Use ephemeral model or a SQL CTE via ref to ephemeral",
+        "texto_opcion": "Use ephemeral model or a SQL CTE via ref to ephemeral.",
         "es_correcta": true,
         "explicacion": "Ephemeral/CTE avoids extra tables in the warehouse."
       }
@@ -177,24 +177,24 @@
     "pregunta": "In a Snowflake warehouse project: dbt compile fails citing a cyclic dependency. Which dbt approach is best?",
     "opciones": [
       {
-        "texto_opcion": "Remove circular ref() chains so the DAG is acyclic",
-        "es_correcta": true,
-        "explicacion": "dbt requires a directed acyclic graph; cycles break compilation."
-      },
-      {
-        "texto_opcion": "Add cycles for 'performance'",
+        "texto_opcion": "Add cycles for 'performance' prioritized for operational.",
         "es_correcta": false,
         "explicacion": "Invalid dbt design."
       },
       {
-        "texto_opcion": "Replace ref() with hardcoded tables",
+        "texto_opcion": "Replace ref() with hardcoded tables, breaks lineage permanently.",
         "es_correcta": false,
         "explicacion": "Breaks lineage permanently."
       },
       {
-        "texto_opcion": "Ignore the error and run --full-refresh",
+        "texto_opcion": "Ignore the error and run --full-refresh, cycle remains; run fails.",
         "es_correcta": false,
         "explicacion": "Cycle remains; run fails."
+      },
+      {
+        "texto_opcion": "Remove circular ref() chains so the DAG is acyclic.",
+        "es_correcta": true,
+        "explicacion": "dbt requires a directed acyclic graph; cycles break compilation."
       }
     ],
     "tags": [
@@ -206,22 +206,22 @@
     "pregunta": "In a finance mart with strict SLAs: raw sources should be lightly cleaned before marts. Which dbt approach is best?",
     "opciones": [
       {
-        "texto_opcion": "One monolithic 5000-line model",
+        "texto_opcion": "One monolithic 5000-line model, hard to test and maintain, hard to test and maintain.",
         "es_correcta": false,
         "explicacion": "Hard to test and maintain."
       },
       {
-        "texto_opcion": "Mart models source() directly with heavy logic",
+        "texto_opcion": "Mart models source() directly with heavy logic, couples marts to raw layout.",
         "es_correcta": false,
         "explicacion": "Couples marts to raw layout."
       },
       {
-        "texto_opcion": "Build staging models with source() then ref staging from marts",
+        "texto_opcion": "Build staging models with source() then ref staging from marts.",
         "es_correcta": true,
         "explicacion": "Staging isolates source changes and standardizes naming."
       },
       {
-        "texto_opcion": "Skip staging and use only seeds",
+        "texto_opcion": "Skip staging and use only seeds, seeds are not live sources, seeds are not live sources.",
         "es_correcta": false,
         "explicacion": "Seeds are not live sources."
       }
@@ -235,24 +235,24 @@
     "pregunta": "dbt project review — a BigQuery analytics repo. model depends on a model installed from a dbt package. What should the team do?",
     "opciones": [
       {
-        "texto_opcion": "Copy package SQL into project manually",
-        "es_correcta": false,
-        "explicacion": "Forks package updates."
-      },
-      {
-        "texto_opcion": "Hardcode package schema.table",
+        "texto_opcion": "Hardcode package schema.table, breaks on package upgrades.",
         "es_correcta": false,
         "explicacion": "Breaks on package upgrades."
       },
       {
-        "texto_opcion": "Remove packages.yml",
+        "texto_opcion": "Copy package SQL into project manually, forks package updates.",
         "es_correcta": false,
-        "explicacion": "Uninstalls package dependencies."
+        "explicacion": "Forks package updates."
       },
       {
-        "texto_opcion": "Use `ref('package_name', 'model_name')` or configure package namespace",
+        "texto_opcion": "Use `ref` or configure package namespace.",
         "es_correcta": true,
         "explicacion": "Package refs resolve models from installed packages in the DAG."
+      },
+      {
+        "texto_opcion": "Remove packages.yml, uninstalls package dependencies.",
+        "es_correcta": false,
+        "explicacion": "Uninstalls package dependencies."
       }
     ],
     "tags": [
@@ -264,22 +264,22 @@
     "pregunta": "single model needs table while folder defaults to view. Context: a multi-environment dbt Cloud job.",
     "opciones": [
       {
-        "texto_opcion": "Set `{{ config(materialized='table') }}` at top of the model SQL",
+        "texto_opcion": "Set `{{ config(materialized='table') }}` at top of the model SQL.",
         "es_correcta": true,
         "explicacion": "Model-level config overrides folder defaults in dbt_project.yml."
       },
       {
-        "texto_opcion": "Change global default to table for all staging",
+        "texto_opcion": "Change global default to table for all staging, overrides intent for other models.",
         "es_correcta": false,
         "explicacion": "Overrides intent for other models."
       },
       {
-        "texto_opcion": "Disable the model",
+        "texto_opcion": "Disable the model, does not apply table materialization, does not apply table materialization.",
         "es_correcta": false,
         "explicacion": "Does not apply table materialization."
       },
       {
-        "texto_opcion": "Edit compiled target/ files",
+        "texto_opcion": "Edit compiled target/ files, generated artifacts are overwritten, generated artifacts are overwritten.",
         "es_correcta": false,
         "explicacion": "Generated artifacts are overwritten."
       }
@@ -293,7 +293,7 @@
     "pregunta": "exploratory query should not be built in production DAG. Context: a product analytics team using dbt.",
     "opciones": [
       {
-        "texto_opcion": "Place SQL in `analyses/` directory",
+        "texto_opcion": "Place SQL in `analyses/` directory.",
         "es_correcta": true,
         "explicacion": "analyses compile but are not materialized or run by default."
       },
@@ -303,12 +303,12 @@
         "explicacion": "Not reproducible."
       },
       {
-        "texto_opcion": "Add to seeds",
+        "texto_opcion": "Add to seeds, seeds are CSV data, not analytical SQL.",
         "es_correcta": false,
         "explicacion": "Seeds are CSV data, not analytical SQL."
       },
       {
-        "texto_opcion": "Put ad hoc query in models/ as table",
+        "texto_opcion": "Put ad hoc query in models/ as table, pollutes production DAG.",
         "es_correcta": false,
         "explicacion": "Pollutes production DAG."
       }
@@ -322,17 +322,17 @@
     "pregunta": "For a finance mart with strict SLAs with nightly jobs: run models that are both tag:nightly and path:marts. Best practice?",
     "opciones": [
       {
-        "texto_opcion": "Select by UUID",
+        "texto_opcion": "Select by UUID, dbt selects by name/tag/path, not UUID.",
         "es_correcta": false,
         "explicacion": "dbt selects by name/tag/path, not UUID."
       },
       {
-        "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`",
+        "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`.",
         "es_correcta": true,
         "explicacion": "Comma intersection narrows selection to models matching all predicates."
       },
       {
-        "texto_opcion": "Run tests with dbt run only",
+        "texto_opcion": "Run tests with dbt run only, dbt run does not execute tests.",
         "es_correcta": false,
         "explicacion": "dbt run does not execute tests."
       },
@@ -351,24 +351,24 @@
     "pregunta": "In a Snowflake warehouse project: declare raw tables for freshness and lineage in docs. Which dbt approach is best?",
     "opciones": [
       {
-        "texto_opcion": "Use exposures for raw tables",
-        "es_correcta": false,
-        "explicacion": "exposures document downstream usage, not raw sources."
-      },
-      {
-        "texto_opcion": "Define sources in YAML under `sources:` with database/schema/tables",
+        "texto_opcion": "Define sources in YAML under `sources:` with.",
         "es_correcta": true,
         "explicacion": "sources YAML registers external tables for source() and freshness."
       },
       {
-        "texto_opcion": "Only document in README",
-        "es_correcta": false,
-        "explicacion": "Not parsed by dbt."
-      },
-      {
-        "texto_opcion": "Put sources block inside a .sql model",
+        "texto_opcion": "Put sources block inside a .sql model, yAML belongs in schema files.",
         "es_correcta": false,
         "explicacion": "YAML belongs in schema files."
+      },
+      {
+        "texto_opcion": "Use exposures for raw tables, exposures document downstream.",
+        "es_correcta": false,
+        "explicacion": "exposures document downstream usage, not raw sources."
+      },
+      {
+        "texto_opcion": "Only document in README prioritized for operational configured.",
+        "es_correcta": false,
+        "explicacion": "Not parsed by dbt."
       }
     ],
     "tags": [
@@ -380,22 +380,22 @@
     "pregunta": "In a multi-environment dbt Cloud job: model SQL must read another dbt model `stg_orders`. Which dbt approach is best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`",
+        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`.",
         "es_correcta": true,
         "explicacion": "ref() resolves dependencies and builds the DAG with environment-aware relations."
       },
       {
-        "texto_opcion": "Hardcode `analytics.stg_orders`",
+        "texto_opcion": "Hardcode `analytics.stg_orders`, bypasses environment routing and lineage.",
         "es_correcta": false,
         "explicacion": "Bypasses environment routing and lineage."
       },
       {
-        "texto_opcion": "Use source() for another dbt model",
+        "texto_opcion": "Use source() for another dbt model, source() is for raw sources, not dbt models.",
         "es_correcta": false,
         "explicacion": "source() is for raw sources, not dbt models."
       },
       {
-        "texto_opcion": "Copy stg_orders SQL inline",
+        "texto_opcion": "Copy stg_orders SQL inline, breaks modularity and lineage, breaks modularity and lineage.",
         "es_correcta": false,
         "explicacion": "Breaks modularity and lineage."
       }
@@ -409,24 +409,24 @@
     "pregunta": "dbt project review — a Snowflake warehouse project. model reads raw landing table loaded by ELT outside dbt. What should the team do? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Create empty model with no SQL",
+        "texto_opcion": "ref('raw_orders') without a model, ref expects a dbt model, ref expects a dbt model, not external raw table.",
         "es_correcta": false,
-        "explicacion": "Does not define the external table as a source."
+        "explicacion": "ref expects a dbt model, not external raw table."
       },
       {
-        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declared in sources YAML",
-        "es_correcta": true,
-        "explicacion": "source() references declared sources and enables freshness tests."
-      },
-      {
-        "texto_opcion": "Hardcode database.schema.table only",
+        "texto_opcion": "Hardcode database.schema.table only, loses source freshness and lineage in docs.",
         "es_correcta": false,
         "explicacion": "Loses source freshness and lineage in docs."
       },
       {
-        "texto_opcion": "ref('raw_orders') without a model",
+        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declared in sources YAML.",
+        "es_correcta": true,
+        "explicacion": "source() references declared sources and enables freshness tests."
+      },
+      {
+        "texto_opcion": "Create empty model with no SQL, does not define the external, does not define the external table as a source.",
         "es_correcta": false,
-        "explicacion": "ref expects a dbt model, not external raw table."
+        "explicacion": "Does not define the external table as a source."
       }
     ],
     "tags": [
@@ -438,24 +438,24 @@
     "pregunta": "dbt project review — a multi-environment dbt Cloud job. only downstream of `stg_customers` changed and must rebuild. What should the team do? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "--select +stg_customers only upstream",
+        "texto_opcion": "--select +stg_customers only upstream, wrong direction, wrong direction; need downstream + suffix.",
         "es_correcta": false,
         "explicacion": "Wrong direction; need downstream + suffix."
       },
       {
-        "texto_opcion": "dbt run without select every time",
+        "texto_opcion": "Run `dbt run --select stg_customers+`.",
+        "es_correcta": true,
+        "explicacion": "+ selects downstream dependents in the DAG."
+      },
+      {
+        "texto_opcion": "dbt run without select every time, rebuilds entire project unnecessarily.",
         "es_correcta": false,
         "explicacion": "Rebuilds entire project unnecessarily."
       },
       {
-        "texto_opcion": "Manually run warehouse SQL per table",
+        "texto_opcion": "Manually run warehouse SQL per table, outside dbt orchestration.",
         "es_correcta": false,
         "explicacion": "Outside dbt orchestration."
-      },
-      {
-        "texto_opcion": "Run `dbt run --select stg_customers+`",
-        "es_correcta": true,
-        "explicacion": "+ selects downstream dependents in the DAG."
       }
     ],
     "tags": [
@@ -467,24 +467,24 @@
     "pregunta": "During `dbt build` troubleshooting in a CI pipeline using dbt Core: fix requires rebuilding a mart and all its parents. Select the correct answer. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "dbt test only",
-        "es_correcta": false,
-        "explicacion": "Does not rebuild models."
-      },
-      {
-        "texto_opcion": "--select fct_orders+ for parents",
+        "texto_opcion": "--select fct_orders+ for parents, suffix + is downstream",
         "es_correcta": false,
         "explicacion": "Suffix + is downstream; prefix + is upstream."
       },
       {
-        "texto_opcion": "Drop child models first manually",
+        "texto_opcion": "Run `dbt run --select +fct_orders`.",
+        "es_correcta": true,
+        "explicacion": "+ prefix selects upstream ancestors of the model."
+      },
+      {
+        "texto_opcion": "Drop child models first manually, risky; selector handles order.",
         "es_correcta": false,
         "explicacion": "Risky; selector handles order."
       },
       {
-        "texto_opcion": "Run `dbt run --select +fct_orders`",
-        "es_correcta": true,
-        "explicacion": "+ prefix selects upstream ancestors of the model."
+        "texto_opcion": "dbt test only, does not rebuild models; not the best fit here.",
+        "es_correcta": false,
+        "explicacion": "Does not rebuild models."
       }
     ],
     "tags": [
@@ -496,22 +496,22 @@
     "pregunta": "During `dbt build` troubleshooting in a medallion lakehouse built with dbt: run staging folder and exclude deprecated models tagged legacy. Select the correct answer. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`",
-        "es_correcta": true,
-        "explicacion": "Graph operators combine path, tag, and exclude filters."
-      },
-      {
-        "texto_opcion": "Use only model name with no path/tag",
+        "texto_opcion": "Use only model name with no path/tag, harder to maintain at scale.",
         "es_correcta": false,
         "explicacion": "Harder to maintain at scale."
       },
       {
-        "texto_opcion": "Exclude by renaming files randomly",
+        "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`.",
+        "es_correcta": true,
+        "explicacion": "Graph operators combine path, tag, and exclude filters."
+      },
+      {
+        "texto_opcion": "Exclude by renaming files randomly configured end-to-end.",
         "es_correcta": false,
         "explicacion": "Not declarative."
       },
       {
-        "texto_opcion": "Run entire project always",
+        "texto_opcion": "Run entire project always prioritized for operational.",
         "es_correcta": false,
         "explicacion": "Wastes compute."
       }
@@ -525,24 +525,24 @@
     "pregunta": "intermediate logic used once should not materialize. Context: a product analytics team using dbt. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Use seeds for intermediates",
+        "texto_opcion": "Materialize every step as table, table sprawl and cost.",
+        "es_correcta": false,
+        "explicacion": "Table sprawl and cost."
+      },
+      {
+        "texto_opcion": "Use seeds for intermediates, wrong tool for transforms.",
         "es_correcta": false,
         "explicacion": "Wrong tool for transforms."
       },
       {
-        "texto_opcion": "Use ephemeral model or a SQL CTE via ref to ephemeral",
-        "es_correcta": true,
-        "explicacion": "Ephemeral/CTE avoids extra tables in the warehouse."
-      },
-      {
-        "texto_opcion": "Duplicate SQL in five models",
+        "texto_opcion": "Duplicate SQL in five models as the default production choice here.",
         "es_correcta": false,
         "explicacion": "Maintenance burden."
       },
       {
-        "texto_opcion": "Materialize every step as table",
-        "es_correcta": false,
-        "explicacion": "Table sprawl and cost."
+        "texto_opcion": "Use ephemeral model or a SQL CTE via ref to ephemeral.",
+        "es_correcta": true,
+        "explicacion": "Ephemeral/CTE avoids extra tables in the warehouse."
       }
     ],
     "tags": [
@@ -554,24 +554,24 @@
     "pregunta": "dbt project review — a BigQuery analytics repo. dbt compile fails citing a cyclic dependency. What should the team do? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Remove circular ref() chains so the DAG is acyclic",
-        "es_correcta": true,
-        "explicacion": "dbt requires a directed acyclic graph; cycles break compilation."
-      },
-      {
-        "texto_opcion": "Ignore the error and run --full-refresh",
+        "texto_opcion": "Ignore the error and run --full-refresh, cycle remains; run fails.",
         "es_correcta": false,
         "explicacion": "Cycle remains; run fails."
       },
       {
-        "texto_opcion": "Add cycles for 'performance'",
-        "es_correcta": false,
-        "explicacion": "Invalid dbt design."
-      },
-      {
-        "texto_opcion": "Replace ref() with hardcoded tables",
+        "texto_opcion": "Replace ref() with hardcoded tables, breaks lineage permanently.",
         "es_correcta": false,
         "explicacion": "Breaks lineage permanently."
+      },
+      {
+        "texto_opcion": "Remove circular ref() chains so the DAG is acyclic.",
+        "es_correcta": true,
+        "explicacion": "dbt requires a directed acyclic graph; cycles break compilation."
+      },
+      {
+        "texto_opcion": "Add cycles for 'performance' as the primary design for.",
+        "es_correcta": false,
+        "explicacion": "Invalid dbt design."
       }
     ],
     "tags": [
@@ -583,22 +583,22 @@
     "pregunta": "For a multi-environment dbt Cloud job with nightly jobs: raw sources should be lightly cleaned before marts. Best practice? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "One monolithic 5000-line model",
+        "texto_opcion": "One monolithic 5000-line model, hard to test and maintain, hard to test and maintain.",
         "es_correcta": false,
         "explicacion": "Hard to test and maintain."
       },
       {
-        "texto_opcion": "Skip staging and use only seeds",
+        "texto_opcion": "Skip staging and use only seeds, seeds are not live sources, seeds are not live sources.",
         "es_correcta": false,
         "explicacion": "Seeds are not live sources."
       },
       {
-        "texto_opcion": "Build staging models with source() then ref staging from marts",
+        "texto_opcion": "Build staging models with source() then ref staging from marts.",
         "es_correcta": true,
         "explicacion": "Staging isolates source changes and standardizes naming."
       },
       {
-        "texto_opcion": "Mart models source() directly with heavy logic",
+        "texto_opcion": "Mart models source() directly with heavy logic, couples marts to raw layout.",
         "es_correcta": false,
         "explicacion": "Couples marts to raw layout."
       }
@@ -612,24 +612,24 @@
     "pregunta": "dbt project review — a platform team publishing shared packages. model depends on a model installed from a dbt package. What should the team do? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Remove packages.yml",
+        "texto_opcion": "Remove packages.yml, uninstalls package dependencies.",
         "es_correcta": false,
         "explicacion": "Uninstalls package dependencies."
       },
       {
-        "texto_opcion": "Use `ref('package_name', 'model_name')` or configure package namespace",
-        "es_correcta": true,
-        "explicacion": "Package refs resolve models from installed packages in the DAG."
-      },
-      {
-        "texto_opcion": "Copy package SQL into project manually",
+        "texto_opcion": "Copy package SQL into project manually, forks package updates.",
         "es_correcta": false,
         "explicacion": "Forks package updates."
       },
       {
-        "texto_opcion": "Hardcode package schema.table",
+        "texto_opcion": "Hardcode package schema.table, breaks on package upgrades.",
         "es_correcta": false,
         "explicacion": "Breaks on package upgrades."
+      },
+      {
+        "texto_opcion": "Use `ref` or configure package namespace.",
+        "es_correcta": true,
+        "explicacion": "Package refs resolve models from installed packages in the DAG."
       }
     ],
     "tags": [
@@ -641,22 +641,22 @@
     "pregunta": "For a Databricks SQL warehouse deployment with nightly jobs: single model needs table while folder defaults to view. Best practice? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Set `{{ config(materialized='table') }}` at top of the model SQL",
+        "texto_opcion": "Set `{{ config(materialized='table') }}` at top of the model SQL.",
         "es_correcta": true,
         "explicacion": "Model-level config overrides folder defaults in dbt_project.yml."
       },
       {
-        "texto_opcion": "Disable the model",
+        "texto_opcion": "Disable the model, does not apply table materialization, does not apply table materialization.",
         "es_correcta": false,
         "explicacion": "Does not apply table materialization."
       },
       {
-        "texto_opcion": "Change global default to table for all staging",
+        "texto_opcion": "Change global default to table for all staging, overrides intent for other models.",
         "es_correcta": false,
         "explicacion": "Overrides intent for other models."
       },
       {
-        "texto_opcion": "Edit compiled target/ files",
+        "texto_opcion": "Edit compiled target/ files, generated artifacts are overwritten, generated artifacts are overwritten.",
         "es_correcta": false,
         "explicacion": "Generated artifacts are overwritten."
       }
@@ -670,24 +670,24 @@
     "pregunta": "For a platform team publishing shared packages with nightly jobs: exploratory query should not be built in production DAG. Best practice? Constraint set #2.",
     "opciones": [
       {
+        "texto_opcion": "Add to seeds, seeds are CSV data, not analytical SQL.",
+        "es_correcta": false,
+        "explicacion": "Seeds are CSV data, not analytical SQL."
+      },
+      {
+        "texto_opcion": "Place SQL in `analyses/` directory.",
+        "es_correcta": true,
+        "explicacion": "analyses compile but are not materialized or run by default."
+      },
+      {
         "texto_opcion": "Run query only in worksheet and lose version control",
         "es_correcta": false,
         "explicacion": "Not reproducible."
       },
       {
-        "texto_opcion": "Place SQL in `analyses/` directory",
-        "es_correcta": true,
-        "explicacion": "analyses compile but are not materialized or run by default."
-      },
-      {
-        "texto_opcion": "Put ad hoc query in models/ as table",
+        "texto_opcion": "Put ad hoc query in models/ as table, pollutes production DAG.",
         "es_correcta": false,
         "explicacion": "Pollutes production DAG."
-      },
-      {
-        "texto_opcion": "Add to seeds",
-        "es_correcta": false,
-        "explicacion": "Seeds are CSV data, not analytical SQL."
       }
     ],
     "tags": [
@@ -704,17 +704,17 @@
         "explicacion": "Graph operator syntax must match docs."
       },
       {
-        "texto_opcion": "Run tests with dbt run only",
+        "texto_opcion": "Run tests with dbt run only, dbt run does not execute tests.",
         "es_correcta": false,
         "explicacion": "dbt run does not execute tests."
       },
       {
-        "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`",
+        "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`.",
         "es_correcta": true,
         "explicacion": "Comma intersection narrows selection to models matching all predicates."
       },
       {
-        "texto_opcion": "Select by UUID",
+        "texto_opcion": "Select by UUID, dbt selects by name/tag/path, not UUID.",
         "es_correcta": false,
         "explicacion": "dbt selects by name/tag/path, not UUID."
       }
@@ -728,22 +728,22 @@
     "pregunta": "During `dbt build` troubleshooting in a platform team publishing shared packages: declare raw tables for freshness and lineage in docs. Select the correct answer. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Define sources in YAML under `sources:` with database/schema/tables",
-        "es_correcta": true,
-        "explicacion": "sources YAML registers external tables for source() and freshness."
-      },
-      {
-        "texto_opcion": "Only document in README",
-        "es_correcta": false,
-        "explicacion": "Not parsed by dbt."
-      },
-      {
-        "texto_opcion": "Put sources block inside a .sql model",
+        "texto_opcion": "Put sources block inside a .sql model, yAML belongs in schema files.",
         "es_correcta": false,
         "explicacion": "YAML belongs in schema files."
       },
       {
-        "texto_opcion": "Use exposures for raw tables",
+        "texto_opcion": "Only document in README used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Not parsed by dbt."
+      },
+      {
+        "texto_opcion": "Define sources in YAML under `sources:` with.",
+        "es_correcta": true,
+        "explicacion": "sources YAML registers external tables for source() and freshness."
+      },
+      {
+        "texto_opcion": "Use exposures for raw tables, exposures document downstream.",
         "es_correcta": false,
         "explicacion": "exposures document downstream usage, not raw sources."
       }
@@ -757,22 +757,22 @@
     "pregunta": "In a Snowflake warehouse project: model SQL must read another dbt model `stg_orders`. Which dbt approach is best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Copy stg_orders SQL inline",
+        "texto_opcion": "Copy stg_orders SQL inline, breaks modularity and lineage, breaks modularity and lineage.",
         "es_correcta": false,
         "explicacion": "Breaks modularity and lineage."
       },
       {
-        "texto_opcion": "Use source() for another dbt model",
+        "texto_opcion": "Use source() for another dbt model, source() is for raw sources, not dbt models.",
         "es_correcta": false,
         "explicacion": "source() is for raw sources, not dbt models."
       },
       {
-        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`",
+        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`.",
         "es_correcta": true,
         "explicacion": "ref() resolves dependencies and builds the DAG with environment-aware relations."
       },
       {
-        "texto_opcion": "Hardcode `analytics.stg_orders`",
+        "texto_opcion": "Hardcode `analytics.stg_orders`, bypasses environment routing and lineage.",
         "es_correcta": false,
         "explicacion": "Bypasses environment routing and lineage."
       }
@@ -786,24 +786,24 @@
     "pregunta": "For a multi-environment dbt Cloud job with nightly jobs: model reads raw landing table loaded by ELT outside dbt. Best practice? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Hardcode database.schema.table only",
-        "es_correcta": false,
-        "explicacion": "Loses source freshness and lineage in docs."
-      },
-      {
-        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declared in sources YAML",
+        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declared in sources YAML.",
         "es_correcta": true,
         "explicacion": "source() references declared sources and enables freshness tests."
       },
       {
-        "texto_opcion": "ref('raw_orders') without a model",
+        "texto_opcion": "Hardcode database.schema.table only, loses source freshness and lineage in docs.",
         "es_correcta": false,
-        "explicacion": "ref expects a dbt model, not external raw table."
+        "explicacion": "Loses source freshness and lineage in docs."
       },
       {
-        "texto_opcion": "Create empty model with no SQL",
+        "texto_opcion": "Create empty model with no SQL, does not define the external, does not define the external table as a source.",
         "es_correcta": false,
         "explicacion": "Does not define the external table as a source."
+      },
+      {
+        "texto_opcion": "ref('raw_orders') without a model, ref expects a dbt model, ref expects a dbt model, not external raw table.",
+        "es_correcta": false,
+        "explicacion": "ref expects a dbt model, not external raw table."
       }
     ],
     "tags": [
@@ -815,24 +815,24 @@
     "pregunta": "During `dbt build` troubleshooting in a monorepo with three dbt projects: only downstream of `stg_customers` changed and must rebuild. Select the correct answer. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "--select +stg_customers only upstream",
+        "texto_opcion": "Manually run warehouse SQL per table, outside dbt orchestration.",
+        "es_correcta": false,
+        "explicacion": "Outside dbt orchestration."
+      },
+      {
+        "texto_opcion": "--select +stg_customers only upstream, wrong direction, wrong direction; need downstream + suffix.",
         "es_correcta": false,
         "explicacion": "Wrong direction; need downstream + suffix."
       },
       {
-        "texto_opcion": "Run `dbt run --select stg_customers+`",
-        "es_correcta": true,
-        "explicacion": "+ selects downstream dependents in the DAG."
-      },
-      {
-        "texto_opcion": "dbt run without select every time",
+        "texto_opcion": "dbt run without select every time, rebuilds entire project unnecessarily.",
         "es_correcta": false,
         "explicacion": "Rebuilds entire project unnecessarily."
       },
       {
-        "texto_opcion": "Manually run warehouse SQL per table",
-        "es_correcta": false,
-        "explicacion": "Outside dbt orchestration."
+        "texto_opcion": "Run `dbt run --select stg_customers+`.",
+        "es_correcta": true,
+        "explicacion": "+ selects downstream dependents in the DAG."
       }
     ],
     "tags": [
@@ -844,24 +844,24 @@
     "pregunta": "fix requires rebuilding a mart and all its parents. Context: a BigQuery analytics repo. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Drop child models first manually",
-        "es_correcta": false,
-        "explicacion": "Risky; selector handles order."
-      },
-      {
-        "texto_opcion": "dbt test only",
+        "texto_opcion": "dbt test only, does not rebuild models; not the best fit here.",
         "es_correcta": false,
         "explicacion": "Does not rebuild models."
       },
       {
-        "texto_opcion": "Run `dbt run --select +fct_orders`",
-        "es_correcta": true,
-        "explicacion": "+ prefix selects upstream ancestors of the model."
+        "texto_opcion": "Drop child models first manually, risky; selector handles order.",
+        "es_correcta": false,
+        "explicacion": "Risky; selector handles order."
       },
       {
-        "texto_opcion": "--select fct_orders+ for parents",
+        "texto_opcion": "--select fct_orders+ for parents, suffix + is downstream",
         "es_correcta": false,
         "explicacion": "Suffix + is downstream; prefix + is upstream."
+      },
+      {
+        "texto_opcion": "Run `dbt run --select +fct_orders`.",
+        "es_correcta": true,
+        "explicacion": "+ prefix selects upstream ancestors of the model."
       }
     ],
     "tags": [
@@ -873,24 +873,24 @@
     "pregunta": "During `dbt build` troubleshooting in a platform team publishing shared packages: run staging folder and exclude deprecated models tagged legacy. Select the correct answer. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Use only model name with no path/tag",
+        "texto_opcion": "Use only model name with no path/tag, harder to maintain at scale.",
         "es_correcta": false,
         "explicacion": "Harder to maintain at scale."
       },
       {
-        "texto_opcion": "Exclude by renaming files randomly",
+        "texto_opcion": "Run entire project always as the default production choice here.",
+        "es_correcta": false,
+        "explicacion": "Wastes compute."
+      },
+      {
+        "texto_opcion": "Exclude by renaming files randomly applied across as the default.",
         "es_correcta": false,
         "explicacion": "Not declarative."
       },
       {
-        "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`",
+        "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`.",
         "es_correcta": true,
         "explicacion": "Graph operators combine path, tag, and exclude filters."
-      },
-      {
-        "texto_opcion": "Run entire project always",
-        "es_correcta": false,
-        "explicacion": "Wastes compute."
       }
     ],
     "tags": [
@@ -902,24 +902,24 @@
     "pregunta": "dbt project review — a product analytics team using dbt. intermediate logic used once should not materialize. What should the team do? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Use seeds for intermediates",
+        "texto_opcion": "Use seeds for intermediates, wrong tool for transforms, wrong tool for transforms.",
         "es_correcta": false,
         "explicacion": "Wrong tool for transforms."
       },
       {
-        "texto_opcion": "Duplicate SQL in five models",
+        "texto_opcion": "Materialize every step as table, table sprawl and cost, table sprawl and cost.",
         "es_correcta": false,
-        "explicacion": "Maintenance burden."
+        "explicacion": "Table sprawl and cost."
       },
       {
-        "texto_opcion": "Use ephemeral model or a SQL CTE via ref to ephemeral",
+        "texto_opcion": "Use ephemeral model or a SQL CTE via ref to ephemeral.",
         "es_correcta": true,
         "explicacion": "Ephemeral/CTE avoids extra tables in the warehouse."
       },
       {
-        "texto_opcion": "Materialize every step as table",
+        "texto_opcion": "Duplicate SQL in five models selected to meet the stated constraints.",
         "es_correcta": false,
-        "explicacion": "Table sprawl and cost."
+        "explicacion": "Maintenance burden."
       }
     ],
     "tags": [
@@ -931,24 +931,24 @@
     "pregunta": "For a BigQuery analytics repo with nightly jobs: dbt compile fails citing a cyclic dependency. Best practice? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Add cycles for 'performance'",
-        "es_correcta": false,
-        "explicacion": "Invalid dbt design."
+        "texto_opcion": "Remove circular ref() chains so the DAG is acyclic.",
+        "es_correcta": true,
+        "explicacion": "dbt requires a directed acyclic graph; cycles break compilation."
       },
       {
-        "texto_opcion": "Ignore the error and run --full-refresh",
+        "texto_opcion": "Ignore the error and run --full-refresh, cycle remains; run fails.",
         "es_correcta": false,
         "explicacion": "Cycle remains; run fails."
       },
       {
-        "texto_opcion": "Replace ref() with hardcoded tables",
+        "texto_opcion": "Add cycles for 'performance' applied across environments.",
         "es_correcta": false,
-        "explicacion": "Breaks lineage permanently."
+        "explicacion": "Invalid dbt design."
       },
       {
-        "texto_opcion": "Remove circular ref() chains so the DAG is acyclic",
-        "es_correcta": true,
-        "explicacion": "dbt requires a directed acyclic graph; cycles break compilation."
+        "texto_opcion": "Replace ref() with hardcoded tables, breaks lineage permanently.",
+        "es_correcta": false,
+        "explicacion": "Breaks lineage permanently."
       }
     ],
     "tags": [
@@ -960,22 +960,22 @@
     "pregunta": "dbt project review — a platform team publishing shared packages. raw sources should be lightly cleaned before marts. What should the team do? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "One monolithic 5000-line model",
+        "texto_opcion": "One monolithic 5000-line model, hard to test and maintain, hard to test and maintain.",
         "es_correcta": false,
         "explicacion": "Hard to test and maintain."
       },
       {
-        "texto_opcion": "Build staging models with source() then ref staging from marts",
+        "texto_opcion": "Build staging models with source() then ref staging from marts.",
         "es_correcta": true,
         "explicacion": "Staging isolates source changes and standardizes naming."
       },
       {
-        "texto_opcion": "Skip staging and use only seeds",
+        "texto_opcion": "Skip staging and use only seeds, seeds are not live sources, seeds are not live sources.",
         "es_correcta": false,
         "explicacion": "Seeds are not live sources."
       },
       {
-        "texto_opcion": "Mart models source() directly with heavy logic",
+        "texto_opcion": "Mart models source() directly with heavy logic, couples marts to raw layout.",
         "es_correcta": false,
         "explicacion": "Couples marts to raw layout."
       }
@@ -989,24 +989,24 @@
     "pregunta": "dbt project review — a platform team publishing shared packages. model depends on a model installed from a dbt package. What should the team do? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Copy package SQL into project manually",
-        "es_correcta": false,
-        "explicacion": "Forks package updates."
-      },
-      {
-        "texto_opcion": "Remove packages.yml",
+        "texto_opcion": "Remove packages.yml, uninstalls package dependencies.",
         "es_correcta": false,
         "explicacion": "Uninstalls package dependencies."
       },
       {
-        "texto_opcion": "Hardcode package schema.table",
+        "texto_opcion": "Copy package SQL into project manually, forks package updates.",
         "es_correcta": false,
-        "explicacion": "Breaks on package upgrades."
+        "explicacion": "Forks package updates."
       },
       {
-        "texto_opcion": "Use `ref('package_name', 'model_name')` or configure package namespace",
+        "texto_opcion": "Use `ref` or configure package namespace.",
         "es_correcta": true,
         "explicacion": "Package refs resolve models from installed packages in the DAG."
+      },
+      {
+        "texto_opcion": "Hardcode package schema.table, breaks on package upgrades.",
+        "es_correcta": false,
+        "explicacion": "Breaks on package upgrades."
       }
     ],
     "tags": [
@@ -1018,22 +1018,22 @@
     "pregunta": "During `dbt build` troubleshooting in a CI pipeline using dbt Core: single model needs table while folder defaults to view. Select the correct answer. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Disable the model",
+        "texto_opcion": "Disable the model, does not apply table materialization, does not apply table materialization.",
         "es_correcta": false,
         "explicacion": "Does not apply table materialization."
       },
       {
-        "texto_opcion": "Edit compiled target/ files",
+        "texto_opcion": "Edit compiled target/ files, generated artifacts are overwritten, generated artifacts are overwritten.",
         "es_correcta": false,
         "explicacion": "Generated artifacts are overwritten."
       },
       {
-        "texto_opcion": "Set `{{ config(materialized='table') }}` at top of the model SQL",
+        "texto_opcion": "Set `{{ config(materialized='table') }}` at top of the model SQL.",
         "es_correcta": true,
         "explicacion": "Model-level config overrides folder defaults in dbt_project.yml."
       },
       {
-        "texto_opcion": "Change global default to table for all staging",
+        "texto_opcion": "Change global default to table for all staging, overrides intent for other models.",
         "es_correcta": false,
         "explicacion": "Overrides intent for other models."
       }
@@ -1047,12 +1047,12 @@
     "pregunta": "For a Databricks SQL warehouse deployment with nightly jobs: exploratory query should not be built in production DAG. Best practice? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Add to seeds",
+        "texto_opcion": "Add to seeds, seeds are CSV data, not analytical SQL.",
         "es_correcta": false,
         "explicacion": "Seeds are CSV data, not analytical SQL."
       },
       {
-        "texto_opcion": "Place SQL in `analyses/` directory",
+        "texto_opcion": "Place SQL in `analyses/` directory.",
         "es_correcta": true,
         "explicacion": "analyses compile but are not materialized or run by default."
       },
@@ -1062,7 +1062,7 @@
         "explicacion": "Not reproducible."
       },
       {
-        "texto_opcion": "Put ad hoc query in models/ as table",
+        "texto_opcion": "Put ad hoc query in models/ as table, pollutes production DAG.",
         "es_correcta": false,
         "explicacion": "Pollutes production DAG."
       }
@@ -1076,14 +1076,14 @@
     "pregunta": "For a finance mart with strict SLAs with nightly jobs: run models that are both tag:nightly and path:marts. Best practice? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Run tests with dbt run only",
-        "es_correcta": false,
-        "explicacion": "dbt run does not execute tests."
+        "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`.",
+        "es_correcta": true,
+        "explicacion": "Comma intersection narrows selection to models matching all predicates."
       },
       {
-        "texto_opcion": "Select by UUID",
+        "texto_opcion": "Run tests with dbt run only, dbt run does not execute tests.",
         "es_correcta": false,
-        "explicacion": "dbt selects by name/tag/path, not UUID."
+        "explicacion": "dbt run does not execute tests."
       },
       {
         "texto_opcion": "Space-separated select meaning OR incorrectly",
@@ -1091,9 +1091,9 @@
         "explicacion": "Graph operator syntax must match docs."
       },
       {
-        "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`",
-        "es_correcta": true,
-        "explicacion": "Comma intersection narrows selection to models matching all predicates."
+        "texto_opcion": "Select by UUID, dbt selects by name/tag/path, not UUID.",
+        "es_correcta": false,
+        "explicacion": "dbt selects by name/tag/path, not UUID."
       }
     ],
     "tags": [
@@ -1105,24 +1105,24 @@
     "pregunta": "During `dbt build` troubleshooting in a monorepo with three dbt projects: declare raw tables for freshness and lineage in docs. Select the correct answer. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Put sources block inside a .sql model",
+        "texto_opcion": "Use exposures for raw tables, exposures document downstream.",
         "es_correcta": false,
-        "explicacion": "YAML belongs in schema files."
+        "explicacion": "exposures document downstream usage, not raw sources."
       },
       {
-        "texto_opcion": "Only document in README",
+        "texto_opcion": "Only document in README applied across environments for consistency.",
         "es_correcta": false,
         "explicacion": "Not parsed by dbt."
       },
       {
-        "texto_opcion": "Define sources in YAML under `sources:` with database/schema/tables",
-        "es_correcta": true,
-        "explicacion": "sources YAML registers external tables for source() and freshness."
+        "texto_opcion": "Put sources block inside a .sql model, yAML belongs in schema files.",
+        "es_correcta": false,
+        "explicacion": "YAML belongs in schema files."
       },
       {
-        "texto_opcion": "Use exposures for raw tables",
-        "es_correcta": false,
-        "explicacion": "exposures document downstream usage, not raw sources."
+        "texto_opcion": "Define sources in YAML under `sources:` with.",
+        "es_correcta": true,
+        "explicacion": "sources YAML registers external tables for source() and freshness."
       }
     ],
     "tags": [
@@ -1134,24 +1134,24 @@
     "pregunta": "model SQL must read another dbt model `stg_orders`. Context: a monorepo with three dbt projects. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Copy stg_orders SQL inline",
-        "es_correcta": false,
-        "explicacion": "Breaks modularity and lineage."
-      },
-      {
-        "texto_opcion": "Use source() for another dbt model",
+        "texto_opcion": "Use source() for another dbt model, source() is for raw sources, not dbt models.",
         "es_correcta": false,
         "explicacion": "source() is for raw sources, not dbt models."
       },
       {
-        "texto_opcion": "Hardcode `analytics.stg_orders`",
+        "texto_opcion": "Copy stg_orders SQL inline, breaks modularity and lineage, breaks modularity and lineage.",
         "es_correcta": false,
-        "explicacion": "Bypasses environment routing and lineage."
+        "explicacion": "Breaks modularity and lineage."
       },
       {
-        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`",
+        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`.",
         "es_correcta": true,
         "explicacion": "ref() resolves dependencies and builds the DAG with environment-aware relations."
+      },
+      {
+        "texto_opcion": "Hardcode `analytics.stg_orders`, bypasses environment routing and lineage.",
+        "es_correcta": false,
+        "explicacion": "Bypasses environment routing and lineage."
       }
     ],
     "tags": [
@@ -1163,24 +1163,24 @@
     "pregunta": "model reads raw landing table loaded by ELT outside dbt. Context: a CI pipeline using dbt Core. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Hardcode database.schema.table only",
-        "es_correcta": false,
-        "explicacion": "Loses source freshness and lineage in docs."
-      },
-      {
-        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declared in sources YAML",
-        "es_correcta": true,
-        "explicacion": "source() references declared sources and enables freshness tests."
-      },
-      {
-        "texto_opcion": "Create empty model with no SQL",
+        "texto_opcion": "Create empty model with no SQL, does not define the external, does not define the external table as a source.",
         "es_correcta": false,
         "explicacion": "Does not define the external table as a source."
       },
       {
-        "texto_opcion": "ref('raw_orders') without a model",
+        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declared in sources YAML.",
+        "es_correcta": true,
+        "explicacion": "source() references declared sources and enables freshness tests."
+      },
+      {
+        "texto_opcion": "ref('raw_orders') without a model, ref expects a dbt model, ref expects a dbt model, not external raw table.",
         "es_correcta": false,
         "explicacion": "ref expects a dbt model, not external raw table."
+      },
+      {
+        "texto_opcion": "Hardcode database.schema.table only, loses source freshness and lineage in docs.",
+        "es_correcta": false,
+        "explicacion": "Loses source freshness and lineage in docs."
       }
     ],
     "tags": [
@@ -1192,22 +1192,22 @@
     "pregunta": "For a monorepo with three dbt projects with nightly jobs: only downstream of `stg_customers` changed and must rebuild. Best practice? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "--select +stg_customers only upstream",
+        "texto_opcion": "--select +stg_customers only upstream, wrong direction, wrong direction; need downstream + suffix.",
         "es_correcta": false,
         "explicacion": "Wrong direction; need downstream + suffix."
       },
       {
-        "texto_opcion": "dbt run without select every time",
+        "texto_opcion": "dbt run without select every time, rebuilds entire project unnecessarily.",
         "es_correcta": false,
         "explicacion": "Rebuilds entire project unnecessarily."
       },
       {
-        "texto_opcion": "Run `dbt run --select stg_customers+`",
+        "texto_opcion": "Run `dbt run --select stg_customers+`.",
         "es_correcta": true,
         "explicacion": "+ selects downstream dependents in the DAG."
       },
       {
-        "texto_opcion": "Manually run warehouse SQL per table",
+        "texto_opcion": "Manually run warehouse SQL per table, outside dbt orchestration.",
         "es_correcta": false,
         "explicacion": "Outside dbt orchestration."
       }
@@ -1221,22 +1221,22 @@
     "pregunta": "For a BigQuery analytics repo with nightly jobs: fix requires rebuilding a mart and all its parents. Best practice? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Drop child models first manually",
+        "texto_opcion": "Drop child models first manually, risky; selector handles order.",
         "es_correcta": false,
         "explicacion": "Risky; selector handles order."
       },
       {
-        "texto_opcion": "Run `dbt run --select +fct_orders`",
+        "texto_opcion": "Run `dbt run --select +fct_orders`.",
         "es_correcta": true,
         "explicacion": "+ prefix selects upstream ancestors of the model."
       },
       {
-        "texto_opcion": "dbt test only",
+        "texto_opcion": "dbt test only, does not rebuild models; not the best fit here.",
         "es_correcta": false,
         "explicacion": "Does not rebuild models."
       },
       {
-        "texto_opcion": "--select fct_orders+ for parents",
+        "texto_opcion": "--select fct_orders+ for parents, suffix + is downstream",
         "es_correcta": false,
         "explicacion": "Suffix + is downstream; prefix + is upstream."
       }
@@ -1250,22 +1250,22 @@
     "pregunta": "run staging folder and exclude deprecated models tagged legacy. Context: a finance mart with strict SLAs. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`",
+        "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`.",
         "es_correcta": true,
         "explicacion": "Graph operators combine path, tag, and exclude filters."
       },
       {
-        "texto_opcion": "Exclude by renaming files randomly",
+        "texto_opcion": "Exclude by renaming files randomly selected to meet the as the primary.",
         "es_correcta": false,
         "explicacion": "Not declarative."
       },
       {
-        "texto_opcion": "Use only model name with no path/tag",
+        "texto_opcion": "Use only model name with no path/tag, harder to maintain at scale.",
         "es_correcta": false,
         "explicacion": "Harder to maintain at scale."
       },
       {
-        "texto_opcion": "Run entire project always",
+        "texto_opcion": "Run entire project always as the primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Wastes compute."
       }
@@ -1279,24 +1279,24 @@
     "pregunta": "For a CI pipeline using dbt Core with nightly jobs: intermediate logic used once should not materialize. Best practice? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use seeds for intermediates",
-        "es_correcta": false,
-        "explicacion": "Wrong tool for transforms."
-      },
-      {
-        "texto_opcion": "Materialize every step as table",
-        "es_correcta": false,
-        "explicacion": "Table sprawl and cost."
-      },
-      {
-        "texto_opcion": "Duplicate SQL in five models",
+        "texto_opcion": "Duplicate SQL in five models as the primary design for.",
         "es_correcta": false,
         "explicacion": "Maintenance burden."
       },
       {
-        "texto_opcion": "Use ephemeral model or a SQL CTE via ref to ephemeral",
+        "texto_opcion": "Use seeds for intermediates, wrong tool for transforms.",
+        "es_correcta": false,
+        "explicacion": "Wrong tool for transforms."
+      },
+      {
+        "texto_opcion": "Use ephemeral model or a SQL CTE via ref to ephemeral.",
         "es_correcta": true,
         "explicacion": "Ephemeral/CTE avoids extra tables in the warehouse."
+      },
+      {
+        "texto_opcion": "Materialize every step as table, table sprawl and cost.",
+        "es_correcta": false,
+        "explicacion": "Table sprawl and cost."
       }
     ],
     "tags": [
@@ -1308,22 +1308,22 @@
     "pregunta": "In a CI pipeline using dbt Core: dbt compile fails citing a cyclic dependency. Which dbt approach is best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Add cycles for 'performance'",
+        "texto_opcion": "Add cycles for 'performance' prioritized for operational.",
         "es_correcta": false,
         "explicacion": "Invalid dbt design."
       },
       {
-        "texto_opcion": "Ignore the error and run --full-refresh",
+        "texto_opcion": "Ignore the error and run --full-refresh, cycle remains; run fails.",
         "es_correcta": false,
         "explicacion": "Cycle remains; run fails."
       },
       {
-        "texto_opcion": "Remove circular ref() chains so the DAG is acyclic",
+        "texto_opcion": "Remove circular ref() chains so the DAG is acyclic.",
         "es_correcta": true,
         "explicacion": "dbt requires a directed acyclic graph; cycles break compilation."
       },
       {
-        "texto_opcion": "Replace ref() with hardcoded tables",
+        "texto_opcion": "Replace ref() with hardcoded tables, breaks lineage permanently.",
         "es_correcta": false,
         "explicacion": "Breaks lineage permanently."
       }
@@ -1337,24 +1337,24 @@
     "pregunta": "For a finance mart with strict SLAs with nightly jobs: raw sources should be lightly cleaned before marts. Best practice? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Skip staging and use only seeds",
-        "es_correcta": false,
-        "explicacion": "Seeds are not live sources."
-      },
-      {
-        "texto_opcion": "One monolithic 5000-line model",
-        "es_correcta": false,
-        "explicacion": "Hard to test and maintain."
-      },
-      {
-        "texto_opcion": "Mart models source() directly with heavy logic",
+        "texto_opcion": "Mart models source() directly with heavy logic, couples marts to raw layout.",
         "es_correcta": false,
         "explicacion": "Couples marts to raw layout."
       },
       {
-        "texto_opcion": "Build staging models with source() then ref staging from marts",
+        "texto_opcion": "Build staging models with source() then ref staging from marts.",
         "es_correcta": true,
         "explicacion": "Staging isolates source changes and standardizes naming."
+      },
+      {
+        "texto_opcion": "Skip staging and use only seeds, seeds are not live sources, seeds are not live sources.",
+        "es_correcta": false,
+        "explicacion": "Seeds are not live sources."
+      },
+      {
+        "texto_opcion": "One monolithic 5000-line model, hard to test and maintain, hard to test and maintain.",
+        "es_correcta": false,
+        "explicacion": "Hard to test and maintain."
       }
     ],
     "tags": [
@@ -1366,24 +1366,24 @@
     "pregunta": "For a product analytics team using dbt with nightly jobs: model depends on a model installed from a dbt package. Best practice? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use `ref('package_name', 'model_name')` or configure package namespace",
-        "es_correcta": true,
-        "explicacion": "Package refs resolve models from installed packages in the DAG."
-      },
-      {
-        "texto_opcion": "Remove packages.yml",
+        "texto_opcion": "Remove packages.yml, uninstalls package dependencies.",
         "es_correcta": false,
         "explicacion": "Uninstalls package dependencies."
       },
       {
-        "texto_opcion": "Copy package SQL into project manually",
-        "es_correcta": false,
-        "explicacion": "Forks package updates."
+        "texto_opcion": "Use `ref` or configure package namespace.",
+        "es_correcta": true,
+        "explicacion": "Package refs resolve models from installed packages in the DAG."
       },
       {
-        "texto_opcion": "Hardcode package schema.table",
+        "texto_opcion": "Hardcode package schema.table, breaks on package upgrades.",
         "es_correcta": false,
         "explicacion": "Breaks on package upgrades."
+      },
+      {
+        "texto_opcion": "Copy package SQL into project manually, forks package updates.",
+        "es_correcta": false,
+        "explicacion": "Forks package updates."
       }
     ],
     "tags": [

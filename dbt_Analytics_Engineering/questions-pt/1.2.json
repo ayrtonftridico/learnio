@@ -3,24 +3,24 @@
     "pregunta": "Em uma implantação do Databricks SQL warehouse: o modelo Snowflake incremental deve atualizar as linhas em `order_id` quando as atualizações chegarem. Qual abordagem dbt é melhor?",
     "opciones": [
       {
-        "texto_opcion": "Use seeds para atualizações",
-        "es_correcta": false,
-        "explicacion": "Seeds são cargas estáticas, não upserts incremental."
-      },
-      {
-        "texto_opcion": "Use `incremental_strategy='merge'` com `unique_key='order_id'`",
-        "es_correcta": true,
-        "explicacion": "A estratégia de mesclagem realiza upserts na chave exclusiva em armazéns que suportam MERGE."
-      },
-      {
-        "texto_opcion": "Excluir configuração unique_key",
+        "texto_opcion": "Excluir configuração unique_key, mesclar/upsert requer uma",
         "es_correcta": false,
         "explicacion": "Mesclar/upsert requer uma definição de chave exclusiva."
       },
       {
-        "texto_opcion": "incremental_strategy='anexar' apenas",
+        "texto_opcion": "Use `incremental_strategy='merge'` com `unique_key='order_id'`.",
+        "es_correcta": true,
+        "explicacion": "A estratégia de mesclagem realiza upserts na chave exclusiva em armazéns que suportam MERGE."
+      },
+      {
+        "texto_opcion": "incremental_strategy='anexar' apenas, anexar nunca atualiza linhas alteradas.",
         "es_correcta": false,
         "explicacion": "anexar nunca atualiza linhas alteradas."
+      },
+      {
+        "texto_opcion": "Use seeds para atualizações, seeds são cargas estáticas, seeds são cargas estáticas",
+        "es_correcta": false,
+        "explicacion": "Seeds são cargas estáticas, não upserts incremental."
       }
     ],
     "tags": [
@@ -32,24 +32,24 @@
     "pregunta": "O modelo Redshift incremental substitui linhas por chaves de partição alteradas a cada execução. Contexto: uma equipe de plataforma publicando pacotes compartilhados.",
     "opciones": [
       {
+        "texto_opcion": "Configure `incremental_strategy='delete+insert'` com unique_key.",
+        "es_correcta": true,
+        "explicacion": "delete+insert remove chaves correspondentes e insere novas linhas – comum no Redshift."
+      },
+      {
+        "texto_opcion": "estratégia de mesclagem em comportamento de adaptador não suportado sem.",
+        "es_correcta": false,
+        "explicacion": "O suporte do adaptador varia; delete+insert pode ser necessário."
+      },
+      {
         "texto_opcion": "Use a tabela materialization para microlotes horários",
         "es_correcta": false,
         "explicacion": "Muito pesado para pequenos lotes frequentes."
       },
       {
-        "texto_opcion": "Truncar a tabela inteira a cada execução",
+        "texto_opcion": "Truncar a tabela inteira a cada execução, perde partições inalteradas desnecessariamente.",
         "es_correcta": false,
         "explicacion": "Perde partições inalteradas desnecessariamente."
-      },
-      {
-        "texto_opcion": "Configure `incremental_strategy='delete+insert'` com unique_key apropriado",
-        "es_correcta": true,
-        "explicacion": "delete+insert remove chaves correspondentes e insere novas linhas – comum no Redshift."
-      },
-      {
-        "texto_opcion": "estratégia de mesclagem em comportamento de adaptador não suportado sem verificar documentos",
-        "es_correcta": false,
-        "explicacion": "O suporte do adaptador varia; delete+insert pode ser necessário."
       }
     ],
     "tags": [
@@ -61,22 +61,22 @@
     "pregunta": "Para um mercado financeiro com SLAs rígidos com empregos noturnos: os eventos são imutáveis; duplicatas nunca ocorrem para o mesmo event_id. Melhor prática?",
     "opciones": [
       {
-        "texto_opcion": "mesclar em cada execução para eventos imutáveis",
-        "es_correcta": false,
-        "explicacion": "Sobrecarga de mesclagem desnecessária."
-      },
-      {
         "texto_opcion": "atualização completa diariamente em uma tabela de um trilhão de linhas",
         "es_correcta": false,
         "explicacion": "Proibitivamente caro."
       },
       {
-        "texto_opcion": "Use `incremental_strategy='append'` com um filtro incremental",
+        "texto_opcion": "Use `incremental_strategy='append'` com um filtro incremental.",
         "es_correcta": true,
         "explicacion": "anexar é eficiente quando as linhas são somente de inserção e desduplicadas no upstream."
       },
       {
-        "texto_opcion": "Use ephemeral materialization para o fato",
+        "texto_opcion": "mesclar em cada execução para eventos imutáveis, sobrecarga de mesclagem desnecessária.",
+        "es_correcta": false,
+        "explicacion": "Sobrecarga de mesclagem desnecessária."
+      },
+      {
+        "texto_opcion": "Use ephemeral materialization para o fato, ephemeral não é uma tabela incremental persistente.",
         "es_correcta": false,
         "explicacion": "Ephemeral não é uma tabela incremental persistente."
       }
@@ -90,14 +90,14 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um repositório analítico BigQuery: a tabela particionada BigQuery deve substituir partições de data inteiras na recarga. Selecione a resposta correta.",
     "opciones": [
       {
-        "texto_opcion": "anexar em partições erradas para sempre",
+        "texto_opcion": "Exclua partições manualmente fora do dbt, não orcestrado em DAG.",
         "es_correcta": false,
-        "explicacion": "Pode duplicar ou perder dados de partição."
+        "explicacion": "Não orcestrado em DAG."
       },
       {
-        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` com `partition_by` configurado",
-        "es_correcta": true,
-        "explicacion": "insert_overwrite substitui fatias de partição de forma eficiente em BigQuery."
+        "texto_opcion": "anexar em partições erradas para sempre, pode duplicar ou perder dados de partição.",
+        "es_correcta": false,
+        "explicacion": "Pode duplicar ou perder dados de partição."
       },
       {
         "texto_opcion": "Use a visualização materialization para fatos particionados",
@@ -105,9 +105,9 @@
         "explicacion": "As visualizações não gerenciam a substituição de partições."
       },
       {
-        "texto_opcion": "Exclua partições manualmente fora do dbt",
-        "es_correcta": false,
-        "explicacion": "Não orcestrado em DAG."
+        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` com.",
+        "es_correcta": true,
+        "explicacion": "insert_overwrite substitui fatias de partição de forma eficiente em BigQuery."
       }
     ],
     "tags": [
@@ -119,22 +119,22 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um trabalho dbt Cloud multiambiente: o projeto dbt 1.9+ é carregado um dia de cada vez com janelas em lote limitadas. Selecione a resposta correta.",
     "opciones": [
       {
+        "texto_opcion": "Configure microbatch incremental com `event_time` e.",
+        "es_correcta": true,
+        "explicacion": "Microbatch incremental processa lotes de tempo discreto para fatos grandes."
+      },
+      {
         "texto_opcion": "incremental monolítico único sem lotes em cargas de TB/dia",
         "es_correcta": false,
         "explicacion": "Mais difícil de tentar novamente e preencher."
       },
       {
-        "texto_opcion": "Use seeds por dia",
+        "texto_opcion": "Use seeds por dia, não escalável para grandes volumes diários.",
         "es_correcta": false,
         "explicacion": "Não escalável para grandes volumes diários."
       },
       {
-        "texto_opcion": "Configure microbatch incremental com `event_time` e limites de lote",
-        "es_correcta": true,
-        "explicacion": "Microbatch incremental processa lotes de tempo discreto para fatos grandes."
-      },
-      {
-        "texto_opcion": "Desative incremental totalmente",
+        "texto_opcion": "Desative incremental totalmente, forces reconstruções completas caras.",
         "es_correcta": false,
         "explicacion": "Forces reconstruções completas caras."
       }
@@ -148,9 +148,9 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um mercado financeiro com SLAs rígidos: a mesclagem incremental deve corresponder a `(customer_id, order_date)`. Selecione a resposta correta.",
     "opciones": [
       {
-        "texto_opcion": "Omitir unique_key com estratégia de mesclagem",
-        "es_correcta": false,
-        "explicacion": "A mesclagem requer colunas-chave."
+        "texto_opcion": "Defina `unique_key=['customer_id','order_date']` como uma lista na configuração.",
+        "es_correcta": true,
+        "explicacion": "Chaves exclusivas compostas definem condições de correspondência de mesclagem para granulação de várias colunas."
       },
       {
         "texto_opcion": "unique_key em customer_id somente quando os grãos são diários por cliente",
@@ -158,14 +158,14 @@
         "explicacion": "Granulação errada causa mesclagens incorretas."
       },
       {
-        "texto_opcion": "Defina `unique_key=['customer_id','order_date']` como uma lista na configuração",
-        "es_correcta": true,
-        "explicacion": "Chaves exclusivas compostas definem condições de correspondência de mesclagem para granulação de várias colunas."
-      },
-      {
         "texto_opcion": "Use chave substituta apenas em SELECT sem configuração unique_key",
         "es_correcta": false,
         "explicacion": "A mesclagem dbt precisa de configuração unique_key explícita."
+      },
+      {
+        "texto_opcion": "Omitir unique_key com estratégia de mesclagem, a mesclagem requer colunas-chave.",
+        "es_correcta": false,
+        "explicacion": "A mesclagem requer colunas-chave."
       }
     ],
     "tags": [
@@ -177,24 +177,24 @@
     "pregunta": "revisão do projeto dbt - um repositório analítico BigQuery. após a execução de incremental, a contagem de linhas dobrou inesperadamente. O que a equipe deve fazer?",
     "opciones": [
       {
-        "texto_opcion": "Remova completamente as referências {{ this }}",
-        "es_correcta": false,
-        "explicacion": "Interrompe as autoconsultas incremental."
-      },
-      {
-        "texto_opcion": "Desative todos os testes",
-        "es_correcta": false,
-        "explicacion": "Os testes ajudam a detectar duplicatas e chaves nulas."
-      },
-      {
-        "texto_opcion": "Produção com atualização cega e completa sem causa raiz",
+        "texto_opcion": "Produção com atualização cega e completa sem causa raiz, pode ocultar bugs lógicos contínuos.",
         "es_correcta": false,
         "explicacion": "Pode ocultar bugs lógicos contínuos."
       },
       {
-        "texto_opcion": "Inspecione o SQL compilado, verifique o filtro is_incremental() e verifique unique_key/strategy",
+        "texto_opcion": "Desative todos os testes, os testes ajudam a detectar duplicatas e chaves nulas",
+        "es_correcta": false,
+        "explicacion": "Os testes ajudam a detectar duplicatas e chaves nulas."
+      },
+      {
+        "texto_opcion": "Inspecione o SQL compilado, verifique o filtro is_incremental() e.",
         "es_correcta": true,
         "explicacion": "Linhas duplicadas geralmente vêm de filtros incremental ausentes ou de escolha errada de acréscimo/mesclagem."
+      },
+      {
+        "texto_opcion": "Remova completamente as referências {{ this }}, interrompe as autoconsultas incremental.",
+        "es_correcta": false,
+        "explicacion": "Interrompe as autoconsultas incremental."
       }
     ],
     "tags": [
@@ -206,24 +206,24 @@
     "pregunta": "BigQuery fato particionado por `DATE(created_at)` para controle de custos. Contexto: um mercado financeiro com SLAs rígidos.",
     "opciones": [
       {
-        "texto_opcion": "Partição em um booleano de baixa cardinalidade",
+        "texto_opcion": "Partição por UUID aleatório, nenhum padrão de poda significativo.",
         "es_correcta": false,
-        "explicacion": "Mau benefício de poda."
+        "explicacion": "Nenhum padrão de poda significativo."
       },
       {
-        "texto_opcion": "Defina `partition_by: {campo: criado_at, tipo de dados: carimbo de data/hora, granularidade: dia }`",
+        "texto_opcion": "Defina `partition_by: {campo: criado_at, tipo de dados: carimbo de.",
         "es_correcta": true,
         "explicacion": "partição_by configura a remoção de partição em adaptadores suportados."
+      },
+      {
+        "texto_opcion": "Partição em um booleano de baixa cardinalidade, mau benefício de poda.",
+        "es_correcta": false,
+        "explicacion": "Mau benefício de poda."
       },
       {
         "texto_opcion": "Nenhuma configuração de partição no fato da série temporal",
         "es_correcta": false,
         "explicacion": "As consultas examinam a tabela inteira."
-      },
-      {
-        "texto_opcion": "Partição por UUID aleatório",
-        "es_correcta": false,
-        "explicacion": "Nenhum padrão de poda significativo."
       }
     ],
     "tags": [
@@ -240,7 +240,7 @@
         "explicacion": "Pode violar os requisitos de recuperação."
       },
       {
-        "texto_opcion": "Use configuração específica do adaptador, como `transient: true` quando apropriado",
+        "texto_opcion": "Use configuração específica do adaptador.",
         "es_correcta": true,
         "explicacion": "Tabelas transitórias reduzem o armazenamento Time Travel para incrementals reconstruíveis."
       },
@@ -250,7 +250,7 @@
         "explicacion": "A intenção no nível do modelo pertence à configuração do modelo."
       },
       {
-        "texto_opcion": "Use ephemeral para incremental persistente",
+        "texto_opcion": "Use ephemeral para incremental persistente, ephemeral não é uma tabela.",
         "es_correcta": false,
         "explicacion": "Ephemeral não é uma tabela."
       }
@@ -264,24 +264,24 @@
     "pregunta": "revisão do projeto dbt - uma equipe de análise de produto usando dbt. as datas históricas devem ser reprocessadas após a correção upstream. O que a equipe deve fazer?",
     "opciones": [
       {
-        "texto_opcion": "INSERIR linhas manualmente sem dbt",
+        "texto_opcion": "INSERIR linhas manualmente sem dbt, quebra linhagem e testes, quebra linhagem e testes.",
         "es_correcta": false,
         "explicacion": "Quebra linhagem e testes."
       },
       {
-        "texto_opcion": "Execute novamente microbatch/incremental com vars de data ou sinalizadores `--event-time-start/end`",
-        "es_correcta": true,
-        "explicacion": "Os preenchimentos limitados reprocessam lotes específicos sem reconstrução completa da tabela."
-      },
-      {
-        "texto_opcion": "Ignorar correção upstream",
+        "texto_opcion": "Ignorar correção upstream, deixa uma história ruim nos mercados.",
         "es_correcta": false,
         "explicacion": "Deixa uma história ruim nos mercados."
       },
       {
-        "texto_opcion": "Truncar a produção e perder datas não afetadas",
+        "texto_opcion": "Truncar a produção e perder datas não afetadas, excessivamente destrutivo.",
         "es_correcta": false,
         "explicacion": "Excessivamente destrutivo."
+      },
+      {
+        "texto_opcion": "Execute novamente microbatch/incremental com vars de data ou.",
+        "es_correcta": true,
+        "explicacion": "Os preenchimentos limitados reprocessam lotes específicos sem reconstrução completa da tabela."
       }
     ],
     "tags": [
@@ -293,24 +293,24 @@
     "pregunta": "revisão do projeto dbt - um trabalho dbt Cloud multiambiente. a mesclagem deve atualizar as métricas quando correspondidas e inserir novas chaves. O que a equipe deve fazer?",
     "opciones": [
       {
+        "texto_opcion": "Pular camada de teste, a preparação isola a lógica raw-to-mart.",
+        "es_correcta": false,
+        "explicacion": "A preparação isola a lógica raw-to-mart."
+      },
+      {
         "texto_opcion": "DELETE a tabela inteira e INSERT todas as linhas do teste",
         "es_correcta": false,
         "explicacion": "Equivalente à recarga completa, não à mesclagem."
       },
       {
-        "texto_opcion": "Use junção cruzada para detectar alterações",
-        "es_correcta": false,
-        "explicacion": "Risco de explosão cartesiana."
-      },
-      {
-        "texto_opcion": "Confie no warehouse MERGE por meio da estratégia de mesclagem dbt com chave exclusiva adequada",
+        "texto_opcion": "Confie no warehouse MERGE por meio da estratégia de mesclagem dbt com.",
         "es_correcta": true,
         "explicacion": "A estratégia de mesclagem do dbt delega a semântica MERGE do warehouse."
       },
       {
-        "texto_opcion": "Pular camada de teste",
+        "texto_opcion": "Use junção cruzada para detectar alterações, risco de explosão cartesiana.",
         "es_correcta": false,
-        "explicacion": "A preparação isola a lógica raw-to-mart."
+        "explicacion": "Risco de explosão cartesiana."
       }
     ],
     "tags": [
@@ -322,22 +322,22 @@
     "pregunta": "Em um trabalho dbt Cloud multiambiente: a equipe documenta qual estratégia um modelo usa para os operadores. Qual abordagem dbt é melhor?",
     "opciones": [
       {
-        "texto_opcion": "Remova o esquema YAML para acelerar o CI",
+        "texto_opcion": "Remova o esquema YAML para acelerar o CI, perde documentos e testes, perde documentos e testes.",
         "es_correcta": false,
         "explicacion": "Perde documentos e testes."
       },
       {
-        "texto_opcion": "Único documento no título da solicitação pull",
+        "texto_opcion": "Único documento no título da solicitação pull, não é durável no repositório, não é durável no repositório.",
         "es_correcta": false,
         "explicacion": "Não é durável no repositório."
       },
       {
-        "texto_opcion": "Adicione estratégia e chave única à descrição/meta do modelo no esquema YAML",
+        "texto_opcion": "Adicione estratégia e chave única à descrição/meta do modelo.",
         "es_correcta": true,
         "explicacion": "A documentação da estratégia auxilia na depuração e na governança em nível de certificação."
       },
       {
-        "texto_opcion": "Mantenha a estratégia não documentada",
+        "texto_opcion": "Mantenha a estratégia não documentada, os operadores configuram incorretamente as execuções.",
         "es_correcta": false,
         "explicacion": "Os operadores configuram incorretamente as execuções."
       }
@@ -351,22 +351,22 @@
     "pregunta": "revisão do projeto dbt — um monorepo com três projetos dbt. escolhendo incremental_strategy antes de verificar a documentação do adaptador. O que a equipe deve fazer?",
     "opciones": [
       {
-        "texto_opcion": "Suponha que a mesclagem funcione de forma idêntica em todos os armazéns",
-        "es_correcta": false,
-        "explicacion": "Os recursos do adaptador são diferentes."
-      },
-      {
-        "texto_opcion": "Verifique estratégias incremental específicas do adaptador na documentação do adaptador dbt",
-        "es_correcta": true,
-        "explicacion": "Nem toda estratégia é válida em todos os armazéns; os documentos do adaptador são oficiais."
-      },
-      {
-        "texto_opcion": "Desativar pinos de versão do adaptador",
+        "texto_opcion": "Desativar pinos de versão do adaptador, o desvio de versão interrompe o suporte à estratégia.",
         "es_correcta": false,
         "explicacion": "O desvio de versão interrompe o suporte à estratégia."
       },
       {
-        "texto_opcion": "Copie a estratégia do Postgres para Spark sem validação",
+        "texto_opcion": "Suponha que a mesclagem funcione de forma idêntica em todos os armazéns, os recursos do adaptador são diferentes.",
+        "es_correcta": false,
+        "explicacion": "Os recursos do adaptador são diferentes."
+      },
+      {
+        "texto_opcion": "Verifique estratégias incremental específicas do adaptador na documentação.",
+        "es_correcta": true,
+        "explicacion": "Nem toda estratégia é válida em todos os armazéns; os documentos do adaptador são oficiais."
+      },
+      {
+        "texto_opcion": "Copie a estratégia do Postgres para Spark sem validação, pode falhar em tempo de compilação/execução.",
         "es_correcta": false,
         "explicacion": "Pode falhar em tempo de compilação/execução."
       }
@@ -380,24 +380,24 @@
     "pregunta": "O modelo Snowflake incremental deve atualizar as linhas em `order_id` quando as atualizações chegarem. Contexto: uma equipe de plataforma publicando pacotes compartilhados. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Excluir configuração unique_key",
-        "es_correcta": false,
-        "explicacion": "Mesclar/upsert requer uma definição de chave exclusiva."
-      },
-      {
-        "texto_opcion": "incremental_strategy='anexar' apenas",
+        "texto_opcion": "incremental_strategy='anexar' apenas, anexar nunca atualiza linhas alteradas.",
         "es_correcta": false,
         "explicacion": "anexar nunca atualiza linhas alteradas."
       },
       {
-        "texto_opcion": "Use `incremental_strategy='merge'` com `unique_key='order_id'`",
-        "es_correcta": true,
-        "explicacion": "A estratégia de mesclagem realiza upserts na chave exclusiva em armazéns que suportam MERGE."
+        "texto_opcion": "Excluir configuração unique_key, mesclar/upsert requer uma",
+        "es_correcta": false,
+        "explicacion": "Mesclar/upsert requer uma definição de chave exclusiva."
       },
       {
-        "texto_opcion": "Use seeds para atualizações",
+        "texto_opcion": "Use seeds para atualizações, seeds são cargas estáticas, seeds são cargas estáticas",
         "es_correcta": false,
         "explicacion": "Seeds são cargas estáticas, não upserts incremental."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='merge'` com `unique_key='order_id'`.",
+        "es_correcta": true,
+        "explicacion": "A estratégia de mesclagem realiza upserts na chave exclusiva em armazéns que suportam MERGE."
       }
     ],
     "tags": [
@@ -409,9 +409,9 @@
     "pregunta": "Durante a solução de problemas `dbt build` em uma implantação do Databricks SQL warehouse: o modelo Redshift incremental substitui linhas por chaves de partição alteradas a cada execução. Selecione a resposta correta. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Configure `incremental_strategy='delete+insert'` com unique_key apropriado",
-        "es_correcta": true,
-        "explicacion": "delete+insert remove chaves correspondentes e insere novas linhas – comum no Redshift."
+        "texto_opcion": "Truncar a tabela inteira a cada execução, perde partições inalteradas desnecessariamente.",
+        "es_correcta": false,
+        "explicacion": "Perde partições inalteradas desnecessariamente."
       },
       {
         "texto_opcion": "Use a tabela materialization para microlotes horários",
@@ -419,14 +419,14 @@
         "explicacion": "Muito pesado para pequenos lotes frequentes."
       },
       {
-        "texto_opcion": "estratégia de mesclagem em comportamento de adaptador não suportado sem verificar documentos",
-        "es_correcta": false,
-        "explicacion": "O suporte do adaptador varia; delete+insert pode ser necessário."
+        "texto_opcion": "Configure `incremental_strategy='delete+insert'` com unique_key.",
+        "es_correcta": true,
+        "explicacion": "delete+insert remove chaves correspondentes e insere novas linhas – comum no Redshift."
       },
       {
-        "texto_opcion": "Truncar a tabela inteira a cada execução",
+        "texto_opcion": "estratégia de mesclagem em comportamento de adaptador não suportado sem.",
         "es_correcta": false,
-        "explicacion": "Perde partições inalteradas desnecessariamente."
+        "explicacion": "O suporte do adaptador varia; delete+insert pode ser necessário."
       }
     ],
     "tags": [
@@ -438,24 +438,24 @@
     "pregunta": "os eventos são imutáveis; duplicatas nunca ocorrem para o mesmo event_id. Contexto: um monorepo com três projetos dbt. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "atualização completa diariamente em uma tabela de um trilhão de linhas",
-        "es_correcta": false,
-        "explicacion": "Proibitivamente caro."
-      },
-      {
-        "texto_opcion": "mesclar em cada execução para eventos imutáveis",
+        "texto_opcion": "mesclar em cada execução para eventos imutáveis, sobrecarga de mesclagem desnecessária.",
         "es_correcta": false,
         "explicacion": "Sobrecarga de mesclagem desnecessária."
       },
       {
-        "texto_opcion": "Use `incremental_strategy='append'` com um filtro incremental",
+        "texto_opcion": "Use ephemeral materialization para o fato, ephemeral não é uma tabela incremental persistente.",
+        "es_correcta": false,
+        "explicacion": "Ephemeral não é uma tabela incremental persistente."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='append'` com um filtro incremental.",
         "es_correcta": true,
         "explicacion": "anexar é eficiente quando as linhas são somente de inserção e desduplicadas no upstream."
       },
       {
-        "texto_opcion": "Use ephemeral materialization para o fato",
+        "texto_opcion": "atualização completa diariamente em uma tabela de um trilhão de linhas",
         "es_correcta": false,
-        "explicacion": "Ephemeral não é uma tabela incremental persistente."
+        "explicacion": "Proibitivamente caro."
       }
     ],
     "tags": [
@@ -467,24 +467,24 @@
     "pregunta": "Para um trabalho dbt Cloud multiambiente com trabalhos noturnos: a tabela particionada BigQuery deve substituir partições de data inteiras na recarga. Melhor prática? Conjunto de restrições nº 2.",
     "opciones": [
       {
+        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` com.",
+        "es_correcta": true,
+        "explicacion": "insert_overwrite substitui fatias de partição de forma eficiente em BigQuery."
+      },
+      {
+        "texto_opcion": "anexar em partições erradas para sempre, pode duplicar ou perder dados de partição.",
+        "es_correcta": false,
+        "explicacion": "Pode duplicar ou perder dados de partição."
+      },
+      {
         "texto_opcion": "Use a visualização materialization para fatos particionados",
         "es_correcta": false,
         "explicacion": "As visualizações não gerenciam a substituição de partições."
       },
       {
-        "texto_opcion": "Exclua partições manualmente fora do dbt",
+        "texto_opcion": "Exclua partições manualmente fora do dbt, não orcestrado em DAG.",
         "es_correcta": false,
         "explicacion": "Não orcestrado em DAG."
-      },
-      {
-        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` com `partition_by` configurado",
-        "es_correcta": true,
-        "explicacion": "insert_overwrite substitui fatias de partição de forma eficiente em BigQuery."
-      },
-      {
-        "texto_opcion": "anexar em partições erradas para sempre",
-        "es_correcta": false,
-        "explicacion": "Pode duplicar ou perder dados de partição."
       }
     ],
     "tags": [
@@ -496,24 +496,24 @@
     "pregunta": "Em uma equipe de análise de produto usando dbt: o projeto dbt 1.9+ é carregado um dia de cada vez com janelas de lote limitadas. Qual abordagem dbt é melhor? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Use seeds por dia",
+        "texto_opcion": "incremental monolítico único sem lotes em cargas de TB/dia",
         "es_correcta": false,
-        "explicacion": "Não escalável para grandes volumes diários."
+        "explicacion": "Mais difícil de tentar novamente e preencher."
       },
       {
-        "texto_opcion": "Configure microbatch incremental com `event_time` e limites de lote",
-        "es_correcta": true,
-        "explicacion": "Microbatch incremental processa lotes de tempo discreto para fatos grandes."
-      },
-      {
-        "texto_opcion": "Desative incremental totalmente",
+        "texto_opcion": "Desative incremental totalmente, forces reconstruções completas caras.",
         "es_correcta": false,
         "explicacion": "Forces reconstruções completas caras."
       },
       {
-        "texto_opcion": "incremental monolítico único sem lotes em cargas de TB/dia",
+        "texto_opcion": "Configure microbatch incremental com `event_time` e.",
+        "es_correcta": true,
+        "explicacion": "Microbatch incremental processa lotes de tempo discreto para fatos grandes."
+      },
+      {
+        "texto_opcion": "Use seeds por dia, não escalável para grandes volumes diários.",
         "es_correcta": false,
-        "explicacion": "Mais difícil de tentar novamente e preencher."
+        "explicacion": "Não escalável para grandes volumes diários."
       }
     ],
     "tags": [
@@ -525,14 +525,9 @@
     "pregunta": "revisão do projeto dbt - um mercado financeiro com SLAs rígidos. A mesclagem incremental deve corresponder a `(customer_id, order_date)`. O que a equipe deve fazer? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Omitir unique_key com estratégia de mesclagem",
+        "texto_opcion": "Use chave substituta apenas em SELECT sem configuração unique_key",
         "es_correcta": false,
-        "explicacion": "A mesclagem requer colunas-chave."
-      },
-      {
-        "texto_opcion": "Defina `unique_key=['customer_id','order_date']` como uma lista na configuração",
-        "es_correcta": true,
-        "explicacion": "Chaves exclusivas compostas definem condições de correspondência de mesclagem para granulação de várias colunas."
+        "explicacion": "A mesclagem dbt precisa de configuração unique_key explícita."
       },
       {
         "texto_opcion": "unique_key em customer_id somente quando os grãos são diários por cliente",
@@ -540,9 +535,14 @@
         "explicacion": "Granulação errada causa mesclagens incorretas."
       },
       {
-        "texto_opcion": "Use chave substituta apenas em SELECT sem configuração unique_key",
+        "texto_opcion": "Defina `unique_key=['customer_id','order_date']` como uma lista na configuração.",
+        "es_correcta": true,
+        "explicacion": "Chaves exclusivas compostas definem condições de correspondência de mesclagem para granulação de várias colunas."
+      },
+      {
+        "texto_opcion": "Omitir unique_key com estratégia de mesclagem, a mesclagem requer colunas-chave.",
         "es_correcta": false,
-        "explicacion": "A mesclagem dbt precisa de configuração unique_key explícita."
+        "explicacion": "A mesclagem requer colunas-chave."
       }
     ],
     "tags": [
@@ -554,24 +554,24 @@
     "pregunta": "Para um monorepo com três projetos dbt com trabalhos noturnos: após a execução de incremental, a contagem de linhas dobrou inesperadamente. Melhor prática? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Desative todos os testes",
-        "es_correcta": false,
-        "explicacion": "Os testes ajudam a detectar duplicatas e chaves nulas."
-      },
-      {
-        "texto_opcion": "Produção com atualização cega e completa sem causa raiz",
-        "es_correcta": false,
-        "explicacion": "Pode ocultar bugs lógicos contínuos."
-      },
-      {
-        "texto_opcion": "Remova completamente as referências {{ this }}",
+        "texto_opcion": "Remova completamente as referências {{ this }}, interrompe as autoconsultas incremental.",
         "es_correcta": false,
         "explicacion": "Interrompe as autoconsultas incremental."
       },
       {
-        "texto_opcion": "Inspecione o SQL compilado, verifique o filtro is_incremental() e verifique unique_key/strategy",
+        "texto_opcion": "Inspecione o SQL compilado, verifique o filtro is_incremental() e.",
         "es_correcta": true,
         "explicacion": "Linhas duplicadas geralmente vêm de filtros incremental ausentes ou de escolha errada de acréscimo/mesclagem."
+      },
+      {
+        "texto_opcion": "Desative todos os testes, os testes ajudam a detectar duplicatas e chaves nulas",
+        "es_correcta": false,
+        "explicacion": "Os testes ajudam a detectar duplicatas e chaves nulas."
+      },
+      {
+        "texto_opcion": "Produção com atualização cega e completa sem causa raiz, pode ocultar bugs lógicos contínuos.",
+        "es_correcta": false,
+        "explicacion": "Pode ocultar bugs lógicos contínuos."
       }
     ],
     "tags": [
@@ -583,17 +583,7 @@
     "pregunta": "Em um repositório analítico BigQuery: BigQuery fato particionado por `DATE(created_at)` para controle de custos. Qual abordagem dbt é melhor? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Defina `partition_by: {campo: criado_at, tipo de dados: carimbo de data/hora, granularidade: dia }`",
-        "es_correcta": true,
-        "explicacion": "partição_by configura a remoção de partição em adaptadores suportados."
-      },
-      {
-        "texto_opcion": "Partição por UUID aleatório",
-        "es_correcta": false,
-        "explicacion": "Nenhum padrão de poda significativo."
-      },
-      {
-        "texto_opcion": "Partição em um booleano de baixa cardinalidade",
+        "texto_opcion": "Partição em um booleano de baixa cardinalidade, mau benefício de poda.",
         "es_correcta": false,
         "explicacion": "Mau benefício de poda."
       },
@@ -601,6 +591,16 @@
         "texto_opcion": "Nenhuma configuração de partição no fato da série temporal",
         "es_correcta": false,
         "explicacion": "As consultas examinam a tabela inteira."
+      },
+      {
+        "texto_opcion": "Defina `partition_by: {campo: criado_at, tipo de dados: carimbo de.",
+        "es_correcta": true,
+        "explicacion": "partição_by configura a remoção de partição em adaptadores suportados."
+      },
+      {
+        "texto_opcion": "Partição por UUID aleatório, nenhum padrão de poda significativo.",
+        "es_correcta": false,
+        "explicacion": "Nenhum padrão de poda significativo."
       }
     ],
     "tags": [
@@ -612,24 +612,24 @@
     "pregunta": "revisão do projeto dbt - uma equipe de análise de produto usando dbt. As tabelas incremental de teste do Snowflake podem ser transitórias para economizar armazenamento. O que a equipe deve fazer? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Configure transitório em profiles.yml globalmente para todos",
-        "es_correcta": false,
-        "explicacion": "A intenção no nível do modelo pertence à configuração do modelo."
-      },
-      {
         "texto_opcion": "Marcar mercados de produção como transitórios sem plano de recuperação",
         "es_correcta": false,
         "explicacion": "Pode violar os requisitos de recuperação."
       },
       {
-        "texto_opcion": "Use ephemeral para incremental persistente",
+        "texto_opcion": "Configure transitório em profiles.yml globalmente para todos",
         "es_correcta": false,
-        "explicacion": "Ephemeral não é uma tabela."
+        "explicacion": "A intenção no nível do modelo pertence à configuração do modelo."
       },
       {
-        "texto_opcion": "Use configuração específica do adaptador, como `transient: true` quando apropriado",
+        "texto_opcion": "Use configuração específica do adaptador.",
         "es_correcta": true,
         "explicacion": "Tabelas transitórias reduzem o armazenamento Time Travel para incrementals reconstruíveis."
+      },
+      {
+        "texto_opcion": "Use ephemeral para incremental persistente, ephemeral não é uma tabela.",
+        "es_correcta": false,
+        "explicacion": "Ephemeral não é uma tabela."
       }
     ],
     "tags": [
@@ -641,22 +641,22 @@
     "pregunta": "Para um medalhão lakehouse construído com dbt com trabalhos noturnos: as datas históricas devem ser reprocessadas após a correção do upstream. Melhor prática? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Truncar a produção e perder datas não afetadas",
+        "texto_opcion": "Truncar a produção e perder datas não afetadas, excessivamente destrutivo.",
         "es_correcta": false,
         "explicacion": "Excessivamente destrutivo."
       },
       {
-        "texto_opcion": "INSERIR linhas manualmente sem dbt",
+        "texto_opcion": "INSERIR linhas manualmente sem dbt, quebra linhagem e testes, quebra linhagem e testes.",
         "es_correcta": false,
         "explicacion": "Quebra linhagem e testes."
       },
       {
-        "texto_opcion": "Execute novamente microbatch/incremental com vars de data ou sinalizadores `--event-time-start/end`",
+        "texto_opcion": "Execute novamente microbatch/incremental com vars de data ou.",
         "es_correcta": true,
         "explicacion": "Os preenchimentos limitados reprocessam lotes específicos sem reconstrução completa da tabela."
       },
       {
-        "texto_opcion": "Ignorar correção upstream",
+        "texto_opcion": "Ignorar correção upstream, deixa uma história ruim nos mercados.",
         "es_correcta": false,
         "explicacion": "Deixa uma história ruim nos mercados."
       }
@@ -670,17 +670,17 @@
     "pregunta": "a mesclagem deve atualizar as métricas quando correspondidas e inserir novas chaves. Contexto: uma equipe de análise de produto usando dbt. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Use junção cruzada para detectar alterações",
+        "texto_opcion": "Use junção cruzada para detectar alterações, risco de explosão cartesiana.",
         "es_correcta": false,
         "explicacion": "Risco de explosão cartesiana."
       },
       {
-        "texto_opcion": "Pular camada de teste",
+        "texto_opcion": "Pular camada de teste, a preparação isola a lógica raw-to-mart.",
         "es_correcta": false,
         "explicacion": "A preparação isola a lógica raw-to-mart."
       },
       {
-        "texto_opcion": "Confie no warehouse MERGE por meio da estratégia de mesclagem dbt com chave exclusiva adequada",
+        "texto_opcion": "Confie no warehouse MERGE por meio da estratégia de mesclagem dbt com.",
         "es_correcta": true,
         "explicacion": "A estratégia de mesclagem do dbt delega a semântica MERGE do warehouse."
       },
@@ -699,22 +699,22 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um repositório analítico BigQuery: a equipe documenta qual estratégia um modelo usa para os operadores. Selecione a resposta correta. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Único documento no título da solicitação pull",
-        "es_correcta": false,
-        "explicacion": "Não é durável no repositório."
-      },
-      {
-        "texto_opcion": "Remova o esquema YAML para acelerar o CI",
+        "texto_opcion": "Remova o esquema YAML para acelerar o CI, perde documentos e testes, perde documentos e testes.",
         "es_correcta": false,
         "explicacion": "Perde documentos e testes."
       },
       {
-        "texto_opcion": "Mantenha a estratégia não documentada",
+        "texto_opcion": "Mantenha a estratégia não documentada, os operadores configuram incorretamente as execuções.",
         "es_correcta": false,
         "explicacion": "Os operadores configuram incorretamente as execuções."
       },
       {
-        "texto_opcion": "Adicione estratégia e chave única à descrição/meta do modelo no esquema YAML",
+        "texto_opcion": "Único documento no título da solicitação pull, não é durável no repositório, não é durável no repositório.",
+        "es_correcta": false,
+        "explicacion": "Não é durável no repositório."
+      },
+      {
+        "texto_opcion": "Adicione estratégia e chave única à descrição/meta do modelo.",
         "es_correcta": true,
         "explicacion": "A documentação da estratégia auxilia na depuração e na governança em nível de certificação."
       }
@@ -728,24 +728,24 @@
     "pregunta": "revisão do projeto dbt — um medalhão lakehouse construído com dbt. escolhendo incremental_strategy antes de verificar a documentação do adaptador. O que a equipe deve fazer? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Copie a estratégia do Postgres para Spark sem validação",
-        "es_correcta": false,
-        "explicacion": "Pode falhar em tempo de compilação/execução."
-      },
-      {
-        "texto_opcion": "Desativar pinos de versão do adaptador",
+        "texto_opcion": "Desativar pinos de versão do adaptador, o desvio de versão interrompe o suporte à estratégia.",
         "es_correcta": false,
         "explicacion": "O desvio de versão interrompe o suporte à estratégia."
       },
       {
-        "texto_opcion": "Suponha que a mesclagem funcione de forma idêntica em todos os armazéns",
+        "texto_opcion": "Verifique estratégias incremental específicas do adaptador na documentação.",
+        "es_correcta": true,
+        "explicacion": "Nem toda estratégia é válida em todos os armazéns; os documentos do adaptador são oficiais."
+      },
+      {
+        "texto_opcion": "Suponha que a mesclagem funcione de forma idêntica em todos os armazéns, os recursos do adaptador são diferentes.",
         "es_correcta": false,
         "explicacion": "Os recursos do adaptador são diferentes."
       },
       {
-        "texto_opcion": "Verifique estratégias incremental específicas do adaptador na documentação do adaptador dbt",
-        "es_correcta": true,
-        "explicacion": "Nem toda estratégia é válida em todos os armazéns; os documentos do adaptador são oficiais."
+        "texto_opcion": "Copie a estratégia do Postgres para Spark sem validação, pode falhar em tempo de compilação/execução.",
+        "es_correcta": false,
+        "explicacion": "Pode falhar em tempo de compilação/execução."
       }
     ],
     "tags": [
@@ -757,22 +757,22 @@
     "pregunta": "Em um trabalho dbt Cloud multiambiente: o modelo Snowflake incremental deve atualizar as linhas em `order_id` quando as atualizações chegarem. Qual abordagem dbt é melhor? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Excluir configuração unique_key",
+        "texto_opcion": "Excluir configuração unique_key, mesclar/upsert requer uma",
         "es_correcta": false,
         "explicacion": "Mesclar/upsert requer uma definição de chave exclusiva."
       },
       {
-        "texto_opcion": "Use seeds para atualizações",
+        "texto_opcion": "Use seeds para atualizações, seeds são cargas estáticas, seeds são cargas estáticas",
         "es_correcta": false,
         "explicacion": "Seeds são cargas estáticas, não upserts incremental."
       },
       {
-        "texto_opcion": "incremental_strategy='anexar' apenas",
+        "texto_opcion": "incremental_strategy='anexar' apenas, anexar nunca atualiza linhas alteradas.",
         "es_correcta": false,
         "explicacion": "anexar nunca atualiza linhas alteradas."
       },
       {
-        "texto_opcion": "Use `incremental_strategy='merge'` com `unique_key='order_id'`",
+        "texto_opcion": "Use `incremental_strategy='merge'` com `unique_key='order_id'`.",
         "es_correcta": true,
         "explicacion": "A estratégia de mesclagem realiza upserts na chave exclusiva em armazéns que suportam MERGE."
       }
@@ -786,24 +786,24 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um trabalho dbt Cloud multiambiente: o modelo Redshift incremental substitui linhas por chaves de partição alteradas a cada execução. Selecione a resposta correta. Conjunto de restrições nº 3.",
     "opciones": [
       {
+        "texto_opcion": "Truncar a tabela inteira a cada execução, perde partições inalteradas desnecessariamente.",
+        "es_correcta": false,
+        "explicacion": "Perde partições inalteradas desnecessariamente."
+      },
+      {
+        "texto_opcion": "estratégia de mesclagem em comportamento de adaptador não suportado sem.",
+        "es_correcta": false,
+        "explicacion": "O suporte do adaptador varia; delete+insert pode ser necessário."
+      },
+      {
         "texto_opcion": "Use a tabela materialization para microlotes horários",
         "es_correcta": false,
         "explicacion": "Muito pesado para pequenos lotes frequentes."
       },
       {
-        "texto_opcion": "Configure `incremental_strategy='delete+insert'` com unique_key apropriado",
+        "texto_opcion": "Configure `incremental_strategy='delete+insert'` com unique_key.",
         "es_correcta": true,
         "explicacion": "delete+insert remove chaves correspondentes e insere novas linhas – comum no Redshift."
-      },
-      {
-        "texto_opcion": "Truncar a tabela inteira a cada execução",
-        "es_correcta": false,
-        "explicacion": "Perde partições inalteradas desnecessariamente."
-      },
-      {
-        "texto_opcion": "estratégia de mesclagem em comportamento de adaptador não suportado sem verificar documentos",
-        "es_correcta": false,
-        "explicacion": "O suporte do adaptador varia; delete+insert pode ser necessário."
       }
     ],
     "tags": [
@@ -815,24 +815,24 @@
     "pregunta": "Em um projeto de armazém Snowflake: os eventos são imutáveis; duplicatas nunca ocorrem para o mesmo event_id. Qual abordagem dbt é melhor? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Use `incremental_strategy='append'` com um filtro incremental",
-        "es_correcta": true,
-        "explicacion": "anexar é eficiente quando as linhas são somente de inserção e desduplicadas no upstream."
-      },
-      {
-        "texto_opcion": "Use ephemeral materialization para o fato",
-        "es_correcta": false,
-        "explicacion": "Ephemeral não é uma tabela incremental persistente."
-      },
-      {
-        "texto_opcion": "mesclar em cada execução para eventos imutáveis",
+        "texto_opcion": "mesclar em cada execução para eventos imutáveis, sobrecarga de mesclagem desnecessária.",
         "es_correcta": false,
         "explicacion": "Sobrecarga de mesclagem desnecessária."
+      },
+      {
+        "texto_opcion": "Use ephemeral materialization para o fato, ephemeral não é uma tabela incremental persistente.",
+        "es_correcta": false,
+        "explicacion": "Ephemeral não é uma tabela incremental persistente."
       },
       {
         "texto_opcion": "atualização completa diariamente em uma tabela de um trilhão de linhas",
         "es_correcta": false,
         "explicacion": "Proibitivamente caro."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='append'` com um filtro incremental.",
+        "es_correcta": true,
+        "explicacion": "anexar é eficiente quando as linhas são somente de inserção e desduplicadas no upstream."
       }
     ],
     "tags": [
@@ -844,24 +844,24 @@
     "pregunta": "Para uma equipe de plataforma que publica pacotes compartilhados com trabalhos noturnos: a tabela particionada BigQuery deve substituir partições de data inteiras na recarga. Melhor prática? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "anexar em partições erradas para sempre",
+        "texto_opcion": "Use a visualização materialization para fatos particionados",
         "es_correcta": false,
-        "explicacion": "Pode duplicar ou perder dados de partição."
+        "explicacion": "As visualizações não gerenciam a substituição de partições."
       },
       {
-        "texto_opcion": "Exclua partições manualmente fora do dbt",
+        "texto_opcion": "Exclua partições manualmente fora do dbt, não orcestrado em DAG.",
         "es_correcta": false,
         "explicacion": "Não orcestrado em DAG."
       },
       {
-        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` com `partition_by` configurado",
-        "es_correcta": true,
-        "explicacion": "insert_overwrite substitui fatias de partição de forma eficiente em BigQuery."
+        "texto_opcion": "anexar em partições erradas para sempre, pode duplicar ou perder dados de partição.",
+        "es_correcta": false,
+        "explicacion": "Pode duplicar ou perder dados de partição."
       },
       {
-        "texto_opcion": "Use a visualização materialization para fatos particionados",
-        "es_correcta": false,
-        "explicacion": "As visualizações não gerenciam a substituição de partições."
+        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` com.",
+        "es_correcta": true,
+        "explicacion": "insert_overwrite substitui fatias de partição de forma eficiente em BigQuery."
       }
     ],
     "tags": [
@@ -873,24 +873,24 @@
     "pregunta": "Em um repositório analítico BigQuery: o projeto dbt 1.9+ é carregado um dia de cada vez com janelas de lote limitadas. Qual abordagem dbt é melhor? Conjunto de restrições nº 3.",
     "opciones": [
       {
+        "texto_opcion": "Desative incremental totalmente, forces reconstruções completas caras.",
+        "es_correcta": false,
+        "explicacion": "Forces reconstruções completas caras."
+      },
+      {
         "texto_opcion": "incremental monolítico único sem lotes em cargas de TB/dia",
         "es_correcta": false,
         "explicacion": "Mais difícil de tentar novamente e preencher."
       },
       {
-        "texto_opcion": "Use seeds por dia",
-        "es_correcta": false,
-        "explicacion": "Não escalável para grandes volumes diários."
-      },
-      {
-        "texto_opcion": "Configure microbatch incremental com `event_time` e limites de lote",
+        "texto_opcion": "Configure microbatch incremental com `event_time` e.",
         "es_correcta": true,
         "explicacion": "Microbatch incremental processa lotes de tempo discreto para fatos grandes."
       },
       {
-        "texto_opcion": "Desative incremental totalmente",
+        "texto_opcion": "Use seeds por dia, não escalável para grandes volumes diários.",
         "es_correcta": false,
-        "explicacion": "Forces reconstruções completas caras."
+        "explicacion": "Não escalável para grandes volumes diários."
       }
     ],
     "tags": [
@@ -902,12 +902,12 @@
     "pregunta": "Para um trabalho dbt Cloud multiambiente com trabalhos noturnos: a mesclagem incremental deve corresponder a `(customer_id, order_date)`. Melhor prática? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Defina `unique_key=['customer_id','order_date']` como uma lista na configuração",
+        "texto_opcion": "Defina `unique_key=['customer_id','order_date']` como uma lista na configuração.",
         "es_correcta": true,
         "explicacion": "Chaves exclusivas compostas definem condições de correspondência de mesclagem para granulação de várias colunas."
       },
       {
-        "texto_opcion": "Omitir unique_key com estratégia de mesclagem",
+        "texto_opcion": "Omitir unique_key com estratégia de mesclagem, a mesclagem requer colunas-chave.",
         "es_correcta": false,
         "explicacion": "A mesclagem requer colunas-chave."
       },
@@ -931,24 +931,24 @@
     "pregunta": "após incremental a contagem de linhas de execução dobrou inesperadamente. Contexto: um pipeline de CI usando dbt Core. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Desative todos os testes",
+        "texto_opcion": "Remova completamente as referências {{ this }}, interrompe as autoconsultas incremental.",
         "es_correcta": false,
-        "explicacion": "Os testes ajudam a detectar duplicatas e chaves nulas."
+        "explicacion": "Interrompe as autoconsultas incremental."
       },
       {
-        "texto_opcion": "Inspecione o SQL compilado, verifique o filtro is_incremental() e verifique unique_key/strategy",
-        "es_correcta": true,
-        "explicacion": "Linhas duplicadas geralmente vêm de filtros incremental ausentes ou de escolha errada de acréscimo/mesclagem."
-      },
-      {
-        "texto_opcion": "Produção com atualização cega e completa sem causa raiz",
+        "texto_opcion": "Produção com atualização cega e completa sem causa raiz, pode ocultar bugs lógicos contínuos.",
         "es_correcta": false,
         "explicacion": "Pode ocultar bugs lógicos contínuos."
       },
       {
-        "texto_opcion": "Remova completamente as referências {{ this }}",
+        "texto_opcion": "Inspecione o SQL compilado, verifique o filtro is_incremental() e.",
+        "es_correcta": true,
+        "explicacion": "Linhas duplicadas geralmente vêm de filtros incremental ausentes ou de escolha errada de acréscimo/mesclagem."
+      },
+      {
+        "texto_opcion": "Desative todos os testes, os testes ajudam a detectar duplicatas e chaves nulas",
         "es_correcta": false,
-        "explicacion": "Interrompe as autoconsultas incremental."
+        "explicacion": "Os testes ajudam a detectar duplicatas e chaves nulas."
       }
     ],
     "tags": [
@@ -960,17 +960,17 @@
     "pregunta": "revisão do projeto dbt — um monorepo com três projetos dbt. BigQuery fato particionado por `DATE(created_at)` para controle de custos. O que a equipe deve fazer? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Defina `partition_by: {campo: criado_at, tipo de dados: carimbo de data/hora, granularidade: dia }`",
+        "texto_opcion": "Defina `partition_by: {campo: criado_at, tipo de dados: carimbo de.",
         "es_correcta": true,
         "explicacion": "partição_by configura a remoção de partição em adaptadores suportados."
       },
       {
-        "texto_opcion": "Partição por UUID aleatório",
+        "texto_opcion": "Partição por UUID aleatório, nenhum padrão de poda significativo.",
         "es_correcta": false,
         "explicacion": "Nenhum padrão de poda significativo."
       },
       {
-        "texto_opcion": "Partição em um booleano de baixa cardinalidade",
+        "texto_opcion": "Partição em um booleano de baixa cardinalidade, mau benefício de poda.",
         "es_correcta": false,
         "explicacion": "Mau benefício de poda."
       },
@@ -994,7 +994,7 @@
         "explicacion": "Pode violar os requisitos de recuperação."
       },
       {
-        "texto_opcion": "Use configuração específica do adaptador, como `transient: true` quando apropriado",
+        "texto_opcion": "Use configuração específica do adaptador.",
         "es_correcta": true,
         "explicacion": "Tabelas transitórias reduzem o armazenamento Time Travel para incrementals reconstruíveis."
       },
@@ -1004,7 +1004,7 @@
         "explicacion": "A intenção no nível do modelo pertence à configuração do modelo."
       },
       {
-        "texto_opcion": "Use ephemeral para incremental persistente",
+        "texto_opcion": "Use ephemeral para incremental persistente, ephemeral não é uma tabela.",
         "es_correcta": false,
         "explicacion": "Ephemeral não é uma tabela."
       }
@@ -1018,24 +1018,24 @@
     "pregunta": "as datas históricas devem ser reprocessadas após a correção upstream. Contexto: uma implantação do Databricks SQL warehouse. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Truncar a produção e perder datas não afetadas",
-        "es_correcta": false,
-        "explicacion": "Excessivamente destrutivo."
-      },
-      {
-        "texto_opcion": "Execute novamente microbatch/incremental com vars de data ou sinalizadores `--event-time-start/end`",
-        "es_correcta": true,
-        "explicacion": "Os preenchimentos limitados reprocessam lotes específicos sem reconstrução completa da tabela."
-      },
-      {
-        "texto_opcion": "INSERIR linhas manualmente sem dbt",
+        "texto_opcion": "INSERIR linhas manualmente sem dbt, quebra linhagem e testes, quebra linhagem e testes.",
         "es_correcta": false,
         "explicacion": "Quebra linhagem e testes."
       },
       {
-        "texto_opcion": "Ignorar correção upstream",
+        "texto_opcion": "Ignorar correção upstream, deixa uma história ruim nos mercados.",
         "es_correcta": false,
         "explicacion": "Deixa uma história ruim nos mercados."
+      },
+      {
+        "texto_opcion": "Truncar a produção e perder datas não afetadas, excessivamente destrutivo.",
+        "es_correcta": false,
+        "explicacion": "Excessivamente destrutivo."
+      },
+      {
+        "texto_opcion": "Execute novamente microbatch/incremental com vars de data ou.",
+        "es_correcta": true,
+        "explicacion": "Os preenchimentos limitados reprocessam lotes específicos sem reconstrução completa da tabela."
       }
     ],
     "tags": [
@@ -1047,12 +1047,12 @@
     "pregunta": "a mesclagem deve atualizar as métricas quando correspondidas e inserir novas chaves. Contexto: uma equipe de plataforma publicando pacotes compartilhados. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Use junção cruzada para detectar alterações",
+        "texto_opcion": "Use junção cruzada para detectar alterações, risco de explosão cartesiana.",
         "es_correcta": false,
         "explicacion": "Risco de explosão cartesiana."
       },
       {
-        "texto_opcion": "Confie no warehouse MERGE por meio da estratégia de mesclagem dbt com chave exclusiva adequada",
+        "texto_opcion": "Confie no warehouse MERGE por meio da estratégia de mesclagem dbt com.",
         "es_correcta": true,
         "explicacion": "A estratégia de mesclagem do dbt delega a semântica MERGE do warehouse."
       },
@@ -1062,7 +1062,7 @@
         "explicacion": "Equivalente à recarga completa, não à mesclagem."
       },
       {
-        "texto_opcion": "Pular camada de teste",
+        "texto_opcion": "Pular camada de teste, a preparação isola a lógica raw-to-mart.",
         "es_correcta": false,
         "explicacion": "A preparação isola a lógica raw-to-mart."
       }
@@ -1076,24 +1076,24 @@
     "pregunta": "Para um mercado financeiro com SLAs rigorosos com trabalhos noturnos: a equipe documenta qual estratégia um modelo usa para os operadores. Melhor prática? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Único documento no título da solicitação pull",
-        "es_correcta": false,
-        "explicacion": "Não é durável no repositório."
-      },
-      {
-        "texto_opcion": "Mantenha a estratégia não documentada",
-        "es_correcta": false,
-        "explicacion": "Os operadores configuram incorretamente as execuções."
-      },
-      {
-        "texto_opcion": "Remova o esquema YAML para acelerar o CI",
+        "texto_opcion": "Remova o esquema YAML para acelerar o CI, perde documentos e testes, perde documentos e testes.",
         "es_correcta": false,
         "explicacion": "Perde documentos e testes."
       },
       {
-        "texto_opcion": "Adicione estratégia e chave única à descrição/meta do modelo no esquema YAML",
+        "texto_opcion": "Adicione estratégia e chave única à descrição/meta do modelo.",
         "es_correcta": true,
         "explicacion": "A documentação da estratégia auxilia na depuração e na governança em nível de certificação."
+      },
+      {
+        "texto_opcion": "Único documento no título da solicitação pull, não é durável no repositório, não é durável no repositório.",
+        "es_correcta": false,
+        "explicacion": "Não é durável no repositório."
+      },
+      {
+        "texto_opcion": "Mantenha a estratégia não documentada, os operadores configuram incorretamente as execuções.",
+        "es_correcta": false,
+        "explicacion": "Os operadores configuram incorretamente as execuções."
       }
     ],
     "tags": [
@@ -1105,22 +1105,22 @@
     "pregunta": "Para uma equipe de análise de produto que usa dbt com trabalhos noturnos: escolha incremental_strategy antes de verificar a documentação do adaptador. Melhor prática? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Desativar pinos de versão do adaptador",
-        "es_correcta": false,
-        "explicacion": "O desvio de versão interrompe o suporte à estratégia."
-      },
-      {
-        "texto_opcion": "Suponha que a mesclagem funcione de forma idêntica em todos os armazéns",
+        "texto_opcion": "Suponha que a mesclagem funcione de forma idêntica em todos os armazéns, os recursos do adaptador são diferentes.",
         "es_correcta": false,
         "explicacion": "Os recursos do adaptador são diferentes."
       },
       {
-        "texto_opcion": "Verifique estratégias incremental específicas do adaptador na documentação do adaptador dbt",
+        "texto_opcion": "Verifique estratégias incremental específicas do adaptador na documentação.",
         "es_correcta": true,
         "explicacion": "Nem toda estratégia é válida em todos os armazéns; os documentos do adaptador são oficiais."
       },
       {
-        "texto_opcion": "Copie a estratégia do Postgres para Spark sem validação",
+        "texto_opcion": "Desativar pinos de versão do adaptador, o desvio de versão interrompe o suporte à estratégia.",
+        "es_correcta": false,
+        "explicacion": "O desvio de versão interrompe o suporte à estratégia."
+      },
+      {
+        "texto_opcion": "Copie a estratégia do Postgres para Spark sem validação, pode falhar em tempo de compilação/execução.",
         "es_correcta": false,
         "explicacion": "Pode falhar em tempo de compilação/execução."
       }
@@ -1134,22 +1134,22 @@
     "pregunta": "revisão do projeto dbt — um monorepo com três projetos dbt. O modelo Snowflake incremental deve atualizar as linhas em `order_id` quando as atualizações chegarem. O que a equipe deve fazer? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Excluir configuração unique_key",
+        "texto_opcion": "Excluir configuração unique_key, mesclar/upsert requer uma",
         "es_correcta": false,
         "explicacion": "Mesclar/upsert requer uma definição de chave exclusiva."
       },
       {
-        "texto_opcion": "incremental_strategy='anexar' apenas",
+        "texto_opcion": "incremental_strategy='anexar' apenas, anexar nunca atualiza linhas alteradas.",
         "es_correcta": false,
         "explicacion": "anexar nunca atualiza linhas alteradas."
       },
       {
-        "texto_opcion": "Use `incremental_strategy='merge'` com `unique_key='order_id'`",
+        "texto_opcion": "Use `incremental_strategy='merge'` com `unique_key='order_id'`.",
         "es_correcta": true,
         "explicacion": "A estratégia de mesclagem realiza upserts na chave exclusiva em armazéns que suportam MERGE."
       },
       {
-        "texto_opcion": "Use seeds para atualizações",
+        "texto_opcion": "Use seeds para atualizações, seeds são cargas estáticas, seeds são cargas estáticas",
         "es_correcta": false,
         "explicacion": "Seeds são cargas estáticas, não upserts incremental."
       }
@@ -1163,9 +1163,14 @@
     "pregunta": "Para um mercado financeiro com SLAs rígidos com trabalhos noturnos: o modelo Redshift incremental substitui linhas por chaves de partição alteradas a cada execução. Melhor prática? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "estratégia de mesclagem em comportamento de adaptador não suportado sem verificar documentos",
+        "texto_opcion": "Configure `incremental_strategy='delete+insert'` com unique_key.",
+        "es_correcta": true,
+        "explicacion": "delete+insert remove chaves correspondentes e insere novas linhas – comum no Redshift."
+      },
+      {
+        "texto_opcion": "Truncar a tabela inteira a cada execução, perde partições inalteradas desnecessariamente.",
         "es_correcta": false,
-        "explicacion": "O suporte do adaptador varia; delete+insert pode ser necessário."
+        "explicacion": "Perde partições inalteradas desnecessariamente."
       },
       {
         "texto_opcion": "Use a tabela materialization para microlotes horários",
@@ -1173,14 +1178,9 @@
         "explicacion": "Muito pesado para pequenos lotes frequentes."
       },
       {
-        "texto_opcion": "Truncar a tabela inteira a cada execução",
+        "texto_opcion": "estratégia de mesclagem em comportamento de adaptador não suportado sem.",
         "es_correcta": false,
-        "explicacion": "Perde partições inalteradas desnecessariamente."
-      },
-      {
-        "texto_opcion": "Configure `incremental_strategy='delete+insert'` com unique_key apropriado",
-        "es_correcta": true,
-        "explicacion": "delete+insert remove chaves correspondentes e insere novas linhas – comum no Redshift."
+        "explicacion": "O suporte do adaptador varia; delete+insert pode ser necessário."
       }
     ],
     "tags": [
@@ -1192,22 +1192,22 @@
     "pregunta": "os eventos são imutáveis; duplicatas nunca ocorrem para o mesmo event_id. Contexto: um mercado financeiro com SLAs rígidos. Conjunto de restrições nº 4.",
     "opciones": [
       {
+        "texto_opcion": "Use `incremental_strategy='append'` com um filtro incremental.",
+        "es_correcta": true,
+        "explicacion": "anexar é eficiente quando as linhas são somente de inserção e desduplicadas no upstream."
+      },
+      {
+        "texto_opcion": "mesclar em cada execução para eventos imutáveis, sobrecarga de mesclagem desnecessária.",
+        "es_correcta": false,
+        "explicacion": "Sobrecarga de mesclagem desnecessária."
+      },
+      {
         "texto_opcion": "atualização completa diariamente em uma tabela de um trilhão de linhas",
         "es_correcta": false,
         "explicacion": "Proibitivamente caro."
       },
       {
-        "texto_opcion": "Use `incremental_strategy='append'` com um filtro incremental",
-        "es_correcta": true,
-        "explicacion": "anexar é eficiente quando as linhas são somente de inserção e desduplicadas no upstream."
-      },
-      {
-        "texto_opcion": "mesclar em cada execução para eventos imutáveis",
-        "es_correcta": false,
-        "explicacion": "Sobrecarga de mesclagem desnecessária."
-      },
-      {
-        "texto_opcion": "Use ephemeral materialization para o fato",
+        "texto_opcion": "Use ephemeral materialization para o fato, ephemeral não é uma tabela incremental persistente.",
         "es_correcta": false,
         "explicacion": "Ephemeral não é uma tabela incremental persistente."
       }
@@ -1221,24 +1221,24 @@
     "pregunta": "A tabela particionada BigQuery deve substituir partições de data inteiras na recarga. Contexto: um pipeline de CI usando dbt Core. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` com `partition_by` configurado",
-        "es_correcta": true,
-        "explicacion": "insert_overwrite substitui fatias de partição de forma eficiente em BigQuery."
-      },
-      {
-        "texto_opcion": "anexar em partições erradas para sempre",
-        "es_correcta": false,
-        "explicacion": "Pode duplicar ou perder dados de partição."
-      },
-      {
         "texto_opcion": "Use a visualização materialization para fatos particionados",
         "es_correcta": false,
         "explicacion": "As visualizações não gerenciam a substituição de partições."
       },
       {
-        "texto_opcion": "Exclua partições manualmente fora do dbt",
+        "texto_opcion": "anexar em partições erradas para sempre, pode duplicar ou perder dados de partição.",
+        "es_correcta": false,
+        "explicacion": "Pode duplicar ou perder dados de partição."
+      },
+      {
+        "texto_opcion": "Exclua partições manualmente fora do dbt, não orcestrado em DAG.",
         "es_correcta": false,
         "explicacion": "Não orcestrado em DAG."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` com.",
+        "es_correcta": true,
+        "explicacion": "insert_overwrite substitui fatias de partição de forma eficiente em BigQuery."
       }
     ],
     "tags": [
@@ -1250,7 +1250,7 @@
     "pregunta": "O projeto dbt 1.9+ é carregado um dia de cada vez com janelas de lote limitadas. Contexto: um projeto de armazém Snowflake. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Desative incremental totalmente",
+        "texto_opcion": "Desative incremental totalmente, forces reconstruções completas caras.",
         "es_correcta": false,
         "explicacion": "Forces reconstruções completas caras."
       },
@@ -1260,12 +1260,12 @@
         "explicacion": "Mais difícil de tentar novamente e preencher."
       },
       {
-        "texto_opcion": "Configure microbatch incremental com `event_time` e limites de lote",
+        "texto_opcion": "Configure microbatch incremental com `event_time` e.",
         "es_correcta": true,
         "explicacion": "Microbatch incremental processa lotes de tempo discreto para fatos grandes."
       },
       {
-        "texto_opcion": "Use seeds por dia",
+        "texto_opcion": "Use seeds por dia, não escalável para grandes volumes diários.",
         "es_correcta": false,
         "explicacion": "Não escalável para grandes volumes diários."
       }
@@ -1279,24 +1279,24 @@
     "pregunta": "Durante a solução de problemas `dbt build` em uma equipe de plataforma que publica pacotes compartilhados: a mesclagem incremental deve corresponder a `(customer_id, order_date)`. Selecione a resposta correta. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Defina `unique_key=['customer_id','order_date']` como uma lista na configuração",
-        "es_correcta": true,
-        "explicacion": "Chaves exclusivas compostas definem condições de correspondência de mesclagem para granulação de várias colunas."
+        "texto_opcion": "Use chave substituta apenas em SELECT sem configuração unique_key",
+        "es_correcta": false,
+        "explicacion": "A mesclagem dbt precisa de configuração unique_key explícita."
       },
       {
-        "texto_opcion": "Omitir unique_key com estratégia de mesclagem",
+        "texto_opcion": "Omitir unique_key com estratégia de mesclagem, a mesclagem requer colunas-chave.",
         "es_correcta": false,
         "explicacion": "A mesclagem requer colunas-chave."
+      },
+      {
+        "texto_opcion": "Defina `unique_key=['customer_id','order_date']` como uma lista na configuração.",
+        "es_correcta": true,
+        "explicacion": "Chaves exclusivas compostas definem condições de correspondência de mesclagem para granulação de várias colunas."
       },
       {
         "texto_opcion": "unique_key em customer_id somente quando os grãos são diários por cliente",
         "es_correcta": false,
         "explicacion": "Granulação errada causa mesclagens incorretas."
-      },
-      {
-        "texto_opcion": "Use chave substituta apenas em SELECT sem configuração unique_key",
-        "es_correcta": false,
-        "explicacion": "A mesclagem dbt precisa de configuração unique_key explícita."
       }
     ],
     "tags": [
@@ -1308,22 +1308,22 @@
     "pregunta": "revisão do projeto dbt - um trabalho dbt Cloud multiambiente. após incremental a contagem de linhas de execução dobrou inesperadamente. O que a equipe deve fazer? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Desative todos os testes",
+        "texto_opcion": "Desative todos os testes, os testes ajudam a detectar duplicatas e chaves nulas",
         "es_correcta": false,
         "explicacion": "Os testes ajudam a detectar duplicatas e chaves nulas."
       },
       {
-        "texto_opcion": "Produção com atualização cega e completa sem causa raiz",
+        "texto_opcion": "Produção com atualização cega e completa sem causa raiz, pode ocultar bugs lógicos contínuos.",
         "es_correcta": false,
         "explicacion": "Pode ocultar bugs lógicos contínuos."
       },
       {
-        "texto_opcion": "Inspecione o SQL compilado, verifique o filtro is_incremental() e verifique unique_key/strategy",
+        "texto_opcion": "Inspecione o SQL compilado, verifique o filtro is_incremental() e.",
         "es_correcta": true,
         "explicacion": "Linhas duplicadas geralmente vêm de filtros incremental ausentes ou de escolha errada de acréscimo/mesclagem."
       },
       {
-        "texto_opcion": "Remova completamente as referências {{ this }}",
+        "texto_opcion": "Remova completamente as referências {{ this }}, interrompe as autoconsultas incremental.",
         "es_correcta": false,
         "explicacion": "Interrompe as autoconsultas incremental."
       }
@@ -1337,22 +1337,22 @@
     "pregunta": "Para um pipeline de CI usando dbt Core com trabalhos noturnos: BigQuery fato particionado por `DATE(created_at)` para controle de custos. Melhor prática? Conjunto de restrições nº 4.",
     "opciones": [
       {
+        "texto_opcion": "Defina `partition_by: {campo: criado_at, tipo de dados: carimbo de.",
+        "es_correcta": true,
+        "explicacion": "partição_by configura a remoção de partição em adaptadores suportados."
+      },
+      {
         "texto_opcion": "Nenhuma configuração de partição no fato da série temporal",
         "es_correcta": false,
         "explicacion": "As consultas examinam a tabela inteira."
       },
       {
-        "texto_opcion": "Partição em um booleano de baixa cardinalidade",
+        "texto_opcion": "Partição em um booleano de baixa cardinalidade, mau benefício de poda.",
         "es_correcta": false,
         "explicacion": "Mau benefício de poda."
       },
       {
-        "texto_opcion": "Defina `partition_by: {campo: criado_at, tipo de dados: carimbo de data/hora, granularidade: dia }`",
-        "es_correcta": true,
-        "explicacion": "partição_by configura a remoção de partição em adaptadores suportados."
-      },
-      {
-        "texto_opcion": "Partição por UUID aleatório",
+        "texto_opcion": "Partição por UUID aleatório, nenhum padrão de poda significativo.",
         "es_correcta": false,
         "explicacion": "Nenhum padrão de poda significativo."
       }
@@ -1371,19 +1371,19 @@
         "explicacion": "Pode violar os requisitos de recuperação."
       },
       {
-        "texto_opcion": "Use configuração específica do adaptador, como `transient: true` quando apropriado",
+        "texto_opcion": "Configure transitório em profiles.yml globalmente para todos",
+        "es_correcta": false,
+        "explicacion": "A intenção no nível do modelo pertence à configuração do modelo."
+      },
+      {
+        "texto_opcion": "Use configuração específica do adaptador.",
         "es_correcta": true,
         "explicacion": "Tabelas transitórias reduzem o armazenamento Time Travel para incrementals reconstruíveis."
       },
       {
-        "texto_opcion": "Use ephemeral para incremental persistente",
+        "texto_opcion": "Use ephemeral para incremental persistente, ephemeral não é uma tabela.",
         "es_correcta": false,
         "explicacion": "Ephemeral não é uma tabela."
-      },
-      {
-        "texto_opcion": "Configure transitório em profiles.yml globalmente para todos",
-        "es_correcta": false,
-        "explicacion": "A intenção no nível do modelo pertence à configuração do modelo."
       }
     ],
     "tags": [
