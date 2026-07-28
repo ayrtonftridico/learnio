@@ -319,7 +319,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa o seguinte código:\n\n```píton\n(faísca.readStream\n  .formato('cloudFiles')\n  .option('cloudFiles.formato', 'csv')\n  .option('cloudFiles.schemaLocation', '/checkpoints/esquema')\n  .load('s3://landing/raw/')\n  .writeStream\n  .formato('delta')\n  .option('checkpointLocation', '/checkpoints/raw')\n  .start('/delta/raw')\n)\n```\n\nQue tipo de ingestão isso implementa?",
+    "pregunta": "Um engenheiro de dados executa o seguinte código:\n\n```python\n(spark.readStream\n  .format('cloudFiles')\n  .option('cloudFiles.format', 'csv')\n  .option('cloudFiles.schemaLocation', '/checkpoints/schema')\n  .load('s3://landing/raw/')\n  .writeStream\n  .format('delta')\n  .option('checkpointLocation', '/checkpoints/raw')\n  .start('/delta/raw')\n)\n```\n\nQue tipo de ingestão isso implementa?",
     "opciones": [
       {
         "texto_opcion": "Carregamento em lote único com idempotência",
@@ -438,24 +438,24 @@
     "pregunta": "Um engenheiro de dados deseja carregar arquivos Avro de ADLS em uma tabela Delta. Os arquivos chegam uma vez por dia e o engenheiro deseja evitar o reprocessamento dos arquivos já carregados.\n\nQual comando SQL o engenheiro deve usar?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nINSERIR EM tabela_alvo\nSELECIONE * DE avro.`abfss://container@storage.dfs.core.windows.net/avro/`;\n```",
+        "texto_opcion": "```sql\nINSERT INTO target_table\nSELECT * FROM avro.`abfss://container@storage.dfs.core.windows.net/avro/`;\n```",
         "es_correcta": false,
         "explicacion": "Um `INSERT INTO` simples não rastreia quais arquivos foram carregados anteriormente e reinserirá os dados em cada execução."
       },
       {
-        "texto_opcion": "```sql\nMERGE INTO target_table USANDO avro_source ON id = avro_source.id\nQUANDO NÃO CORRESPONDE INSERIR *;\n```, `MERGE` pode evitar duplicatas",
+        "texto_opcion": "```sql\nCOPY INTO target_table\nFROM 'abfss://container@storage.dfs.core.windows.net/avro/'\nFILEFORMAT = AVRO;\n```.",
+        "es_correcta": true,
+        "explicacion": "`COPY INTO` com `FILEFORMAT = AVRO` carrega arquivos Avro de forma idempotente - os arquivos já carregados são ignorados automaticamente."
+      },
+      {
+        "texto_opcion": "```sql\nMERGE INTO target_table USING avro_source ON id = avro_source.id\nWHEN NOT MATCHED THEN INSERT *;\n```",
         "es_correcta": false,
         "explicacion": "`MERGE` pode evitar duplicatas, mas requer uma referência de origem pré-carregada. Ele não rastreia inerentemente arquivos processados ​​como `COPY INTO` faz."
       },
       {
-        "texto_opcion": "```sql\nCRIAR OU SUBSTITUIR TABELA target_table\nAS SELECT * FROM avro.`abfss://container@storage.dfs.core.windows.net/avro/`;\n```",
+        "texto_opcion": "```sql\nCREATE OR REPLACE TABLE target_table\nAS SELECT * FROM avro.`abfss://container@storage.dfs.core.windows.net/avro/`;\n```",
         "es_correcta": false,
         "explicacion": "`CREATE OR REPLACE TABLE` reescreve a tabela inteira em cada execução e não suporta carregamento incremental idempotente."
-      },
-      {
-        "texto_opcion": "```sql\nCOPY INTO tabela_alvo\nDE 'abfss://container@storage.dfs.core.windows.net/avro/'\nARQUIVOFORMAT = AVRO;\n```.",
-        "es_correcta": true,
-        "explicacion": "`COPY INTO` com `FILEFORMAT = AVRO` carrega arquivos Avro de forma idempotente - os arquivos já carregados são ignorados automaticamente."
       }
     ],
     "tags": [
@@ -696,7 +696,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa o seguinte comando:\n\n```sql\nCOPY INTO meu_catalog.meu_schema.events\nDE 's3://raw-bucket/events/'\nARQUIVOFORMAT = JSON\nCOPY_OPTIONS('mergeSchema' = 'true');\n```\n\nO que a opção `mergeSchema` permite?",
+    "pregunta": "Um engenheiro de dados executa o seguinte comando:\n\n```sql\nCOPY INTO my_catalog.my_schema.events\nFROM 's3://raw-bucket/events/'\nFILEFORMAT = JSON\nCOPY_OPTIONS ('mergeSchema' = 'true');\n```\n\nO que a opção `mergeSchema` permite?",
     "opciones": [
       {
         "texto_opcion": "Ele mescla os dados recebidos com a tabela de destino usando uma chave primária",
@@ -899,7 +899,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados analisa este código:\n\n```píton\ndf = spark.read.format('jdbc') \\\n    .option('url', 'jdbc:postgresql://host:5432/db') \\\n    .option('dbtable', 'pedidos') \\\n    .option('usuário', 'etl_user') \\\n    .option('senha', dbutils.secrets.get('escopo', 'pg_pass')) \\\n    .option('numPartições', 8) \\\n    .carregar()\n\ndf.write.format('delta').mode('append').save('/bronze/orders')\n```\n\nQual preocupação o engenheiro deve abordar antes de promover isso para produção?",
+    "pregunta": "Um engenheiro de dados analisa este código:\n\n```python\ndf = spark.read.format('jdbc') \\\n    .option('url', 'jdbc:postgresql://host:5432/db') \\\n    .option('dbtable', 'orders') \\\n    .option('user', 'etl_user') \\\n    .option('password', dbutils.secrets.get('scope', 'pg_pass')) \\\n    .option('numPartitions', 8) \\\n    .load()\n\ndf.write.format('delta').mode('append').save('/bronze/orders')\n```\n\nQual preocupação o engenheiro deve abordar antes de promover isso para produção?",
     "opciones": [
       {
         "texto_opcion": "`mode('append')` causará duplicatas nas repetições, embora o modo de acréscimo não desduplica",

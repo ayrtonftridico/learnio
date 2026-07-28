@@ -1,6 +1,6 @@
 [
   {
-    "pregunta": "Um engenheiro de dados define o seguinte em um pipeline Lakeflow Spark Declarative Pipelines (SDP):\n\n```sql\nCRIAR OU ATUALIZAR MATERIALIZED VIEW gold_daily_sales AS\nSELECIONE data_da_venda, SUM(valor) COMO total\nDE prata_vendas\nGRUPO POR data_venda;\n```\n\nQuando o Databricks recalcula esse materialized view?",
+    "pregunta": "Um engenheiro de dados define o seguinte em um pipeline Lakeflow Spark Declarative Pipelines (SDP):\n\n```sql\nCREATE OR REFRESH MATERIALIZED VIEW gold_daily_sales AS\nSELECT sale_date, SUM(amount) AS total\nFROM silver_sales\nGROUP BY sale_date;\n```\n\nQuando o Databricks recalcula esse materialized view?",
     "opciones": [
       {
         "texto_opcion": "Somente quando o engenheiro executa manualmente REFRESH MATERIALIZED VIEW.",
@@ -89,7 +89,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte código de pipeline Lakeflow SDP Python:\n\n```píton\nde pipelines de importação do pyspark como dp\nde pyspark.sql.functions importar soma como _sum\n\n@dp.materialized_view\ndef receita_ouro():\n    retornar (\n        dp.read(\"pedidos_prata\")\n        .groupBy(\"região\")\n        .agg(_sum(\"receita\").alias(\"receita_total\"))\n    )\n```\n\nQue tipo de objeto da camada Gold isso cria?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte código de pipeline Lakeflow SDP Python:\n\n```python\nfrom pyspark import pipelines as dp\nfrom pyspark.sql.functions import sum as _sum\n\n@dp.materialized_view\ndef gold_revenue():\n    return (\n        dp.read(\"silver_orders\")\n        .groupBy(\"region\")\n        .agg(_sum(\"revenue\").alias(\"total_revenue\"))\n    )\n```\n\nQue tipo de objeto da camada Gold isso cria?",
     "opciones": [
       {
         "texto_opcion": "Um streaming table que ingere continuamente de silver_orders",
@@ -178,7 +178,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados cria o seguinte objeto:\n\n```sql\nCRIAR OU ATUALIZAR STREAMING TABLE gold_events\nAS SELECT event_id, event_type, ts\nFROM STREAM(prata_eventos);\n```\n\nQual cenário causaria falha na execução do pipeline?",
+    "pregunta": "Um engenheiro de dados cria o seguinte objeto:\n\n```sql\nCREATE OR REFRESH STREAMING TABLE gold_events\nAS SELECT event_id, event_type, ts\nFROM STREAM(silver_events);\n```\n\nQual cenário causaria falha na execução do pipeline?",
     "opciones": [
       {
         "texto_opcion": "A tabela silver_events é uma tabela Delta estática sem novos acréscimos desde a.",
@@ -238,7 +238,7 @@
     ]
   },
   {
-    "pregunta": "Uma visualização SQL da camada Gold é definida como:\n\n```sql\nCRIAR VISUALIZAÇÃO gold.customer_ltv AS\nSELECIONE ID_do_cliente, SUM(total_pedido) AS valor_durante\nDE prata.pedidos\nGRUPO POR ID_do_cliente;\n```\n\nUm engenheiro de ML consulta essa visualização para treinar um modelo em 500 milhões de linhas. Qual é a principal preocupação?",
+    "pregunta": "Uma visualização SQL da camada Gold é definida como:\n\n```sql\nCREATE VIEW gold.customer_ltv AS\nSELECT customer_id, SUM(order_total) AS lifetime_value\nFROM silver.orders\nGROUP BY customer_id;\n```\n\nUm engenheiro de ML consulta essa visualização para treinar um modelo em 500 milhões de linhas. Qual é a principal preocupação?",
     "opciones": [
       {
         "texto_opcion": "A visualização não pode ser consultada por cargas de trabalho de ML — apenas ferramentas de BI podem ler visualizações.",
@@ -306,17 +306,17 @@
         "explicacion": "Faltando o wrapper `OR REFRESH` e `STREAM()`; a fonte deve ser declarada como fonte de streaming."
       },
       {
-        "texto_opcion": "`CRIAR OU ATUALIZAR STREAMING TABLE gold_events AS SELECT * FROM STREAM(silver_events);`.",
+        "texto_opcion": "`CREATE OR REFRESH STREAMING TABLE gold_events AS SELECT * FROM STREAM(silver_events);`.",
         "es_correcta": true,
         "explicacion": "`CREATE OR REFRESH STREAMING TABLE` com `STREAM()` agrupando a fonte é a sintaxe correta do Lakeflow SDP para definir um streaming table."
       },
       {
-        "texto_opcion": "`CRIAR OU ATUALIZAR MATERIALIZED VIEW gold_events AS SELECT * FROM STREAM(silver_events);`",
+        "texto_opcion": "`CREATE OR REFRESH MATERIALIZED VIEW gold_events AS SELECT * FROM STREAM(silver_events);`",
         "es_correcta": false,
         "explicacion": "`MATERIALIZED VIEW` combinado com `STREAM()` é inválido; `STREAM()` é usado apenas com streaming tables."
       },
       {
-        "texto_opcion": "`CRIAR TABELA gold_events USANDO DELTA COMO SELECT * FROM STREAM(silver_events);`",
+        "texto_opcion": "`CREATE TABLE gold_events USANDO DELTA COMO SELECT * FROM STREAM(silver_events);`",
         "es_correcta": false,
         "explicacion": "Isso mistura Delta DDL padrão com a função Lakeflow SDP `STREAM()`, que não é válida fora de um contexto de pipeline SDP."
       }
@@ -358,7 +358,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve:\n\n```píton\nde pipelines de importação do pyspark como dp\n\n@dp.table\ndef gold_top_customers():\n    retornar dp.read_stream(\"transações_prata\") \\\n        .groupBy(\"id_cliente\") \\\n        .contagem()\n```\n\nQual problema esse código tem?",
+    "pregunta": "Um engenheiro de dados escreve:\n\n```python\nfrom pyspark import pipelines as dp\n\n@dp.table\ndef gold_top_customers():\n    return dp.read_stream(\"silver_transactions\") \\\n        .groupBy(\"customer_id\") \\\n        .count()\n```\n\nQual problema esse código tem?",
     "opciones": [
       {
         "texto_opcion": "Agregações com estado como `groupBy().count()` em um stream exigem a substituição de `@dp.table` por `@dp.materialized_view`.",
@@ -508,7 +508,7 @@
     ]
   },
   {
-    "pregunta": "Examine o seguinte código:\n\n```sql\nCRIAR OU ATUALIZAR MATERIALIZED VIEW gold.weekly_kpis AS\nSELECIONAR\n  DATE_TRUNC('semana', data_do_evento) AS início_semana,\n  COUNT(DISTINCT user_id) AS usuários_ativos,\n  SOMA(receita) AS receita_total\nDE prata.eventos\nAgrupar por 1;\n```\n\nUma nova coluna `country` é adicionada a `silver.events`. O que acontece com o materialized view na próxima execução do pipeline?",
+    "pregunta": "Examine o seguinte código:\n\n```sql\nCREATE OR REFRESH MATERIALIZED VIEW gold.weekly_kpis AS\nSELECT\n  DATE_TRUNC('week', event_date) AS week_start,\n  COUNT(DISTINCT user_id)        AS active_users,\n  SUM(revenue)                   AS total_revenue\nFROM silver.events\nGROUP BY 1;\n```\n\nUma nova coluna `country` é adicionada a `silver.events`. O que acontece com o materialized view na próxima execução do pipeline?",
     "opciones": [
       {
         "texto_opcion": "O pipeline falha porque o esquema de origem foi alterado, adicionar uma coluna à origem não quebra um.",
@@ -657,7 +657,7 @@
     ]
   },
   {
-    "pregunta": "Uma tabela Delta gerenciada pela camada Gold é definida como:\n\n```sql\nCRIAR TABELA SE NÃO EXISTIR gold.customer_segments\n(customer_id STRING, segmento STRING, pontuação DOUBLE)\nUSANDO DELTA;\n```\n\nO que acontece com os dados desta tabela se o engenheiro executar `DROP TABLE gold.customer_segments`?",
+    "pregunta": "Uma tabela Delta gerenciada pela camada Gold é definida como:\n\n```sql\nCREATE TABLE IF NOT EXISTS gold.customer_segments\n(customer_id STRING, segment STRING, score DOUBLE)\nUSING DELTA;\n```\n\nO que acontece com os dados desta tabela se o engenheiro executar `DROP TABLE gold.customer_segments`?",
     "opciones": [
       {
         "texto_opcion": "Somente os metadados da tabela são excluídos; os arquivos Delta subjacentes permanecem no local de armazenamento.",
@@ -717,7 +717,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados constrói uma camada Gold usando o seguinte Lakeflow SDP SQL:\n\n```sql\nCRIAR OU ATUALIZAR MATERIALIZED VIEW gold.revenue_by_product AS\nSELECIONE product_id, SUM(quantia) AS receita\nDE prata.transações\nGRUPO POR id_produto;\n\nCRIAR OU ATUALIZAR STREAMING TABLE gold.live_transactions AS\nSELECIONE *FROM STREAM(silver.transactions);\n```\n\nQual afirmação é verdadeira sobre como esses dois objetos coexistem no mesmo pipeline?",
+    "pregunta": "Um engenheiro de dados constrói uma camada Gold usando o seguinte Lakeflow SDP SQL:\n\n```sql\nCREATE OR REFRESH MATERIALIZED VIEW gold.revenue_by_product AS\nSELECT product_id, SUM(amount) AS revenue\nFROM silver.transactions\nGROUP BY product_id;\n\nCREATE OR REFRESH STREAMING TABLE gold.live_transactions AS\nSELECT * FROM STREAM(silver.transactions);\n```\n\nQual afirmação é verdadeira sobre como esses dois objetos coexistem no mesmo pipeline?",
     "opciones": [
       {
         "texto_opcion": "Ambos os objetos usarão o mesmo diretório de checkpoint, causando conflitos, lakeflow SDP gerencia checkpoints por objeto automaticamente",

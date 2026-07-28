@@ -89,7 +89,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados abre um estágio no Spark UI e vê este padrão na lista de tarefas:\n\n```\nTarefa 0: Duração=2s, shuffle read=55 MB\nTarefa 1: Duração=2s, shuffle read=60 MB\nTarefa 2: Duração=37min, shuffle read=6,2 GB\nTarefa 3: Duração=2s, shuffle read=58 MB\n```\n\nQual é a causa raiz e o que isso confirma?",
+    "pregunta": "Um engenheiro de dados abre um estágio no Spark UI e vê este padrão na lista de tarefas:\n\n```sql\nTask 0:  Duration=2s,   Shuffle Read=55 MB\nTask 1:  Duration=2s,   Shuffle Read=60 MB\nTask 2:  Duration=37min, Shuffle Read=6.2 GB\nTask 3:  Duration=2s,   Shuffle Read=58 MB\n```\n\nQual é a causa raiz e o que isso confirma?",
     "opciones": [
       {
         "texto_opcion": "Inclinação aleatória – a tarefa 2 está lendo 6,2 GB, enquanto outras lêem aproximadamente 55–60 MB.",
@@ -211,22 +211,22 @@
     "pregunta": "Um engenheiro de dados deseja detectar distorções de dados **programaticamente** antes de executar uma associação cara. Qual código PySpark verifica corretamente a distribuição de linhas entre partições?",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf.groupBy(\"join_key\").count().show()\n```, isso conta as linhas por valor `join_key` (útil para encontrar teclas de atalho)",
-        "es_correcta": false,
-        "explicacion": "Isso conta as linhas por valor `join_key` (útil para encontrar teclas de atalho), mas não por partição. A distribuição de partições usa `spark_partition_id()`."
-      },
-      {
-        "texto_opcion": "```píton\ndf.explain(Verdadeiro)\n```, `explain()` mostra o plano de consulta (lógico e físico), `explain()` mostra o plano de consulta (lógico e físico)",
-        "es_correcta": false,
-        "explicacion": "`explain()` mostra o plano de consulta (lógico e físico), não as estatísticas reais da partição de tempo de execução. A distribuição de linhas de partição requer a execução de `spark_partition_id()` nos dados reais."
-      },
-      {
-        "texto_opcion": "```píton\nde pyspark.sql.functions import spark_partition_id.",
+        "texto_opcion": "```python\nfrom pyspark.sql.functions import spark_partition_id.",
         "es_correcta": true,
         "explicacion": "`spark_partition_id()` retorna o ID da partição para cada linha. Agrupar por ele e contar as linhas revela a distribuição entre as partições – contagens desiguais de linhas confirmam a distorção antes mesmo de a junção ser executada."
       },
       {
-        "texto_opcion": "```píton\ndf.rdd.getNumPartitions()\n```, `getNumPartitions()` retorna o número total de partições — não diz nada sobre quantas linhas há em.",
+        "texto_opcion": "```python\ndf.rdd.getNumPartitions()\n```, `getNumPartitions()` returns the total number of partitions — it says nothing about how many.",
+        "es_correcta": false,
+        "explicacion": "Isso conta as linhas por valor `join_key` (útil para encontrar teclas de atalho), mas não por partição. A distribuição de partições usa `spark_partition_id()`."
+      },
+      {
+        "texto_opcion": "```python\ndf.groupBy(\"join_key\").count().show()\n```, this counts rows per `join_key` value (useful for finding hot keys)",
+        "es_correcta": false,
+        "explicacion": "`explain()` mostra o plano de consulta (lógico e físico), não as estatísticas reais da partição de tempo de execução. A distribuição de linhas de partição requer a execução de `spark_partition_id()` nos dados reais."
+      },
+      {
+        "texto_opcion": "```python\ndf.explain(True)\n```, `explain()` shows the query plan (logical and physical), not actual runtime partition statistics.",
         "es_correcta": false,
         "explicacion": "`getNumPartitions()` retorna o número total de partições — não diz nada sobre quantas linhas há em cada partição. Skew requer conhecer a *distribuição*, não apenas a contagem."
       }
@@ -326,7 +326,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados configura:\n\n```píton\nspark.conf.set(\"spark.sql.shuffle.partitions\", \"2000\")\n```\n\nO job anteriormente usava 200 shuffle partitions com vazamento de disco consistente. Por que o aumento das shuffle partitions reduz o vazamento do disco?",
+    "pregunta": "Um engenheiro de dados configura:\n\n```python\nspark.conf.set(\"spark.sql.shuffle.partitions\", \"2000\")\n```\n\nO job anteriormente usava 200 shuffle partitions com vazamento de disco consistente. Por que o aumento das shuffle partitions reduz o vazamento do disco?",
     "opciones": [
       {
         "texto_opcion": "Mais partições significa que cada partição contém menos dados — portanto, cada tarefa processa menos linhas.",
@@ -594,7 +594,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados deseja eliminar o shuffle para uma junção entre `pedidos` (1 TB) e `produtos` (30 MB). Eles definiram:\n\n```píton\nspark.conf.set(\"spark.sql.autoBroadcastJoinThreshold\", \"50m\")\n```\n\nIsso desencadeará um broadcast join? Por que?",
+    "pregunta": "Um engenheiro de dados deseja eliminar o shuffle para uma junção entre `pedidos` (1 TB) e `produtos` (30 MB). Eles definiram:\n\n```python\nspark.conf.set(\"spark.sql.autoBroadcastJoinThreshold\", \"50m\")\n```\n\nIsso desencadeará um broadcast join? Por que?",
     "opciones": [
       {
         "texto_opcion": "Não — o limite deve ser definido em bytes, não em megabytes. `\"50m\"` é um valor inválido",
@@ -654,7 +654,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados aplica o seguinte código para corrigir a distorção aleatória:\n\n```píton\ndf.repartition(400, \"customer_id\").groupBy(\"customer_id\").agg(sum(\"quantia\"))\n```\n\nPor que `repartition(400, \"customer_id\")` NÃO corrige a distorção quando há uma tecla de atalho como `customer_id = 'UNKNOWN'`?",
+    "pregunta": "Um engenheiro de dados aplica o seguinte código para corrigir a distorção aleatória:\n\n```python\ndf.repartition(400, \"customer_id\").groupBy(\"customer_id\").agg(sum(\"amount\"))\n```\n\nPor que `repartition(400, \"customer_id\")` NÃO corrige a distorção quando há uma tecla de atalho como `customer_id = 'UNKNOWN'`?",
     "opciones": [
       {
         "texto_opcion": "`repartition(\"customer_id\")` faz hash da chave - `UNKNOWN` sempre faz hash para o mesmo bucket.",

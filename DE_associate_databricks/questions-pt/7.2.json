@@ -33,24 +33,24 @@
     "pregunta": "Qual é o SQL correto para grant um grupo `data-analysts` a capacidade de ler todas as tabelas em `prod_catalog.analytics`?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nGRANT SELECIONE NO CATALOG prod_catalog TO `analistas de dados`;\n```, `SELECT` em um catálogo grants o privilégio para consultar todas.",
+        "texto_opcion": "```sql\nGRANT SELECT ON SCHEMA prod_catalog.analytics TO `data-analysts`;\n```, without `USE CATALOG` and `USE SCHEMA`, without `USE CATALOG` and `USE SCHEMA`",
         "es_correcta": false,
         "explicacion": "`SELECT` em um catálogo grants o privilégio para consultar todas as tabelas em todos os esquemas - mas o usuário também precisa de `USE CATALOG` e `USE SCHEMA` para navegar na hierarquia. Um único SELECT em nível de catálogo sem USE não é suficiente."
       },
       {
-        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `analistas de dados`;\nGRANT USAR ESQUEMA NO SCHEMA prod_catalog.analytics.",
-        "es_correcta": true,
-        "explicacion": "São necessários três grants: `USE CATALOG` para navegar no catálogo, `USE SCHEMA` para navegar no esquema e `SELECT` no esquema (que herda todas as tabelas atuais e futuras)."
-      },
-      {
-        "texto_opcion": "```sql\nGRANT SELECIONE NO SCHEMA prod_catalog.analytics TO `analistas de dados`;\n```, sem `USE CATALOG` e `USE SCHEMA`, sem `USE CATALOG` e `USE SCHEMA`",
+        "texto_opcion": "```sql\nGRANT ALL PRIVILEGES ON SCHEMA prod_catalog.analytics TO `data-analysts`;\n```, `ALL PRIVILEGES` on the schema grants excessive permissions (including.",
         "es_correcta": false,
         "explicacion": "Sem `USE CATALOG` e `USE SCHEMA`, os usuários em `data-analysts` não podem navegar para o esquema mesmo com `SELECT`. Todos os três grants são obrigatórios."
       },
       {
-        "texto_opcion": "```sql\nGRANT TODOS OS PRIVILÉGIOS NO SCHEMA prod_catalog.analytics TO `data-analysts`;\n```",
+        "texto_opcion": "```sql\nGRANT SELECT ON CATALOG prod_catalog TO `data-analysts`;\n```, `SELECT` on a catalog grants the privilege to query all tables in all.",
         "es_correcta": false,
         "explicacion": "`ALL PRIVILEGES` nas permissões excessivas do esquema grants (incluindo CREATE TABLE, MODIFY, etc.). Para acesso somente leitura, grant somente `USE CATALOG`, `USE SCHEMA` e `SELECT`."
+      },
+      {
+        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `data-analysts`;\nGRANT USE SCHEMA  ON SCHEMA prod_catalog.analytics TO.",
+        "es_correcta": true,
+        "explicacion": "São necessários três grants: `USE CATALOG` para navegar no catálogo, `USE SCHEMA` para navegar no esquema e `SELECT` no esquema (que herda todas as tabelas atuais e futuras)."
       }
     ],
     "tags": [
@@ -60,7 +60,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nGRANT SELECIONE NO ESQUEMA prod_catalog.analytics TO `analistas`;\n```\n\nUma nova tabela `prod_catalog.analytics.sales_2025` será criada no próximo mês. O grupo `analistas` tem SELECT nele?",
+    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nGRANT SELECT ON SCHEMA prod_catalog.analytics TO `analysts`;\n```\n\nUma nova tabela `prod_catalog.analytics.sales_2025` será criada no próximo mês. O grupo `analistas` tem SELECT nele?",
     "opciones": [
       {
         "texto_opcion": "Somente se o criador da tabela executar explicitamente `GRANT SELECT ON TABLE prod_catalog.analytics.sales_2025 TO Analysts`",
@@ -148,7 +148,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nGRANT TODOS OS PRIVILÉGIOS NA TABELA prod_catalog.finance.payroll TO `payroll-team`;\n```\n\n`payroll-team` agora tem o privilégio `MANAGE` em `payroll`?",
+    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nGRANT ALL PRIVILEGES ON TABLE prod_catalog.finance.payroll TO `payroll-team`;\n```\n\n`payroll-team` agora tem o privilégio `MANAGE` em `payroll`?",
     "opciones": [
       {
         "texto_opcion": "`ALL PRIVILEGES` está obsoleto em Unity Catalog v1.0 - em vez disso, use nomes de privilégios individuais",
@@ -177,7 +177,7 @@
     ]
   },
   {
-    "pregunta": "Um principal `contractor@vendor.com` está no grupo `data-analysts`, que tem `SELECT` em `prod_catalog.finance`. Um engenheiro de dados executa:\n\n```sql\nDENY SELECIONE NA TABELA prod_catalog.finance.payroll TO `contractor@vendor.com`;\n```\n\nO contratante pode consultar a `folha de pagamento`?",
+    "pregunta": "Um principal `contractor@vendor.com` está no grupo `data-analysts`, que tem `SELECT` em `prod_catalog.finance`. Um engenheiro de dados executa:\n\n```sql\nDENY SELECT ON TABLE prod_catalog.finance.payroll TO `contractor@vendor.com`;\n```\n\nO contratante pode consultar a `folha de pagamento`?",
     "opciones": [
       {
         "texto_opcion": "Não — `DENY` tem precedência sobre qualquer `GRANT` herdado ou explícito.",
@@ -235,7 +235,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados transfere a propriedade da tabela:\n\n```sql\nALTER TABLE prod_catalog.analytics.orders\nDEFINIR PROPRIETÁRIO PARA `equipe de análise`;\n```\n\nQuais recursos a `equipe de análise` possui agora?",
+    "pregunta": "Um engenheiro de dados transfere a propriedade da tabela:\n\n```sql\nALTER TABLE prod_catalog.analytics.orders\nSET OWNER TO `analytics-team`;\n```\n\nQuais recursos a `equipe de análise` possui agora?",
     "opciones": [
       {
         "texto_opcion": "Somente o administrador do metastore pode definir o proprietário - o comando `ALTER TABLE SET OWNER` falha para não administradores.",
@@ -293,7 +293,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nGRANT MODIFICAR NA TABELA catalog.staging.events PARA `etl-engineers`;\n```\n\nQuais operações `MODIFY` permite?",
+    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nGRANT MODIFY ON TABLE catalog.staging.events TO `etl-engineers`;\n```\n\nQuais operações `MODIFY` permite?",
     "opciones": [
       {
         "texto_opcion": "`MODIFY` permite alterar metadados da tabela, como comentários, tags e propriedades da tabela.",
@@ -443,22 +443,22 @@
     "pregunta": "Um principal de serviço `etl-pipeline-sp` precisa CRIAR novas tabelas Delta em `prod_catalog.staging`. Qual conjunto mínimo de privilégios é necessário?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `etl-pipeline-sp`;\nGRANT USE ESQUEMA NO SCHEMA prod_catalog.staging TO.",
-        "es_correcta": true,
-        "explicacion": "A criação de uma tabela requer: navegação no catálogo (`USE CATALOG`), navegação no esquema (`USE SCHEMA`) e o privilégio de criação (`CREATE TABLE` no esquema). Este é o conjunto mínimo necessário."
-      },
-      {
-        "texto_opcion": "```sql\nGRANT CRIAR TABELA NO CATALOG prod_catalog TO `etl-pipeline-sp`;\n```, sem `USE CATALOG` e `USE SCHEMA`, sem `USE CATALOG` e `USE SCHEMA`",
+        "texto_opcion": "```sql\nGRANT ALL PRIVILEGES ON CATALOG prod_catalog TO `etl-pipeline-sp`;\n```, `ALL PRIVILEGES` on the catalog is excessive — it grants.",
         "es_correcta": false,
         "explicacion": "Sem `USE CATALOG` e `USE SCHEMA`, o principal do serviço não pode navegar até o esquema para criar uma tabela. Todos os três grants são necessários."
       },
       {
-        "texto_opcion": "```sql\nGRANT MODIFICAR NO ESQUEMA prod_catalog.staging PARA `etl-pipeline-sp`;\n```, `MODIFY` grants INSERT/UPDATE/DELETE em tabelas existentes.",
+        "texto_opcion": "```sql\nGRANT CREATE TABLE ON CATALOG prod_catalog TO `etl-pipeline-sp`;\n```, without `USE CATALOG` and `USE SCHEMA`, without `USE CATALOG` and `USE SCHEMA`",
         "es_correcta": false,
         "explicacion": "`MODIFY` grants INSERT/UPDATE/DELETE em tabelas existentes. Não grant a capacidade de CRIAR novas tabelas. `CREATE TABLE` é o privilégio correto."
       },
       {
-        "texto_opcion": "```sql\nGRANT TODOS OS PRIVILÉGIOS NO CATALOG prod_catalog TO `etl-pipeline-sp`;\n```, `ALL PRIVILEGES` no catálogo é excessivo — grants acesso de leitura/gravação a.",
+        "texto_opcion": "```sql\nGRANT USE CATALOG   ON CATALOG prod_catalog TO `etl-pipeline-sp`;\nGRANT USE SCHEMA    ON SCHEMA prod_catalog.staging.",
+        "es_correcta": true,
+        "explicacion": "A criação de uma tabela requer: navegação no catálogo (`USE CATALOG`), navegação no esquema (`USE SCHEMA`) e o privilégio de criação (`CREATE TABLE` no esquema). Este é o conjunto mínimo necessário."
+      },
+      {
+        "texto_opcion": "```sql\nGRANT MODIFY ON SCHEMA prod_catalog.staging TO `etl-pipeline-sp`;\n```, `MODIFY` grants INSERT/UPDATE/DELETE on existing tables.",
         "es_correcta": false,
         "explicacion": "`ALL PRIVILEGES` no catálogo é excessivo — grants acesso de leitura/gravação a todas as tabelas existentes, não apenas a capacidade de criar novas. O princípio do menor privilégio deve ser aplicado."
       }
@@ -503,22 +503,22 @@
     "pregunta": "Qual das seguintes instruções SQL grants corretamente o grupo `data-engineering` possui a capacidade de criar tabelas externas no caminho de armazenamento coberto pelo local externo `raw_landing`?",
     "opciones": [
       {
-        "texto_opcion": "`GRANT ESCREVER ARQUIVOS EM LOCAL EXTERNO raw_landing TO `data-engineering`;`",
+        "texto_opcion": "`GRANT ESCREVER ARQUIVOS EM EXTERNAL LOCATION raw_landing TO `data-engineering`;`",
         "es_correcta": false,
         "explicacion": "`WRITE FILES` permite gravar arquivos brutos no caminho de armazenamento, mas não grant a capacidade de CREATE EXTERNAL TABLE definições no catálogo."
       },
       {
-        "texto_opcion": "`GRANT CRIAR TABELA EXTERNA EM LOCAL EXTERNO raw_landing TO `data-engineering`;`.",
+        "texto_opcion": "`GRANT CREATE TABLE EXTERNA EM EXTERNAL LOCATION raw_landing TO `data-engineering`;`.",
         "es_correcta": true,
         "explicacion": "`CREATE EXTERNAL TABLE` em um local externo granté a capacidade de registrar novas tabelas externas que apontam para esse caminho de armazenamento. Este é o privilégio correto para este caso de uso específico."
       },
       {
-        "texto_opcion": "`GRANT CRIAR TABELA EM LOCAL EXTERNO raw_landing TO `data-engineering`;`",
+        "texto_opcion": "`GRANT CREATE TABLE EM EXTERNAL LOCATION raw_landing TO `data-engineering`;`",
         "es_correcta": false,
         "explicacion": "`CREATE TABLE` é um privilégio de nível de esquema, não um privilégio de local externo. Para tabelas externas em um local externo, use `CREATE EXTERNAL TABLE ON EXTERNAL LOCATION`."
       },
       {
-        "texto_opcion": "`GRANT SELECIONE EM LOCAL EXTERNO raw_landing TO `data-engineering`;`",
+        "texto_opcion": "`GRANT SELECT EM EXTERNAL LOCATION raw_landing TO `data-engineering`;`",
         "es_correcta": false,
         "explicacion": "`SELECT` não é um privilégio válido para locais externos. Os privilégios de localização externa são: `READ FILES`, `WRITE FILES`, `CREATE EXTERNAL TABLE` e `BROWSE`."
       }
@@ -533,22 +533,22 @@
     "pregunta": "Um engenheiro de dados deseja grant que todos os usuários da conta leiam o acesso a uma tabela de referência `prod_catalog.shared.country_codes`. Qual principal deve ser usado?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `usuários da conta`;\nGRANT USAR ESQUEMA NO.",
-        "es_correcta": true,
-        "explicacion": "`account users` é o grupo interno que representa todos os usuários na conta do Databricks. Granting a este grupo fornece automaticamente acesso a todos os usuários atuais e futuros."
-      },
-      {
-        "texto_opcion": "```sql\nGRANT SELECIONE NA TABELA prod_catalog.shared.country_codes PARA PÚBLICO;\n```",
+        "texto_opcion": "```sql\nGRANT SELECT ON TABLE prod_catalog.shared.country_codes TO PUBLIC;\n```, `PUBLIC` is not a recognized principal in Unity Catalog SQL.",
         "es_correcta": false,
         "explicacion": "`PUBLIC` não é um principal reconhecido na sintaxe Unity Catalog SQL. O grupo interno correto para todos os usuários da conta é `` `usuários da conta` ``."
       },
       {
-        "texto_opcion": "Não há como grant para todos os usuários — cada usuário deve ter acesso granted individualmente",
+        "texto_opcion": "There is no way to grant to all users — each user must be individually granted access, the `` `account users` `` group represents all users in the account.",
         "es_correcta": false,
         "explicacion": "O grupo `` `usuários da conta` `` representa todos os usuários da conta. Granting para este grupo fornece acesso a todos os usuários sem grants individuais."
       },
       {
-        "texto_opcion": "```sql\nGRANT SELECIONE NA TABELA prod_catalog.shared.country_codes PARA `workspace-users`;\n```",
+        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `account users`;\nGRANT USE SCHEMA  ON SCHEMA.",
+        "es_correcta": true,
+        "explicacion": "`account users` é o grupo interno que representa todos os usuários na conta do Databricks. Granting a este grupo fornece automaticamente acesso a todos os usuários atuais e futuros."
+      },
+      {
+        "texto_opcion": "```sql\nGRANT SELECT ON TABLE prod_catalog.shared.country_codes TO `workspace-users`;\n```, `workspace-users` is not the correct group name for all account users.",
         "es_correcta": false,
         "explicacion": "`workspace-users` não é o nome de grupo correto para todos os usuários da conta. O grupo interno correto é `` `usuários da conta` ``."
       }
@@ -593,22 +593,22 @@
     "pregunta": "Um engenheiro de dados precisa grant `analytics-sp` a capacidade de ler e gravar dados em todas as tabelas em `prod_catalog.analytics` e criar novas tabelas. Qual é o conjunto mínimo correto de privilégios?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nGRANT TODOS OS PRIVILÉGIOS NO CATALOG prod_catalog TO `analytics-sp`;\n```",
+        "texto_opcion": "```sql\nGRANT ALL PRIVILEGES ON SCHEMA prod_catalog.analytics TO `analytics-sp`;\n```, while this grants the right privileges on the schema",
         "es_correcta": false,
         "explicacion": "`ALL PRIVILEGES` no catálogo é excessivo - é o acesso grants a todos os esquemas, não apenas `analítica`. O princípio do menor privilégio requer o escopo do esquema específico."
       },
       {
-        "texto_opcion": "```sql\nGRANT TODOS OS PRIVILÉGIOS NO SCHEMA prod_catalog.analytics TO `analytics-sp`;\n```",
+        "texto_opcion": "```sql\nGRANT MODIFY ON SCHEMA prod_catalog.analytics TO `analytics-sp`;\n```, `MODIFY` allows INSERT/UPDATE/DELETE but not SELECT (read) or.",
         "es_correcta": false,
         "explicacion": "Embora este grantseja os privilégios corretos no esquema, ele ainda perde os privilégios de gateway `USE CATALOG` e `USE SCHEMA`. Sem eles, `analytics-sp` não pode navegar até o esquema."
       },
       {
-        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `analytics-sp`;\nGRANT USAR ESQUEMA NO.",
+        "texto_opcion": "```sql\nGRANT USE CATALOG   ON CATALOG prod_catalog TO `analytics-sp`;\nGRANT USE SCHEMA    ON SCHEMA prod_catalog.analytics TO.",
         "es_correcta": true,
         "explicacion": "São necessários cinco grants: USE CATALOG (navegar no catálogo), USE SCHEMA (navegar no esquema), SELECT (ler tabelas), MODIFY (gravar em tabelas) e CREATE TABLE (criar novas tabelas). Todos são necessários; nenhum é redundante."
       },
       {
-        "texto_opcion": "```sql\nGRANT MODIFICAR NO ESQUEMA prod_catalog.analytics PARA `analytics-sp`;\n```",
+        "texto_opcion": "```sql\nGRANT ALL PRIVILEGES ON CATALOG prod_catalog TO `analytics-sp`;\n```, `ALL PRIVILEGES` on the catalog is excessive — it grants access to.",
         "es_correcta": false,
         "explicacion": "`MODIFY` permite INSERT/UPDATE/DELETE mas não SELECT (ler) ou CREATE TABLE. São necessários vários privilégios em vários níveis."
       }
@@ -652,22 +652,22 @@
     "pregunta": "Um engenheiro de dados precisa revoke todos os privilégios explícitos de `old-team` na tabela `prod_catalog.finance.revenue`. Qual comando consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "`REVOKE TODOS OS PRIVILÉGIOS NA TABELA prod_catalog.finance.revenue FROM `old-team`;`.",
+        "texto_opcion": "`REVOKE TODOS OS PRIVILÉGIOS ON TABLE prod_catalog.finance.revenue FROM `old-team`;`.",
         "es_correcta": true,
         "explicacion": "`REVOKE ALL PRIVILEGES` remove todos os privilégios explicitamente granted do principal especificado no objeto em um único comando."
       },
       {
-        "texto_opcion": "`DROP GRANT TUDO NA TABELA prod_catalog.finance.revenue FROM `old-team`;`",
+        "texto_opcion": "`DROP GRANT TUDO ON TABLE prod_catalog.finance.revenue FROM `old-team`;`",
         "es_correcta": false,
         "explicacion": "`DROP GRANT` não é um comando SQL válido. Use `REVOKE ALL PRIVILEGES ... FROM` para remover todos os grants."
       },
       {
-        "texto_opcion": "`EXCLUIR PRIVILÉGIOS PARA `old-team` NA TABELA prod_catalog.finance.revenue;`",
+        "texto_opcion": "`EXCLUIR PRIVILÉGIOS PARA `old-team` ON TABLE prod_catalog.finance.revenue;`",
         "es_correcta": false,
         "explicacion": "`DELETE PRIVILEGES` não é um comando SQL válido do Databricks. O comando correto é `REVOKE ALL PRIVILEGES ... FROM`."
       },
       {
-        "texto_opcion": "`DENY TODOS OS PRIVILÉGIOS NA TABELA prod_catalog.finance.revenue TO `old-team`;`",
+        "texto_opcion": "`DENY TODOS OS PRIVILÉGIOS ON TABLE prod_catalog.finance.revenue TO `old-team`;`",
         "es_correcta": false,
         "explicacion": "`DENY ALL PRIVILEGES` adiciona negações explícitas - não remove grants existentes. Use `REVOKE TODOS OS PRIVILÉGIOS ... FROM` para remover grants."
       }

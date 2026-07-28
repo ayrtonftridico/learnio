@@ -3,22 +3,22 @@
     "pregunta": "Um engenheiro de dados deseja ler uma tabela PostgreSQL `orders` em um Spark DataFrame. Qual código carrega corretamente a tabela usando JDBC?",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf = spark.read.jdbc(\"jdbc:postgresql://host:5432/mydb\", \"pedidos\")\n```, `spark.read.jdbc()` é uma abreviação válida, `spark.read.jdbc()` é uma abreviação válida",
-        "es_correcta": false,
-        "explicacion": "`spark.read.jdbc()` é uma abreviação válida, mas requer credenciais passadas separadamente e é menos explícita; no entanto, funcionaria - mas esta resposta omite totalmente as credenciais e falharia na autenticação."
-      },
-      {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"postgresql\") \\\n    .option(\"url\", \"jdbc:postgresql://host:5432/mydb\") \\\n    .option(\"dbtable\", \"pedidos\").load()\n```",
-        "es_correcta": false,
-        "explicacion": "A string de formato deve ser sempre `\"jdbc\"` independentemente do fornecedor do banco de dados. `\"postgresql\"` não é um formato Spark válido."
-      },
-      {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option \\\n    .option \\\n    .option.option \\\n    .carregar()\n```.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option \\\n    .option \\\n    .option.option \\\n    .load()\n```.",
         "es_correcta": true,
         "explicacion": "Este é o padrão de leitura JDBC correto: `format(\"jdbc\")`, uma URL JDBC válida, `dbtable` para o nome da tabela e credenciais passadas via `.option()`."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"postgresql://host:5432/meudb\") \\\n    .option(\"tabela\", \"pedidos\") \\\n    .carregar()\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"postgresql://host:5432/mydb\") \\\n    .option(\"table\", \"orders\") \\\n    .load()\n```",
+        "es_correcta": false,
+        "explicacion": "`spark.read.jdbc()` é uma abreviação válida, mas requer credenciais passadas separadamente e é menos explícita; no entanto, funcionaria - mas esta resposta omite totalmente as credenciais e falharia na autenticação."
+      },
+      {
+        "texto_opcion": "```python\ndf = spark.read.jdbc(\"jdbc:postgresql://host:5432/mydb\", \"orders\")\n```, `spark.read.jdbc()` is a valid shorthand but requires credentials passed separately and is.",
+        "es_correcta": false,
+        "explicacion": "A string de formato deve ser sempre `\"jdbc\"` independentemente do fornecedor do banco de dados. `\"postgresql\"` não é um formato Spark válido."
+      },
+      {
+        "texto_opcion": "```python\ndf = spark.read.format(\"postgresql\") \\\n    .option(\"url\", \"jdbc:postgresql://host:5432/mydb\") \\\n    .option(\"dbtable\", \"orders\").load()\n```",
         "es_correcta": false,
         "explicacion": "A URL deve começar com `jdbc:postgresql://`, não `postgresql://`. Além disso, a chave de opção correta é `dbtable`, não `table`."
       }
@@ -58,7 +58,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa o seguinte código, mas obtém um erro `java.lang.ClassNotFoundException` para a classe do driver:\n\n```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"jdbc:mysql://host:3306/meudb\") \\\n    .option(\"dbtable\", \"vendas\") \\\n    .option(\"driver\", \"com.mysql.cj.jdbc.Driver\") \\\n    .carregar()\n```\n\nQual é a causa mais provável?",
+    "pregunta": "Um engenheiro de dados executa o seguinte código, mas obtém um erro `java.lang.ClassNotFoundException` para a classe do driver:\n\n```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"jdbc:mysql://host:3306/mydb\") \\\n    .option(\"dbtable\", \"sales\") \\\n    .option(\"driver\", \"com.mysql.cj.jdbc.Driver\") \\\n    .load()\n```\n\nQual é a causa mais provável?",
     "opciones": [
       {
         "texto_opcion": "MySQL não é compatível com o conector JDBC do Spark",
@@ -90,22 +90,22 @@
     "pregunta": "Um engenheiro de dados precisa ler apenas pedidos feitos após 01/01/2024 de uma tabela remota do SQL Server. Qual abordagem envia o filtro para o servidor de banco de dados em vez de filtrar no Spark?",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option.option AS t\") \\\n    .carregar()\n```.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option.option AS t\") \\\n    .load()\n```.",
         "es_correcta": true,
         "explicacion": "Envolver uma subconsulta como `dbtable` faz com que a cláusula WHERE seja executada no servidor de banco de dados antes que os dados sejam transferidos para o Spark — este é o padrão de empilhamento padrão."
       },
       {
-        "texto_opcion": "Adicione `.option(\"pushdown\", \"true\")` para ativar o pushdown automático do filtro, não há opção `pushdown` no conector JDBC do Spark",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"orders\").load() \\\n    .filter(\"order_date > '2024-01-01'\")\n```",
         "es_correcta": false,
         "explicacion": "Não há opção `pushdown` no conector JDBC do Spark. O pushdown é obtido por meio de uma subconsulta em `dbtable` ou da otimização do catalisador interno do Spark."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"pedidos\").load() \\\n    .filter(\"data_pedido > '01/01/2024'\")\n```",
+        "texto_opcion": "Use `.option(\"predicates\", \"order_date > '2024-01-01'\")` in the JDBC options, `predicates` in Spark JDBC is used for specifying partition split conditions",
         "es_correcta": false,
         "explicacion": "Chamar `.filter()` após `.load()` filtra no Spark depois que todas as linhas foram transferidas do banco de dados, anulando o propósito do pushdown."
       },
       {
-        "texto_opcion": "Use `.option(\"predicates\", \"order_date > '2024-01-01'\")` nas opções JDBC, `predicados` no Spark JDBC é usado para especificar condições de.",
+        "texto_opcion": "Add `.option(\"pushdown\", \"true\")` to enable automatic filter pushdown, there is no `pushdown` option in Spark's JDBC connector",
         "es_correcta": false,
         "explicacion": "`predicados` no Spark JDBC é usado para especificar condições de divisão de partição, não para filtragem de linha. Ele não envia cláusulas WHERE para a origem."
       }
@@ -116,7 +116,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa este código para ler uma grande tabela MySQL em paralelo:\n\n```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"transações\") \\\n    .option(\"numPartições\", 8)\\\n    .carregar()\n```\n\nA leitura é concluída, mas usa apenas 1 partição. O que está faltando?",
+    "pregunta": "Um engenheiro de dados executa este código para ler uma grande tabela MySQL em paralelo:\n\n```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"transactions\") \\\n    .option(\"numPartitions\", 8) \\\n    .load()\n```\n\nA leitura é concluída, mas usa apenas 1 partição. O que está faltando?",
     "opciones": [
       {
         "texto_opcion": "`numPartitions` só funciona com a abreviação `spark.read.jdbc()`, não com `format(\"jdbc\")`.",
@@ -148,24 +148,24 @@
     "pregunta": "Qual das opções a seguir configura corretamente uma leitura paralela JDBC em uma coluna `transaction_id` variando de 1 a 1.000.000?",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option.option \\\n    .option.load()\n```, `partitionColumn` está faltando.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option \\\n    .option.option \\\n   .",
+        "es_correcta": true,
+        "explicacion": "Todas as quatro opções necessárias são fornecidas: `partitionColumn`, `lowerBound`, `upperBound` e `numPartitions`. O Spark dividirá o intervalo de ID em 10 fatias iguais."
+      },
+      {
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option \\\n    .option.load()\n```",
         "es_correcta": false,
         "explicacion": "`partitionColumn` está faltando. Todas as quatro opções (`partitionColumn`, `lowerBound`, `upperBound`, `numPartitions`) são necessárias juntas."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option \\\n    .option.load()\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option \\\n    .option.load()\n```",
         "es_correcta": false,
         "explicacion": "`partitionColumn` requer que `lowerBound` e `upperBound` sejam definidos. Sem limites, o Spark não pode definir os intervalos de partição."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option\\\n    .option.load()\n```, `splitBy` e `partitions` não são opções válidas do Spark JDBC.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option.option \\\n    .option.load()\n```, `partitionColumn` is missing.",
         "es_correcta": false,
         "explicacion": "`splitBy` e `partitions` não são opções válidas do Spark JDBC. As chaves corretas são `partitionColumn` e `numPartitions`."
-      },
-      {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option \\\n    .option.option \\\n   .",
-        "es_correcta": true,
-        "explicacion": "Todas as quatro opções necessárias são fornecidas: `partitionColumn`, `lowerBound`, `upperBound` e `numPartitions`. O Spark dividirá o intervalo de ID em 10 fatias iguais."
       }
     ],
     "tags": [
@@ -177,22 +177,22 @@
     "pregunta": "Um engenheiro de dados armazena credenciais de banco de dados usando Databricks Secrets e as lê em um notebook. Qual código evita corretamente a exposição de senhas em texto simples?",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"vendas\") \\\n    .option(\"senha\", \"{{secrets/my-scope/db-password}}\").load()\n```",
-        "es_correcta": false,
-        "explicacion": "A sintaxe `{{secrets/...}}` é para configuração de cluster do Databricks (scripts de inicialização, variáveis de ambiente), não para código Python em notebooks."
-      },
-      {
-        "texto_opcion": "```píton\npwd = dbutils.secrets.get\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option.load()\n```.",
+        "texto_opcion": "```python\npwd = dbutils.secrets.get\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option.load()\n```.",
         "es_correcta": true,
         "explicacion": "`dbutils.secrets.get()` recupera o segredo em tempo de execução e nunca o exibe na saída do notebook. Este é o padrão recomendado pelo Databricks para gerenciamento de credenciais."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"jdbc:postgresql://host/db?password=secret\") \\\n    .option(\"dbtable\", \"vendas\").load()\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"sales\") \\\n    .option(\"password\", \"{{secrets/my-scope/db-password}}\").load()\n```",
+        "es_correcta": false,
+        "explicacion": "A sintaxe `{{secrets/...}}` é para configuração de cluster do Databricks (scripts de inicialização, variáveis de ambiente), não para código Python em notebooks."
+      },
+      {
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"sales\") \\\n    .option(\"password\", os.environ[\"DB_PASSWORD\"]).load()\n```",
         "es_correcta": false,
         "explicacion": "A incorporação de credenciais na cadeia de URL as expõe em logs, saídas de notebook e trilhas de auditoria. Isto é explicitamente desencorajado."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"vendas\") \\\n    .option(\"senha\", os.environ[\"DB_PASSWORD\"]).load()\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"jdbc:postgresql://host/db?password=secret\") \\\n    .option(\"dbtable\", \"sales\").load()\n```",
         "es_correcta": false,
         "explicacion": "Embora as variáveis ​​ambientais sejam melhores do que a codificação permanente, não são a abordagem de gestão secreta nativa do Databricks e requerem uma injeção segura separada no ambiente de cluster."
       }
@@ -206,22 +206,22 @@
     "pregunta": "Um engenheiro de dados deseja escrever um Spark DataFrame de volta em uma tabela PostgreSQL chamada `summary`. A tabela já existe e deve ser totalmente substituída. Qual código consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf.write.format(\"jdbc\") \\\n    .option.option \\\n    .option.option \\\n    .mode.save()\n```.",
+        "texto_opcion": "```python\ndf.write.format(\"jdbc\") \\\n    .option.option \\\n    .option.option \\\n    .mode.save()\n```.",
         "es_correcta": true,
         "explicacion": "`mode(\"overwrite\")` com JDBC descarta e recria a tabela de destino antes de inserir as novas linhas, substituindo totalmente o conteúdo existente."
       },
       {
-        "texto_opcion": "```píton\ndf.write.format(\"jdbc\") \\\n    .option.option \\\n    .option.option \\\n    .mode.save()\n```",
+        "texto_opcion": "```python\ndf.write.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"summary\") \\\n    .option(\"user\", user).option(\"password\", pwd) \\\n    .mode(\"replace\").save()\n```",
         "es_correcta": false,
         "explicacion": "`replace` não é um modo de gravação válido do Spark. Os modos válidos são `overwrite`, `append`, `ignore` e `error`."
       },
       {
-        "texto_opcion": "```píton\ndf.write.format(\"jdbc\") \\\n    .option.option \\\n    .option.option \\\n    .mode.save()\n```",
+        "texto_opcion": "```python\ndf.write.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"summary\") \\\n    .option(\"user\", user).option(\"password\", pwd) \\\n    .mode(\"append\").save()\n```",
         "es_correcta": false,
         "explicacion": "`append` insere novas linhas sem remover as existentes. A tabela conteria dados antigos e novos combinados, não uma substituição."
       },
       {
-        "texto_opcion": "```píton\ndf.write.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"tabela\", \"resumo\") \\\n    .mode(\"sobrescrever\").save()\n```",
+        "texto_opcion": "```python\ndf.write.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"table\", \"summary\") \\\n    .mode(\"overwrite\").save()\n```, the option key must be `dbtable`, not `table`. Using the wrong key causes the write to fail or behave unexpectedly.",
         "es_correcta": false,
         "explicacion": "A chave de opção deve ser `dbtable`, não `table`. Usar a chave errada faz com que a gravação falhe ou se comporte de forma inesperada."
       }
@@ -261,7 +261,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados usa o seguinte padrão de propriedades de conexão em vez de encadear chamadas `.option()`:\n\n```píton\nadereços = {\"usuário\": \"admin\", \"senha\": pwd, \"driver\": \"org.postgresql.Driver\"}\ndf = spark.read.jdbc(url=jdbc_url, table=\"clientes\", propriedades=props)\n```\n\nQual afirmação sobre essa abordagem está correta?",
+    "pregunta": "Um engenheiro de dados usa o seguinte padrão de propriedades de conexão em vez de encadear chamadas `.option()`:\n\n```python\nprops = {\"user\": \"admin\", \"password\": pwd, \"driver\": \"org.postgresql.Driver\"}\ndf = spark.read.jdbc(url=jdbc_url, table=\"customers\", properties=props)\n```\n\nQual afirmação sobre essa abordagem está correta?",
     "opciones": [
       {
         "texto_opcion": "Isso é equivalente a encadear chamadas `.option()` e é uma sintaxe alternativa válida para leituras JDBC.",
@@ -293,22 +293,22 @@
     "pregunta": "Um engenheiro de dados precisa ler dados de uma tabela remota usando uma consulta SQL personalizada em vez de um nome completo da tabela. Qual código está correto?",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"consulta\", \"SELECIONE id, nome FROM clientes WHERE ativo = 1\") \\\n    .carregar()\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"query\", \"SELECT id, name FROM customers WHERE active=1\") \\\n    .load()\n```",
         "es_correcta": false,
         "explicacion": "O conector JDBC do Spark não possui uma chave de opção `query`. SQL personalizado deve ser passado como uma subconsulta através da opção `dbtable`."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option \\\n    .option AS t\") \\\n    .carregar()\n```.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option \\\n    .option AS t\") \\\n    .load()\n```.",
         "es_correcta": true,
         "explicacion": "Colocar a consulta entre parênteses e fornecer um alias a torna uma subconsulta válida que o Spark trata como uma tabela virtual. Este é o padrão padrão para SQL customizado em leituras JDBC."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"SELECT id, nome FROM clientes WHERE ativo = 1\") \\\n    .carregar()\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"SELECT id, name FROM customers WHERE active=1\") \\\n    .load()\n```",
         "es_correcta": false,
         "explicacion": "Um SELECT bruto sem parênteses e um alias não é um identificador SQL válido. O banco de dados irá rejeitá-lo. Um alias de subconsulta (`AS t`) é necessário."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"sql\", \"SELECT id, nome FROM clientes WHERE ativo = 1\") \\\n    .carregar()\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"sql\", \"SELECT id, name FROM customers WHERE active=1\") \\\n    .load()\n```",
         "es_correcta": false,
         "explicacion": "`sql` não é uma opção JDBC válida no Spark. Consultas personalizadas devem ser incorporadas como uma subconsulta na opção `dbtable`."
       }
@@ -406,7 +406,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa este código de ingestão JDBC:\n\n```píton\ndf = spark.read.format(\"jdbc\")\\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"pedidos\") \\\n    .option(\"partitionColumn\", \"order_id\") \\\n    .option(\"limite inferior\", \"1\") \\\n    .option(\"limite superior\", \"1000\") \\\n    .option(\"numPartições\", \"4\") \\\n    .carregar()\n```\n\nQuantas conexões de banco de dados o Spark abrirá?",
+    "pregunta": "Um engenheiro de dados executa este código de ingestão JDBC:\n\n```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"orders\") \\\n    .option(\"partitionColumn\", \"order_id\") \\\n    .option(\"lowerBound\", \"1\") \\\n    .option(\"upperBound\", \"1000\") \\\n    .option(\"numPartitions\", \"4\") \\\n    .load()\n```\n\nQuantas conexões de banco de dados o Spark abrirá?",
     "opciones": [
       {
         "texto_opcion": "O número de conexões é igual ao número de núcleos executores",
@@ -464,7 +464,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte código para assimilar de um banco de dados Oracle:\n\n```píton\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"jdbc:oracle:thin:@host:1521:ORCL\") \\\n    .option(\"dbtable\", \"HR.EMPLOYEES\") \\\n    .option(\"usuário\", \"hr\") \\\n    .option(\"senha\", \"hr123\") \\\n    .carregar()\n```\n\nQual é a principal preocupação de segurança com este código?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte código para assimilar de um banco de dados Oracle:\n\n```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"jdbc:oracle:thin:@host:1521:ORCL\") \\\n    .option(\"dbtable\", \"HR.EMPLOYEES\") \\\n    .option(\"user\", \"hr\") \\\n    .option(\"password\", \"hr123\") \\\n    .load()\n```\n\nQual é a principal preocupação de segurança com este código?",
     "opciones": [
       {
         "texto_opcion": "A senha é codificada como texto simples no notebook.",
@@ -551,7 +551,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte código para gravar dados em um banco de dados remoto:\n\n```píton\ndf.repartition(1).write.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"target_table\") \\\n    .option(\"usuário\", usuário).option(\"senha\", senha) \\\n    .mode(\"acrescentar\").save()\n```\n\nQual é a desvantagem de chamar `.repartition(1)` antes da gravação JDBC?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte código para gravar dados em um banco de dados remoto:\n\n```python\ndf.repartition(1).write.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"target_table\") \\\n    .option(\"user\", user).option(\"password\", pwd) \\\n    .mode(\"append\").save()\n```\n\nQual é a desvantagem de chamar `.repartition(1)` antes da gravação JDBC?",
     "opciones": [
       {
         "texto_opcion": "Ele permite o comportamento de upsert, substituindo linhas duplicadas na tabela de destino",

@@ -237,6 +237,7 @@ Dependência: `deep_translator` (e rede para Google Translate).
 
 - Default idioma: **EN**
 - Termos de produto oficiais preferencialmente **em inglês** mesmo no PT (job cluster, Unity Catalog, COPY INTO, etc.)
+- SQL/Python em fences: sintaxe **sempre em inglês**; rodar `python fix_pt_terms.py` após traduzir (restaura fences a partir do EN + glossário)
 - Blurbs: frases naturais, sem data de blueprint, sem lista telegráfica demais
 - Não usar markdown com `**` em textos que o usuário cola em LinkedIn (regra do workspace Dataside; pouco relevante aqui)
 - Preferir PT-BR em respostas do agente neste workspace

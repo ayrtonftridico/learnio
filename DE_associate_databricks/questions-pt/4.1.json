@@ -87,7 +87,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados define este YAML para um job Lakeflow:\n\n```yaml\ntarefas:\n  - task_key: extrair\n    notebook_task:\n      notebook_path: ./extract.py\n  - task_key: carregar\n    depende_de:\n      - task_key: extrair\n    run_if: ALL_SUCCESS\n    notebook_task:\n      notebook_path: ./load.py\n```\n\nO que acontece se a tarefa `extrair` falhar?",
+    "pregunta": "Um engenheiro de dados define este YAML para um job Lakeflow:\n\n```yaml\ntasks:\n  - task_key: extract\n    notebook_task:\n      notebook_path: ./extract.py\n  - task_key: load\n    depends_on:\n      - task_key: extract\n    run_if: ALL_SUCCESS\n    notebook_task:\n      notebook_path: ./load.py\n```\n\nO que acontece se a tarefa `extrair` falhar?",
     "opciones": [
       {
         "texto_opcion": "Todo o job é cancelado imediatamente sem nenhuma avaliação adicional da tarefa, o Databricks avalia a condição `run_if` de cada tarefa de forma.",
@@ -174,7 +174,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa o seguinte pacote YAML:\n\n```yaml\ntarefas:\n  - chave_tarefa: trabalho_a\n    notebook_task:\n      notebook_path: ./a.py\n  - chave_tarefa: trabalho_b\n    notebook_task:\n      notebook_path: ./b.py\n  - chave_tarefa: job_c\n    depende_de:\n      - chave_tarefa: trabalho_a\n      - chave_tarefa: trabalho_b\n    run_if: ALL_FAILED\n    notebook_task:\n      caminho_do_notebook: ./c.py\n```\n\n`job_a` falha e `job_b` é bem-sucedido. `job_c` é executado?",
+    "pregunta": "Um engenheiro de dados executa o seguinte pacote YAML:\n\n```yaml\ntasks:\n  - task_key: job_a\n    notebook_task:\n      notebook_path: ./a.py\n  - task_key: job_b\n    notebook_task:\n      notebook_path: ./b.py\n  - task_key: job_c\n    depends_on:\n      - task_key: job_a\n      - task_key: job_b\n    run_if: ALL_FAILED\n    notebook_task:\n      notebook_path: ./c.py\n```\n\n`job_a` falha e `job_b` é bem-sucedido. `job_c` é executado?",
     "opciones": [
       {
         "texto_opcion": "Sim — porque pelo menos uma tarefa upstream (`job_a`) falhou",
@@ -348,7 +348,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados analisa este snippet YAML:\n\n```yaml\n- task_key: notificar\n  depende_de:\n    - task_key: carregar\n  run_if: NONE_FAILED\n  notebook_task:\n    notebook_path: ./notify.py\n```\n\n`load` foi ignorado porque sua dependência upstream falhou. O `notify` é executado?",
+    "pregunta": "Um engenheiro de dados analisa este snippet YAML:\n\n```yaml\n- task_key: notify\n  depends_on:\n    - task_key: load\n  run_if: NONE_FAILED\n  notebook_task:\n    notebook_path: ./notify.py\n```\n\n`load` foi ignorado porque sua dependência upstream falhou. O `notify` é executado?",
     "opciones": [
       {
         "texto_opcion": "Sim — `NONE_FAILED` apenas verifica se nenhuma tarefa upstream falhou explicitamente e se uma tarefa ignorada não é uma falha.",
@@ -551,7 +551,7 @@
     ]
   },
   {
-    "pregunta": "Revise esta definição de tarefa YAML:\n\n```yaml\n- chave_tarefa: audit_log\n  depende_de:\n    - chave_tarefa: transform_silver\n    - chave_tarefa: load_gold\n  run_if: AT_LEAST_ONE_SUCCEEDED\n  notebook_task:\n    notebook_path: ./audit.py\n```\n\n`transform_silver` foi bem-sucedido e `load_gold` falhou. O `audit_log` é executado?",
+    "pregunta": "Revise esta definição de tarefa YAML:\n\n```yaml\n- task_key: audit_log\n  depends_on:\n    - task_key: transform_silver\n    - task_key: load_gold\n  run_if: AT_LEAST_ONE_SUCCEEDED\n  notebook_task:\n    notebook_path: ./audit.py\n```\n\n`transform_silver` foi bem-sucedido e `load_gold` falhou. O `audit_log` é executado?",
     "opciones": [
       {
         "texto_opcion": "Sim - `AT_LEAST_ONE_SUCCEEDED` foi satisfeito porque `transform_silver` foi bem-sucedido.",
@@ -725,7 +725,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados define o seguinte YAML:\n\n```yaml\ntarefas:\n  - chave_tarefa: fonte_a\n    notebook_task:\n      notebook_path: ./source_a.py\n  - chave_tarefa: fonte_b\n    notebook_task:\n      notebook_path: ./source_b.py\n  - task_key: mesclar\n    depende_de:\n      - chave_tarefa: fonte_a\n      - chave_tarefa: fonte_b\n    notebook_task:\n      notebook_path: ./merge.py\n```\n\nNenhum `run_if` é especificado para `merge`. Quais tarefas são executadas em paralelo?",
+    "pregunta": "Um engenheiro de dados define o seguinte YAML:\n\n```yaml\ntasks:\n  - task_key: source_a\n    notebook_task:\n      notebook_path: ./source_a.py\n  - task_key: source_b\n    notebook_task:\n      notebook_path: ./source_b.py\n  - task_key: merge\n    depends_on:\n      - task_key: source_a\n      - task_key: source_b\n    notebook_task:\n      notebook_path: ./merge.py\n```\n\nNenhum `run_if` é especificado para `merge`. Quais tarefas são executadas em paralelo?",
     "opciones": [
       {
         "texto_opcion": "`source_a` e `source_b` rodam em paralelo; `merge` é executado após a conclusão.",

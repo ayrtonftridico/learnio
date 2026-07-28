@@ -29,7 +29,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte pipeline Auto Loader:\n\n```píton\nspark.readStream.format('cloudFiles') \\\n    .option('cloudFiles.formato', 'json') \\\n    .option('cloudFiles.schemaLocation', '/schema/events') \\\n    .load('/desembarque/eventos') \\\n    .writeStream\\\n    .option('checkpointLocation', '/chk/events') \\\n    .start('/bronze/eventos')\n```\n\nQual é o propósito de `cloudFiles.schemaLocation`?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte pipeline Auto Loader:\n\n```python\nspark.readStream.format('cloudFiles') \\\n    .option('cloudFiles.format', 'json') \\\n    .option('cloudFiles.schemaLocation', '/schema/events') \\\n    .load('/landing/events') \\\n    .writeStream \\\n    .option('checkpointLocation', '/chk/events') \\\n    .start('/bronze/events')\n```\n\nQual é o propósito de `cloudFiles.schemaLocation`?",
     "opciones": [
       {
         "texto_opcion": "Define o caminho de saída onde a tabela Bronze Delta será armazenada",
@@ -174,7 +174,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados usa `schemaHints` em Auto Loader da seguinte forma:\n\n```píton\n.option('cloudFiles.schemaHints', 'quantidade DOUBLE, event_ts TIMESTAMP')\n```\n\nQual é o efeito desta configuração?",
+    "pregunta": "Um engenheiro de dados usa `schemaHints` em Auto Loader da seguinte forma:\n\n```python\n.option('cloudFiles.schemaHints', 'amount DOUBLE, event_ts TIMESTAMP')\n```\n\nQual é o efeito desta configuração?",
     "opciones": [
       {
         "texto_opcion": "Auto Loader desativa a evolução do esquema para todo o fluxo, a evolução do esquema é controlada por.",
@@ -319,7 +319,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados fornece a seguinte configuração Auto Loader:\n\n```píton\n.option('cloudFiles.schemaEvolutionMode', 'failOnNewColumns')\n```\n\nUma nova coluna `campaign_id` aparece nos arquivos recebidos. O que acontece?",
+    "pregunta": "Um engenheiro de dados fornece a seguinte configuração Auto Loader:\n\n```python\n.option('cloudFiles.schemaEvolutionMode', 'failOnNewColumns')\n```\n\nUma nova coluna `campaign_id` aparece nos arquivos recebidos. O que acontece?",
     "opciones": [
       {
         "texto_opcion": "Os dados `campaign_id` são capturados em `rescuedDataColumn`",
@@ -377,7 +377,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados define a seguinte opção no DBR 16.4:\n\n```píton\n.option('cloudFiles.schemaEvolutionMode', 'addNewColumnsWithTypeWidening')\n```\n\nUm arquivo recebido contém uma coluna `price` que foi anteriormente inferida como `INT`, mas agora contém `9,99`. O que acontece?",
+    "pregunta": "Um engenheiro de dados define a seguinte opção no DBR 16.4:\n\n```python\n.option('cloudFiles.schemaEvolutionMode', 'addNewColumnsWithTypeWidening')\n```\n\nUm arquivo recebido contém uma coluna `price` que foi anteriormente inferida como `INT`, mas agora contém `9,99`. O que acontece?",
     "opciones": [
       {
         "texto_opcion": "O fluxo falha porque as alterações de tipo não são suportadas mesmo no modo de ampliação de tipo",
@@ -583,22 +583,22 @@
     "pregunta": "Um engenheiro de dados está ingerindo arquivos Avro com Auto Loader. O esquema Avro evolui para adicionar um novo campo. Qual configuração lida corretamente com isso com Auto Loader?",
     "opciones": [
       {
-        "texto_opcion": "```píton\nspark.readStream.format\n    .option\n    .option\n    .option\n    .load\n```.",
-        "es_correcta": true,
-        "explicacion": "Auto Loader suporta Avro com `cloudFiles.format = 'avro'`. Combinado com um modo de evolução `schemaLocation` e `addNewColumns`, novos campos Avro são tratados automaticamente."
-      },
-      {
-        "texto_opcion": "```píton\nspark.readStream.format('cloudFiles')\n    .option('cloudFiles.formato', 'avro')\n    .option('mergeSchema', 'true')\n    .load('/desembarque/avro')\n```",
+        "texto_opcion": "```python\nspark.readStream.format('avro')\n    .option('schemaEvolutionMode', 'addNewColumns')\n    .load('/landing/avro')\n```",
         "es_correcta": false,
         "explicacion": "`mergeSchema` é uma opção de gravação Delta Lake, não uma opção de leitura Auto Loader. A evolução do esquema em Auto Loader é controlada por `cloudFiles.schemaEvolutionMode` e `schemaLocation`."
       },
       {
-        "texto_opcion": "```píton\nspark.read.format('cloudFiles')\n    .option('cloudFiles.formato', 'avro')\n    .option('cloudFiles.schemaLocation', '/schema/avro')\n    .load('/desembarque/avro')\n```",
+        "texto_opcion": "```python\nspark.readStream.format\n    .option\n    .option\n    .option\n    .load\n```.",
+        "es_correcta": true,
+        "explicacion": "Auto Loader suporta Avro com `cloudFiles.format = 'avro'`. Combinado com um modo de evolução `schemaLocation` e `addNewColumns`, novos campos Avro são tratados automaticamente."
+      },
+      {
+        "texto_opcion": "```python\nspark.read.format('cloudFiles')\n    .option('cloudFiles.format', 'avro')\n    .option('cloudFiles.schemaLocation', '/schema/avro')\n    .load('/landing/avro')\n```",
         "es_correcta": false,
         "explicacion": "`spark.read` é o modo em lote - a evolução do esquema de streaming de Auto Loader requer `spark.readStream`."
       },
       {
-        "texto_opcion": "```píton\nspark.readStream.format('avro')\n    .option('schemaEvolutionMode', 'addNewColumns')\n    .load('/desembarque/avro')\n```",
+        "texto_opcion": "```python\nspark.readStream.format('cloudFiles')\n    .option('cloudFiles.format', 'avro')\n    .option('mergeSchema', 'true')\n    .load('/landing/avro')\n```, `mergeSchema` is a Delta Lake write option",
         "es_correcta": false,
         "explicacion": "`format('avro')` lê Avro em modo batch sem os recursos de evolução de esquema de Auto Loader. Auto Loader requer `format('cloudFiles')` com `cloudFiles.format = 'avro'`."
       }
@@ -667,7 +667,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte código:\n\n```píton\nspark.readStream.format('cloudFiles') \\\n    .option('cloudFiles.formato', 'json') \\\n    .option('cloudFiles.schemaLocation', '/schema/ev') \\\n    .option('cloudFiles.schemaEvolutionMode', 'addNewColumns') \\\n    .option('cloudFiles.inferColumnTypes', 'true') \\\n    .load('/desembarque/eventos') \\\n    .writeStream\\\n    .option('checkpointLocation', '/chk/ev') \\\n    .option('mergeSchema', 'true') \\\n    .formato('delta') \\\n    .start('/bronze/eventos')\n```\n\nO que `mergeSchema = true` faz neste contexto?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte código:\n\n```python\nspark.readStream.format('cloudFiles') \\\n    .option('cloudFiles.format', 'json') \\\n    .option('cloudFiles.schemaLocation', '/schema/ev') \\\n    .option('cloudFiles.schemaEvolutionMode', 'addNewColumns') \\\n    .option('cloudFiles.inferColumnTypes', 'true') \\\n    .load('/landing/events') \\\n    .writeStream \\\n    .option('checkpointLocation', '/chk/ev') \\\n    .option('mergeSchema', 'true') \\\n    .format('delta') \\\n    .start('/bronze/events')\n```\n\nO que `mergeSchema = true` faz neste contexto?",
     "opciones": [
       {
         "texto_opcion": "Ele permite que a tabela Delta de destino aceite automaticamente novas colunas quando Auto Loader evolui o esquema.",
@@ -728,24 +728,24 @@
     "pregunta": "Qual das alternativas a seguir é a maneira correta de configurar Auto Loader para ingerir arquivos CSV com uma linha de cabeçalho e inferir tipos de coluna com precisão?",
     "opciones": [
       {
-        "texto_opcion": "```píton\nspark.readStream.format('csv')\n    .option\n    .option\n    .load\n```",
+        "texto_opcion": "```python\nspark.readStream.format\n    .option\n    .option\n    .option\n    .load\n```, the correct option for Auto Loader type inference is.",
         "es_correcta": false,
         "explicacion": "`format('csv')` com `inferSchema` é um padrão de leitura em lote. Auto Loader requer `format('cloudFiles')` com `cloudFiles.format = 'csv'`."
       },
       {
-        "texto_opcion": "```píton\nspark.readStream.format\n    .option\n    .option\n    .option\n    .option\n    .load\n```.",
-        "es_correcta": true,
-        "explicacion": "Auto Loader para CSV requer `cloudFiles.format = 'csv'`, `header = 'true'` para tratar a primeira linha como nomes de colunas e `cloudFiles.inferColumnTypes = 'true'` para inferência de tipo precisa além de `STRING`."
-      },
-      {
-        "texto_opcion": "```píton\nspark.read.format('cloudFiles')\n    .option('cloudFiles.formato', 'csv')\n    .option('cabeçalho'",
+        "texto_opcion": "```python\nspark.readStream.format('csv')\n    .option('header', 'true')\n    .option('inferSchema', 'true')\n    .load('/landing/csv')\n```",
         "es_correcta": false,
         "explicacion": "`spark.read` é o modo em lote. A evolução do esquema Auto Loader e o rastreamento incremental de arquivos requerem `spark.readStream`."
       },
       {
-        "texto_opcion": "```píton\nspark.readStream.format\n    .option\n    .option\n    .option\n    .load\n```",
+        "texto_opcion": "```python\nspark.read.format('cloudFiles')\n    .option('cloudFiles.format', 'csv')\n    .option('header', `spark.read` is batch mode.",
         "es_correcta": false,
         "explicacion": "A opção correta para inferência de tipo Auto Loader é `cloudFiles.inferColumnTypes`, não `inferSchema`. A última é uma opção do Spark em lote e é ignorada por Auto Loader."
+      },
+      {
+        "texto_opcion": "```python\nspark.readStream.format\n    .option\n    .option\n    .option\n    .option\n    .load\n```.",
+        "es_correcta": true,
+        "explicacion": "Auto Loader para CSV requer `cloudFiles.format = 'csv'`, `header = 'true'` para tratar a primeira linha como nomes de colunas e `cloudFiles.inferColumnTypes = 'true'` para inferência de tipo precisa além de `STRING`."
       }
     ],
     "tags": [
@@ -870,7 +870,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa o seguinte fluxo Auto Loader:\n\n```píton\nspark.readStream.format('cloudFiles') \\\n    .option('cloudFiles.formato', 'json') \\\n    .option('cloudFiles.schemaLocation', '/esquema/pedidos') \\\n    .option('cloudFiles.schemaEvolutionMode', 'addNewColumns') \\\n    .load('/desembarque/pedidos') \\\n    .writeStream\\\n    .option('checkpointLocation', '/chk/pedidos') \\\n    .formato('delta') \\\n    .start('/bronze/pedidos')\n```\n\nApós 10 dias, o engenheiro exclui o diretório `schemaLocation`, mas mantém o checkpoint. O que acontece na reinicialização?",
+    "pregunta": "Um engenheiro de dados executa o seguinte fluxo Auto Loader:\n\n```python\nspark.readStream.format('cloudFiles') \\\n    .option('cloudFiles.format', 'json') \\\n    .option('cloudFiles.schemaLocation', '/schema/orders') \\\n    .option('cloudFiles.schemaEvolutionMode', 'addNewColumns') \\\n    .load('/landing/orders') \\\n    .writeStream \\\n    .option('checkpointLocation', '/chk/orders') \\\n    .format('delta') \\\n    .start('/bronze/orders')\n```\n\nApós 10 dias, o engenheiro exclui o diretório `schemaLocation`, mas mantém o checkpoint. O que acontece na reinicialização?",
     "opciones": [
       {
         "texto_opcion": "O fluxo falha permanentemente porque o local do esquema e o checkpoint sempre devem existir juntos, eles são independentes.",

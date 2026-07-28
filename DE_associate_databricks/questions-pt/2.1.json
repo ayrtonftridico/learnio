@@ -29,7 +29,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte código:\n\n```píton\ndf = spark.read.format(\"delta\").load(\"/data/events\")\ndf.write.format(\"delta\").mode(\"sobrescrever\").save(\"/dados/saída\")\n```\n\nQue tipo de processamento isso implementa?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte código:\n\n```python\ndf = spark.read.format(\"delta\").load(\"/data/events\")\ndf.write.format(\"delta\").mode(\"overwrite\").save(\"/data/output\")\n```\n\nQue tipo de processamento isso implementa?",
     "opciones": [
       {
         "texto_opcion": "Processamento em lote – lê todos os dados disponíveis de uma vez e os grava em uma única execução.",
@@ -58,7 +58,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte código:\n\n```píton\ndf = spark.readStream.format(\"cloudFiles\")\\\n    .option(\"cloudFiles.formato\", \"json\")\\\n    .load(\"/desembarque/eventos\")\n\ndf.writeStream \\\n    .formato(\"delta\")\\\n    .option(\"checkpointLocation\", \"/checkpoints/events\") \\\n    .start(\"/dados/eventos\")\n```\n\nQual é o propósito de `checkpointLocation` neste código?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte código:\n\n```python\ndf = spark.readStream.format(\"cloudFiles\") \\\n    .option(\"cloudFiles.format\", \"json\") \\\n    .load(\"/landing/events\")\n\ndf.writeStream \\\n    .format(\"delta\") \\\n    .option(\"checkpointLocation\", \"/checkpoints/events\") \\\n    .start(\"/data/events\")\n```\n\nQual é o propósito de `checkpointLocation` neste código?",
     "opciones": [
       {
         "texto_opcion": "Ele armazena informações de esquema para os arquivos JSON recebidos, o esquema é gerenciado separadamente via",
@@ -351,22 +351,22 @@
     "pregunta": "Um engenheiro de dados precisa ler uma tabela Delta como um fluxo e gravar os resultados em outra tabela Delta. Qual código implementa isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf = spark.readStream.format(\"delta\").load\ndf.writeStream.format(\"delta\") \\\n  .option \\\n  .start\n```.",
+        "texto_opcion": "```python\ndf = spark.readStream.format(\"delta\").load\ndf.writeStream.format(\"delta\") \\\n  .option \\\n  .start\n```.",
         "es_correcta": true,
         "explicacion": "`spark.readStream` cria um streaming DataFrame. `.writeStream.start()` inicia a gravação contínua. O checkpoint é necessário para garantias exatamente uma vez e tolerância a falhas."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"delta\").load\ndf.writeStream.format(\"delta\") \\\n  .option \\\n  .start\n```, `spark.read` cria um **lote** DataFrame",
+        "texto_opcion": "```python\ndf = spark.read.format(\"delta\").load\ndf.writeStream.format(\"delta\") \\\n  .option \\\n  .start\n```, `spark.read` creates a **batch** DataFrame",
         "es_correcta": false,
         "explicacion": "`spark.read` cria um **lote** DataFrame, não um de streaming. Você não pode chamar `.writeStream` em um lote DataFrame — isso gerará uma `AnalysisException`."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.readStream.format(\"delta\").load(\"/dados/fonte\")\ndf.write.format(\"delta\").mode(\"anexar\").save(\"/dados/saída\")\n```",
+        "texto_opcion": "```python\ndf = spark.readStream.format(\"delta\").load(\"/data/source\")\ndf.write.format(\"delta\").mode(\"append\").save(\"/data/output\")\n```",
         "es_correcta": false,
         "explicacion": "`.write.save()` é uma operação de gravação em lote. Você não pode usar `.write` em um streaming DataFrame — ele requer `.writeStream.start()`."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.readStream.format(\"delta\").load(\"/dados/fonte\")\ndf.writeStream.format(\"delta\").save(\"/dados/saída\")\n```",
+        "texto_opcion": "```python\ndf = spark.readStream.format(\"delta\").load(\"/data/source\")\ndf.writeStream.format(\"delta\").save(\"/data/output\")\n```",
         "es_correcta": false,
         "explicacion": "`.writeStream` requer `.start()` para iniciar a consulta de streaming, não `.save()`. Além disso, a opção obrigatória `checkpointLocation` está faltando."
       }
@@ -464,7 +464,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados configura a seguinte consulta de streaming:\n\n```píton\ndf = spark.readStream.format(\"kafka\") \\\n    .option(\"kafka.bootstrap.servers\", \"corretor:9092\")\\\n    .option(\"inscrever-se\", \"transações\") \\\n    .carregar()\n\ndf.writeStream \\\n    .outputMode(\"acrescentar\") \\\n    .formato(\"delta\")\\\n    .option(\"checkpointLocation\", \"/chk/transações\") \\\n    .start(\"/dados/transações\")\n```\n\nO stream é executado com êxito por três dias e, em seguida, o cluster é reiniciado. O que acontece quando o stream é reiniciado?",
+    "pregunta": "Um engenheiro de dados configura a seguinte consulta de streaming:\n\n```python\ndf = spark.readStream.format(\"kafka\") \\\n    .option(\"kafka.bootstrap.servers\", \"broker:9092\") \\\n    .option(\"subscribe\", \"transactions\") \\\n    .load()\n\ndf.writeStream \\\n    .outputMode(\"append\") \\\n    .format(\"delta\") \\\n    .option(\"checkpointLocation\", \"/chk/transactions\") \\\n    .start(\"/data/transactions\")\n```\n\nO stream é executado com êxito por três dias e, em seguida, o cluster é reiniciado. O que acontece quando o stream é reiniciado?",
     "opciones": [
       {
         "texto_opcion": "O fluxo continua de onde parou, processando apenas mensagens Kafka que chegaram após o último.",
@@ -609,25 +609,25 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados deseja implementar **carregamento incremental em lote** a partir de uma tabela Delta que rastreia carimbos de data/hora `updated_at`. Qual abordagem lê corretamente apenas novos registros desde a última execução?\n\n```píton\núltima_execução = \"01/06/2024 00:00:00\"\n```",
+    "pregunta": "Um engenheiro de dados deseja implementar **carregamento incremental em lote** a partir de uma tabela Delta que rastreia carimbos de data/hora `updated_at`. Qual abordagem lê corretamente apenas novos registros desde a última execução?\n\n```python\nlast_run = \"2024-06-01 00:00:00\"\n```",
     "opciones": [
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"delta\").load(\"/dados/fonte\") \\\n    .filter(f\"updated_at > '{última_execução}'\")\n```.",
-        "es_correcta": true,
-        "explicacion": "Isso implementa corretamente o lote incremental – ele lê a tabela Delta no modo em lote e filtra apenas as linhas atualizadas após o carimbo de data/hora da última execução. O engenheiro deve então persistir o novo valor `last_run` após cada execução bem-sucedida."
-      },
-      {
-        "texto_opcion": "```píton\ndf = spark.readStream.format(\"delta\").load(\"/dados/fonte\") \\\n    .filter(f\"updated_at > '{última_execução}'\")\n```, usar `readStream` converte isso em uma consulta de streaming.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"delta\") \\\n    .option(\"startingTimestamp\", last_run) \\\n    .load(\"/data/source\")\n```",
         "es_correcta": false,
         "explicacion": "Usar `readStream` converte isso em uma consulta de streaming. O streaming no Delta já lida com o processamento incremental por meio de checkpoints – a filtragem manual por `updated_at` em um stream é redundante e potencialmente incorreta."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"delta\") \\\n    .option(\"startTimestamp\", última_execução) \\\n    .load(\"/dados/fonte\")\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"delta\") \\\n    .option(\"readChangeFeed\", \"true\") \\\n    .option(\"startingTimestamp\", last_run) \\\n    .load(\"/data/source\")\n```",
         "es_correcta": false,
         "explicacion": "`startingTimestamp` é uma opção de **streaming** para Delta (`readStream`), não uma opção de leitura em lote. Usá-lo com `spark.read` gerará um erro ou será ignorado."
       },
       {
-        "texto_opcion": "```píton\ndf = spark.read.format(\"delta\") \\\n    .option(\"readChangeFeed\", \"true\")\\\n    .option(\"startTimestamp\", última_execução) \\\n    .load(\"/dados/fonte\")\n```",
+        "texto_opcion": "```python\ndf = spark.read.format(\"delta\").load(\"/data/source\") \\\n    .filter(f\"updated_at > '{last_run}'\")\n```.",
+        "es_correcta": true,
+        "explicacion": "Isso implementa corretamente o lote incremental – ele lê a tabela Delta no modo em lote e filtra apenas as linhas atualizadas após o carimbo de data/hora da última execução. O engenheiro deve então persistir o novo valor `last_run` após cada execução bem-sucedida."
+      },
+      {
+        "texto_opcion": "```python\ndf = spark.readStream.format(\"delta\").load(\"/data/source\") \\\n    .filter(f\"updated_at > '{last_run}'\")\n```, using `readStream` converts this to a streaming query.",
         "es_correcta": false,
         "explicacion": "Change Data Feed (CDF) com `startingTimestamp` é válido para leituras de lote Delta, mas retorna eventos de alteração (inserir/atualizar/excluir metadados), não apenas o estado atual de linhas novas/alteradas. Isto é CDC, não uma simples filtragem incremental."
       }

@@ -29,7 +29,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados cria a seguinte tabela:\n\n```sql\nCRIAR TABELA catalog.sales.orders (\n  order_id BIGINT,\n  ID_do_cliente BIGINT,\n  data_pedido DATA,\n  região STRING\n) USANDO DELTA\nCLUSTER BY (id_cliente, data_pedido);\n```\n\nDepois de carregar 10 milhões de linhas, que comando adicional eles devem executar para organizar fisicamente os dados?",
+    "pregunta": "Um engenheiro de dados cria a seguinte tabela:\n\n```sql\nCREATE TABLE catalog.sales.orders (\n  order_id    BIGINT,\n  customer_id BIGINT,\n  order_date  DATE,\n  region      STRING\n) USING DELTA\nCLUSTER BY (customer_id, order_date);\n```\n\nDepois de carregar 10 milhões de linhas, que comando adicional eles devem executar para organizar fisicamente os dados?",
     "opciones": [
       {
         "texto_opcion": "`CLUSTER catalog.sales.orders BY (customer_id, order_date);` — este é o comando que aplica fisicamente o clustering.",
@@ -359,24 +359,24 @@
     "pregunta": "Um engenheiro de dados precisa excluir uma única tabela confidencial de Predictive Optimization enquanto mantém o PO habilitado para todas as outras tabelas no esquema. Qual comando consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nALTER TABLE meu_catalog.esquema_sensível.tabela_sensível\nSET TBLPROPERTIES;\n```.",
-        "es_correcta": true,
-        "explicacion": "A configuração do PO em nível de tabela substitui a configuração de esquema/catálogo herdado. Definir `'disable'` no nível da tabela isenta esta tabela específica enquanto deixa o PO no nível do esquema habilitado para todas as outras tabelas."
-      },
-      {
-        "texto_opcion": "```sql\nALTER SCHEMA meu_catalog.sensitive_schema\nDESATIVAR PREDICTIVE OPTIMIZATION\nEXCLUINDO TABELA tabela_sensível;\n```",
+        "texto_opcion": "```sql\nDROP TABLE my_catalog.sensitive_schema.sensitive_table;\n-- Recreate without PO\nCREATE TABLE",
         "es_correcta": false,
         "explicacion": "Não há cláusula `EXCLUDING TABLE`. A desativação no nível do esquema desativaria o PO para todas as tabelas do esquema. A abordagem correta é desabilitar o PO no nível da tabela individual."
       },
       {
-        "texto_opcion": "```sql\nDROP TABLE meu_catalog.sensitive_schema.sensitive_table;\n- Recriar sem PO\nCREATE TABLE ... SET TBLPROPERTIES;\n```",
+        "texto_opcion": "```sql\nALTER SCHEMA my_catalog.sensitive_schema\nDISABLE PREDICTIVE OPTIMIZATION\nEXCLUDING TABLE sensitive_table;\n```",
         "es_correcta": false,
         "explicacion": "Descartar e recriar a tabela é desnecessário. PO pode ser desabilitado em uma tabela existente com `ALTER TABLE ... SET TBLPROPERTIES` sem perda de dados."
       },
       {
-        "texto_opcion": "```sql\nALTER TABLE meu_catalog.esquema_sensível.tabela_sensível\nDESATIVAR PREDICTIVE OPTIMIZATION;\n```",
+        "texto_opcion": "```sql\nALTER TABLE my_catalog.sensitive_schema.sensitive_table\nDISABLE PREDICTIVE OPTIMIZATION;\n```",
         "es_correcta": false,
         "explicacion": "A sintaxe correta usa `SET TBLPROPERTIES ('delta.enablePredictiveOptimization' = 'disable')`, não uma cláusula direta `DISABLE PREDICTIVE OPTIMIZATION`."
+      },
+      {
+        "texto_opcion": "```sql\nALTER TABLE my_catalog.sensitive_schema.sensitive_table\nSET TBLPROPERTIES;\n```.",
+        "es_correcta": true,
+        "explicacion": "A configuração do PO em nível de tabela substitui a configuração de esquema/catálogo herdado. Definir `'disable'` no nível da tabela isenta esta tabela específica enquanto deixa o PO no nível do esquema habilitado para todas as outras tabelas."
       }
     ],
     "tags": [
@@ -445,7 +445,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nDESCREVER TABELA ESTENDIDA my_catalog.my_schema.my_table;\n```\n\nNa saída, eles veem `Clusteringcolumns: customer_id, order_date`. O que isso confirma?",
+    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nDESCRIBE TABLE EXTENDED my_catalog.my_schema.my_table;\n```\n\nNa saída, eles veem `Clusteringcolumns: customer_id, order_date`. O que isso confirma?",
     "opciones": [
       {
         "texto_opcion": "A tabela possui **Liquid Clustering configurada** com chaves de cluster `customer_id` e `order_date`.",
@@ -562,7 +562,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados verifica o histórico Predictive Optimization usando tabelas do sistema:\n\n```sql\nSELECIONE tipo_de_operação, status, bytes_compactados, arquivos_compactados\nDE system.storage.predictive_optimization_operations_history\nWHERE nome_tabela = 'eventos'\nORDER BY operação_start DESC;\n```\n\nO resultado mostra `operação_type = 'VACUUM', status = 'SUCCEEDED', bytes_compacted = 0`. O que isto significa?",
+    "pregunta": "Um engenheiro de dados verifica o histórico Predictive Optimization usando tabelas do sistema:\n\n```sql\nSELECT operation_type, status, bytes_compacted, files_compacted\nFROM system.storage.predictive_optimization_operations_history\nWHERE table_name = 'events'\nORDER BY operation_start DESC;\n```\n\nO resultado mostra `operação_type = 'VACUUM', status = 'SUCCEEDED', bytes_compacted = 0`. O que isto significa?",
     "opciones": [
       {
         "texto_opcion": "A operação VACUUM ignorou todos os arquivos porque eles foram gravados dentro da janela de retenção de 7 dias",
@@ -651,7 +651,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nALTER CATALOG prod_catalog ENABLE PREDICTIVE OPTIMIZATION;\n```\n\nPosteriormente, eles criam um novo esquema e tabela em `prod_catalog`. Então eles correm:\n\n```sql\nALTER TABLE prod_catalog.new_schema.important_table\nSET TBLPROPERTIES ('delta.enablePredictiveOptimization' = 'desabilitar');\n```\n\nQual é o status final do pedido de `important_table`?",
+    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nALTER CATALOG prod_catalog ENABLE PREDICTIVE OPTIMIZATION;\n```\n\nPosteriormente, eles criam um novo esquema e tabela em `prod_catalog`. Então eles correm:\n\n```sql\nALTER TABLE prod_catalog.new_schema.important_table\nSET TBLPROPERTIES ('delta.enablePredictiveOptimization' = 'disable');\n```\n\nQual é o status final do pedido de `important_table`?",
     "opciones": [
       {
         "texto_opcion": "PO está em um estado indefinido — configurações conflitantes no nível do catálogo e da tabela causam um erro",
@@ -684,22 +684,22 @@
     "pregunta": "Um engenheiro de dados migra uma tabela legada de `PARTITIONED BY (ano, mês)` + `OPTIMIZE ZORDER BY (customer_id)` para Liquid Clustering. Qual sequência SQL está correta?",
     "opciones": [
       {
-        "texto_opcion": "```sql\n- Migração no local\nALTER TABLE pedidos_antigos CLUSTER BY (customer_id, data_pedido);\nDROP TABLE PARTITIONED BY (ano, mês);\n```",
-        "es_correcta": false,
-        "explicacion": "`ALTER TABLE CLUSTER BY` não pode ser aplicado a uma tabela que já usa `PARTITIONED BY`. As estratégias são mutuamente exclusivas — a migração requer a criação de uma nova tabela."
-      },
-      {
-        "texto_opcion": "```sql\nOPTIMIZE pedidos_antigos CLUSTER BY (id_do_cliente, data_do_pedido);\n```, `OPTIMIZE ... CLUSTER BY` não é SQL válido.",
-        "es_correcta": false,
-        "explicacion": "`OPTIMIZE ... CLUSTER BY` não é SQL válido. Liquid Clustering é definido no nível da tabela com `CREATE TABLE ... CLUSTER BY`, não como uma opção por OPTIMIZE."
-      },
-      {
-        "texto_opcion": "```sql\n-- Passo 1: Crie uma nova tabela com Liquid Clustering\nCRIAR TABELA novos_pedidos\nCLUSTER POR (ID_do_cliente.",
+        "texto_opcion": "```sql\n-- Step 1: Create a new table with Liquid Clustering\nCREATE TABLE new_orders\nCLUSTER BY (customer_id.",
         "es_correcta": true,
         "explicacion": "O caminho de migração mais limpo é criar uma nova tabela com `CLUSTER BY` (incompatível com o antigo `PARTITIONED BY`), preenchê-la com um CTAS e executar `OPTIMIZE`. O particionamento da tabela antiga e a configuração Z-Order não podem ser convertidos no local."
       },
       {
-        "texto_opcion": "```sql\nALTER TABLE pedidos_antigos SET TBLPROPERTIES ('clustering' = 'customer_id,order_date');\n```",
+        "texto_opcion": "```sql\nALTER TABLE old_orders SET TBLPROPERTIES ('clustering' = 'customer_id,order_date');\n```",
+        "es_correcta": false,
+        "explicacion": "`ALTER TABLE CLUSTER BY` não pode ser aplicado a uma tabela que já usa `PARTITIONED BY`. As estratégias são mutuamente exclusivas — a migração requer a criação de uma nova tabela."
+      },
+      {
+        "texto_opcion": "```sql\n-- In-place migration\nALTER TABLE old_orders CLUSTER BY (customer_id, order_date);\nDROP TABLE PARTITIONED BY (year, month);\n```",
+        "es_correcta": false,
+        "explicacion": "`OPTIMIZE ... CLUSTER BY` não é SQL válido. Liquid Clustering é definido no nível da tabela com `CREATE TABLE ... CLUSTER BY`, não como uma opção por OPTIMIZE."
+      },
+      {
+        "texto_opcion": "```sql\nOPTIMIZE old_orders CLUSTER BY (customer_id, order_date);\n```, `OPTIMIZE ... CLUSTER BY` is not valid SQL, `OPTIMIZE ...",
         "es_correcta": false,
         "explicacion": "Liquid Clustering não está habilitado através de uma chave `TBLPROPERTIES`. Ele usa a cláusula `CLUSTER BY` em `CREATE TABLE` ou `ALTER TABLE CLUSTER BY`."
       }

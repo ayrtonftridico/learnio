@@ -30,25 +30,25 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados cria a seguinte máscara de coluna UDF:\n\n```sql\nCRIAR OU SUBSTITUIR FUNÇÃO catalog.schema.ssn_mask(ssn STRING)\nCADEIA DE RETORNOS\nCASO DE DEVOLUÇÃO\n  QUANDO is_account_group_member('pii-authorized') ENTÃO ssn\n  OUTRO '***-**-****'\nFIM;\n```\n\nComo eles deveriam anexar esta máscara à coluna `users.ssn`?",
+    "pregunta": "Um engenheiro de dados cria a seguinte máscara de coluna UDF:\n\n```sql\nCREATE OR REPLACE FUNCTION catalog.schema.ssn_mask(ssn STRING)\nRETURNS STRING\nRETURN CASE\n  WHEN is_account_group_member('pii-authorized') THEN ssn\n  ELSE '***-**-****'\nEND;\n```\n\nComo eles deveriam anexar esta máscara à coluna `users.ssn`?",
     "opciones": [
+      {
+        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nSET MASK catalog.schema.ssn_mask;\n```.",
+        "es_correcta": true,
+        "explicacion": "`ALTER TABLE ... ALTER COLUMN ... SET MASK <nome_da_função>` é a sintaxe correta para anexar uma máscara de coluna a uma coluna específica. A função já deve existir antes de ALTER ser executado."
+      },
       {
         "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nSET MASK ssn = catalog.schema.ssn_mask;\n```",
         "es_correcta": false,
         "explicacion": "A sintaxe correta requer `ALTER COLUMN <col_name> SET MASK`, não um `SET MASK col = function` direto na tabela. A cláusula `ALTER COLUMN` é obrigatória."
       },
       {
-        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTERAR COLUNA ssn\nDEFINIR MÁSCARA catalog.schema.ssn_mask;\n```.",
-        "es_correcta": true,
-        "explicacion": "`ALTER TABLE ... ALTER COLUMN ... SET MASK <nome_da_função>` é a sintaxe correta para anexar uma máscara de coluna a uma coluna específica. A função já deve existir antes de ALTER ser executado."
-      },
-      {
-        "texto_opcion": "```sql\nGRANT MÁSCARA NA COLUNA catalog.schema.users.ssn\nUSANDO FUNÇÃO catalog.schema.ssn_mask;\n```",
+        "texto_opcion": "```sql\nCREATE MASK POLICY ssn_policy\nUSING catalog.schema.ssn_mask ON TABLE catalog.schema.users COLUMN ssn;\n```",
         "es_correcta": false,
         "explicacion": "`GRANT MASK` não é um comando SQL válido do Databricks. As máscaras de coluna são aplicadas com `ALTER TABLE ... ALTER COLUMN ... SET MASK`."
       },
       {
-        "texto_opcion": "```sql\nCRIAR POLÍTICA DE MÁSCARA ssn_policy\nUSANDO catalog.schema.ssn_mask ON TABLE catalog.schema.users COLUMN ssn;\n```",
+        "texto_opcion": "```sql\nGRANT MASK ON COLUMN catalog.schema.users.ssn\nUSING FUNCTION catalog.schema.ssn_mask;\n```",
         "es_correcta": false,
         "explicacion": "`CREATE MASK POLICY` não é o SQL padrão do Databricks para mascaramento em nível de tabela. O comando correto é `ALTER TABLE ... ALTER COLUMN ... SET MASK`."
       }
@@ -89,7 +89,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados cria o seguinte filtro de linha:\n\n```sql\nCRIAR OU SUBSTITUIR FUNÇÃO catalog.sales.region_filter(região STRING)\nRETORNA BOOLEAN\nRETURN is_account_group_member('admin')\n    OU is_account_group_member(CONCAT(região, '-team'));\n```\n\nEste filtro é aplicado à tabela `orders` na coluna `region`. Um analista da UE (na `equipe da UE`, mas NÃO no `admin`) consulta `SELECT COUNT(*) FROM ordens`. O que a contagem reflete?",
+    "pregunta": "Um engenheiro de dados cria o seguinte filtro de linha:\n\n```sql\nCREATE OR REPLACE FUNCTION catalog.sales.region_filter(region STRING)\nRETURNS BOOLEAN\nRETURN is_account_group_member('admin')\n    OR is_account_group_member(CONCAT(region, '-team'));\n```\n\nEste filtro é aplicado à tabela `orders` na coluna `region`. Um analista da UE (na `equipe da UE`, mas NÃO no `admin`) consulta `SELECT COUNT(*) FROM ordens`. O que a contagem reflete?",
     "opciones": [
       {
         "texto_opcion": "Somente a contagem de linhas onde `region = 'EU'` — o filtro de linha restringe a visibilidade às linhas onde.",
@@ -148,7 +148,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nALTER TABLE catálogo.vendas.pedidos\nDEFINIR FILTRO DE LINHA catalog.sales.region_filter\nLIGADO (região);\n```\n\nO que acontece com as linhas onde `region_filter(region)` retorna `NULL`?",
+    "pregunta": "Um engenheiro de dados executa:\n\n```sql\nALTER TABLE catalog.sales.orders\nSET ROW FILTER catalog.sales.region_filter\nON (region);\n```\n\nO que acontece com as linhas onde `region_filter(region)` retorna `NULL`?",
     "opciones": [
       {
         "texto_opcion": "O comportamento depende da configuração de manipulação de NULL nas configurações do cluster",
@@ -209,22 +209,22 @@
     "pregunta": "Um engenheiro de dados precisa remover a máscara da coluna `ssn` na tabela `users`. Qual comando consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTERAR COLUNA ssn\nMÁSCARA DESCONFIGURADA;\n```",
-        "es_correcta": false,
-        "explicacion": "`UNSET MASK` não é a sintaxe correta. O comando correto é `DROP MASK`."
-      },
-      {
-        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTERAR COLUNA ssn\nMÁSCARA DE QUEDA;\n```.",
+        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nDROP MASK;\n```.",
         "es_correcta": true,
         "explicacion": "`ALTER TABLE ... ALTER COLUMN ... DROP MASK` remove a máscara da coluna especificada. Depois disso, todos os usuários com SELECT veem o valor real da coluna."
       },
       {
-        "texto_opcion": "```sql\nREVOKE MÁSCARA catalog.schema.ssn_mask FROM TABELA catalog.schema.users;\n```",
+        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nUNSET MASK;\n```",
+        "es_correcta": false,
+        "explicacion": "`UNSET MASK` não é a sintaxe correta. O comando correto é `DROP MASK`."
+      },
+      {
+        "texto_opcion": "```sql\nDROP FUNCTION catalog.schema.ssn_mask;\n```",
         "es_correcta": false,
         "explicacion": "`REVOKE MASK` não é um comando SQL válido do Databricks. Use `ALTER TABLE ... ALTER COLUMN ... DROP MASK`."
       },
       {
-        "texto_opcion": "```sql\nFUNÇÃO DROP catalog.schema.ssn_mask;\n```, eliminar a função NÃO remove a máscara da.",
+        "texto_opcion": "```sql\nREVOKE MASK catalog.schema.ssn_mask FROM TABLE catalog.schema.users;\n```",
         "es_correcta": false,
         "explicacion": "Eliminar a função NÃO remove a máscara da coluna da tabela — isso quebraria as consultas na coluna mascarada. Primeiro remova a máscara com `DROP MASK` e, opcionalmente, elimine a função."
       }
@@ -329,22 +329,22 @@
     "pregunta": "Qual comando SQL aplica um filtro de linha no momento da criação da tabela?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nCRIAR TABELA catalog.schema.orders\n)\nCOM FILTRO DE LINHA catalog.schema.region_filter ON (região);\n```.",
+        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders\n)\nWITH ROW FILTER catalog.schema.region_filter ON (region);\n```.",
         "es_correcta": true,
         "explicacion": "Filtros de linha podem ser aplicados na criação da tabela usando a cláusula `WITH ROW FILTER ... ON (...)` na instrução `CREATE TABLE`. Isso garante que a política esteja ativa desde a primeira inserção de dados."
       },
       {
-        "texto_opcion": "```sql\nCRIAR TABELA catalog.schema.orders (...)\nFILTRO DE LINHA = catalog.schema.region_filter ON região;\n```",
+        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (...)\nROW FILTER = catalog.schema.region_filter ON region;\n```",
         "es_correcta": false,
         "explicacion": "A sintaxe correta usa `WITH ROW FILTER ... ON (...)` — e não `ROW FILTER =`."
       },
       {
-        "texto_opcion": "```sql\nCRIAR TABELA catalog.schema.orders (...)\nDEFINIR FILTRO DE LINHA catalog.schema.region_filter (região);\n```",
+        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (...)\nSET ROW FILTER catalog.schema.region_filter (region);\n```",
         "es_correcta": false,
         "explicacion": "`SET ROW FILTER` é usado em `ALTER TABLE`, não em `CREATE TABLE`. A sintaxe CREATE TABLE usa `WITH ROW FILTER ... ON (...)`."
       },
       {
-        "texto_opcion": "Os filtros de linha não podem ser definidos na criação da tabela — eles devem ser adicionados com `ALTER TABLE` após a criação.",
+        "texto_opcion": "Row filters cannot be set at table creation — they must be added with `ALTER TABLE` after creation",
         "es_correcta": false,
         "explicacion": "Os filtros de linha PODEM ser especificados na criação da tabela usando `WITH ROW FILTER ... ON (...)` na instrução `CREATE TABLE`."
       }
@@ -352,7 +352,7 @@
     "tags": [
       "7.3",
       "Filtro de linha",
-      "CRIAR TABELA"
+      "CREATE TABLE"
     ]
   },
   {
@@ -389,22 +389,22 @@
     "pregunta": "Um engenheiro de dados deseja usar `current_user()` em um filtro de linha para permitir que cada usuário veja apenas seus próprios registros. A coluna `created_by` armazena o email do usuário. Qual UDF implementa isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nCRIAR FUNÇÃO catalog.schema.owner_filter(criado_por STRING)\nRETORNA BOOLEAN\nRETURN is_account_group_member('admin')\n  .",
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS BOOLEAN\nRETURN.",
         "es_correcta": true,
         "explicacion": "Isso usa `current_user()` corretamente para comparar a identidade do usuário que está consultando com a coluna `created_by`. Os administradores ignoram o filtro. A função retorna BOOLEAN conforme necessário para filtros de linha."
       },
       {
-        "texto_opcion": "```sql\nCRIAR FUNÇÃO catalog.schema.owner_filter(criado_por STRING)\nCADEIA DE RETORNOS\nRETURN CASE WHEN current_user() = criado_por THEN criado_por ELSE NULL END;\n```",
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter()\nRETURNS BOOLEAN\nRETURN SELECT * FROM catalog.schema.user_tasks WHERE created_by = current_user();\n```",
         "es_correcta": false,
         "explicacion": "As UDFs de filtro de linha devem retornar BOOLEAN, não STRING. Um tipo de retorno STRING é para máscaras de coluna, não para filtros de linha."
       },
       {
-        "texto_opcion": "```sql\nCRIAR FUNÇÃO catalog.schema.owner_filter()\nRETORNA BOOLEAN\nRETURN SELECT * FROM catalog.schema.user_tasks WHERE criado_by = current_user();\n```",
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS BOOLEAN\nDETERMINISTIC\nRETURN current_user() = created_by;\n```",
         "es_correcta": false,
         "explicacion": "UDFs de filtro de linha não podem conter subconsultas SELECT que leem tabelas — isso causaria dependências circulares e problemas de desempenho. Use expressões CASE simples com funções de identidade."
       },
       {
-        "texto_opcion": "```sql\nCRIAR FUNÇÃO catalog.schema.owner_filter(criado_por STRING)\nRETORNA BOOLEAN\nDETERMINISTA\nRETURN usuário_atual() = criado_por;\n```",
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS STRING\nRETURN CASE WHEN current_user() = created_by THEN created_by ELSE NULL END;\n```",
         "es_correcta": false,
         "explicacion": "Marcar um UDF `DETERMINISTIC` que usa `current_user()` está incorreto — `current_user()` retorna valores diferentes para sessões diferentes. UDFs que usam funções de identidade NÃO devem ser marcados como `DETERMINISTIC`."
       }
@@ -446,7 +446,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados consulta uma tabela Delta com um filtro de linha ativo usando **Time Travel**:\n\n```sql\nSELECIONE * FROM catalog.schema.orders VERSÃO A PARTIR DE 5;\n```\n\nA viagem no tempo é compatível com filtros de linha?",
+    "pregunta": "Um engenheiro de dados consulta uma tabela Delta com um filtro de linha ativo usando **Time Travel**:\n\n```sql\nSELECT * FROM catalog.schema.orders VERSION AS OF 5;\n```\n\nA viagem no tempo é compatível com filtros de linha?",
     "opciones": [
       {
         "texto_opcion": "Suportado apenas se a função de filtro de linha existisse no momento da versão 5, a existência da função numa versão histórica não é o problema.",
@@ -536,7 +536,7 @@
     ]
   },
   {
-    "pregunta": "Uma tabela `orders` possui a coluna `customer_email` com esta máscara:\n\n```sql\nCRIAR FUNÇÃO catalog.schema.email_mask(e-mail STRING)\nCADEIA DE RETORNOS\nCASO DE DEVOLUÇÃO\n  QUANDO is_account_group_member('admins') ENTÃO e-mail\n  ELSE CONCAT('****@', SPLIT(e-mail, '@')[1])\nFIM;\n```\n\nUm usuário não administrador vê `****@gmail.com` para um e-mail de `frank@gmail.com`. Este é o comportamento esperado?",
+    "pregunta": "Uma tabela `orders` possui a coluna `customer_email` com esta máscara:\n\n```sql\nCREATE FUNCTION catalog.schema.email_mask(email STRING)\nRETURNS STRING\nRETURN CASE\n  WHEN is_account_group_member('admins') THEN email\n  ELSE CONCAT('****@', SPLIT(email, '@')[1])\nEND;\n```\n\nUm usuário não administrador vê `****@gmail.com` para um e-mail de `frank@gmail.com`. Este é o comportamento esperado?",
     "opciones": [
       {
         "texto_opcion": "Sim — a função preserva o domínio do e-mail (`gmail.com`) enquanto mascara a parte local (`frank`) com `****`.",
@@ -599,12 +599,12 @@
     "pregunta": "Um engenheiro de dados deseja verificar quais máscaras de coluna e filtros de linha são aplicados a `catalog.schema.users`. Qual comando mostra essas informações?",
     "opciones": [
       {
-        "texto_opcion": "`MOSTRAR GRANTS NA TABELA catalog.schema.users;`, `SHOW GRANTS` mostra privilégios grants.",
+        "texto_opcion": "`MOSTRAR GRANTS ON TABLE catalog.schema.users;`, `SHOW GRANTS` mostra privilégios grants.",
         "es_correcta": false,
         "explicacion": "`SHOW GRANTS` mostra privilégios grants (SELECT, MODIFY, etc.) - máscaras de coluna ou políticas de filtro de linha não aplicadas."
       },
       {
-        "texto_opcion": "`MOSTRAR POLÍTICAS NA TABELA catalog.schema.users;`, `SHOW POLICIES` não é um comando SQL padrão do.",
+        "texto_opcion": "`MOSTRAR POLÍTICAS ON TABLE catalog.schema.users;`, `SHOW POLICIES` não é um comando SQL padrão do.",
         "es_correcta": false,
         "explicacion": "`SHOW POLICIES` não é um comando SQL padrão do Databricks. `DESCRIBE TABLE EXTENDED` é o comando correto para visualizar máscaras e filtros aplicados."
       },
@@ -655,7 +655,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados aplica o seguinte filtro de linha:\n\n```sql\nCRIAR FUNÇÃO catalog.schema.admin_only()\nRETORNA BOOLEAN\nRETURN is_account_group_member('administradores');\n\nALTER TABLE catalog.schema.sensitive_table\nDEFINIR FILTRO DE LINHA catalog.schema.admin_only ON();\n```\n\nO que um usuário não administrador vê quando consulta `SELECT COUNT(*) FROM catalog.schema.sensitive_table`?",
+    "pregunta": "Um engenheiro de dados aplica o seguinte filtro de linha:\n\n```sql\nCREATE FUNCTION catalog.schema.admin_only()\nRETURNS BOOLEAN\nRETURN is_account_group_member('admins');\n\nALTER TABLE catalog.schema.sensitive_table\nSET ROW FILTER catalog.schema.admin_only ON ();\n```\n\nO que um usuário não administrador vê quando consulta `SELECT COUNT(*) FROM catalog.schema.sensitive_table`?",
     "opciones": [
       {
         "texto_opcion": "NULL — quando nenhuma linha passa no filtro, COUNT(*) retorna NULL",

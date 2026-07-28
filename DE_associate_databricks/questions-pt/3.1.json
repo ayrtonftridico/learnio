@@ -90,7 +90,7 @@
     ]
   },
   {
-    "pregunta": "Um pipeline lê uma tabela Bronze e aplica as seguintes transformações:\n\n```píton\ndf = spark.read.table(\"bronze.pedidos\")\ndf_limpo = (\n    df.dropDuplicates([\"id_pedido\"])\n      .filter(df.order_id.isNotNull())\n      .withColumn(\"quantidade\", df.amount.cast(\"duplo\"))\n)\ndf_clean.write.format(\"delta\").saveAsTable(\"silver.orders\")\n```\n\nQual camada Medallion a saída representa?",
+    "pregunta": "Um pipeline lê uma tabela Bronze e aplica as seguintes transformações:\n\n```python\ndf = spark.read.table(\"bronze.orders\")\ndf_clean = (\n    df.dropDuplicates([\"order_id\"])\n      .filter(df.order_id.isNotNull())\n      .withColumn(\"amount\", df.amount.cast(\"double\"))\n)\ndf_clean.write.format(\"delta\").saveAsTable(\"silver.orders\")\n```\n\nQual camada Medallion a saída representa?",
     "opciones": [
       {
         "texto_opcion": "Bronze — o código é lido de uma fonte Bronze, portanto a saída também é Bronze",
@@ -213,7 +213,7 @@
     ]
   },
   {
-    "pregunta": "Um streaming table recebe eventos de clickstream brutos e deve colocá-los no Lakehouse com latência mínima e sem transformação. Qual camada e padrão de gravação estão corretos?\n\n```píton\n(faísca.readStream\n     .formato(\"cloudFiles\")\n     .option(\"cloudFiles.formato\", \"json\")\n     .load(\"/mnt/raw/cliques\")\n     .writeStream\n     .formato(\"delta\")\n     .outputMode(\"acrescentar\")\n     .option(\"localização do checkpoint\", \"/chk/bronze_clicks\")\n     .table(\"bronze.cliques\"))\n```",
+    "pregunta": "Um streaming table recebe eventos de clickstream brutos e deve colocá-los no Lakehouse com latência mínima e sem transformação. Qual camada e padrão de gravação estão corretos?\n\n```python\n(spark.readStream\n     .format(\"cloudFiles\")\n     .option(\"cloudFiles.format\", \"json\")\n     .load(\"/mnt/raw/clicks\")\n     .writeStream\n     .format(\"delta\")\n     .outputMode(\"append\")\n     .option(\"checkpointLocation\", \"/chk/bronze_clicks\")\n     .table(\"bronze.clicks\"))\n```",
     "opciones": [
       {
         "texto_opcion": "Prata – o padrão de gravação de streaming implica que os dados já estão limpos",
@@ -306,7 +306,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o código a seguir para construir uma tabela da camada Gold a partir de `silver.customers`. O que há de correto nessa implementação?\n\n```píton\ndf = spark.read.table(\"prata.clientes\")\n(\n    df.groupBy(\"país\")\n      .agg(count(\"customer_id\").alias(\"total_customers\"))\n      .write.formato(\"delta\")\n      .mode(\"sobrescrever\")\n      .saveAsTable(\"gold.customers_by_country\")\n)\n```",
+    "pregunta": "Um engenheiro de dados escreve o código a seguir para construir uma tabela da camada Gold a partir de `silver.customers`. O que há de correto nessa implementação?\n\n```python\ndf = spark.read.table(\"silver.customers\")\n(\n    df.groupBy(\"country\")\n      .agg(count(\"customer_id\").alias(\"total_customers\"))\n      .write.format(\"delta\")\n      .mode(\"overwrite\")\n      .saveAsTable(\"gold.customers_by_country\")\n)\n```",
     "opciones": [
       {
         "texto_opcion": "O código está errado porque as tabelas Gold devem usar o modo `append`, não `overwrite`",
@@ -646,7 +646,7 @@
     ]
   },
   {
-    "pregunta": "O pipeline a seguir lê do Bronze e grava no Gold, ignorando completamente o Silver:\n\n```píton\ndf = spark.read.table(\"bronze.transações\")\n(\n    df.filtro(df.quantidade > 0)\n      .groupBy(\"comerciante_id\")\n      .agg(soma(\"quantidade\").alias(\"total_vendas\"))\n      .write.formato(\"delta\")\n      .mode(\"sobrescrever\")\n      .saveAsTable(\"gold.merchant_totals\")\n)\n```\n\nQual é o principal risco deste design?",
+    "pregunta": "O pipeline a seguir lê do Bronze e grava no Gold, ignorando completamente o Silver:\n\n```python\ndf = spark.read.table(\"bronze.transactions\")\n(\n    df.filter(df.amount > 0)\n      .groupBy(\"merchant_id\")\n      .agg(sum(\"amount\").alias(\"total_sales\"))\n      .write.format(\"delta\")\n      .mode(\"overwrite\")\n      .saveAsTable(\"gold.merchant_totals\")\n)\n```\n\nQual é o principal risco deste design?",
     "opciones": [
       {
         "texto_opcion": "Agregar diretamente do Bronze significa que a tabela Gold pode incluir dados duplicados.",

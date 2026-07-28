@@ -1,6 +1,6 @@
 [
   {
-    "pregunta": "Um engenheiro de dados define a seguinte expectativa em um pipeline Lakeflow SDP:\n\n```píton\nde pipelines de importação do pyspark como dp\n\n@dp.table()\n@dp.expect(\"preço_válido\", \"preço >= 0\")\nprodutos def():\n    retornar spark.readStream.table(\"raw.produtos\")\n```\n\nO que acontece com os registros onde o `preço` é negativo?",
+    "pregunta": "Um engenheiro de dados define a seguinte expectativa em um pipeline Lakeflow SDP:\n\n```python\nfrom pyspark import pipelines as dp\n\n@dp.table()\n@dp.expect(\"valid_price\", \"price >= 0\")\ndef products():\n    return spark.readStream.table(\"raw.products\")\n```\n\nO que acontece com os registros onde o `preço` é negativo?",
     "opciones": [
       {
         "texto_opcion": "Eles são gravados na tabela de destino e a violação é rastreada nas métricas.",
@@ -58,7 +58,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados precisa garantir que os registros sem um `customer_id` **nunca sejam gravados** na tabela Silver. Qual decorador consegue isso?\n\n```píton\nde pipelines de importação do pyspark como dp\n\n@dp.table()\n@dp.???  (\"non_null_customer\", \"customer_id NÃO É NULO\")\ndef pedidos_prata():\n    retornar spark.readStream.table(\"bronze.orders\")\n```",
+    "pregunta": "Um engenheiro de dados precisa garantir que os registros sem um `customer_id` **nunca sejam gravados** na tabela Silver. Qual decorador consegue isso?\n\n```python\nfrom pyspark import pipelines as dp\n\n@dp.table()\n@dp.???  (\"non_null_customer\", \"customer_id IS NOT NULL\")\ndef silver_orders():\n    return spark.readStream.table(\"bronze.orders\")\n```",
     "opciones": [
       {
         "texto_opcion": "`@dp.expect_or_drop`.",
@@ -116,7 +116,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve a seguinte definição de pipeline SQL:\n\n```sql\nCRIAR OU ATUALIZAR STREAMING TABLE clean_events (\n  CONSTRAINT valid_ts EXPECT (event_ts > '2020-01-01') NA LINHA DE QUEDA DE VIOLAÇÃO\n)\nAS SELECT * FROM STREAM(raw.events);\n```\n\nQual é o efeito de `ON VIOLATION DROP ROW`?",
+    "pregunta": "Um engenheiro de dados escreve a seguinte definição de pipeline SQL:\n\n```sql\nCREATE OR REFRESH STREAMING TABLE clean_events (\n  CONSTRAINT valid_ts EXPECT (event_ts > '2020-01-01') ON VIOLATION DROP ROW\n)\nAS SELECT * FROM STREAM(raw.events);\n```\n\nQual é o efeito de `ON VIOLATION DROP ROW`?",
     "opciones": [
       {
         "texto_opcion": "Registros onde `event_ts <= '2020-01-01'` são excluídos de `clean_events` e a contagem é registrada.",
@@ -174,27 +174,27 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados deseja impor duas regras de qualidade em um streaming table e **descartar** qualquer registro que falhe em qualquer uma das regras. Qual abordagem Python está correta?\n\n```píton\nde pipelines de importação do pyspark como dp\n```",
+    "pregunta": "Um engenheiro de dados deseja impor duas regras de qualidade em um streaming table e **descartar** qualquer registro que falhe em qualquer uma das regras. Qual abordagem Python está correta?\n\n```python\nfrom pyspark import pipelines as dp\n```",
     "opciones": [
       {
-        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_all_or_drop\ndef pedidos_limpos():\n    retornar spark.readStream.table\n```.",
-        "es_correcta": true,
-        "explicacion": "`@dp.expect_all_or_drop` aceita um ditado de pares `{name: restrição}` e descarta qualquer registro que falhe em pelo menos uma regra."
-      },
-      {
-        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_or_drop\n@dp.expect_or_drop\ndef pedidos_limpos():\n    retornar spark.readStream.table\n```",
+        "texto_opcion": "```python\n@dp.table()\n@dp.expect_or_drop([\"id IS NOT NULL\", \"quantity > 0\"])\ndef clean_orders():\n    return spark.readStream.table(\"bronze.orders\")\n```",
         "es_correcta": false,
         "explicacion": "Embora empilhar decoradores `@dp.expect_or_drop` seja possível, `@dp.expect_all_or_drop` é a maneira idiomática e mais limpa de aplicar múltiplas regras DROP."
       },
       {
-        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_all\ndef pedidos_limpos():\n    retornar spark.readStream.table\n```, `@dp.expect_all` aplica a ação WARN, `@dp.expect_all` aplica a ação WARN",
+        "texto_opcion": "```python\n@dp.table()\n@dp.expect_all\ndef clean_orders():\n    return spark.readStream.table\n```, `@dp.expect_all` applies the WARN action, not DROP. Violating records would still be written to the target.",
         "es_correcta": false,
         "explicacion": "`@dp.expect_all` aplica a ação WARN, não DROP. Os registros violados ainda seriam gravados no destino."
       },
       {
-        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_or_drop([\"id NÃO É NULO\", \"quantidade > 0\"])\ndef pedidos_limpos():\n    retornar spark.readStream.table(\"bronze.orders\")\n```",
+        "texto_opcion": "```python\n@dp.table()\n@dp.expect_or_drop\n@dp.expect_or_drop\ndef clean_orders():\n    return spark.readStream.table\n```",
         "es_correcta": false,
         "explicacion": "`@dp.expect_or_drop` requer exatamente dois argumentos de string (nome, restrição), não uma lista. Use `@dp.expect_all_or_drop` para múltiplas regras."
+      },
+      {
+        "texto_opcion": "```python\n@dp.table()\n@dp.expect_all_or_drop\ndef clean_orders():\n    return spark.readStream.table\n```.",
+        "es_correcta": true,
+        "explicacion": "`@dp.expect_all_or_drop` aceita um ditado de pares `{name: restrição}` e descarta qualquer registro que falhe em pelo menos uma regra."
       }
     ],
     "tags": [
@@ -232,7 +232,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte código:\n\n```píton\nde pipelines de importação do pyspark como dp\n\n@dp.table()\n@dp.expect_all_or_fail({\n    \"non_null_id\": \"order_id NÃO É NULO\",\n    \"valid_status\": \"status IN ('ABERTO','FECHADO','PENDENTE')\"\n})\ndef pedidos_críticos():\n    retornar spark.readStream.table(\"silver.orders\")\n```\n\nUm registro recebido possui `order_id = NULL` e `status = 'OPEN'`. O que acontece?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte código:\n\n```python\nfrom pyspark import pipelines as dp\n\n@dp.table()\n@dp.expect_all_or_fail({\n    \"non_null_id\":   \"order_id IS NOT NULL\",\n    \"valid_status\":  \"status IN ('OPEN','CLOSED','PENDING')\"\n})\ndef critical_orders():\n    return spark.readStream.table(\"silver.orders\")\n```\n\nUm registro recebido possui `order_id = NULL` e `status = 'OPEN'`. O que acontece?",
     "opciones": [
       {
         "texto_opcion": "A atualização do pipeline falha porque `non_null_id` foi violado.",
@@ -261,7 +261,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados usa a seguinte definição SQL:\n\n```sql\nCRIAR OU ATUALIZAR STREAMING TABLEorders_silver (\n  CONSTRAINT valid_amount EXPECT (valor > 0),\n  CONSTRAINT valid_category EXPECT (categoria IN ('A','B','C')) ON VIOLATION DROP ROW\n)\nAS SELECT * FROM STREAM(bronze.orders);\n```\n\nUm registro tem `amount = -5` e `category = 'A'`. O que acontece?",
+    "pregunta": "Um engenheiro de dados usa a seguinte definição SQL:\n\n```sql\nCREATE OR REFRESH STREAMING TABLE orders_silver (\n  CONSTRAINT valid_amount   EXPECT (amount > 0),\n  CONSTRAINT valid_category EXPECT (category IN ('A','B','C')) ON VIOLATION DROP ROW\n)\nAS SELECT * FROM STREAM(bronze.orders);\n```\n\nUm registro tem `amount = -5` e `category = 'A'`. O que acontece?",
     "opciones": [
       {
         "texto_opcion": "O pipeline falha porque `amount > 0` foi violado",
@@ -319,7 +319,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados deseja garantir que `data_inicial <= data_final` e ambas as colunas sejam não nulas, usando uma única expectativa com ação WARN. Qual restrição está correta?\n\n```píton\n@dp.expect(???, ???)\n```",
+    "pregunta": "Um engenheiro de dados deseja garantir que `data_inicial <= data_final` e ambas as colunas sejam não nulas, usando uma única expectativa com ação WARN. Qual restrição está correta?\n\n```python\n@dp.expect(???, ???)\n```",
     "opciones": [
       {
         "texto_opcion": "`@dp.expect(\"datas_validas\", \"data_inicial NÃO É NULO E data_final NÃO É NULO E data_inicial.",
@@ -351,22 +351,22 @@
     "pregunta": "Um engenheiro de dados cria uma tabela Delta diretamente (fora de um pipeline) e deseja garantir que a `quantidade` nunca seja negativa. Qual instrução SQL atinge a aplicação em nível de tabela?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nInventário CREATE TABLE (\n  item_idSTRING,\n  quantidade INT CHECK (quantidade >= 0)\n);\n```.",
-        "es_correcta": true,
-        "explicacion": "As restrições `CHECK` são aplicadas no nível da tabela Delta para todas as gravações. Qualquer tentativa de inserir ou atualizar uma linha que viole `quantidade >= 0` será rejeitada."
-      },
-      {
-        "texto_opcion": "```sql\nInventário CREATE TABLE (\n  item_idSTRING,\n  quantidade INT EXPECT (quantidade >= 0)\n);\n```",
+        "texto_opcion": "```sql\nCREATE TABLE inventory (\n  item_id STRING,\n  quantity INT EXPECT (quantity >= 0)\n);\n```",
         "es_correcta": false,
         "explicacion": "`EXPECT` é a sintaxe do pipeline SDP, não é um DDL válido para uma tabela Delta independente. Use `CHECK` para restrições em nível de tabela."
       },
       {
-        "texto_opcion": "```sql\nInventário CREATE TABLE (\n  item_idSTRING,\n  quantidade INT CONSTRAINT quantidade_positiva WARN\n);\n```",
+        "texto_opcion": "```sql\nCREATE TABLE inventory (\n  item_id STRING,\n  quantity INT CONSTRAINT positive_qty WARN\n);\n```",
         "es_correcta": false,
         "explicacion": "WARN é uma ação de expectativa de pipeline, não uma palavra-chave de restrição de tabela Delta."
       },
       {
-        "texto_opcion": "```sql\nInventário CREATE TABLE (\n  item_idSTRING,\n  quantidade INT NÃO NULO\n);\n```, `NOT NULL` evita valores nulos",
+        "texto_opcion": "```sql\nCREATE TABLE inventory (\n  item_id STRING,\n  quantity INT CHECK (quantity >= 0)\n);\n```.",
+        "es_correcta": true,
+        "explicacion": "As restrições `CHECK` são aplicadas no nível da tabela Delta para todas as gravações. Qualquer tentativa de inserir ou atualizar uma linha que viole `quantidade >= 0` será rejeitada."
+      },
+      {
+        "texto_opcion": "```sql\nCREATE TABLE inventory (\n  item_id STRING,\n  quantity INT NOT NULL\n);\n```",
         "es_correcta": false,
         "explicacion": "`NOT NULL` evita valores nulos, mas não evita números inteiros negativos. `CHECK (quantity >= 0)` é necessário para a restrição de intervalo."
       }
@@ -464,7 +464,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o código a seguir. O que há de errado?\n\n```píton\nde pipelines de importação do pyspark como dp\n\n@dp.table()\n@dp.expect_all_or_fail(\"non_null_id\", \"order_id NÃO É NULO\")\ndef pedidos_críticos():\n    retornar spark.readStream.table(\"silver.orders\")\n```",
+    "pregunta": "Um engenheiro de dados escreve o código a seguir. O que há de errado?\n\n```python\nfrom pyspark import pipelines as dp\n\n@dp.table()\n@dp.expect_all_or_fail(\"non_null_id\", \"order_id IS NOT NULL\")\ndef critical_orders():\n    return spark.readStream.table(\"silver.orders\")\n```",
     "opciones": [
       {
         "texto_opcion": "`@dp.expect_all_or_fail` requer um argumento dict, não duas strings posicionais.",
@@ -522,7 +522,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve o seguinte SQL:\n\n```sql\nCRIAR OU ATUALIZAR pagamentos STREAMING TABLE (\n  CONSTRAINT non_null_txn EXPECT (txn_id IS NOT NULL) NA ATUALIZAÇÃO DE FALHA DE VIOLAÇÃO,\n  CONSTRAINT Positive_amt EXPECT (quantidade > 0) ON VIOLATION DROP ROW\n)\nAS SELECT * FROM STREAM(bronze.payments);\n```\n\nUm registro chega com `txn_id = NULL` e `amount = 50`. O que acontece?",
+    "pregunta": "Um engenheiro de dados escreve o seguinte SQL:\n\n```sql\nCREATE OR REFRESH STREAMING TABLE payments (\n  CONSTRAINT non_null_txn   EXPECT (txn_id IS NOT NULL)   ON VIOLATION FAIL UPDATE,\n  CONSTRAINT positive_amt   EXPECT (amount > 0)            ON VIOLATION DROP ROW\n)\nAS SELECT * FROM STREAM(bronze.payments);\n```\n\nUm registro chega com `txn_id = NULL` e `amount = 50`. O que acontece?",
     "opciones": [
       {
         "texto_opcion": "Ambas as restrições são avaliadas de forma independente; o registro é descartado para `non_null_txn` e retido para `positivo_amt`.",
@@ -551,7 +551,7 @@
     ]
   },
   {
-    "pregunta": "O SQL a seguir cria um streaming table. Qual afirmação é verdadeira sobre a expectativa definida?\n\n```sql\nCRIAR OU ATUALIZAR STREAMING TABLE clean_users (\n  CONSTRAINT valid_email EXPECT (e-mail RLIKE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$')\n)\nAS SELECT * FROM STREAM(raw.users);\n```",
+    "pregunta": "O SQL a seguir cria um streaming table. Qual afirmação é verdadeira sobre a expectativa definida?\n\n```sql\nCREATE OR REFRESH STREAMING TABLE clean_users (\n  CONSTRAINT valid_email EXPECT (email RLIKE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$')\n)\nAS SELECT * FROM STREAM(raw.users);\n```",
     "opciones": [
       {
         "texto_opcion": "Registros com e-mails inválidos são eliminados porque as validações RLIKE sempre aplicam o comportamento DROP.",
@@ -667,7 +667,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados executa o seguinte código:\n\n```píton\nde pipelines de importação do pyspark como dp\n\n@dp.table()\n@dp.expect(\"status_válido\", \"\"\"\n  CASO\n    WHEN tipo = 'ORDER' THEN status IN ('PENDING','COMPLETED')\n    WHEN tipo = 'REEMBOLSO' THEN status IN ('PENDING','APPROVED')\n    ELSE falso\n  FIM\n\"\"\")\ndef validadas_transações():\n    retornar spark.readStream.table(\"bronze.transactions\")\n```\n\nUm registro chega com `type = 'ORDER'` e `status = 'APPROVED'`. O que acontece?",
+    "pregunta": "Um engenheiro de dados executa o seguinte código:\n\n```python\nfrom pyspark import pipelines as dp\n\n@dp.table()\n@dp.expect(\"valid_status\", \"\"\"\n  CASE\n    WHEN type = 'ORDER' THEN status IN ('PENDING','COMPLETED')\n    WHEN type = 'REFUND' THEN status IN ('PENDING','APPROVED')\n    ELSE false\n  END\n\"\"\")\ndef validated_transactions():\n    return spark.readStream.table(\"bronze.transactions\")\n```\n\nUm registro chega com `type = 'ORDER'` e `status = 'APPROVED'`. O que acontece?",
     "opciones": [
       {
         "texto_opcion": "O registro é gravado em `validated_transactions` com a violação `valid_status` sinalizada.",
@@ -841,7 +841,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados escreve:\n\n```píton\nde pipelines de importação do pyspark como dp\n\nregras = {\n    \"non_null_id\": \"order_id NÃO É NULO\",\n    \"valid_amount\": \"valor ENTRE 0 E 1000000\",\n    \"valid_currency\": \"moeda IN ('USD','EUR','GBP')\"\n}\n\n@dp.table()\n@dp.expect_all(regras)\ndef pedidos_prata():\n    retornar spark.readStream.table(\"bronze.orders\")\n```\n\nUm registro tem `order_id = NULL`, `amount = 500`, `currency = 'USD'`. O que acontece?",
+    "pregunta": "Um engenheiro de dados escreve:\n\n```python\nfrom pyspark import pipelines as dp\n\nrules = {\n    \"non_null_id\":    \"order_id IS NOT NULL\",\n    \"valid_amount\":   \"amount BETWEEN 0 AND 1000000\",\n    \"valid_currency\": \"currency IN ('USD','EUR','GBP')\"\n}\n\n@dp.table()\n@dp.expect_all(rules)\ndef silver_orders():\n    return spark.readStream.table(\"bronze.orders\")\n```\n\nUm registro tem `order_id = NULL`, `amount = 500`, `currency = 'USD'`. O que acontece?",
     "opciones": [
       {
         "texto_opcion": "O registro é gravado em `silver_orders`; a violação `non_null_id` é rastreada.",
@@ -873,22 +873,22 @@
     "pregunta": "Um engenheiro de dados precisa configurar uma camada Gold materialized view com aplicação de qualidade. A equipe deseja que os registros com `total_sales < 0` sejam **descartados** e os registros com uma região `NULL` sejam **avisados, mas retidos**. Qual código SDP Python está correto?",
     "opciones": [
       {
-        "texto_opcion": "```píton\n@dp.materialized_view()\n@dp.expect\n@dp.expect_or_drop\ndef gold_sales_summary():\n    retornar spark.read.table\n```.",
+        "texto_opcion": "```python\n@dp.materialized_view()\n@dp.expect\n@dp.expect_or_drop\ndef gold_sales_summary():\n    return spark.read.table\n```.",
         "es_correcta": true,
         "explicacion": "O empilhamento `@dp.expect` (WARN) e `@dp.expect_or_drop` (DROP) aplica ações diferentes a cada regra independentemente no mesmo conjunto de dados."
       },
       {
-        "texto_opcion": "```píton\n@dp.materialized_view()\n@dp.expect_all_or_drop\ndef gold_sales_summary():\n    retornar spark.read.table\n```",
+        "texto_opcion": "```python\n@dp.materialized_view()\n@dp.expect_all\ndef gold_sales_summary():\n    return spark.read.table\n```",
         "es_correcta": false,
         "explicacion": "`@dp.expect_all_or_drop` aplica DROP a todas as regras. Não pode aplicar WARN a uma regra e DROP a outra."
       },
       {
-        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_or_drop\ndef gold_sales_summary():\n    retornar spark.read.table\n```",
+        "texto_opcion": "```python\n@dp.materialized_view()\n@dp.expect_all_or_drop\ndef gold_sales_summary():\n    return spark.read.table\n```",
         "es_correcta": false,
         "explicacion": "`@dp.expect_or_drop` leva dois argumentos de string posicionais (nome, restrição), não um ditado. Use `@dp.expect_all_or_drop` para DROP de múltiplas regras no estilo dict."
       },
       {
-        "texto_opcion": "```píton\n@dp.materialized_view()\n@dp.expect_all\ndef gold_sales_summary():\n    retornar spark.read.table\n```",
+        "texto_opcion": "```python\n@dp.table()\n@dp.expect_or_drop\ndef gold_sales_summary():\n    return spark.read.table\n```",
         "es_correcta": false,
         "explicacion": "`@dp.expect_all` aplica a mesma ação WARN a todas as regras. Não é possível misturar ações WARN e DROP em um único decorador."
       }
