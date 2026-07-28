@@ -7,5 +7,5 @@ window.LEARNIO = {
   buyMeACoffee: "https://www.buymeacoffee.com/ayrtontridico",
   github: "",
   description:
-    "Large question banks for Databricks DE Associate, DE Professional, and AWS DEA-C01. Practice in PT-BR or EN. Progress stays in your browser.",
+    "Large question banks for Databricks DE Associate, DE Professional, and AWS DEA-C01. Practice in English or PT-BR. Progress stays in your browser.",
 };

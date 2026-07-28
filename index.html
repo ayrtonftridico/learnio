@@ -58,6 +58,28 @@
       text-decoration: none;
     }
     .topnav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    #lang-switch {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-card);
+    }
+    #lang-switch button {
+      border: none;
+      background: transparent;
+      color: var(--ink-dim);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      padding: 7px 12px;
+      cursor: pointer;
+    }
+    #lang-switch button + button { border-left: 1px solid var(--line); }
+    #lang-switch button.active {
+      background: rgba(211,150,62,.16);
+      color: var(--amber);
+    }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -313,47 +335,46 @@
     <nav class="topnav">
       <a class="brand" href="index.html" id="brand">learn.io</a>
       <div class="topnav-actions">
+        <div id="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-lang="en" class="active">EN</button>
+          <button type="button" data-lang="pt">PT</button>
+        </div>
         <a class="btn btn-coffee" id="bmcTop" href="#" target="_blank" rel="noopener">Buy me a coffee</a>
       </div>
     </nav>
 
     <header class="hero">
-      <p class="eyebrow" id="tagline">Free practice</p>
-      <h1>Study Data Engineering certifications at your pace</h1>
-      <p class="lead">
-        Large question banks with official product terms kept in English — the way the real exam reads.
+      <p class="eyebrow" id="uiTagline">Free practice</p>
+      <h1 id="uiTitle">Study Data Engineering certifications at your pace</h1>
+      <p class="lead" id="uiLead">
+        Large question banks shaped like the real certifications.
         Practice mode or timed mock exams. Progress stays in your browser.
       </p>
-      <div class="hero-meta" id="heroMeta">
-        <span>Free</span>
-        <span>PT-BR + EN</span>
-        <span>No login</span>
-        <span>Mock exams</span>
-      </div>
+      <div class="hero-meta" id="heroMeta"></div>
     </header>
 
     <div class="features">
       <div class="feature">
-        <h3>Exam-shaped practice</h3>
-        <p>Four options, explanations, and vocabulary like job cluster / workspace left untranslated on purpose.</p>
+        <h3 id="f1t">Exam-shaped practice</h3>
+        <p id="f1p">Four options, clear explanations, and coverage mapped to the official exam domains.</p>
       </div>
       <div class="feature">
-        <h3>Mock exam mode</h3>
-        <p>Random sample sized like the real test, countdown timer, score at the end — then review what you missed.</p>
+        <h3 id="f2t">Mock exam mode</h3>
+        <p id="f2p">Random sample sized like the real test, countdown timer, score at the end — then review what you missed.</p>
       </div>
       <div class="feature">
-        <h3>Your progress</h3>
-        <p>Saved per exam in localStorage. Export JSON/CSV anytime. Nothing is sent to a server.</p>
+        <h3 id="f3t">Your progress</h3>
+        <p id="f3p">Saved in your browser for each exam. Export anytime — nothing leaves your device.</p>
       </div>
     </div>
 
-    <p class="section-label">Choose an exam</p>
+    <p class="section-label" id="uiChoose">Choose an exam</p>
     <div class="grid" id="grid"></div>
 
     <section class="donate" id="donate">
       <div>
-        <h2>Useful? A coffee keeps this free</h2>
-        <p>
+        <h2 id="uiDonateTitle">Useful? A coffee keeps this free</h2>
+        <p id="uiDonateBody">
           learn.io is free. If it helps you pass, Buy Me a Coffee is the easiest way to support maintenance and new banks.
         </p>
       </div>
@@ -362,23 +383,114 @@
 
     <footer>
       <span id="footerAuthor">learn.io</span>
-      <span>Quiz shortcuts: ↑ ↓ · → confirm · ← · A–E · G · ?</span>
+      <span id="uiShortcuts">Quiz shortcuts: ↑ ↓ · → confirm · ← · A–E · G · ?</span>
     </footer>
   </div>
   <script>
     (function () {
       const cfg = window.LEARNIO || {};
       const bmc = cfg.buyMeACoffee || 'https://www.buymeacoffee.com/';
+      let uiLang = (localStorage.getItem('learnioLang') || 'en').toLowerCase();
+      if (uiLang !== 'en' && uiLang !== 'pt') uiLang = 'en';
+
+      const I18N = {
+        en: {
+          tagline: cfg.tagline || 'Free practice for Data Engineering certifications',
+          title: 'Study Data Engineering certifications at your pace',
+          lead: 'Large question banks shaped like the real certifications. Practice mode or timed mock exams. Progress stays in your browser.',
+          free: 'Free', langBadge: 'EN + PT-BR', noLogin: 'No login', mockBadge: 'Mock exams',
+          choose: 'Choose an exam',
+          f1t: 'Exam-shaped practice',
+          f1p: 'Four options, clear explanations, and coverage mapped to the official exam domains.',
+          f2t: 'Mock exam mode',
+          f2p: 'Random sample sized like the real test, countdown timer, score at the end — then review what you missed.',
+          f3t: 'Your progress',
+          f3p: 'Saved in your browser for each exam. Export anytime — nothing leaves your device.',
+          donateTitle: 'Useful? A coffee keeps this free',
+          donateBody: 'learn.io is free. If it helps you pass, Buy Me a Coffee is the easiest way to support maintenance and new banks.',
+          coffee: 'Buy me a coffee',
+          questions: 'questions',
+          realExam: 'min (real exam)',
+          mockQ: 'q. mock',
+          progress: 'Your practice progress',
+          notStarted: 'Not started yet',
+          practice: 'Practice',
+          mock: 'Mock exam',
+          shortcuts: 'Quiz shortcuts: ↑ ↓ · → confirm · ← · A–E · G · ?',
+          catalogErr: 'Could not load the catalog. Refresh the page.'
+        },
+        pt: {
+          tagline: 'Treino gratuito para certificações de Data Engineering',
+          title: 'Estude certificações de Data Engineering no seu ritmo',
+          lead: 'Bancos grandes no formato das certificações reais. Modo prática ou simulado com timer. Progresso fica no navegador.',
+          free: 'Grátis', langBadge: 'EN + PT-BR', noLogin: 'Sem login', mockBadge: 'Simulados',
+          choose: 'Escolha a prova',
+          f1t: 'Prática no formato da prova',
+          f1p: 'Quatro alternativas, explicações claras e cobertura alinhada aos domínios oficiais da prova.',
+          f2t: 'Modo simulado',
+          f2p: 'Amostra aleatória no tamanho da prova real, cronômetro e nota no fim — depois revise o que errou.',
+          f3t: 'Seu progresso',
+          f3p: 'Salvo no navegador por prova. Exporte quando quiser — nada sai do seu dispositivo.',
+          donateTitle: 'Gostou? Um café mantém o projeto grátis',
+          donateBody: 'O learn.io é gratuito. Se estiver te ajudando a passar, o Buy Me a Coffee é a forma mais fácil de apoiar.',
+          coffee: 'Buy me a coffee',
+          questions: 'questões',
+          realExam: 'min (prova real)',
+          mockQ: 'q. simulado',
+          progress: 'Seu progresso',
+          notStarted: 'Ainda não começou',
+          practice: 'Praticar',
+          mock: 'Simulado',
+          shortcuts: 'Atalhos no quiz: ↑ ↓ · → confirma · ← · A–E · G · ?',
+          catalogErr: 'Não foi possível carregar o catálogo. Recarregue a página.'
+        }
+      };
+
       document.getElementById('brand').textContent = cfg.brand || 'learn.io';
-      document.getElementById('tagline').textContent = cfg.tagline || 'Free practice';
       document.getElementById('footerAuthor').textContent =
         (cfg.brand || 'learn.io') + (cfg.author ? ' · ' + cfg.author : '');
-      ['bmcTop', 'bmcBottom'].forEach(id => {
-        document.getElementById(id).href = bmc;
+      ['bmcTop', 'bmcBottom'].forEach(id => { document.getElementById(id).href = bmc; });
+
+      function t() { return I18N[uiLang] || I18N.en; }
+
+      function syncLangButtons() {
+        document.querySelectorAll('#lang-switch button').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === uiLang);
+        });
+      }
+
+      function applyUiCopy() {
+        const x = t();
+        document.documentElement.lang = uiLang === 'pt' ? 'pt-BR' : 'en';
+        document.getElementById('uiTagline').textContent = x.tagline;
+        document.getElementById('uiTitle').textContent = x.title;
+        document.getElementById('uiLead').textContent = x.lead;
+        document.getElementById('uiChoose').textContent = x.choose;
+        document.getElementById('f1t').textContent = x.f1t;
+        document.getElementById('f1p').textContent = x.f1p;
+        document.getElementById('f2t').textContent = x.f2t;
+        document.getElementById('f2p').textContent = x.f2p;
+        document.getElementById('f3t').textContent = x.f3t;
+        document.getElementById('f3p').textContent = x.f3p;
+        document.getElementById('uiDonateTitle').textContent = x.donateTitle;
+        document.getElementById('uiDonateBody').textContent = x.donateBody;
+        document.getElementById('bmcTop').textContent = x.coffee;
+        document.getElementById('bmcBottom').textContent = x.coffee;
+        document.getElementById('uiShortcuts').textContent = x.shortcuts;
+        syncLangButtons();
+      }
+
+      document.getElementById('lang-switch').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-lang]');
+        if (!btn || btn.dataset.lang === uiLang) return;
+        uiLang = btn.dataset.lang;
+        localStorage.setItem('learnioLang', uiLang);
+        applyUiCopy();
+        renderGrid(window.__EXAMS_DATA__);
       });
 
       function readProgress(examId) {
-        const keys = ['learnioQuiz_' + examId + '_pt', 'learnioQuiz_' + examId + '_en', 'learnioQuiz_' + examId];
+        const keys = ['learnioQuiz_' + examId + '_en', 'learnioQuiz_' + examId + '_pt', 'learnioQuiz_' + examId];
         let best = {};
         let bestN = -1;
         keys.forEach(k => {
@@ -397,40 +509,35 @@
         return { answered, correct, wrong: answered - correct };
       }
 
-      async function main() {
+      function renderGrid(data) {
         const grid = document.getElementById('grid');
-        let data;
-        try {
-          data = await (await fetch('exams.json')).json();
-        } catch (e) {
-          grid.innerHTML = '<p style="color:#d3663f">Could not load the catalog. Refresh the page.</p>';
-          return;
-        }
-
+        if (!data) return;
+        const x = t();
         const totalBank = (data.exams || []).reduce((s, e) => s + (e.bankCount || 0), 0);
         document.getElementById('heroMeta').innerHTML =
-          '<span>Free</span><span>PT-BR + EN</span><span>No login</span>' +
-          '<span>~' + totalBank.toLocaleString('en-US') + ' questions</span>';
+          `<span>${x.free}</span><span>${x.langBadge}</span><span>${x.noLogin}</span>` +
+          `<span>~${totalBank.toLocaleString(uiLang === 'pt' ? 'pt-BR' : 'en-US')} ${x.questions}</span>`;
 
         grid.innerHTML = data.exams.map(ex => {
           const pr = readProgress(ex.id);
           const pct = ex.bankCount ? Math.round((pr.answered / ex.bankCount) * 100) : 0;
           const hasProg = pr.answered > 0;
-          const practice = 'quiz.html?exam=' + encodeURIComponent(ex.id);
+          const blurb = uiLang === 'pt' ? (ex.blurbPt || ex.blurb) : ex.blurb;
+          const practice = 'quiz.html?exam=' + encodeURIComponent(ex.id) + '&lang=' + uiLang;
           const mock = practice + '&mode=sim';
           return `
             <div class="card">
               <div class="vendor">${ex.vendor}</div>
               <h2>${ex.short}</h2>
-              <p class="blurb">${ex.blurb}</p>
+              <p class="blurb">${blurb}</p>
               <div class="meta">
-                <span class="ok">${ex.bankCount} questions</span>
-                <span>${ex.durationMinutes} min (real exam)</span>
-                <span>~${ex.realExamQuestions} q. mock</span>
+                <span class="ok">${ex.bankCount} ${x.questions}</span>
+                <span>${ex.durationMinutes} ${x.realExam}</span>
+                <span>~${ex.realExamQuestions} ${x.mockQ}</span>
               </div>
               <div class="progress-block">
                 <div class="progress-row">
-                  <span>${hasProg ? 'Your practice progress' : 'Not started yet'}</span>
+                  <span>${hasProg ? x.progress : x.notStarted}</span>
                   <span class="pct">${pct}%</span>
                 </div>
                 <div class="bar"><i style="width:${pct}%"></i></div>
@@ -441,12 +548,26 @@
                     <span>${pr.answered}/${ex.bankCount}</span>
                   </div>` : ''}
                 <div class="card-actions">
-                  <a class="btn btn-primary" href="${practice}">Practice</a>
-                  <a class="btn" href="${mock}">Mock exam</a>
+                  <a class="btn btn-primary" href="${practice}">${x.practice}</a>
+                  <a class="btn" href="${mock}">${x.mock}</a>
                 </div>
               </div>
             </div>`;
         }).join('');
+      }
+
+      async function main() {
+        applyUiCopy();
+        const grid = document.getElementById('grid');
+        let data;
+        try {
+          data = await (await fetch('exams.json')).json();
+        } catch (e) {
+          grid.innerHTML = '<p style="color:#d3663f">' + t().catalogErr + '</p>';
+          return;
+        }
+        window.__EXAMS_DATA__ = data;
+        renderGrid(data);
       }
       main();
     })();
