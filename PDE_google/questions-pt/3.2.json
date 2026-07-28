@@ -1,0 +1,1742 @@
+[
+  {
+    "pregunta": "tabela de fatos consultada quase sempre filtrada por event_date. Contexto: prestador de cuidados de saúde, painéis quase em tempo real.",
+    "opciones": [
+      {
+        "texto_opcion": "Nunca particione dados multi-TB",
+        "es_correcta": false,
+        "explicacion": "As varreduras completas dominam o custo."
+      },
+      {
+        "texto_opcion": "Particione em milhões de pequenas partições horárias sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Risco de sobrecarga de metadados."
+      },
+      {
+        "texto_opcion": "Particionar a tabela BigQuery por data_evento (DIA)",
+        "es_correcta": true,
+        "explicacion": "O particionamento de datas permite a eliminação de partições e o controle de custos."
+      },
+      {
+        "texto_opcion": "Partição por um literal constante",
+        "es_correcta": false,
+        "explicacion": "Poda inútil."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partição por data"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma de viagens com painéis quase em tempo real: consultas filtradas por customer_id e status após remoção de data. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Desative sempre o conselho de cluster",
+        "es_correcta": false,
+        "explicacion": "Perde otimização."
+      },
+      {
+        "texto_opcion": "Substitua o particionamento por clustering apenas para filtros de data obrigatórios na escala PB sem cuidado",
+        "es_correcta": false,
+        "explicacion": "O particionamento ainda é crítico para filtros de tempo."
+      },
+      {
+        "texto_opcion": "Agrupe a tabela por customer_id, status (ordene por seletividade/frequência de filtro)",
+        "es_correcta": true,
+        "explicacion": "O clustering classifica os dados para ignorar blocos nas partições."
+      },
+      {
+        "texto_opcion": "Cluster por uma coluna nunca usada em filtros",
+        "es_correcta": false,
+        "explicacion": "Pouco benefício."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Agrupamento"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma de viagens com consultas interativas em menos de um segundo: as ferramentas de BI precisam de fatos e dimensões de vendas compreensíveis. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Dimensões de clientes conflitantes duplicadas por equipe sem modelo compatível",
+        "es_correcta": false,
+        "explicacion": "Caos métrico."
+      },
+      {
+        "texto_opcion": "Modele esquemas estrela/floco de neve com dimensões conformadas em BigQuery",
+        "es_correcta": true,
+        "explicacion": "A modelagem dimensional permanece eficaz para a usabilidade do BI."
+      },
+      {
+        "texto_opcion": "Apenas uma gigantesca coluna de string JSON desnormalizada",
+        "es_correcta": false,
+        "explicacion": "Difícil para BI."
+      },
+      {
+        "texto_opcion": "Sem chaves ou definição de grãos",
+        "es_correcta": false,
+        "explicacion": "Métricas ambíguas."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Esquema estrela"
+    ]
+  },
+  {
+    "pregunta": "Uma plataforma de viagens (janelas de lote por hora, região norte da Europa) deve: decidir até que ponto normalizar os mercados de desembarque e de atendimento. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Mantenha o bruto mais próximo da fonte; atender mercados desnormalizados/amplos para desempenho de BI",
+        "es_correcta": true,
+        "explicacion": "As camadas do armazém equilibram a fidelidade do armazenamento versus a usabilidade da consulta."
+      },
+      {
+        "texto_opcion": "Force 6NF para cada exploração do Looker",
+        "es_correcta": false,
+        "explicacion": "Doloroso para BI."
+      },
+      {
+        "texto_opcion": "Substitua raw apenas por marts e perca detalhes da fonte",
+        "es_correcta": false,
+        "explicacion": "Dói o reprocessamento."
+      },
+      {
+        "texto_opcion": "Ignore a granularidade e misture linhas transacionais + agregadas",
+        "es_correcta": false,
+        "explicacion": "Métricas incorretas."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Troca de normalização"
+    ]
+  },
+  {
+    "pregunta": "Uma concessionária de energia (janelas batch horária, região Brasil Sul) deve: garantir capacidade SQL interativa para executivos durante o final do mês. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Compre aparelhos físicos embaixo das mesas",
+        "es_correcta": false,
+        "explicacion": "Não é gerenciamento de capacidade BQ."
+      },
+      {
+        "texto_opcion": "Desative todas as consultas simultâneas",
+        "es_correcta": false,
+        "explicacion": "Bloqueia o negócio."
+      },
+      {
+        "texto_opcion": "Espero que sob demanda nunca haja filas no final do mês",
+        "es_correcta": false,
+        "explicacion": "Risco."
+      },
+      {
+        "texto_opcion": "Use reservas/atribuições de edições BigQuery para slots de linha de base",
+        "es_correcta": true,
+        "explicacion": "As reservas proporcionam previsibilidade de capacidade versus pura contenção sob demanda."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Capacidade de slots"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de uma seguradora com residência estrita no GDPR: recarregue apenas a partição de ontem de forma idempotente. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Escreva na partição específica (partição WRITE_TRUNCATE) ou MERGE into naquele dia",
+        "es_correcta": true,
+        "explicacion": "Cargas com escopo de partição tornam as repetições diárias seguras e baratas."
+      },
+      {
+        "texto_opcion": "Anexar duplicatas para o mesmo dia para sempre",
+        "es_correcta": false,
+        "explicacion": "Quebra grãos."
+      },
+      {
+        "texto_opcion": "TRUNCATE toda a tabela plurianual diariamente",
+        "es_correcta": false,
+        "explicacion": "Destrutivo/caro."
+      },
+      {
+        "texto_opcion": "Carregue em um nome de tabela aleatório a cada hora, sem visualizações",
+        "es_correcta": false,
+        "explicacion": "Quebra do consumidor."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Cargas do decorador de partição"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de fintech de pagamentos com janelas de lote por hora: preserve sempre os itens de linha do pedido sem explodir em junções planas gigantescas. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Sempre explodir em trilhões de linhas planas sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Inchaço de armazenamento/verificação."
+      },
+      {
+        "texto_opcion": "Proibir STRUCTs mesmo quando ideal",
+        "es_correcta": false,
+        "explicacion": "Perde a força do BQ."
+      },
+      {
+        "texto_opcion": "Use esquemas aninhados ARRAY/STRUCT onde os padrões de acesso se ajustam",
+        "es_correcta": true,
+        "explicacion": "Campos repetidos aninhados modelam hierarquias de forma eficiente em BigQuery."
+      },
+      {
+        "texto_opcion": "Armazene itens de linha como capturas de tela opacas",
+        "es_correcta": false,
+        "explicacion": "Não questionável."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Aninhado repetido"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de uma seguradora com dados históricos em escala de petabytes: entender o clustering ajuda mais quando os filtros correspondem às colunas do cluster e os dados são atualizados cuidadosamente. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Espere que o clustering substitua toda a necessidade de partições em grandes séries temporais",
+        "es_correcta": false,
+        "explicacion": "Suposição arriscada."
+      },
+      {
+        "texto_opcion": "Projete colunas de cluster em torno de filtros seletivos comuns; evite lixo recluso inútil",
+        "es_correcta": true,
+        "explicacion": "O clustering é poderoso, mas não mágico; alinhar aos predicados."
+      },
+      {
+        "texto_opcion": "Agrupe por 40 colunas de baixo valor esperando por milagres",
+        "es_correcta": false,
+        "explicacion": "Retornos decrescentes."
+      },
+      {
+        "texto_opcion": "Reescreva cada linha de hora em hora para 'atualizar clustering'",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Limite de cluster"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (westeurope): centenas de atributos esparsos por entidade para análise. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "Sempre EAV para tudo, incluindo fatos simples",
+        "es_correcta": false,
+        "explicacion": "SQL doloroso."
+      },
+      {
+        "texto_opcion": "Escolha esquemas (colunas largas, aninhadas ou EAV com cuidado) com base em padrões de consulta e esparsidade nula",
+        "es_correcta": true,
+        "explicacion": "A modelagem de atributos deve seguir a forma como os analistas filtram e agregam."
+      },
+      {
+        "texto_opcion": "Ignore a dispersão e densifique explosivamente sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Desperdício."
+      },
+      {
+        "texto_opcion": "Uma coluna chamada dados contendo texto CSV arbitrário",
+        "es_correcta": false,
+        "explicacion": "Digitação fraca."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Largo vs alto"
+    ]
+  },
+  {
+    "pregunta": "Cenário da operadora de telecomunicações – lógica cara de KPI multi-join é executada dezenas de vezes por hora. O que eles deveriam implementar?",
+    "opciones": [
+      {
+        "texto_opcion": "Banir transformações agendadas",
+        "es_correcta": false,
+        "explicacion": "Forces repetiu computação pesada."
+      },
+      {
+        "texto_opcion": "Somente cache no navegador para sempre",
+        "es_correcta": false,
+        "explicacion": "Problemas inconsistentes/de segurança."
+      },
+      {
+        "texto_opcion": "Recalcular junções completas de vários TB em cada painel aberto sem cache/MV",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Crie tabelas mart materializadas programadas ou materialized views",
+        "es_correcta": true,
+        "explicacion": "A pré-computação reduz o custo repetido de slot/varredura para KPIs estáveis."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Materializar mercados"
+    ]
+  },
+  {
+    "pregunta": "Um varejista global (dados históricos em escala de petabytes, região norte da Europa) deve: precisar desfazer 7 dias para DML acidental em tabelas de armazém. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Grant permissão para todos soltarem livremente sem controles",
+        "es_correcta": false,
+        "explicacion": "Aumenta os incidentes."
+      },
+      {
+        "texto_opcion": "Nenhuma história de recuperação para DROP TABLE",
+        "es_correcta": false,
+        "explicacion": "Risco operacional."
+      },
+      {
+        "texto_opcion": "Confie em BigQuery time travel dentro da retenção configurada; snapshot por mais tempo",
+        "es_correcta": true,
+        "explicacion": "Time travel apoia a recuperação a curto prazo; snapshots estendem o histórico."
+      },
+      {
+        "texto_opcion": "Assuma time travel infinito por padrão para sempre sem configuração",
+        "es_correcta": false,
+        "explicacion": "Verifique a retenção."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Time travel retenção"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (eastus): evita que os analistas façam uma varredura completa em uma tabela particionada de 50 TB. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "Exclua partições históricas aleatoriamente",
+        "es_correcta": false,
+        "explicacion": "Perda de dados."
+      },
+      {
+        "texto_opcion": "Esconda a mesa e espere",
+        "es_correcta": false,
+        "explicacion": "Não é um controle."
+      },
+      {
+        "texto_opcion": "Permitir SELECT * sem filtros de data à vontade",
+        "es_correcta": false,
+        "explicacion": "Choque de conta."
+      },
+      {
+        "texto_opcion": "Defina require_partition_filter=true na tabela",
+        "es_correcta": true,
+        "explicacion": "Os filtros de partição Enforced protegem custos e desempenho."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Exigir filtro de partição"
+    ]
+  },
+  {
+    "pregunta": "Uma empresa de streaming de mídia (aproximadamente 200 milhões de linhas/dia, região australiaeast) deve: aplicar alterações Datastream em dimensões selecionadas com SCD2. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Substituir o histórico, perdendo datação efetiva quando o SCD2 for necessário",
+        "es_correcta": false,
+        "explicacion": "Perde a trilha de auditoria."
+      },
+      {
+        "texto_opcion": "MERGE da preparação de tabelas CDC em tabelas de dimensão com versão",
+        "es_correcta": true,
+        "explicacion": "MERGE + SCD2 é um padrão de aplicação de warehouse padrão para CDC."
+      },
+      {
+        "texto_opcion": "Sempre complete as dimensões de recarga do zero a cada minuto",
+        "es_correcta": false,
+        "explicacion": "Um desperdício."
+      },
+      {
+        "texto_opcion": "Ignore as chaves primárias e anexe para sempre",
+        "es_correcta": false,
+        "explicacion": "Duplicatas."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Armazém de mesclagem CDC"
+    ]
+  },
+  {
+    "pregunta": "map Looker explora o design de partição/cluster subjacente. Contexto: empresa de streaming de mídia, dados históricos em escala de petabytes.",
+    "opciones": [
+      {
+        "texto_opcion": "Incentive varreduras completas e irrestritas do histórico em cada exploração",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Alinhe filtros de exploração/intervalos de datas padrão à estratégia de particionamento físico",
+        "es_correcta": true,
+        "explicacion": "O design físico deve refletir os predicados reais do BI."
+      },
+      {
+        "texto_opcion": "Nenhuma comunicação entre as equipes de modelagem e BI",
+        "es_correcta": false,
+        "explicacion": "Incompatibilidade."
+      },
+      {
+        "texto_opcion": "Projetar partições não relacionadas a qualquer filtro aplicado pelos usuários",
+        "es_correcta": false,
+        "explicacion": "Esforço desperdiçado."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Padrões de acesso ao BI"
+    ]
+  },
+  {
+    "pregunta": "Cenário do provedor de saúde – mercados com curadoria intensa precisam de desempenho máximo de consulta e governança previsível. O que eles deveriam implementar?",
+    "opciones": [
+      {
+        "texto_opcion": "Prefira armazenamento BigQuery nativo para mercados quentes; BigLake/externo para dados centrados em lago",
+        "es_correcta": true,
+        "explicacion": "O armazenamento gerenciado geralmente vence pela veiculação analítica mais eficiente."
+      },
+      {
+        "texto_opcion": "Exteriorize tudo, incluindo pequenos dims sem motivo",
+        "es_correcta": false,
+        "explicacion": "Pode prejudicar o desempenho."
+      },
+      {
+        "texto_opcion": "Duplicar cegamente para ambos sem política de ciclo de vida",
+        "es_correcta": false,
+        "explicacion": "Desvio de custos."
+      },
+      {
+        "texto_opcion": "Mantenha os KPIs executivos mais importantes apenas como CSV no GCS frio",
+        "es_correcta": false,
+        "explicacion": "Mais lento/menos governado."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Externo vs gerenciado"
+    ]
+  },
+  {
+    "pregunta": "tabela de fatos consultada quase sempre filtrada por event_date. Contexto: fintech de pagamentos, aproximadamente 200 milhões de linhas/dia. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Particione em milhões de pequenas partições horárias sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Risco de sobrecarga de metadados."
+      },
+      {
+        "texto_opcion": "Nunca particione dados multi-TB",
+        "es_correcta": false,
+        "explicacion": "As varreduras completas dominam o custo."
+      },
+      {
+        "texto_opcion": "Particionar a tabela BigQuery por data_evento (DIA)",
+        "es_correcta": true,
+        "explicacion": "O particionamento de datas permite a eliminação de partições e o controle de custos."
+      },
+      {
+        "texto_opcion": "Partição por um literal constante",
+        "es_correcta": false,
+        "explicacion": "Poda inútil."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partição por data"
+    ]
+  },
+  {
+    "pregunta": "as consultas são filtradas por customer_id e status após a remoção da data. Contexto: operadora de telecomunicações, janelas de lote por hora. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Desative sempre o conselho de cluster",
+        "es_correcta": false,
+        "explicacion": "Perde otimização."
+      },
+      {
+        "texto_opcion": "Cluster por uma coluna nunca usada em filtros",
+        "es_correcta": false,
+        "explicacion": "Pouco benefício."
+      },
+      {
+        "texto_opcion": "Substitua o particionamento por clustering apenas para filtros de data obrigatórios na escala PB sem cuidado",
+        "es_correcta": false,
+        "explicacion": "O particionamento ainda é crítico para filtros de tempo."
+      },
+      {
+        "texto_opcion": "Agrupe a tabela por customer_id, status (ordene por seletividade/frequência de filtro)",
+        "es_correcta": true,
+        "explicacion": "O clustering classifica os dados para ignorar blocos nas partições."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Agrupamento"
+    ]
+  },
+  {
+    "pregunta": "As ferramentas de BI precisam de fatos e dimensões de vendas compreensíveis. Contexto: operadora de telecomunicações, painéis quase em tempo real. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Sem chaves ou definição de grãos",
+        "es_correcta": false,
+        "explicacion": "Métricas ambíguas."
+      },
+      {
+        "texto_opcion": "Modele esquemas estrela/floco de neve com dimensões conformadas em BigQuery",
+        "es_correcta": true,
+        "explicacion": "A modelagem dimensional permanece eficaz para a usabilidade do BI."
+      },
+      {
+        "texto_opcion": "Dimensões de clientes conflitantes duplicadas por equipe sem modelo compatível",
+        "es_correcta": false,
+        "explicacion": "Caos métrico."
+      },
+      {
+        "texto_opcion": "Apenas uma gigantesca coluna de string JSON desnormalizada",
+        "es_correcta": false,
+        "explicacion": "Difícil para BI."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Esquema estrela"
+    ]
+  },
+  {
+    "pregunta": "Uma operadora de telecomunicações (janelas de lote por hora, região oeste da Europa) deve: decidir até que ponto normalizar os mercados de desembarque versus mercados de atendimento. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore a granularidade e misture linhas transacionais + agregadas",
+        "es_correcta": false,
+        "explicacion": "Métricas incorretas."
+      },
+      {
+        "texto_opcion": "Mantenha o bruto mais próximo da fonte; atender mercados desnormalizados/amplos para desempenho de BI",
+        "es_correcta": true,
+        "explicacion": "As camadas do armazém equilibram a fidelidade do armazenamento versus a usabilidade da consulta."
+      },
+      {
+        "texto_opcion": "Force 6NF para cada exploração do Looker",
+        "es_correcta": false,
+        "explicacion": "Doloroso para BI."
+      },
+      {
+        "texto_opcion": "Substitua raw apenas por marts e perca detalhes da fonte",
+        "es_correcta": false,
+        "explicacion": "Dói o reprocessamento."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Troca de normalização"
+    ]
+  },
+  {
+    "pregunta": "Um provedor de serviços de saúde (~50.000 eventos/s, região australiaeast) deve: garantir capacidade SQL interativa para executivos durante o final do mês. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Espero que sob demanda nunca haja filas no final do mês",
+        "es_correcta": false,
+        "explicacion": "Risco."
+      },
+      {
+        "texto_opcion": "Compre aparelhos físicos embaixo das mesas",
+        "es_correcta": false,
+        "explicacion": "Não é gerenciamento de capacidade BQ."
+      },
+      {
+        "texto_opcion": "Desative todas as consultas simultâneas",
+        "es_correcta": false,
+        "explicacion": "Bloqueia o negócio."
+      },
+      {
+        "texto_opcion": "Use reservas/atribuições de edições BigQuery para slots de linha de base",
+        "es_correcta": true,
+        "explicacion": "As reservas proporcionam previsibilidade de capacidade versus pura contenção sob demanda."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Capacidade de slots"
+    ]
+  },
+  {
+    "pregunta": "Um provedor de serviços de saúde (janelas de lote por hora, região eastus) deve: recarregar apenas a partição de ontem de forma idempotente. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Carregue em um nome de tabela aleatório a cada hora, sem visualizações",
+        "es_correcta": false,
+        "explicacion": "Quebra do consumidor."
+      },
+      {
+        "texto_opcion": "Anexar duplicatas para o mesmo dia para sempre",
+        "es_correcta": false,
+        "explicacion": "Quebra grãos."
+      },
+      {
+        "texto_opcion": "Escreva na partição específica (partição WRITE_TRUNCATE) ou MERGE into naquele dia",
+        "es_correcta": true,
+        "explicacion": "Cargas com escopo de partição tornam as repetições diárias seguras e baratas."
+      },
+      {
+        "texto_opcion": "TRUNCATE toda a tabela plurianual diariamente",
+        "es_correcta": false,
+        "explicacion": "Destrutivo/caro."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Cargas do decorador de partição"
+    ]
+  },
+  {
+    "pregunta": "Cenário de transportadora logística - preserve sempre os itens de linha do pedido sem explodir em junções planas gigantescas. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Sempre explodir em trilhões de linhas planas sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Inchaço de armazenamento/verificação."
+      },
+      {
+        "texto_opcion": "Use esquemas aninhados ARRAY/STRUCT onde os padrões de acesso se ajustam",
+        "es_correcta": true,
+        "explicacion": "Campos repetidos aninhados modelam hierarquias de forma eficiente em BigQuery."
+      },
+      {
+        "texto_opcion": "Proibir STRUCTs mesmo quando ideal",
+        "es_correcta": false,
+        "explicacion": "Perde a força do BQ."
+      },
+      {
+        "texto_opcion": "Armazene itens de linha como capturas de tela opacas",
+        "es_correcta": false,
+        "explicacion": "Não questionável."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Aninhado repetido"
+    ]
+  },
+  {
+    "pregunta": "entender o clustering ajuda mais quando os filtros correspondem às colunas do cluster e os dados são atualizados cuidadosamente. Contexto: operadora de telecomunicações, janelas de lote por hora. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Projete colunas de cluster em torno de filtros seletivos comuns; evite lixo recluso inútil",
+        "es_correcta": true,
+        "explicacion": "O clustering é poderoso, mas não mágico; alinhar aos predicados."
+      },
+      {
+        "texto_opcion": "Espere que o clustering substitua toda a necessidade de partições em grandes séries temporais",
+        "es_correcta": false,
+        "explicacion": "Suposição arriscada."
+      },
+      {
+        "texto_opcion": "Agrupe por 40 colunas de baixo valor esperando por milagres",
+        "es_correcta": false,
+        "explicacion": "Retornos decrescentes."
+      },
+      {
+        "texto_opcion": "Reescreva cada linha de hora em hora para 'atualizar clustering'",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Limite de cluster"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (sudestesia): centenas de atributos esparsos por entidade para análise. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Escolha esquemas (colunas largas, aninhadas ou EAV com cuidado) com base em padrões de consulta e esparsidade nula",
+        "es_correcta": true,
+        "explicacion": "A modelagem de atributos deve seguir a forma como os analistas filtram e agregam."
+      },
+      {
+        "texto_opcion": "Uma coluna chamada dados contendo texto CSV arbitrário",
+        "es_correcta": false,
+        "explicacion": "Digitação fraca."
+      },
+      {
+        "texto_opcion": "Ignore a dispersão e densifique explosivamente sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Desperdício."
+      },
+      {
+        "texto_opcion": "Sempre EAV para tudo, incluindo fatos simples",
+        "es_correcta": false,
+        "explicacion": "SQL doloroso."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Largo vs alto"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (eastus): lógica cara de KPI de junção múltipla é executada dezenas de vezes por hora. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Recalcular junções completas de vários TB em cada painel aberto sem cache/MV",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Banir transformações agendadas",
+        "es_correcta": false,
+        "explicacion": "Forces repetiu computação pesada."
+      },
+      {
+        "texto_opcion": "Crie tabelas mart materializadas programadas ou materialized views",
+        "es_correcta": true,
+        "explicacion": "A pré-computação reduz o custo repetido de slot/varredura para KPIs estáveis."
+      },
+      {
+        "texto_opcion": "Somente cache no navegador para sempre",
+        "es_correcta": false,
+        "explicacion": "Problemas inconsistentes/de segurança."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Materializar mercados"
+    ]
+  },
+  {
+    "pregunta": "Cenário de estúdio de jogos – é necessário desfazer 7 dias para DML acidental em tabelas de warehouse. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Nenhuma história de recuperação para DROP TABLE",
+        "es_correcta": false,
+        "explicacion": "Risco operacional."
+      },
+      {
+        "texto_opcion": "Confie em BigQuery time travel dentro da retenção configurada; snapshot por mais tempo",
+        "es_correcta": true,
+        "explicacion": "Time travel apoia a recuperação a curto prazo; snapshots estendem o histórico."
+      },
+      {
+        "texto_opcion": "Assuma time travel infinito por padrão para sempre sem configuração",
+        "es_correcta": false,
+        "explicacion": "Verifique a retenção."
+      },
+      {
+        "texto_opcion": "Grant permissão para todos soltarem livremente sem controles",
+        "es_correcta": false,
+        "explicacion": "Aumenta os incidentes."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Time travel retenção"
+    ]
+  },
+  {
+    "pregunta": "impedir que os analistas façam uma varredura completa em uma tabela particionada de 50 TB. Contexto: plataforma IoT industrial, aproximadamente 50.000 eventos/s. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Esconda a mesa e espere",
+        "es_correcta": false,
+        "explicacion": "Não é um controle."
+      },
+      {
+        "texto_opcion": "Exclua partições históricas aleatoriamente",
+        "es_correcta": false,
+        "explicacion": "Perda de dados."
+      },
+      {
+        "texto_opcion": "Defina require_partition_filter=true na tabela",
+        "es_correcta": true,
+        "explicacion": "Os filtros de partição Enforced protegem custos e desempenho."
+      },
+      {
+        "texto_opcion": "Permitir SELECT * sem filtros de data à vontade",
+        "es_correcta": false,
+        "explicacion": "Choque de conta."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Exigir filtro de partição"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de concessionária de energia com painéis quase em tempo real: aplique alterações Datastream em dimensões selecionadas com SCD2. Melhor escolha (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore as chaves primárias e anexe para sempre",
+        "es_correcta": false,
+        "explicacion": "Duplicatas."
+      },
+      {
+        "texto_opcion": "Substituir o histórico, perdendo datação efetiva quando o SCD2 for necessário",
+        "es_correcta": false,
+        "explicacion": "Perde a trilha de auditoria."
+      },
+      {
+        "texto_opcion": "Sempre complete as dimensões de recarga do zero a cada minuto",
+        "es_correcta": false,
+        "explicacion": "Um desperdício."
+      },
+      {
+        "texto_opcion": "MERGE da preparação de tabelas CDC em tabelas de dimensão com versão",
+        "es_correcta": true,
+        "explicacion": "MERGE + SCD2 é um padrão de aplicação de warehouse padrão para CDC."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Armazém de mesclagem CDC"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de estúdio de jogos com aproximadamente 50.000 eventos/s: o map Looker explora o design de partição/cluster subjacente. Melhor escolha (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Nenhuma comunicação entre as equipes de modelagem e BI",
+        "es_correcta": false,
+        "explicacion": "Incompatibilidade."
+      },
+      {
+        "texto_opcion": "Incentive varreduras completas e irrestritas do histórico em cada exploração",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Alinhe filtros de exploração/intervalos de datas padrão à estratégia de particionamento físico",
+        "es_correcta": true,
+        "explicacion": "O design físico deve refletir os predicados reais do BI."
+      },
+      {
+        "texto_opcion": "Projetar partições não relacionadas a qualquer filtro aplicado pelos usuários",
+        "es_correcta": false,
+        "explicacion": "Esforço desperdiçado."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Padrões de acesso ao BI"
+    ]
+  },
+  {
+    "pregunta": "mercados com curadoria importante precisam de desempenho máximo de consulta e governança previsível. Contexto: empresa de streaming de mídia, aproximadamente 50.000 eventos/s. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicar cegamente para ambos sem política de ciclo de vida",
+        "es_correcta": false,
+        "explicacion": "Desvio de custos."
+      },
+      {
+        "texto_opcion": "Mantenha os KPIs executivos mais importantes apenas como CSV no GCS frio",
+        "es_correcta": false,
+        "explicacion": "Mais lento/menos governado."
+      },
+      {
+        "texto_opcion": "Exteriorize tudo, incluindo pequenos dims sem motivo",
+        "es_correcta": false,
+        "explicacion": "Pode prejudicar o desempenho."
+      },
+      {
+        "texto_opcion": "Prefira armazenamento BigQuery nativo para mercados quentes; BigLake/externo para dados centrados em lago",
+        "es_correcta": true,
+        "explicacion": "O armazenamento gerenciado geralmente vence pela veiculação analítica mais eficiente."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Externo vs gerenciado"
+    ]
+  },
+  {
+    "pregunta": "Uma transportadora logística (painel quase em tempo real, região brasilsul) deve: tabela de fatos consultada quase sempre filtrada por event_date. Qual opção se adapta melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Particione em milhões de pequenas partições horárias sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Risco de sobrecarga de metadados."
+      },
+      {
+        "texto_opcion": "Nunca particione dados multi-TB",
+        "es_correcta": false,
+        "explicacion": "As varreduras completas dominam o custo."
+      },
+      {
+        "texto_opcion": "Particionar a tabela BigQuery por data_evento (DIA)",
+        "es_correcta": true,
+        "explicacion": "O particionamento de datas permite a eliminação de partições e o controle de custos."
+      },
+      {
+        "texto_opcion": "Partição por um literal constante",
+        "es_correcta": false,
+        "explicacion": "Poda inútil."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partição por data"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de estúdio de jogos com aproximadamente 200 milhões de linhas/dia: as consultas são filtradas por customer_id e status após a remoção da data. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Desative sempre o conselho de cluster",
+        "es_correcta": false,
+        "explicacion": "Perde otimização."
+      },
+      {
+        "texto_opcion": "Cluster por uma coluna nunca usada em filtros",
+        "es_correcta": false,
+        "explicacion": "Pouco benefício."
+      },
+      {
+        "texto_opcion": "Agrupe a tabela por customer_id, status (ordene por seletividade/frequência de filtro)",
+        "es_correcta": true,
+        "explicacion": "O clustering classifica os dados para ignorar blocos nas partições."
+      },
+      {
+        "texto_opcion": "Substitua o particionamento por clustering apenas para filtros de data obrigatórios na escala PB sem cuidado",
+        "es_correcta": false,
+        "explicacion": "O particionamento ainda é crítico para filtros de tempo."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Agrupamento"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de varejista global com painéis quase em tempo real: as ferramentas de BI precisam de fatos e dimensões de vendas compreensíveis. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Dimensões de clientes conflitantes duplicadas por equipe sem modelo compatível",
+        "es_correcta": false,
+        "explicacion": "Caos métrico."
+      },
+      {
+        "texto_opcion": "Apenas uma gigantesca coluna de string JSON desnormalizada",
+        "es_correcta": false,
+        "explicacion": "Difícil para BI."
+      },
+      {
+        "texto_opcion": "Sem chaves ou definição de grãos",
+        "es_correcta": false,
+        "explicacion": "Métricas ambíguas."
+      },
+      {
+        "texto_opcion": "Modele esquemas estrela/floco de neve com dimensões conformadas em BigQuery",
+        "es_correcta": true,
+        "explicacion": "A modelagem dimensional permanece eficaz para a usabilidade do BI."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Esquema estrela"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de uma seguradora com residência estrita no GDPR: decida até que ponto normalizar os mercados de desembarque e de atendimento. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Mantenha o bruto mais próximo da fonte; atender mercados desnormalizados/amplos para desempenho de BI",
+        "es_correcta": true,
+        "explicacion": "As camadas do armazém equilibram a fidelidade do armazenamento versus a usabilidade da consulta."
+      },
+      {
+        "texto_opcion": "Substitua raw apenas por marts e perca detalhes da fonte",
+        "es_correcta": false,
+        "explicacion": "Dói o reprocessamento."
+      },
+      {
+        "texto_opcion": "Force 6NF para cada exploração do Looker",
+        "es_correcta": false,
+        "explicacion": "Doloroso para BI."
+      },
+      {
+        "texto_opcion": "Ignore a granularidade e misture linhas transacionais + agregadas",
+        "es_correcta": false,
+        "explicacion": "Métricas incorretas."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Troca de normalização"
+    ]
+  },
+  {
+    "pregunta": "garantir capacidade SQL interativa para executivos durante o final do mês. Contexto: concessionária de energia, residência estrita do GDPR. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use reservas/atribuições de edições BigQuery para slots de linha de base",
+        "es_correcta": true,
+        "explicacion": "As reservas proporcionam previsibilidade de capacidade versus pura contenção sob demanda."
+      },
+      {
+        "texto_opcion": "Espero que sob demanda nunca haja filas no final do mês",
+        "es_correcta": false,
+        "explicacion": "Risco."
+      },
+      {
+        "texto_opcion": "Desative todas as consultas simultâneas",
+        "es_correcta": false,
+        "explicacion": "Bloqueia o negócio."
+      },
+      {
+        "texto_opcion": "Compre aparelhos físicos embaixo das mesas",
+        "es_correcta": false,
+        "explicacion": "Não é gerenciamento de capacidade BQ."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Capacidade de slots"
+    ]
+  },
+  {
+    "pregunta": "Uma fintech de pagamentos (~200 milhões de linhas/dia, região australiaeast) deve: recarregar apenas a partição de ontem de forma idempotente. Qual opção se adapta melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Escreva na partição específica (partição WRITE_TRUNCATE) ou MERGE into naquele dia",
+        "es_correcta": true,
+        "explicacion": "Cargas com escopo de partição tornam as repetições diárias seguras e baratas."
+      },
+      {
+        "texto_opcion": "Anexar duplicatas para o mesmo dia para sempre",
+        "es_correcta": false,
+        "explicacion": "Quebra grãos."
+      },
+      {
+        "texto_opcion": "TRUNCATE toda a tabela plurianual diariamente",
+        "es_correcta": false,
+        "explicacion": "Destrutivo/caro."
+      },
+      {
+        "texto_opcion": "Carregue em um nome de tabela aleatório a cada hora, sem visualizações",
+        "es_correcta": false,
+        "explicacion": "Quebra do consumidor."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Cargas do decorador de partição"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma de viagens com dados históricos em escala de petabytes: preserve sempre os itens de linha do pedido sem explodir em junções planas gigantescas. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Sempre explodir em trilhões de linhas planas sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Inchaço de armazenamento/verificação."
+      },
+      {
+        "texto_opcion": "Use esquemas aninhados ARRAY/STRUCT onde os padrões de acesso se ajustam",
+        "es_correcta": true,
+        "explicacion": "Campos repetidos aninhados modelam hierarquias de forma eficiente em BigQuery."
+      },
+      {
+        "texto_opcion": "Armazene itens de linha como capturas de tela opacas",
+        "es_correcta": false,
+        "explicacion": "Não questionável."
+      },
+      {
+        "texto_opcion": "Proibir STRUCTs mesmo quando ideal",
+        "es_correcta": false,
+        "explicacion": "Perde a força do BQ."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Aninhado repetido"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (brasilsul): entender o clustering ajuda mais quando os filtros correspondem às colunas do cluster e os dados são atualizados cuidadosamente. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Reescreva cada linha de hora em hora para 'atualizar clustering'",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Espere que o clustering substitua toda a necessidade de partições em grandes séries temporais",
+        "es_correcta": false,
+        "explicacion": "Suposição arriscada."
+      },
+      {
+        "texto_opcion": "Projete colunas de cluster em torno de filtros seletivos comuns; evite lixo recluso inútil",
+        "es_correcta": true,
+        "explicacion": "O clustering é poderoso, mas não mágico; alinhar aos predicados."
+      },
+      {
+        "texto_opcion": "Agrupe por 40 colunas de baixo valor esperando por milagres",
+        "es_correcta": false,
+        "explicacion": "Retornos decrescentes."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Limite de cluster"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de provedor de saúde com painéis quase em tempo real: centenas de atributos esparsos por entidade para análise. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma coluna chamada dados contendo texto CSV arbitrário",
+        "es_correcta": false,
+        "explicacion": "Digitação fraca."
+      },
+      {
+        "texto_opcion": "Ignore a dispersão e densifique explosivamente sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Desperdício."
+      },
+      {
+        "texto_opcion": "Sempre EAV para tudo, incluindo fatos simples",
+        "es_correcta": false,
+        "explicacion": "SQL doloroso."
+      },
+      {
+        "texto_opcion": "Escolha esquemas (colunas largas, aninhadas ou EAV com cuidado) com base em padrões de consulta e esparsidade nula",
+        "es_correcta": true,
+        "explicacion": "A modelagem de atributos deve seguir a forma como os analistas filtram e agregam."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Largo vs alto"
+    ]
+  },
+  {
+    "pregunta": "A cara lógica de KPI multi-join é executada dezenas de vezes por hora. Contexto: estúdio de jogos, aproximadamente 50.000 eventos/s. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Banir transformações agendadas",
+        "es_correcta": false,
+        "explicacion": "Forces repetiu computação pesada."
+      },
+      {
+        "texto_opcion": "Somente cache no navegador para sempre",
+        "es_correcta": false,
+        "explicacion": "Problemas inconsistentes/de segurança."
+      },
+      {
+        "texto_opcion": "Recalcular junções completas de vários TB em cada painel aberto sem cache/MV",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Crie tabelas mart materializadas programadas ou materialized views",
+        "es_correcta": true,
+        "explicacion": "A pré-computação reduz o custo repetido de slot/varredura para KPIs estáveis."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Materializar mercados"
+    ]
+  },
+  {
+    "pregunta": "precisa de desfazer 7 dias para DML acidental em tabelas de warehouse. Contexto: mercado online, aproximadamente 200 milhões de linhas/dia. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Nenhuma história de recuperação para DROP TABLE",
+        "es_correcta": false,
+        "explicacion": "Risco operacional."
+      },
+      {
+        "texto_opcion": "Confie em BigQuery time travel dentro da retenção configurada; snapshot por mais tempo",
+        "es_correcta": true,
+        "explicacion": "Time travel apoia a recuperação a curto prazo; snapshots estendem o histórico."
+      },
+      {
+        "texto_opcion": "Grant permissão para todos soltarem livremente sem controles",
+        "es_correcta": false,
+        "explicacion": "Aumenta os incidentes."
+      },
+      {
+        "texto_opcion": "Assuma time travel infinito por padrão para sempre sem configuração",
+        "es_correcta": false,
+        "explicacion": "Verifique a retenção."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Time travel retenção"
+    ]
+  },
+  {
+    "pregunta": "Cenário varejista global: evite que os analistas façam uma varredura completa em uma tabela particionada de 50 TB. O que eles deveriam implementar? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Exclua partições históricas aleatoriamente",
+        "es_correcta": false,
+        "explicacion": "Perda de dados."
+      },
+      {
+        "texto_opcion": "Esconda a mesa e espere",
+        "es_correcta": false,
+        "explicacion": "Não é um controle."
+      },
+      {
+        "texto_opcion": "Defina require_partition_filter=true na tabela",
+        "es_correcta": true,
+        "explicacion": "Os filtros de partição Enforced protegem custos e desempenho."
+      },
+      {
+        "texto_opcion": "Permitir SELECT * sem filtros de data à vontade",
+        "es_correcta": false,
+        "explicacion": "Choque de conta."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Exigir filtro de partição"
+    ]
+  },
+  {
+    "pregunta": "aplique alterações Datastream em dimensões selecionadas com SCD2. Contexto: plataforma IoT industrial, residência estrita no GDPR. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Substituir o histórico, perdendo datação efetiva quando o SCD2 for necessário",
+        "es_correcta": false,
+        "explicacion": "Perde a trilha de auditoria."
+      },
+      {
+        "texto_opcion": "Ignore as chaves primárias e anexe para sempre",
+        "es_correcta": false,
+        "explicacion": "Duplicatas."
+      },
+      {
+        "texto_opcion": "Sempre complete as dimensões de recarga do zero a cada minuto",
+        "es_correcta": false,
+        "explicacion": "Um desperdício."
+      },
+      {
+        "texto_opcion": "MERGE da preparação de tabelas CDC em tabelas de dimensão com versão",
+        "es_correcta": true,
+        "explicacion": "MERGE + SCD2 é um padrão de aplicação de warehouse padrão para CDC."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Armazém de mesclagem CDC"
+    ]
+  },
+  {
+    "pregunta": "Uma empresa de streaming de mídia (dados históricos em escala de petabytes, região Brasil Sul) deve: mapear as explorações do Looker para o design de partição/cluster subjacente. Qual opção se adapta melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Nenhuma comunicação entre as equipes de modelagem e BI",
+        "es_correcta": false,
+        "explicacion": "Incompatibilidade."
+      },
+      {
+        "texto_opcion": "Alinhe filtros de exploração/intervalos de datas padrão à estratégia de particionamento físico",
+        "es_correcta": true,
+        "explicacion": "O design físico deve refletir os predicados reais do BI."
+      },
+      {
+        "texto_opcion": "Incentive varreduras completas e irrestritas do histórico em cada exploração",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Projetar partições não relacionadas a qualquer filtro aplicado pelos usuários",
+        "es_correcta": false,
+        "explicacion": "Esforço desperdiçado."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Padrões de acesso ao BI"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de mercado on-line com consultas interativas em menos de um segundo: mercados com curadoria intensa precisam de desempenho máximo de consulta e governança previsível. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicar cegamente para ambos sem política de ciclo de vida",
+        "es_correcta": false,
+        "explicacion": "Desvio de custos."
+      },
+      {
+        "texto_opcion": "Mantenha os KPIs executivos mais importantes apenas como CSV no GCS frio",
+        "es_correcta": false,
+        "explicacion": "Mais lento/menos governado."
+      },
+      {
+        "texto_opcion": "Exteriorize tudo, incluindo pequenos dims sem motivo",
+        "es_correcta": false,
+        "explicacion": "Pode prejudicar o desempenho."
+      },
+      {
+        "texto_opcion": "Prefira armazenamento BigQuery nativo para mercados quentes; BigLake/externo para dados centrados em lago",
+        "es_correcta": true,
+        "explicacion": "O armazenamento gerenciado geralmente vence pela veiculação analítica mais eficiente."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Externo vs gerenciado"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de uma seguradora com aproximadamente 200 milhões de linhas/dia: tabela de fatos consultada quase sempre filtrada por event_date. Melhor escolha (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Particione em milhões de pequenas partições horárias sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Risco de sobrecarga de metadados."
+      },
+      {
+        "texto_opcion": "Particionar a tabela BigQuery por data_evento (DIA)",
+        "es_correcta": true,
+        "explicacion": "O particionamento de datas permite a eliminação de partições e o controle de custos."
+      },
+      {
+        "texto_opcion": "Partição por um literal constante",
+        "es_correcta": false,
+        "explicacion": "Poda inútil."
+      },
+      {
+        "texto_opcion": "Nunca particione dados multi-TB",
+        "es_correcta": false,
+        "explicacion": "As varreduras completas dominam o custo."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partição por data"
+    ]
+  },
+  {
+    "pregunta": "Cenário da seguradora – consultas filtradas por customer_id e status após a remoção da data. O que eles deveriam implementar? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Substitua o particionamento por clustering apenas para filtros de data obrigatórios na escala PB sem cuidado",
+        "es_correcta": false,
+        "explicacion": "O particionamento ainda é crítico para filtros de tempo."
+      },
+      {
+        "texto_opcion": "Agrupe a tabela por customer_id, status (ordene por seletividade/frequência de filtro)",
+        "es_correcta": true,
+        "explicacion": "O clustering classifica os dados para ignorar blocos nas partições."
+      },
+      {
+        "texto_opcion": "Desative sempre o conselho de cluster",
+        "es_correcta": false,
+        "explicacion": "Perde otimização."
+      },
+      {
+        "texto_opcion": "Cluster por uma coluna nunca usada em filtros",
+        "es_correcta": false,
+        "explicacion": "Pouco benefício."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Agrupamento"
+    ]
+  },
+  {
+    "pregunta": "Uma operadora de telecomunicações (aproximadamente 50.000 eventos/s, região australiaeast) deve: As ferramentas de BI precisam de fatos e dimensões de vendas compreensíveis. Qual opção se adapta melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Modele esquemas estrela/floco de neve com dimensões conformadas em BigQuery",
+        "es_correcta": true,
+        "explicacion": "A modelagem dimensional permanece eficaz para a usabilidade do BI."
+      },
+      {
+        "texto_opcion": "Dimensões de clientes conflitantes duplicadas por equipe sem modelo compatível",
+        "es_correcta": false,
+        "explicacion": "Caos métrico."
+      },
+      {
+        "texto_opcion": "Sem chaves ou definição de grãos",
+        "es_correcta": false,
+        "explicacion": "Métricas ambíguas."
+      },
+      {
+        "texto_opcion": "Apenas uma gigantesca coluna de string JSON desnormalizada",
+        "es_correcta": false,
+        "explicacion": "Difícil para BI."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Esquema estrela"
+    ]
+  },
+  {
+    "pregunta": "Cenário da plataforma de viagens – decida até que ponto normalizar os mercados de desembarque e de atendimento. O que eles deveriam implementar? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore a granularidade e misture linhas transacionais + agregadas",
+        "es_correcta": false,
+        "explicacion": "Métricas incorretas."
+      },
+      {
+        "texto_opcion": "Force 6NF para cada exploração do Looker",
+        "es_correcta": false,
+        "explicacion": "Doloroso para BI."
+      },
+      {
+        "texto_opcion": "Mantenha o bruto mais próximo da fonte; atender mercados desnormalizados/amplos para desempenho de BI",
+        "es_correcta": true,
+        "explicacion": "As camadas do armazém equilibram a fidelidade do armazenamento versus a usabilidade da consulta."
+      },
+      {
+        "texto_opcion": "Substitua raw apenas por marts e perca detalhes da fonte",
+        "es_correcta": false,
+        "explicacion": "Dói o reprocessamento."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Troca de normalização"
+    ]
+  },
+  {
+    "pregunta": "Cenário de estúdio de jogos – garanta capacidade SQL interativa para executivos durante o final do mês. O que eles deveriam implementar? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Compre aparelhos físicos embaixo das mesas",
+        "es_correcta": false,
+        "explicacion": "Não é gerenciamento de capacidade BQ."
+      },
+      {
+        "texto_opcion": "Use reservas/atribuições de edições BigQuery para slots de linha de base",
+        "es_correcta": true,
+        "explicacion": "As reservas proporcionam previsibilidade de capacidade versus pura contenção sob demanda."
+      },
+      {
+        "texto_opcion": "Espero que sob demanda nunca haja filas no final do mês",
+        "es_correcta": false,
+        "explicacion": "Risco."
+      },
+      {
+        "texto_opcion": "Desative todas as consultas simultâneas",
+        "es_correcta": false,
+        "explicacion": "Bloqueia o negócio."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Capacidade de slots"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidente (brasilsul): recarregue apenas a partição de ontem de forma idempotente. Selecione o design mais apropriado. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "TRUNCATE toda a tabela plurianual diariamente",
+        "es_correcta": false,
+        "explicacion": "Destrutivo/caro."
+      },
+      {
+        "texto_opcion": "Escreva na partição específica (partição WRITE_TRUNCATE) ou MERGE into naquele dia",
+        "es_correcta": true,
+        "explicacion": "Cargas com escopo de partição tornam as repetições diárias seguras e baratas."
+      },
+      {
+        "texto_opcion": "Carregue em um nome de tabela aleatório a cada hora, sem visualizações",
+        "es_correcta": false,
+        "explicacion": "Quebra do consumidor."
+      },
+      {
+        "texto_opcion": "Anexar duplicatas para o mesmo dia para sempre",
+        "es_correcta": false,
+        "explicacion": "Quebra grãos."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Cargas do decorador de partição"
+    ]
+  },
+  {
+    "pregunta": "Cenário da empresa de streaming de mídia - preserve sempre os itens de linha do pedido sem explodir em junções planas gigantescas. O que eles deveriam implementar? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Sempre explodir em trilhões de linhas planas sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Inchaço de armazenamento/verificação."
+      },
+      {
+        "texto_opcion": "Use esquemas aninhados ARRAY/STRUCT onde os padrões de acesso se ajustam",
+        "es_correcta": true,
+        "explicacion": "Campos repetidos aninhados modelam hierarquias de forma eficiente em BigQuery."
+      },
+      {
+        "texto_opcion": "Proibir STRUCTs mesmo quando ideal",
+        "es_correcta": false,
+        "explicacion": "Perde a força do BQ."
+      },
+      {
+        "texto_opcion": "Armazene itens de linha como capturas de tela opacas",
+        "es_correcta": false,
+        "explicacion": "Não questionável."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Aninhado repetido"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (westeurope): compreender o clustering ajuda mais quando os filtros correspondem às colunas do cluster e os dados são atualizados cuidadosamente. Selecione o design mais apropriado. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Projete colunas de cluster em torno de filtros seletivos comuns; evite lixo recluso inútil",
+        "es_correcta": true,
+        "explicacion": "O clustering é poderoso, mas não mágico; alinhar aos predicados."
+      },
+      {
+        "texto_opcion": "Espere que o clustering substitua toda a necessidade de partições em grandes séries temporais",
+        "es_correcta": false,
+        "explicacion": "Suposição arriscada."
+      },
+      {
+        "texto_opcion": "Reescreva cada linha de hora em hora para 'atualizar clustering'",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Agrupe por 40 colunas de baixo valor esperando por milagres",
+        "es_correcta": false,
+        "explicacion": "Retornos decrescentes."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Limite de cluster"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de concessionária de energia com residência estrita no GDPR: centenas de atributos esparsos por entidade para análise. Melhor escolha (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Uma coluna chamada dados contendo texto CSV arbitrário",
+        "es_correcta": false,
+        "explicacion": "Digitação fraca."
+      },
+      {
+        "texto_opcion": "Ignore a dispersão e densifique explosivamente sem necessidade",
+        "es_correcta": false,
+        "explicacion": "Desperdício."
+      },
+      {
+        "texto_opcion": "Sempre EAV para tudo, incluindo fatos simples",
+        "es_correcta": false,
+        "explicacion": "SQL doloroso."
+      },
+      {
+        "texto_opcion": "Escolha esquemas (colunas largas, aninhadas ou EAV com cuidado) com base em padrões de consulta e esparsidade nula",
+        "es_correcta": true,
+        "explicacion": "A modelagem de atributos deve seguir a forma como os analistas filtram e agregam."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Largo vs alto"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de transportadora logística com consultas interativas em menos de um segundo: a dispendiosa lógica de KPI multi-join é executada dezenas de vezes por hora. Melhor escolha (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Somente cache no navegador para sempre",
+        "es_correcta": false,
+        "explicacion": "Problemas inconsistentes/de segurança."
+      },
+      {
+        "texto_opcion": "Crie tabelas mart materializadas programadas ou materialized views",
+        "es_correcta": true,
+        "explicacion": "A pré-computação reduz o custo repetido de slot/varredura para KPIs estáveis."
+      },
+      {
+        "texto_opcion": "Recalcular junções completas de vários TB em cada painel aberto sem cache/MV",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Banir transformações agendadas",
+        "es_correcta": false,
+        "explicacion": "Forces repetiu computação pesada."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Materializar mercados"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma IoT industrial com aproximadamente 200 milhões de linhas/dia: é necessário desfazer 7 dias para DML acidental em tabelas de warehouse. Melhor escolha (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Confie em BigQuery time travel dentro da retenção configurada; snapshot por mais tempo",
+        "es_correcta": true,
+        "explicacion": "Time travel apoia a recuperação a curto prazo; snapshots estendem o histórico."
+      },
+      {
+        "texto_opcion": "Assuma time travel infinito por padrão para sempre sem configuração",
+        "es_correcta": false,
+        "explicacion": "Verifique a retenção."
+      },
+      {
+        "texto_opcion": "Nenhuma história de recuperação para DROP TABLE",
+        "es_correcta": false,
+        "explicacion": "Risco operacional."
+      },
+      {
+        "texto_opcion": "Grant permissão para todos soltarem livremente sem controles",
+        "es_correcta": false,
+        "explicacion": "Aumenta os incidentes."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Time travel retenção"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de um provedor de saúde com dados históricos em escala de petabytes: evite que os analistas façam uma varredura completa em uma tabela particionada de 50 TB. Melhor escolha (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Esconda a mesa e espere",
+        "es_correcta": false,
+        "explicacion": "Não é um controle."
+      },
+      {
+        "texto_opcion": "Exclua partições históricas aleatoriamente",
+        "es_correcta": false,
+        "explicacion": "Perda de dados."
+      },
+      {
+        "texto_opcion": "Defina require_partition_filter=true na tabela",
+        "es_correcta": true,
+        "explicacion": "Os filtros de partição Enforced protegem custos e desempenho."
+      },
+      {
+        "texto_opcion": "Permitir SELECT * sem filtros de data à vontade",
+        "es_correcta": false,
+        "explicacion": "Choque de conta."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Exigir filtro de partição"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de operadora de telecomunicações com dados históricos em escala de petabytes: aplique alterações Datastream em dimensões selecionadas com SCD2. Melhor escolha (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Sempre complete as dimensões de recarga do zero a cada minuto",
+        "es_correcta": false,
+        "explicacion": "Um desperdício."
+      },
+      {
+        "texto_opcion": "MERGE da preparação de tabelas CDC em tabelas de dimensão com versão",
+        "es_correcta": true,
+        "explicacion": "MERGE + SCD2 é um padrão de aplicação de warehouse padrão para CDC."
+      },
+      {
+        "texto_opcion": "Substituir o histórico, perdendo datação efetiva quando o SCD2 for necessário",
+        "es_correcta": false,
+        "explicacion": "Perde a trilha de auditoria."
+      },
+      {
+        "texto_opcion": "Ignore as chaves primárias e anexe para sempre",
+        "es_correcta": false,
+        "explicacion": "Duplicatas."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Armazém de mesclagem CDC"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma de viagens com janelas em lote por hora: mapeie o Looker explorando o design de partição/cluster subjacente. Melhor escolha (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Incentive varreduras completas e irrestritas do histórico em cada exploração",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Alinhe filtros de exploração/intervalos de datas padrão à estratégia de particionamento físico",
+        "es_correcta": true,
+        "explicacion": "O design físico deve refletir os predicados reais do BI."
+      },
+      {
+        "texto_opcion": "Projetar partições não relacionadas a qualquer filtro aplicado pelos usuários",
+        "es_correcta": false,
+        "explicacion": "Esforço desperdiçado."
+      },
+      {
+        "texto_opcion": "Nenhuma comunicação entre as equipes de modelagem e BI",
+        "es_correcta": false,
+        "explicacion": "Incompatibilidade."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Padrões de acesso ao BI"
+    ]
+  },
+  {
+    "pregunta": "mercados com curadoria importante precisam de desempenho máximo de consulta e governança previsível. Contexto: varejista global, dados históricos em escala de petabytes. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Mantenha os KPIs executivos mais importantes apenas como CSV no GCS frio",
+        "es_correcta": false,
+        "explicacion": "Mais lento/menos governado."
+      },
+      {
+        "texto_opcion": "Exteriorize tudo, incluindo pequenos dims sem motivo",
+        "es_correcta": false,
+        "explicacion": "Pode prejudicar o desempenho."
+      },
+      {
+        "texto_opcion": "Duplicar cegamente para ambos sem política de ciclo de vida",
+        "es_correcta": false,
+        "explicacion": "Desvio de custos."
+      },
+      {
+        "texto_opcion": "Prefira armazenamento BigQuery nativo para mercados quentes; BigLake/externo para dados centrados em lago",
+        "es_correcta": true,
+        "explicacion": "O armazenamento gerenciado geralmente vence pela veiculação analítica mais eficiente."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Externo vs gerenciado"
+    ]
+  }
+]

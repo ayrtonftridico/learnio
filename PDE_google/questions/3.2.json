@@ -1,0 +1,1742 @@
+[
+  {
+    "pregunta": "fact table queried almost always filtered by event_date. Context: healthcare provider, near-real-time dashboards.",
+    "opciones": [
+      {
+        "texto_opcion": "Never partition multi-TB facts",
+        "es_correcta": false,
+        "explicacion": "Full scans dominate cost."
+      },
+      {
+        "texto_opcion": "Partition into millions of tiny hourly partitions without need",
+        "es_correcta": false,
+        "explicacion": "Metadata overhead risk."
+      },
+      {
+        "texto_opcion": "Partition the BigQuery table by event_date (DAY)",
+        "es_correcta": true,
+        "explicacion": "Date partitioning enables partition elimination and cost control."
+      },
+      {
+        "texto_opcion": "Partition by a constant literal",
+        "es_correcta": false,
+        "explicacion": "Useless pruning."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partition by date"
+    ]
+  },
+  {
+    "pregunta": "For a travel platform workload with near-real-time dashboards: queries filter by customer_id and status after date prune. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable clustering advice always",
+        "es_correcta": false,
+        "explicacion": "Misses optimization."
+      },
+      {
+        "texto_opcion": "Replace partitioning with clustering only for mandatory date filters at PB scale without care",
+        "es_correcta": false,
+        "explicacion": "Partitioning still critical for time filters."
+      },
+      {
+        "texto_opcion": "Cluster the table by customer_id, status (order by selectivity/filter frequency)",
+        "es_correcta": true,
+        "explicacion": "Clustering sorts data to skip blocks within partitions."
+      },
+      {
+        "texto_opcion": "Cluster by a column never used in filters",
+        "es_correcta": false,
+        "explicacion": "Little benefit."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Clustering"
+    ]
+  },
+  {
+    "pregunta": "For a travel platform workload with sub-second interactive queries: BI tools need understandable sales facts and dimensions. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate conflicting customer dimensions per team with no conformed model",
+        "es_correcta": false,
+        "explicacion": "Metric chaos."
+      },
+      {
+        "texto_opcion": "Model star/snowflake schemas with conformed dimensions in BigQuery",
+        "es_correcta": true,
+        "explicacion": "Dimensional modeling remains effective for BI usability."
+      },
+      {
+        "texto_opcion": "One gigantic denormalized JSON string column only",
+        "es_correcta": false,
+        "explicacion": "Hard for BI."
+      },
+      {
+        "texto_opcion": "No keys or grain definition",
+        "es_correcta": false,
+        "explicacion": "Ambiguous metrics."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Star schema"
+    ]
+  },
+  {
+    "pregunta": "A travel platform (hourly batch windows, region northeurope) must: decide how far to normalize landing vs serving marts. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Keep raw closer to source; serve denormalized/wide marts for BI performance",
+        "es_correcta": true,
+        "explicacion": "Warehouse layers balance storage fidelity vs query usability."
+      },
+      {
+        "texto_opcion": "Force 6NF for every Looker explore",
+        "es_correcta": false,
+        "explicacion": "Painful for BI."
+      },
+      {
+        "texto_opcion": "Overwrite raw with only marts and lose source detail",
+        "es_correcta": false,
+        "explicacion": "Hurts reprocessing."
+      },
+      {
+        "texto_opcion": "Ignore grain and mix transactional+aggregated rows",
+        "es_correcta": false,
+        "explicacion": "Incorrect metrics."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Normalization tradeoff"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (hourly batch windows, region brazilsouth) must: guarantee interactive SQL capacity for executives during month-end. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Buy physical appliances under desks",
+        "es_correcta": false,
+        "explicacion": "Not BQ capacity mgmt."
+      },
+      {
+        "texto_opcion": "Disable all concurrent queries",
+        "es_correcta": false,
+        "explicacion": "Blocks the business."
+      },
+      {
+        "texto_opcion": "Hope on-demand never queues at month-end",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      },
+      {
+        "texto_opcion": "Use BigQuery Editions reservations/assignments for baseline slots",
+        "es_correcta": true,
+        "explicacion": "Reservations provide capacity predictability vs pure on-demand contention."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Slots capacity"
+    ]
+  },
+  {
+    "pregunta": "For a insurance carrier workload with strict GDPR residency: reload only yesterday's partition idempotently. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Write to the specific partition (WRITE_TRUNCATE partition) or MERGE into that day",
+        "es_correcta": true,
+        "explicacion": "Partition-scoped loads make daily reruns safe and cheap."
+      },
+      {
+        "texto_opcion": "Append duplicates for the same day forever",
+        "es_correcta": false,
+        "explicacion": "Breaks grain."
+      },
+      {
+        "texto_opcion": "TRUNCATE the entire multi-year table daily",
+        "es_correcta": false,
+        "explicacion": "Destructive/expensive."
+      },
+      {
+        "texto_opcion": "Load into a random table name each hour without views",
+        "es_correcta": false,
+        "explicacion": "Consumer breakage."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partition decorator loads"
+    ]
+  },
+  {
+    "pregunta": "For a payments fintech workload with hourly batch windows: preserve order line items without exploding to gigantic flat joins always. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Always explode to trillions of flat rows without need",
+        "es_correcta": false,
+        "explicacion": "Storage/scan bloat."
+      },
+      {
+        "texto_opcion": "Forbid STRUCTs even when ideal",
+        "es_correcta": false,
+        "explicacion": "Misses BQ strength."
+      },
+      {
+        "texto_opcion": "Use ARRAY/STRUCT nested schemas where access patterns fit",
+        "es_correcta": true,
+        "explicacion": "Nested repeated fields model hierarchies efficiently in BigQuery."
+      },
+      {
+        "texto_opcion": "Store line items as opaque screenshots",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Nested repeated"
+    ]
+  },
+  {
+    "pregunta": "For a insurance carrier workload with petabyte-scale historical data: understand clustering helps most when filters match cluster columns and data is updated thoughtfully. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Expect clustering to replace all need for partitions on huge time series",
+        "es_correcta": false,
+        "explicacion": "Risky assumption."
+      },
+      {
+        "texto_opcion": "Design cluster columns around common selective filters; avoid pointless recluster thrash",
+        "es_correcta": true,
+        "explicacion": "Clustering is powerful but not magic; align to predicates."
+      },
+      {
+        "texto_opcion": "Cluster by 40 low-value columns hoping for miracles",
+        "es_correcta": false,
+        "explicacion": "Diminishing returns."
+      },
+      {
+        "texto_opcion": "Rewrite every row hourly to 'refresh clustering'",
+        "es_correcta": false,
+        "explicacion": "Costly."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Clustering limit"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): hundreds of sparse attributes per entity for analytics. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Always EAV for everything including simple facts",
+        "es_correcta": false,
+        "explicacion": "Painful SQL."
+      },
+      {
+        "texto_opcion": "Choose schemas (wide columns, nested, or EAV carefully) based on query patterns and null sparsity",
+        "es_correcta": true,
+        "explicacion": "Attribute modeling must follow how analysts filter and aggregate."
+      },
+      {
+        "texto_opcion": "Ignore sparsity and densify explosively without need",
+        "es_correcta": false,
+        "explicacion": "Waste."
+      },
+      {
+        "texto_opcion": "One column named data holding arbitrary CSV text",
+        "es_correcta": false,
+        "explicacion": "Weak typing."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Wide vs tall"
+    ]
+  },
+  {
+    "pregunta": "Telecom operator scenario — expensive multi-join KPI logic runs dozens of times per hour. What should they implement?",
+    "opciones": [
+      {
+        "texto_opcion": "Ban scheduled transforms",
+        "es_correcta": false,
+        "explicacion": "Forces repeated heavy compute."
+      },
+      {
+        "texto_opcion": "Only cache in the browser forever",
+        "es_correcta": false,
+        "explicacion": "Inconsistent/security issues."
+      },
+      {
+        "texto_opcion": "Recompute full multi-TB joins on every dashboard open with no cache/MV",
+        "es_correcta": false,
+        "explicacion": "Expensive."
+      },
+      {
+        "texto_opcion": "Build scheduled materialized mart tables or materialized views",
+        "es_correcta": true,
+        "explicacion": "Precomputation reduces repeated slot/scan cost for stable KPIs."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Materialize marts"
+    ]
+  },
+  {
+    "pregunta": "A global retailer (petabyte-scale historical data, region northeurope) must: need 7-day undo for accidental DML on warehouse tables. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Grant everyone permission to drop freely without controls",
+        "es_correcta": false,
+        "explicacion": "Increases incidents."
+      },
+      {
+        "texto_opcion": "No recovery story for DROP TABLE",
+        "es_correcta": false,
+        "explicacion": "Ops risk."
+      },
+      {
+        "texto_opcion": "Rely on BigQuery time travel within configured retention; snapshot for longer",
+        "es_correcta": true,
+        "explicacion": "Time travel supports short-term recovery; snapshots extend history."
+      },
+      {
+        "texto_opcion": "Assume infinite time travel by default forever without config",
+        "es_correcta": false,
+        "explicacion": "Verify retention."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Time travel retention"
+    ]
+  },
+  {
+    "pregunta": "Incident review (eastus): prevent analysts from full-scanning a 50 TB partitioned table. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete historical partitions randomly",
+        "es_correcta": false,
+        "explicacion": "Data loss."
+      },
+      {
+        "texto_opcion": "Hide the table and hope",
+        "es_correcta": false,
+        "explicacion": "Not a control."
+      },
+      {
+        "texto_opcion": "Allow SELECT * without date filters at will",
+        "es_correcta": false,
+        "explicacion": "Bill shock."
+      },
+      {
+        "texto_opcion": "Set require_partition_filter=true on the table",
+        "es_correcta": true,
+        "explicacion": "Enforced partition filters protect cost and performance."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Require partition filter"
+    ]
+  },
+  {
+    "pregunta": "A media streaming company (~200 million rows/day, region australiaeast) must: apply Datastream changes into curated dimensions with SCD2. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Overwrite history losing effective dating when SCD2 required",
+        "es_correcta": false,
+        "explicacion": "Loses audit trail."
+      },
+      {
+        "texto_opcion": "MERGE from staging CDC tables into versioned dimension tables",
+        "es_correcta": true,
+        "explicacion": "MERGE + SCD2 is a standard warehouse apply pattern for CDC."
+      },
+      {
+        "texto_opcion": "Always full reload dimensions from scratch every minute",
+        "es_correcta": false,
+        "explicacion": "Wasteful."
+      },
+      {
+        "texto_opcion": "Ignore primary keys and append forever",
+        "es_correcta": false,
+        "explicacion": "Duplicates."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "CDC merge warehouse"
+    ]
+  },
+  {
+    "pregunta": "map Looker explores to underlying partition/cluster design. Context: media streaming company, petabyte-scale historical data.",
+    "opciones": [
+      {
+        "texto_opcion": "Encourage unrestricted full history scans in every explore",
+        "es_correcta": false,
+        "explicacion": "Costly."
+      },
+      {
+        "texto_opcion": "Align explore filters/default date ranges to physical partitioning strategy",
+        "es_correcta": true,
+        "explicacion": "Physical design should mirror actual BI predicates."
+      },
+      {
+        "texto_opcion": "No communication between modeling and BI teams",
+        "es_correcta": false,
+        "explicacion": "Mismatch."
+      },
+      {
+        "texto_opcion": "Design partitions unrelated to any filter users apply",
+        "es_correcta": false,
+        "explicacion": "Wasted effort."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "BI access patterns"
+    ]
+  },
+  {
+    "pregunta": "Healthcare provider scenario — hot curated marts need peak query performance and predictable governance. What should they implement?",
+    "opciones": [
+      {
+        "texto_opcion": "Prefer native BigQuery storage for hot marts; BigLake/external for lake-centric data",
+        "es_correcta": true,
+        "explicacion": "Managed storage often wins for hottest analytical serving."
+      },
+      {
+        "texto_opcion": "Externalize everything including tiny dims without reason",
+        "es_correcta": false,
+        "explicacion": "May hurt performance."
+      },
+      {
+        "texto_opcion": "Duplicate blindly to both without lifecycle policy",
+        "es_correcta": false,
+        "explicacion": "Cost drift."
+      },
+      {
+        "texto_opcion": "Keep hottest executive KPIs only as CSV on cold GCS",
+        "es_correcta": false,
+        "explicacion": "Slower/less governed."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "External vs managed"
+    ]
+  },
+  {
+    "pregunta": "fact table queried almost always filtered by event_date. Context: payments fintech, ~200 million rows/day. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Partition into millions of tiny hourly partitions without need",
+        "es_correcta": false,
+        "explicacion": "Metadata overhead risk."
+      },
+      {
+        "texto_opcion": "Never partition multi-TB facts",
+        "es_correcta": false,
+        "explicacion": "Full scans dominate cost."
+      },
+      {
+        "texto_opcion": "Partition the BigQuery table by event_date (DAY)",
+        "es_correcta": true,
+        "explicacion": "Date partitioning enables partition elimination and cost control."
+      },
+      {
+        "texto_opcion": "Partition by a constant literal",
+        "es_correcta": false,
+        "explicacion": "Useless pruning."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partition by date"
+    ]
+  },
+  {
+    "pregunta": "queries filter by customer_id and status after date prune. Context: telecom operator, hourly batch windows. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable clustering advice always",
+        "es_correcta": false,
+        "explicacion": "Misses optimization."
+      },
+      {
+        "texto_opcion": "Cluster by a column never used in filters",
+        "es_correcta": false,
+        "explicacion": "Little benefit."
+      },
+      {
+        "texto_opcion": "Replace partitioning with clustering only for mandatory date filters at PB scale without care",
+        "es_correcta": false,
+        "explicacion": "Partitioning still critical for time filters."
+      },
+      {
+        "texto_opcion": "Cluster the table by customer_id, status (order by selectivity/filter frequency)",
+        "es_correcta": true,
+        "explicacion": "Clustering sorts data to skip blocks within partitions."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Clustering"
+    ]
+  },
+  {
+    "pregunta": "BI tools need understandable sales facts and dimensions. Context: telecom operator, near-real-time dashboards. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "No keys or grain definition",
+        "es_correcta": false,
+        "explicacion": "Ambiguous metrics."
+      },
+      {
+        "texto_opcion": "Model star/snowflake schemas with conformed dimensions in BigQuery",
+        "es_correcta": true,
+        "explicacion": "Dimensional modeling remains effective for BI usability."
+      },
+      {
+        "texto_opcion": "Duplicate conflicting customer dimensions per team with no conformed model",
+        "es_correcta": false,
+        "explicacion": "Metric chaos."
+      },
+      {
+        "texto_opcion": "One gigantic denormalized JSON string column only",
+        "es_correcta": false,
+        "explicacion": "Hard for BI."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Star schema"
+    ]
+  },
+  {
+    "pregunta": "A telecom operator (hourly batch windows, region westeurope) must: decide how far to normalize landing vs serving marts. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore grain and mix transactional+aggregated rows",
+        "es_correcta": false,
+        "explicacion": "Incorrect metrics."
+      },
+      {
+        "texto_opcion": "Keep raw closer to source; serve denormalized/wide marts for BI performance",
+        "es_correcta": true,
+        "explicacion": "Warehouse layers balance storage fidelity vs query usability."
+      },
+      {
+        "texto_opcion": "Force 6NF for every Looker explore",
+        "es_correcta": false,
+        "explicacion": "Painful for BI."
+      },
+      {
+        "texto_opcion": "Overwrite raw with only marts and lose source detail",
+        "es_correcta": false,
+        "explicacion": "Hurts reprocessing."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Normalization tradeoff"
+    ]
+  },
+  {
+    "pregunta": "A healthcare provider (~50,000 events/s, region australiaeast) must: guarantee interactive SQL capacity for executives during month-end. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Hope on-demand never queues at month-end",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      },
+      {
+        "texto_opcion": "Buy physical appliances under desks",
+        "es_correcta": false,
+        "explicacion": "Not BQ capacity mgmt."
+      },
+      {
+        "texto_opcion": "Disable all concurrent queries",
+        "es_correcta": false,
+        "explicacion": "Blocks the business."
+      },
+      {
+        "texto_opcion": "Use BigQuery Editions reservations/assignments for baseline slots",
+        "es_correcta": true,
+        "explicacion": "Reservations provide capacity predictability vs pure on-demand contention."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Slots capacity"
+    ]
+  },
+  {
+    "pregunta": "A healthcare provider (hourly batch windows, region eastus) must: reload only yesterday's partition idempotently. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Load into a random table name each hour without views",
+        "es_correcta": false,
+        "explicacion": "Consumer breakage."
+      },
+      {
+        "texto_opcion": "Append duplicates for the same day forever",
+        "es_correcta": false,
+        "explicacion": "Breaks grain."
+      },
+      {
+        "texto_opcion": "Write to the specific partition (WRITE_TRUNCATE partition) or MERGE into that day",
+        "es_correcta": true,
+        "explicacion": "Partition-scoped loads make daily reruns safe and cheap."
+      },
+      {
+        "texto_opcion": "TRUNCATE the entire multi-year table daily",
+        "es_correcta": false,
+        "explicacion": "Destructive/expensive."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partition decorator loads"
+    ]
+  },
+  {
+    "pregunta": "Logistics carrier scenario — preserve order line items without exploding to gigantic flat joins always. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Always explode to trillions of flat rows without need",
+        "es_correcta": false,
+        "explicacion": "Storage/scan bloat."
+      },
+      {
+        "texto_opcion": "Use ARRAY/STRUCT nested schemas where access patterns fit",
+        "es_correcta": true,
+        "explicacion": "Nested repeated fields model hierarchies efficiently in BigQuery."
+      },
+      {
+        "texto_opcion": "Forbid STRUCTs even when ideal",
+        "es_correcta": false,
+        "explicacion": "Misses BQ strength."
+      },
+      {
+        "texto_opcion": "Store line items as opaque screenshots",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Nested repeated"
+    ]
+  },
+  {
+    "pregunta": "understand clustering helps most when filters match cluster columns and data is updated thoughtfully. Context: telecom operator, hourly batch windows. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Design cluster columns around common selective filters; avoid pointless recluster thrash",
+        "es_correcta": true,
+        "explicacion": "Clustering is powerful but not magic; align to predicates."
+      },
+      {
+        "texto_opcion": "Expect clustering to replace all need for partitions on huge time series",
+        "es_correcta": false,
+        "explicacion": "Risky assumption."
+      },
+      {
+        "texto_opcion": "Cluster by 40 low-value columns hoping for miracles",
+        "es_correcta": false,
+        "explicacion": "Diminishing returns."
+      },
+      {
+        "texto_opcion": "Rewrite every row hourly to 'refresh clustering'",
+        "es_correcta": false,
+        "explicacion": "Costly."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Clustering limit"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): hundreds of sparse attributes per entity for analytics. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Choose schemas (wide columns, nested, or EAV carefully) based on query patterns and null sparsity",
+        "es_correcta": true,
+        "explicacion": "Attribute modeling must follow how analysts filter and aggregate."
+      },
+      {
+        "texto_opcion": "One column named data holding arbitrary CSV text",
+        "es_correcta": false,
+        "explicacion": "Weak typing."
+      },
+      {
+        "texto_opcion": "Ignore sparsity and densify explosively without need",
+        "es_correcta": false,
+        "explicacion": "Waste."
+      },
+      {
+        "texto_opcion": "Always EAV for everything including simple facts",
+        "es_correcta": false,
+        "explicacion": "Painful SQL."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Wide vs tall"
+    ]
+  },
+  {
+    "pregunta": "Incident review (eastus): expensive multi-join KPI logic runs dozens of times per hour. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Recompute full multi-TB joins on every dashboard open with no cache/MV",
+        "es_correcta": false,
+        "explicacion": "Expensive."
+      },
+      {
+        "texto_opcion": "Ban scheduled transforms",
+        "es_correcta": false,
+        "explicacion": "Forces repeated heavy compute."
+      },
+      {
+        "texto_opcion": "Build scheduled materialized mart tables or materialized views",
+        "es_correcta": true,
+        "explicacion": "Precomputation reduces repeated slot/scan cost for stable KPIs."
+      },
+      {
+        "texto_opcion": "Only cache in the browser forever",
+        "es_correcta": false,
+        "explicacion": "Inconsistent/security issues."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Materialize marts"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — need 7-day undo for accidental DML on warehouse tables. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "No recovery story for DROP TABLE",
+        "es_correcta": false,
+        "explicacion": "Ops risk."
+      },
+      {
+        "texto_opcion": "Rely on BigQuery time travel within configured retention; snapshot for longer",
+        "es_correcta": true,
+        "explicacion": "Time travel supports short-term recovery; snapshots extend history."
+      },
+      {
+        "texto_opcion": "Assume infinite time travel by default forever without config",
+        "es_correcta": false,
+        "explicacion": "Verify retention."
+      },
+      {
+        "texto_opcion": "Grant everyone permission to drop freely without controls",
+        "es_correcta": false,
+        "explicacion": "Increases incidents."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Time travel retention"
+    ]
+  },
+  {
+    "pregunta": "prevent analysts from full-scanning a 50 TB partitioned table. Context: industrial IoT platform, ~50,000 events/s. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Hide the table and hope",
+        "es_correcta": false,
+        "explicacion": "Not a control."
+      },
+      {
+        "texto_opcion": "Delete historical partitions randomly",
+        "es_correcta": false,
+        "explicacion": "Data loss."
+      },
+      {
+        "texto_opcion": "Set require_partition_filter=true on the table",
+        "es_correcta": true,
+        "explicacion": "Enforced partition filters protect cost and performance."
+      },
+      {
+        "texto_opcion": "Allow SELECT * without date filters at will",
+        "es_correcta": false,
+        "explicacion": "Bill shock."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Require partition filter"
+    ]
+  },
+  {
+    "pregunta": "For a energy utility workload with near-real-time dashboards: apply Datastream changes into curated dimensions with SCD2. Best choice (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore primary keys and append forever",
+        "es_correcta": false,
+        "explicacion": "Duplicates."
+      },
+      {
+        "texto_opcion": "Overwrite history losing effective dating when SCD2 required",
+        "es_correcta": false,
+        "explicacion": "Loses audit trail."
+      },
+      {
+        "texto_opcion": "Always full reload dimensions from scratch every minute",
+        "es_correcta": false,
+        "explicacion": "Wasteful."
+      },
+      {
+        "texto_opcion": "MERGE from staging CDC tables into versioned dimension tables",
+        "es_correcta": true,
+        "explicacion": "MERGE + SCD2 is a standard warehouse apply pattern for CDC."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "CDC merge warehouse"
+    ]
+  },
+  {
+    "pregunta": "For a gaming studio workload with ~50,000 events/s: map Looker explores to underlying partition/cluster design. Best choice (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "No communication between modeling and BI teams",
+        "es_correcta": false,
+        "explicacion": "Mismatch."
+      },
+      {
+        "texto_opcion": "Encourage unrestricted full history scans in every explore",
+        "es_correcta": false,
+        "explicacion": "Costly."
+      },
+      {
+        "texto_opcion": "Align explore filters/default date ranges to physical partitioning strategy",
+        "es_correcta": true,
+        "explicacion": "Physical design should mirror actual BI predicates."
+      },
+      {
+        "texto_opcion": "Design partitions unrelated to any filter users apply",
+        "es_correcta": false,
+        "explicacion": "Wasted effort."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "BI access patterns"
+    ]
+  },
+  {
+    "pregunta": "hot curated marts need peak query performance and predictable governance. Context: media streaming company, ~50,000 events/s. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate blindly to both without lifecycle policy",
+        "es_correcta": false,
+        "explicacion": "Cost drift."
+      },
+      {
+        "texto_opcion": "Keep hottest executive KPIs only as CSV on cold GCS",
+        "es_correcta": false,
+        "explicacion": "Slower/less governed."
+      },
+      {
+        "texto_opcion": "Externalize everything including tiny dims without reason",
+        "es_correcta": false,
+        "explicacion": "May hurt performance."
+      },
+      {
+        "texto_opcion": "Prefer native BigQuery storage for hot marts; BigLake/external for lake-centric data",
+        "es_correcta": true,
+        "explicacion": "Managed storage often wins for hottest analytical serving."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "External vs managed"
+    ]
+  },
+  {
+    "pregunta": "A logistics carrier (near-real-time dashboards, region brazilsouth) must: fact table queried almost always filtered by event_date. Which option fits best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Partition into millions of tiny hourly partitions without need",
+        "es_correcta": false,
+        "explicacion": "Metadata overhead risk."
+      },
+      {
+        "texto_opcion": "Never partition multi-TB facts",
+        "es_correcta": false,
+        "explicacion": "Full scans dominate cost."
+      },
+      {
+        "texto_opcion": "Partition the BigQuery table by event_date (DAY)",
+        "es_correcta": true,
+        "explicacion": "Date partitioning enables partition elimination and cost control."
+      },
+      {
+        "texto_opcion": "Partition by a constant literal",
+        "es_correcta": false,
+        "explicacion": "Useless pruning."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partition by date"
+    ]
+  },
+  {
+    "pregunta": "For a gaming studio workload with ~200 million rows/day: queries filter by customer_id and status after date prune. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable clustering advice always",
+        "es_correcta": false,
+        "explicacion": "Misses optimization."
+      },
+      {
+        "texto_opcion": "Cluster by a column never used in filters",
+        "es_correcta": false,
+        "explicacion": "Little benefit."
+      },
+      {
+        "texto_opcion": "Cluster the table by customer_id, status (order by selectivity/filter frequency)",
+        "es_correcta": true,
+        "explicacion": "Clustering sorts data to skip blocks within partitions."
+      },
+      {
+        "texto_opcion": "Replace partitioning with clustering only for mandatory date filters at PB scale without care",
+        "es_correcta": false,
+        "explicacion": "Partitioning still critical for time filters."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Clustering"
+    ]
+  },
+  {
+    "pregunta": "For a global retailer workload with near-real-time dashboards: BI tools need understandable sales facts and dimensions. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate conflicting customer dimensions per team with no conformed model",
+        "es_correcta": false,
+        "explicacion": "Metric chaos."
+      },
+      {
+        "texto_opcion": "One gigantic denormalized JSON string column only",
+        "es_correcta": false,
+        "explicacion": "Hard for BI."
+      },
+      {
+        "texto_opcion": "No keys or grain definition",
+        "es_correcta": false,
+        "explicacion": "Ambiguous metrics."
+      },
+      {
+        "texto_opcion": "Model star/snowflake schemas with conformed dimensions in BigQuery",
+        "es_correcta": true,
+        "explicacion": "Dimensional modeling remains effective for BI usability."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Star schema"
+    ]
+  },
+  {
+    "pregunta": "For a insurance carrier workload with strict GDPR residency: decide how far to normalize landing vs serving marts. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Keep raw closer to source; serve denormalized/wide marts for BI performance",
+        "es_correcta": true,
+        "explicacion": "Warehouse layers balance storage fidelity vs query usability."
+      },
+      {
+        "texto_opcion": "Overwrite raw with only marts and lose source detail",
+        "es_correcta": false,
+        "explicacion": "Hurts reprocessing."
+      },
+      {
+        "texto_opcion": "Force 6NF for every Looker explore",
+        "es_correcta": false,
+        "explicacion": "Painful for BI."
+      },
+      {
+        "texto_opcion": "Ignore grain and mix transactional+aggregated rows",
+        "es_correcta": false,
+        "explicacion": "Incorrect metrics."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Normalization tradeoff"
+    ]
+  },
+  {
+    "pregunta": "guarantee interactive SQL capacity for executives during month-end. Context: energy utility, strict GDPR residency. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use BigQuery Editions reservations/assignments for baseline slots",
+        "es_correcta": true,
+        "explicacion": "Reservations provide capacity predictability vs pure on-demand contention."
+      },
+      {
+        "texto_opcion": "Hope on-demand never queues at month-end",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      },
+      {
+        "texto_opcion": "Disable all concurrent queries",
+        "es_correcta": false,
+        "explicacion": "Blocks the business."
+      },
+      {
+        "texto_opcion": "Buy physical appliances under desks",
+        "es_correcta": false,
+        "explicacion": "Not BQ capacity mgmt."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Slots capacity"
+    ]
+  },
+  {
+    "pregunta": "A payments fintech (~200 million rows/day, region australiaeast) must: reload only yesterday's partition idempotently. Which option fits best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Write to the specific partition (WRITE_TRUNCATE partition) or MERGE into that day",
+        "es_correcta": true,
+        "explicacion": "Partition-scoped loads make daily reruns safe and cheap."
+      },
+      {
+        "texto_opcion": "Append duplicates for the same day forever",
+        "es_correcta": false,
+        "explicacion": "Breaks grain."
+      },
+      {
+        "texto_opcion": "TRUNCATE the entire multi-year table daily",
+        "es_correcta": false,
+        "explicacion": "Destructive/expensive."
+      },
+      {
+        "texto_opcion": "Load into a random table name each hour without views",
+        "es_correcta": false,
+        "explicacion": "Consumer breakage."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partition decorator loads"
+    ]
+  },
+  {
+    "pregunta": "For a travel platform workload with petabyte-scale historical data: preserve order line items without exploding to gigantic flat joins always. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Always explode to trillions of flat rows without need",
+        "es_correcta": false,
+        "explicacion": "Storage/scan bloat."
+      },
+      {
+        "texto_opcion": "Use ARRAY/STRUCT nested schemas where access patterns fit",
+        "es_correcta": true,
+        "explicacion": "Nested repeated fields model hierarchies efficiently in BigQuery."
+      },
+      {
+        "texto_opcion": "Store line items as opaque screenshots",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
+      },
+      {
+        "texto_opcion": "Forbid STRUCTs even when ideal",
+        "es_correcta": false,
+        "explicacion": "Misses BQ strength."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Nested repeated"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): understand clustering helps most when filters match cluster columns and data is updated thoughtfully. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Rewrite every row hourly to 'refresh clustering'",
+        "es_correcta": false,
+        "explicacion": "Costly."
+      },
+      {
+        "texto_opcion": "Expect clustering to replace all need for partitions on huge time series",
+        "es_correcta": false,
+        "explicacion": "Risky assumption."
+      },
+      {
+        "texto_opcion": "Design cluster columns around common selective filters; avoid pointless recluster thrash",
+        "es_correcta": true,
+        "explicacion": "Clustering is powerful but not magic; align to predicates."
+      },
+      {
+        "texto_opcion": "Cluster by 40 low-value columns hoping for miracles",
+        "es_correcta": false,
+        "explicacion": "Diminishing returns."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Clustering limit"
+    ]
+  },
+  {
+    "pregunta": "For a healthcare provider workload with near-real-time dashboards: hundreds of sparse attributes per entity for analytics. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "One column named data holding arbitrary CSV text",
+        "es_correcta": false,
+        "explicacion": "Weak typing."
+      },
+      {
+        "texto_opcion": "Ignore sparsity and densify explosively without need",
+        "es_correcta": false,
+        "explicacion": "Waste."
+      },
+      {
+        "texto_opcion": "Always EAV for everything including simple facts",
+        "es_correcta": false,
+        "explicacion": "Painful SQL."
+      },
+      {
+        "texto_opcion": "Choose schemas (wide columns, nested, or EAV carefully) based on query patterns and null sparsity",
+        "es_correcta": true,
+        "explicacion": "Attribute modeling must follow how analysts filter and aggregate."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Wide vs tall"
+    ]
+  },
+  {
+    "pregunta": "expensive multi-join KPI logic runs dozens of times per hour. Context: gaming studio, ~50,000 events/s. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Ban scheduled transforms",
+        "es_correcta": false,
+        "explicacion": "Forces repeated heavy compute."
+      },
+      {
+        "texto_opcion": "Only cache in the browser forever",
+        "es_correcta": false,
+        "explicacion": "Inconsistent/security issues."
+      },
+      {
+        "texto_opcion": "Recompute full multi-TB joins on every dashboard open with no cache/MV",
+        "es_correcta": false,
+        "explicacion": "Expensive."
+      },
+      {
+        "texto_opcion": "Build scheduled materialized mart tables or materialized views",
+        "es_correcta": true,
+        "explicacion": "Precomputation reduces repeated slot/scan cost for stable KPIs."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Materialize marts"
+    ]
+  },
+  {
+    "pregunta": "need 7-day undo for accidental DML on warehouse tables. Context: online marketplace, ~200 million rows/day. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "No recovery story for DROP TABLE",
+        "es_correcta": false,
+        "explicacion": "Ops risk."
+      },
+      {
+        "texto_opcion": "Rely on BigQuery time travel within configured retention; snapshot for longer",
+        "es_correcta": true,
+        "explicacion": "Time travel supports short-term recovery; snapshots extend history."
+      },
+      {
+        "texto_opcion": "Grant everyone permission to drop freely without controls",
+        "es_correcta": false,
+        "explicacion": "Increases incidents."
+      },
+      {
+        "texto_opcion": "Assume infinite time travel by default forever without config",
+        "es_correcta": false,
+        "explicacion": "Verify retention."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Time travel retention"
+    ]
+  },
+  {
+    "pregunta": "Global retailer scenario — prevent analysts from full-scanning a 50 TB partitioned table. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete historical partitions randomly",
+        "es_correcta": false,
+        "explicacion": "Data loss."
+      },
+      {
+        "texto_opcion": "Hide the table and hope",
+        "es_correcta": false,
+        "explicacion": "Not a control."
+      },
+      {
+        "texto_opcion": "Set require_partition_filter=true on the table",
+        "es_correcta": true,
+        "explicacion": "Enforced partition filters protect cost and performance."
+      },
+      {
+        "texto_opcion": "Allow SELECT * without date filters at will",
+        "es_correcta": false,
+        "explicacion": "Bill shock."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Require partition filter"
+    ]
+  },
+  {
+    "pregunta": "apply Datastream changes into curated dimensions with SCD2. Context: industrial IoT platform, strict GDPR residency. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Overwrite history losing effective dating when SCD2 required",
+        "es_correcta": false,
+        "explicacion": "Loses audit trail."
+      },
+      {
+        "texto_opcion": "Ignore primary keys and append forever",
+        "es_correcta": false,
+        "explicacion": "Duplicates."
+      },
+      {
+        "texto_opcion": "Always full reload dimensions from scratch every minute",
+        "es_correcta": false,
+        "explicacion": "Wasteful."
+      },
+      {
+        "texto_opcion": "MERGE from staging CDC tables into versioned dimension tables",
+        "es_correcta": true,
+        "explicacion": "MERGE + SCD2 is a standard warehouse apply pattern for CDC."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "CDC merge warehouse"
+    ]
+  },
+  {
+    "pregunta": "A media streaming company (petabyte-scale historical data, region brazilsouth) must: map Looker explores to underlying partition/cluster design. Which option fits best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "No communication between modeling and BI teams",
+        "es_correcta": false,
+        "explicacion": "Mismatch."
+      },
+      {
+        "texto_opcion": "Align explore filters/default date ranges to physical partitioning strategy",
+        "es_correcta": true,
+        "explicacion": "Physical design should mirror actual BI predicates."
+      },
+      {
+        "texto_opcion": "Encourage unrestricted full history scans in every explore",
+        "es_correcta": false,
+        "explicacion": "Costly."
+      },
+      {
+        "texto_opcion": "Design partitions unrelated to any filter users apply",
+        "es_correcta": false,
+        "explicacion": "Wasted effort."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "BI access patterns"
+    ]
+  },
+  {
+    "pregunta": "For a online marketplace workload with sub-second interactive queries: hot curated marts need peak query performance and predictable governance. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate blindly to both without lifecycle policy",
+        "es_correcta": false,
+        "explicacion": "Cost drift."
+      },
+      {
+        "texto_opcion": "Keep hottest executive KPIs only as CSV on cold GCS",
+        "es_correcta": false,
+        "explicacion": "Slower/less governed."
+      },
+      {
+        "texto_opcion": "Externalize everything including tiny dims without reason",
+        "es_correcta": false,
+        "explicacion": "May hurt performance."
+      },
+      {
+        "texto_opcion": "Prefer native BigQuery storage for hot marts; BigLake/external for lake-centric data",
+        "es_correcta": true,
+        "explicacion": "Managed storage often wins for hottest analytical serving."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "External vs managed"
+    ]
+  },
+  {
+    "pregunta": "For a insurance carrier workload with ~200 million rows/day: fact table queried almost always filtered by event_date. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Partition into millions of tiny hourly partitions without need",
+        "es_correcta": false,
+        "explicacion": "Metadata overhead risk."
+      },
+      {
+        "texto_opcion": "Partition the BigQuery table by event_date (DAY)",
+        "es_correcta": true,
+        "explicacion": "Date partitioning enables partition elimination and cost control."
+      },
+      {
+        "texto_opcion": "Partition by a constant literal",
+        "es_correcta": false,
+        "explicacion": "Useless pruning."
+      },
+      {
+        "texto_opcion": "Never partition multi-TB facts",
+        "es_correcta": false,
+        "explicacion": "Full scans dominate cost."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partition by date"
+    ]
+  },
+  {
+    "pregunta": "Insurance carrier scenario — queries filter by customer_id and status after date prune. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Replace partitioning with clustering only for mandatory date filters at PB scale without care",
+        "es_correcta": false,
+        "explicacion": "Partitioning still critical for time filters."
+      },
+      {
+        "texto_opcion": "Cluster the table by customer_id, status (order by selectivity/filter frequency)",
+        "es_correcta": true,
+        "explicacion": "Clustering sorts data to skip blocks within partitions."
+      },
+      {
+        "texto_opcion": "Disable clustering advice always",
+        "es_correcta": false,
+        "explicacion": "Misses optimization."
+      },
+      {
+        "texto_opcion": "Cluster by a column never used in filters",
+        "es_correcta": false,
+        "explicacion": "Little benefit."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Clustering"
+    ]
+  },
+  {
+    "pregunta": "A telecom operator (~50,000 events/s, region australiaeast) must: BI tools need understandable sales facts and dimensions. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Model star/snowflake schemas with conformed dimensions in BigQuery",
+        "es_correcta": true,
+        "explicacion": "Dimensional modeling remains effective for BI usability."
+      },
+      {
+        "texto_opcion": "Duplicate conflicting customer dimensions per team with no conformed model",
+        "es_correcta": false,
+        "explicacion": "Metric chaos."
+      },
+      {
+        "texto_opcion": "No keys or grain definition",
+        "es_correcta": false,
+        "explicacion": "Ambiguous metrics."
+      },
+      {
+        "texto_opcion": "One gigantic denormalized JSON string column only",
+        "es_correcta": false,
+        "explicacion": "Hard for BI."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Star schema"
+    ]
+  },
+  {
+    "pregunta": "Travel platform scenario — decide how far to normalize landing vs serving marts. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore grain and mix transactional+aggregated rows",
+        "es_correcta": false,
+        "explicacion": "Incorrect metrics."
+      },
+      {
+        "texto_opcion": "Force 6NF for every Looker explore",
+        "es_correcta": false,
+        "explicacion": "Painful for BI."
+      },
+      {
+        "texto_opcion": "Keep raw closer to source; serve denormalized/wide marts for BI performance",
+        "es_correcta": true,
+        "explicacion": "Warehouse layers balance storage fidelity vs query usability."
+      },
+      {
+        "texto_opcion": "Overwrite raw with only marts and lose source detail",
+        "es_correcta": false,
+        "explicacion": "Hurts reprocessing."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Normalization tradeoff"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — guarantee interactive SQL capacity for executives during month-end. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Buy physical appliances under desks",
+        "es_correcta": false,
+        "explicacion": "Not BQ capacity mgmt."
+      },
+      {
+        "texto_opcion": "Use BigQuery Editions reservations/assignments for baseline slots",
+        "es_correcta": true,
+        "explicacion": "Reservations provide capacity predictability vs pure on-demand contention."
+      },
+      {
+        "texto_opcion": "Hope on-demand never queues at month-end",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      },
+      {
+        "texto_opcion": "Disable all concurrent queries",
+        "es_correcta": false,
+        "explicacion": "Blocks the business."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Slots capacity"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): reload only yesterday's partition idempotently. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "TRUNCATE the entire multi-year table daily",
+        "es_correcta": false,
+        "explicacion": "Destructive/expensive."
+      },
+      {
+        "texto_opcion": "Write to the specific partition (WRITE_TRUNCATE partition) or MERGE into that day",
+        "es_correcta": true,
+        "explicacion": "Partition-scoped loads make daily reruns safe and cheap."
+      },
+      {
+        "texto_opcion": "Load into a random table name each hour without views",
+        "es_correcta": false,
+        "explicacion": "Consumer breakage."
+      },
+      {
+        "texto_opcion": "Append duplicates for the same day forever",
+        "es_correcta": false,
+        "explicacion": "Breaks grain."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Partition decorator loads"
+    ]
+  },
+  {
+    "pregunta": "Media streaming company scenario — preserve order line items without exploding to gigantic flat joins always. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Always explode to trillions of flat rows without need",
+        "es_correcta": false,
+        "explicacion": "Storage/scan bloat."
+      },
+      {
+        "texto_opcion": "Use ARRAY/STRUCT nested schemas where access patterns fit",
+        "es_correcta": true,
+        "explicacion": "Nested repeated fields model hierarchies efficiently in BigQuery."
+      },
+      {
+        "texto_opcion": "Forbid STRUCTs even when ideal",
+        "es_correcta": false,
+        "explicacion": "Misses BQ strength."
+      },
+      {
+        "texto_opcion": "Store line items as opaque screenshots",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Nested repeated"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): understand clustering helps most when filters match cluster columns and data is updated thoughtfully. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Design cluster columns around common selective filters; avoid pointless recluster thrash",
+        "es_correcta": true,
+        "explicacion": "Clustering is powerful but not magic; align to predicates."
+      },
+      {
+        "texto_opcion": "Expect clustering to replace all need for partitions on huge time series",
+        "es_correcta": false,
+        "explicacion": "Risky assumption."
+      },
+      {
+        "texto_opcion": "Rewrite every row hourly to 'refresh clustering'",
+        "es_correcta": false,
+        "explicacion": "Costly."
+      },
+      {
+        "texto_opcion": "Cluster by 40 low-value columns hoping for miracles",
+        "es_correcta": false,
+        "explicacion": "Diminishing returns."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Clustering limit"
+    ]
+  },
+  {
+    "pregunta": "For a energy utility workload with strict GDPR residency: hundreds of sparse attributes per entity for analytics. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "One column named data holding arbitrary CSV text",
+        "es_correcta": false,
+        "explicacion": "Weak typing."
+      },
+      {
+        "texto_opcion": "Ignore sparsity and densify explosively without need",
+        "es_correcta": false,
+        "explicacion": "Waste."
+      },
+      {
+        "texto_opcion": "Always EAV for everything including simple facts",
+        "es_correcta": false,
+        "explicacion": "Painful SQL."
+      },
+      {
+        "texto_opcion": "Choose schemas (wide columns, nested, or EAV carefully) based on query patterns and null sparsity",
+        "es_correcta": true,
+        "explicacion": "Attribute modeling must follow how analysts filter and aggregate."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Wide vs tall"
+    ]
+  },
+  {
+    "pregunta": "For a logistics carrier workload with sub-second interactive queries: expensive multi-join KPI logic runs dozens of times per hour. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Only cache in the browser forever",
+        "es_correcta": false,
+        "explicacion": "Inconsistent/security issues."
+      },
+      {
+        "texto_opcion": "Build scheduled materialized mart tables or materialized views",
+        "es_correcta": true,
+        "explicacion": "Precomputation reduces repeated slot/scan cost for stable KPIs."
+      },
+      {
+        "texto_opcion": "Recompute full multi-TB joins on every dashboard open with no cache/MV",
+        "es_correcta": false,
+        "explicacion": "Expensive."
+      },
+      {
+        "texto_opcion": "Ban scheduled transforms",
+        "es_correcta": false,
+        "explicacion": "Forces repeated heavy compute."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Materialize marts"
+    ]
+  },
+  {
+    "pregunta": "For a industrial IoT platform workload with ~200 million rows/day: need 7-day undo for accidental DML on warehouse tables. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Rely on BigQuery time travel within configured retention; snapshot for longer",
+        "es_correcta": true,
+        "explicacion": "Time travel supports short-term recovery; snapshots extend history."
+      },
+      {
+        "texto_opcion": "Assume infinite time travel by default forever without config",
+        "es_correcta": false,
+        "explicacion": "Verify retention."
+      },
+      {
+        "texto_opcion": "No recovery story for DROP TABLE",
+        "es_correcta": false,
+        "explicacion": "Ops risk."
+      },
+      {
+        "texto_opcion": "Grant everyone permission to drop freely without controls",
+        "es_correcta": false,
+        "explicacion": "Increases incidents."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Time travel retention"
+    ]
+  },
+  {
+    "pregunta": "For a healthcare provider workload with petabyte-scale historical data: prevent analysts from full-scanning a 50 TB partitioned table. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Hide the table and hope",
+        "es_correcta": false,
+        "explicacion": "Not a control."
+      },
+      {
+        "texto_opcion": "Delete historical partitions randomly",
+        "es_correcta": false,
+        "explicacion": "Data loss."
+      },
+      {
+        "texto_opcion": "Set require_partition_filter=true on the table",
+        "es_correcta": true,
+        "explicacion": "Enforced partition filters protect cost and performance."
+      },
+      {
+        "texto_opcion": "Allow SELECT * without date filters at will",
+        "es_correcta": false,
+        "explicacion": "Bill shock."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "Require partition filter"
+    ]
+  },
+  {
+    "pregunta": "For a telecom operator workload with petabyte-scale historical data: apply Datastream changes into curated dimensions with SCD2. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Always full reload dimensions from scratch every minute",
+        "es_correcta": false,
+        "explicacion": "Wasteful."
+      },
+      {
+        "texto_opcion": "MERGE from staging CDC tables into versioned dimension tables",
+        "es_correcta": true,
+        "explicacion": "MERGE + SCD2 is a standard warehouse apply pattern for CDC."
+      },
+      {
+        "texto_opcion": "Overwrite history losing effective dating when SCD2 required",
+        "es_correcta": false,
+        "explicacion": "Loses audit trail."
+      },
+      {
+        "texto_opcion": "Ignore primary keys and append forever",
+        "es_correcta": false,
+        "explicacion": "Duplicates."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "CDC merge warehouse"
+    ]
+  },
+  {
+    "pregunta": "For a travel platform workload with hourly batch windows: map Looker explores to underlying partition/cluster design. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Encourage unrestricted full history scans in every explore",
+        "es_correcta": false,
+        "explicacion": "Costly."
+      },
+      {
+        "texto_opcion": "Align explore filters/default date ranges to physical partitioning strategy",
+        "es_correcta": true,
+        "explicacion": "Physical design should mirror actual BI predicates."
+      },
+      {
+        "texto_opcion": "Design partitions unrelated to any filter users apply",
+        "es_correcta": false,
+        "explicacion": "Wasted effort."
+      },
+      {
+        "texto_opcion": "No communication between modeling and BI teams",
+        "es_correcta": false,
+        "explicacion": "Mismatch."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "BI access patterns"
+    ]
+  },
+  {
+    "pregunta": "hot curated marts need peak query performance and predictable governance. Context: global retailer, petabyte-scale historical data. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Keep hottest executive KPIs only as CSV on cold GCS",
+        "es_correcta": false,
+        "explicacion": "Slower/less governed."
+      },
+      {
+        "texto_opcion": "Externalize everything including tiny dims without reason",
+        "es_correcta": false,
+        "explicacion": "May hurt performance."
+      },
+      {
+        "texto_opcion": "Duplicate blindly to both without lifecycle policy",
+        "es_correcta": false,
+        "explicacion": "Cost drift."
+      },
+      {
+        "texto_opcion": "Prefer native BigQuery storage for hot marts; BigLake/external for lake-centric data",
+        "es_correcta": true,
+        "explicacion": "Managed storage often wins for hottest analytical serving."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "External vs managed"
+    ]
+  }
+]

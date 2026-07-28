@@ -1,0 +1,1191 @@
+[
+  {
+    "pregunta": "Qual distribuição você deve usar para um grande fato Dedicated SQL pool associado frequentemente em customer_id?",
+    "opciones": [
+      {
+        "texto_opcion": "Heap sem escolha de distribuição",
+        "es_correcta": false,
+        "explicacion": "As tabelas Dedicated SQL pool requerem uma estratégia de distribuição."
+      },
+      {
+        "texto_opcion": "HASH distribui o fato em customer_id",
+        "es_correcta": true,
+        "explicacion": "O hash na chave de junção reduz a movimentação de dados para grandes junções equivalentes."
+      },
+      {
+        "texto_opcion": "ROUND_ROBIN para o grande fato",
+        "es_correcta": false,
+        "explicacion": "Round-robin causa mais remodelações nas junções."
+      },
+      {
+        "texto_opcion": "REPLICATE o fato multi-TB",
+        "es_correcta": false,
+        "explicacion": "Replicate é para pequenas dimensões, não para fatos grandes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Fato hash"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (Europa Ocidental): uma pequena dimensão que muda lentamente (~50 MB) é associada a muitos factos grandes. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "REPLICATE distribuir a dimensão",
+        "es_correcta": true,
+        "explicacion": "Replicated pequenos dims evitam embaralhamento copiando para cada distribuição."
+      },
+      {
+        "texto_opcion": "ROUND_ROBIN apenas a pequena dimensão",
+        "es_correcta": false,
+        "explicacion": "Funciona, mas replicate tem melhor desempenho para junções frequentes."
+      },
+      {
+        "texto_opcion": "Tabela externa apenas sem cache",
+        "es_correcta": false,
+        "explicacion": "Tabelas externas não fornecem desempenho no conjunto replicated."
+      },
+      {
+        "texto_opcion": "HASH em uma chave de alta cardinalidade desnecessariamente",
+        "es_correcta": false,
+        "explicacion": "Hash é melhor para tabelas grandes; pequenas dims preferem replicate."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Replicate escuro"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma IoT industrial com aproximadamente 50.000 eventos/s: a tabela de preparação recebe cargas antes da redistribuição; junções são raras na preparação. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Sempre HASH em um GUID aleatório sem uso de junção",
+        "es_correcta": false,
+        "explicacion": "Risco de distorção desnecessário sem benefício."
+      },
+      {
+        "texto_opcion": "Distribuição ROUND_ROBIN para tabelas temporárias/transitórias",
+        "es_correcta": true,
+        "explicacion": "O round-robin carrega rapidamente e é adequado quando a co-localização de junção ainda não é necessária."
+      },
+      {
+        "texto_opcion": "Pule a criação de uma tabela e cole no Excel",
+        "es_correcta": false,
+        "explicacion": "Não é armazenamento MPP."
+      },
+      {
+        "texto_opcion": "REPLICATE fatos sobre teste multi-TB",
+        "es_correcta": false,
+        "explicacion": "O custo de replicação explode para grandes volumes de dados."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Estágio round-robin"
+    ]
+  },
+  {
+    "pregunta": "Cenário de transportadora logística – grande fato verificado principalmente por análises com poucas atualizações. O que eles deveriam implementar?",
+    "opciones": [
+      {
+        "texto_opcion": "Índices XML em cada coluna",
+        "es_correcta": false,
+        "explicacion": "Foco incorreto no recurso do motor."
+      },
+      {
+        "texto_opcion": "Índice columnstore clusterizado (CCI) de fato",
+        "es_correcta": true,
+        "explicacion": "Columnstore é o armazenamento analítico de alta compactação padrão em Dedicated SQL pool."
+      },
+      {
+        "texto_opcion": "Apenas montes sem colunas para fatos enormes",
+        "es_correcta": false,
+        "explicacion": "Perde a compactação e a velocidade de varredura."
+      },
+      {
+        "texto_opcion": "Processamento de linha baseado em cursor",
+        "es_correcta": false,
+        "explicacion": "Antipadrão para análise de MPP."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Loja de colunas"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de uma seguradora com janelas de lote por hora: optimizer escolhe planos ruins após grandes cargas em Dedicated SQL pool. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Exclua todos os índices permanentemente",
+        "es_correcta": false,
+        "explicacion": "Geralmente piora os planos."
+      },
+      {
+        "texto_opcion": "Atualizar estatísticas (e considerar CRIAR ESTATÍSTICAS) após alterações significativas nos dados",
+        "es_correcta": true,
+        "explicacion": "Estatísticas recentes melhoram a qualidade do plano com base na distribuição."
+      },
+      {
+        "texto_opcion": "Reinicie os clientes Windows",
+        "es_correcta": false,
+        "explicacion": "Irrelevante para estatísticas de pool."
+      },
+      {
+        "texto_opcion": "Desative o cache do conjunto de resultados como a única correção",
+        "es_correcta": false,
+        "explicacion": "Não corrige estimativas de cardinalidade."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Estatísticas"
+    ]
+  },
+  {
+    "pregunta": "DMVs mostram embaralhamento excessivo durante junções fact-dim em chaves incompatíveis. Contexto: plataforma IoT industrial, painéis quase em tempo real.",
+    "opciones": [
+      {
+        "texto_opcion": "Alinhe as distribuições HASH na chave de junção ou replicate no lado pequeno",
+        "es_correcta": true,
+        "explicacion": "A redução da movimentação de dados é a principal alavanca de ajuste de junção do MPP."
+      },
+      {
+        "texto_opcion": "Force loops aninhados sugerem cegamente em todos os lugares",
+        "es_correcta": false,
+        "explicacion": "Não corrige incompatibilidade de distribuição."
+      },
+      {
+        "texto_opcion": "Desative todas as distribuições e use apenas heaps",
+        "es_correcta": false,
+        "explicacion": "Design SQL dedicado inválido."
+      },
+      {
+        "texto_opcion": "Aumentar a contagem visual do Power BI",
+        "es_correcta": false,
+        "explicacion": "Não relacionado ao embaralhamento do pool SQL."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Movimentação de dados"
+    ]
+  },
+  {
+    "pregunta": "Cenário de estúdio de jogos – a qualidade do columnstore é ruim devido a muitos pequenos grupos de linhas abertos após inserções lentas. O que eles deveriam implementar?",
+    "opciones": [
+      {
+        "texto_opcion": "Desligue a compactação permanentemente",
+        "es_correcta": false,
+        "explicacion": "Aumenta o armazenamento e a E/S."
+      },
+      {
+        "texto_opcion": "Insira uma linha por transação para sempre",
+        "es_correcta": false,
+        "explicacion": "Cria baixa qualidade de rowgroup."
+      },
+      {
+        "texto_opcion": "Carregamentos em lote no CCI e reconstrução/reorganização quando os rowgroups não estão íntegros",
+        "es_correcta": true,
+        "explicacion": "Columnstore prefere cargas em massa; a manutenção corrige rowgroups fragmentados."
+      },
+      {
+        "texto_opcion": "Elimine o CCI e armazene fatos como XML",
+        "es_correcta": false,
+        "explicacion": "Destrói o desempenho analítico."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Grupo de linhas CCI"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (norte da Europa): consultas idênticas no painel atingiram Dedicated SQL pool repetidamente em poucos minutos. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "Cache apenas em navegadores de usuários finais sem política de servidor",
+        "es_correcta": false,
+        "explicacion": "Inconsistente e inseguro."
+      },
+      {
+        "texto_opcion": "Reescreva cada consulta para SELECT * FROM em todos os lugares",
+        "es_correcta": false,
+        "explicacion": "Piora a carga."
+      },
+      {
+        "texto_opcion": "Desative o cache e aumente apenas o DWU",
+        "es_correcta": false,
+        "explicacion": "Gasta dinheiro sem ajudar em consultas idênticas repetidas."
+      },
+      {
+        "texto_opcion": "Habilite e use o cache do conjunto de resultados quando apropriado",
+        "es_correcta": true,
+        "explicacion": "O cache do conjunto de resultados retorna resultados de consulta idênticos recentes sem recalcular."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Cache de resultados"
+    ]
+  },
+  {
+    "pregunta": "Uma concessionária de energia (consultas interativas em menos de um segundo, região oeste da Europa) deve: Dedicated SQL pool o fato precisa de exclusões de meses antigos em janelas deslizantes. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "DELETE linha por linha sem partições",
+        "es_correcta": false,
+        "explicacion": "Caro em fatos enormes."
+      },
+      {
+        "texto_opcion": "Elimine o banco de dados mensalmente",
+        "es_correcta": false,
+        "explicacion": "Destrói tudo."
+      },
+      {
+        "texto_opcion": "Confie apenas nos filtros do Power BI para exclusão",
+        "es_correcta": false,
+        "explicacion": "Não remove dados do warehouse."
+      },
+      {
+        "texto_opcion": "Particionamento de tabela por data com padrões de troca/truncamento de partição",
+        "es_correcta": true,
+        "explicacion": "As partições permitem operações eficientes do ciclo de vida de dados em fatos grandes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Tabela de partição"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de operadora de telecomunicações com residência estrita no GDPR: carregue em massa de ADLS Parquet para Dedicated SQL pool com eficiência. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Modo de importação do Power BI como ferramenta de carregamento",
+        "es_correcta": false,
+        "explicacion": "A importação do BI não é o caminho de carregamento do warehouse."
+      },
+      {
+        "texto_opcion": "Aplicativos lógicos para cada cópia de arquivo",
+        "es_correcta": false,
+        "explicacion": "Não é um carregador em massa analítico."
+      },
+      {
+        "texto_opcion": "PolyBase ou COPY INTO de fontes ADLS externas",
+        "es_correcta": true,
+        "explicacion": "PolyBase/COPY são projetados para cargas de alto rendimento em Dedicated SQL pool."
+      },
+      {
+        "texto_opcion": "Instruções INSERT linha por linha",
+        "es_correcta": false,
+        "explicacion": "Muito lento para cargas de lago em massa."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "PolyBase carregar"
+    ]
+  },
+  {
+    "pregunta": "Uma fintech de pagamentos (residência estrita do GDPR, região sudeste) deve: Uma distribuição contém a maioria das linhas após HASH em uma bandeira de status de baixa cardinalidade. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Escolha uma chave HASH de cardinalidade mais alta alinhada a junções/filtros",
+        "es_correcta": true,
+        "explicacion": "Chaves hash de baixa cardinalidade criam distorções e retardatários de distribuição."
+      },
+      {
+        "texto_opcion": "Mantenha a chave distorcida e espere que o DWU conserte isso",
+        "es_correcta": false,
+        "explicacion": "A escala não remove a inclinação."
+      },
+      {
+        "texto_opcion": "Converter todas as colunas em NVARCHAR(MAX)",
+        "es_correcta": false,
+        "explicacion": "Prejudica o armazenamento e a CPU."
+      },
+      {
+        "texto_opcion": "REPLICATE o fato multi-TB para ocultar distorções",
+        "es_correcta": false,
+        "explicacion": "O custo de replicação é proibitivo."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Detecção de inclinação"
+    ]
+  },
+  {
+    "pregunta": "pesquisas de pontos em uma tabela Dedicated SQL pool grande por order_id. Contexto: empresa de streaming de mídia, aproximadamente 200 milhões de linhas/dia.",
+    "opciones": [
+      {
+        "texto_opcion": "Crie um índice não clusterizado alinhado aos predicados de pesquisa onde for benéfico",
+        "es_correcta": true,
+        "explicacion": "Os índices secundários podem acelerar pesquisas seletivas quando projetados com cuidado."
+      },
+      {
+        "texto_opcion": "Armazene pedidos apenas como imagens",
+        "es_correcta": false,
+        "explicacion": "Não questionável."
+      },
+      {
+        "texto_opcion": "Sempre dicas de varredura de tabela completa",
+        "es_correcta": false,
+        "explicacion": "Mais lento para pesquisas seletivas."
+      },
+      {
+        "texto_opcion": "Desative o cache do conjunto de resultados para sempre sem motivo",
+        "es_correcta": false,
+        "explicacion": "Pode prejudicar consultas repetidas."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Pesquisa indexada"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (brasilsul): ETL noturno precisa de alta computação; durante o dia são principalmente painéis leves. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "Deixe o DWU máximo 24 horas por dia, 7 dias por semana, para sempre, sem revisão",
+        "es_correcta": false,
+        "explicacion": "Custo desnecessário."
+      },
+      {
+        "texto_opcion": "Substitua o pool SQL pelo Excel para cargas noturnas",
+        "es_correcta": false,
+        "explicacion": "Não em escala empresarial."
+      },
+      {
+        "texto_opcion": "Faça uma pausa durante o ETL e execute o ETL em um laptop",
+        "es_correcta": false,
+        "explicacion": "Quebra o ETL do armazém."
+      },
+      {
+        "texto_opcion": "Escale Dedicated SQL pool DWUs em um cronograma (aumente para ETL, diminua depois)",
+        "es_correcta": true,
+        "explicacion": "O dimensionamento do Elastic DWU corresponde ao custo às janelas de carga de trabalho."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Escala DWU"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (norte da Europa): Dedicated SQL pool necessita de agregações mais rápidas em padrões de resumo estáveis. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "Desative as estatísticas permanentemente",
+        "es_correcta": false,
+        "explicacion": "Piora as escolhas optimizer."
+      },
+      {
+        "texto_opcion": "Force CROSS JOIN em todos os lugares",
+        "es_correcta": false,
+        "explicacion": "Explode a cardinalidade."
+      },
+      {
+        "texto_opcion": "Armazene agregados apenas em navegadores clientes",
+        "es_correcta": false,
+        "explicacion": "Não é uma estratégia de armazém durável."
+      },
+      {
+        "texto_opcion": "Crie estruturas agregadas materializadas/indexadas quando suportadas por uma estratégia de atualização clara",
+        "es_correcta": true,
+        "explicacion": "Estruturas pré-agregadas reduzem verificações pesadas e repetidas."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Agg materializada"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma IoT industrial com janelas de lote por hora: projete uma grande tabela de fatos em Dedicated SQL pool juntada frequentemente em customer_id. Melhor escolha (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "ROUND_ROBIN para o grande fato",
+        "es_correcta": false,
+        "explicacion": "Round-robin causa mais remodelações nas junções."
+      },
+      {
+        "texto_opcion": "REPLICATE o fato multi-TB",
+        "es_correcta": false,
+        "explicacion": "Replicate é para pequenas dimensões, não para fatos grandes."
+      },
+      {
+        "texto_opcion": "Heap sem escolha de distribuição",
+        "es_correcta": false,
+        "explicacion": "As tabelas Dedicated SQL pool requerem uma estratégia de distribuição."
+      },
+      {
+        "texto_opcion": "HASH distribui o fato em customer_id",
+        "es_correcta": true,
+        "explicacion": "O hash na chave de junção reduz a movimentação de dados para grandes junções equivalentes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Fato hash"
+    ]
+  },
+  {
+    "pregunta": "uma pequena dimensão que muda lentamente (~50 MB) é associada a muitos fatos grandes. Contexto: plataforma IoT industrial, dados históricos em escala de petabytes. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Tabela externa apenas sem cache",
+        "es_correcta": false,
+        "explicacion": "Tabelas externas não fornecem desempenho no conjunto replicated."
+      },
+      {
+        "texto_opcion": "REPLICATE distribuir a dimensão",
+        "es_correcta": true,
+        "explicacion": "Replicated pequenos dims evitam embaralhamento copiando para cada distribuição."
+      },
+      {
+        "texto_opcion": "ROUND_ROBIN apenas a pequena dimensão",
+        "es_correcta": false,
+        "explicacion": "Funciona, mas replicate tem melhor desempenho para junções frequentes."
+      },
+      {
+        "texto_opcion": "HASH em uma chave de alta cardinalidade desnecessariamente",
+        "es_correcta": false,
+        "explicacion": "Hash é melhor para tabelas grandes; pequenas dims preferem replicate."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Replicate escuro"
+    ]
+  },
+  {
+    "pregunta": "Cenário de plataforma IoT industrial – a mesa intermediária recebe cargas antes da redistribuição; junções são raras na preparação. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Pule a criação de uma tabela e cole no Excel",
+        "es_correcta": false,
+        "explicacion": "Não é armazenamento MPP."
+      },
+      {
+        "texto_opcion": "Distribuição ROUND_ROBIN para tabelas temporárias/transitórias",
+        "es_correcta": true,
+        "explicacion": "O round-robin carrega rapidamente e é adequado quando a co-localização de junção ainda não é necessária."
+      },
+      {
+        "texto_opcion": "REPLICATE fatos sobre teste multi-TB",
+        "es_correcta": false,
+        "explicacion": "O custo de replicação explode para grandes volumes de dados."
+      },
+      {
+        "texto_opcion": "Sempre HASH em um GUID aleatório sem uso de junção",
+        "es_correcta": false,
+        "explicacion": "Risco de distorção desnecessário sem benefício."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Estágio round-robin"
+    ]
+  },
+  {
+    "pregunta": "Cenário da empresa de streaming de mídia – grande fato verificado principalmente por análises com poucas atualizações. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Índice columnstore clusterizado (CCI) de fato",
+        "es_correcta": true,
+        "explicacion": "Columnstore é o armazenamento analítico de alta compactação padrão em Dedicated SQL pool."
+      },
+      {
+        "texto_opcion": "Processamento de linha baseado em cursor",
+        "es_correcta": false,
+        "explicacion": "Antipadrão para análise de MPP."
+      },
+      {
+        "texto_opcion": "Apenas montes sem colunas para fatos enormes",
+        "es_correcta": false,
+        "explicacion": "Perde a compactação e a velocidade de varredura."
+      },
+      {
+        "texto_opcion": "Índices XML em cada coluna",
+        "es_correcta": false,
+        "explicacion": "Foco incorreto no recurso do motor."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Loja de colunas"
+    ]
+  },
+  {
+    "pregunta": "Um estúdio de jogos (consultas interativas em menos de um segundo, região norte da Europa) deve: optimizer escolher planos ruins após grandes cargas em Dedicated SQL pool. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Desative o cache do conjunto de resultados como a única correção",
+        "es_correcta": false,
+        "explicacion": "Não corrige estimativas de cardinalidade."
+      },
+      {
+        "texto_opcion": "Atualizar estatísticas (e considerar CRIAR ESTATÍSTICAS) após alterações significativas nos dados",
+        "es_correcta": true,
+        "explicacion": "Estatísticas recentes melhoram a qualidade do plano com base na distribuição."
+      },
+      {
+        "texto_opcion": "Reinicie os clientes Windows",
+        "es_correcta": false,
+        "explicacion": "Irrelevante para estatísticas de pool."
+      },
+      {
+        "texto_opcion": "Exclua todos os índices permanentemente",
+        "es_correcta": false,
+        "explicacion": "Geralmente piora os planos."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Estatísticas"
+    ]
+  },
+  {
+    "pregunta": "Um mercado on-line (dados históricos em escala de petabytes, região sudeste) deve: DMVs mostrar embaralhamento excessivo durante junções fact-dim em chaves incompatíveis. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Force loops aninhados sugerem cegamente em todos os lugares",
+        "es_correcta": false,
+        "explicacion": "Não corrige incompatibilidade de distribuição."
+      },
+      {
+        "texto_opcion": "Desative todas as distribuições e use apenas heaps",
+        "es_correcta": false,
+        "explicacion": "Design SQL dedicado inválido."
+      },
+      {
+        "texto_opcion": "Alinhe as distribuições HASH na chave de junção ou replicate no lado pequeno",
+        "es_correcta": true,
+        "explicacion": "A redução da movimentação de dados é a principal alavanca de ajuste de junção do MPP."
+      },
+      {
+        "texto_opcion": "Aumentar a contagem visual do Power BI",
+        "es_correcta": false,
+        "explicacion": "Não relacionado ao embaralhamento do pool SQL."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Movimentação de dados"
+    ]
+  },
+  {
+    "pregunta": "Cenário do provedor de serviços de saúde – a qualidade do columnstore é ruim devido a muitos pequenos grupos de linhas abertos após inserções lentas. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Elimine o CCI e armazene fatos como XML",
+        "es_correcta": false,
+        "explicacion": "Destrói o desempenho analítico."
+      },
+      {
+        "texto_opcion": "Desligue a compactação permanentemente",
+        "es_correcta": false,
+        "explicacion": "Aumenta o armazenamento e a E/S."
+      },
+      {
+        "texto_opcion": "Carregamentos em lote no CCI e reconstrução/reorganização quando os rowgroups não estão íntegros",
+        "es_correcta": true,
+        "explicacion": "Columnstore prefere cargas em massa; a manutenção corrige rowgroups fragmentados."
+      },
+      {
+        "texto_opcion": "Insira uma linha por transação para sempre",
+        "es_correcta": false,
+        "explicacion": "Cria baixa qualidade de rowgroup."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Grupo de linhas CCI"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (brasilsul): consultas idênticas no painel atingiram Dedicated SQL pool repetidamente em poucos minutos. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Habilite e use o cache do conjunto de resultados quando apropriado",
+        "es_correcta": true,
+        "explicacion": "O cache do conjunto de resultados retorna resultados de consulta idênticos recentes sem recalcular."
+      },
+      {
+        "texto_opcion": "Desative o cache e aumente apenas o DWU",
+        "es_correcta": false,
+        "explicacion": "Gasta dinheiro sem ajudar em consultas idênticas repetidas."
+      },
+      {
+        "texto_opcion": "Cache apenas em navegadores de usuários finais sem política de servidor",
+        "es_correcta": false,
+        "explicacion": "Inconsistente e inseguro."
+      },
+      {
+        "texto_opcion": "Reescreva cada consulta para SELECT * FROM em todos os lugares",
+        "es_correcta": false,
+        "explicacion": "Piora a carga."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Cache de resultados"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidente (eastus): o fato Dedicated SQL pool precisa de exclusões de janelas deslizantes de meses antigos. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Elimine o banco de dados mensalmente",
+        "es_correcta": false,
+        "explicacion": "Destrói tudo."
+      },
+      {
+        "texto_opcion": "Confie apenas nos filtros do Power BI para exclusão",
+        "es_correcta": false,
+        "explicacion": "Não remove dados do warehouse."
+      },
+      {
+        "texto_opcion": "DELETE linha por linha sem partições",
+        "es_correcta": false,
+        "explicacion": "Caro em fatos enormes."
+      },
+      {
+        "texto_opcion": "Particionamento de tabela por data com padrões de troca/truncamento de partição",
+        "es_correcta": true,
+        "explicacion": "As partições permitem operações eficientes do ciclo de vida de dados em fatos grandes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Tabela de partição"
+    ]
+  },
+  {
+    "pregunta": "carga em massa de ADLS Parquet para Dedicated SQL pool com eficiência. Contexto: operadora de telecomunicações, painéis quase em tempo real. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Aplicativos lógicos para cada cópia de arquivo",
+        "es_correcta": false,
+        "explicacion": "Não é um carregador em massa analítico."
+      },
+      {
+        "texto_opcion": "Instruções INSERT linha por linha",
+        "es_correcta": false,
+        "explicacion": "Muito lento para cargas de lago em massa."
+      },
+      {
+        "texto_opcion": "Modo de importação do Power BI como ferramenta de carregamento",
+        "es_correcta": false,
+        "explicacion": "A importação do BI não é o caminho de carregamento do warehouse."
+      },
+      {
+        "texto_opcion": "PolyBase ou COPY INTO de fontes ADLS externas",
+        "es_correcta": true,
+        "explicacion": "PolyBase/COPY são projetados para cargas de alto rendimento em Dedicated SQL pool."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "PolyBase carregar"
+    ]
+  },
+  {
+    "pregunta": "uma distribuição contém a maioria das linhas após HASH em um sinalizador de status de baixa cardinalidade. Contexto: plataforma de viagens, dados históricos em escala de petabytes. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Mantenha a chave distorcida e espere que o DWU conserte isso",
+        "es_correcta": false,
+        "explicacion": "A escala não remove a inclinação."
+      },
+      {
+        "texto_opcion": "Converter todas as colunas em NVARCHAR(MAX)",
+        "es_correcta": false,
+        "explicacion": "Prejudica o armazenamento e a CPU."
+      },
+      {
+        "texto_opcion": "REPLICATE o fato multi-TB para ocultar distorções",
+        "es_correcta": false,
+        "explicacion": "O custo de replicação é proibitivo."
+      },
+      {
+        "texto_opcion": "Escolha uma chave HASH de cardinalidade mais alta alinhada a junções/filtros",
+        "es_correcta": true,
+        "explicacion": "Chaves hash de baixa cardinalidade criam distorções e retardatários de distribuição."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Detecção de inclinação"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de provedor de saúde com aproximadamente 200 milhões de linhas/dia: aponte pesquisas em uma tabela Dedicated SQL pool grande por order_id. Melhor escolha (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Sempre dicas de varredura de tabela completa",
+        "es_correcta": false,
+        "explicacion": "Mais lento para pesquisas seletivas."
+      },
+      {
+        "texto_opcion": "Crie um índice não clusterizado alinhado aos predicados de pesquisa onde for benéfico",
+        "es_correcta": true,
+        "explicacion": "Os índices secundários podem acelerar pesquisas seletivas quando projetados com cuidado."
+      },
+      {
+        "texto_opcion": "Armazene pedidos apenas como imagens",
+        "es_correcta": false,
+        "explicacion": "Não questionável."
+      },
+      {
+        "texto_opcion": "Desative o cache do conjunto de resultados para sempre sem motivo",
+        "es_correcta": false,
+        "explicacion": "Pode prejudicar consultas repetidas."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Pesquisa indexada"
+    ]
+  },
+  {
+    "pregunta": "Cenário varejista global – ETL noturno precisa de alta computação; durante o dia são principalmente painéis leves. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Faça uma pausa durante o ETL e execute o ETL em um laptop",
+        "es_correcta": false,
+        "explicacion": "Quebra o ETL do armazém."
+      },
+      {
+        "texto_opcion": "Deixe o DWU máximo 24 horas por dia, 7 dias por semana, para sempre, sem revisão",
+        "es_correcta": false,
+        "explicacion": "Custo desnecessário."
+      },
+      {
+        "texto_opcion": "Escale Dedicated SQL pool DWUs em um cronograma (aumente para ETL, diminua depois)",
+        "es_correcta": true,
+        "explicacion": "O dimensionamento do Elastic DWU corresponde ao custo às janelas de carga de trabalho."
+      },
+      {
+        "texto_opcion": "Substitua o pool SQL pelo Excel para cargas noturnas",
+        "es_correcta": false,
+        "explicacion": "Não em escala empresarial."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Escala DWU"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de estúdio de jogos com aproximadamente 5 TB/dia: Dedicated SQL pool precisa de agregações mais rápidas em padrões de resumo estáveis. Melhor escolha (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Armazene agregados apenas em navegadores clientes",
+        "es_correcta": false,
+        "explicacion": "Não é uma estratégia de armazém durável."
+      },
+      {
+        "texto_opcion": "Desative as estatísticas permanentemente",
+        "es_correcta": false,
+        "explicacion": "Piora as escolhas optimizer."
+      },
+      {
+        "texto_opcion": "Force CROSS JOIN em todos os lugares",
+        "es_correcta": false,
+        "explicacion": "Explode a cardinalidade."
+      },
+      {
+        "texto_opcion": "Crie estruturas agregadas materializadas/indexadas quando suportadas por uma estratégia de atualização clara",
+        "es_correcta": true,
+        "explicacion": "Estruturas pré-agregadas reduzem verificações pesadas e repetidas."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Agg materializada"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (norte da Europa): projete uma grande tabela de fatos em Dedicated SQL pool juntada frequentemente em customer_id. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Heap sem escolha de distribuição",
+        "es_correcta": false,
+        "explicacion": "As tabelas Dedicated SQL pool requerem uma estratégia de distribuição."
+      },
+      {
+        "texto_opcion": "ROUND_ROBIN para o grande fato",
+        "es_correcta": false,
+        "explicacion": "Round-robin causa mais remodelações nas junções."
+      },
+      {
+        "texto_opcion": "HASH distribui o fato em customer_id",
+        "es_correcta": true,
+        "explicacion": "O hash na chave de junção reduz a movimentação de dados para grandes junções equivalentes."
+      },
+      {
+        "texto_opcion": "REPLICATE o fato multi-TB",
+        "es_correcta": false,
+        "explicacion": "Replicate é para pequenas dimensões, não para fatos grandes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Fato hash"
+    ]
+  },
+  {
+    "pregunta": "uma pequena dimensão que muda lentamente (~50 MB) é associada a muitos fatos grandes. Contexto: operadora de telecomunicações, consultas interativas em segundos. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "ROUND_ROBIN apenas a pequena dimensão",
+        "es_correcta": false,
+        "explicacion": "Funciona, mas replicate tem melhor desempenho para junções frequentes."
+      },
+      {
+        "texto_opcion": "HASH em uma chave de alta cardinalidade desnecessariamente",
+        "es_correcta": false,
+        "explicacion": "Hash é melhor para tabelas grandes; pequenas dims preferem replicate."
+      },
+      {
+        "texto_opcion": "REPLICATE distribuir a dimensão",
+        "es_correcta": true,
+        "explicacion": "Replicated pequenos dims evitam embaralhamento copiando para cada distribuição."
+      },
+      {
+        "texto_opcion": "Tabela externa apenas sem cache",
+        "es_correcta": false,
+        "explicacion": "Tabelas externas não fornecem desempenho no conjunto replicated."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Replicate escuro"
+    ]
+  },
+  {
+    "pregunta": "a tabela intermediária recebe cargas antes da redistribuição; junções são raras na preparação. Contexto: varejista global, ~5 TB/dia. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Distribuição ROUND_ROBIN para tabelas temporárias/transitórias",
+        "es_correcta": true,
+        "explicacion": "O round-robin carrega rapidamente e é adequado quando a co-localização de junção ainda não é necessária."
+      },
+      {
+        "texto_opcion": "Pule a criação de uma tabela e cole no Excel",
+        "es_correcta": false,
+        "explicacion": "Não é armazenamento MPP."
+      },
+      {
+        "texto_opcion": "Sempre HASH em um GUID aleatório sem uso de junção",
+        "es_correcta": false,
+        "explicacion": "Risco de distorção desnecessário sem benefício."
+      },
+      {
+        "texto_opcion": "REPLICATE fatos sobre teste multi-TB",
+        "es_correcta": false,
+        "explicacion": "O custo de replicação explode para grandes volumes de dados."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Estágio round-robin"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma IoT industrial com painéis quase em tempo real: grandes fatos verificados principalmente por análises com poucas atualizações. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Índice columnstore clusterizado (CCI) de fato",
+        "es_correcta": true,
+        "explicacion": "Columnstore é o armazenamento analítico de alta compactação padrão em Dedicated SQL pool."
+      },
+      {
+        "texto_opcion": "Índices XML em cada coluna",
+        "es_correcta": false,
+        "explicacion": "Foco incorreto no recurso do motor."
+      },
+      {
+        "texto_opcion": "Apenas montes sem colunas para fatos enormes",
+        "es_correcta": false,
+        "explicacion": "Perde a compactação e a velocidade de varredura."
+      },
+      {
+        "texto_opcion": "Processamento de linha baseado em cursor",
+        "es_correcta": false,
+        "explicacion": "Antipadrão para análise de MPP."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Loja de colunas"
+    ]
+  },
+  {
+    "pregunta": "Cenário de plataforma IoT industrial — optimizer escolhe planos ruins após grandes cargas em Dedicated SQL pool. O que eles deveriam implementar? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Exclua todos os índices permanentemente",
+        "es_correcta": false,
+        "explicacion": "Geralmente piora os planos."
+      },
+      {
+        "texto_opcion": "Atualizar estatísticas (e considerar CRIAR ESTATÍSTICAS) após alterações significativas nos dados",
+        "es_correcta": true,
+        "explicacion": "Estatísticas recentes melhoram a qualidade do plano com base na distribuição."
+      },
+      {
+        "texto_opcion": "Reinicie os clientes Windows",
+        "es_correcta": false,
+        "explicacion": "Irrelevante para estatísticas de pool."
+      },
+      {
+        "texto_opcion": "Desative o cache do conjunto de resultados como a única correção",
+        "es_correcta": false,
+        "explicacion": "Não corrige estimativas de cardinalidade."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Estatísticas"
+    ]
+  },
+  {
+    "pregunta": "Um estúdio de jogos (janelas de lote por hora, região australiaeast) deve: DMVs mostrar embaralhamento excessivo durante junções fact-dim em chaves incompatíveis. Qual opção se adapta melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Alinhe as distribuições HASH na chave de junção ou replicate no lado pequeno",
+        "es_correcta": true,
+        "explicacion": "A redução da movimentação de dados é a principal alavanca de ajuste de junção do MPP."
+      },
+      {
+        "texto_opcion": "Desative todas as distribuições e use apenas heaps",
+        "es_correcta": false,
+        "explicacion": "Design SQL dedicado inválido."
+      },
+      {
+        "texto_opcion": "Force loops aninhados sugerem cegamente em todos os lugares",
+        "es_correcta": false,
+        "explicacion": "Não corrige incompatibilidade de distribuição."
+      },
+      {
+        "texto_opcion": "Aumentar a contagem visual do Power BI",
+        "es_correcta": false,
+        "explicacion": "Não relacionado ao embaralhamento do pool SQL."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Movimentação de dados"
+    ]
+  },
+  {
+    "pregunta": "Um estúdio de jogos (janelas de lote por hora, região sudeste) deve: a qualidade do columnstore é ruim devido a muitos pequenos grupos de linhas abertos após inserções lentas. Qual opção se adapta melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Insira uma linha por transação para sempre",
+        "es_correcta": false,
+        "explicacion": "Cria baixa qualidade de rowgroup."
+      },
+      {
+        "texto_opcion": "Elimine o CCI e armazene fatos como XML",
+        "es_correcta": false,
+        "explicacion": "Destrói o desempenho analítico."
+      },
+      {
+        "texto_opcion": "Carregamentos em lote no CCI e reconstrução/reorganização quando os rowgroups não estão íntegros",
+        "es_correcta": true,
+        "explicacion": "Columnstore prefere cargas em massa; a manutenção corrige rowgroups fragmentados."
+      },
+      {
+        "texto_opcion": "Desligue a compactação permanentemente",
+        "es_correcta": false,
+        "explicacion": "Aumenta o armazenamento e a E/S."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Grupo de linhas CCI"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de um provedor de saúde com aproximadamente 5 TB/dia: consultas idênticas no painel atingem Dedicated SQL pool repetidamente em minutos. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Reescreva cada consulta para SELECT * FROM em todos os lugares",
+        "es_correcta": false,
+        "explicacion": "Piora a carga."
+      },
+      {
+        "texto_opcion": "Cache apenas em navegadores de usuários finais sem política de servidor",
+        "es_correcta": false,
+        "explicacion": "Inconsistente e inseguro."
+      },
+      {
+        "texto_opcion": "Desative o cache e aumente apenas o DWU",
+        "es_correcta": false,
+        "explicacion": "Gasta dinheiro sem ajudar em consultas idênticas repetidas."
+      },
+      {
+        "texto_opcion": "Habilite e use o cache do conjunto de resultados quando apropriado",
+        "es_correcta": true,
+        "explicacion": "O cache do conjunto de resultados retorna resultados de consulta idênticos recentes sem recalcular."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Cache de resultados"
+    ]
+  },
+  {
+    "pregunta": "O fato Dedicated SQL pool precisa de exclusões em janelas deslizantes de meses antigos. Contexto: transportador logístico, ~5 TB/dia. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "DELETE linha por linha sem partições",
+        "es_correcta": false,
+        "explicacion": "Caro em fatos enormes."
+      },
+      {
+        "texto_opcion": "Confie apenas nos filtros do Power BI para exclusão",
+        "es_correcta": false,
+        "explicacion": "Não remove dados do warehouse."
+      },
+      {
+        "texto_opcion": "Elimine o banco de dados mensalmente",
+        "es_correcta": false,
+        "explicacion": "Destrói tudo."
+      },
+      {
+        "texto_opcion": "Particionamento de tabela por data com padrões de troca/truncamento de partição",
+        "es_correcta": true,
+        "explicacion": "As partições permitem operações eficientes do ciclo de vida de dados em fatos grandes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Tabela de partição"
+    ]
+  },
+  {
+    "pregunta": "Cenário de transportadora logística - carga a granel de ADLS Parquet para Dedicated SQL pool com eficiência. O que eles deveriam implementar? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Aplicativos lógicos para cada cópia de arquivo",
+        "es_correcta": false,
+        "explicacion": "Não é um carregador em massa analítico."
+      },
+      {
+        "texto_opcion": "Modo de importação do Power BI como ferramenta de carregamento",
+        "es_correcta": false,
+        "explicacion": "A importação do BI não é o caminho de carregamento do warehouse."
+      },
+      {
+        "texto_opcion": "Instruções INSERT linha por linha",
+        "es_correcta": false,
+        "explicacion": "Muito lento para cargas de lago em massa."
+      },
+      {
+        "texto_opcion": "PolyBase ou COPY INTO de fontes ADLS externas",
+        "es_correcta": true,
+        "explicacion": "PolyBase/COPY são projetados para cargas de alto rendimento em Dedicated SQL pool."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "PolyBase carregar"
+    ]
+  },
+  {
+    "pregunta": "Um provedor de serviços de saúde (~50.000 eventos/s, região sudeste) deve: Uma distribuição contém a maioria das linhas após HASH em um sinalizador de status de baixa cardinalidade. Qual opção se adapta melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Mantenha a chave distorcida e espere que o DWU conserte isso",
+        "es_correcta": false,
+        "explicacion": "A escala não remove a inclinação."
+      },
+      {
+        "texto_opcion": "Converter todas as colunas em NVARCHAR(MAX)",
+        "es_correcta": false,
+        "explicacion": "Prejudica o armazenamento e a CPU."
+      },
+      {
+        "texto_opcion": "REPLICATE o fato multi-TB para ocultar distorções",
+        "es_correcta": false,
+        "explicacion": "O custo de replicação é proibitivo."
+      },
+      {
+        "texto_opcion": "Escolha uma chave HASH de cardinalidade mais alta alinhada a junções/filtros",
+        "es_correcta": true,
+        "explicacion": "Chaves hash de baixa cardinalidade criam distorções e retardatários de distribuição."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Detecção de inclinação"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de transportadora logística com consultas interativas em menos de um segundo: pesquisas de pontos em uma grande tabela Dedicated SQL pool por order_id. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Desative o cache do conjunto de resultados para sempre sem motivo",
+        "es_correcta": false,
+        "explicacion": "Pode prejudicar consultas repetidas."
+      },
+      {
+        "texto_opcion": "Sempre dicas de varredura de tabela completa",
+        "es_correcta": false,
+        "explicacion": "Mais lento para pesquisas seletivas."
+      },
+      {
+        "texto_opcion": "Armazene pedidos apenas como imagens",
+        "es_correcta": false,
+        "explicacion": "Não questionável."
+      },
+      {
+        "texto_opcion": "Crie um índice não clusterizado alinhado aos predicados de pesquisa onde for benéfico",
+        "es_correcta": true,
+        "explicacion": "Os índices secundários podem acelerar pesquisas seletivas quando projetados com cuidado."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Pesquisa indexada"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de operadora de telecomunicações com aproximadamente 50.000 eventos/s: o ETL noturno precisa de alta computação; durante o dia são principalmente painéis leves. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Escale Dedicated SQL pool DWUs em um cronograma (aumente para ETL, diminua depois)",
+        "es_correcta": true,
+        "explicacion": "O dimensionamento do Elastic DWU corresponde ao custo às janelas de carga de trabalho."
+      },
+      {
+        "texto_opcion": "Deixe o DWU máximo 24 horas por dia, 7 dias por semana, para sempre, sem revisão",
+        "es_correcta": false,
+        "explicacion": "Custo desnecessário."
+      },
+      {
+        "texto_opcion": "Substitua o pool SQL pelo Excel para cargas noturnas",
+        "es_correcta": false,
+        "explicacion": "Não em escala empresarial."
+      },
+      {
+        "texto_opcion": "Faça uma pausa durante o ETL e execute o ETL em um laptop",
+        "es_correcta": false,
+        "explicacion": "Quebra o ETL do armazém."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Escala DWU"
+    ]
+  }
+]

@@ -1,0 +1,1568 @@
+[
+  {
+    "pregunta": "load local CSV without external cloud bucket setup for test. Context: payments fintech, strict GDPR residency.",
+    "opciones": [
+      {
+        "texto_opcion": "Internal stage bypasses file format",
+        "es_correcta": false,
+        "explicacion": "COPY still needs file format."
+      },
+      {
+        "texto_opcion": "Internal stage requires customer S3 bucket always",
+        "es_correcta": false,
+        "explicacion": "Internal stages are Snowflake-managed."
+      },
+      {
+        "texto_opcion": "Use user/table/named internal stage and PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Internal stages store files inside Snowflake for loading."
+      },
+      {
+        "texto_opcion": "PUT uploads to warehouse SSD permanently as table",
+        "es_correcta": false,
+        "explicacion": "PUT loads files to stage then COPY to table."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Internal stage"
+    ]
+  },
+  {
+    "pregunta": "load from S3 with credentials integrated securely. Context: logistics carrier, ~200 million rows/day.",
+    "opciones": [
+      {
+        "texto_opcion": "Create external stage with STORAGE INTEGRATION or credentials referencing cloud storage",
+        "es_correcta": true,
+        "explicacion": "External stages point to cloud storage paths."
+      },
+      {
+        "texto_opcion": "Stage object is same as virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Different object types."
+      },
+      {
+        "texto_opcion": "External stage stores data in Cloud Services RAM",
+        "es_correcta": false,
+        "explicacion": "Data remains in cloud storage."
+      },
+      {
+        "texto_opcion": "COPY directly from laptop path C:\\data without stage",
+        "es_correcta": false,
+        "explicacion": "Use PUT to stage or external stage URL."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "External stage"
+    ]
+  },
+  {
+    "pregunta": "A payments fintech (~200 million rows/day, region westeurope) must: parse CSV with header row and quoted commas. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Create FILE FORMAT with TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "File formats define parsing rules for COPY."
+      },
+      {
+        "texto_opcion": "Load CSV as VARIANT only without format",
+        "es_correcta": false,
+        "explicacion": "Structured load needs format or JSON variant path."
+      },
+      {
+        "texto_opcion": "Use warehouse SIZE as file format",
+        "es_correcta": false,
+        "explicacion": "Incorrect."
+      },
+      {
+        "texto_opcion": "File format defines clustering key",
+        "es_correcta": false,
+        "explicacion": "Unrelated objects."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "File format"
+    ]
+  },
+  {
+    "pregunta": "A telecom operator (sub-second interactive queries, region brazilsouth) must: bulk load Parquet files from @stage into FACT table. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "LIST @stage loads data into table",
+        "es_correcta": false,
+        "explicacion": "LIST enumerates files only."
+      },
+      {
+        "texto_opcion": "COPY INTO fact FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME or column list",
+        "es_correcta": true,
+        "explicacion": "COPY INTO is primary bulk load command."
+      },
+      {
+        "texto_opcion": "COPY INTO exports data from table to stage by default without option",
+        "es_correcta": false,
+        "explicacion": "COPY INTO loads into table; unload uses different syntax."
+      },
+      {
+        "texto_opcion": "INSERT row-by-row from stage with cursor in app only",
+        "es_correcta": false,
+        "explicacion": "Inefficient vs COPY."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "A travel platform (~50,000 events/s, region northeurope) must: detect bad rows during CSV load without failing entire batch. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE, or load to staging then reject analysis pattern",
+        "es_correcta": true,
+        "explicacion": "Snowflake supports error handling/validation options on load."
+      },
+      {
+        "texto_opcion": "Validation requires Snowpipe only",
+        "es_correcta": false,
+        "explicacion": "COPY supports validation modes."
+      },
+      {
+        "texto_opcion": "Disable error handling to skip bad rows silently always without option",
+        "es_correcta": false,
+        "explicacion": "Must configure ON_ERROR behavior explicitly."
+      },
+      {
+        "texto_opcion": "Bad rows auto-fixed by warehouse resize",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load validation"
+    ]
+  },
+  {
+    "pregunta": "load only files matching date prefix in stage path. Context: media streaming company, petabyte-scale historical data.",
+    "opciones": [
+      {
+        "texto_opcion": "PATTERN is network policy feature",
+        "es_correcta": false,
+        "explicacion": "Wrong feature."
+      },
+      {
+        "texto_opcion": "PATTERN replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Stage still required."
+      },
+      {
+        "texto_opcion": "Load all files always including archives manually excluded by renaming laptop files",
+        "es_correcta": false,
+        "explicacion": "Use PATTERN in COPY."
+      },
+      {
+        "texto_opcion": "Use PATTERN parameter in COPY INTO (e.g., '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filters staged files for load."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Pattern matching"
+    ]
+  },
+  {
+    "pregunta": "Industrial iot platform scenario — preserve source file name in target table audit column. What should they implement?",
+    "opciones": [
+      {
+        "texto_opcion": "Use METADATA$FILENAME in COPY SELECT list",
+        "es_correcta": true,
+        "explicacion": "Metadata columns capture load context."
+      },
+      {
+        "texto_opcion": "Hardcode filename string in every COPY manually only",
+        "es_correcta": false,
+        "explicacion": "METADATA functions automate."
+      },
+      {
+        "texto_opcion": "Filename metadata requires external table only",
+        "es_correcta": false,
+        "explicacion": "Available in COPY metadata."
+      },
+      {
+        "texto_opcion": "METADATA$FILENAME stored in Fail-safe only",
+        "es_correcta": false,
+        "explicacion": "Available at load/query."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Metadata load"
+    ]
+  },
+  {
+    "pregunta": "A logistics carrier (~50,000 events/s, region westeurope) must: load JSON lines into VARIANT column. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "JSON must be flattened before COPY always",
+        "es_correcta": false,
+        "explicacion": "Can load raw JSON to VARIANT."
+      },
+      {
+        "texto_opcion": "Convert JSON to CSV first always required",
+        "es_correcta": false,
+        "explicacion": "Direct JSON load supported."
+      },
+      {
+        "texto_opcion": "COPY INTO with FILE_FORMAT TYPE=JSON and VARIANT target column",
+        "es_correcta": true,
+        "explicacion": "JSON loads into VARIANT preserving structure."
+      },
+      {
+        "texto_opcion": "VARIANT loads only via Snowpipe never COPY",
+        "es_correcta": false,
+        "explicacion": "COPY supports VARIANT."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Unstructured load"
+    ]
+  },
+  {
+    "pregunta": "For a gaming studio workload with strict GDPR residency: export query results to S3 Parquet for partner. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "SELECT INTO OUTFILE local on Snowflake server laptop path",
+        "es_correcta": false,
+        "explicacion": "Use COPY INTO stage for cloud unload."
+      },
+      {
+        "texto_opcion": "COPY INTO @external_stage FROM (SELECT ...) FILE_FORMAT=(TYPE=PARQUET)",
+        "es_correcta": true,
+        "explicacion": "COPY INTO @stage unloads query results to files."
+      },
+      {
+        "texto_opcion": "Unload requires zero-copy clone",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "PUT unloads table to S3",
+        "es_correcta": false,
+        "explicacion": "PUT uploads to internal stage; COPY unloads."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Unload"
+    ]
+  },
+  {
+    "pregunta": "For a payments fintech workload with ~200 million rows/day: reduce load file size for CSV transfers. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Use GZIP compressed files and file format COMPRESSION=GZIP",
+        "es_correcta": true,
+        "explicacion": "Compressed files reduce transfer and load time."
+      },
+      {
+        "texto_opcion": "Disable compression to help COPY parse faster always",
+        "es_correcta": false,
+        "explicacion": "Compression usually net positive."
+      },
+      {
+        "texto_opcion": "Only Parquet can be compressed",
+        "es_correcta": false,
+        "explicacion": "CSV/GZIP common."
+      },
+      {
+        "texto_opcion": "Compression set on warehouse not file format",
+        "es_correcta": false,
+        "explicacion": "File format/stage handles compression."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Compression"
+    ]
+  },
+  {
+    "pregunta": "A travel platform (~200 million rows/day, region southeastasia) must: avoid embedding long-lived AWS keys in stage definition. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable encryption on stage bucket for speed",
+        "es_correcta": false,
+        "explicacion": "Security risk."
+      },
+      {
+        "texto_opcion": "Use PUBLIC role credentials for stage",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Paste access key in stage URL query string in git",
+        "es_correcta": false,
+        "explicacion": "Secret leakage."
+      },
+      {
+        "texto_opcion": "Use STORAGE INTEGRATION with IAM role trust for S3 stages",
+        "es_correcta": true,
+        "explicacion": "Storage integrations provide secure cloud credential delegation."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Stage credentials"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): Transform during load with lightweight column expressions. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Transform requires separate ETL tool always before Snowflake",
+        "es_correcta": false,
+        "explicacion": "In-load transforms supported."
+      },
+      {
+        "texto_opcion": "COPY transform disables micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Loaded data still micro-partitioned."
+      },
+      {
+        "texto_opcion": "Transform only with Snowpipe not COPY",
+        "es_correcta": false,
+        "explicacion": "COPY supports SELECT transforms."
+      },
+      {
+        "texto_opcion": "COPY INTO ... FROM (SELECT $1, TO_TIMESTAMP($2), ... FROM @stage)",
+        "es_correcta": true,
+        "explicacion": "Transform SELECT in COPY applies during load."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load ordering"
+    ]
+  },
+  {
+    "pregunta": "For a industrial IoT platform workload with hourly batch windows: load local CSV without external cloud bucket setup for test. Best choice (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Internal stage requires customer S3 bucket always",
+        "es_correcta": false,
+        "explicacion": "Internal stages are Snowflake-managed."
+      },
+      {
+        "texto_opcion": "Use user/table/named internal stage and PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Internal stages store files inside Snowflake for loading."
+      },
+      {
+        "texto_opcion": "PUT uploads to warehouse SSD permanently as table",
+        "es_correcta": false,
+        "explicacion": "PUT loads files to stage then COPY to table."
+      },
+      {
+        "texto_opcion": "Internal stage bypasses file format",
+        "es_correcta": false,
+        "explicacion": "COPY still needs file format."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Internal stage"
+    ]
+  },
+  {
+    "pregunta": "load from S3 with credentials integrated securely. Context: payments fintech, ~50,000 events/s. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Stage object is same as virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Different object types."
+      },
+      {
+        "texto_opcion": "COPY directly from laptop path C:\\data without stage",
+        "es_correcta": false,
+        "explicacion": "Use PUT to stage or external stage URL."
+      },
+      {
+        "texto_opcion": "Create external stage with STORAGE INTEGRATION or credentials referencing cloud storage",
+        "es_correcta": true,
+        "explicacion": "External stages point to cloud storage paths."
+      },
+      {
+        "texto_opcion": "External stage stores data in Cloud Services RAM",
+        "es_correcta": false,
+        "explicacion": "Data remains in cloud storage."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "External stage"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — parse CSV with header row and quoted commas. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Create FILE FORMAT with TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "File formats define parsing rules for COPY."
+      },
+      {
+        "texto_opcion": "File format defines clustering key",
+        "es_correcta": false,
+        "explicacion": "Unrelated objects."
+      },
+      {
+        "texto_opcion": "Load CSV as VARIANT only without format",
+        "es_correcta": false,
+        "explicacion": "Structured load needs format or JSON variant path."
+      },
+      {
+        "texto_opcion": "Use warehouse SIZE as file format",
+        "es_correcta": false,
+        "explicacion": "Incorrect."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "File format"
+    ]
+  },
+  {
+    "pregunta": "Travel platform scenario — bulk load Parquet files from @stage into FACT table. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "LIST @stage loads data into table",
+        "es_correcta": false,
+        "explicacion": "LIST enumerates files only."
+      },
+      {
+        "texto_opcion": "INSERT row-by-row from stage with cursor in app only",
+        "es_correcta": false,
+        "explicacion": "Inefficient vs COPY."
+      },
+      {
+        "texto_opcion": "COPY INTO exports data from table to stage by default without option",
+        "es_correcta": false,
+        "explicacion": "COPY INTO loads into table; unload uses different syntax."
+      },
+      {
+        "texto_opcion": "COPY INTO fact FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME or column list",
+        "es_correcta": true,
+        "explicacion": "COPY INTO is primary bulk load command."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "detect bad rows during CSV load without failing entire batch. Context: online marketplace, ~200 million rows/day. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE, or load to staging then reject analysis pattern",
+        "es_correcta": true,
+        "explicacion": "Snowflake supports error handling/validation options on load."
+      },
+      {
+        "texto_opcion": "Disable error handling to skip bad rows silently always without option",
+        "es_correcta": false,
+        "explicacion": "Must configure ON_ERROR behavior explicitly."
+      },
+      {
+        "texto_opcion": "Bad rows auto-fixed by warehouse resize",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Validation requires Snowpipe only",
+        "es_correcta": false,
+        "explicacion": "COPY supports validation modes."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load validation"
+    ]
+  },
+  {
+    "pregunta": "A gaming studio (sub-second interactive queries, region brazilsouth) must: load only files matching date prefix in stage path. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use PATTERN parameter in COPY INTO (e.g., '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filters staged files for load."
+      },
+      {
+        "texto_opcion": "PATTERN replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Stage still required."
+      },
+      {
+        "texto_opcion": "PATTERN is network policy feature",
+        "es_correcta": false,
+        "explicacion": "Wrong feature."
+      },
+      {
+        "texto_opcion": "Load all files always including archives manually excluded by renaming laptop files",
+        "es_correcta": false,
+        "explicacion": "Use PATTERN in COPY."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Pattern matching"
+    ]
+  },
+  {
+    "pregunta": "A online marketplace (strict GDPR residency, region southeastasia) must: preserve source file name in target table audit column. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Hardcode filename string in every COPY manually only",
+        "es_correcta": false,
+        "explicacion": "METADATA functions automate."
+      },
+      {
+        "texto_opcion": "METADATA$FILENAME stored in Fail-safe only",
+        "es_correcta": false,
+        "explicacion": "Available at load/query."
+      },
+      {
+        "texto_opcion": "Use METADATA$FILENAME in COPY SELECT list",
+        "es_correcta": true,
+        "explicacion": "Metadata columns capture load context."
+      },
+      {
+        "texto_opcion": "Filename metadata requires external table only",
+        "es_correcta": false,
+        "explicacion": "Available in COPY metadata."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Metadata load"
+    ]
+  },
+  {
+    "pregunta": "A gaming studio (~200 million rows/day, region brazilsouth) must: load JSON lines into VARIANT column. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Convert JSON to CSV first always required",
+        "es_correcta": false,
+        "explicacion": "Direct JSON load supported."
+      },
+      {
+        "texto_opcion": "COPY INTO with FILE_FORMAT TYPE=JSON and VARIANT target column",
+        "es_correcta": true,
+        "explicacion": "JSON loads into VARIANT preserving structure."
+      },
+      {
+        "texto_opcion": "JSON must be flattened before COPY always",
+        "es_correcta": false,
+        "explicacion": "Can load raw JSON to VARIANT."
+      },
+      {
+        "texto_opcion": "VARIANT loads only via Snowpipe never COPY",
+        "es_correcta": false,
+        "explicacion": "COPY supports VARIANT."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Unstructured load"
+    ]
+  },
+  {
+    "pregunta": "Energy utility scenario — export query results to S3 Parquet for partner. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "PUT unloads table to S3",
+        "es_correcta": false,
+        "explicacion": "PUT uploads to internal stage; COPY unloads."
+      },
+      {
+        "texto_opcion": "COPY INTO @external_stage FROM (SELECT ...) FILE_FORMAT=(TYPE=PARQUET)",
+        "es_correcta": true,
+        "explicacion": "COPY INTO @stage unloads query results to files."
+      },
+      {
+        "texto_opcion": "Unload requires zero-copy clone",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "SELECT INTO OUTFILE local on Snowflake server laptop path",
+        "es_correcta": false,
+        "explicacion": "Use COPY INTO stage for cloud unload."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Unload"
+    ]
+  },
+  {
+    "pregunta": "For a logistics carrier workload with ~200 million rows/day: reduce load file size for CSV transfers. Best choice (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Only Parquet can be compressed",
+        "es_correcta": false,
+        "explicacion": "CSV/GZIP common."
+      },
+      {
+        "texto_opcion": "Use GZIP compressed files and file format COMPRESSION=GZIP",
+        "es_correcta": true,
+        "explicacion": "Compressed files reduce transfer and load time."
+      },
+      {
+        "texto_opcion": "Disable compression to help COPY parse faster always",
+        "es_correcta": false,
+        "explicacion": "Compression usually net positive."
+      },
+      {
+        "texto_opcion": "Compression set on warehouse not file format",
+        "es_correcta": false,
+        "explicacion": "File format/stage handles compression."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Compression"
+    ]
+  },
+  {
+    "pregunta": "A online marketplace (~200 million rows/day, region eastus) must: avoid embedding long-lived AWS keys in stage definition. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use PUBLIC role credentials for stage",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Paste access key in stage URL query string in git",
+        "es_correcta": false,
+        "explicacion": "Secret leakage."
+      },
+      {
+        "texto_opcion": "Use STORAGE INTEGRATION with IAM role trust for S3 stages",
+        "es_correcta": true,
+        "explicacion": "Storage integrations provide secure cloud credential delegation."
+      },
+      {
+        "texto_opcion": "Disable encryption on stage bucket for speed",
+        "es_correcta": false,
+        "explicacion": "Security risk."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Stage credentials"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): Transform during load with lightweight column expressions. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Transform only with Snowpipe not COPY",
+        "es_correcta": false,
+        "explicacion": "COPY supports SELECT transforms."
+      },
+      {
+        "texto_opcion": "COPY INTO ... FROM (SELECT $1, TO_TIMESTAMP($2), ... FROM @stage)",
+        "es_correcta": true,
+        "explicacion": "Transform SELECT in COPY applies during load."
+      },
+      {
+        "texto_opcion": "COPY transform disables micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Loaded data still micro-partitioned."
+      },
+      {
+        "texto_opcion": "Transform requires separate ETL tool always before Snowflake",
+        "es_correcta": false,
+        "explicacion": "In-load transforms supported."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load ordering"
+    ]
+  },
+  {
+    "pregunta": "For a logistics carrier workload with ~5 TB/day: load local CSV without external cloud bucket setup for test. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Use user/table/named internal stage and PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Internal stages store files inside Snowflake for loading."
+      },
+      {
+        "texto_opcion": "Internal stage bypasses file format",
+        "es_correcta": false,
+        "explicacion": "COPY still needs file format."
+      },
+      {
+        "texto_opcion": "Internal stage requires customer S3 bucket always",
+        "es_correcta": false,
+        "explicacion": "Internal stages are Snowflake-managed."
+      },
+      {
+        "texto_opcion": "PUT uploads to warehouse SSD permanently as table",
+        "es_correcta": false,
+        "explicacion": "PUT loads files to stage then COPY to table."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Internal stage"
+    ]
+  },
+  {
+    "pregunta": "Healthcare provider scenario — load from S3 with credentials integrated securely. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Create external stage with STORAGE INTEGRATION or credentials referencing cloud storage",
+        "es_correcta": true,
+        "explicacion": "External stages point to cloud storage paths."
+      },
+      {
+        "texto_opcion": "External stage stores data in Cloud Services RAM",
+        "es_correcta": false,
+        "explicacion": "Data remains in cloud storage."
+      },
+      {
+        "texto_opcion": "COPY directly from laptop path C:\\data without stage",
+        "es_correcta": false,
+        "explicacion": "Use PUT to stage or external stage URL."
+      },
+      {
+        "texto_opcion": "Stage object is same as virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Different object types."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "External stage"
+    ]
+  },
+  {
+    "pregunta": "parse CSV with header row and quoted commas. Context: global retailer, ~50,000 events/s. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Create FILE FORMAT with TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "File formats define parsing rules for COPY."
+      },
+      {
+        "texto_opcion": "File format defines clustering key",
+        "es_correcta": false,
+        "explicacion": "Unrelated objects."
+      },
+      {
+        "texto_opcion": "Use warehouse SIZE as file format",
+        "es_correcta": false,
+        "explicacion": "Incorrect."
+      },
+      {
+        "texto_opcion": "Load CSV as VARIANT only without format",
+        "es_correcta": false,
+        "explicacion": "Structured load needs format or JSON variant path."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "File format"
+    ]
+  },
+  {
+    "pregunta": "bulk load Parquet files from @stage into FACT table. Context: payments fintech, petabyte-scale historical data. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "COPY INTO fact FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME or column list",
+        "es_correcta": true,
+        "explicacion": "COPY INTO is primary bulk load command."
+      },
+      {
+        "texto_opcion": "COPY INTO exports data from table to stage by default without option",
+        "es_correcta": false,
+        "explicacion": "COPY INTO loads into table; unload uses different syntax."
+      },
+      {
+        "texto_opcion": "INSERT row-by-row from stage with cursor in app only",
+        "es_correcta": false,
+        "explicacion": "Inefficient vs COPY."
+      },
+      {
+        "texto_opcion": "LIST @stage loads data into table",
+        "es_correcta": false,
+        "explicacion": "LIST enumerates files only."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "detect bad rows during CSV load without failing entire batch. Context: gaming studio, ~50,000 events/s. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE, or load to staging then reject analysis pattern",
+        "es_correcta": true,
+        "explicacion": "Snowflake supports error handling/validation options on load."
+      },
+      {
+        "texto_opcion": "Disable error handling to skip bad rows silently always without option",
+        "es_correcta": false,
+        "explicacion": "Must configure ON_ERROR behavior explicitly."
+      },
+      {
+        "texto_opcion": "Validation requires Snowpipe only",
+        "es_correcta": false,
+        "explicacion": "COPY supports validation modes."
+      },
+      {
+        "texto_opcion": "Bad rows auto-fixed by warehouse resize",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load validation"
+    ]
+  },
+  {
+    "pregunta": "Incident review (eastus): load only files matching date prefix in stage path. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "PATTERN is network policy feature",
+        "es_correcta": false,
+        "explicacion": "Wrong feature."
+      },
+      {
+        "texto_opcion": "Use PATTERN parameter in COPY INTO (e.g., '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filters staged files for load."
+      },
+      {
+        "texto_opcion": "Load all files always including archives manually excluded by renaming laptop files",
+        "es_correcta": false,
+        "explicacion": "Use PATTERN in COPY."
+      },
+      {
+        "texto_opcion": "PATTERN replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Stage still required."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Pattern matching"
+    ]
+  },
+  {
+    "pregunta": "For a media streaming company workload with near-real-time dashboards: preserve source file name in target table audit column. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Hardcode filename string in every COPY manually only",
+        "es_correcta": false,
+        "explicacion": "METADATA functions automate."
+      },
+      {
+        "texto_opcion": "Use METADATA$FILENAME in COPY SELECT list",
+        "es_correcta": true,
+        "explicacion": "Metadata columns capture load context."
+      },
+      {
+        "texto_opcion": "Filename metadata requires external table only",
+        "es_correcta": false,
+        "explicacion": "Available in COPY metadata."
+      },
+      {
+        "texto_opcion": "METADATA$FILENAME stored in Fail-safe only",
+        "es_correcta": false,
+        "explicacion": "Available at load/query."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Metadata load"
+    ]
+  },
+  {
+    "pregunta": "Incident review (northeurope): load JSON lines into VARIANT column. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "COPY INTO with FILE_FORMAT TYPE=JSON and VARIANT target column",
+        "es_correcta": true,
+        "explicacion": "JSON loads into VARIANT preserving structure."
+      },
+      {
+        "texto_opcion": "JSON must be flattened before COPY always",
+        "es_correcta": false,
+        "explicacion": "Can load raw JSON to VARIANT."
+      },
+      {
+        "texto_opcion": "VARIANT loads only via Snowpipe never COPY",
+        "es_correcta": false,
+        "explicacion": "COPY supports VARIANT."
+      },
+      {
+        "texto_opcion": "Convert JSON to CSV first always required",
+        "es_correcta": false,
+        "explicacion": "Direct JSON load supported."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Unstructured load"
+    ]
+  },
+  {
+    "pregunta": "Incident review (eastus): export query results to S3 Parquet for partner. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "SELECT INTO OUTFILE local on Snowflake server laptop path",
+        "es_correcta": false,
+        "explicacion": "Use COPY INTO stage for cloud unload."
+      },
+      {
+        "texto_opcion": "Unload requires zero-copy clone",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "COPY INTO @external_stage FROM (SELECT ...) FILE_FORMAT=(TYPE=PARQUET)",
+        "es_correcta": true,
+        "explicacion": "COPY INTO @stage unloads query results to files."
+      },
+      {
+        "texto_opcion": "PUT unloads table to S3",
+        "es_correcta": false,
+        "explicacion": "PUT uploads to internal stage; COPY unloads."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Unload"
+    ]
+  },
+  {
+    "pregunta": "For a energy utility workload with sub-second interactive queries: reduce load file size for CSV transfers. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable compression to help COPY parse faster always",
+        "es_correcta": false,
+        "explicacion": "Compression usually net positive."
+      },
+      {
+        "texto_opcion": "Compression set on warehouse not file format",
+        "es_correcta": false,
+        "explicacion": "File format/stage handles compression."
+      },
+      {
+        "texto_opcion": "Only Parquet can be compressed",
+        "es_correcta": false,
+        "explicacion": "CSV/GZIP common."
+      },
+      {
+        "texto_opcion": "Use GZIP compressed files and file format COMPRESSION=GZIP",
+        "es_correcta": true,
+        "explicacion": "Compressed files reduce transfer and load time."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Compression"
+    ]
+  },
+  {
+    "pregunta": "avoid embedding long-lived AWS keys in stage definition. Context: logistics carrier, strict GDPR residency. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use PUBLIC role credentials for stage",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Paste access key in stage URL query string in git",
+        "es_correcta": false,
+        "explicacion": "Secret leakage."
+      },
+      {
+        "texto_opcion": "Use STORAGE INTEGRATION with IAM role trust for S3 stages",
+        "es_correcta": true,
+        "explicacion": "Storage integrations provide secure cloud credential delegation."
+      },
+      {
+        "texto_opcion": "Disable encryption on stage bucket for speed",
+        "es_correcta": false,
+        "explicacion": "Security risk."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Stage credentials"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): Transform during load with lightweight column expressions. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Transform only with Snowpipe not COPY",
+        "es_correcta": false,
+        "explicacion": "COPY supports SELECT transforms."
+      },
+      {
+        "texto_opcion": "COPY transform disables micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Loaded data still micro-partitioned."
+      },
+      {
+        "texto_opcion": "Transform requires separate ETL tool always before Snowflake",
+        "es_correcta": false,
+        "explicacion": "In-load transforms supported."
+      },
+      {
+        "texto_opcion": "COPY INTO ... FROM (SELECT $1, TO_TIMESTAMP($2), ... FROM @stage)",
+        "es_correcta": true,
+        "explicacion": "Transform SELECT in COPY applies during load."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load ordering"
+    ]
+  },
+  {
+    "pregunta": "load local CSV without external cloud bucket setup for test. Context: online marketplace, ~200 million rows/day. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use user/table/named internal stage and PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Internal stages store files inside Snowflake for loading."
+      },
+      {
+        "texto_opcion": "Internal stage requires customer S3 bucket always",
+        "es_correcta": false,
+        "explicacion": "Internal stages are Snowflake-managed."
+      },
+      {
+        "texto_opcion": "PUT uploads to warehouse SSD permanently as table",
+        "es_correcta": false,
+        "explicacion": "PUT loads files to stage then COPY to table."
+      },
+      {
+        "texto_opcion": "Internal stage bypasses file format",
+        "es_correcta": false,
+        "explicacion": "COPY still needs file format."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Internal stage"
+    ]
+  },
+  {
+    "pregunta": "load from S3 with credentials integrated securely. Context: energy utility, ~200 million rows/day. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Stage object is same as virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Different object types."
+      },
+      {
+        "texto_opcion": "COPY directly from laptop path C:\\data without stage",
+        "es_correcta": false,
+        "explicacion": "Use PUT to stage or external stage URL."
+      },
+      {
+        "texto_opcion": "Create external stage with STORAGE INTEGRATION or credentials referencing cloud storage",
+        "es_correcta": true,
+        "explicacion": "External stages point to cloud storage paths."
+      },
+      {
+        "texto_opcion": "External stage stores data in Cloud Services RAM",
+        "es_correcta": false,
+        "explicacion": "Data remains in cloud storage."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "External stage"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): parse CSV with header row and quoted commas. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "File format defines clustering key",
+        "es_correcta": false,
+        "explicacion": "Unrelated objects."
+      },
+      {
+        "texto_opcion": "Load CSV as VARIANT only without format",
+        "es_correcta": false,
+        "explicacion": "Structured load needs format or JSON variant path."
+      },
+      {
+        "texto_opcion": "Use warehouse SIZE as file format",
+        "es_correcta": false,
+        "explicacion": "Incorrect."
+      },
+      {
+        "texto_opcion": "Create FILE FORMAT with TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "File formats define parsing rules for COPY."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "File format"
+    ]
+  },
+  {
+    "pregunta": "Industrial iot platform scenario — bulk load Parquet files from @stage into FACT table. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "LIST @stage loads data into table",
+        "es_correcta": false,
+        "explicacion": "LIST enumerates files only."
+      },
+      {
+        "texto_opcion": "COPY INTO exports data from table to stage by default without option",
+        "es_correcta": false,
+        "explicacion": "COPY INTO loads into table; unload uses different syntax."
+      },
+      {
+        "texto_opcion": "INSERT row-by-row from stage with cursor in app only",
+        "es_correcta": false,
+        "explicacion": "Inefficient vs COPY."
+      },
+      {
+        "texto_opcion": "COPY INTO fact FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME or column list",
+        "es_correcta": true,
+        "explicacion": "COPY INTO is primary bulk load command."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): detect bad rows during CSV load without failing entire batch. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable error handling to skip bad rows silently always without option",
+        "es_correcta": false,
+        "explicacion": "Must configure ON_ERROR behavior explicitly."
+      },
+      {
+        "texto_opcion": "Validation requires Snowpipe only",
+        "es_correcta": false,
+        "explicacion": "COPY supports validation modes."
+      },
+      {
+        "texto_opcion": "Bad rows auto-fixed by warehouse resize",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE, or load to staging then reject analysis pattern",
+        "es_correcta": true,
+        "explicacion": "Snowflake supports error handling/validation options on load."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load validation"
+    ]
+  },
+  {
+    "pregunta": "A industrial IoT platform (hourly batch windows, region westeurope) must: load only files matching date prefix in stage path. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "PATTERN is network policy feature",
+        "es_correcta": false,
+        "explicacion": "Wrong feature."
+      },
+      {
+        "texto_opcion": "Load all files always including archives manually excluded by renaming laptop files",
+        "es_correcta": false,
+        "explicacion": "Use PATTERN in COPY."
+      },
+      {
+        "texto_opcion": "PATTERN replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Stage still required."
+      },
+      {
+        "texto_opcion": "Use PATTERN parameter in COPY INTO (e.g., '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filters staged files for load."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Pattern matching"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (petabyte-scale historical data, region westeurope) must: preserve source file name in target table audit column. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Filename metadata requires external table only",
+        "es_correcta": false,
+        "explicacion": "Available in COPY metadata."
+      },
+      {
+        "texto_opcion": "Use METADATA$FILENAME in COPY SELECT list",
+        "es_correcta": true,
+        "explicacion": "Metadata columns capture load context."
+      },
+      {
+        "texto_opcion": "Hardcode filename string in every COPY manually only",
+        "es_correcta": false,
+        "explicacion": "METADATA functions automate."
+      },
+      {
+        "texto_opcion": "METADATA$FILENAME stored in Fail-safe only",
+        "es_correcta": false,
+        "explicacion": "Available at load/query."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Metadata load"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): load JSON lines into VARIANT column. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "JSON must be flattened before COPY always",
+        "es_correcta": false,
+        "explicacion": "Can load raw JSON to VARIANT."
+      },
+      {
+        "texto_opcion": "Convert JSON to CSV first always required",
+        "es_correcta": false,
+        "explicacion": "Direct JSON load supported."
+      },
+      {
+        "texto_opcion": "COPY INTO with FILE_FORMAT TYPE=JSON and VARIANT target column",
+        "es_correcta": true,
+        "explicacion": "JSON loads into VARIANT preserving structure."
+      },
+      {
+        "texto_opcion": "VARIANT loads only via Snowpipe never COPY",
+        "es_correcta": false,
+        "explicacion": "COPY supports VARIANT."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Unstructured load"
+    ]
+  },
+  {
+    "pregunta": "Insurance carrier scenario — export query results to S3 Parquet for partner. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "PUT unloads table to S3",
+        "es_correcta": false,
+        "explicacion": "PUT uploads to internal stage; COPY unloads."
+      },
+      {
+        "texto_opcion": "SELECT INTO OUTFILE local on Snowflake server laptop path",
+        "es_correcta": false,
+        "explicacion": "Use COPY INTO stage for cloud unload."
+      },
+      {
+        "texto_opcion": "Unload requires zero-copy clone",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "COPY INTO @external_stage FROM (SELECT ...) FILE_FORMAT=(TYPE=PARQUET)",
+        "es_correcta": true,
+        "explicacion": "COPY INTO @stage unloads query results to files."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Unload"
+    ]
+  },
+  {
+    "pregunta": "For a telecom operator workload with ~50,000 events/s: reduce load file size for CSV transfers. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Only Parquet can be compressed",
+        "es_correcta": false,
+        "explicacion": "CSV/GZIP common."
+      },
+      {
+        "texto_opcion": "Disable compression to help COPY parse faster always",
+        "es_correcta": false,
+        "explicacion": "Compression usually net positive."
+      },
+      {
+        "texto_opcion": "Use GZIP compressed files and file format COMPRESSION=GZIP",
+        "es_correcta": true,
+        "explicacion": "Compressed files reduce transfer and load time."
+      },
+      {
+        "texto_opcion": "Compression set on warehouse not file format",
+        "es_correcta": false,
+        "explicacion": "File format/stage handles compression."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Compression"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): avoid embedding long-lived AWS keys in stage definition. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use STORAGE INTEGRATION with IAM role trust for S3 stages",
+        "es_correcta": true,
+        "explicacion": "Storage integrations provide secure cloud credential delegation."
+      },
+      {
+        "texto_opcion": "Disable encryption on stage bucket for speed",
+        "es_correcta": false,
+        "explicacion": "Security risk."
+      },
+      {
+        "texto_opcion": "Paste access key in stage URL query string in git",
+        "es_correcta": false,
+        "explicacion": "Secret leakage."
+      },
+      {
+        "texto_opcion": "Use PUBLIC role credentials for stage",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Stage credentials"
+    ]
+  },
+  {
+    "pregunta": "Insurance carrier scenario — Transform during load with lightweight column expressions. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "COPY INTO ... FROM (SELECT $1, TO_TIMESTAMP($2), ... FROM @stage)",
+        "es_correcta": true,
+        "explicacion": "Transform SELECT in COPY applies during load."
+      },
+      {
+        "texto_opcion": "COPY transform disables micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Loaded data still micro-partitioned."
+      },
+      {
+        "texto_opcion": "Transform only with Snowpipe not COPY",
+        "es_correcta": false,
+        "explicacion": "COPY supports SELECT transforms."
+      },
+      {
+        "texto_opcion": "Transform requires separate ETL tool always before Snowflake",
+        "es_correcta": false,
+        "explicacion": "In-load transforms supported."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load ordering"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (petabyte-scale historical data, region australiaeast) must: load local CSV without external cloud bucket setup for test. Which option fits best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Internal stage requires customer S3 bucket always",
+        "es_correcta": false,
+        "explicacion": "Internal stages are Snowflake-managed."
+      },
+      {
+        "texto_opcion": "PUT uploads to warehouse SSD permanently as table",
+        "es_correcta": false,
+        "explicacion": "PUT loads files to stage then COPY to table."
+      },
+      {
+        "texto_opcion": "Internal stage bypasses file format",
+        "es_correcta": false,
+        "explicacion": "COPY still needs file format."
+      },
+      {
+        "texto_opcion": "Use user/table/named internal stage and PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Internal stages store files inside Snowflake for loading."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Internal stage"
+    ]
+  },
+  {
+    "pregunta": "A payments fintech (~50,000 events/s, region westeurope) must: load from S3 with credentials integrated securely. Which option fits best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Create external stage with STORAGE INTEGRATION or credentials referencing cloud storage",
+        "es_correcta": true,
+        "explicacion": "External stages point to cloud storage paths."
+      },
+      {
+        "texto_opcion": "Stage object is same as virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Different object types."
+      },
+      {
+        "texto_opcion": "COPY directly from laptop path C:\\data without stage",
+        "es_correcta": false,
+        "explicacion": "Use PUT to stage or external stage URL."
+      },
+      {
+        "texto_opcion": "External stage stores data in Cloud Services RAM",
+        "es_correcta": false,
+        "explicacion": "Data remains in cloud storage."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "External stage"
+    ]
+  },
+  {
+    "pregunta": "Online marketplace scenario — parse CSV with header row and quoted commas. What should they implement? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Load CSV as VARIANT only without format",
+        "es_correcta": false,
+        "explicacion": "Structured load needs format or JSON variant path."
+      },
+      {
+        "texto_opcion": "Use warehouse SIZE as file format",
+        "es_correcta": false,
+        "explicacion": "Incorrect."
+      },
+      {
+        "texto_opcion": "Create FILE FORMAT with TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "File formats define parsing rules for COPY."
+      },
+      {
+        "texto_opcion": "File format defines clustering key",
+        "es_correcta": false,
+        "explicacion": "Unrelated objects."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "File format"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): bulk load Parquet files from @stage into FACT table. Select the most appropriate design. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "INSERT row-by-row from stage with cursor in app only",
+        "es_correcta": false,
+        "explicacion": "Inefficient vs COPY."
+      },
+      {
+        "texto_opcion": "COPY INTO exports data from table to stage by default without option",
+        "es_correcta": false,
+        "explicacion": "COPY INTO loads into table; unload uses different syntax."
+      },
+      {
+        "texto_opcion": "LIST @stage loads data into table",
+        "es_correcta": false,
+        "explicacion": "LIST enumerates files only."
+      },
+      {
+        "texto_opcion": "COPY INTO fact FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME or column list",
+        "es_correcta": true,
+        "explicacion": "COPY INTO is primary bulk load command."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): detect bad rows during CSV load without failing entire batch. Select the most appropriate design. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE, or load to staging then reject analysis pattern",
+        "es_correcta": true,
+        "explicacion": "Snowflake supports error handling/validation options on load."
+      },
+      {
+        "texto_opcion": "Disable error handling to skip bad rows silently always without option",
+        "es_correcta": false,
+        "explicacion": "Must configure ON_ERROR behavior explicitly."
+      },
+      {
+        "texto_opcion": "Bad rows auto-fixed by warehouse resize",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Validation requires Snowpipe only",
+        "es_correcta": false,
+        "explicacion": "COPY supports validation modes."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Load validation"
+    ]
+  },
+  {
+    "pregunta": "A telecom operator (~50,000 events/s, region brazilsouth) must: load only files matching date prefix in stage path. Which option fits best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "PATTERN replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Stage still required."
+      },
+      {
+        "texto_opcion": "Use PATTERN parameter in COPY INTO (e.g., '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filters staged files for load."
+      },
+      {
+        "texto_opcion": "Load all files always including archives manually excluded by renaming laptop files",
+        "es_correcta": false,
+        "explicacion": "Use PATTERN in COPY."
+      },
+      {
+        "texto_opcion": "PATTERN is network policy feature",
+        "es_correcta": false,
+        "explicacion": "Wrong feature."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Pattern matching"
+    ]
+  }
+]

@@ -3,13 +3,14 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>learn.io — Quiz</title>
+  <title>LEARN.IO</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Quiz de estudo para certificações de Data Engineering — learn.io">
+  <meta name="description" content="Quiz de estudo para certificações de Data Engineering. learn.io">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
   <style>
     :root {
@@ -26,9 +27,9 @@
       --good-bg: rgba(95, 180, 137, 0.12);
       --bad: #d3663f;
       --bad-bg: rgba(211, 102, 63, 0.12);
-      --mono: 'IBM Plex Mono', monospace;
-      --serif: 'Fraunces', serif;
-      --sans: 'IBM Plex Sans', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+      --serif: 'Bricolage Grotesque', 'Figtree', sans-serif;
+      --sans: 'Figtree', system-ui, sans-serif;
     }
 
     * {
@@ -278,15 +279,15 @@
     .section-label {
       font-family: var(--mono);
       font-size: 10.5px;
-      letter-spacing: .06em;
+      letter-spacing: .04em;
       color: var(--ink-faint);
       text-transform: uppercase;
-      padding: 10px 18px 4px;
-      line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      padding: 10px 18px 6px;
+      line-height: 1.4;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      hyphens: auto;
     }
 
     .file-item {
@@ -893,7 +894,7 @@
       <div>
         <strong>Mock exam</strong>
         <span id="simMeta"></span>
-        · <span class="timer" id="simTimer">--:--</span>
+        <span class="timer" id="simTimer">--:--</span>
       </div>
       <div class="sim-actions">
         <button type="button" class="nav-btn" id="simFinishBtn" style="padding:6px 12px;font-size:12px;">Finish</button>
@@ -1135,7 +1136,7 @@
         const mins = currentExam.durationMinutes || 90;
         if (!confirm(
           'Start a mock exam?\n\n' +
-          n + ' random questions · ' + mins + ' minutes\n' +
+          n + ' random questions, ' + mins + ' minutes\n' +
           'Answers are graded at the end (no instant reveal).\n' +
           'This does not change your practice progress.'
         )) {
@@ -1165,7 +1166,7 @@
         filterWrap.querySelectorAll('.filter-pill').forEach(b => {
           b.classList.toggle('active', b.dataset.filter === 'all');
         });
-        simMetaEl.textContent = ' · ' + n + ' q · ' + mins + ' min';
+        simMetaEl.textContent = ' ' + n + ' q / ' + mins + ' min';
         setSimChrome(true);
         stopSimTimer();
         tickSimTimer();
@@ -1265,7 +1266,7 @@
         card.className = 'results-card';
         card.innerHTML =
           '<h2>' + (fromTimer ? 'Time is up' : 'Mock exam finished') + '</h2>' +
-          '<p class="sub">' + escapeHtml(currentExam.short) + ' · ' + filtered.length + ' questions · ' +
+          '<p class="sub">' + escapeHtml(currentExam.short) + ' / ' + filtered.length + ' questions / ' +
           (uiLang === 'en' ? 'EN' : 'PT') + '</p>' +
           '<div class="results-grid">' +
             '<div class="stat"><b style="color:var(--good)">' + correct + '</b><span>Correct</span></div>' +
@@ -1279,7 +1280,7 @@
             (wrong.length ? '<button type="button" class="nav-btn" id="resReview">Review missed (' + wrong.length + ')</button>' : '') +
           '</div>';
         contentEl.appendChild(card);
-        progressEl.innerHTML = 'Mock result · <b>' + pct + '%</b>';
+        progressEl.innerHTML = 'Mock result: <b>' + pct + '%</b>';
         scoreEl.innerHTML = '<span class="val">' + correct + ' ✓</span><span class="wrong">' + (filtered.length - correct) + ' ✗</span>';
         if (railFill) railFill.style.width = '100%';
 
@@ -1420,7 +1421,7 @@
           currentExam = (catalog.exams || []).find(e => e.id === id);
           if (!currentExam) throw new Error('Prova não encontrada em exams.json: ' + id);
           examTitle.textContent = currentExam.short;
-          document.title = currentExam.short + ' — learn.io';
+          document.title = 'LEARN.IO';
           PROGRESS_KEY = 'learnioQuiz_' + id + '_' + uiLang;
           progress = loadProgress();
 
@@ -1614,9 +1615,11 @@
           label.className = 'section-label';
           const title = sectionTitles[String(secNum)];
           label.textContent = title
-            ? ('Section ' + secNum + ' · ' + title)
+            ? ('Section ' + secNum + ': ' + title)
             : ('Section ' + secNum);
-          label.title = title || '';
+          label.title = title
+            ? ('Section ' + secNum + ': ' + title)
+            : ('Section ' + secNum);
           groupDiv.appendChild(label);
 
           groups[secNum].forEach(f => {
@@ -1686,7 +1689,7 @@
       function renderQuestion() {
         if (!filtered.length) {
           const hint = studyFilter === 'wrong'
-            ? 'No wrong answers in this filter — nice, or you have not missed any yet.'
+            ? 'No wrong answers in this filter. Nice, or you have not missed any yet.'
             : studyFilter === 'pending'
               ? 'Nothing pending. Change the filter or clear search.'
               : 'No questions match, or the bank is not loaded yet.';
@@ -1700,7 +1703,7 @@
 
         const q = filtered[currentIdx];
         const modeLabel = simMode ? 'Mock' : 'Q';
-        progressEl.innerHTML = `${modeLabel} <b>${currentIdx + 1}</b> of ${filtered.length} · <span style="color:var(--ink-faint)">${q.fileName.replace(/\.json$/i, '')} #${q.idxInFile}</span>`;
+        progressEl.innerHTML = `${modeLabel} <b>${currentIdx + 1}</b> of ${filtered.length} / <span style="color:var(--ink-faint)">${q.fileName.replace(/\.json$/i, '')} #${q.idxInFile}</span>`;
         tagbarEl.innerHTML = (q.tags || []).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('');
         highlightActiveFile(q.fileName);
 
@@ -1709,7 +1712,7 @@
 
         const stamp = document.createElement('div');
         stamp.className = 'stamp';
-        stamp.textContent = q.fileName.replace('.json', '') + ' · #' + q.idxInFile;
+        stamp.textContent = q.fileName.replace('.json', '') + ' #' + q.idxInFile;
         card.appendChild(stamp);
 
         const qnum = document.createElement('div');
@@ -1844,7 +1847,7 @@
       <div id="jump-wrap">
         <label for="jumpInput">Go to</label>
         <input id="jumpInput" type="text" inputmode="numeric" autocomplete="off"
-               placeholder="${currentIdx + 1}" title="List number (75) or section + number (4.2 12) · shortcut: G">
+               placeholder="${currentIdx + 1}" title="List number (75) or section + number (4.2 12). Shortcut: G">
         <span id="jump-status"></span>
       </div>
       <button class="nav-btn" id="nextBtn">Next →</button>
@@ -1988,7 +1991,7 @@
           return;
         }
 
-        // A/B/C/D/E (and 1–5) select an option directly — single-char keys only
+        // A/B/C/D/E (and 1-5) select an option directly (single-char keys only)
         // (ArrowDown was matching "a".."e" via string comparison before)
         const k = e.key.length === 1 ? e.key.toLowerCase() : '';
         let pos = -1;

@@ -1,0 +1,1568 @@
+[
+  {
+    "pregunta": "Where does Snowflake persist table data in its architecture?",
+    "opciones": [
+      {
+        "texto_opcion": "In cloud object storage managed by the Snowflake storage layer (e.g., S3, Azure Blob, GCS)",
+        "es_correcta": true,
+        "explicacion": "Snowflake separates storage from compute; persisted micro-partition files reside in object storage."
+      },
+      {
+        "texto_opcion": "On local SSD attached to each virtual warehouse node only",
+        "es_correcta": false,
+        "explicacion": "Warehouse local storage is ephemeral cache, not durable table storage."
+      },
+      {
+        "texto_opcion": "On client workstations after each query completes",
+        "es_correcta": false,
+        "explicacion": "Clients never hold authoritative persisted data."
+      },
+      {
+        "texto_opcion": "Inside the Cloud Services layer metadata database exclusively",
+        "es_correcta": false,
+        "explicacion": "Cloud Services holds metadata and orchestration, not table micro-partitions."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Storage layer"
+    ]
+  },
+  {
+    "pregunta": "Payments fintech scenario — run heavy analytical SQL without resizing storage when demand spikes. What should they implement?",
+    "opciones": [
+      {
+        "texto_opcion": "Merge storage and compute into a single monolithic cluster only",
+        "es_correcta": false,
+        "explicacion": "Snowflake explicitly separates the layers."
+      },
+      {
+        "texto_opcion": "Resize the storage layer to add CPU for each query",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not provide query compute."
+      },
+      {
+        "texto_opcion": "Copy all tables to a larger filesystem on each user laptop",
+        "es_correcta": false,
+        "explicacion": "Not Snowflake architecture."
+      },
+      {
+        "texto_opcion": "Scale virtual warehouses independently from storage",
+        "es_correcta": true,
+        "explicacion": "Compute scales via warehouses; storage billing and capacity are decoupled."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Compute layer"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): need authentication, query parsing, optimization, and transaction coordination. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Offload all metadata to client-side browser storage",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized in Cloud Services."
+      },
+      {
+        "texto_opcion": "Use only warehouse workers for login and RBAC enforcement",
+        "es_correcta": false,
+        "explicacion": "Security and metadata services run in Cloud Services."
+      },
+      {
+        "texto_opcion": "Disable Cloud Services to reduce credit usage on SELECT queries",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is required for query orchestration."
+      },
+      {
+        "texto_opcion": "Use the Cloud Services layer (metadata, security, optimizer, session state)",
+        "es_correcta": true,
+        "explicacion": "Cloud Services handles login, parsing, optimization, DDL coordination, and metadata."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Cloud Services"
+    ]
+  },
+  {
+    "pregunta": "explain how all virtual warehouses access the same table data concurrently. Context: gaming studio, hourly batch windows.",
+    "opciones": [
+      {
+        "texto_opcion": "Each warehouse maintains a private copy of every table on local disk permanently",
+        "es_correcta": false,
+        "explicacion": "Persistent data is shared; local disk is cache only."
+      },
+      {
+        "texto_opcion": "Warehouses must export/import data between each other for every query",
+        "es_correcta": false,
+        "explicacion": "No cross-warehouse data copy is required for reads."
+      },
+      {
+        "texto_opcion": "Only one warehouse may access a table at any time globally",
+        "es_correcta": false,
+        "explicacion": "Multiple warehouses can query shared storage concurrently."
+      },
+      {
+        "texto_opcion": "All warehouses read the same shared storage layer without copying full datasets per warehouse",
+        "es_correcta": true,
+        "explicacion": "Snowflake uses shared storage; compute clusters are independent."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Shared-disk model"
+    ]
+  },
+  {
+    "pregunta": "deploy Snowflake accounts in AWS, Azure, and GCP regions for residency requirements. Context: healthcare provider, ~200 million rows/day.",
+    "opciones": [
+      {
+        "texto_opcion": "Run Snowflake compute only on-premises and storage only in one cloud",
+        "es_correcta": false,
+        "explicacion": "Snowflake is a cloud-native SaaS across AWS/Azure/GCP."
+      },
+      {
+        "texto_opcion": "Use a single on-prem Hadoop cluster as the storage layer",
+        "es_correcta": false,
+        "explicacion": "Snowflake storage is cloud object storage managed by Snowflake."
+      },
+      {
+        "texto_opcion": "Provision accounts in the cloud region on the desired cloud provider; cross-cloud is via replication/sharing patterns",
+        "es_correcta": true,
+        "explicacion": "Snowflake runs natively on each major cloud; account location follows provider/region choice."
+      },
+      {
+        "texto_opcion": "Move micro-partitions manually between clouds with FTP nightly",
+        "es_correcta": false,
+        "explicacion": "Not how Snowflake manages storage."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Multi-cloud"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): organize schemas, tables, and stages under a logical hierarchy for RBAC. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Account > Database > Schema > Object (table, view, stage, etc.)",
+        "es_correcta": true,
+        "explicacion": "Standard Snowflake namespace hierarchy for securable objects."
+      },
+      {
+        "texto_opcion": "Stage > Pipe > Stream as the top-level security boundary",
+        "es_correcta": false,
+        "explicacion": "Those are objects inside schemas, not the root hierarchy."
+      },
+      {
+        "texto_opcion": "User > Role > Query as the storage hierarchy",
+        "es_correcta": false,
+        "explicacion": "That describes security, not object namespace."
+      },
+      {
+        "texto_opcion": "Warehouse > Table > Column only with no database concept",
+        "es_correcta": false,
+        "explicacion": "Databases and schemas are first-class containers."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Database objects"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (petabyte-scale historical data, region brazilsouth) must: finance asks which layer consumption primarily drives warehouse spend. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Cloud Services charges per SELECT row returned",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is not billed per row; compute credits dominate interactive workloads."
+      },
+      {
+        "texto_opcion": "Storage layer charges per SQL query parsed",
+        "es_correcta": false,
+        "explicacion": "Storage is capacity/time based, not per-query parsing."
+      },
+      {
+        "texto_opcion": "Client JDBC driver licensing per developer seat",
+        "es_correcta": false,
+        "explicacion": "Snowflake does not bill JDBC seats as the primary model."
+      },
+      {
+        "texto_opcion": "Virtual warehouse compute credits while running/resuming",
+        "es_correcta": true,
+        "explicacion": "Warehouses consume credits based on size and uptime; storage billed separately."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Credit model"
+    ]
+  },
+  {
+    "pregunta": "A gaming studio (near-real-time dashboards, region eastus) must: a user runs queries against PROD_DB.ANALYTICS.FACT_SALES. Which context must be set? Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "USE DATABASE and USE SCHEMA (or fully qualified names) to resolve objects",
+        "es_correcta": true,
+        "explicacion": "Sessions need database/schema context or three-part names."
+      },
+      {
+        "texto_opcion": "Configure the storage layer region in the JDBC URL only",
+        "es_correcta": false,
+        "explicacion": "Region is account-level; object resolution needs DB/schema."
+      },
+      {
+        "texto_opcion": "Only the warehouse name is required; database is inferred automatically",
+        "es_correcta": false,
+        "explicacion": "Unqualified names require active database/schema context."
+      },
+      {
+        "texto_opcion": "Set the file format as session default instead of schema",
+        "es_correcta": false,
+        "explicacion": "File format does not replace database/schema context for tables."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Session context"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (near-real-time dashboards, region eastus) must: billions of micro-partitions must be tracked for pruning and Time Travel. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Clients cache all partition metadata locally after first login",
+        "es_correcta": false,
+        "explicacion": "Central metadata service drives optimization."
+      },
+      {
+        "texto_opcion": "Micro-partition metadata is stored only inside Parquet footers with no Snowflake catalog",
+        "es_correcta": false,
+        "explicacion": "Snowflake maintains rich catalog metadata beyond file footers."
+      },
+      {
+        "texto_opcion": "Cloud Services maintains partition metadata and statistics in the global services layer",
+        "es_correcta": true,
+        "explicacion": "Partition min/max metadata enables pruning without scanning all files."
+      },
+      {
+        "texto_opcion": "Each warehouse keeps its own unrelated copy of catalog metadata forever",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized, not warehouse-local authoritative catalog."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Metadata scale"
+    ]
+  },
+  {
+    "pregunta": "nightly ETL needs 4X compute for two hours then minimal idle cost. Context: media streaming company, sub-second interactive queries.",
+    "opciones": [
+      {
+        "texto_opcion": "Increase storage size to make queries faster without changing warehouse",
+        "es_correcta": false,
+        "explicacion": "Query performance scaling is primarily warehouse compute."
+      },
+      {
+        "texto_opcion": "Duplicate all tables to four separate accounts during ETL",
+        "es_correcta": false,
+        "explicacion": "Does not leverage warehouse elasticity."
+      },
+      {
+        "texto_opcion": "Keep X-Large warehouse running 24/7 to avoid resume latency only",
+        "es_correcta": false,
+        "explicacion": "Violates cost optimization for predictable batch windows."
+      },
+      {
+        "texto_opcion": "Use a larger warehouse or multi-cluster warehouse for the window, then suspend or scale down",
+        "es_correcta": true,
+        "explicacion": "Independent compute scaling matches bursty ETL without paying for idle peak capacity 24/7."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Elasticity"
+    ]
+  },
+  {
+    "pregunta": "developers connect with Snowflake CLI and drivers using account identifier. Context: healthcare provider, petabyte-scale historical data.",
+    "opciones": [
+      {
+        "texto_opcion": "Connect to individual micro-partition URLs directly",
+        "es_correcta": false,
+        "explicacion": "Clients connect to the account endpoint, not partitions."
+      },
+      {
+        "texto_opcion": "Use warehouse UUID as the account hostname",
+        "es_correcta": false,
+        "explicacion": "Warehouse is not the account identifier."
+      },
+      {
+        "texto_opcion": "Use the account locator/URL format for the cloud region and deployment (e.g., org-account or legacy locator)",
+        "es_correcta": true,
+        "explicacion": "Clients target account identifier plus cloud region/provider."
+      },
+      {
+        "texto_opcion": "Hardcode Cloud Services IP in every query",
+        "es_correcta": false,
+        "explicacion": "Snowflake provides account URLs; clients do not target service IPs."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Account URL"
+    ]
+  },
+  {
+    "pregunta": "A healthcare provider (~200 million rows/day, region brazilsouth) must: apply platform patches and version upgrades with minimal customer ops burden. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Customers SSH into warehouse nodes to patch Linux kernels weekly",
+        "es_correcta": false,
+        "explicacion": "Customers do not manage warehouse OS patching."
+      },
+      {
+        "texto_opcion": "Pause all accounts globally during every customer-managed maintenance weekend",
+        "es_correcta": false,
+        "explicacion": "Snowflake performs rolling managed maintenance."
+      },
+      {
+        "texto_opcion": "Snowflake manages platform updates in the Cloud Services layer transparently",
+        "es_correcta": true,
+        "explicacion": "Snowflake is fully managed SaaS for infrastructure patching."
+      },
+      {
+        "texto_opcion": "Download and install Snowflake MSI on each analyst PC for upgrades",
+        "es_correcta": false,
+        "explicacion": "Snowflake server is cloud SaaS, not on-prem install per user."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "SaaS operations"
+    ]
+  },
+  {
+    "pregunta": "Travel platform scenario — understand where persisted table data lives in Snowflake's architecture. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "On local SSD attached to each virtual warehouse node only",
+        "es_correcta": false,
+        "explicacion": "Warehouse local storage is ephemeral cache, not durable table storage."
+      },
+      {
+        "texto_opcion": "On client workstations after each query completes",
+        "es_correcta": false,
+        "explicacion": "Clients never hold authoritative persisted data."
+      },
+      {
+        "texto_opcion": "Inside the Cloud Services layer metadata database exclusively",
+        "es_correcta": false,
+        "explicacion": "Cloud Services holds metadata and orchestration, not table micro-partitions."
+      },
+      {
+        "texto_opcion": "In cloud object storage managed by the Snowflake storage layer (e.g., S3, Azure Blob, GCS)",
+        "es_correcta": true,
+        "explicacion": "Snowflake separates storage from compute; persisted micro-partition files reside in object storage."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Storage layer"
+    ]
+  },
+  {
+    "pregunta": "Online marketplace scenario — run heavy analytical SQL without resizing storage when demand spikes. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Merge storage and compute into a single monolithic cluster only",
+        "es_correcta": false,
+        "explicacion": "Snowflake explicitly separates the layers."
+      },
+      {
+        "texto_opcion": "Resize the storage layer to add CPU for each query",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not provide query compute."
+      },
+      {
+        "texto_opcion": "Scale virtual warehouses independently from storage",
+        "es_correcta": true,
+        "explicacion": "Compute scales via warehouses; storage billing and capacity are decoupled."
+      },
+      {
+        "texto_opcion": "Copy all tables to a larger filesystem on each user laptop",
+        "es_correcta": false,
+        "explicacion": "Not Snowflake architecture."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Compute layer"
+    ]
+  },
+  {
+    "pregunta": "A logistics carrier (hourly batch windows, region eastus) must: need authentication, query parsing, optimization, and transaction coordination. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable Cloud Services to reduce credit usage on SELECT queries",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is required for query orchestration."
+      },
+      {
+        "texto_opcion": "Use the Cloud Services layer (metadata, security, optimizer, session state)",
+        "es_correcta": true,
+        "explicacion": "Cloud Services handles login, parsing, optimization, DDL coordination, and metadata."
+      },
+      {
+        "texto_opcion": "Offload all metadata to client-side browser storage",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized in Cloud Services."
+      },
+      {
+        "texto_opcion": "Use only warehouse workers for login and RBAC enforcement",
+        "es_correcta": false,
+        "explicacion": "Security and metadata services run in Cloud Services."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Cloud Services"
+    ]
+  },
+  {
+    "pregunta": "explain how all virtual warehouses access the same table data concurrently. Context: media streaming company, ~5 TB/day. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Warehouses must export/import data between each other for every query",
+        "es_correcta": false,
+        "explicacion": "No cross-warehouse data copy is required for reads."
+      },
+      {
+        "texto_opcion": "Only one warehouse may access a table at any time globally",
+        "es_correcta": false,
+        "explicacion": "Multiple warehouses can query shared storage concurrently."
+      },
+      {
+        "texto_opcion": "All warehouses read the same shared storage layer without copying full datasets per warehouse",
+        "es_correcta": true,
+        "explicacion": "Snowflake uses shared storage; compute clusters are independent."
+      },
+      {
+        "texto_opcion": "Each warehouse maintains a private copy of every table on local disk permanently",
+        "es_correcta": false,
+        "explicacion": "Persistent data is shared; local disk is cache only."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Shared-disk model"
+    ]
+  },
+  {
+    "pregunta": "Travel platform scenario — deploy Snowflake accounts in AWS, Azure, and GCP regions for residency requirements. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Run Snowflake compute only on-premises and storage only in one cloud",
+        "es_correcta": false,
+        "explicacion": "Snowflake is a cloud-native SaaS across AWS/Azure/GCP."
+      },
+      {
+        "texto_opcion": "Provision accounts in the cloud region on the desired cloud provider; cross-cloud is via replication/sharing patterns",
+        "es_correcta": true,
+        "explicacion": "Snowflake runs natively on each major cloud; account location follows provider/region choice."
+      },
+      {
+        "texto_opcion": "Use a single on-prem Hadoop cluster as the storage layer",
+        "es_correcta": false,
+        "explicacion": "Snowflake storage is cloud object storage managed by Snowflake."
+      },
+      {
+        "texto_opcion": "Move micro-partitions manually between clouds with FTP nightly",
+        "es_correcta": false,
+        "explicacion": "Not how Snowflake manages storage."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Multi-cloud"
+    ]
+  },
+  {
+    "pregunta": "Incident review (northeurope): organize schemas, tables, and stages under a logical hierarchy for RBAC. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Account > Database > Schema > Object (table, view, stage, etc.)",
+        "es_correcta": true,
+        "explicacion": "Standard Snowflake namespace hierarchy for securable objects."
+      },
+      {
+        "texto_opcion": "Warehouse > Table > Column only with no database concept",
+        "es_correcta": false,
+        "explicacion": "Databases and schemas are first-class containers."
+      },
+      {
+        "texto_opcion": "Stage > Pipe > Stream as the top-level security boundary",
+        "es_correcta": false,
+        "explicacion": "Those are objects inside schemas, not the root hierarchy."
+      },
+      {
+        "texto_opcion": "User > Role > Query as the storage hierarchy",
+        "es_correcta": false,
+        "explicacion": "That describes security, not object namespace."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Database objects"
+    ]
+  },
+  {
+    "pregunta": "Incident review (northeurope): finance asks which layer consumption primarily drives warehouse spend. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Cloud Services charges per SELECT row returned",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is not billed per row; compute credits dominate interactive workloads."
+      },
+      {
+        "texto_opcion": "Client JDBC driver licensing per developer seat",
+        "es_correcta": false,
+        "explicacion": "Snowflake does not bill JDBC seats as the primary model."
+      },
+      {
+        "texto_opcion": "Virtual warehouse compute credits while running/resuming",
+        "es_correcta": true,
+        "explicacion": "Warehouses consume credits based on size and uptime; storage billed separately."
+      },
+      {
+        "texto_opcion": "Storage layer charges per SQL query parsed",
+        "es_correcta": false,
+        "explicacion": "Storage is capacity/time based, not per-query parsing."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Credit model"
+    ]
+  },
+  {
+    "pregunta": "For a energy utility workload with hourly batch windows: a user runs queries against PROD_DB.ANALYTICS.FACT_SALES. Which context must be set? Best choice (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Only the warehouse name is required; database is inferred automatically",
+        "es_correcta": false,
+        "explicacion": "Unqualified names require active database/schema context."
+      },
+      {
+        "texto_opcion": "USE DATABASE and USE SCHEMA (or fully qualified names) to resolve objects",
+        "es_correcta": true,
+        "explicacion": "Sessions need database/schema context or three-part names."
+      },
+      {
+        "texto_opcion": "Configure the storage layer region in the JDBC URL only",
+        "es_correcta": false,
+        "explicacion": "Region is account-level; object resolution needs DB/schema."
+      },
+      {
+        "texto_opcion": "Set the file format as session default instead of schema",
+        "es_correcta": false,
+        "explicacion": "File format does not replace database/schema context for tables."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Session context"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (petabyte-scale historical data, region northeurope) must: billions of micro-partitions must be tracked for pruning and Time Travel. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Cloud Services maintains partition metadata and statistics in the global services layer",
+        "es_correcta": true,
+        "explicacion": "Partition min/max metadata enables pruning without scanning all files."
+      },
+      {
+        "texto_opcion": "Each warehouse keeps its own unrelated copy of catalog metadata forever",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized, not warehouse-local authoritative catalog."
+      },
+      {
+        "texto_opcion": "Micro-partition metadata is stored only inside Parquet footers with no Snowflake catalog",
+        "es_correcta": false,
+        "explicacion": "Snowflake maintains rich catalog metadata beyond file footers."
+      },
+      {
+        "texto_opcion": "Clients cache all partition metadata locally after first login",
+        "es_correcta": false,
+        "explicacion": "Central metadata service drives optimization."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Metadata scale"
+    ]
+  },
+  {
+    "pregunta": "For a logistics carrier workload with hourly batch windows: nightly ETL needs 4X compute for two hours then minimal idle cost. Best choice (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate all tables to four separate accounts during ETL",
+        "es_correcta": false,
+        "explicacion": "Does not leverage warehouse elasticity."
+      },
+      {
+        "texto_opcion": "Keep X-Large warehouse running 24/7 to avoid resume latency only",
+        "es_correcta": false,
+        "explicacion": "Violates cost optimization for predictable batch windows."
+      },
+      {
+        "texto_opcion": "Use a larger warehouse or multi-cluster warehouse for the window, then suspend or scale down",
+        "es_correcta": true,
+        "explicacion": "Independent compute scaling matches bursty ETL without paying for idle peak capacity 24/7."
+      },
+      {
+        "texto_opcion": "Increase storage size to make queries faster without changing warehouse",
+        "es_correcta": false,
+        "explicacion": "Query performance scaling is primarily warehouse compute."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Elasticity"
+    ]
+  },
+  {
+    "pregunta": "Payments fintech scenario — developers connect with Snowflake CLI and drivers using account identifier. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Connect to individual micro-partition URLs directly",
+        "es_correcta": false,
+        "explicacion": "Clients connect to the account endpoint, not partitions."
+      },
+      {
+        "texto_opcion": "Hardcode Cloud Services IP in every query",
+        "es_correcta": false,
+        "explicacion": "Snowflake provides account URLs; clients do not target service IPs."
+      },
+      {
+        "texto_opcion": "Use warehouse UUID as the account hostname",
+        "es_correcta": false,
+        "explicacion": "Warehouse is not the account identifier."
+      },
+      {
+        "texto_opcion": "Use the account locator/URL format for the cloud region and deployment (e.g., org-account or legacy locator)",
+        "es_correcta": true,
+        "explicacion": "Clients target account identifier plus cloud region/provider."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Account URL"
+    ]
+  },
+  {
+    "pregunta": "apply platform patches and version upgrades with minimal customer ops burden. Context: industrial IoT platform, ~50,000 events/s. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Pause all accounts globally during every customer-managed maintenance weekend",
+        "es_correcta": false,
+        "explicacion": "Snowflake performs rolling managed maintenance."
+      },
+      {
+        "texto_opcion": "Snowflake manages platform updates in the Cloud Services layer transparently",
+        "es_correcta": true,
+        "explicacion": "Snowflake is fully managed SaaS for infrastructure patching."
+      },
+      {
+        "texto_opcion": "Download and install Snowflake MSI on each analyst PC for upgrades",
+        "es_correcta": false,
+        "explicacion": "Snowflake server is cloud SaaS, not on-prem install per user."
+      },
+      {
+        "texto_opcion": "Customers SSH into warehouse nodes to patch Linux kernels weekly",
+        "es_correcta": false,
+        "explicacion": "Customers do not manage warehouse OS patching."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "SaaS operations"
+    ]
+  },
+  {
+    "pregunta": "Healthcare provider scenario — understand where persisted table data lives in Snowflake's architecture. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "On local SSD attached to each virtual warehouse node only",
+        "es_correcta": false,
+        "explicacion": "Warehouse local storage is ephemeral cache, not durable table storage."
+      },
+      {
+        "texto_opcion": "In cloud object storage managed by the Snowflake storage layer (e.g., S3, Azure Blob, GCS)",
+        "es_correcta": true,
+        "explicacion": "Snowflake separates storage from compute; persisted micro-partition files reside in object storage."
+      },
+      {
+        "texto_opcion": "Inside the Cloud Services layer metadata database exclusively",
+        "es_correcta": false,
+        "explicacion": "Cloud Services holds metadata and orchestration, not table micro-partitions."
+      },
+      {
+        "texto_opcion": "On client workstations after each query completes",
+        "es_correcta": false,
+        "explicacion": "Clients never hold authoritative persisted data."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Storage layer"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): run heavy analytical SQL without resizing storage when demand spikes. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Resize the storage layer to add CPU for each query",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not provide query compute."
+      },
+      {
+        "texto_opcion": "Copy all tables to a larger filesystem on each user laptop",
+        "es_correcta": false,
+        "explicacion": "Not Snowflake architecture."
+      },
+      {
+        "texto_opcion": "Merge storage and compute into a single monolithic cluster only",
+        "es_correcta": false,
+        "explicacion": "Snowflake explicitly separates the layers."
+      },
+      {
+        "texto_opcion": "Scale virtual warehouses independently from storage",
+        "es_correcta": true,
+        "explicacion": "Compute scales via warehouses; storage billing and capacity are decoupled."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Compute layer"
+    ]
+  },
+  {
+    "pregunta": "Payments fintech scenario — need authentication, query parsing, optimization, and transaction coordination. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable Cloud Services to reduce credit usage on SELECT queries",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is required for query orchestration."
+      },
+      {
+        "texto_opcion": "Use only warehouse workers for login and RBAC enforcement",
+        "es_correcta": false,
+        "explicacion": "Security and metadata services run in Cloud Services."
+      },
+      {
+        "texto_opcion": "Offload all metadata to client-side browser storage",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized in Cloud Services."
+      },
+      {
+        "texto_opcion": "Use the Cloud Services layer (metadata, security, optimizer, session state)",
+        "es_correcta": true,
+        "explicacion": "Cloud Services handles login, parsing, optimization, DDL coordination, and metadata."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Cloud Services"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — explain how all virtual warehouses access the same table data concurrently. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Only one warehouse may access a table at any time globally",
+        "es_correcta": false,
+        "explicacion": "Multiple warehouses can query shared storage concurrently."
+      },
+      {
+        "texto_opcion": "Each warehouse maintains a private copy of every table on local disk permanently",
+        "es_correcta": false,
+        "explicacion": "Persistent data is shared; local disk is cache only."
+      },
+      {
+        "texto_opcion": "Warehouses must export/import data between each other for every query",
+        "es_correcta": false,
+        "explicacion": "No cross-warehouse data copy is required for reads."
+      },
+      {
+        "texto_opcion": "All warehouses read the same shared storage layer without copying full datasets per warehouse",
+        "es_correcta": true,
+        "explicacion": "Snowflake uses shared storage; compute clusters are independent."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Shared-disk model"
+    ]
+  },
+  {
+    "pregunta": "For a energy utility workload with ~200 million rows/day: deploy Snowflake accounts in AWS, Azure, and GCP regions for residency requirements. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Move micro-partitions manually between clouds with FTP nightly",
+        "es_correcta": false,
+        "explicacion": "Not how Snowflake manages storage."
+      },
+      {
+        "texto_opcion": "Provision accounts in the cloud region on the desired cloud provider; cross-cloud is via replication/sharing patterns",
+        "es_correcta": true,
+        "explicacion": "Snowflake runs natively on each major cloud; account location follows provider/region choice."
+      },
+      {
+        "texto_opcion": "Run Snowflake compute only on-premises and storage only in one cloud",
+        "es_correcta": false,
+        "explicacion": "Snowflake is a cloud-native SaaS across AWS/Azure/GCP."
+      },
+      {
+        "texto_opcion": "Use a single on-prem Hadoop cluster as the storage layer",
+        "es_correcta": false,
+        "explicacion": "Snowflake storage is cloud object storage managed by Snowflake."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Multi-cloud"
+    ]
+  },
+  {
+    "pregunta": "Payments fintech scenario — organize schemas, tables, and stages under a logical hierarchy for RBAC. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "User > Role > Query as the storage hierarchy",
+        "es_correcta": false,
+        "explicacion": "That describes security, not object namespace."
+      },
+      {
+        "texto_opcion": "Account > Database > Schema > Object (table, view, stage, etc.)",
+        "es_correcta": true,
+        "explicacion": "Standard Snowflake namespace hierarchy for securable objects."
+      },
+      {
+        "texto_opcion": "Stage > Pipe > Stream as the top-level security boundary",
+        "es_correcta": false,
+        "explicacion": "Those are objects inside schemas, not the root hierarchy."
+      },
+      {
+        "texto_opcion": "Warehouse > Table > Column only with no database concept",
+        "es_correcta": false,
+        "explicacion": "Databases and schemas are first-class containers."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Database objects"
+    ]
+  },
+  {
+    "pregunta": "A payments fintech (~200 million rows/day, region eastus) must: finance asks which layer consumption primarily drives warehouse spend. Which option fits best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Cloud Services charges per SELECT row returned",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is not billed per row; compute credits dominate interactive workloads."
+      },
+      {
+        "texto_opcion": "Storage layer charges per SQL query parsed",
+        "es_correcta": false,
+        "explicacion": "Storage is capacity/time based, not per-query parsing."
+      },
+      {
+        "texto_opcion": "Virtual warehouse compute credits while running/resuming",
+        "es_correcta": true,
+        "explicacion": "Warehouses consume credits based on size and uptime; storage billed separately."
+      },
+      {
+        "texto_opcion": "Client JDBC driver licensing per developer seat",
+        "es_correcta": false,
+        "explicacion": "Snowflake does not bill JDBC seats as the primary model."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Credit model"
+    ]
+  },
+  {
+    "pregunta": "Travel platform scenario — a user runs queries against PROD_DB.ANALYTICS.FACT_SALES. Which context must be set? What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Only the warehouse name is required; database is inferred automatically",
+        "es_correcta": false,
+        "explicacion": "Unqualified names require active database/schema context."
+      },
+      {
+        "texto_opcion": "Configure the storage layer region in the JDBC URL only",
+        "es_correcta": false,
+        "explicacion": "Region is account-level; object resolution needs DB/schema."
+      },
+      {
+        "texto_opcion": "USE DATABASE and USE SCHEMA (or fully qualified names) to resolve objects",
+        "es_correcta": true,
+        "explicacion": "Sessions need database/schema context or three-part names."
+      },
+      {
+        "texto_opcion": "Set the file format as session default instead of schema",
+        "es_correcta": false,
+        "explicacion": "File format does not replace database/schema context for tables."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Session context"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): billions of micro-partitions must be tracked for pruning and Time Travel. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Each warehouse keeps its own unrelated copy of catalog metadata forever",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized, not warehouse-local authoritative catalog."
+      },
+      {
+        "texto_opcion": "Micro-partition metadata is stored only inside Parquet footers with no Snowflake catalog",
+        "es_correcta": false,
+        "explicacion": "Snowflake maintains rich catalog metadata beyond file footers."
+      },
+      {
+        "texto_opcion": "Cloud Services maintains partition metadata and statistics in the global services layer",
+        "es_correcta": true,
+        "explicacion": "Partition min/max metadata enables pruning without scanning all files."
+      },
+      {
+        "texto_opcion": "Clients cache all partition metadata locally after first login",
+        "es_correcta": false,
+        "explicacion": "Central metadata service drives optimization."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Metadata scale"
+    ]
+  },
+  {
+    "pregunta": "nightly ETL needs 4X compute for two hours then minimal idle cost. Context: travel platform, sub-second interactive queries. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Increase storage size to make queries faster without changing warehouse",
+        "es_correcta": false,
+        "explicacion": "Query performance scaling is primarily warehouse compute."
+      },
+      {
+        "texto_opcion": "Keep X-Large warehouse running 24/7 to avoid resume latency only",
+        "es_correcta": false,
+        "explicacion": "Violates cost optimization for predictable batch windows."
+      },
+      {
+        "texto_opcion": "Duplicate all tables to four separate accounts during ETL",
+        "es_correcta": false,
+        "explicacion": "Does not leverage warehouse elasticity."
+      },
+      {
+        "texto_opcion": "Use a larger warehouse or multi-cluster warehouse for the window, then suspend or scale down",
+        "es_correcta": true,
+        "explicacion": "Independent compute scaling matches bursty ETL without paying for idle peak capacity 24/7."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Elasticity"
+    ]
+  },
+  {
+    "pregunta": "For a telecom operator workload with sub-second interactive queries: developers connect with Snowflake CLI and drivers using account identifier. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Connect to individual micro-partition URLs directly",
+        "es_correcta": false,
+        "explicacion": "Clients connect to the account endpoint, not partitions."
+      },
+      {
+        "texto_opcion": "Use the account locator/URL format for the cloud region and deployment (e.g., org-account or legacy locator)",
+        "es_correcta": true,
+        "explicacion": "Clients target account identifier plus cloud region/provider."
+      },
+      {
+        "texto_opcion": "Use warehouse UUID as the account hostname",
+        "es_correcta": false,
+        "explicacion": "Warehouse is not the account identifier."
+      },
+      {
+        "texto_opcion": "Hardcode Cloud Services IP in every query",
+        "es_correcta": false,
+        "explicacion": "Snowflake provides account URLs; clients do not target service IPs."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Account URL"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): apply platform patches and version upgrades with minimal customer ops burden. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Pause all accounts globally during every customer-managed maintenance weekend",
+        "es_correcta": false,
+        "explicacion": "Snowflake performs rolling managed maintenance."
+      },
+      {
+        "texto_opcion": "Snowflake manages platform updates in the Cloud Services layer transparently",
+        "es_correcta": true,
+        "explicacion": "Snowflake is fully managed SaaS for infrastructure patching."
+      },
+      {
+        "texto_opcion": "Download and install Snowflake MSI on each analyst PC for upgrades",
+        "es_correcta": false,
+        "explicacion": "Snowflake server is cloud SaaS, not on-prem install per user."
+      },
+      {
+        "texto_opcion": "Customers SSH into warehouse nodes to patch Linux kernels weekly",
+        "es_correcta": false,
+        "explicacion": "Customers do not manage warehouse OS patching."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "SaaS operations"
+    ]
+  },
+  {
+    "pregunta": "understand where persisted table data lives in Snowflake's architecture. Context: insurance carrier, sub-second interactive queries. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "In cloud object storage managed by the Snowflake storage layer (e.g., S3, Azure Blob, GCS)",
+        "es_correcta": true,
+        "explicacion": "Snowflake separates storage from compute; persisted micro-partition files reside in object storage."
+      },
+      {
+        "texto_opcion": "On client workstations after each query completes",
+        "es_correcta": false,
+        "explicacion": "Clients never hold authoritative persisted data."
+      },
+      {
+        "texto_opcion": "On local SSD attached to each virtual warehouse node only",
+        "es_correcta": false,
+        "explicacion": "Warehouse local storage is ephemeral cache, not durable table storage."
+      },
+      {
+        "texto_opcion": "Inside the Cloud Services layer metadata database exclusively",
+        "es_correcta": false,
+        "explicacion": "Cloud Services holds metadata and orchestration, not table micro-partitions."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Storage layer"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): run heavy analytical SQL without resizing storage when demand spikes. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Scale virtual warehouses independently from storage",
+        "es_correcta": true,
+        "explicacion": "Compute scales via warehouses; storage billing and capacity are decoupled."
+      },
+      {
+        "texto_opcion": "Merge storage and compute into a single monolithic cluster only",
+        "es_correcta": false,
+        "explicacion": "Snowflake explicitly separates the layers."
+      },
+      {
+        "texto_opcion": "Copy all tables to a larger filesystem on each user laptop",
+        "es_correcta": false,
+        "explicacion": "Not Snowflake architecture."
+      },
+      {
+        "texto_opcion": "Resize the storage layer to add CPU for each query",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not provide query compute."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Compute layer"
+    ]
+  },
+  {
+    "pregunta": "A gaming studio (hourly batch windows, region westeurope) must: need authentication, query parsing, optimization, and transaction coordination. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use the Cloud Services layer (metadata, security, optimizer, session state)",
+        "es_correcta": true,
+        "explicacion": "Cloud Services handles login, parsing, optimization, DDL coordination, and metadata."
+      },
+      {
+        "texto_opcion": "Disable Cloud Services to reduce credit usage on SELECT queries",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is required for query orchestration."
+      },
+      {
+        "texto_opcion": "Offload all metadata to client-side browser storage",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized in Cloud Services."
+      },
+      {
+        "texto_opcion": "Use only warehouse workers for login and RBAC enforcement",
+        "es_correcta": false,
+        "explicacion": "Security and metadata services run in Cloud Services."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Cloud Services"
+    ]
+  },
+  {
+    "pregunta": "For a travel platform workload with sub-second interactive queries: explain how all virtual warehouses access the same table data concurrently. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "All warehouses read the same shared storage layer without copying full datasets per warehouse",
+        "es_correcta": true,
+        "explicacion": "Snowflake uses shared storage; compute clusters are independent."
+      },
+      {
+        "texto_opcion": "Warehouses must export/import data between each other for every query",
+        "es_correcta": false,
+        "explicacion": "No cross-warehouse data copy is required for reads."
+      },
+      {
+        "texto_opcion": "Only one warehouse may access a table at any time globally",
+        "es_correcta": false,
+        "explicacion": "Multiple warehouses can query shared storage concurrently."
+      },
+      {
+        "texto_opcion": "Each warehouse maintains a private copy of every table on local disk permanently",
+        "es_correcta": false,
+        "explicacion": "Persistent data is shared; local disk is cache only."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Shared-disk model"
+    ]
+  },
+  {
+    "pregunta": "A healthcare provider (~50,000 events/s, region brazilsouth) must: deploy Snowflake accounts in AWS, Azure, and GCP regions for residency requirements. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Run Snowflake compute only on-premises and storage only in one cloud",
+        "es_correcta": false,
+        "explicacion": "Snowflake is a cloud-native SaaS across AWS/Azure/GCP."
+      },
+      {
+        "texto_opcion": "Provision accounts in the cloud region on the desired cloud provider; cross-cloud is via replication/sharing patterns",
+        "es_correcta": true,
+        "explicacion": "Snowflake runs natively on each major cloud; account location follows provider/region choice."
+      },
+      {
+        "texto_opcion": "Use a single on-prem Hadoop cluster as the storage layer",
+        "es_correcta": false,
+        "explicacion": "Snowflake storage is cloud object storage managed by Snowflake."
+      },
+      {
+        "texto_opcion": "Move micro-partitions manually between clouds with FTP nightly",
+        "es_correcta": false,
+        "explicacion": "Not how Snowflake manages storage."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Multi-cloud"
+    ]
+  },
+  {
+    "pregunta": "organize schemas, tables, and stages under a logical hierarchy for RBAC. Context: online marketplace, ~50,000 events/s. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "User > Role > Query as the storage hierarchy",
+        "es_correcta": false,
+        "explicacion": "That describes security, not object namespace."
+      },
+      {
+        "texto_opcion": "Warehouse > Table > Column only with no database concept",
+        "es_correcta": false,
+        "explicacion": "Databases and schemas are first-class containers."
+      },
+      {
+        "texto_opcion": "Account > Database > Schema > Object (table, view, stage, etc.)",
+        "es_correcta": true,
+        "explicacion": "Standard Snowflake namespace hierarchy for securable objects."
+      },
+      {
+        "texto_opcion": "Stage > Pipe > Stream as the top-level security boundary",
+        "es_correcta": false,
+        "explicacion": "Those are objects inside schemas, not the root hierarchy."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Database objects"
+    ]
+  },
+  {
+    "pregunta": "finance asks which layer consumption primarily drives warehouse spend. Context: logistics carrier, ~5 TB/day. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Client JDBC driver licensing per developer seat",
+        "es_correcta": false,
+        "explicacion": "Snowflake does not bill JDBC seats as the primary model."
+      },
+      {
+        "texto_opcion": "Cloud Services charges per SELECT row returned",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is not billed per row; compute credits dominate interactive workloads."
+      },
+      {
+        "texto_opcion": "Storage layer charges per SQL query parsed",
+        "es_correcta": false,
+        "explicacion": "Storage is capacity/time based, not per-query parsing."
+      },
+      {
+        "texto_opcion": "Virtual warehouse compute credits while running/resuming",
+        "es_correcta": true,
+        "explicacion": "Warehouses consume credits based on size and uptime; storage billed separately."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Credit model"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (near-real-time dashboards, region eastus) must: a user runs queries against PROD_DB.ANALYTICS.FACT_SALES. Which context must be set? Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "USE DATABASE and USE SCHEMA (or fully qualified names) to resolve objects",
+        "es_correcta": true,
+        "explicacion": "Sessions need database/schema context or three-part names."
+      },
+      {
+        "texto_opcion": "Set the file format as session default instead of schema",
+        "es_correcta": false,
+        "explicacion": "File format does not replace database/schema context for tables."
+      },
+      {
+        "texto_opcion": "Configure the storage layer region in the JDBC URL only",
+        "es_correcta": false,
+        "explicacion": "Region is account-level; object resolution needs DB/schema."
+      },
+      {
+        "texto_opcion": "Only the warehouse name is required; database is inferred automatically",
+        "es_correcta": false,
+        "explicacion": "Unqualified names require active database/schema context."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Session context"
+    ]
+  },
+  {
+    "pregunta": "For a industrial IoT platform workload with near-real-time dashboards: billions of micro-partitions must be tracked for pruning and Time Travel. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Each warehouse keeps its own unrelated copy of catalog metadata forever",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized, not warehouse-local authoritative catalog."
+      },
+      {
+        "texto_opcion": "Cloud Services maintains partition metadata and statistics in the global services layer",
+        "es_correcta": true,
+        "explicacion": "Partition min/max metadata enables pruning without scanning all files."
+      },
+      {
+        "texto_opcion": "Micro-partition metadata is stored only inside Parquet footers with no Snowflake catalog",
+        "es_correcta": false,
+        "explicacion": "Snowflake maintains rich catalog metadata beyond file footers."
+      },
+      {
+        "texto_opcion": "Clients cache all partition metadata locally after first login",
+        "es_correcta": false,
+        "explicacion": "Central metadata service drives optimization."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Metadata scale"
+    ]
+  },
+  {
+    "pregunta": "A industrial IoT platform (strict GDPR residency, region australiaeast) must: nightly ETL needs 4X compute for two hours then minimal idle cost. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use a larger warehouse or multi-cluster warehouse for the window, then suspend or scale down",
+        "es_correcta": true,
+        "explicacion": "Independent compute scaling matches bursty ETL without paying for idle peak capacity 24/7."
+      },
+      {
+        "texto_opcion": "Keep X-Large warehouse running 24/7 to avoid resume latency only",
+        "es_correcta": false,
+        "explicacion": "Violates cost optimization for predictable batch windows."
+      },
+      {
+        "texto_opcion": "Increase storage size to make queries faster without changing warehouse",
+        "es_correcta": false,
+        "explicacion": "Query performance scaling is primarily warehouse compute."
+      },
+      {
+        "texto_opcion": "Duplicate all tables to four separate accounts during ETL",
+        "es_correcta": false,
+        "explicacion": "Does not leverage warehouse elasticity."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Elasticity"
+    ]
+  },
+  {
+    "pregunta": "A insurance carrier (petabyte-scale historical data, region australiaeast) must: developers connect with Snowflake CLI and drivers using account identifier. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Connect to individual micro-partition URLs directly",
+        "es_correcta": false,
+        "explicacion": "Clients connect to the account endpoint, not partitions."
+      },
+      {
+        "texto_opcion": "Use warehouse UUID as the account hostname",
+        "es_correcta": false,
+        "explicacion": "Warehouse is not the account identifier."
+      },
+      {
+        "texto_opcion": "Use the account locator/URL format for the cloud region and deployment (e.g., org-account or legacy locator)",
+        "es_correcta": true,
+        "explicacion": "Clients target account identifier plus cloud region/provider."
+      },
+      {
+        "texto_opcion": "Hardcode Cloud Services IP in every query",
+        "es_correcta": false,
+        "explicacion": "Snowflake provides account URLs; clients do not target service IPs."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Account URL"
+    ]
+  },
+  {
+    "pregunta": "Online marketplace scenario — apply platform patches and version upgrades with minimal customer ops burden. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Customers SSH into warehouse nodes to patch Linux kernels weekly",
+        "es_correcta": false,
+        "explicacion": "Customers do not manage warehouse OS patching."
+      },
+      {
+        "texto_opcion": "Pause all accounts globally during every customer-managed maintenance weekend",
+        "es_correcta": false,
+        "explicacion": "Snowflake performs rolling managed maintenance."
+      },
+      {
+        "texto_opcion": "Download and install Snowflake MSI on each analyst PC for upgrades",
+        "es_correcta": false,
+        "explicacion": "Snowflake server is cloud SaaS, not on-prem install per user."
+      },
+      {
+        "texto_opcion": "Snowflake manages platform updates in the Cloud Services layer transparently",
+        "es_correcta": true,
+        "explicacion": "Snowflake is fully managed SaaS for infrastructure patching."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "SaaS operations"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): understand where persisted table data lives in Snowflake's architecture. Select the most appropriate design. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Inside the Cloud Services layer metadata database exclusively",
+        "es_correcta": false,
+        "explicacion": "Cloud Services holds metadata and orchestration, not table micro-partitions."
+      },
+      {
+        "texto_opcion": "In cloud object storage managed by the Snowflake storage layer (e.g., S3, Azure Blob, GCS)",
+        "es_correcta": true,
+        "explicacion": "Snowflake separates storage from compute; persisted micro-partition files reside in object storage."
+      },
+      {
+        "texto_opcion": "On client workstations after each query completes",
+        "es_correcta": false,
+        "explicacion": "Clients never hold authoritative persisted data."
+      },
+      {
+        "texto_opcion": "On local SSD attached to each virtual warehouse node only",
+        "es_correcta": false,
+        "explicacion": "Warehouse local storage is ephemeral cache, not durable table storage."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Storage layer"
+    ]
+  },
+  {
+    "pregunta": "A gaming studio (near-real-time dashboards, region eastus) must: run heavy analytical SQL without resizing storage when demand spikes. Which option fits best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Merge storage and compute into a single monolithic cluster only",
+        "es_correcta": false,
+        "explicacion": "Snowflake explicitly separates the layers."
+      },
+      {
+        "texto_opcion": "Resize the storage layer to add CPU for each query",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not provide query compute."
+      },
+      {
+        "texto_opcion": "Scale virtual warehouses independently from storage",
+        "es_correcta": true,
+        "explicacion": "Compute scales via warehouses; storage billing and capacity are decoupled."
+      },
+      {
+        "texto_opcion": "Copy all tables to a larger filesystem on each user laptop",
+        "es_correcta": false,
+        "explicacion": "Not Snowflake architecture."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Compute layer"
+    ]
+  },
+  {
+    "pregunta": "Incident review (northeurope): need authentication, query parsing, optimization, and transaction coordination. Select the most appropriate design. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Use the Cloud Services layer (metadata, security, optimizer, session state)",
+        "es_correcta": true,
+        "explicacion": "Cloud Services handles login, parsing, optimization, DDL coordination, and metadata."
+      },
+      {
+        "texto_opcion": "Offload all metadata to client-side browser storage",
+        "es_correcta": false,
+        "explicacion": "Metadata is centralized in Cloud Services."
+      },
+      {
+        "texto_opcion": "Use only warehouse workers for login and RBAC enforcement",
+        "es_correcta": false,
+        "explicacion": "Security and metadata services run in Cloud Services."
+      },
+      {
+        "texto_opcion": "Disable Cloud Services to reduce credit usage on SELECT queries",
+        "es_correcta": false,
+        "explicacion": "Cloud Services is required for query orchestration."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Cloud Services"
+    ]
+  },
+  {
+    "pregunta": "A media streaming company (hourly batch windows, region australiaeast) must: explain how all virtual warehouses access the same table data concurrently. Which option fits best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Each warehouse maintains a private copy of every table on local disk permanently",
+        "es_correcta": false,
+        "explicacion": "Persistent data is shared; local disk is cache only."
+      },
+      {
+        "texto_opcion": "Warehouses must export/import data between each other for every query",
+        "es_correcta": false,
+        "explicacion": "No cross-warehouse data copy is required for reads."
+      },
+      {
+        "texto_opcion": "Only one warehouse may access a table at any time globally",
+        "es_correcta": false,
+        "explicacion": "Multiple warehouses can query shared storage concurrently."
+      },
+      {
+        "texto_opcion": "All warehouses read the same shared storage layer without copying full datasets per warehouse",
+        "es_correcta": true,
+        "explicacion": "Snowflake uses shared storage; compute clusters are independent."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Shared-disk model"
+    ]
+  },
+  {
+    "pregunta": "For a travel platform workload with petabyte-scale historical data: deploy Snowflake accounts in AWS, Azure, and GCP regions for residency requirements. Best choice (variant 5)?",
+    "opciones": [
+      {
+        "texto_opcion": "Run Snowflake compute only on-premises and storage only in one cloud",
+        "es_correcta": false,
+        "explicacion": "Snowflake is a cloud-native SaaS across AWS/Azure/GCP."
+      },
+      {
+        "texto_opcion": "Move micro-partitions manually between clouds with FTP nightly",
+        "es_correcta": false,
+        "explicacion": "Not how Snowflake manages storage."
+      },
+      {
+        "texto_opcion": "Use a single on-prem Hadoop cluster as the storage layer",
+        "es_correcta": false,
+        "explicacion": "Snowflake storage is cloud object storage managed by Snowflake."
+      },
+      {
+        "texto_opcion": "Provision accounts in the cloud region on the desired cloud provider; cross-cloud is via replication/sharing patterns",
+        "es_correcta": true,
+        "explicacion": "Snowflake runs natively on each major cloud; account location follows provider/region choice."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Multi-cloud"
+    ]
+  },
+  {
+    "pregunta": "A media streaming company (hourly batch windows, region northeurope) must: organize schemas, tables, and stages under a logical hierarchy for RBAC. Which option fits best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "User > Role > Query as the storage hierarchy",
+        "es_correcta": false,
+        "explicacion": "That describes security, not object namespace."
+      },
+      {
+        "texto_opcion": "Account > Database > Schema > Object (table, view, stage, etc.)",
+        "es_correcta": true,
+        "explicacion": "Standard Snowflake namespace hierarchy for securable objects."
+      },
+      {
+        "texto_opcion": "Stage > Pipe > Stream as the top-level security boundary",
+        "es_correcta": false,
+        "explicacion": "Those are objects inside schemas, not the root hierarchy."
+      },
+      {
+        "texto_opcion": "Warehouse > Table > Column only with no database concept",
+        "es_correcta": false,
+        "explicacion": "Databases and schemas are first-class containers."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "Database objects"
+    ]
+  }
+]

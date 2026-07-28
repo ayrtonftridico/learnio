@@ -1,0 +1,1568 @@
+[
+  {
+    "pregunta": "Incident review (southeastasia): interactive dashboard queries need roughly double CPU/memory for the same SQL. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Increase virtual warehouse size (e.g., Medium to Large)",
+        "es_correcta": true,
+        "explicacion": "Larger warehouses provide more compute resources per cluster."
+      },
+      {
+        "texto_opcion": "Add clustering keys on unrelated columns only without sizing warehouse",
+        "es_correcta": false,
+        "explicacion": "Clustering helps pruning but does not replace compute scaling."
+      },
+      {
+        "texto_opcion": "Convert tables to CSV to reduce warehouse work",
+        "es_correcta": false,
+        "explicacion": "Format change does not replace warehouse scaling."
+      },
+      {
+        "texto_opcion": "Disable result cache permanently",
+        "es_correcta": false,
+        "explicacion": "That may increase work, not provide controlled scaling."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse size"
+    ]
+  },
+  {
+    "pregunta": "A media streaming company (~5 TB/day, region eastus) must: avoid paying credits when the BI warehouse is idle overnight. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Leave warehouse running because suspend drops all table data",
+        "es_correcta": false,
+        "explicacion": "Suspend stops compute credits; shared storage persists."
+      },
+      {
+        "texto_opcion": "Configure AUTO_SUSPEND to a low minute threshold and AUTO_RESUME as needed",
+        "es_correcta": true,
+        "explicacion": "Suspending stops credit consumption when idle; resume on next query."
+      },
+      {
+        "texto_opcion": "Set AUTO_SUSPEND to NULL to never suspend for cost savings",
+        "es_correcta": false,
+        "explicacion": "Opposite of cost control."
+      },
+      {
+        "texto_opcion": "Drop the warehouse every night and lose grant history",
+        "es_correcta": false,
+        "explicacion": "Suspend is preferred over destructive drop for routine idle periods."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Auto-suspend"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — concurrent users cause query queuing on a single Medium warehouse during peak hours. What should they implement?",
+    "opciones": [
+      {
+        "texto_opcion": "Force all users to share one serial query slot",
+        "es_correcta": false,
+        "explicacion": "Increases queuing."
+      },
+      {
+        "texto_opcion": "Enable multi-cluster warehouse with min/max clusters and scaling policy",
+        "es_correcta": true,
+        "explicacion": "Multi-cluster adds parallel clusters to handle concurrency."
+      },
+      {
+        "texto_opcion": "Copy data to separate accounts per user",
+        "es_correcta": false,
+        "explicacion": "Does not solve warehouse concurrency in one account."
+      },
+      {
+        "texto_opcion": "Use only XS warehouse to reduce queuing",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse reduces per-query resources and can worsen queuing."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Multi-cluster WH"
+    ]
+  },
+  {
+    "pregunta": "prevent ad-hoc analysts from starving the production ETL warehouse. Context: gaming studio, near-real-time dashboards.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable all warehouses except one shared X-Large",
+        "es_correcta": false,
+        "explicacion": "Removes isolation and cost tuning."
+      },
+      {
+        "texto_opcion": "Store ETL SQL in a different database to auto-isolate compute",
+        "es_correcta": false,
+        "explicacion": "Database separation alone does not isolate compute."
+      },
+      {
+        "texto_opcion": "Use separate virtual warehouses for workloads with different SLAs and resource monitors",
+        "es_correcta": true,
+        "explicacion": "Workload isolation via dedicated warehouses avoids contention."
+      },
+      {
+        "texto_opcion": "Run ETL and ad-hoc on the same warehouse without limits always",
+        "es_correcta": false,
+        "explicacion": "Risk of resource contention."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse isolation"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): need improved performance for certain query patterns on supported regions. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Snowflake warehouse types/generations where available (e.g., Snowpark-optimized or newer generations per docs)",
+        "es_correcta": true,
+        "explicacion": "Snowflake offers warehouse variants/generations for specialized workloads."
+      },
+      {
+        "texto_opcion": "Run SQL only on Cloud Services nodes",
+        "es_correcta": false,
+        "explicacion": "Query execution happens on warehouse compute."
+      },
+      {
+        "texto_opcion": "Use file formats instead of warehouses for all SELECT queries",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged files, not query compute."
+      },
+      {
+        "texto_opcion": "Replace warehouses with external EC2 Auto Scaling groups you manage",
+        "es_correcta": false,
+        "explicacion": "Compute is managed via Snowflake warehouses, not customer EC2 for SQL."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Gen2 warehouse"
+    ]
+  },
+  {
+    "pregunta": "For a gaming studio workload with ~5 TB/day: multi-cluster warehouse should add clusters aggressively for user-facing dashboards. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Manually ALTER WAREHOUSE every minute based on email alerts",
+        "es_correcta": false,
+        "explicacion": "Use automated multi-cluster policies instead."
+      },
+      {
+        "texto_opcion": "Disable scale-out and accept unlimited queuing",
+        "es_correcta": false,
+        "explicacion": "Fails concurrency requirements."
+      },
+      {
+        "texto_opcion": "Economy policy for sub-second interactive SLAs exclusively",
+        "es_correcta": false,
+        "explicacion": "Economy trades responsiveness for cost on scale-out."
+      },
+      {
+        "texto_opcion": "Choose Standard scaling policy for faster scale-out (vs Economy for batch)",
+        "es_correcta": true,
+        "explicacion": "Standard scales out faster; Economy saves credits with slower scale-out."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Scaling policy"
+    ]
+  },
+  {
+    "pregunta": "For a payments fintech workload with sub-second interactive queries: repeated identical query within minutes should avoid re-scanning remote storage. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Leverage warehouse local disk cache and result cache where applicable",
+        "es_correcta": true,
+        "explicacion": "Local disk cache holds recently accessed micro-partitions; result cache stores query results."
+      },
+      {
+        "texto_opcion": "Copy all tables into warehouse RAM permanently",
+        "es_correcta": false,
+        "explicacion": "Cache is temporary and managed automatically."
+      },
+      {
+        "texto_opcion": "Require users to download results to Excel for caching",
+        "es_correcta": false,
+        "explicacion": "Not a platform cache mechanism."
+      },
+      {
+        "texto_opcion": "Disable metadata to force cache use",
+        "es_correcta": false,
+        "explicacion": "Metadata is required; caches complement storage reads."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse cache"
+    ]
+  },
+  {
+    "pregunta": "Incident review (northeurope): determine which resource executes a submitted SQL statement. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "The file format executes the query",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged data, not compute."
+      },
+      {
+        "texto_opcion": "The virtual warehouse specified in session context executes the query",
+        "es_correcta": true,
+        "explicacion": "Users/roles run queries on a chosen warehouse for compute."
+      },
+      {
+        "texto_opcion": "Storage layer spins up Spark for each SELECT",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not execute warehouse SQL compute."
+      },
+      {
+        "texto_opcion": "Cloud Services layer executes all heavy joins locally",
+        "es_correcta": false,
+        "explicacion": "Heavy compute runs on warehouses."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Query assignment"
+    ]
+  },
+  {
+    "pregunta": "For a healthcare provider workload with ~50,000 events/s: clone a 10 TB table for what-if analysis without duplicate storage charges for the clone. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Export to CSV on laptop to avoid storage",
+        "es_correcta": false,
+        "explicacion": "Not zero-copy clone."
+      },
+      {
+        "texto_opcion": "CREATE TABLE ... CLONE uses zero-copy clone at storage layer; still need warehouse for queries",
+        "es_correcta": true,
+        "explicacion": "Clone shares micro-partitions; queries still consume warehouse credits."
+      },
+      {
+        "texto_opcion": "CREATE TABLE AS SELECT full copy always duplicates all storage immediately at full cost",
+        "es_correcta": false,
+        "explicacion": "CTAS materializes new data; CLONE shares storage initially."
+      },
+      {
+        "texto_opcion": "Cloning eliminates need for any warehouse during analysis",
+        "es_correcta": false,
+        "explicacion": "Compute still required to query cloned tables."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Zero-copy vs WH"
+    ]
+  },
+  {
+    "pregunta": "Insurance carrier scenario — suspend warehouse automatically when monthly credits exceed budget. What should they implement?",
+    "opciones": [
+      {
+        "texto_opcion": "Delete the account when budget exceeded without warning",
+        "es_correcta": false,
+        "explicacion": "Resource monitors provide controlled actions."
+      },
+      {
+        "texto_opcion": "Disable all queries globally via network policy only",
+        "es_correcta": false,
+        "explicacion": "Network policy blocks access; does not meter warehouse credits."
+      },
+      {
+        "texto_opcion": "Rely on storage layer auto-suspend",
+        "es_correcta": false,
+        "explicacion": "Storage is not suspended via warehouse resource monitors."
+      },
+      {
+        "texto_opcion": "Attach a resource monitor to the warehouse with suspend/action thresholds",
+        "es_correcta": true,
+        "explicacion": "Resource monitors enforce credit budgets on warehouses."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Resource monitor WH"
+    ]
+  },
+  {
+    "pregunta": "For a industrial IoT platform workload with sub-second interactive queries: prevent runaway cartesian join from consuming warehouse for hours. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Reduce storage retention to one day",
+        "es_correcta": false,
+        "explicacion": "Retention does not stop active queries."
+      },
+      {
+        "texto_opcion": "Switch to a smaller warehouse to make the cartesian join finish faster",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse likely slows or still runs long; timeout is correct control."
+      },
+      {
+        "texto_opcion": "Set STATEMENT_TIMEOUT_IN_SECONDS at session/warehouse/account level",
+        "es_correcta": true,
+        "explicacion": "Statement timeouts cancel long-running queries."
+      },
+      {
+        "texto_opcion": "Drop all tables touched by the query",
+        "es_correcta": false,
+        "explicacion": "Destructive and unrelated to timeout feature."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Statement timeout"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): role ANALYST should use WH_REPORTING but not WH_ETL. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Grant OWNERSHIP on database only to imply warehouse access",
+        "es_correcta": false,
+        "explicacion": "Warehouse privileges are separate securables."
+      },
+      {
+        "texto_opcion": "Share warehouse via Secure Data Sharing to internal role",
+        "es_correcta": false,
+        "explicacion": "Sharing is for cross-account data, not internal warehouse RBAC substitute."
+      },
+      {
+        "texto_opcion": "GRANT SELECT ON WAREHOUSE to role",
+        "es_correcta": false,
+        "explicacion": "Warehouses use USAGE/MONITOR/OPERATE privileges, not SELECT."
+      },
+      {
+        "texto_opcion": "GRANT USAGE ON WAREHOUSE WH_REPORTING TO ROLE ANALYST",
+        "es_correcta": true,
+        "explicacion": "USAGE on warehouse required to execute queries with it."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse grants"
+    ]
+  },
+  {
+    "pregunta": "interactive dashboard queries need roughly double CPU/memory for the same SQL. Context: payments fintech, sub-second interactive queries. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Convert tables to CSV to reduce warehouse work",
+        "es_correcta": false,
+        "explicacion": "Format change does not replace warehouse scaling."
+      },
+      {
+        "texto_opcion": "Increase virtual warehouse size (e.g., Medium to Large)",
+        "es_correcta": true,
+        "explicacion": "Larger warehouses provide more compute resources per cluster."
+      },
+      {
+        "texto_opcion": "Add clustering keys on unrelated columns only without sizing warehouse",
+        "es_correcta": false,
+        "explicacion": "Clustering helps pruning but does not replace compute scaling."
+      },
+      {
+        "texto_opcion": "Disable result cache permanently",
+        "es_correcta": false,
+        "explicacion": "That may increase work, not provide controlled scaling."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse size"
+    ]
+  },
+  {
+    "pregunta": "Incident review (eastus): avoid paying credits when the BI warehouse is idle overnight. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Leave warehouse running because suspend drops all table data",
+        "es_correcta": false,
+        "explicacion": "Suspend stops compute credits; shared storage persists."
+      },
+      {
+        "texto_opcion": "Configure AUTO_SUSPEND to a low minute threshold and AUTO_RESUME as needed",
+        "es_correcta": true,
+        "explicacion": "Suspending stops credit consumption when idle; resume on next query."
+      },
+      {
+        "texto_opcion": "Set AUTO_SUSPEND to NULL to never suspend for cost savings",
+        "es_correcta": false,
+        "explicacion": "Opposite of cost control."
+      },
+      {
+        "texto_opcion": "Drop the warehouse every night and lose grant history",
+        "es_correcta": false,
+        "explicacion": "Suspend is preferred over destructive drop for routine idle periods."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Auto-suspend"
+    ]
+  },
+  {
+    "pregunta": "Global retailer scenario — concurrent users cause query queuing on a single Medium warehouse during peak hours. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Enable multi-cluster warehouse with min/max clusters and scaling policy",
+        "es_correcta": true,
+        "explicacion": "Multi-cluster adds parallel clusters to handle concurrency."
+      },
+      {
+        "texto_opcion": "Use only XS warehouse to reduce queuing",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse reduces per-query resources and can worsen queuing."
+      },
+      {
+        "texto_opcion": "Force all users to share one serial query slot",
+        "es_correcta": false,
+        "explicacion": "Increases queuing."
+      },
+      {
+        "texto_opcion": "Copy data to separate accounts per user",
+        "es_correcta": false,
+        "explicacion": "Does not solve warehouse concurrency in one account."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Multi-cluster WH"
+    ]
+  },
+  {
+    "pregunta": "prevent ad-hoc analysts from starving the production ETL warehouse. Context: travel platform, ~5 TB/day. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable all warehouses except one shared X-Large",
+        "es_correcta": false,
+        "explicacion": "Removes isolation and cost tuning."
+      },
+      {
+        "texto_opcion": "Store ETL SQL in a different database to auto-isolate compute",
+        "es_correcta": false,
+        "explicacion": "Database separation alone does not isolate compute."
+      },
+      {
+        "texto_opcion": "Run ETL and ad-hoc on the same warehouse without limits always",
+        "es_correcta": false,
+        "explicacion": "Risk of resource contention."
+      },
+      {
+        "texto_opcion": "Use separate virtual warehouses for workloads with different SLAs and resource monitors",
+        "es_correcta": true,
+        "explicacion": "Workload isolation via dedicated warehouses avoids contention."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse isolation"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (petabyte-scale historical data, region brazilsouth) must: need improved performance for certain query patterns on supported regions. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Snowflake warehouse types/generations where available (e.g., Snowpark-optimized or newer generations per docs)",
+        "es_correcta": true,
+        "explicacion": "Snowflake offers warehouse variants/generations for specialized workloads."
+      },
+      {
+        "texto_opcion": "Run SQL only on Cloud Services nodes",
+        "es_correcta": false,
+        "explicacion": "Query execution happens on warehouse compute."
+      },
+      {
+        "texto_opcion": "Replace warehouses with external EC2 Auto Scaling groups you manage",
+        "es_correcta": false,
+        "explicacion": "Compute is managed via Snowflake warehouses, not customer EC2 for SQL."
+      },
+      {
+        "texto_opcion": "Use file formats instead of warehouses for all SELECT queries",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged files, not query compute."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Gen2 warehouse"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): multi-cluster warehouse should add clusters aggressively for user-facing dashboards. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Economy policy for sub-second interactive SLAs exclusively",
+        "es_correcta": false,
+        "explicacion": "Economy trades responsiveness for cost on scale-out."
+      },
+      {
+        "texto_opcion": "Disable scale-out and accept unlimited queuing",
+        "es_correcta": false,
+        "explicacion": "Fails concurrency requirements."
+      },
+      {
+        "texto_opcion": "Choose Standard scaling policy for faster scale-out (vs Economy for batch)",
+        "es_correcta": true,
+        "explicacion": "Standard scales out faster; Economy saves credits with slower scale-out."
+      },
+      {
+        "texto_opcion": "Manually ALTER WAREHOUSE every minute based on email alerts",
+        "es_correcta": false,
+        "explicacion": "Use automated multi-cluster policies instead."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Scaling policy"
+    ]
+  },
+  {
+    "pregunta": "Online marketplace scenario — repeated identical query within minutes should avoid re-scanning remote storage. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Leverage warehouse local disk cache and result cache where applicable",
+        "es_correcta": true,
+        "explicacion": "Local disk cache holds recently accessed micro-partitions; result cache stores query results."
+      },
+      {
+        "texto_opcion": "Copy all tables into warehouse RAM permanently",
+        "es_correcta": false,
+        "explicacion": "Cache is temporary and managed automatically."
+      },
+      {
+        "texto_opcion": "Require users to download results to Excel for caching",
+        "es_correcta": false,
+        "explicacion": "Not a platform cache mechanism."
+      },
+      {
+        "texto_opcion": "Disable metadata to force cache use",
+        "es_correcta": false,
+        "explicacion": "Metadata is required; caches complement storage reads."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse cache"
+    ]
+  },
+  {
+    "pregunta": "For a payments fintech workload with petabyte-scale historical data: determine which resource executes a submitted SQL statement. Best choice (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Cloud Services layer executes all heavy joins locally",
+        "es_correcta": false,
+        "explicacion": "Heavy compute runs on warehouses."
+      },
+      {
+        "texto_opcion": "Storage layer spins up Spark for each SELECT",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not execute warehouse SQL compute."
+      },
+      {
+        "texto_opcion": "The virtual warehouse specified in session context executes the query",
+        "es_correcta": true,
+        "explicacion": "Users/roles run queries on a chosen warehouse for compute."
+      },
+      {
+        "texto_opcion": "The file format executes the query",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged data, not compute."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Query assignment"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): clone a 10 TB table for what-if analysis without duplicate storage charges for the clone. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "CREATE TABLE AS SELECT full copy always duplicates all storage immediately at full cost",
+        "es_correcta": false,
+        "explicacion": "CTAS materializes new data; CLONE shares storage initially."
+      },
+      {
+        "texto_opcion": "Cloning eliminates need for any warehouse during analysis",
+        "es_correcta": false,
+        "explicacion": "Compute still required to query cloned tables."
+      },
+      {
+        "texto_opcion": "CREATE TABLE ... CLONE uses zero-copy clone at storage layer; still need warehouse for queries",
+        "es_correcta": true,
+        "explicacion": "Clone shares micro-partitions; queries still consume warehouse credits."
+      },
+      {
+        "texto_opcion": "Export to CSV on laptop to avoid storage",
+        "es_correcta": false,
+        "explicacion": "Not zero-copy clone."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Zero-copy vs WH"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): suspend warehouse automatically when monthly credits exceed budget. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable all queries globally via network policy only",
+        "es_correcta": false,
+        "explicacion": "Network policy blocks access; does not meter warehouse credits."
+      },
+      {
+        "texto_opcion": "Delete the account when budget exceeded without warning",
+        "es_correcta": false,
+        "explicacion": "Resource monitors provide controlled actions."
+      },
+      {
+        "texto_opcion": "Rely on storage layer auto-suspend",
+        "es_correcta": false,
+        "explicacion": "Storage is not suspended via warehouse resource monitors."
+      },
+      {
+        "texto_opcion": "Attach a resource monitor to the warehouse with suspend/action thresholds",
+        "es_correcta": true,
+        "explicacion": "Resource monitors enforce credit budgets on warehouses."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Resource monitor WH"
+    ]
+  },
+  {
+    "pregunta": "prevent runaway cartesian join from consuming warehouse for hours. Context: global retailer, petabyte-scale historical data. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Drop all tables touched by the query",
+        "es_correcta": false,
+        "explicacion": "Destructive and unrelated to timeout feature."
+      },
+      {
+        "texto_opcion": "Reduce storage retention to one day",
+        "es_correcta": false,
+        "explicacion": "Retention does not stop active queries."
+      },
+      {
+        "texto_opcion": "Switch to a smaller warehouse to make the cartesian join finish faster",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse likely slows or still runs long; timeout is correct control."
+      },
+      {
+        "texto_opcion": "Set STATEMENT_TIMEOUT_IN_SECONDS at session/warehouse/account level",
+        "es_correcta": true,
+        "explicacion": "Statement timeouts cancel long-running queries."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Statement timeout"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): role ANALYST should use WH_REPORTING but not WH_ETL. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "GRANT USAGE ON WAREHOUSE WH_REPORTING TO ROLE ANALYST",
+        "es_correcta": true,
+        "explicacion": "USAGE on warehouse required to execute queries with it."
+      },
+      {
+        "texto_opcion": "GRANT SELECT ON WAREHOUSE to role",
+        "es_correcta": false,
+        "explicacion": "Warehouses use USAGE/MONITOR/OPERATE privileges, not SELECT."
+      },
+      {
+        "texto_opcion": "Share warehouse via Secure Data Sharing to internal role",
+        "es_correcta": false,
+        "explicacion": "Sharing is for cross-account data, not internal warehouse RBAC substitute."
+      },
+      {
+        "texto_opcion": "Grant OWNERSHIP on database only to imply warehouse access",
+        "es_correcta": false,
+        "explicacion": "Warehouse privileges are separate securables."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse grants"
+    ]
+  },
+  {
+    "pregunta": "A energy utility (hourly batch windows, region northeurope) must: interactive dashboard queries need roughly double CPU/memory for the same SQL. Which option fits best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Add clustering keys on unrelated columns only without sizing warehouse",
+        "es_correcta": false,
+        "explicacion": "Clustering helps pruning but does not replace compute scaling."
+      },
+      {
+        "texto_opcion": "Increase virtual warehouse size (e.g., Medium to Large)",
+        "es_correcta": true,
+        "explicacion": "Larger warehouses provide more compute resources per cluster."
+      },
+      {
+        "texto_opcion": "Convert tables to CSV to reduce warehouse work",
+        "es_correcta": false,
+        "explicacion": "Format change does not replace warehouse scaling."
+      },
+      {
+        "texto_opcion": "Disable result cache permanently",
+        "es_correcta": false,
+        "explicacion": "That may increase work, not provide controlled scaling."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse size"
+    ]
+  },
+  {
+    "pregunta": "avoid paying credits when the BI warehouse is idle overnight. Context: travel platform, sub-second interactive queries. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Set AUTO_SUSPEND to NULL to never suspend for cost savings",
+        "es_correcta": false,
+        "explicacion": "Opposite of cost control."
+      },
+      {
+        "texto_opcion": "Leave warehouse running because suspend drops all table data",
+        "es_correcta": false,
+        "explicacion": "Suspend stops compute credits; shared storage persists."
+      },
+      {
+        "texto_opcion": "Drop the warehouse every night and lose grant history",
+        "es_correcta": false,
+        "explicacion": "Suspend is preferred over destructive drop for routine idle periods."
+      },
+      {
+        "texto_opcion": "Configure AUTO_SUSPEND to a low minute threshold and AUTO_RESUME as needed",
+        "es_correcta": true,
+        "explicacion": "Suspending stops credit consumption when idle; resume on next query."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Auto-suspend"
+    ]
+  },
+  {
+    "pregunta": "For a global retailer workload with ~50,000 events/s: concurrent users cause query queuing on a single Medium warehouse during peak hours. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Use only XS warehouse to reduce queuing",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse reduces per-query resources and can worsen queuing."
+      },
+      {
+        "texto_opcion": "Copy data to separate accounts per user",
+        "es_correcta": false,
+        "explicacion": "Does not solve warehouse concurrency in one account."
+      },
+      {
+        "texto_opcion": "Force all users to share one serial query slot",
+        "es_correcta": false,
+        "explicacion": "Increases queuing."
+      },
+      {
+        "texto_opcion": "Enable multi-cluster warehouse with min/max clusters and scaling policy",
+        "es_correcta": true,
+        "explicacion": "Multi-cluster adds parallel clusters to handle concurrency."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Multi-cluster WH"
+    ]
+  },
+  {
+    "pregunta": "For a healthcare provider workload with petabyte-scale historical data: prevent ad-hoc analysts from starving the production ETL warehouse. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Use separate virtual warehouses for workloads with different SLAs and resource monitors",
+        "es_correcta": true,
+        "explicacion": "Workload isolation via dedicated warehouses avoids contention."
+      },
+      {
+        "texto_opcion": "Run ETL and ad-hoc on the same warehouse without limits always",
+        "es_correcta": false,
+        "explicacion": "Risk of resource contention."
+      },
+      {
+        "texto_opcion": "Store ETL SQL in a different database to auto-isolate compute",
+        "es_correcta": false,
+        "explicacion": "Database separation alone does not isolate compute."
+      },
+      {
+        "texto_opcion": "Disable all warehouses except one shared X-Large",
+        "es_correcta": false,
+        "explicacion": "Removes isolation and cost tuning."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse isolation"
+    ]
+  },
+  {
+    "pregunta": "A media streaming company (sub-second interactive queries, region australiaeast) must: need improved performance for certain query patterns on supported regions. Which option fits best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use file formats instead of warehouses for all SELECT queries",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged files, not query compute."
+      },
+      {
+        "texto_opcion": "Run SQL only on Cloud Services nodes",
+        "es_correcta": false,
+        "explicacion": "Query execution happens on warehouse compute."
+      },
+      {
+        "texto_opcion": "Use Snowflake warehouse types/generations where available (e.g., Snowpark-optimized or newer generations per docs)",
+        "es_correcta": true,
+        "explicacion": "Snowflake offers warehouse variants/generations for specialized workloads."
+      },
+      {
+        "texto_opcion": "Replace warehouses with external EC2 Auto Scaling groups you manage",
+        "es_correcta": false,
+        "explicacion": "Compute is managed via Snowflake warehouses, not customer EC2 for SQL."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Gen2 warehouse"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — multi-cluster warehouse should add clusters aggressively for user-facing dashboards. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable scale-out and accept unlimited queuing",
+        "es_correcta": false,
+        "explicacion": "Fails concurrency requirements."
+      },
+      {
+        "texto_opcion": "Economy policy for sub-second interactive SLAs exclusively",
+        "es_correcta": false,
+        "explicacion": "Economy trades responsiveness for cost on scale-out."
+      },
+      {
+        "texto_opcion": "Choose Standard scaling policy for faster scale-out (vs Economy for batch)",
+        "es_correcta": true,
+        "explicacion": "Standard scales out faster; Economy saves credits with slower scale-out."
+      },
+      {
+        "texto_opcion": "Manually ALTER WAREHOUSE every minute based on email alerts",
+        "es_correcta": false,
+        "explicacion": "Use automated multi-cluster policies instead."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Scaling policy"
+    ]
+  },
+  {
+    "pregunta": "repeated identical query within minutes should avoid re-scanning remote storage. Context: industrial IoT platform, hourly batch windows. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Copy all tables into warehouse RAM permanently",
+        "es_correcta": false,
+        "explicacion": "Cache is temporary and managed automatically."
+      },
+      {
+        "texto_opcion": "Disable metadata to force cache use",
+        "es_correcta": false,
+        "explicacion": "Metadata is required; caches complement storage reads."
+      },
+      {
+        "texto_opcion": "Require users to download results to Excel for caching",
+        "es_correcta": false,
+        "explicacion": "Not a platform cache mechanism."
+      },
+      {
+        "texto_opcion": "Leverage warehouse local disk cache and result cache where applicable",
+        "es_correcta": true,
+        "explicacion": "Local disk cache holds recently accessed micro-partitions; result cache stores query results."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse cache"
+    ]
+  },
+  {
+    "pregunta": "Incident review (eastus): determine which resource executes a submitted SQL statement. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "The file format executes the query",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged data, not compute."
+      },
+      {
+        "texto_opcion": "Cloud Services layer executes all heavy joins locally",
+        "es_correcta": false,
+        "explicacion": "Heavy compute runs on warehouses."
+      },
+      {
+        "texto_opcion": "The virtual warehouse specified in session context executes the query",
+        "es_correcta": true,
+        "explicacion": "Users/roles run queries on a chosen warehouse for compute."
+      },
+      {
+        "texto_opcion": "Storage layer spins up Spark for each SELECT",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not execute warehouse SQL compute."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Query assignment"
+    ]
+  },
+  {
+    "pregunta": "For a insurance carrier workload with strict GDPR residency: clone a 10 TB table for what-if analysis without duplicate storage charges for the clone. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Export to CSV on laptop to avoid storage",
+        "es_correcta": false,
+        "explicacion": "Not zero-copy clone."
+      },
+      {
+        "texto_opcion": "Cloning eliminates need for any warehouse during analysis",
+        "es_correcta": false,
+        "explicacion": "Compute still required to query cloned tables."
+      },
+      {
+        "texto_opcion": "CREATE TABLE AS SELECT full copy always duplicates all storage immediately at full cost",
+        "es_correcta": false,
+        "explicacion": "CTAS materializes new data; CLONE shares storage initially."
+      },
+      {
+        "texto_opcion": "CREATE TABLE ... CLONE uses zero-copy clone at storage layer; still need warehouse for queries",
+        "es_correcta": true,
+        "explicacion": "Clone shares micro-partitions; queries still consume warehouse credits."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Zero-copy vs WH"
+    ]
+  },
+  {
+    "pregunta": "suspend warehouse automatically when monthly credits exceed budget. Context: industrial IoT platform, hourly batch windows. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Rely on storage layer auto-suspend",
+        "es_correcta": false,
+        "explicacion": "Storage is not suspended via warehouse resource monitors."
+      },
+      {
+        "texto_opcion": "Delete the account when budget exceeded without warning",
+        "es_correcta": false,
+        "explicacion": "Resource monitors provide controlled actions."
+      },
+      {
+        "texto_opcion": "Attach a resource monitor to the warehouse with suspend/action thresholds",
+        "es_correcta": true,
+        "explicacion": "Resource monitors enforce credit budgets on warehouses."
+      },
+      {
+        "texto_opcion": "Disable all queries globally via network policy only",
+        "es_correcta": false,
+        "explicacion": "Network policy blocks access; does not meter warehouse credits."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Resource monitor WH"
+    ]
+  },
+  {
+    "pregunta": "Energy utility scenario — prevent runaway cartesian join from consuming warehouse for hours. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Drop all tables touched by the query",
+        "es_correcta": false,
+        "explicacion": "Destructive and unrelated to timeout feature."
+      },
+      {
+        "texto_opcion": "Switch to a smaller warehouse to make the cartesian join finish faster",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse likely slows or still runs long; timeout is correct control."
+      },
+      {
+        "texto_opcion": "Reduce storage retention to one day",
+        "es_correcta": false,
+        "explicacion": "Retention does not stop active queries."
+      },
+      {
+        "texto_opcion": "Set STATEMENT_TIMEOUT_IN_SECONDS at session/warehouse/account level",
+        "es_correcta": true,
+        "explicacion": "Statement timeouts cancel long-running queries."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Statement timeout"
+    ]
+  },
+  {
+    "pregunta": "Travel platform scenario — role ANALYST should use WH_REPORTING but not WH_ETL. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Grant OWNERSHIP on database only to imply warehouse access",
+        "es_correcta": false,
+        "explicacion": "Warehouse privileges are separate securables."
+      },
+      {
+        "texto_opcion": "Share warehouse via Secure Data Sharing to internal role",
+        "es_correcta": false,
+        "explicacion": "Sharing is for cross-account data, not internal warehouse RBAC substitute."
+      },
+      {
+        "texto_opcion": "GRANT USAGE ON WAREHOUSE WH_REPORTING TO ROLE ANALYST",
+        "es_correcta": true,
+        "explicacion": "USAGE on warehouse required to execute queries with it."
+      },
+      {
+        "texto_opcion": "GRANT SELECT ON WAREHOUSE to role",
+        "es_correcta": false,
+        "explicacion": "Warehouses use USAGE/MONITOR/OPERATE privileges, not SELECT."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse grants"
+    ]
+  },
+  {
+    "pregunta": "A telecom operator (sub-second interactive queries, region northeurope) must: interactive dashboard queries need roughly double CPU/memory for the same SQL. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Convert tables to CSV to reduce warehouse work",
+        "es_correcta": false,
+        "explicacion": "Format change does not replace warehouse scaling."
+      },
+      {
+        "texto_opcion": "Disable result cache permanently",
+        "es_correcta": false,
+        "explicacion": "That may increase work, not provide controlled scaling."
+      },
+      {
+        "texto_opcion": "Add clustering keys on unrelated columns only without sizing warehouse",
+        "es_correcta": false,
+        "explicacion": "Clustering helps pruning but does not replace compute scaling."
+      },
+      {
+        "texto_opcion": "Increase virtual warehouse size (e.g., Medium to Large)",
+        "es_correcta": true,
+        "explicacion": "Larger warehouses provide more compute resources per cluster."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse size"
+    ]
+  },
+  {
+    "pregunta": "Media streaming company scenario — avoid paying credits when the BI warehouse is idle overnight. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Drop the warehouse every night and lose grant history",
+        "es_correcta": false,
+        "explicacion": "Suspend is preferred over destructive drop for routine idle periods."
+      },
+      {
+        "texto_opcion": "Set AUTO_SUSPEND to NULL to never suspend for cost savings",
+        "es_correcta": false,
+        "explicacion": "Opposite of cost control."
+      },
+      {
+        "texto_opcion": "Leave warehouse running because suspend drops all table data",
+        "es_correcta": false,
+        "explicacion": "Suspend stops compute credits; shared storage persists."
+      },
+      {
+        "texto_opcion": "Configure AUTO_SUSPEND to a low minute threshold and AUTO_RESUME as needed",
+        "es_correcta": true,
+        "explicacion": "Suspending stops credit consumption when idle; resume on next query."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Auto-suspend"
+    ]
+  },
+  {
+    "pregunta": "concurrent users cause query queuing on a single Medium warehouse during peak hours. Context: energy utility, strict GDPR residency. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Force all users to share one serial query slot",
+        "es_correcta": false,
+        "explicacion": "Increases queuing."
+      },
+      {
+        "texto_opcion": "Copy data to separate accounts per user",
+        "es_correcta": false,
+        "explicacion": "Does not solve warehouse concurrency in one account."
+      },
+      {
+        "texto_opcion": "Use only XS warehouse to reduce queuing",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse reduces per-query resources and can worsen queuing."
+      },
+      {
+        "texto_opcion": "Enable multi-cluster warehouse with min/max clusters and scaling policy",
+        "es_correcta": true,
+        "explicacion": "Multi-cluster adds parallel clusters to handle concurrency."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Multi-cluster WH"
+    ]
+  },
+  {
+    "pregunta": "prevent ad-hoc analysts from starving the production ETL warehouse. Context: travel platform, sub-second interactive queries. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Store ETL SQL in a different database to auto-isolate compute",
+        "es_correcta": false,
+        "explicacion": "Database separation alone does not isolate compute."
+      },
+      {
+        "texto_opcion": "Run ETL and ad-hoc on the same warehouse without limits always",
+        "es_correcta": false,
+        "explicacion": "Risk of resource contention."
+      },
+      {
+        "texto_opcion": "Disable all warehouses except one shared X-Large",
+        "es_correcta": false,
+        "explicacion": "Removes isolation and cost tuning."
+      },
+      {
+        "texto_opcion": "Use separate virtual warehouses for workloads with different SLAs and resource monitors",
+        "es_correcta": true,
+        "explicacion": "Workload isolation via dedicated warehouses avoids contention."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse isolation"
+    ]
+  },
+  {
+    "pregunta": "For a logistics carrier workload with hourly batch windows: need improved performance for certain query patterns on supported regions. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Use Snowflake warehouse types/generations where available (e.g., Snowpark-optimized or newer generations per docs)",
+        "es_correcta": true,
+        "explicacion": "Snowflake offers warehouse variants/generations for specialized workloads."
+      },
+      {
+        "texto_opcion": "Run SQL only on Cloud Services nodes",
+        "es_correcta": false,
+        "explicacion": "Query execution happens on warehouse compute."
+      },
+      {
+        "texto_opcion": "Use file formats instead of warehouses for all SELECT queries",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged files, not query compute."
+      },
+      {
+        "texto_opcion": "Replace warehouses with external EC2 Auto Scaling groups you manage",
+        "es_correcta": false,
+        "explicacion": "Compute is managed via Snowflake warehouses, not customer EC2 for SQL."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Gen2 warehouse"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): multi-cluster warehouse should add clusters aggressively for user-facing dashboards. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable scale-out and accept unlimited queuing",
+        "es_correcta": false,
+        "explicacion": "Fails concurrency requirements."
+      },
+      {
+        "texto_opcion": "Economy policy for sub-second interactive SLAs exclusively",
+        "es_correcta": false,
+        "explicacion": "Economy trades responsiveness for cost on scale-out."
+      },
+      {
+        "texto_opcion": "Choose Standard scaling policy for faster scale-out (vs Economy for batch)",
+        "es_correcta": true,
+        "explicacion": "Standard scales out faster; Economy saves credits with slower scale-out."
+      },
+      {
+        "texto_opcion": "Manually ALTER WAREHOUSE every minute based on email alerts",
+        "es_correcta": false,
+        "explicacion": "Use automated multi-cluster policies instead."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Scaling policy"
+    ]
+  },
+  {
+    "pregunta": "A logistics carrier (strict GDPR residency, region eastus) must: repeated identical query within minutes should avoid re-scanning remote storage. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Copy all tables into warehouse RAM permanently",
+        "es_correcta": false,
+        "explicacion": "Cache is temporary and managed automatically."
+      },
+      {
+        "texto_opcion": "Leverage warehouse local disk cache and result cache where applicable",
+        "es_correcta": true,
+        "explicacion": "Local disk cache holds recently accessed micro-partitions; result cache stores query results."
+      },
+      {
+        "texto_opcion": "Disable metadata to force cache use",
+        "es_correcta": false,
+        "explicacion": "Metadata is required; caches complement storage reads."
+      },
+      {
+        "texto_opcion": "Require users to download results to Excel for caching",
+        "es_correcta": false,
+        "explicacion": "Not a platform cache mechanism."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse cache"
+    ]
+  },
+  {
+    "pregunta": "For a healthcare provider workload with ~50,000 events/s: determine which resource executes a submitted SQL statement. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "The virtual warehouse specified in session context executes the query",
+        "es_correcta": true,
+        "explicacion": "Users/roles run queries on a chosen warehouse for compute."
+      },
+      {
+        "texto_opcion": "Cloud Services layer executes all heavy joins locally",
+        "es_correcta": false,
+        "explicacion": "Heavy compute runs on warehouses."
+      },
+      {
+        "texto_opcion": "Storage layer spins up Spark for each SELECT",
+        "es_correcta": false,
+        "explicacion": "Storage layer does not execute warehouse SQL compute."
+      },
+      {
+        "texto_opcion": "The file format executes the query",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged data, not compute."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Query assignment"
+    ]
+  },
+  {
+    "pregunta": "A industrial IoT platform (petabyte-scale historical data, region eastus) must: clone a 10 TB table for what-if analysis without duplicate storage charges for the clone. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "CREATE TABLE ... CLONE uses zero-copy clone at storage layer; still need warehouse for queries",
+        "es_correcta": true,
+        "explicacion": "Clone shares micro-partitions; queries still consume warehouse credits."
+      },
+      {
+        "texto_opcion": "Export to CSV on laptop to avoid storage",
+        "es_correcta": false,
+        "explicacion": "Not zero-copy clone."
+      },
+      {
+        "texto_opcion": "Cloning eliminates need for any warehouse during analysis",
+        "es_correcta": false,
+        "explicacion": "Compute still required to query cloned tables."
+      },
+      {
+        "texto_opcion": "CREATE TABLE AS SELECT full copy always duplicates all storage immediately at full cost",
+        "es_correcta": false,
+        "explicacion": "CTAS materializes new data; CLONE shares storage initially."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Zero-copy vs WH"
+    ]
+  },
+  {
+    "pregunta": "For a healthcare provider workload with ~200 million rows/day: suspend warehouse automatically when monthly credits exceed budget. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Delete the account when budget exceeded without warning",
+        "es_correcta": false,
+        "explicacion": "Resource monitors provide controlled actions."
+      },
+      {
+        "texto_opcion": "Rely on storage layer auto-suspend",
+        "es_correcta": false,
+        "explicacion": "Storage is not suspended via warehouse resource monitors."
+      },
+      {
+        "texto_opcion": "Attach a resource monitor to the warehouse with suspend/action thresholds",
+        "es_correcta": true,
+        "explicacion": "Resource monitors enforce credit budgets on warehouses."
+      },
+      {
+        "texto_opcion": "Disable all queries globally via network policy only",
+        "es_correcta": false,
+        "explicacion": "Network policy blocks access; does not meter warehouse credits."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Resource monitor WH"
+    ]
+  },
+  {
+    "pregunta": "For a energy utility workload with ~50,000 events/s: prevent runaway cartesian join from consuming warehouse for hours. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Switch to a smaller warehouse to make the cartesian join finish faster",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse likely slows or still runs long; timeout is correct control."
+      },
+      {
+        "texto_opcion": "Reduce storage retention to one day",
+        "es_correcta": false,
+        "explicacion": "Retention does not stop active queries."
+      },
+      {
+        "texto_opcion": "Set STATEMENT_TIMEOUT_IN_SECONDS at session/warehouse/account level",
+        "es_correcta": true,
+        "explicacion": "Statement timeouts cancel long-running queries."
+      },
+      {
+        "texto_opcion": "Drop all tables touched by the query",
+        "es_correcta": false,
+        "explicacion": "Destructive and unrelated to timeout feature."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Statement timeout"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — role ANALYST should use WH_REPORTING but not WH_ETL. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Grant OWNERSHIP on database only to imply warehouse access",
+        "es_correcta": false,
+        "explicacion": "Warehouse privileges are separate securables."
+      },
+      {
+        "texto_opcion": "Share warehouse via Secure Data Sharing to internal role",
+        "es_correcta": false,
+        "explicacion": "Sharing is for cross-account data, not internal warehouse RBAC substitute."
+      },
+      {
+        "texto_opcion": "GRANT USAGE ON WAREHOUSE WH_REPORTING TO ROLE ANALYST",
+        "es_correcta": true,
+        "explicacion": "USAGE on warehouse required to execute queries with it."
+      },
+      {
+        "texto_opcion": "GRANT SELECT ON WAREHOUSE to role",
+        "es_correcta": false,
+        "explicacion": "Warehouses use USAGE/MONITOR/OPERATE privileges, not SELECT."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse grants"
+    ]
+  },
+  {
+    "pregunta": "For a industrial IoT platform workload with ~200 million rows/day: interactive dashboard queries need roughly double CPU/memory for the same SQL. Best choice (variant 5)?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable result cache permanently",
+        "es_correcta": false,
+        "explicacion": "That may increase work, not provide controlled scaling."
+      },
+      {
+        "texto_opcion": "Add clustering keys on unrelated columns only without sizing warehouse",
+        "es_correcta": false,
+        "explicacion": "Clustering helps pruning but does not replace compute scaling."
+      },
+      {
+        "texto_opcion": "Increase virtual warehouse size (e.g., Medium to Large)",
+        "es_correcta": true,
+        "explicacion": "Larger warehouses provide more compute resources per cluster."
+      },
+      {
+        "texto_opcion": "Convert tables to CSV to reduce warehouse work",
+        "es_correcta": false,
+        "explicacion": "Format change does not replace warehouse scaling."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse size"
+    ]
+  },
+  {
+    "pregunta": "Logistics carrier scenario — avoid paying credits when the BI warehouse is idle overnight. What should they implement? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Configure AUTO_SUSPEND to a low minute threshold and AUTO_RESUME as needed",
+        "es_correcta": true,
+        "explicacion": "Suspending stops credit consumption when idle; resume on next query."
+      },
+      {
+        "texto_opcion": "Set AUTO_SUSPEND to NULL to never suspend for cost savings",
+        "es_correcta": false,
+        "explicacion": "Opposite of cost control."
+      },
+      {
+        "texto_opcion": "Leave warehouse running because suspend drops all table data",
+        "es_correcta": false,
+        "explicacion": "Suspend stops compute credits; shared storage persists."
+      },
+      {
+        "texto_opcion": "Drop the warehouse every night and lose grant history",
+        "es_correcta": false,
+        "explicacion": "Suspend is preferred over destructive drop for routine idle periods."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Auto-suspend"
+    ]
+  },
+  {
+    "pregunta": "A global retailer (near-real-time dashboards, region southeastasia) must: concurrent users cause query queuing on a single Medium warehouse during peak hours. Which option fits best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Enable multi-cluster warehouse with min/max clusters and scaling policy",
+        "es_correcta": true,
+        "explicacion": "Multi-cluster adds parallel clusters to handle concurrency."
+      },
+      {
+        "texto_opcion": "Copy data to separate accounts per user",
+        "es_correcta": false,
+        "explicacion": "Does not solve warehouse concurrency in one account."
+      },
+      {
+        "texto_opcion": "Use only XS warehouse to reduce queuing",
+        "es_correcta": false,
+        "explicacion": "Smaller warehouse reduces per-query resources and can worsen queuing."
+      },
+      {
+        "texto_opcion": "Force all users to share one serial query slot",
+        "es_correcta": false,
+        "explicacion": "Increases queuing."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Multi-cluster WH"
+    ]
+  },
+  {
+    "pregunta": "prevent ad-hoc analysts from starving the production ETL warehouse. Context: telecom operator, petabyte-scale historical data. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Store ETL SQL in a different database to auto-isolate compute",
+        "es_correcta": false,
+        "explicacion": "Database separation alone does not isolate compute."
+      },
+      {
+        "texto_opcion": "Run ETL and ad-hoc on the same warehouse without limits always",
+        "es_correcta": false,
+        "explicacion": "Risk of resource contention."
+      },
+      {
+        "texto_opcion": "Use separate virtual warehouses for workloads with different SLAs and resource monitors",
+        "es_correcta": true,
+        "explicacion": "Workload isolation via dedicated warehouses avoids contention."
+      },
+      {
+        "texto_opcion": "Disable all warehouses except one shared X-Large",
+        "es_correcta": false,
+        "explicacion": "Removes isolation and cost tuning."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Warehouse isolation"
+    ]
+  },
+  {
+    "pregunta": "For a energy utility workload with ~50,000 events/s: need improved performance for certain query patterns on supported regions. Best choice (variant 5)?",
+    "opciones": [
+      {
+        "texto_opcion": "Use Snowflake warehouse types/generations where available (e.g., Snowpark-optimized or newer generations per docs)",
+        "es_correcta": true,
+        "explicacion": "Snowflake offers warehouse variants/generations for specialized workloads."
+      },
+      {
+        "texto_opcion": "Run SQL only on Cloud Services nodes",
+        "es_correcta": false,
+        "explicacion": "Query execution happens on warehouse compute."
+      },
+      {
+        "texto_opcion": "Use file formats instead of warehouses for all SELECT queries",
+        "es_correcta": false,
+        "explicacion": "File formats describe staged files, not query compute."
+      },
+      {
+        "texto_opcion": "Replace warehouses with external EC2 Auto Scaling groups you manage",
+        "es_correcta": false,
+        "explicacion": "Compute is managed via Snowflake warehouses, not customer EC2 for SQL."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Gen2 warehouse"
+    ]
+  },
+  {
+    "pregunta": "For a online marketplace workload with hourly batch windows: multi-cluster warehouse should add clusters aggressively for user-facing dashboards. Best choice (variant 5)?",
+    "opciones": [
+      {
+        "texto_opcion": "Choose Standard scaling policy for faster scale-out (vs Economy for batch)",
+        "es_correcta": true,
+        "explicacion": "Standard scales out faster; Economy saves credits with slower scale-out."
+      },
+      {
+        "texto_opcion": "Manually ALTER WAREHOUSE every minute based on email alerts",
+        "es_correcta": false,
+        "explicacion": "Use automated multi-cluster policies instead."
+      },
+      {
+        "texto_opcion": "Economy policy for sub-second interactive SLAs exclusively",
+        "es_correcta": false,
+        "explicacion": "Economy trades responsiveness for cost on scale-out."
+      },
+      {
+        "texto_opcion": "Disable scale-out and accept unlimited queuing",
+        "es_correcta": false,
+        "explicacion": "Fails concurrency requirements."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Scaling policy"
+    ]
+  }
+]

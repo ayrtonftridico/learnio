@@ -1,0 +1,1394 @@
+[
+  {
+    "pregunta": "In a Databricks SQL warehouse deployment: Snowflake incremental model must upsert rows on `order_id` when updates arrive. Which dbt approach is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Use seeds for updates",
+        "es_correcta": false,
+        "explicacion": "Seeds are static loads, not incremental upserts."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='merge'` with `unique_key='order_id'`",
+        "es_correcta": true,
+        "explicacion": "merge strategy performs upserts on the unique key in warehouses that support MERGE."
+      },
+      {
+        "texto_opcion": "Delete unique_key config",
+        "es_correcta": false,
+        "explicacion": "Merge/upsert requires a unique key definition."
+      },
+      {
+        "texto_opcion": "incremental_strategy='append' only",
+        "es_correcta": false,
+        "explicacion": "append never updates changed rows."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "merge strategy"
+    ]
+  },
+  {
+    "pregunta": "Redshift incremental model replaces rows for changed partition keys each run. Context: a platform team publishing shared packages.",
+    "opciones": [
+      {
+        "texto_opcion": "Use table materialization for hourly micro-batches",
+        "es_correcta": false,
+        "explicacion": "Too heavy for frequent small batches."
+      },
+      {
+        "texto_opcion": "Truncate the entire table each run",
+        "es_correcta": false,
+        "explicacion": "Loses unchanged partitions unnecessarily."
+      },
+      {
+        "texto_opcion": "Configure `incremental_strategy='delete+insert'` with appropriate unique_key",
+        "es_correcta": true,
+        "explicacion": "delete+insert removes matching keys then inserts new rows—common on Redshift."
+      },
+      {
+        "texto_opcion": "merge strategy on unsupported adapter behavior without checking docs",
+        "es_correcta": false,
+        "explicacion": "Adapter support varies; delete+insert may be required."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "delete+insert"
+    ]
+  },
+  {
+    "pregunta": "For a finance mart with strict SLAs with nightly jobs: events are immutable; duplicates never occur for the same event_id. Best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "merge on every run for immutable events",
+        "es_correcta": false,
+        "explicacion": "Unnecessary merge overhead."
+      },
+      {
+        "texto_opcion": "full-refresh daily on a trillion-row table",
+        "es_correcta": false,
+        "explicacion": "Prohibitively expensive."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='append'` with an incremental filter",
+        "es_correcta": true,
+        "explicacion": "append is efficient when rows are insert-only and deduped upstream."
+      },
+      {
+        "texto_opcion": "Use ephemeral materialization for the fact",
+        "es_correcta": false,
+        "explicacion": "Ephemeral is not a persisted incremental table."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "append strategy"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a BigQuery analytics repo: BigQuery partitioned table should replace entire date partitions on reload. Select the correct answer.",
+    "opciones": [
+      {
+        "texto_opcion": "append into wrong partitions forever",
+        "es_correcta": false,
+        "explicacion": "Can duplicate or misplace partition data."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` with `partition_by` configured",
+        "es_correcta": true,
+        "explicacion": "insert_overwrite replaces partition slices efficiently on BigQuery."
+      },
+      {
+        "texto_opcion": "Use view materialization for partitioned facts",
+        "es_correcta": false,
+        "explicacion": "Views do not manage partition replacement."
+      },
+      {
+        "texto_opcion": "Delete partitions manually outside dbt",
+        "es_correcta": false,
+        "explicacion": "Not orchestrated in the DAG."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "insert_overwrite"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a multi-environment dbt Cloud job: dbt 1.9+ project loads one day at a time with bounded batch windows. Select the correct answer.",
+    "opciones": [
+      {
+        "texto_opcion": "Single monolithic incremental with no batching on TB/day loads",
+        "es_correcta": false,
+        "explicacion": "Harder to retry and backfill."
+      },
+      {
+        "texto_opcion": "Use seeds per day",
+        "es_correcta": false,
+        "explicacion": "Not scalable for large daily volumes."
+      },
+      {
+        "texto_opcion": "Configure microbatch incremental with `event_time` and batch boundaries",
+        "es_correcta": true,
+        "explicacion": "Microbatch incremental processes discrete time batches for large facts."
+      },
+      {
+        "texto_opcion": "Disable incremental entirely",
+        "es_correcta": false,
+        "explicacion": "Forces costly full rebuilds."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "microbatch"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a finance mart with strict SLAs: incremental merge must match on `(customer_id, order_date)`. Select the correct answer.",
+    "opciones": [
+      {
+        "texto_opcion": "Omit unique_key with merge strategy",
+        "es_correcta": false,
+        "explicacion": "Merge requires key columns."
+      },
+      {
+        "texto_opcion": "unique_key on customer_id only when grain is daily per customer",
+        "es_correcta": false,
+        "explicacion": "Wrong grain causes incorrect merges."
+      },
+      {
+        "texto_opcion": "Set `unique_key=['customer_id','order_date']` as a list in config",
+        "es_correcta": true,
+        "explicacion": "Composite unique keys define merge match conditions for multi-column grain."
+      },
+      {
+        "texto_opcion": "Use surrogate key only in SELECT without unique_key config",
+        "es_correcta": false,
+        "explicacion": "dbt merge needs explicit unique_key config."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "unique_key composite"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a BigQuery analytics repo. after incremental run row counts doubled unexpectedly. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Remove {{ this }} references entirely",
+        "es_correcta": false,
+        "explicacion": "Breaks incremental self-queries."
+      },
+      {
+        "texto_opcion": "Disable all tests",
+        "es_correcta": false,
+        "explicacion": "Tests help catch duplicates and null keys."
+      },
+      {
+        "texto_opcion": "Blindly full-refresh production without root cause",
+        "es_correcta": false,
+        "explicacion": "May hide ongoing logic bugs."
+      },
+      {
+        "texto_opcion": "Inspect compiled SQL, verify is_incremental() filter, and check unique_key/strategy",
+        "es_correcta": true,
+        "explicacion": "Duplicate rows often come from missing incremental filters or wrong append/merge choice."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "incremental validation"
+    ]
+  },
+  {
+    "pregunta": "BigQuery fact partitioned by `DATE(created_at)` for cost control. Context: a finance mart with strict SLAs.",
+    "opciones": [
+      {
+        "texto_opcion": "Partition on a low-cardinality boolean",
+        "es_correcta": false,
+        "explicacion": "Poor pruning benefit."
+      },
+      {
+        "texto_opcion": "Set `partition_by: { field: created_at, data_type: timestamp, granularity: day }`",
+        "es_correcta": true,
+        "explicacion": "partition_by configures partition pruning on supported adapters."
+      },
+      {
+        "texto_opcion": "No partition config on time-series fact",
+        "es_correcta": false,
+        "explicacion": "Queries scan entire table."
+      },
+      {
+        "texto_opcion": "Partition by random UUID",
+        "es_correcta": false,
+        "explicacion": "No meaningful prune pattern."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "partition_by"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a Databricks SQL warehouse deployment. Snowflake staging incremental tables can be transient to save storage. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Mark production marts transient without recovery plan",
+        "es_correcta": false,
+        "explicacion": "May violate recovery requirements."
+      },
+      {
+        "texto_opcion": "Use adapter-specific config such as `transient: true` where appropriate",
+        "es_correcta": true,
+        "explicacion": "Transient tables reduce Time Travel storage for rebuildable incrementals."
+      },
+      {
+        "texto_opcion": "Configure transient in profiles.yml globally for all",
+        "es_correcta": false,
+        "explicacion": "Model-level intent belongs in model config."
+      },
+      {
+        "texto_opcion": "Use ephemeral for persisted incremental",
+        "es_correcta": false,
+        "explicacion": "Ephemeral is not a table."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "snowflake incremental transient"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a product analytics team using dbt. historical dates must be reprocessed after upstream fix. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Manually INSERT rows without dbt",
+        "es_correcta": false,
+        "explicacion": "Breaks lineage and tests."
+      },
+      {
+        "texto_opcion": "Re-run microbatch/incremental with date vars or `--event-time-start/end` flags",
+        "es_correcta": true,
+        "explicacion": "Bounded backfills reprocess specific batches without full table rebuild."
+      },
+      {
+        "texto_opcion": "Ignore upstream fix",
+        "es_correcta": false,
+        "explicacion": "Leaves bad history in marts."
+      },
+      {
+        "texto_opcion": "Truncate production and lose unaffectedd dates",
+        "es_correcta": false,
+        "explicacion": "Overly destructive."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "backfill batches"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a multi-environment dbt Cloud job. merge should update metrics when matched and insert new keys. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "DELETE entire table then INSERT all rows from staging",
+        "es_correcta": false,
+        "explicacion": "Equivalent to full reload, not merge."
+      },
+      {
+        "texto_opcion": "Use cross join to detect changes",
+        "es_correcta": false,
+        "explicacion": "Cartesian explosion risk."
+      },
+      {
+        "texto_opcion": "Rely on warehouse MERGE via dbt merge strategy with proper unique_key",
+        "es_correcta": true,
+        "explicacion": "dbt merge strategy delegates to warehouse MERGE semantics."
+      },
+      {
+        "texto_opcion": "Skip staging layer",
+        "es_correcta": false,
+        "explicacion": "Staging isolates raw-to-mart logic."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "merge matched"
+    ]
+  },
+  {
+    "pregunta": "In a multi-environment dbt Cloud job: team documents which strategy a model uses for operators. Which dbt approach is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Remove schema YAML to speed CI",
+        "es_correcta": false,
+        "explicacion": "Loses docs and tests."
+      },
+      {
+        "texto_opcion": "Only document in pull request title",
+        "es_correcta": false,
+        "explicacion": "Not durable in repo."
+      },
+      {
+        "texto_opcion": "Add strategy and unique_key to model description/meta in schema YAML",
+        "es_correcta": true,
+        "explicacion": "Documenting strategy aids debugging and certification-level governance."
+      },
+      {
+        "texto_opcion": "Keep strategy undocumented",
+        "es_correcta": false,
+        "explicacion": "Operators misconfigure runs."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "incremental docs"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a monorepo with three dbt projects. choosing incremental_strategy before checking adapter docs. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Assume merge works identically on all warehouses",
+        "es_correcta": false,
+        "explicacion": "Adapter capabilities differ."
+      },
+      {
+        "texto_opcion": "Verify adapter-specific incremental strategies in dbt adapter documentation",
+        "es_correcta": true,
+        "explicacion": "Not every strategy is valid on every warehouse; adapter docs are authoritative."
+      },
+      {
+        "texto_opcion": "Disable adapter version pins",
+        "es_correcta": false,
+        "explicacion": "Version drift breaks strategy support."
+      },
+      {
+        "texto_opcion": "Copy Postgres strategy to Spark without validation",
+        "es_correcta": false,
+        "explicacion": "May fail at compile/run time."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "adapter support"
+    ]
+  },
+  {
+    "pregunta": "Snowflake incremental model must upsert rows on `order_id` when updates arrive. Context: a platform team publishing shared packages. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete unique_key config",
+        "es_correcta": false,
+        "explicacion": "Merge/upsert requires a unique key definition."
+      },
+      {
+        "texto_opcion": "incremental_strategy='append' only",
+        "es_correcta": false,
+        "explicacion": "append never updates changed rows."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='merge'` with `unique_key='order_id'`",
+        "es_correcta": true,
+        "explicacion": "merge strategy performs upserts on the unique key in warehouses that support MERGE."
+      },
+      {
+        "texto_opcion": "Use seeds for updates",
+        "es_correcta": false,
+        "explicacion": "Seeds are static loads, not incremental upserts."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "merge strategy"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a Databricks SQL warehouse deployment: Redshift incremental model replaces rows for changed partition keys each run. Select the correct answer. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Configure `incremental_strategy='delete+insert'` with appropriate unique_key",
+        "es_correcta": true,
+        "explicacion": "delete+insert removes matching keys then inserts new rows—common on Redshift."
+      },
+      {
+        "texto_opcion": "Use table materialization for hourly micro-batches",
+        "es_correcta": false,
+        "explicacion": "Too heavy for frequent small batches."
+      },
+      {
+        "texto_opcion": "merge strategy on unsupported adapter behavior without checking docs",
+        "es_correcta": false,
+        "explicacion": "Adapter support varies; delete+insert may be required."
+      },
+      {
+        "texto_opcion": "Truncate the entire table each run",
+        "es_correcta": false,
+        "explicacion": "Loses unchanged partitions unnecessarily."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "delete+insert"
+    ]
+  },
+  {
+    "pregunta": "events are immutable; duplicates never occur for the same event_id. Context: a monorepo with three dbt projects. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "full-refresh daily on a trillion-row table",
+        "es_correcta": false,
+        "explicacion": "Prohibitively expensive."
+      },
+      {
+        "texto_opcion": "merge on every run for immutable events",
+        "es_correcta": false,
+        "explicacion": "Unnecessary merge overhead."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='append'` with an incremental filter",
+        "es_correcta": true,
+        "explicacion": "append is efficient when rows are insert-only and deduped upstream."
+      },
+      {
+        "texto_opcion": "Use ephemeral materialization for the fact",
+        "es_correcta": false,
+        "explicacion": "Ephemeral is not a persisted incremental table."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "append strategy"
+    ]
+  },
+  {
+    "pregunta": "For a multi-environment dbt Cloud job with nightly jobs: BigQuery partitioned table should replace entire date partitions on reload. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use view materialization for partitioned facts",
+        "es_correcta": false,
+        "explicacion": "Views do not manage partition replacement."
+      },
+      {
+        "texto_opcion": "Delete partitions manually outside dbt",
+        "es_correcta": false,
+        "explicacion": "Not orchestrated in the DAG."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` with `partition_by` configured",
+        "es_correcta": true,
+        "explicacion": "insert_overwrite replaces partition slices efficiently on BigQuery."
+      },
+      {
+        "texto_opcion": "append into wrong partitions forever",
+        "es_correcta": false,
+        "explicacion": "Can duplicate or misplace partition data."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "insert_overwrite"
+    ]
+  },
+  {
+    "pregunta": "In a product analytics team using dbt: dbt 1.9+ project loads one day at a time with bounded batch windows. Which dbt approach is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use seeds per day",
+        "es_correcta": false,
+        "explicacion": "Not scalable for large daily volumes."
+      },
+      {
+        "texto_opcion": "Configure microbatch incremental with `event_time` and batch boundaries",
+        "es_correcta": true,
+        "explicacion": "Microbatch incremental processes discrete time batches for large facts."
+      },
+      {
+        "texto_opcion": "Disable incremental entirely",
+        "es_correcta": false,
+        "explicacion": "Forces costly full rebuilds."
+      },
+      {
+        "texto_opcion": "Single monolithic incremental with no batching on TB/day loads",
+        "es_correcta": false,
+        "explicacion": "Harder to retry and backfill."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "microbatch"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a finance mart with strict SLAs. incremental merge must match on `(customer_id, order_date)`. What should the team do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Omit unique_key with merge strategy",
+        "es_correcta": false,
+        "explicacion": "Merge requires key columns."
+      },
+      {
+        "texto_opcion": "Set `unique_key=['customer_id','order_date']` as a list in config",
+        "es_correcta": true,
+        "explicacion": "Composite unique keys define merge match conditions for multi-column grain."
+      },
+      {
+        "texto_opcion": "unique_key on customer_id only when grain is daily per customer",
+        "es_correcta": false,
+        "explicacion": "Wrong grain causes incorrect merges."
+      },
+      {
+        "texto_opcion": "Use surrogate key only in SELECT without unique_key config",
+        "es_correcta": false,
+        "explicacion": "dbt merge needs explicit unique_key config."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "unique_key composite"
+    ]
+  },
+  {
+    "pregunta": "For a monorepo with three dbt projects with nightly jobs: after incremental run row counts doubled unexpectedly. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable all tests",
+        "es_correcta": false,
+        "explicacion": "Tests help catch duplicates and null keys."
+      },
+      {
+        "texto_opcion": "Blindly full-refresh production without root cause",
+        "es_correcta": false,
+        "explicacion": "May hide ongoing logic bugs."
+      },
+      {
+        "texto_opcion": "Remove {{ this }} references entirely",
+        "es_correcta": false,
+        "explicacion": "Breaks incremental self-queries."
+      },
+      {
+        "texto_opcion": "Inspect compiled SQL, verify is_incremental() filter, and check unique_key/strategy",
+        "es_correcta": true,
+        "explicacion": "Duplicate rows often come from missing incremental filters or wrong append/merge choice."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "incremental validation"
+    ]
+  },
+  {
+    "pregunta": "In a BigQuery analytics repo: BigQuery fact partitioned by `DATE(created_at)` for cost control. Which dbt approach is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Set `partition_by: { field: created_at, data_type: timestamp, granularity: day }`",
+        "es_correcta": true,
+        "explicacion": "partition_by configures partition pruning on supported adapters."
+      },
+      {
+        "texto_opcion": "Partition by random UUID",
+        "es_correcta": false,
+        "explicacion": "No meaningful prune pattern."
+      },
+      {
+        "texto_opcion": "Partition on a low-cardinality boolean",
+        "es_correcta": false,
+        "explicacion": "Poor pruning benefit."
+      },
+      {
+        "texto_opcion": "No partition config on time-series fact",
+        "es_correcta": false,
+        "explicacion": "Queries scan entire table."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "partition_by"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a product analytics team using dbt. Snowflake staging incremental tables can be transient to save storage. What should the team do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Configure transient in profiles.yml globally for all",
+        "es_correcta": false,
+        "explicacion": "Model-level intent belongs in model config."
+      },
+      {
+        "texto_opcion": "Mark production marts transient without recovery plan",
+        "es_correcta": false,
+        "explicacion": "May violate recovery requirements."
+      },
+      {
+        "texto_opcion": "Use ephemeral for persisted incremental",
+        "es_correcta": false,
+        "explicacion": "Ephemeral is not a table."
+      },
+      {
+        "texto_opcion": "Use adapter-specific config such as `transient: true` where appropriate",
+        "es_correcta": true,
+        "explicacion": "Transient tables reduce Time Travel storage for rebuildable incrementals."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "snowflake incremental transient"
+    ]
+  },
+  {
+    "pregunta": "For a medallion lakehouse built with dbt with nightly jobs: historical dates must be reprocessed after upstream fix. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Truncate production and lose unaffectedd dates",
+        "es_correcta": false,
+        "explicacion": "Overly destructive."
+      },
+      {
+        "texto_opcion": "Manually INSERT rows without dbt",
+        "es_correcta": false,
+        "explicacion": "Breaks lineage and tests."
+      },
+      {
+        "texto_opcion": "Re-run microbatch/incremental with date vars or `--event-time-start/end` flags",
+        "es_correcta": true,
+        "explicacion": "Bounded backfills reprocess specific batches without full table rebuild."
+      },
+      {
+        "texto_opcion": "Ignore upstream fix",
+        "es_correcta": false,
+        "explicacion": "Leaves bad history in marts."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "backfill batches"
+    ]
+  },
+  {
+    "pregunta": "merge should update metrics when matched and insert new keys. Context: a product analytics team using dbt. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use cross join to detect changes",
+        "es_correcta": false,
+        "explicacion": "Cartesian explosion risk."
+      },
+      {
+        "texto_opcion": "Skip staging layer",
+        "es_correcta": false,
+        "explicacion": "Staging isolates raw-to-mart logic."
+      },
+      {
+        "texto_opcion": "Rely on warehouse MERGE via dbt merge strategy with proper unique_key",
+        "es_correcta": true,
+        "explicacion": "dbt merge strategy delegates to warehouse MERGE semantics."
+      },
+      {
+        "texto_opcion": "DELETE entire table then INSERT all rows from staging",
+        "es_correcta": false,
+        "explicacion": "Equivalent to full reload, not merge."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "merge matched"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a BigQuery analytics repo: team documents which strategy a model uses for operators. Select the correct answer. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Only document in pull request title",
+        "es_correcta": false,
+        "explicacion": "Not durable in repo."
+      },
+      {
+        "texto_opcion": "Remove schema YAML to speed CI",
+        "es_correcta": false,
+        "explicacion": "Loses docs and tests."
+      },
+      {
+        "texto_opcion": "Keep strategy undocumented",
+        "es_correcta": false,
+        "explicacion": "Operators misconfigure runs."
+      },
+      {
+        "texto_opcion": "Add strategy and unique_key to model description/meta in schema YAML",
+        "es_correcta": true,
+        "explicacion": "Documenting strategy aids debugging and certification-level governance."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "incremental docs"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a medallion lakehouse built with dbt. choosing incremental_strategy before checking adapter docs. What should the team do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Copy Postgres strategy to Spark without validation",
+        "es_correcta": false,
+        "explicacion": "May fail at compile/run time."
+      },
+      {
+        "texto_opcion": "Disable adapter version pins",
+        "es_correcta": false,
+        "explicacion": "Version drift breaks strategy support."
+      },
+      {
+        "texto_opcion": "Assume merge works identically on all warehouses",
+        "es_correcta": false,
+        "explicacion": "Adapter capabilities differ."
+      },
+      {
+        "texto_opcion": "Verify adapter-specific incremental strategies in dbt adapter documentation",
+        "es_correcta": true,
+        "explicacion": "Not every strategy is valid on every warehouse; adapter docs are authoritative."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "adapter support"
+    ]
+  },
+  {
+    "pregunta": "In a multi-environment dbt Cloud job: Snowflake incremental model must upsert rows on `order_id` when updates arrive. Which dbt approach is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete unique_key config",
+        "es_correcta": false,
+        "explicacion": "Merge/upsert requires a unique key definition."
+      },
+      {
+        "texto_opcion": "Use seeds for updates",
+        "es_correcta": false,
+        "explicacion": "Seeds are static loads, not incremental upserts."
+      },
+      {
+        "texto_opcion": "incremental_strategy='append' only",
+        "es_correcta": false,
+        "explicacion": "append never updates changed rows."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='merge'` with `unique_key='order_id'`",
+        "es_correcta": true,
+        "explicacion": "merge strategy performs upserts on the unique key in warehouses that support MERGE."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "merge strategy"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a multi-environment dbt Cloud job: Redshift incremental model replaces rows for changed partition keys each run. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use table materialization for hourly micro-batches",
+        "es_correcta": false,
+        "explicacion": "Too heavy for frequent small batches."
+      },
+      {
+        "texto_opcion": "Configure `incremental_strategy='delete+insert'` with appropriate unique_key",
+        "es_correcta": true,
+        "explicacion": "delete+insert removes matching keys then inserts new rows—common on Redshift."
+      },
+      {
+        "texto_opcion": "Truncate the entire table each run",
+        "es_correcta": false,
+        "explicacion": "Loses unchanged partitions unnecessarily."
+      },
+      {
+        "texto_opcion": "merge strategy on unsupported adapter behavior without checking docs",
+        "es_correcta": false,
+        "explicacion": "Adapter support varies; delete+insert may be required."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "delete+insert"
+    ]
+  },
+  {
+    "pregunta": "In a Snowflake warehouse project: events are immutable; duplicates never occur for the same event_id. Which dbt approach is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use `incremental_strategy='append'` with an incremental filter",
+        "es_correcta": true,
+        "explicacion": "append is efficient when rows are insert-only and deduped upstream."
+      },
+      {
+        "texto_opcion": "Use ephemeral materialization for the fact",
+        "es_correcta": false,
+        "explicacion": "Ephemeral is not a persisted incremental table."
+      },
+      {
+        "texto_opcion": "merge on every run for immutable events",
+        "es_correcta": false,
+        "explicacion": "Unnecessary merge overhead."
+      },
+      {
+        "texto_opcion": "full-refresh daily on a trillion-row table",
+        "es_correcta": false,
+        "explicacion": "Prohibitively expensive."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "append strategy"
+    ]
+  },
+  {
+    "pregunta": "For a platform team publishing shared packages with nightly jobs: BigQuery partitioned table should replace entire date partitions on reload. Best practice? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "append into wrong partitions forever",
+        "es_correcta": false,
+        "explicacion": "Can duplicate or misplace partition data."
+      },
+      {
+        "texto_opcion": "Delete partitions manually outside dbt",
+        "es_correcta": false,
+        "explicacion": "Not orchestrated in the DAG."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` with `partition_by` configured",
+        "es_correcta": true,
+        "explicacion": "insert_overwrite replaces partition slices efficiently on BigQuery."
+      },
+      {
+        "texto_opcion": "Use view materialization for partitioned facts",
+        "es_correcta": false,
+        "explicacion": "Views do not manage partition replacement."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "insert_overwrite"
+    ]
+  },
+  {
+    "pregunta": "In a BigQuery analytics repo: dbt 1.9+ project loads one day at a time with bounded batch windows. Which dbt approach is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Single monolithic incremental with no batching on TB/day loads",
+        "es_correcta": false,
+        "explicacion": "Harder to retry and backfill."
+      },
+      {
+        "texto_opcion": "Use seeds per day",
+        "es_correcta": false,
+        "explicacion": "Not scalable for large daily volumes."
+      },
+      {
+        "texto_opcion": "Configure microbatch incremental with `event_time` and batch boundaries",
+        "es_correcta": true,
+        "explicacion": "Microbatch incremental processes discrete time batches for large facts."
+      },
+      {
+        "texto_opcion": "Disable incremental entirely",
+        "es_correcta": false,
+        "explicacion": "Forces costly full rebuilds."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "microbatch"
+    ]
+  },
+  {
+    "pregunta": "For a multi-environment dbt Cloud job with nightly jobs: incremental merge must match on `(customer_id, order_date)`. Best practice? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Set `unique_key=['customer_id','order_date']` as a list in config",
+        "es_correcta": true,
+        "explicacion": "Composite unique keys define merge match conditions for multi-column grain."
+      },
+      {
+        "texto_opcion": "Omit unique_key with merge strategy",
+        "es_correcta": false,
+        "explicacion": "Merge requires key columns."
+      },
+      {
+        "texto_opcion": "Use surrogate key only in SELECT without unique_key config",
+        "es_correcta": false,
+        "explicacion": "dbt merge needs explicit unique_key config."
+      },
+      {
+        "texto_opcion": "unique_key on customer_id only when grain is daily per customer",
+        "es_correcta": false,
+        "explicacion": "Wrong grain causes incorrect merges."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "unique_key composite"
+    ]
+  },
+  {
+    "pregunta": "after incremental run row counts doubled unexpectedly. Context: a CI pipeline using dbt Core. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable all tests",
+        "es_correcta": false,
+        "explicacion": "Tests help catch duplicates and null keys."
+      },
+      {
+        "texto_opcion": "Inspect compiled SQL, verify is_incremental() filter, and check unique_key/strategy",
+        "es_correcta": true,
+        "explicacion": "Duplicate rows often come from missing incremental filters or wrong append/merge choice."
+      },
+      {
+        "texto_opcion": "Blindly full-refresh production without root cause",
+        "es_correcta": false,
+        "explicacion": "May hide ongoing logic bugs."
+      },
+      {
+        "texto_opcion": "Remove {{ this }} references entirely",
+        "es_correcta": false,
+        "explicacion": "Breaks incremental self-queries."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "incremental validation"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a monorepo with three dbt projects. BigQuery fact partitioned by `DATE(created_at)` for cost control. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Set `partition_by: { field: created_at, data_type: timestamp, granularity: day }`",
+        "es_correcta": true,
+        "explicacion": "partition_by configures partition pruning on supported adapters."
+      },
+      {
+        "texto_opcion": "Partition by random UUID",
+        "es_correcta": false,
+        "explicacion": "No meaningful prune pattern."
+      },
+      {
+        "texto_opcion": "Partition on a low-cardinality boolean",
+        "es_correcta": false,
+        "explicacion": "Poor pruning benefit."
+      },
+      {
+        "texto_opcion": "No partition config on time-series fact",
+        "es_correcta": false,
+        "explicacion": "Queries scan entire table."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "partition_by"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a finance mart with strict SLAs. Snowflake staging incremental tables can be transient to save storage. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Mark production marts transient without recovery plan",
+        "es_correcta": false,
+        "explicacion": "May violate recovery requirements."
+      },
+      {
+        "texto_opcion": "Use adapter-specific config such as `transient: true` where appropriate",
+        "es_correcta": true,
+        "explicacion": "Transient tables reduce Time Travel storage for rebuildable incrementals."
+      },
+      {
+        "texto_opcion": "Configure transient in profiles.yml globally for all",
+        "es_correcta": false,
+        "explicacion": "Model-level intent belongs in model config."
+      },
+      {
+        "texto_opcion": "Use ephemeral for persisted incremental",
+        "es_correcta": false,
+        "explicacion": "Ephemeral is not a table."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "snowflake incremental transient"
+    ]
+  },
+  {
+    "pregunta": "historical dates must be reprocessed after upstream fix. Context: a Databricks SQL warehouse deployment. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Truncate production and lose unaffectedd dates",
+        "es_correcta": false,
+        "explicacion": "Overly destructive."
+      },
+      {
+        "texto_opcion": "Re-run microbatch/incremental with date vars or `--event-time-start/end` flags",
+        "es_correcta": true,
+        "explicacion": "Bounded backfills reprocess specific batches without full table rebuild."
+      },
+      {
+        "texto_opcion": "Manually INSERT rows without dbt",
+        "es_correcta": false,
+        "explicacion": "Breaks lineage and tests."
+      },
+      {
+        "texto_opcion": "Ignore upstream fix",
+        "es_correcta": false,
+        "explicacion": "Leaves bad history in marts."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "backfill batches"
+    ]
+  },
+  {
+    "pregunta": "merge should update metrics when matched and insert new keys. Context: a platform team publishing shared packages. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use cross join to detect changes",
+        "es_correcta": false,
+        "explicacion": "Cartesian explosion risk."
+      },
+      {
+        "texto_opcion": "Rely on warehouse MERGE via dbt merge strategy with proper unique_key",
+        "es_correcta": true,
+        "explicacion": "dbt merge strategy delegates to warehouse MERGE semantics."
+      },
+      {
+        "texto_opcion": "DELETE entire table then INSERT all rows from staging",
+        "es_correcta": false,
+        "explicacion": "Equivalent to full reload, not merge."
+      },
+      {
+        "texto_opcion": "Skip staging layer",
+        "es_correcta": false,
+        "explicacion": "Staging isolates raw-to-mart logic."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "merge matched"
+    ]
+  },
+  {
+    "pregunta": "For a finance mart with strict SLAs with nightly jobs: team documents which strategy a model uses for operators. Best practice? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Only document in pull request title",
+        "es_correcta": false,
+        "explicacion": "Not durable in repo."
+      },
+      {
+        "texto_opcion": "Keep strategy undocumented",
+        "es_correcta": false,
+        "explicacion": "Operators misconfigure runs."
+      },
+      {
+        "texto_opcion": "Remove schema YAML to speed CI",
+        "es_correcta": false,
+        "explicacion": "Loses docs and tests."
+      },
+      {
+        "texto_opcion": "Add strategy and unique_key to model description/meta in schema YAML",
+        "es_correcta": true,
+        "explicacion": "Documenting strategy aids debugging and certification-level governance."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "incremental docs"
+    ]
+  },
+  {
+    "pregunta": "For a product analytics team using dbt with nightly jobs: choosing incremental_strategy before checking adapter docs. Best practice? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable adapter version pins",
+        "es_correcta": false,
+        "explicacion": "Version drift breaks strategy support."
+      },
+      {
+        "texto_opcion": "Assume merge works identically on all warehouses",
+        "es_correcta": false,
+        "explicacion": "Adapter capabilities differ."
+      },
+      {
+        "texto_opcion": "Verify adapter-specific incremental strategies in dbt adapter documentation",
+        "es_correcta": true,
+        "explicacion": "Not every strategy is valid on every warehouse; adapter docs are authoritative."
+      },
+      {
+        "texto_opcion": "Copy Postgres strategy to Spark without validation",
+        "es_correcta": false,
+        "explicacion": "May fail at compile/run time."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "adapter support"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a monorepo with three dbt projects. Snowflake incremental model must upsert rows on `order_id` when updates arrive. What should the team do? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete unique_key config",
+        "es_correcta": false,
+        "explicacion": "Merge/upsert requires a unique key definition."
+      },
+      {
+        "texto_opcion": "incremental_strategy='append' only",
+        "es_correcta": false,
+        "explicacion": "append never updates changed rows."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='merge'` with `unique_key='order_id'`",
+        "es_correcta": true,
+        "explicacion": "merge strategy performs upserts on the unique key in warehouses that support MERGE."
+      },
+      {
+        "texto_opcion": "Use seeds for updates",
+        "es_correcta": false,
+        "explicacion": "Seeds are static loads, not incremental upserts."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "merge strategy"
+    ]
+  },
+  {
+    "pregunta": "For a finance mart with strict SLAs with nightly jobs: Redshift incremental model replaces rows for changed partition keys each run. Best practice? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "merge strategy on unsupported adapter behavior without checking docs",
+        "es_correcta": false,
+        "explicacion": "Adapter support varies; delete+insert may be required."
+      },
+      {
+        "texto_opcion": "Use table materialization for hourly micro-batches",
+        "es_correcta": false,
+        "explicacion": "Too heavy for frequent small batches."
+      },
+      {
+        "texto_opcion": "Truncate the entire table each run",
+        "es_correcta": false,
+        "explicacion": "Loses unchanged partitions unnecessarily."
+      },
+      {
+        "texto_opcion": "Configure `incremental_strategy='delete+insert'` with appropriate unique_key",
+        "es_correcta": true,
+        "explicacion": "delete+insert removes matching keys then inserts new rows—common on Redshift."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "delete+insert"
+    ]
+  },
+  {
+    "pregunta": "events are immutable; duplicates never occur for the same event_id. Context: a finance mart with strict SLAs. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "full-refresh daily on a trillion-row table",
+        "es_correcta": false,
+        "explicacion": "Prohibitively expensive."
+      },
+      {
+        "texto_opcion": "Use `incremental_strategy='append'` with an incremental filter",
+        "es_correcta": true,
+        "explicacion": "append is efficient when rows are insert-only and deduped upstream."
+      },
+      {
+        "texto_opcion": "merge on every run for immutable events",
+        "es_correcta": false,
+        "explicacion": "Unnecessary merge overhead."
+      },
+      {
+        "texto_opcion": "Use ephemeral materialization for the fact",
+        "es_correcta": false,
+        "explicacion": "Ephemeral is not a persisted incremental table."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "append strategy"
+    ]
+  },
+  {
+    "pregunta": "BigQuery partitioned table should replace entire date partitions on reload. Context: a CI pipeline using dbt Core. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use `incremental_strategy='insert_overwrite'` with `partition_by` configured",
+        "es_correcta": true,
+        "explicacion": "insert_overwrite replaces partition slices efficiently on BigQuery."
+      },
+      {
+        "texto_opcion": "append into wrong partitions forever",
+        "es_correcta": false,
+        "explicacion": "Can duplicate or misplace partition data."
+      },
+      {
+        "texto_opcion": "Use view materialization for partitioned facts",
+        "es_correcta": false,
+        "explicacion": "Views do not manage partition replacement."
+      },
+      {
+        "texto_opcion": "Delete partitions manually outside dbt",
+        "es_correcta": false,
+        "explicacion": "Not orchestrated in the DAG."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "insert_overwrite"
+    ]
+  },
+  {
+    "pregunta": "dbt 1.9+ project loads one day at a time with bounded batch windows. Context: a Snowflake warehouse project. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable incremental entirely",
+        "es_correcta": false,
+        "explicacion": "Forces costly full rebuilds."
+      },
+      {
+        "texto_opcion": "Single monolithic incremental with no batching on TB/day loads",
+        "es_correcta": false,
+        "explicacion": "Harder to retry and backfill."
+      },
+      {
+        "texto_opcion": "Configure microbatch incremental with `event_time` and batch boundaries",
+        "es_correcta": true,
+        "explicacion": "Microbatch incremental processes discrete time batches for large facts."
+      },
+      {
+        "texto_opcion": "Use seeds per day",
+        "es_correcta": false,
+        "explicacion": "Not scalable for large daily volumes."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "microbatch"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a platform team publishing shared packages: incremental merge must match on `(customer_id, order_date)`. Select the correct answer. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Set `unique_key=['customer_id','order_date']` as a list in config",
+        "es_correcta": true,
+        "explicacion": "Composite unique keys define merge match conditions for multi-column grain."
+      },
+      {
+        "texto_opcion": "Omit unique_key with merge strategy",
+        "es_correcta": false,
+        "explicacion": "Merge requires key columns."
+      },
+      {
+        "texto_opcion": "unique_key on customer_id only when grain is daily per customer",
+        "es_correcta": false,
+        "explicacion": "Wrong grain causes incorrect merges."
+      },
+      {
+        "texto_opcion": "Use surrogate key only in SELECT without unique_key config",
+        "es_correcta": false,
+        "explicacion": "dbt merge needs explicit unique_key config."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "unique_key composite"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a multi-environment dbt Cloud job. after incremental run row counts doubled unexpectedly. What should the team do? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable all tests",
+        "es_correcta": false,
+        "explicacion": "Tests help catch duplicates and null keys."
+      },
+      {
+        "texto_opcion": "Blindly full-refresh production without root cause",
+        "es_correcta": false,
+        "explicacion": "May hide ongoing logic bugs."
+      },
+      {
+        "texto_opcion": "Inspect compiled SQL, verify is_incremental() filter, and check unique_key/strategy",
+        "es_correcta": true,
+        "explicacion": "Duplicate rows often come from missing incremental filters or wrong append/merge choice."
+      },
+      {
+        "texto_opcion": "Remove {{ this }} references entirely",
+        "es_correcta": false,
+        "explicacion": "Breaks incremental self-queries."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "incremental validation"
+    ]
+  },
+  {
+    "pregunta": "For a CI pipeline using dbt Core with nightly jobs: BigQuery fact partitioned by `DATE(created_at)` for cost control. Best practice? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "No partition config on time-series fact",
+        "es_correcta": false,
+        "explicacion": "Queries scan entire table."
+      },
+      {
+        "texto_opcion": "Partition on a low-cardinality boolean",
+        "es_correcta": false,
+        "explicacion": "Poor pruning benefit."
+      },
+      {
+        "texto_opcion": "Set `partition_by: { field: created_at, data_type: timestamp, granularity: day }`",
+        "es_correcta": true,
+        "explicacion": "partition_by configures partition pruning on supported adapters."
+      },
+      {
+        "texto_opcion": "Partition by random UUID",
+        "es_correcta": false,
+        "explicacion": "No meaningful prune pattern."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "partition_by"
+    ]
+  },
+  {
+    "pregunta": "Snowflake staging incremental tables can be transient to save storage. Context: a multi-environment dbt Cloud job. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Mark production marts transient without recovery plan",
+        "es_correcta": false,
+        "explicacion": "May violate recovery requirements."
+      },
+      {
+        "texto_opcion": "Use adapter-specific config such as `transient: true` where appropriate",
+        "es_correcta": true,
+        "explicacion": "Transient tables reduce Time Travel storage for rebuildable incrementals."
+      },
+      {
+        "texto_opcion": "Use ephemeral for persisted incremental",
+        "es_correcta": false,
+        "explicacion": "Ephemeral is not a table."
+      },
+      {
+        "texto_opcion": "Configure transient in profiles.yml globally for all",
+        "es_correcta": false,
+        "explicacion": "Model-level intent belongs in model config."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "snowflake incremental transient"
+    ]
+  }
+]

@@ -1,0 +1,1394 @@
+[
+  {
+    "pregunta": "downstream BI only needs a logical layer; no persisted table is required. Context: a Databricks SQL warehouse deployment.",
+    "opciones": [
+      {
+        "texto_opcion": "materialized='incremental' with no unique key",
+        "es_correcta": false,
+        "explicacion": "Incremental without keys is unnecessary when no persistence is needed."
+      },
+      {
+        "texto_opcion": "Disable materialization in dbt_project.yml",
+        "es_correcta": false,
+        "explicacion": "Every model needs an explicit or inherited materialization."
+      },
+      {
+        "texto_opcion": "materialized='table' for every staging model",
+        "es_correcta": false,
+        "explicacion": "Tables persist data and add storage/maintenance cost when a view suffices."
+      },
+      {
+        "texto_opcion": "Configure `materialized='view'` in the model config",
+        "es_correcta": true,
+        "explicacion": "Views compile to warehouse views without storing duplicate data."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "view materialization"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a medallion lakehouse built with dbt: a mart must be fully rebuilt nightly and is queried heavily by many dashboards. Select the correct answer.",
+    "opciones": [
+      {
+        "texto_opcion": "materialized='ephemeral' for the mart",
+        "es_correcta": false,
+        "explicacion": "Ephemeral models are inlined CTEs, not queryable relations."
+      },
+      {
+        "texto_opcion": "Only create a source() stub without a model",
+        "es_correcta": false,
+        "explicacion": "Sources reference raw data; marts need model builds."
+      },
+      {
+        "texto_opcion": "Run manual CREATE TABLE outside dbt",
+        "es_correcta": false,
+        "explicacion": "Bypasses dbt lineage, tests, and config."
+      },
+      {
+        "texto_opcion": "Use `materialized='table'` (optionally with `post-hook` grants)",
+        "es_correcta": true,
+        "explicacion": "Tables provide fast read performance for frequently accessed marts."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "table materialization"
+    ]
+  },
+  {
+    "pregunta": "For a product analytics team using dbt with nightly jobs: a reusable intermediate SELECT should not create a warehouse object. Best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "Use a seed file for the intermediate",
+        "es_correcta": false,
+        "explicacion": "Seeds are for static CSV-like data, not transforms."
+      },
+      {
+        "texto_opcion": "Set `materialized='ephemeral'` so dbt inlines it as a CTE",
+        "es_correcta": true,
+        "explicacion": "Ephemeral models reduce clutter and avoid extra table scans when inlined."
+      },
+      {
+        "texto_opcion": "materialized='table' for the intermediate",
+        "es_correcta": false,
+        "explicacion": "Creates an unnecessary persisted object."
+      },
+      {
+        "texto_opcion": "Duplicate the SQL in every downstream model manually",
+        "es_correcta": false,
+        "explicacion": "Violates DRY and complicates maintenance."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ephemeral"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a medallion lakehouse built with dbt. a large fact table receives daily append-only events with billions of rows. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Full table rebuild every hour with materialized='table'",
+        "es_correcta": false,
+        "explicacion": "Full rebuilds on billions of rows are costly."
+      },
+      {
+        "texto_opcion": "Skip incremental logic and rely on warehouse caching only",
+        "es_correcta": false,
+        "explicacion": "Caching does not replace efficient incremental loads."
+      },
+      {
+        "texto_opcion": "Use `materialized='incremental'` with an `is_incremental()` filter on event date",
+        "es_correcta": true,
+        "explicacion": "Incremental models process only new rows after the initial build."
+      },
+      {
+        "texto_opcion": "materialized='view' and scan all history each query",
+        "es_correcta": false,
+        "explicacion": "Views recompute full history on every BI query."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "incremental default"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a finance mart with strict SLAs: new source columns appear frequently; the incremental model should adapt safely. Select the correct answer.",
+    "opciones": [
+      {
+        "texto_opcion": "Drop the table on any new column",
+        "es_correcta": false,
+        "explicacion": "Destructive and loses history."
+      },
+      {
+        "texto_opcion": "Set `on_schema_change: append_new_columns` (or sync) in model config",
+        "es_correcta": true,
+        "explicacion": "on_schema_change controls how dbt handles new/changed columns during incremental runs."
+      },
+      {
+        "texto_opcion": "Ignore schema drift and fail every run",
+        "es_correcta": false,
+        "explicacion": "Brittle; append/sync handles additive changes."
+      },
+      {
+        "texto_opcion": "Disable incremental and always full-refresh silently",
+        "es_correcta": false,
+        "explicacion": "Expensive and hides config intent."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "on_schema_change"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a Databricks SQL warehouse deployment. BigQuery queries filter on `event_date` and `country_code` constantly. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Configure `cluster_by: ['event_date', 'country_code']` in the model config",
+        "es_correcta": true,
+        "explicacion": "cluster_by (BigQuery) or similar layout hints improve prune-friendly scans."
+      },
+      {
+        "texto_opcion": "Use seeds instead of the fact model",
+        "es_correcta": false,
+        "explicacion": "Seeds cannot replace large fact pipelines."
+      },
+      {
+        "texto_opcion": "Hardcode LIMIT 1000 in the model SQL",
+        "es_correcta": false,
+        "explicacion": "Truncates data; not a layout optimization."
+      },
+      {
+        "texto_opcion": "No partitioning or clustering on a multi-TB fact",
+        "es_correcta": false,
+        "explicacion": "Full scans increase cost and latency."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "cluster_by"
+    ]
+  },
+  {
+    "pregunta": "For a Databricks SQL warehouse deployment with nightly jobs: orchestration should run only finance-tagged models in a subset job. Best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "Rename files manually before each run",
+        "es_correcta": false,
+        "explicacion": "Error-prone; tags are the supported selector."
+      },
+      {
+        "texto_opcion": "Use `--exclude` on every model individually",
+        "es_correcta": false,
+        "explicacion": "Impractical at scale."
+      },
+      {
+        "texto_opcion": "Comment out unrelated models in SQL",
+        "es_correcta": false,
+        "explicacion": "Not maintainable; breaks DAG clarity."
+      },
+      {
+        "texto_opcion": "Assign `tags: ['finance']` in model config and run `dbt run --select tag:finance`",
+        "es_correcta": true,
+        "explicacion": "Tags enable selective execution via `--select tag:<name>`."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tags config"
+    ]
+  },
+  {
+    "pregunta": "after each mart build the team must `GRANT SELECT` to an analyst role. Context: a multi-environment dbt Cloud job.",
+    "opciones": [
+      {
+        "texto_opcion": "Store grants only in a wiki page",
+        "es_correcta": false,
+        "explicacion": "Not enforced by pipeline."
+      },
+      {
+        "texto_opcion": "Embed GRANT in a pre-hook before table exists",
+        "es_correcta": false,
+        "explicacion": "Table may not exist yet for post-create grants."
+      },
+      {
+        "texto_opcion": "Define a `post-hook` with the GRANT statement in model config",
+        "es_correcta": true,
+        "explicacion": "post-hooks run after model materialization; ideal for grants and auditing."
+      },
+      {
+        "texto_opcion": "Run GRANT manually after every dbt run",
+        "es_correcta": false,
+        "explicacion": "Not reproducible or version-controlled."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "hooks"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a monorepo with three dbt projects. column descriptions in YAML should appear in the warehouse catalog. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Set `persist_docs: {relation: true, columns: true}` for the model",
+        "es_correcta": true,
+        "explicacion": "persist_docs pushes dbt descriptions to warehouse metadata where supported."
+      },
+      {
+        "texto_opcion": "Rely on dbt docs site only with no persist_docs",
+        "es_correcta": false,
+        "explicacion": "Warehouse catalog stays empty."
+      },
+      {
+        "texto_opcion": "Delete schema.yml to reduce repo size",
+        "es_correcta": false,
+        "explicacion": "Removes documentation and tests."
+      },
+      {
+        "texto_opcion": "Put descriptions only in SQL comments",
+        "es_correcta": false,
+        "explicacion": "Not synced to dbt docs or catalog via YAML."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "persist docs"
+    ]
+  },
+  {
+    "pregunta": "In a monorepo with three dbt projects: all models under `models/staging/` should be views by default. Which dbt approach is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Configure materialization in profiles.yml",
+        "es_correcta": false,
+        "explicacion": "profiles.yml holds connection profiles, not model materializations."
+      },
+      {
+        "texto_opcion": "Use packages.yml for materialization defaults",
+        "es_correcta": false,
+        "explicacion": "packages.yml declares package dependencies, not model config."
+      },
+      {
+        "texto_opcion": "In dbt_project.yml set `models: my_project: staging: +materialized: view`",
+        "es_correcta": true,
+        "explicacion": "Directory-level config in dbt_project.yml applies defaults by folder."
+      },
+      {
+        "texto_opcion": "Set materialization inside every .sql file only",
+        "es_correcta": false,
+        "explicacion": "Works but duplicates config; folder defaults are cleaner."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "dbt_project models config"
+    ]
+  },
+  {
+    "pregunta": "In a Databricks SQL warehouse deployment: schema changed on an incremental model; team needs a one-time rebuild. Which dbt approach is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Drop the profile and re-clone the repo",
+        "es_correcta": false,
+        "explicacion": "Unrelated to incremental rebuild."
+      },
+      {
+        "texto_opcion": "Run `dbt test` only",
+        "es_correcta": false,
+        "explicacion": "Tests do not rebuild models."
+      },
+      {
+        "texto_opcion": "Run `dbt run --full-refresh --select <model>`",
+        "es_correcta": true,
+        "explicacion": "--full-refresh rebuilds incremental models from scratch once."
+      },
+      {
+        "texto_opcion": "Delete dbt_project.yml",
+        "es_correcta": false,
+        "explicacion": "Breaks the project."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "full refresh"
+    ]
+  },
+  {
+    "pregunta": "In a BigQuery analytics repo: a legacy model should stay in repo but not run in production. Which dbt approach is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Move the model to analyses/",
+        "es_correcta": false,
+        "explicacion": "analyses are not materialized but changes model semantics."
+      },
+      {
+        "texto_opcion": "Rename the .sql to .bak without config",
+        "es_correcta": false,
+        "explicacion": "dbt may still parse depending on layout; config is clearer."
+      },
+      {
+        "texto_opcion": "Set `enabled: false` in the model config",
+        "es_correcta": true,
+        "explicacion": "enabled: false keeps the model out of the DAG without deleting files."
+      },
+      {
+        "texto_opcion": "Delete the model from git history only locally",
+        "es_correcta": false,
+        "explicacion": "Risky; enabled:false is explicit and reversible."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "enabled false"
+    ]
+  },
+  {
+    "pregunta": "For a platform team publishing shared packages with nightly jobs: every model file should document owner and SLA at the top. Best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "Use a Jinja `{{ config(...) }}` block and YAML meta; optional file header comments",
+        "es_correcta": true,
+        "explicacion": "Config blocks and schema YAML meta document ownership and SLAs in version control."
+      },
+      {
+        "texto_opcion": "Remove all documentation to speed compiles",
+        "es_correcta": false,
+        "explicacion": "Hurts governance."
+      },
+      {
+        "texto_opcion": "Store SLA only in Slack pins",
+        "es_correcta": false,
+        "explicacion": "Not version-controlled with the model."
+      },
+      {
+        "texto_opcion": "Hardcode owner email in warehouse comments manually",
+        "es_correcta": false,
+        "explicacion": "Not tied to dbt metadata."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "sql header"
+    ]
+  },
+  {
+    "pregunta": "For a product analytics team using dbt with nightly jobs: incremental model must filter new rows using a reliable watermark column. Best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "Wrap filter logic in `{% if is_incremental() %} WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }}) {% endif %}`",
+        "es_correcta": true,
+        "explicacion": "is_incremental() gates the filter so full-refresh builds load all history once."
+      },
+      {
+        "texto_opcion": "Use is_incremental() without referencing {{ this }}",
+        "es_correcta": false,
+        "explicacion": "May reprocess all rows or miss logic on self-reference."
+      },
+      {
+        "texto_opcion": "Disable is_incremental() and append duplicates daily",
+        "es_correcta": false,
+        "explicacion": "Creates duplicate rows."
+      },
+      {
+        "texto_opcion": "Always filter with WHERE updated_at > current_date in full refresh too",
+        "es_correcta": false,
+        "explicacion": "Would skip historical rows on first build."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "incremental predicate"
+    ]
+  },
+  {
+    "pregunta": "downstream BI only needs a logical layer; no persisted table is required. Context: a CI pipeline using dbt Core. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Configure `materialized='view'` in the model config",
+        "es_correcta": true,
+        "explicacion": "Views compile to warehouse views without storing duplicate data."
+      },
+      {
+        "texto_opcion": "materialized='table' for every staging model",
+        "es_correcta": false,
+        "explicacion": "Tables persist data and add storage/maintenance cost when a view suffices."
+      },
+      {
+        "texto_opcion": "materialized='incremental' with no unique key",
+        "es_correcta": false,
+        "explicacion": "Incremental without keys is unnecessary when no persistence is needed."
+      },
+      {
+        "texto_opcion": "Disable materialization in dbt_project.yml",
+        "es_correcta": false,
+        "explicacion": "Every model needs an explicit or inherited materialization."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "view materialization"
+    ]
+  },
+  {
+    "pregunta": "a mart must be fully rebuilt nightly and is queried heavily by many dashboards. Context: a multi-environment dbt Cloud job. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "materialized='ephemeral' for the mart",
+        "es_correcta": false,
+        "explicacion": "Ephemeral models are inlined CTEs, not queryable relations."
+      },
+      {
+        "texto_opcion": "Only create a source() stub without a model",
+        "es_correcta": false,
+        "explicacion": "Sources reference raw data; marts need model builds."
+      },
+      {
+        "texto_opcion": "Run manual CREATE TABLE outside dbt",
+        "es_correcta": false,
+        "explicacion": "Bypasses dbt lineage, tests, and config."
+      },
+      {
+        "texto_opcion": "Use `materialized='table'` (optionally with `post-hook` grants)",
+        "es_correcta": true,
+        "explicacion": "Tables provide fast read performance for frequently accessed marts."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "table materialization"
+    ]
+  },
+  {
+    "pregunta": "For a monorepo with three dbt projects with nightly jobs: a reusable intermediate SELECT should not create a warehouse object. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "materialized='table' for the intermediate",
+        "es_correcta": false,
+        "explicacion": "Creates an unnecessary persisted object."
+      },
+      {
+        "texto_opcion": "Set `materialized='ephemeral'` so dbt inlines it as a CTE",
+        "es_correcta": true,
+        "explicacion": "Ephemeral models reduce clutter and avoid extra table scans when inlined."
+      },
+      {
+        "texto_opcion": "Duplicate the SQL in every downstream model manually",
+        "es_correcta": false,
+        "explicacion": "Violates DRY and complicates maintenance."
+      },
+      {
+        "texto_opcion": "Use a seed file for the intermediate",
+        "es_correcta": false,
+        "explicacion": "Seeds are for static CSV-like data, not transforms."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ephemeral"
+    ]
+  },
+  {
+    "pregunta": "In a CI pipeline using dbt Core: a large fact table receives daily append-only events with billions of rows. Which dbt approach is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Skip incremental logic and rely on warehouse caching only",
+        "es_correcta": false,
+        "explicacion": "Caching does not replace efficient incremental loads."
+      },
+      {
+        "texto_opcion": "materialized='view' and scan all history each query",
+        "es_correcta": false,
+        "explicacion": "Views recompute full history on every BI query."
+      },
+      {
+        "texto_opcion": "Use `materialized='incremental'` with an `is_incremental()` filter on event date",
+        "es_correcta": true,
+        "explicacion": "Incremental models process only new rows after the initial build."
+      },
+      {
+        "texto_opcion": "Full table rebuild every hour with materialized='table'",
+        "es_correcta": false,
+        "explicacion": "Full rebuilds on billions of rows are costly."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "incremental default"
+    ]
+  },
+  {
+    "pregunta": "new source columns appear frequently; the incremental model should adapt safely. Context: a Databricks SQL warehouse deployment. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore schema drift and fail every run",
+        "es_correcta": false,
+        "explicacion": "Brittle; append/sync handles additive changes."
+      },
+      {
+        "texto_opcion": "Drop the table on any new column",
+        "es_correcta": false,
+        "explicacion": "Destructive and loses history."
+      },
+      {
+        "texto_opcion": "Set `on_schema_change: append_new_columns` (or sync) in model config",
+        "es_correcta": true,
+        "explicacion": "on_schema_change controls how dbt handles new/changed columns during incremental runs."
+      },
+      {
+        "texto_opcion": "Disable incremental and always full-refresh silently",
+        "es_correcta": false,
+        "explicacion": "Expensive and hides config intent."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "on_schema_change"
+    ]
+  },
+  {
+    "pregunta": "BigQuery queries filter on `event_date` and `country_code` constantly. Context: a product analytics team using dbt. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Hardcode LIMIT 1000 in the model SQL",
+        "es_correcta": false,
+        "explicacion": "Truncates data; not a layout optimization."
+      },
+      {
+        "texto_opcion": "Use seeds instead of the fact model",
+        "es_correcta": false,
+        "explicacion": "Seeds cannot replace large fact pipelines."
+      },
+      {
+        "texto_opcion": "Configure `cluster_by: ['event_date', 'country_code']` in the model config",
+        "es_correcta": true,
+        "explicacion": "cluster_by (BigQuery) or similar layout hints improve prune-friendly scans."
+      },
+      {
+        "texto_opcion": "No partitioning or clustering on a multi-TB fact",
+        "es_correcta": false,
+        "explicacion": "Full scans increase cost and latency."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "cluster_by"
+    ]
+  },
+  {
+    "pregunta": "For a medallion lakehouse built with dbt with nightly jobs: orchestration should run only finance-tagged models in a subset job. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use `--exclude` on every model individually",
+        "es_correcta": false,
+        "explicacion": "Impractical at scale."
+      },
+      {
+        "texto_opcion": "Assign `tags: ['finance']` in model config and run `dbt run --select tag:finance`",
+        "es_correcta": true,
+        "explicacion": "Tags enable selective execution via `--select tag:<name>`."
+      },
+      {
+        "texto_opcion": "Comment out unrelated models in SQL",
+        "es_correcta": false,
+        "explicacion": "Not maintainable; breaks DAG clarity."
+      },
+      {
+        "texto_opcion": "Rename files manually before each run",
+        "es_correcta": false,
+        "explicacion": "Error-prone; tags are the supported selector."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tags config"
+    ]
+  },
+  {
+    "pregunta": "In a Databricks SQL warehouse deployment: after each mart build the team must `GRANT SELECT` to an analyst role. Which dbt approach is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Store grants only in a wiki page",
+        "es_correcta": false,
+        "explicacion": "Not enforced by pipeline."
+      },
+      {
+        "texto_opcion": "Embed GRANT in a pre-hook before table exists",
+        "es_correcta": false,
+        "explicacion": "Table may not exist yet for post-create grants."
+      },
+      {
+        "texto_opcion": "Define a `post-hook` with the GRANT statement in model config",
+        "es_correcta": true,
+        "explicacion": "post-hooks run after model materialization; ideal for grants and auditing."
+      },
+      {
+        "texto_opcion": "Run GRANT manually after every dbt run",
+        "es_correcta": false,
+        "explicacion": "Not reproducible or version-controlled."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "hooks"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a medallion lakehouse built with dbt: column descriptions in YAML should appear in the warehouse catalog. Select the correct answer. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Set `persist_docs: {relation: true, columns: true}` for the model",
+        "es_correcta": true,
+        "explicacion": "persist_docs pushes dbt descriptions to warehouse metadata where supported."
+      },
+      {
+        "texto_opcion": "Delete schema.yml to reduce repo size",
+        "es_correcta": false,
+        "explicacion": "Removes documentation and tests."
+      },
+      {
+        "texto_opcion": "Put descriptions only in SQL comments",
+        "es_correcta": false,
+        "explicacion": "Not synced to dbt docs or catalog via YAML."
+      },
+      {
+        "texto_opcion": "Rely on dbt docs site only with no persist_docs",
+        "es_correcta": false,
+        "explicacion": "Warehouse catalog stays empty."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "persist docs"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a CI pipeline using dbt Core: all models under `models/staging/` should be views by default. Select the correct answer. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Set materialization inside every .sql file only",
+        "es_correcta": false,
+        "explicacion": "Works but duplicates config; folder defaults are cleaner."
+      },
+      {
+        "texto_opcion": "Use packages.yml for materialization defaults",
+        "es_correcta": false,
+        "explicacion": "packages.yml declares package dependencies, not model config."
+      },
+      {
+        "texto_opcion": "Configure materialization in profiles.yml",
+        "es_correcta": false,
+        "explicacion": "profiles.yml holds connection profiles, not model materializations."
+      },
+      {
+        "texto_opcion": "In dbt_project.yml set `models: my_project: staging: +materialized: view`",
+        "es_correcta": true,
+        "explicacion": "Directory-level config in dbt_project.yml applies defaults by folder."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "dbt_project models config"
+    ]
+  },
+  {
+    "pregunta": "For a medallion lakehouse built with dbt with nightly jobs: schema changed on an incremental model; team needs a one-time rebuild. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Run `dbt test` only",
+        "es_correcta": false,
+        "explicacion": "Tests do not rebuild models."
+      },
+      {
+        "texto_opcion": "Delete dbt_project.yml",
+        "es_correcta": false,
+        "explicacion": "Breaks the project."
+      },
+      {
+        "texto_opcion": "Drop the profile and re-clone the repo",
+        "es_correcta": false,
+        "explicacion": "Unrelated to incremental rebuild."
+      },
+      {
+        "texto_opcion": "Run `dbt run --full-refresh --select <model>`",
+        "es_correcta": true,
+        "explicacion": "--full-refresh rebuilds incremental models from scratch once."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "full refresh"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a finance mart with strict SLAs. a legacy model should stay in repo but not run in production. What should the team do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Rename the .sql to .bak without config",
+        "es_correcta": false,
+        "explicacion": "dbt may still parse depending on layout; config is clearer."
+      },
+      {
+        "texto_opcion": "Set `enabled: false` in the model config",
+        "es_correcta": true,
+        "explicacion": "enabled: false keeps the model out of the DAG without deleting files."
+      },
+      {
+        "texto_opcion": "Move the model to analyses/",
+        "es_correcta": false,
+        "explicacion": "analyses are not materialized but changes model semantics."
+      },
+      {
+        "texto_opcion": "Delete the model from git history only locally",
+        "es_correcta": false,
+        "explicacion": "Risky; enabled:false is explicit and reversible."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "enabled false"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a Databricks SQL warehouse deployment. every model file should document owner and SLA at the top. What should the team do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Hardcode owner email in warehouse comments manually",
+        "es_correcta": false,
+        "explicacion": "Not tied to dbt metadata."
+      },
+      {
+        "texto_opcion": "Remove all documentation to speed compiles",
+        "es_correcta": false,
+        "explicacion": "Hurts governance."
+      },
+      {
+        "texto_opcion": "Store SLA only in Slack pins",
+        "es_correcta": false,
+        "explicacion": "Not version-controlled with the model."
+      },
+      {
+        "texto_opcion": "Use a Jinja `{{ config(...) }}` block and YAML meta; optional file header comments",
+        "es_correcta": true,
+        "explicacion": "Config blocks and schema YAML meta document ownership and SLAs in version control."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "sql header"
+    ]
+  },
+  {
+    "pregunta": "In a multi-environment dbt Cloud job: incremental model must filter new rows using a reliable watermark column. Which dbt approach is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable is_incremental() and append duplicates daily",
+        "es_correcta": false,
+        "explicacion": "Creates duplicate rows."
+      },
+      {
+        "texto_opcion": "Wrap filter logic in `{% if is_incremental() %} WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }}) {% endif %}`",
+        "es_correcta": true,
+        "explicacion": "is_incremental() gates the filter so full-refresh builds load all history once."
+      },
+      {
+        "texto_opcion": "Always filter with WHERE updated_at > current_date in full refresh too",
+        "es_correcta": false,
+        "explicacion": "Would skip historical rows on first build."
+      },
+      {
+        "texto_opcion": "Use is_incremental() without referencing {{ this }}",
+        "es_correcta": false,
+        "explicacion": "May reprocess all rows or miss logic on self-reference."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "incremental predicate"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a monorepo with three dbt projects: downstream BI only needs a logical layer; no persisted table is required. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Configure `materialized='view'` in the model config",
+        "es_correcta": true,
+        "explicacion": "Views compile to warehouse views without storing duplicate data."
+      },
+      {
+        "texto_opcion": "materialized='incremental' with no unique key",
+        "es_correcta": false,
+        "explicacion": "Incremental without keys is unnecessary when no persistence is needed."
+      },
+      {
+        "texto_opcion": "materialized='table' for every staging model",
+        "es_correcta": false,
+        "explicacion": "Tables persist data and add storage/maintenance cost when a view suffices."
+      },
+      {
+        "texto_opcion": "Disable materialization in dbt_project.yml",
+        "es_correcta": false,
+        "explicacion": "Every model needs an explicit or inherited materialization."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "view materialization"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a Snowflake warehouse project: a mart must be fully rebuilt nightly and is queried heavily by many dashboards. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Run manual CREATE TABLE outside dbt",
+        "es_correcta": false,
+        "explicacion": "Bypasses dbt lineage, tests, and config."
+      },
+      {
+        "texto_opcion": "Only create a source() stub without a model",
+        "es_correcta": false,
+        "explicacion": "Sources reference raw data; marts need model builds."
+      },
+      {
+        "texto_opcion": "Use `materialized='table'` (optionally with `post-hook` grants)",
+        "es_correcta": true,
+        "explicacion": "Tables provide fast read performance for frequently accessed marts."
+      },
+      {
+        "texto_opcion": "materialized='ephemeral' for the mart",
+        "es_correcta": false,
+        "explicacion": "Ephemeral models are inlined CTEs, not queryable relations."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "table materialization"
+    ]
+  },
+  {
+    "pregunta": "a reusable intermediate SELECT should not create a warehouse object. Context: a multi-environment dbt Cloud job. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate the SQL in every downstream model manually",
+        "es_correcta": false,
+        "explicacion": "Violates DRY and complicates maintenance."
+      },
+      {
+        "texto_opcion": "Set `materialized='ephemeral'` so dbt inlines it as a CTE",
+        "es_correcta": true,
+        "explicacion": "Ephemeral models reduce clutter and avoid extra table scans when inlined."
+      },
+      {
+        "texto_opcion": "Use a seed file for the intermediate",
+        "es_correcta": false,
+        "explicacion": "Seeds are for static CSV-like data, not transforms."
+      },
+      {
+        "texto_opcion": "materialized='table' for the intermediate",
+        "es_correcta": false,
+        "explicacion": "Creates an unnecessary persisted object."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ephemeral"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a product analytics team using dbt. a large fact table receives daily append-only events with billions of rows. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "materialized='view' and scan all history each query",
+        "es_correcta": false,
+        "explicacion": "Views recompute full history on every BI query."
+      },
+      {
+        "texto_opcion": "Full table rebuild every hour with materialized='table'",
+        "es_correcta": false,
+        "explicacion": "Full rebuilds on billions of rows are costly."
+      },
+      {
+        "texto_opcion": "Use `materialized='incremental'` with an `is_incremental()` filter on event date",
+        "es_correcta": true,
+        "explicacion": "Incremental models process only new rows after the initial build."
+      },
+      {
+        "texto_opcion": "Skip incremental logic and rely on warehouse caching only",
+        "es_correcta": false,
+        "explicacion": "Caching does not replace efficient incremental loads."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "incremental default"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a CI pipeline using dbt Core: new source columns appear frequently; the incremental model should adapt safely. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable incremental and always full-refresh silently",
+        "es_correcta": false,
+        "explicacion": "Expensive and hides config intent."
+      },
+      {
+        "texto_opcion": "Set `on_schema_change: append_new_columns` (or sync) in model config",
+        "es_correcta": true,
+        "explicacion": "on_schema_change controls how dbt handles new/changed columns during incremental runs."
+      },
+      {
+        "texto_opcion": "Ignore schema drift and fail every run",
+        "es_correcta": false,
+        "explicacion": "Brittle; append/sync handles additive changes."
+      },
+      {
+        "texto_opcion": "Drop the table on any new column",
+        "es_correcta": false,
+        "explicacion": "Destructive and loses history."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "on_schema_change"
+    ]
+  },
+  {
+    "pregunta": "In a Databricks SQL warehouse deployment: BigQuery queries filter on `event_date` and `country_code` constantly. Which dbt approach is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Hardcode LIMIT 1000 in the model SQL",
+        "es_correcta": false,
+        "explicacion": "Truncates data; not a layout optimization."
+      },
+      {
+        "texto_opcion": "Use seeds instead of the fact model",
+        "es_correcta": false,
+        "explicacion": "Seeds cannot replace large fact pipelines."
+      },
+      {
+        "texto_opcion": "No partitioning or clustering on a multi-TB fact",
+        "es_correcta": false,
+        "explicacion": "Full scans increase cost and latency."
+      },
+      {
+        "texto_opcion": "Configure `cluster_by: ['event_date', 'country_code']` in the model config",
+        "es_correcta": true,
+        "explicacion": "cluster_by (BigQuery) or similar layout hints improve prune-friendly scans."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "cluster_by"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a Databricks SQL warehouse deployment: orchestration should run only finance-tagged models in a subset job. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Rename files manually before each run",
+        "es_correcta": false,
+        "explicacion": "Error-prone; tags are the supported selector."
+      },
+      {
+        "texto_opcion": "Assign `tags: ['finance']` in model config and run `dbt run --select tag:finance`",
+        "es_correcta": true,
+        "explicacion": "Tags enable selective execution via `--select tag:<name>`."
+      },
+      {
+        "texto_opcion": "Use `--exclude` on every model individually",
+        "es_correcta": false,
+        "explicacion": "Impractical at scale."
+      },
+      {
+        "texto_opcion": "Comment out unrelated models in SQL",
+        "es_correcta": false,
+        "explicacion": "Not maintainable; breaks DAG clarity."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tags config"
+    ]
+  },
+  {
+    "pregunta": "after each mart build the team must `GRANT SELECT` to an analyst role. Context: a product analytics team using dbt. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Define a `post-hook` with the GRANT statement in model config",
+        "es_correcta": true,
+        "explicacion": "post-hooks run after model materialization; ideal for grants and auditing."
+      },
+      {
+        "texto_opcion": "Run GRANT manually after every dbt run",
+        "es_correcta": false,
+        "explicacion": "Not reproducible or version-controlled."
+      },
+      {
+        "texto_opcion": "Embed GRANT in a pre-hook before table exists",
+        "es_correcta": false,
+        "explicacion": "Table may not exist yet for post-create grants."
+      },
+      {
+        "texto_opcion": "Store grants only in a wiki page",
+        "es_correcta": false,
+        "explicacion": "Not enforced by pipeline."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "hooks"
+    ]
+  },
+  {
+    "pregunta": "column descriptions in YAML should appear in the warehouse catalog. Context: a product analytics team using dbt. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete schema.yml to reduce repo size",
+        "es_correcta": false,
+        "explicacion": "Removes documentation and tests."
+      },
+      {
+        "texto_opcion": "Rely on dbt docs site only with no persist_docs",
+        "es_correcta": false,
+        "explicacion": "Warehouse catalog stays empty."
+      },
+      {
+        "texto_opcion": "Set `persist_docs: {relation: true, columns: true}` for the model",
+        "es_correcta": true,
+        "explicacion": "persist_docs pushes dbt descriptions to warehouse metadata where supported."
+      },
+      {
+        "texto_opcion": "Put descriptions only in SQL comments",
+        "es_correcta": false,
+        "explicacion": "Not synced to dbt docs or catalog via YAML."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "persist docs"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a monorepo with three dbt projects: all models under `models/staging/` should be views by default. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use packages.yml for materialization defaults",
+        "es_correcta": false,
+        "explicacion": "packages.yml declares package dependencies, not model config."
+      },
+      {
+        "texto_opcion": "In dbt_project.yml set `models: my_project: staging: +materialized: view`",
+        "es_correcta": true,
+        "explicacion": "Directory-level config in dbt_project.yml applies defaults by folder."
+      },
+      {
+        "texto_opcion": "Configure materialization in profiles.yml",
+        "es_correcta": false,
+        "explicacion": "profiles.yml holds connection profiles, not model materializations."
+      },
+      {
+        "texto_opcion": "Set materialization inside every .sql file only",
+        "es_correcta": false,
+        "explicacion": "Works but duplicates config; folder defaults are cleaner."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "dbt_project models config"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a platform team publishing shared packages. schema changed on an incremental model; team needs a one-time rebuild. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete dbt_project.yml",
+        "es_correcta": false,
+        "explicacion": "Breaks the project."
+      },
+      {
+        "texto_opcion": "Run `dbt test` only",
+        "es_correcta": false,
+        "explicacion": "Tests do not rebuild models."
+      },
+      {
+        "texto_opcion": "Drop the profile and re-clone the repo",
+        "es_correcta": false,
+        "explicacion": "Unrelated to incremental rebuild."
+      },
+      {
+        "texto_opcion": "Run `dbt run --full-refresh --select <model>`",
+        "es_correcta": true,
+        "explicacion": "--full-refresh rebuilds incremental models from scratch once."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "full refresh"
+    ]
+  },
+  {
+    "pregunta": "a legacy model should stay in repo but not run in production. Context: a platform team publishing shared packages. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete the model from git history only locally",
+        "es_correcta": false,
+        "explicacion": "Risky; enabled:false is explicit and reversible."
+      },
+      {
+        "texto_opcion": "Rename the .sql to .bak without config",
+        "es_correcta": false,
+        "explicacion": "dbt may still parse depending on layout; config is clearer."
+      },
+      {
+        "texto_opcion": "Set `enabled: false` in the model config",
+        "es_correcta": true,
+        "explicacion": "enabled: false keeps the model out of the DAG without deleting files."
+      },
+      {
+        "texto_opcion": "Move the model to analyses/",
+        "es_correcta": false,
+        "explicacion": "analyses are not materialized but changes model semantics."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "enabled false"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a finance mart with strict SLAs: every model file should document owner and SLA at the top. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Hardcode owner email in warehouse comments manually",
+        "es_correcta": false,
+        "explicacion": "Not tied to dbt metadata."
+      },
+      {
+        "texto_opcion": "Remove all documentation to speed compiles",
+        "es_correcta": false,
+        "explicacion": "Hurts governance."
+      },
+      {
+        "texto_opcion": "Store SLA only in Slack pins",
+        "es_correcta": false,
+        "explicacion": "Not version-controlled with the model."
+      },
+      {
+        "texto_opcion": "Use a Jinja `{{ config(...) }}` block and YAML meta; optional file header comments",
+        "es_correcta": true,
+        "explicacion": "Config blocks and schema YAML meta document ownership and SLAs in version control."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "sql header"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a medallion lakehouse built with dbt. incremental model must filter new rows using a reliable watermark column. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use is_incremental() without referencing {{ this }}",
+        "es_correcta": false,
+        "explicacion": "May reprocess all rows or miss logic on self-reference."
+      },
+      {
+        "texto_opcion": "Disable is_incremental() and append duplicates daily",
+        "es_correcta": false,
+        "explicacion": "Creates duplicate rows."
+      },
+      {
+        "texto_opcion": "Always filter with WHERE updated_at > current_date in full refresh too",
+        "es_correcta": false,
+        "explicacion": "Would skip historical rows on first build."
+      },
+      {
+        "texto_opcion": "Wrap filter logic in `{% if is_incremental() %} WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }}) {% endif %}`",
+        "es_correcta": true,
+        "explicacion": "is_incremental() gates the filter so full-refresh builds load all history once."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "incremental predicate"
+    ]
+  },
+  {
+    "pregunta": "For a multi-environment dbt Cloud job with nightly jobs: downstream BI only needs a logical layer; no persisted table is required. Best practice? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable materialization in dbt_project.yml",
+        "es_correcta": false,
+        "explicacion": "Every model needs an explicit or inherited materialization."
+      },
+      {
+        "texto_opcion": "materialized='incremental' with no unique key",
+        "es_correcta": false,
+        "explicacion": "Incremental without keys is unnecessary when no persistence is needed."
+      },
+      {
+        "texto_opcion": "Configure `materialized='view'` in the model config",
+        "es_correcta": true,
+        "explicacion": "Views compile to warehouse views without storing duplicate data."
+      },
+      {
+        "texto_opcion": "materialized='table' for every staging model",
+        "es_correcta": false,
+        "explicacion": "Tables persist data and add storage/maintenance cost when a view suffices."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "view materialization"
+    ]
+  },
+  {
+    "pregunta": "In a multi-environment dbt Cloud job: a mart must be fully rebuilt nightly and is queried heavily by many dashboards. Which dbt approach is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Run manual CREATE TABLE outside dbt",
+        "es_correcta": false,
+        "explicacion": "Bypasses dbt lineage, tests, and config."
+      },
+      {
+        "texto_opcion": "materialized='ephemeral' for the mart",
+        "es_correcta": false,
+        "explicacion": "Ephemeral models are inlined CTEs, not queryable relations."
+      },
+      {
+        "texto_opcion": "Use `materialized='table'` (optionally with `post-hook` grants)",
+        "es_correcta": true,
+        "explicacion": "Tables provide fast read performance for frequently accessed marts."
+      },
+      {
+        "texto_opcion": "Only create a source() stub without a model",
+        "es_correcta": false,
+        "explicacion": "Sources reference raw data; marts need model builds."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "table materialization"
+    ]
+  },
+  {
+    "pregunta": "For a medallion lakehouse built with dbt with nightly jobs: a reusable intermediate SELECT should not create a warehouse object. Best practice? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Set `materialized='ephemeral'` so dbt inlines it as a CTE",
+        "es_correcta": true,
+        "explicacion": "Ephemeral models reduce clutter and avoid extra table scans when inlined."
+      },
+      {
+        "texto_opcion": "Use a seed file for the intermediate",
+        "es_correcta": false,
+        "explicacion": "Seeds are for static CSV-like data, not transforms."
+      },
+      {
+        "texto_opcion": "materialized='table' for the intermediate",
+        "es_correcta": false,
+        "explicacion": "Creates an unnecessary persisted object."
+      },
+      {
+        "texto_opcion": "Duplicate the SQL in every downstream model manually",
+        "es_correcta": false,
+        "explicacion": "Violates DRY and complicates maintenance."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ephemeral"
+    ]
+  },
+  {
+    "pregunta": "For a monorepo with three dbt projects with nightly jobs: a large fact table receives daily append-only events with billions of rows. Best practice? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Full table rebuild every hour with materialized='table'",
+        "es_correcta": false,
+        "explicacion": "Full rebuilds on billions of rows are costly."
+      },
+      {
+        "texto_opcion": "Skip incremental logic and rely on warehouse caching only",
+        "es_correcta": false,
+        "explicacion": "Caching does not replace efficient incremental loads."
+      },
+      {
+        "texto_opcion": "materialized='view' and scan all history each query",
+        "es_correcta": false,
+        "explicacion": "Views recompute full history on every BI query."
+      },
+      {
+        "texto_opcion": "Use `materialized='incremental'` with an `is_incremental()` filter on event date",
+        "es_correcta": true,
+        "explicacion": "Incremental models process only new rows after the initial build."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "incremental default"
+    ]
+  },
+  {
+    "pregunta": "For a medallion lakehouse built with dbt with nightly jobs: new source columns appear frequently; the incremental model should adapt safely. Best practice? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Drop the table on any new column",
+        "es_correcta": false,
+        "explicacion": "Destructive and loses history."
+      },
+      {
+        "texto_opcion": "Set `on_schema_change: append_new_columns` (or sync) in model config",
+        "es_correcta": true,
+        "explicacion": "on_schema_change controls how dbt handles new/changed columns during incremental runs."
+      },
+      {
+        "texto_opcion": "Disable incremental and always full-refresh silently",
+        "es_correcta": false,
+        "explicacion": "Expensive and hides config intent."
+      },
+      {
+        "texto_opcion": "Ignore schema drift and fail every run",
+        "es_correcta": false,
+        "explicacion": "Brittle; append/sync handles additive changes."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "on_schema_change"
+    ]
+  },
+  {
+    "pregunta": "In a finance mart with strict SLAs: BigQuery queries filter on `event_date` and `country_code` constantly. Which dbt approach is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "No partitioning or clustering on a multi-TB fact",
+        "es_correcta": false,
+        "explicacion": "Full scans increase cost and latency."
+      },
+      {
+        "texto_opcion": "Configure `cluster_by: ['event_date', 'country_code']` in the model config",
+        "es_correcta": true,
+        "explicacion": "cluster_by (BigQuery) or similar layout hints improve prune-friendly scans."
+      },
+      {
+        "texto_opcion": "Hardcode LIMIT 1000 in the model SQL",
+        "es_correcta": false,
+        "explicacion": "Truncates data; not a layout optimization."
+      },
+      {
+        "texto_opcion": "Use seeds instead of the fact model",
+        "es_correcta": false,
+        "explicacion": "Seeds cannot replace large fact pipelines."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "cluster_by"
+    ]
+  }
+]

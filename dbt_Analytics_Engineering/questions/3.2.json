@@ -1,0 +1,1481 @@
+[
+  {
+    "pregunta": "metric counts inflated after joining orders to line items. Context: a medallion lakehouse built with dbt.",
+    "opciones": [
+      {
+        "texto_opcion": "Aggregate to grain before join or use bridge/fact table at correct grain",
+        "es_correcta": true,
+        "explicacion": "Fan-out duplicates parent rows when joining one-to-many without aggregation."
+      },
+      {
+        "texto_opcion": "Use DISTINCT after bad join always",
+        "es_correcta": false,
+        "explicacion": "Hides but may drop valid rows."
+      },
+      {
+        "texto_opcion": "Ignore grain in tests",
+        "es_correcta": false,
+        "explicacion": "Bad metrics ship to BI."
+      },
+      {
+        "texto_opcion": "Join wide tables at different grains",
+        "es_correcta": false,
+        "explicacion": "Inflates metrics."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "fanout join"
+    ]
+  },
+  {
+    "pregunta": "For a platform team publishing shared packages with nightly jobs: fact rows reference missing dimension keys. Best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "Delete facts with null keys without analysis",
+        "es_correcta": false,
+        "explicacion": "May lose valid data."
+      },
+      {
+        "texto_opcion": "Disable relationships tests",
+        "es_correcta": false,
+        "explicacion": "Orphans undetected."
+      },
+      {
+        "texto_opcion": "Inner join dim silently dropping facts",
+        "es_correcta": false,
+        "explicacion": "Data loss without visibility."
+      },
+      {
+        "texto_opcion": "Add relationships test and coalesce to unknown member or fix staging keys",
+        "es_correcta": true,
+        "explicacion": "Orphan facts indicate key mapping or timing issues."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "orphan facts"
+    ]
+  },
+  {
+    "pregunta": "For a multi-environment dbt Cloud job with nightly jobs: dim_customer current flag wrong after snapshot. Best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore deleted rows config",
+        "es_correcta": false,
+        "explicacion": "Hard deletes mishandled."
+      },
+      {
+        "texto_opcion": "Snapshot without unique key",
+        "es_correcta": false,
+        "explicacion": "Cannot track row changes reliably."
+      },
+      {
+        "texto_opcion": "Use table materialization for SCD2 history",
+        "es_correcta": false,
+        "explicacion": "Snapshots designed for SCD2 tracking."
+      },
+      {
+        "texto_opcion": "Review snapshot strategy (timestamp/check), unique key, and hard deletes setting",
+        "es_correcta": true,
+        "explicacion": "SCD bugs often come from snapshot config or source change detection."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "scd mismatch"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a CI pipeline using dbt Core: revenue duplicated across unioned regions. Select the correct answer.",
+    "opciones": [
+      {
+        "texto_opcion": "UNION ALL duplicates without keys",
+        "es_correcta": false,
+        "explicacion": "May double count same entity."
+      },
+      {
+        "texto_opcion": "Sum across tables at different grains",
+        "es_correcta": false,
+        "explicacion": "Incorrect totals."
+      },
+      {
+        "texto_opcion": "Remove tests on revenue",
+        "es_correcta": false,
+        "explicacion": "Finance errors undetected."
+      },
+      {
+        "texto_opcion": "Union at consistent grain and dedupe with unique key before aggregating",
+        "es_correcta": true,
+        "explicacion": "Double counting arises from overlapping sets or bad union grain."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "metric double count"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a monorepo with three dbt projects. primary key column contains nulls breaking uniqueness. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Allow null PK in mart",
+        "es_correcta": false,
+        "explicacion": "Invalid dimensional model."
+      },
+      {
+        "texto_opcion": "Coalesce PK to random UUID without stability",
+        "es_correcta": false,
+        "explicacion": "Breaks slowly changing logic."
+      },
+      {
+        "texto_opcion": "Skip staging validation",
+        "es_correcta": false,
+        "explicacion": "Bad keys propagate."
+      },
+      {
+        "texto_opcion": "Filter null keys in staging and add not_null test on grain columns",
+        "es_correcta": true,
+        "explicacion": "Null keys break joins and uniqueness assumptions."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "null grain"
+    ]
+  },
+  {
+    "pregunta": "For a BigQuery analytics repo with nightly jobs: event_date shifts a day for global users. Best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "Use local server timezone implicitly",
+        "es_correcta": false,
+        "explicacion": "Inconsistent results."
+      },
+      {
+        "texto_opcion": "Fix only in BI tool",
+        "es_correcta": false,
+        "explicacion": "Should be consistent in marts."
+      },
+      {
+        "texto_opcion": "Cast to date without timezone conversion",
+        "es_correcta": false,
+        "explicacion": "Misleading daily aggregates."
+      },
+      {
+        "texto_opcion": "Normalize timestamps to UTC in staging before deriving dates",
+        "es_correcta": true,
+        "explicacion": "Timezone mishandling causes off-by-one date buckets."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "timezone bug"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a medallion lakehouse built with dbt: surrogate key collisions across sources. Select the correct answer.",
+    "opciones": [
+      {
+        "texto_opcion": "Use row_number across full table reload",
+        "es_correcta": false,
+        "explicacion": "Unstable keys."
+      },
+      {
+        "texto_opcion": "Include source system id in surrogate key hash inputs",
+        "es_correcta": true,
+        "explicacion": "Surrogate keys must reflect full grain including source."
+      },
+      {
+        "texto_opcion": "Hash only name field",
+        "es_correcta": false,
+        "explicacion": "Collisions across people/places."
+      },
+      {
+        "texto_opcion": "Skip uniqueness test on SK",
+        "es_correcta": false,
+        "explicacion": "Collisions undetected."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "bad surrogate key"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a medallion lakehouse built with dbt. incremental filter excludes late-arriving facts permanently. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Use lookback window on incremental filter or merge with wider watermark",
+        "es_correcta": true,
+        "explicacion": "Strict watermark without lookback drops late records."
+      },
+      {
+        "texto_opcion": "Full refresh hourly for minor lateness",
+        "es_correcta": false,
+        "explicacion": "Costly overreaction."
+      },
+      {
+        "texto_opcion": "Disable source freshness",
+        "es_correcta": false,
+        "explicacion": "Unrelated to late facts logic."
+      },
+      {
+        "texto_opcion": "Never revisit prior dates",
+        "es_correcta": false,
+        "explicacion": "Late data lost."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "incremental orphan"
+    ]
+  },
+  {
+    "pregunta": "unique test fails on fct_orders.order_id. Context: a medallion lakehouse built with dbt.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable unique test",
+        "es_correcta": false,
+        "explicacion": "Allows duplicates."
+      },
+      {
+        "texto_opcion": "Delete failing rows in prod without fix",
+        "es_correcta": false,
+        "explicacion": "Hides symptom."
+      },
+      {
+        "texto_opcion": "Only re-run test without investigation",
+        "es_correcta": false,
+        "explicacion": "Failure may recur."
+      },
+      {
+        "texto_opcion": "Query failing keys in warehouse, trace upstream staging deduplication",
+        "es_correcta": true,
+        "explicacion": "Unique failures show duplicate grain; trace upstream joins/filters."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "test failure debug"
+    ]
+  },
+  {
+    "pregunta": "exposure depends on deprecated model name. Context: a CI pipeline using dbt Core.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore compile warnings on exposures",
+        "es_correcta": false,
+        "explicacion": "Docs lineage wrong."
+      },
+      {
+        "texto_opcion": "Delete exposure instead of fixing dependency",
+        "es_correcta": false,
+        "explicacion": "Loses downstream documentation."
+      },
+      {
+        "texto_opcion": "Update exposure depends_on to current model or version ref",
+        "es_correcta": true,
+        "explicacion": "exposures must reference existing nodes for lineage accuracy."
+      },
+      {
+        "texto_opcion": "Point exposure to raw source",
+        "es_correcta": false,
+        "explicacion": "Misrepresents mart usage."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "exposure broken ref"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a monorepo with three dbt projects. running total resets incorrectly per partition. What should the team do?",
+    "opciones": [
+      {
+        "texto_opcion": "Compute running total in Excel",
+        "es_correcta": false,
+        "explicacion": "Not scalable."
+      },
+      {
+        "texto_opcion": "Remove ORDER BY in window",
+        "es_correcta": false,
+        "explicacion": "Undefined frame behavior."
+      },
+      {
+        "texto_opcion": "Cross join before window",
+        "es_correcta": false,
+        "explicacion": "Row explosion."
+      },
+      {
+        "texto_opcion": "Fix window PARTITION BY and ORDER BY columns in SQL",
+        "es_correcta": true,
+        "explicacion": "Window frames require correct partition/order specification."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "window frame error"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a CI pipeline using dbt Core: unit test fixture expects columns not in model output. Select the correct answer.",
+    "opciones": [
+      {
+        "texto_opcion": "Change warehouse schema only",
+        "es_correcta": false,
+        "explicacion": "Test fixtures still stale."
+      },
+      {
+        "texto_opcion": "Delete failing unit test file",
+        "es_correcta": false,
+        "explicacion": "Removes coverage."
+      },
+      {
+        "texto_opcion": "Disable unit tests in CI",
+        "es_correcta": false,
+        "explicacion": "Regressions slip through."
+      },
+      {
+        "texto_opcion": "Update unit test expected output or model SELECT to align schemas",
+        "es_correcta": true,
+        "explicacion": "Unit tests compare model logic to fixtures; schemas must match."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "unit test mismatch"
+    ]
+  },
+  {
+    "pregunta": "In a Databricks SQL warehouse deployment: macro using run_query fails at parse time. Which dbt approach is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Hardcode warehouse state in git",
+        "es_correcta": false,
+        "explicacion": "Stale quickly."
+      },
+      {
+        "texto_opcion": "Guard with `{% if execute %}` around run_query logic",
+        "es_correcta": true,
+        "explicacion": "Parse phase cannot hit warehouse; execute phase can."
+      },
+      {
+        "texto_opcion": "Call run_query unconditionally",
+        "es_correcta": false,
+        "explicacion": "Parse-time errors."
+      },
+      {
+        "texto_opcion": "Skip macro entirely",
+        "es_correcta": false,
+        "explicacion": "Loses dynamic capability."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "parse vs execute"
+    ]
+  },
+  {
+    "pregunta": "In a Snowflake warehouse project: metric counts inflated after joining orders to line items. Which dbt approach is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Aggregate to grain before join or use bridge/fact table at correct grain",
+        "es_correcta": true,
+        "explicacion": "Fan-out duplicates parent rows when joining one-to-many without aggregation."
+      },
+      {
+        "texto_opcion": "Use DISTINCT after bad join always",
+        "es_correcta": false,
+        "explicacion": "Hides but may drop valid rows."
+      },
+      {
+        "texto_opcion": "Ignore grain in tests",
+        "es_correcta": false,
+        "explicacion": "Bad metrics ship to BI."
+      },
+      {
+        "texto_opcion": "Join wide tables at different grains",
+        "es_correcta": false,
+        "explicacion": "Inflates metrics."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "fanout join"
+    ]
+  },
+  {
+    "pregunta": "fact rows reference missing dimension keys. Context: a CI pipeline using dbt Core. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete facts with null keys without analysis",
+        "es_correcta": false,
+        "explicacion": "May lose valid data."
+      },
+      {
+        "texto_opcion": "Disable relationships tests",
+        "es_correcta": false,
+        "explicacion": "Orphans undetected."
+      },
+      {
+        "texto_opcion": "Inner join dim silently dropping facts",
+        "es_correcta": false,
+        "explicacion": "Data loss without visibility."
+      },
+      {
+        "texto_opcion": "Add relationships test and coalesce to unknown member or fix staging keys",
+        "es_correcta": true,
+        "explicacion": "Orphan facts indicate key mapping or timing issues."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "orphan facts"
+    ]
+  },
+  {
+    "pregunta": "In a finance mart with strict SLAs: dim_customer current flag wrong after snapshot. Which dbt approach is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore deleted rows config",
+        "es_correcta": false,
+        "explicacion": "Hard deletes mishandled."
+      },
+      {
+        "texto_opcion": "Review snapshot strategy (timestamp/check), unique key, and hard deletes setting",
+        "es_correcta": true,
+        "explicacion": "SCD bugs often come from snapshot config or source change detection."
+      },
+      {
+        "texto_opcion": "Use table materialization for SCD2 history",
+        "es_correcta": false,
+        "explicacion": "Snapshots designed for SCD2 tracking."
+      },
+      {
+        "texto_opcion": "Snapshot without unique key",
+        "es_correcta": false,
+        "explicacion": "Cannot track row changes reliably."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "scd mismatch"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a BigQuery analytics repo: revenue duplicated across unioned regions. Select the correct answer. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Union at consistent grain and dedupe with unique key before aggregating",
+        "es_correcta": true,
+        "explicacion": "Double counting arises from overlapping sets or bad union grain."
+      },
+      {
+        "texto_opcion": "Remove tests on revenue",
+        "es_correcta": false,
+        "explicacion": "Finance errors undetected."
+      },
+      {
+        "texto_opcion": "UNION ALL duplicates without keys",
+        "es_correcta": false,
+        "explicacion": "May double count same entity."
+      },
+      {
+        "texto_opcion": "Sum across tables at different grains",
+        "es_correcta": false,
+        "explicacion": "Incorrect totals."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "metric double count"
+    ]
+  },
+  {
+    "pregunta": "For a Databricks SQL warehouse deployment with nightly jobs: primary key column contains nulls breaking uniqueness. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Skip staging validation",
+        "es_correcta": false,
+        "explicacion": "Bad keys propagate."
+      },
+      {
+        "texto_opcion": "Allow null PK in mart",
+        "es_correcta": false,
+        "explicacion": "Invalid dimensional model."
+      },
+      {
+        "texto_opcion": "Filter null keys in staging and add not_null test on grain columns",
+        "es_correcta": true,
+        "explicacion": "Null keys break joins and uniqueness assumptions."
+      },
+      {
+        "texto_opcion": "Coalesce PK to random UUID without stability",
+        "es_correcta": false,
+        "explicacion": "Breaks slowly changing logic."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "null grain"
+    ]
+  },
+  {
+    "pregunta": "event_date shifts a day for global users. Context: a product analytics team using dbt. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use local server timezone implicitly",
+        "es_correcta": false,
+        "explicacion": "Inconsistent results."
+      },
+      {
+        "texto_opcion": "Fix only in BI tool",
+        "es_correcta": false,
+        "explicacion": "Should be consistent in marts."
+      },
+      {
+        "texto_opcion": "Normalize timestamps to UTC in staging before deriving dates",
+        "es_correcta": true,
+        "explicacion": "Timezone mishandling causes off-by-one date buckets."
+      },
+      {
+        "texto_opcion": "Cast to date without timezone conversion",
+        "es_correcta": false,
+        "explicacion": "Misleading daily aggregates."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "timezone bug"
+    ]
+  },
+  {
+    "pregunta": "For a CI pipeline using dbt Core with nightly jobs: surrogate key collisions across sources. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use row_number across full table reload",
+        "es_correcta": false,
+        "explicacion": "Unstable keys."
+      },
+      {
+        "texto_opcion": "Hash only name field",
+        "es_correcta": false,
+        "explicacion": "Collisions across people/places."
+      },
+      {
+        "texto_opcion": "Skip uniqueness test on SK",
+        "es_correcta": false,
+        "explicacion": "Collisions undetected."
+      },
+      {
+        "texto_opcion": "Include source system id in surrogate key hash inputs",
+        "es_correcta": true,
+        "explicacion": "Surrogate keys must reflect full grain including source."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "bad surrogate key"
+    ]
+  },
+  {
+    "pregunta": "incremental filter excludes late-arriving facts permanently. Context: a Snowflake warehouse project. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Full refresh hourly for minor lateness",
+        "es_correcta": false,
+        "explicacion": "Costly overreaction."
+      },
+      {
+        "texto_opcion": "Use lookback window on incremental filter or merge with wider watermark",
+        "es_correcta": true,
+        "explicacion": "Strict watermark without lookback drops late records."
+      },
+      {
+        "texto_opcion": "Never revisit prior dates",
+        "es_correcta": false,
+        "explicacion": "Late data lost."
+      },
+      {
+        "texto_opcion": "Disable source freshness",
+        "es_correcta": false,
+        "explicacion": "Unrelated to late facts logic."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "incremental orphan"
+    ]
+  },
+  {
+    "pregunta": "For a Snowflake warehouse project with nightly jobs: unique test fails on fct_orders.order_id. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete failing rows in prod without fix",
+        "es_correcta": false,
+        "explicacion": "Hides symptom."
+      },
+      {
+        "texto_opcion": "Only re-run test without investigation",
+        "es_correcta": false,
+        "explicacion": "Failure may recur."
+      },
+      {
+        "texto_opcion": "Query failing keys in warehouse, trace upstream staging deduplication",
+        "es_correcta": true,
+        "explicacion": "Unique failures show duplicate grain; trace upstream joins/filters."
+      },
+      {
+        "texto_opcion": "Disable unique test",
+        "es_correcta": false,
+        "explicacion": "Allows duplicates."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "test failure debug"
+    ]
+  },
+  {
+    "pregunta": "exposure depends on deprecated model name. Context: a Databricks SQL warehouse deployment. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Update exposure depends_on to current model or version ref",
+        "es_correcta": true,
+        "explicacion": "exposures must reference existing nodes for lineage accuracy."
+      },
+      {
+        "texto_opcion": "Point exposure to raw source",
+        "es_correcta": false,
+        "explicacion": "Misrepresents mart usage."
+      },
+      {
+        "texto_opcion": "Delete exposure instead of fixing dependency",
+        "es_correcta": false,
+        "explicacion": "Loses downstream documentation."
+      },
+      {
+        "texto_opcion": "Ignore compile warnings on exposures",
+        "es_correcta": false,
+        "explicacion": "Docs lineage wrong."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "exposure broken ref"
+    ]
+  },
+  {
+    "pregunta": "running total resets incorrectly per partition. Context: a platform team publishing shared packages. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Compute running total in Excel",
+        "es_correcta": false,
+        "explicacion": "Not scalable."
+      },
+      {
+        "texto_opcion": "Cross join before window",
+        "es_correcta": false,
+        "explicacion": "Row explosion."
+      },
+      {
+        "texto_opcion": "Fix window PARTITION BY and ORDER BY columns in SQL",
+        "es_correcta": true,
+        "explicacion": "Window frames require correct partition/order specification."
+      },
+      {
+        "texto_opcion": "Remove ORDER BY in window",
+        "es_correcta": false,
+        "explicacion": "Undefined frame behavior."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "window frame error"
+    ]
+  },
+  {
+    "pregunta": "For a product analytics team using dbt with nightly jobs: unit test fixture expects columns not in model output. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete failing unit test file",
+        "es_correcta": false,
+        "explicacion": "Removes coverage."
+      },
+      {
+        "texto_opcion": "Update unit test expected output or model SELECT to align schemas",
+        "es_correcta": true,
+        "explicacion": "Unit tests compare model logic to fixtures; schemas must match."
+      },
+      {
+        "texto_opcion": "Change warehouse schema only",
+        "es_correcta": false,
+        "explicacion": "Test fixtures still stale."
+      },
+      {
+        "texto_opcion": "Disable unit tests in CI",
+        "es_correcta": false,
+        "explicacion": "Regressions slip through."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "unit test mismatch"
+    ]
+  },
+  {
+    "pregunta": "For a CI pipeline using dbt Core with nightly jobs: macro using run_query fails at parse time. Best practice? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Skip macro entirely",
+        "es_correcta": false,
+        "explicacion": "Loses dynamic capability."
+      },
+      {
+        "texto_opcion": "Call run_query unconditionally",
+        "es_correcta": false,
+        "explicacion": "Parse-time errors."
+      },
+      {
+        "texto_opcion": "Guard with `{% if execute %}` around run_query logic",
+        "es_correcta": true,
+        "explicacion": "Parse phase cannot hit warehouse; execute phase can."
+      },
+      {
+        "texto_opcion": "Hardcode warehouse state in git",
+        "es_correcta": false,
+        "explicacion": "Stale quickly."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "parse vs execute"
+    ]
+  },
+  {
+    "pregunta": "In a BigQuery analytics repo: metric counts inflated after joining orders to line items. Which dbt approach is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Aggregate to grain before join or use bridge/fact table at correct grain",
+        "es_correcta": true,
+        "explicacion": "Fan-out duplicates parent rows when joining one-to-many without aggregation."
+      },
+      {
+        "texto_opcion": "Join wide tables at different grains",
+        "es_correcta": false,
+        "explicacion": "Inflates metrics."
+      },
+      {
+        "texto_opcion": "Use DISTINCT after bad join always",
+        "es_correcta": false,
+        "explicacion": "Hides but may drop valid rows."
+      },
+      {
+        "texto_opcion": "Ignore grain in tests",
+        "es_correcta": false,
+        "explicacion": "Bad metrics ship to BI."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "fanout join"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a Databricks SQL warehouse deployment. fact rows reference missing dimension keys. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Inner join dim silently dropping facts",
+        "es_correcta": false,
+        "explicacion": "Data loss without visibility."
+      },
+      {
+        "texto_opcion": "Add relationships test and coalesce to unknown member or fix staging keys",
+        "es_correcta": true,
+        "explicacion": "Orphan facts indicate key mapping or timing issues."
+      },
+      {
+        "texto_opcion": "Delete facts with null keys without analysis",
+        "es_correcta": false,
+        "explicacion": "May lose valid data."
+      },
+      {
+        "texto_opcion": "Disable relationships tests",
+        "es_correcta": false,
+        "explicacion": "Orphans undetected."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "orphan facts"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a platform team publishing shared packages. dim_customer current flag wrong after snapshot. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Review snapshot strategy (timestamp/check), unique key, and hard deletes setting",
+        "es_correcta": true,
+        "explicacion": "SCD bugs often come from snapshot config or source change detection."
+      },
+      {
+        "texto_opcion": "Snapshot without unique key",
+        "es_correcta": false,
+        "explicacion": "Cannot track row changes reliably."
+      },
+      {
+        "texto_opcion": "Use table materialization for SCD2 history",
+        "es_correcta": false,
+        "explicacion": "Snapshots designed for SCD2 tracking."
+      },
+      {
+        "texto_opcion": "Ignore deleted rows config",
+        "es_correcta": false,
+        "explicacion": "Hard deletes mishandled."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "scd mismatch"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a product analytics team using dbt: revenue duplicated across unioned regions. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "UNION ALL duplicates without keys",
+        "es_correcta": false,
+        "explicacion": "May double count same entity."
+      },
+      {
+        "texto_opcion": "Union at consistent grain and dedupe with unique key before aggregating",
+        "es_correcta": true,
+        "explicacion": "Double counting arises from overlapping sets or bad union grain."
+      },
+      {
+        "texto_opcion": "Remove tests on revenue",
+        "es_correcta": false,
+        "explicacion": "Finance errors undetected."
+      },
+      {
+        "texto_opcion": "Sum across tables at different grains",
+        "es_correcta": false,
+        "explicacion": "Incorrect totals."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "metric double count"
+    ]
+  },
+  {
+    "pregunta": "primary key column contains nulls breaking uniqueness. Context: a Databricks SQL warehouse deployment. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Filter null keys in staging and add not_null test on grain columns",
+        "es_correcta": true,
+        "explicacion": "Null keys break joins and uniqueness assumptions."
+      },
+      {
+        "texto_opcion": "Coalesce PK to random UUID without stability",
+        "es_correcta": false,
+        "explicacion": "Breaks slowly changing logic."
+      },
+      {
+        "texto_opcion": "Skip staging validation",
+        "es_correcta": false,
+        "explicacion": "Bad keys propagate."
+      },
+      {
+        "texto_opcion": "Allow null PK in mart",
+        "es_correcta": false,
+        "explicacion": "Invalid dimensional model."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "null grain"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a BigQuery analytics repo. event_date shifts a day for global users. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use local server timezone implicitly",
+        "es_correcta": false,
+        "explicacion": "Inconsistent results."
+      },
+      {
+        "texto_opcion": "Normalize timestamps to UTC in staging before deriving dates",
+        "es_correcta": true,
+        "explicacion": "Timezone mishandling causes off-by-one date buckets."
+      },
+      {
+        "texto_opcion": "Fix only in BI tool",
+        "es_correcta": false,
+        "explicacion": "Should be consistent in marts."
+      },
+      {
+        "texto_opcion": "Cast to date without timezone conversion",
+        "es_correcta": false,
+        "explicacion": "Misleading daily aggregates."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "timezone bug"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a monorepo with three dbt projects. surrogate key collisions across sources. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Hash only name field",
+        "es_correcta": false,
+        "explicacion": "Collisions across people/places."
+      },
+      {
+        "texto_opcion": "Include source system id in surrogate key hash inputs",
+        "es_correcta": true,
+        "explicacion": "Surrogate keys must reflect full grain including source."
+      },
+      {
+        "texto_opcion": "Skip uniqueness test on SK",
+        "es_correcta": false,
+        "explicacion": "Collisions undetected."
+      },
+      {
+        "texto_opcion": "Use row_number across full table reload",
+        "es_correcta": false,
+        "explicacion": "Unstable keys."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "bad surrogate key"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a finance mart with strict SLAs. incremental filter excludes late-arriving facts permanently. What should the team do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use lookback window on incremental filter or merge with wider watermark",
+        "es_correcta": true,
+        "explicacion": "Strict watermark without lookback drops late records."
+      },
+      {
+        "texto_opcion": "Full refresh hourly for minor lateness",
+        "es_correcta": false,
+        "explicacion": "Costly overreaction."
+      },
+      {
+        "texto_opcion": "Never revisit prior dates",
+        "es_correcta": false,
+        "explicacion": "Late data lost."
+      },
+      {
+        "texto_opcion": "Disable source freshness",
+        "es_correcta": false,
+        "explicacion": "Unrelated to late facts logic."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "incremental orphan"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a finance mart with strict SLAs: unique test fails on fct_orders.order_id. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete failing rows in prod without fix",
+        "es_correcta": false,
+        "explicacion": "Hides symptom."
+      },
+      {
+        "texto_opcion": "Only re-run test without investigation",
+        "es_correcta": false,
+        "explicacion": "Failure may recur."
+      },
+      {
+        "texto_opcion": "Query failing keys in warehouse, trace upstream staging deduplication",
+        "es_correcta": true,
+        "explicacion": "Unique failures show duplicate grain; trace upstream joins/filters."
+      },
+      {
+        "texto_opcion": "Disable unique test",
+        "es_correcta": false,
+        "explicacion": "Allows duplicates."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "test failure debug"
+    ]
+  },
+  {
+    "pregunta": "exposure depends on deprecated model name. Context: a monorepo with three dbt projects. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Point exposure to raw source",
+        "es_correcta": false,
+        "explicacion": "Misrepresents mart usage."
+      },
+      {
+        "texto_opcion": "Ignore compile warnings on exposures",
+        "es_correcta": false,
+        "explicacion": "Docs lineage wrong."
+      },
+      {
+        "texto_opcion": "Delete exposure instead of fixing dependency",
+        "es_correcta": false,
+        "explicacion": "Loses downstream documentation."
+      },
+      {
+        "texto_opcion": "Update exposure depends_on to current model or version ref",
+        "es_correcta": true,
+        "explicacion": "exposures must reference existing nodes for lineage accuracy."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "exposure broken ref"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a multi-environment dbt Cloud job: running total resets incorrectly per partition. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Compute running total in Excel",
+        "es_correcta": false,
+        "explicacion": "Not scalable."
+      },
+      {
+        "texto_opcion": "Fix window PARTITION BY and ORDER BY columns in SQL",
+        "es_correcta": true,
+        "explicacion": "Window frames require correct partition/order specification."
+      },
+      {
+        "texto_opcion": "Remove ORDER BY in window",
+        "es_correcta": false,
+        "explicacion": "Undefined frame behavior."
+      },
+      {
+        "texto_opcion": "Cross join before window",
+        "es_correcta": false,
+        "explicacion": "Row explosion."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "window frame error"
+    ]
+  },
+  {
+    "pregunta": "For a Databricks SQL warehouse deployment with nightly jobs: unit test fixture expects columns not in model output. Best practice? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Change warehouse schema only",
+        "es_correcta": false,
+        "explicacion": "Test fixtures still stale."
+      },
+      {
+        "texto_opcion": "Disable unit tests in CI",
+        "es_correcta": false,
+        "explicacion": "Regressions slip through."
+      },
+      {
+        "texto_opcion": "Delete failing unit test file",
+        "es_correcta": false,
+        "explicacion": "Removes coverage."
+      },
+      {
+        "texto_opcion": "Update unit test expected output or model SELECT to align schemas",
+        "es_correcta": true,
+        "explicacion": "Unit tests compare model logic to fixtures; schemas must match."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "unit test mismatch"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a monorepo with three dbt projects: macro using run_query fails at parse time. Select the correct answer. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Guard with `{% if execute %}` around run_query logic",
+        "es_correcta": true,
+        "explicacion": "Parse phase cannot hit warehouse; execute phase can."
+      },
+      {
+        "texto_opcion": "Call run_query unconditionally",
+        "es_correcta": false,
+        "explicacion": "Parse-time errors."
+      },
+      {
+        "texto_opcion": "Skip macro entirely",
+        "es_correcta": false,
+        "explicacion": "Loses dynamic capability."
+      },
+      {
+        "texto_opcion": "Hardcode warehouse state in git",
+        "es_correcta": false,
+        "explicacion": "Stale quickly."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "parse vs execute"
+    ]
+  },
+  {
+    "pregunta": "In a BigQuery analytics repo: metric counts inflated after joining orders to line items. Which dbt approach is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Aggregate to grain before join or use bridge/fact table at correct grain",
+        "es_correcta": true,
+        "explicacion": "Fan-out duplicates parent rows when joining one-to-many without aggregation."
+      },
+      {
+        "texto_opcion": "Use DISTINCT after bad join always",
+        "es_correcta": false,
+        "explicacion": "Hides but may drop valid rows."
+      },
+      {
+        "texto_opcion": "Ignore grain in tests",
+        "es_correcta": false,
+        "explicacion": "Bad metrics ship to BI."
+      },
+      {
+        "texto_opcion": "Join wide tables at different grains",
+        "es_correcta": false,
+        "explicacion": "Inflates metrics."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "fanout join"
+    ]
+  },
+  {
+    "pregunta": "For a BigQuery analytics repo with nightly jobs: fact rows reference missing dimension keys. Best practice? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Add relationships test and coalesce to unknown member or fix staging keys",
+        "es_correcta": true,
+        "explicacion": "Orphan facts indicate key mapping or timing issues."
+      },
+      {
+        "texto_opcion": "Delete facts with null keys without analysis",
+        "es_correcta": false,
+        "explicacion": "May lose valid data."
+      },
+      {
+        "texto_opcion": "Disable relationships tests",
+        "es_correcta": false,
+        "explicacion": "Orphans undetected."
+      },
+      {
+        "texto_opcion": "Inner join dim silently dropping facts",
+        "es_correcta": false,
+        "explicacion": "Data loss without visibility."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "orphan facts"
+    ]
+  },
+  {
+    "pregunta": "dim_customer current flag wrong after snapshot. Context: a platform team publishing shared packages. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Review snapshot strategy (timestamp/check), unique key, and hard deletes setting",
+        "es_correcta": true,
+        "explicacion": "SCD bugs often come from snapshot config or source change detection."
+      },
+      {
+        "texto_opcion": "Use table materialization for SCD2 history",
+        "es_correcta": false,
+        "explicacion": "Snapshots designed for SCD2 tracking."
+      },
+      {
+        "texto_opcion": "Snapshot without unique key",
+        "es_correcta": false,
+        "explicacion": "Cannot track row changes reliably."
+      },
+      {
+        "texto_opcion": "Ignore deleted rows config",
+        "es_correcta": false,
+        "explicacion": "Hard deletes mishandled."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "scd mismatch"
+    ]
+  },
+  {
+    "pregunta": "For a multi-environment dbt Cloud job with nightly jobs: revenue duplicated across unioned regions. Best practice? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "UNION ALL duplicates without keys",
+        "es_correcta": false,
+        "explicacion": "May double count same entity."
+      },
+      {
+        "texto_opcion": "Union at consistent grain and dedupe with unique key before aggregating",
+        "es_correcta": true,
+        "explicacion": "Double counting arises from overlapping sets or bad union grain."
+      },
+      {
+        "texto_opcion": "Remove tests on revenue",
+        "es_correcta": false,
+        "explicacion": "Finance errors undetected."
+      },
+      {
+        "texto_opcion": "Sum across tables at different grains",
+        "es_correcta": false,
+        "explicacion": "Incorrect totals."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "metric double count"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a product analytics team using dbt: primary key column contains nulls breaking uniqueness. Select the correct answer. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Allow null PK in mart",
+        "es_correcta": false,
+        "explicacion": "Invalid dimensional model."
+      },
+      {
+        "texto_opcion": "Coalesce PK to random UUID without stability",
+        "es_correcta": false,
+        "explicacion": "Breaks slowly changing logic."
+      },
+      {
+        "texto_opcion": "Skip staging validation",
+        "es_correcta": false,
+        "explicacion": "Bad keys propagate."
+      },
+      {
+        "texto_opcion": "Filter null keys in staging and add not_null test on grain columns",
+        "es_correcta": true,
+        "explicacion": "Null keys break joins and uniqueness assumptions."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "null grain"
+    ]
+  },
+  {
+    "pregunta": "In a medallion lakehouse built with dbt: event_date shifts a day for global users. Which dbt approach is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use local server timezone implicitly",
+        "es_correcta": false,
+        "explicacion": "Inconsistent results."
+      },
+      {
+        "texto_opcion": "Cast to date without timezone conversion",
+        "es_correcta": false,
+        "explicacion": "Misleading daily aggregates."
+      },
+      {
+        "texto_opcion": "Normalize timestamps to UTC in staging before deriving dates",
+        "es_correcta": true,
+        "explicacion": "Timezone mishandling causes off-by-one date buckets."
+      },
+      {
+        "texto_opcion": "Fix only in BI tool",
+        "es_correcta": false,
+        "explicacion": "Should be consistent in marts."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "timezone bug"
+    ]
+  },
+  {
+    "pregunta": "dbt project review — a BigQuery analytics repo. surrogate key collisions across sources. What should the team do? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use row_number across full table reload",
+        "es_correcta": false,
+        "explicacion": "Unstable keys."
+      },
+      {
+        "texto_opcion": "Skip uniqueness test on SK",
+        "es_correcta": false,
+        "explicacion": "Collisions undetected."
+      },
+      {
+        "texto_opcion": "Hash only name field",
+        "es_correcta": false,
+        "explicacion": "Collisions across people/places."
+      },
+      {
+        "texto_opcion": "Include source system id in surrogate key hash inputs",
+        "es_correcta": true,
+        "explicacion": "Surrogate keys must reflect full grain including source."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "bad surrogate key"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a BigQuery analytics repo: incremental filter excludes late-arriving facts permanently. Select the correct answer. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable source freshness",
+        "es_correcta": false,
+        "explicacion": "Unrelated to late facts logic."
+      },
+      {
+        "texto_opcion": "Never revisit prior dates",
+        "es_correcta": false,
+        "explicacion": "Late data lost."
+      },
+      {
+        "texto_opcion": "Full refresh hourly for minor lateness",
+        "es_correcta": false,
+        "explicacion": "Costly overreaction."
+      },
+      {
+        "texto_opcion": "Use lookback window on incremental filter or merge with wider watermark",
+        "es_correcta": true,
+        "explicacion": "Strict watermark without lookback drops late records."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "incremental orphan"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a CI pipeline using dbt Core: unique test fails on fct_orders.order_id. Select the correct answer. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Delete failing rows in prod without fix",
+        "es_correcta": false,
+        "explicacion": "Hides symptom."
+      },
+      {
+        "texto_opcion": "Query failing keys in warehouse, trace upstream staging deduplication",
+        "es_correcta": true,
+        "explicacion": "Unique failures show duplicate grain; trace upstream joins/filters."
+      },
+      {
+        "texto_opcion": "Only re-run test without investigation",
+        "es_correcta": false,
+        "explicacion": "Failure may recur."
+      },
+      {
+        "texto_opcion": "Disable unique test",
+        "es_correcta": false,
+        "explicacion": "Allows duplicates."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "test failure debug"
+    ]
+  },
+  {
+    "pregunta": "exposure depends on deprecated model name. Context: a finance mart with strict SLAs. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Point exposure to raw source",
+        "es_correcta": false,
+        "explicacion": "Misrepresents mart usage."
+      },
+      {
+        "texto_opcion": "Delete exposure instead of fixing dependency",
+        "es_correcta": false,
+        "explicacion": "Loses downstream documentation."
+      },
+      {
+        "texto_opcion": "Ignore compile warnings on exposures",
+        "es_correcta": false,
+        "explicacion": "Docs lineage wrong."
+      },
+      {
+        "texto_opcion": "Update exposure depends_on to current model or version ref",
+        "es_correcta": true,
+        "explicacion": "exposures must reference existing nodes for lineage accuracy."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "exposure broken ref"
+    ]
+  },
+  {
+    "pregunta": "In a medallion lakehouse built with dbt: running total resets incorrectly per partition. Which dbt approach is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Fix window PARTITION BY and ORDER BY columns in SQL",
+        "es_correcta": true,
+        "explicacion": "Window frames require correct partition/order specification."
+      },
+      {
+        "texto_opcion": "Compute running total in Excel",
+        "es_correcta": false,
+        "explicacion": "Not scalable."
+      },
+      {
+        "texto_opcion": "Remove ORDER BY in window",
+        "es_correcta": false,
+        "explicacion": "Undefined frame behavior."
+      },
+      {
+        "texto_opcion": "Cross join before window",
+        "es_correcta": false,
+        "explicacion": "Row explosion."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "window frame error"
+    ]
+  },
+  {
+    "pregunta": "During `dbt build` troubleshooting in a finance mart with strict SLAs: unit test fixture expects columns not in model output. Select the correct answer. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Change warehouse schema only",
+        "es_correcta": false,
+        "explicacion": "Test fixtures still stale."
+      },
+      {
+        "texto_opcion": "Update unit test expected output or model SELECT to align schemas",
+        "es_correcta": true,
+        "explicacion": "Unit tests compare model logic to fixtures; schemas must match."
+      },
+      {
+        "texto_opcion": "Delete failing unit test file",
+        "es_correcta": false,
+        "explicacion": "Removes coverage."
+      },
+      {
+        "texto_opcion": "Disable unit tests in CI",
+        "es_correcta": false,
+        "explicacion": "Regressions slip through."
+      }
+    ],
+    "tags": [
+      "3.2",
+      "unit test mismatch"
+    ]
+  }
+]

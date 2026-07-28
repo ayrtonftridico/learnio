@@ -1,0 +1,1568 @@
+[
+  {
+    "pregunta": "carregue CSV local sem configuração de bucket de nuvem externo para teste. Contexto: fintech de pagamentos, residência estrita do GDPR.",
+    "opciones": [
+      {
+        "texto_opcion": "O estágio interno ignora o formato do arquivo",
+        "es_correcta": false,
+        "explicacion": "COPY ainda precisa do formato de arquivo."
+      },
+      {
+        "texto_opcion": "O estágio interno exige sempre o bucket S3 do cliente",
+        "es_correcta": false,
+        "explicacion": "Os estágios internos são gerenciados pelo Snowflake."
+      },
+      {
+        "texto_opcion": "Use usuário/tabela/estágio interno nomeado e PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Os estágios internos armazenam arquivos dentro do Snowflake para carregamento."
+      },
+      {
+        "texto_opcion": "PUT faz upload para o SSD do armazém permanentemente como tabela",
+        "es_correcta": false,
+        "explicacion": "PUT carrega arquivos para teste e depois COPY para tabela."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio interno"
+    ]
+  },
+  {
+    "pregunta": "carregue do S3 com credenciais integradas com segurança. Contexto: transportador logístico, ~200 milhões de linhas/dia.",
+    "opciones": [
+      {
+        "texto_opcion": "Crie um estágio externo com STORAGE INTEGRATION ou referências de credenciais cloud storage",
+        "es_correcta": true,
+        "explicacion": "Estágios externos apontam para caminhos cloud storage."
+      },
+      {
+        "texto_opcion": "O objeto de palco é igual a virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Diferentes tipos de objetos."
+      },
+      {
+        "texto_opcion": "O estágio externo armazena dados na RAM dos serviços de nuvem",
+        "es_correcta": false,
+        "explicacion": "Os dados permanecem em cloud storage."
+      },
+      {
+        "texto_opcion": "COPIE diretamente do caminho do laptop C:\\data sem estágio",
+        "es_correcta": false,
+        "explicacion": "Use PUT para preparar ou URL de estágio externo."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio externo"
+    ]
+  },
+  {
+    "pregunta": "Uma fintech de pagamentos (~200 milhões de linhas/dia, região oeste da Europa) deve: analisar CSV com linha de cabeçalho e vírgulas entre aspas. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Crie FILE FORMAT com TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "Os formatos de arquivo definem regras de análise para COPY."
+      },
+      {
+        "texto_opcion": "Carregue CSV como VARIANT apenas sem formato",
+        "es_correcta": false,
+        "explicacion": "O carregamento estruturado precisa de formato ou caminho JSON variant."
+      },
+      {
+        "texto_opcion": "Use o warehouse SIZE como formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "Incorreto."
+      },
+      {
+        "texto_opcion": "O formato do arquivo define clustering key",
+        "es_correcta": false,
+        "explicacion": "Objetos não relacionados."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Formato de arquivo"
+    ]
+  },
+  {
+    "pregunta": "Uma operadora de telecomunicações (consultas interativas em subsegundos, região brasilsul) deve: carregar em massa arquivos Parquet de @stage na tabela FACT. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "LIST @stage carrega dados na tabela",
+        "es_correcta": false,
+        "explicacion": "LIST enumera apenas arquivos."
+      },
+      {
+        "texto_opcion": "COPY INTO fato FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME ou lista de colunas",
+        "es_correcta": true,
+        "explicacion": "COPY INTO é o comando primário de carregamento em massa."
+      },
+      {
+        "texto_opcion": "COPY INTO exporta dados da tabela para o cenário por padrão, sem opção",
+        "es_correcta": false,
+        "explicacion": "COPY INTO carrega na tabela; unload usa sintaxe diferente."
+      },
+      {
+        "texto_opcion": "INSERT linha por linha do palco com cursor apenas no aplicativo",
+        "es_correcta": false,
+        "explicacion": "Ineficiente vs CÓPIA."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "Uma plataforma de viagens (~50.000 eventos/s, região norte da Europa) deve: detectar linhas incorretas durante o carregamento de CSV sem falhar em todo o lote. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE ou carregue para teste e rejeite o padrão de análise",
+        "es_correcta": true,
+        "explicacion": "Snowflake oferece suporte a opções de tratamento/validação de erros no carregamento."
+      },
+      {
+        "texto_opcion": "A validação requer apenas Snowpipe",
+        "es_correcta": false,
+        "explicacion": "COPY suporta modos de validação."
+      },
+      {
+        "texto_opcion": "Desative o tratamento de erros para pular linhas incorretas silenciosamente, sempre sem opção",
+        "es_correcta": false,
+        "explicacion": "Deve configurar o comportamento ON_ERROR explicitamente."
+      },
+      {
+        "texto_opcion": "Linhas incorretas corrigidas automaticamente pelo redimensionamento do armazém",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Validação de carga"
+    ]
+  },
+  {
+    "pregunta": "carregue apenas os arquivos que correspondam ao prefixo de data no caminho do estágio. Contexto: empresa de streaming de mídia, dados históricos em escala de petabytes.",
+    "opciones": [
+      {
+        "texto_opcion": "PATTERN é um recurso de política de rede",
+        "es_correcta": false,
+        "explicacion": "Recurso errado."
+      },
+      {
+        "texto_opcion": "PATTERN substitui a necessidade de palco",
+        "es_correcta": false,
+        "explicacion": "Estágio ainda necessário."
+      },
+      {
+        "texto_opcion": "Carregue todos os arquivos, incluindo sempre os arquivos excluídos manualmente, renomeando os arquivos do laptop",
+        "es_correcta": false,
+        "explicacion": "Use PADRÃO em CÓPIA."
+      },
+      {
+        "texto_opcion": "Use o parâmetro PATTERN em COPY INTO (por exemplo, '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filtra arquivos preparados para carregamento."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Correspondência de padrões"
+    ]
+  },
+  {
+    "pregunta": "Cenário de plataforma IoT industrial — preserve o nome do arquivo de origem na coluna de auditoria da tabela de destino. O que eles deveriam implementar?",
+    "opciones": [
+      {
+        "texto_opcion": "Use METADATA$FILENAME na lista COPY SELECT",
+        "es_correcta": true,
+        "explicacion": "As colunas de metadados capturam o contexto de carga."
+      },
+      {
+        "texto_opcion": "String de nome de arquivo codificado em cada COPY apenas manualmente",
+        "es_correcta": false,
+        "explicacion": "As funções METADATA são automatizadas."
+      },
+      {
+        "texto_opcion": "Os metadados do nome do arquivo requerem apenas tabela externa",
+        "es_correcta": false,
+        "explicacion": "Disponível em metadados COPY."
+      },
+      {
+        "texto_opcion": "METADATA$FILENAME armazenado apenas em Fail-safe",
+        "es_correcta": false,
+        "explicacion": "Disponível em carregamento/consulta."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Carregamento de metadados"
+    ]
+  },
+  {
+    "pregunta": "Uma transportadora logística (~50.000 eventos/s, região oeste da Europa) deve: carregar linhas JSON na coluna VARIANT. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "JSON deve ser flattened antes de COPY sempre",
+        "es_correcta": false,
+        "explicacion": "Pode carregar JSON bruto para VARIANT."
+      },
+      {
+        "texto_opcion": "Converter JSON em CSV primeiro é sempre obrigatório",
+        "es_correcta": false,
+        "explicacion": "Carga JSON direta suportada."
+      },
+      {
+        "texto_opcion": "COPY INTO com FILE_FORMAT TYPE=JSON e coluna de destino VARIANT",
+        "es_correcta": true,
+        "explicacion": "JSON é carregado em VARIANT preservando a estrutura."
+      },
+      {
+        "texto_opcion": "VARIANT carrega apenas via Snowpipe nunca COPY",
+        "es_correcta": false,
+        "explicacion": "COPY suporta VARIANT."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Carga não estruturada"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de estúdio de jogos com residência estrita no GDPR: exporte os resultados da consulta para S3 Parquet para parceiro. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "SELECT INTO OUTFILE local no caminho do laptop do servidor Snowflake",
+        "es_correcta": false,
+        "explicacion": "Use o estágio COPY INTO para descarregar a nuvem."
+      },
+      {
+        "texto_opcion": "COPY INTO @external_stage FROM (SELECT ...) FILE_FORMAT=(TYPE=PARQUET)",
+        "es_correcta": true,
+        "explicacion": "COPY INTO @stage descarrega os resultados da consulta em arquivos."
+      },
+      {
+        "texto_opcion": "Descarregar requer zero-copy clone",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      },
+      {
+        "texto_opcion": "PUT descarrega tabela para S3",
+        "es_correcta": false,
+        "explicacion": "PUT carrega para o estágio interno; COPY descarrega."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Descarregar"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de fintech de pagamentos com aproximadamente 200 milhões de linhas/dia: reduza o tamanho do arquivo de carregamento para transferências CSV. Melhor escolha?",
+    "opciones": [
+      {
+        "texto_opcion": "Use arquivos compactados GZIP e formato de arquivo COMPRESSION=GZIP",
+        "es_correcta": true,
+        "explicacion": "Arquivos compactados reduzem o tempo de transferência e carregamento."
+      },
+      {
+        "texto_opcion": "Desative a compactação para ajudar o COPY a analisar sempre mais rápido",
+        "es_correcta": false,
+        "explicacion": "A compressão geralmente é positiva."
+      },
+      {
+        "texto_opcion": "Apenas Parquet pode ser compactado",
+        "es_correcta": false,
+        "explicacion": "CSV/GZIP comum."
+      },
+      {
+        "texto_opcion": "Compactação definida no warehouse, não no formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "O formato/estágio do arquivo lida com a compactação."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Compressão"
+    ]
+  },
+  {
+    "pregunta": "Uma plataforma de viagens (aproximadamente 200 milhões de linhas/dia, região sudeste) deve: evitar incorporar chaves AWS de longa duração na definição do estágio. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Desative a criptografia no bucket do cenário para obter velocidade",
+        "es_correcta": false,
+        "explicacion": "Risco de segurança."
+      },
+      {
+        "texto_opcion": "Use credenciais de função PUBLIC para estágio",
+        "es_correcta": false,
+        "explicacion": "Inseguro."
+      },
+      {
+        "texto_opcion": "Cole a chave de acesso na string de consulta do URL do estágio no git",
+        "es_correcta": false,
+        "explicacion": "Vazamento secreto."
+      },
+      {
+        "texto_opcion": "Use STORAGE INTEGRATION com confiança de função IAM para estágios S3",
+        "es_correcta": true,
+        "explicacion": "As integrações de armazenamento fornecem delegação segura de credenciais na nuvem."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Credenciais de estágio"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (brazilsouth): Transformação durante carregamento com expressões de colunas leves. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "A transformação requer uma ferramenta ETL separada sempre antes do Snowflake",
+        "es_correcta": false,
+        "explicacion": "Transformações em carga suportadas."
+      },
+      {
+        "texto_opcion": "A transformação COPY desativa micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Os dados carregados ainda estão micro-partitioned."
+      },
+      {
+        "texto_opcion": "Transforme apenas com Snowpipe e não COPY",
+        "es_correcta": false,
+        "explicacion": "COPY oferece suporte a transformações SELECT."
+      },
+      {
+        "texto_opcion": "COPY INTO ... FROM (SELECIONE $1, TO_TIMESTAMP($2), ... FROM @estágio)",
+        "es_correcta": true,
+        "explicacion": "A transformação SELECT em COPY se aplica durante o carregamento."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Ordem de carga"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de plataforma IoT industrial com janelas em lote por hora: carregue CSV local sem configuração de bucket de nuvem externa para teste. Melhor escolha (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "O estágio interno exige sempre o bucket S3 do cliente",
+        "es_correcta": false,
+        "explicacion": "Os estágios internos são gerenciados pelo Snowflake."
+      },
+      {
+        "texto_opcion": "Use usuário/tabela/estágio interno nomeado e PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Os estágios internos armazenam arquivos dentro do Snowflake para carregamento."
+      },
+      {
+        "texto_opcion": "PUT faz upload para o SSD do armazém permanentemente como tabela",
+        "es_correcta": false,
+        "explicacion": "PUT carrega arquivos para teste e depois COPY para tabela."
+      },
+      {
+        "texto_opcion": "O estágio interno ignora o formato do arquivo",
+        "es_correcta": false,
+        "explicacion": "COPY ainda precisa do formato de arquivo."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio interno"
+    ]
+  },
+  {
+    "pregunta": "carregue do S3 com credenciais integradas com segurança. Contexto: fintech de pagamentos, ~50.000 eventos/s. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "O objeto de palco é igual a virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Diferentes tipos de objetos."
+      },
+      {
+        "texto_opcion": "COPIE diretamente do caminho do laptop C:\\data sem estágio",
+        "es_correcta": false,
+        "explicacion": "Use PUT para preparar ou URL de estágio externo."
+      },
+      {
+        "texto_opcion": "Crie um estágio externo com STORAGE INTEGRATION ou referências de credenciais cloud storage",
+        "es_correcta": true,
+        "explicacion": "Estágios externos apontam para caminhos cloud storage."
+      },
+      {
+        "texto_opcion": "O estágio externo armazena dados na RAM dos serviços de nuvem",
+        "es_correcta": false,
+        "explicacion": "Os dados permanecem em cloud storage."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio externo"
+    ]
+  },
+  {
+    "pregunta": "Cenário de estúdio de jogos – analise CSV com linha de cabeçalho e vírgulas entre aspas. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Crie FILE FORMAT com TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "Os formatos de arquivo definem regras de análise para COPY."
+      },
+      {
+        "texto_opcion": "O formato do arquivo define clustering key",
+        "es_correcta": false,
+        "explicacion": "Objetos não relacionados."
+      },
+      {
+        "texto_opcion": "Carregue CSV como VARIANT apenas sem formato",
+        "es_correcta": false,
+        "explicacion": "O carregamento estruturado precisa de formato ou caminho JSON variant."
+      },
+      {
+        "texto_opcion": "Use o warehouse SIZE como formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "Incorreto."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Formato de arquivo"
+    ]
+  },
+  {
+    "pregunta": "Cenário da plataforma de viagens - carregamento em massa de arquivos Parquet de @stage na tabela FACT. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "LIST @stage carrega dados na tabela",
+        "es_correcta": false,
+        "explicacion": "LIST enumera apenas arquivos."
+      },
+      {
+        "texto_opcion": "INSERT linha por linha do palco com cursor apenas no aplicativo",
+        "es_correcta": false,
+        "explicacion": "Ineficiente vs CÓPIA."
+      },
+      {
+        "texto_opcion": "COPY INTO exporta dados da tabela para o cenário por padrão, sem opção",
+        "es_correcta": false,
+        "explicacion": "COPY INTO carrega na tabela; unload usa sintaxe diferente."
+      },
+      {
+        "texto_opcion": "COPY INTO fato FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME ou lista de colunas",
+        "es_correcta": true,
+        "explicacion": "COPY INTO é o comando primário de carregamento em massa."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "detecte linhas incorretas durante o carregamento de CSV sem falhar no lote inteiro. Contexto: mercado online, aproximadamente 200 milhões de linhas/dia. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE ou carregue para teste e rejeite o padrão de análise",
+        "es_correcta": true,
+        "explicacion": "Snowflake oferece suporte a opções de tratamento/validação de erros no carregamento."
+      },
+      {
+        "texto_opcion": "Desative o tratamento de erros para pular linhas incorretas silenciosamente, sempre sem opção",
+        "es_correcta": false,
+        "explicacion": "Deve configurar o comportamento ON_ERROR explicitamente."
+      },
+      {
+        "texto_opcion": "Linhas incorretas corrigidas automaticamente pelo redimensionamento do armazém",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      },
+      {
+        "texto_opcion": "A validação requer apenas Snowpipe",
+        "es_correcta": false,
+        "explicacion": "COPY suporta modos de validação."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Validação de carga"
+    ]
+  },
+  {
+    "pregunta": "Um estúdio de jogos (consultas interativas em subsegundos, região BrasilSul) deve: carregar apenas arquivos que correspondam ao prefixo de data no caminho do estágio. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use o parâmetro PATTERN em COPY INTO (por exemplo, '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filtra arquivos preparados para carregamento."
+      },
+      {
+        "texto_opcion": "PATTERN substitui a necessidade de palco",
+        "es_correcta": false,
+        "explicacion": "Estágio ainda necessário."
+      },
+      {
+        "texto_opcion": "PATTERN é um recurso de política de rede",
+        "es_correcta": false,
+        "explicacion": "Recurso errado."
+      },
+      {
+        "texto_opcion": "Carregue todos os arquivos, incluindo sempre os arquivos excluídos manualmente, renomeando os arquivos do laptop",
+        "es_correcta": false,
+        "explicacion": "Use PADRÃO em CÓPIA."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Correspondência de padrões"
+    ]
+  },
+  {
+    "pregunta": "Um mercado on-line (residência estrita do GDPR, região sudeste) deve: preservar o nome do arquivo de origem na coluna de auditoria da tabela de destino. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "String de nome de arquivo codificado em cada COPY apenas manualmente",
+        "es_correcta": false,
+        "explicacion": "As funções METADATA são automatizadas."
+      },
+      {
+        "texto_opcion": "METADATA$FILENAME armazenado apenas em Fail-safe",
+        "es_correcta": false,
+        "explicacion": "Disponível em carregamento/consulta."
+      },
+      {
+        "texto_opcion": "Use METADATA$FILENAME na lista COPY SELECT",
+        "es_correcta": true,
+        "explicacion": "As colunas de metadados capturam o contexto de carga."
+      },
+      {
+        "texto_opcion": "Os metadados do nome do arquivo requerem apenas tabela externa",
+        "es_correcta": false,
+        "explicacion": "Disponível em metadados COPY."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Carregamento de metadados"
+    ]
+  },
+  {
+    "pregunta": "Um estúdio de jogos (~200 milhões de linhas/dia, região BrasilSul) deve: carregar linhas JSON na coluna VARIANT. Qual opção se adapta melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Converter JSON em CSV primeiro é sempre obrigatório",
+        "es_correcta": false,
+        "explicacion": "Carga JSON direta suportada."
+      },
+      {
+        "texto_opcion": "COPY INTO com FILE_FORMAT TYPE=JSON e coluna de destino VARIANT",
+        "es_correcta": true,
+        "explicacion": "JSON é carregado em VARIANT preservando a estrutura."
+      },
+      {
+        "texto_opcion": "JSON deve ser flattened antes de COPY sempre",
+        "es_correcta": false,
+        "explicacion": "Pode carregar JSON bruto para VARIANT."
+      },
+      {
+        "texto_opcion": "VARIANT carrega apenas via Snowpipe nunca COPY",
+        "es_correcta": false,
+        "explicacion": "COPY suporta VARIANT."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Carga não estruturada"
+    ]
+  },
+  {
+    "pregunta": "Cenário de concessionária de energia — exporte os resultados da consulta para S3 Parquet para parceiro. O que eles deveriam implementar? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "PUT descarrega tabela para S3",
+        "es_correcta": false,
+        "explicacion": "PUT carrega para o estágio interno; COPY descarrega."
+      },
+      {
+        "texto_opcion": "COPY INTO @external_stage FROM (SELECT ...) FILE_FORMAT=(TYPE=PARQUET)",
+        "es_correcta": true,
+        "explicacion": "COPY INTO @stage descarrega os resultados da consulta em arquivos."
+      },
+      {
+        "texto_opcion": "Descarregar requer zero-copy clone",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      },
+      {
+        "texto_opcion": "SELECT INTO OUTFILE local no caminho do laptop do servidor Snowflake",
+        "es_correcta": false,
+        "explicacion": "Use o estágio COPY INTO para descarregar a nuvem."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Descarregar"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de transportadora logística com aproximadamente 200 milhões de linhas/dia: reduza o tamanho do arquivo de carga para transferências CSV. Melhor escolha (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Apenas Parquet pode ser compactado",
+        "es_correcta": false,
+        "explicacion": "CSV/GZIP comum."
+      },
+      {
+        "texto_opcion": "Use arquivos compactados GZIP e formato de arquivo COMPRESSION=GZIP",
+        "es_correcta": true,
+        "explicacion": "Arquivos compactados reduzem o tempo de transferência e carregamento."
+      },
+      {
+        "texto_opcion": "Desative a compactação para ajudar o COPY a analisar sempre mais rápido",
+        "es_correcta": false,
+        "explicacion": "A compressão geralmente é positiva."
+      },
+      {
+        "texto_opcion": "Compactação definida no warehouse, não no formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "O formato/estágio do arquivo lida com a compactação."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Compressão"
+    ]
+  },
+  {
+    "pregunta": "Um mercado on-line (aproximadamente 200 milhões de linhas/dia, região eastus) deve: evitar incorporar chaves AWS de longa duração na definição do estágio. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use credenciais de função PUBLIC para estágio",
+        "es_correcta": false,
+        "explicacion": "Inseguro."
+      },
+      {
+        "texto_opcion": "Cole a chave de acesso na string de consulta do URL do estágio no git",
+        "es_correcta": false,
+        "explicacion": "Vazamento secreto."
+      },
+      {
+        "texto_opcion": "Use STORAGE INTEGRATION com confiança de função IAM para estágios S3",
+        "es_correcta": true,
+        "explicacion": "As integrações de armazenamento fornecem delegação segura de credenciais na nuvem."
+      },
+      {
+        "texto_opcion": "Desative a criptografia no bucket do cenário para obter velocidade",
+        "es_correcta": false,
+        "explicacion": "Risco de segurança."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Credenciais de estágio"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (australiaeast): transformação durante o carregamento com expressões de coluna leves. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Transforme apenas com Snowpipe e não COPY",
+        "es_correcta": false,
+        "explicacion": "COPY oferece suporte a transformações SELECT."
+      },
+      {
+        "texto_opcion": "COPY INTO ... FROM (SELECIONE $1, TO_TIMESTAMP($2), ... FROM @estágio)",
+        "es_correcta": true,
+        "explicacion": "A transformação SELECT em COPY se aplica durante o carregamento."
+      },
+      {
+        "texto_opcion": "A transformação COPY desativa micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Os dados carregados ainda estão micro-partitioned."
+      },
+      {
+        "texto_opcion": "A transformação requer uma ferramenta ETL separada sempre antes do Snowflake",
+        "es_correcta": false,
+        "explicacion": "Transformações em carga suportadas."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Ordem de carga"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de transportadora logística com aproximadamente 5 TB/dia: carregue CSV local sem configuração de bucket de nuvem externo para teste. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Use usuário/tabela/estágio interno nomeado e PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Os estágios internos armazenam arquivos dentro do Snowflake para carregamento."
+      },
+      {
+        "texto_opcion": "O estágio interno ignora o formato do arquivo",
+        "es_correcta": false,
+        "explicacion": "COPY ainda precisa do formato de arquivo."
+      },
+      {
+        "texto_opcion": "O estágio interno exige sempre o bucket S3 do cliente",
+        "es_correcta": false,
+        "explicacion": "Os estágios internos são gerenciados pelo Snowflake."
+      },
+      {
+        "texto_opcion": "PUT faz upload para o SSD do armazém permanentemente como tabela",
+        "es_correcta": false,
+        "explicacion": "PUT carrega arquivos para teste e depois COPY para tabela."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio interno"
+    ]
+  },
+  {
+    "pregunta": "Cenário do provedor de saúde: carregue do S3 com credenciais integradas de forma segura. O que eles deveriam implementar? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Crie um estágio externo com STORAGE INTEGRATION ou referências de credenciais cloud storage",
+        "es_correcta": true,
+        "explicacion": "Estágios externos apontam para caminhos cloud storage."
+      },
+      {
+        "texto_opcion": "O estágio externo armazena dados na RAM dos serviços de nuvem",
+        "es_correcta": false,
+        "explicacion": "Os dados permanecem em cloud storage."
+      },
+      {
+        "texto_opcion": "COPIE diretamente do caminho do laptop C:\\data sem estágio",
+        "es_correcta": false,
+        "explicacion": "Use PUT para preparar ou URL de estágio externo."
+      },
+      {
+        "texto_opcion": "O objeto de palco é igual a virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Diferentes tipos de objetos."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio externo"
+    ]
+  },
+  {
+    "pregunta": "analise CSV com linha de cabeçalho e vírgulas entre aspas. Contexto: varejista global, aproximadamente 50.000 eventos/s. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Crie FILE FORMAT com TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "Os formatos de arquivo definem regras de análise para COPY."
+      },
+      {
+        "texto_opcion": "O formato do arquivo define clustering key",
+        "es_correcta": false,
+        "explicacion": "Objetos não relacionados."
+      },
+      {
+        "texto_opcion": "Use o warehouse SIZE como formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "Incorreto."
+      },
+      {
+        "texto_opcion": "Carregue CSV como VARIANT apenas sem formato",
+        "es_correcta": false,
+        "explicacion": "O carregamento estruturado precisa de formato ou caminho JSON variant."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Formato de arquivo"
+    ]
+  },
+  {
+    "pregunta": "carregar arquivos Parquet em massa de @stage na tabela FACT. Contexto: fintech de pagamentos, dados históricos em escala de petabytes. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "COPY INTO fato FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME ou lista de colunas",
+        "es_correcta": true,
+        "explicacion": "COPY INTO é o comando primário de carregamento em massa."
+      },
+      {
+        "texto_opcion": "COPY INTO exporta dados da tabela para o cenário por padrão, sem opção",
+        "es_correcta": false,
+        "explicacion": "COPY INTO carrega na tabela; unload usa sintaxe diferente."
+      },
+      {
+        "texto_opcion": "INSERT linha por linha do palco com cursor apenas no aplicativo",
+        "es_correcta": false,
+        "explicacion": "Ineficiente vs CÓPIA."
+      },
+      {
+        "texto_opcion": "LIST @stage carrega dados na tabela",
+        "es_correcta": false,
+        "explicacion": "LIST enumera apenas arquivos."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "detecte linhas incorretas durante o carregamento de CSV sem falhar no lote inteiro. Contexto: estúdio de jogos, aproximadamente 50.000 eventos/s. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE ou carregue para teste e rejeite o padrão de análise",
+        "es_correcta": true,
+        "explicacion": "Snowflake oferece suporte a opções de tratamento/validação de erros no carregamento."
+      },
+      {
+        "texto_opcion": "Desative o tratamento de erros para pular linhas incorretas silenciosamente, sempre sem opção",
+        "es_correcta": false,
+        "explicacion": "Deve configurar o comportamento ON_ERROR explicitamente."
+      },
+      {
+        "texto_opcion": "A validação requer apenas Snowpipe",
+        "es_correcta": false,
+        "explicacion": "COPY suporta modos de validação."
+      },
+      {
+        "texto_opcion": "Linhas incorretas corrigidas automaticamente pelo redimensionamento do armazém",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Validação de carga"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidente (eastus): carrega apenas arquivos que correspondam ao prefixo de data no caminho do estágio. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "PATTERN é um recurso de política de rede",
+        "es_correcta": false,
+        "explicacion": "Recurso errado."
+      },
+      {
+        "texto_opcion": "Use o parâmetro PATTERN em COPY INTO (por exemplo, '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filtra arquivos preparados para carregamento."
+      },
+      {
+        "texto_opcion": "Carregue todos os arquivos, incluindo sempre os arquivos excluídos manualmente, renomeando os arquivos do laptop",
+        "es_correcta": false,
+        "explicacion": "Use PADRÃO em CÓPIA."
+      },
+      {
+        "texto_opcion": "PATTERN substitui a necessidade de palco",
+        "es_correcta": false,
+        "explicacion": "Estágio ainda necessário."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Correspondência de padrões"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de empresa de streaming de mídia com painéis quase em tempo real: preserve o nome do arquivo de origem na coluna de auditoria da tabela de destino. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "String de nome de arquivo codificado em cada COPY apenas manualmente",
+        "es_correcta": false,
+        "explicacion": "As funções METADATA são automatizadas."
+      },
+      {
+        "texto_opcion": "Use METADATA$FILENAME na lista COPY SELECT",
+        "es_correcta": true,
+        "explicacion": "As colunas de metadados capturam o contexto de carga."
+      },
+      {
+        "texto_opcion": "Os metadados do nome do arquivo requerem apenas tabela externa",
+        "es_correcta": false,
+        "explicacion": "Disponível em metadados COPY."
+      },
+      {
+        "texto_opcion": "METADATA$FILENAME armazenado apenas em Fail-safe",
+        "es_correcta": false,
+        "explicacion": "Disponível em carregamento/consulta."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Carregamento de metadados"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidente (norte da Europa): carregue linhas JSON na coluna VARIANT. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "COPY INTO com FILE_FORMAT TYPE=JSON e coluna de destino VARIANT",
+        "es_correcta": true,
+        "explicacion": "JSON é carregado em VARIANT preservando a estrutura."
+      },
+      {
+        "texto_opcion": "JSON deve ser flattened antes de COPY sempre",
+        "es_correcta": false,
+        "explicacion": "Pode carregar JSON bruto para VARIANT."
+      },
+      {
+        "texto_opcion": "VARIANT carrega apenas via Snowpipe nunca COPY",
+        "es_correcta": false,
+        "explicacion": "COPY suporta VARIANT."
+      },
+      {
+        "texto_opcion": "Converter JSON em CSV primeiro é sempre obrigatório",
+        "es_correcta": false,
+        "explicacion": "Carga JSON direta suportada."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Carga não estruturada"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidente (eastus): exporte os resultados da consulta para S3 Parquet para parceiro. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "SELECT INTO OUTFILE local no caminho do laptop do servidor Snowflake",
+        "es_correcta": false,
+        "explicacion": "Use o estágio COPY INTO para descarregar a nuvem."
+      },
+      {
+        "texto_opcion": "Descarregar requer zero-copy clone",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      },
+      {
+        "texto_opcion": "COPY INTO @external_stage FROM (SELECT ...) FILE_FORMAT=(TYPE=PARQUET)",
+        "es_correcta": true,
+        "explicacion": "COPY INTO @stage descarrega os resultados da consulta em arquivos."
+      },
+      {
+        "texto_opcion": "PUT descarrega tabela para S3",
+        "es_correcta": false,
+        "explicacion": "PUT carrega para o estágio interno; COPY descarrega."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Descarregar"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de concessionária de energia com consultas interativas em menos de um segundo: reduza o tamanho do arquivo de carga para transferências CSV. Melhor escolha (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Desative a compactação para ajudar o COPY a analisar sempre mais rápido",
+        "es_correcta": false,
+        "explicacion": "A compressão geralmente é positiva."
+      },
+      {
+        "texto_opcion": "Compactação definida no warehouse, não no formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "O formato/estágio do arquivo lida com a compactação."
+      },
+      {
+        "texto_opcion": "Apenas Parquet pode ser compactado",
+        "es_correcta": false,
+        "explicacion": "CSV/GZIP comum."
+      },
+      {
+        "texto_opcion": "Use arquivos compactados GZIP e formato de arquivo COMPRESSION=GZIP",
+        "es_correcta": true,
+        "explicacion": "Arquivos compactados reduzem o tempo de transferência e carregamento."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Compressão"
+    ]
+  },
+  {
+    "pregunta": "evite incorporar chaves AWS de longa duração na definição do estágio. Contexto: transportador logístico, residência estrita no GDPR. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use credenciais de função PUBLIC para estágio",
+        "es_correcta": false,
+        "explicacion": "Inseguro."
+      },
+      {
+        "texto_opcion": "Cole a chave de acesso na string de consulta do URL do estágio no git",
+        "es_correcta": false,
+        "explicacion": "Vazamento secreto."
+      },
+      {
+        "texto_opcion": "Use STORAGE INTEGRATION com confiança de função IAM para estágios S3",
+        "es_correcta": true,
+        "explicacion": "As integrações de armazenamento fornecem delegação segura de credenciais na nuvem."
+      },
+      {
+        "texto_opcion": "Desative a criptografia no bucket do cenário para obter velocidade",
+        "es_correcta": false,
+        "explicacion": "Risco de segurança."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Credenciais de estágio"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (sudestesia): transformação durante o carregamento com expressões de coluna leves. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Transforme apenas com Snowpipe e não COPY",
+        "es_correcta": false,
+        "explicacion": "COPY oferece suporte a transformações SELECT."
+      },
+      {
+        "texto_opcion": "A transformação COPY desativa micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Os dados carregados ainda estão micro-partitioned."
+      },
+      {
+        "texto_opcion": "A transformação requer uma ferramenta ETL separada sempre antes do Snowflake",
+        "es_correcta": false,
+        "explicacion": "Transformações em carga suportadas."
+      },
+      {
+        "texto_opcion": "COPY INTO ... FROM (SELECIONE $1, TO_TIMESTAMP($2), ... FROM @estágio)",
+        "es_correcta": true,
+        "explicacion": "A transformação SELECT em COPY se aplica durante o carregamento."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Ordem de carga"
+    ]
+  },
+  {
+    "pregunta": "carregue CSV local sem configuração de bucket de nuvem externo para teste. Contexto: mercado online, aproximadamente 200 milhões de linhas/dia. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use usuário/tabela/estágio interno nomeado e PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Os estágios internos armazenam arquivos dentro do Snowflake para carregamento."
+      },
+      {
+        "texto_opcion": "O estágio interno exige sempre o bucket S3 do cliente",
+        "es_correcta": false,
+        "explicacion": "Os estágios internos são gerenciados pelo Snowflake."
+      },
+      {
+        "texto_opcion": "PUT faz upload para o SSD do armazém permanentemente como tabela",
+        "es_correcta": false,
+        "explicacion": "PUT carrega arquivos para teste e depois COPY para tabela."
+      },
+      {
+        "texto_opcion": "O estágio interno ignora o formato do arquivo",
+        "es_correcta": false,
+        "explicacion": "COPY ainda precisa do formato de arquivo."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio interno"
+    ]
+  },
+  {
+    "pregunta": "carregue do S3 com credenciais integradas com segurança. Contexto: concessionária de energia, aproximadamente 200 milhões de linhas/dia. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "O objeto de palco é igual a virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Diferentes tipos de objetos."
+      },
+      {
+        "texto_opcion": "COPIE diretamente do caminho do laptop C:\\data sem estágio",
+        "es_correcta": false,
+        "explicacion": "Use PUT para preparar ou URL de estágio externo."
+      },
+      {
+        "texto_opcion": "Crie um estágio externo com STORAGE INTEGRATION ou referências de credenciais cloud storage",
+        "es_correcta": true,
+        "explicacion": "Estágios externos apontam para caminhos cloud storage."
+      },
+      {
+        "texto_opcion": "O estágio externo armazena dados na RAM dos serviços de nuvem",
+        "es_correcta": false,
+        "explicacion": "Os dados permanecem em cloud storage."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio externo"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidente (australiaeast): analise CSV com linha de cabeçalho e vírgulas entre aspas. Selecione o design mais apropriado. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "O formato do arquivo define clustering key",
+        "es_correcta": false,
+        "explicacion": "Objetos não relacionados."
+      },
+      {
+        "texto_opcion": "Carregue CSV como VARIANT apenas sem formato",
+        "es_correcta": false,
+        "explicacion": "O carregamento estruturado precisa de formato ou caminho JSON variant."
+      },
+      {
+        "texto_opcion": "Use o warehouse SIZE como formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "Incorreto."
+      },
+      {
+        "texto_opcion": "Crie FILE FORMAT com TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "Os formatos de arquivo definem regras de análise para COPY."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Formato de arquivo"
+    ]
+  },
+  {
+    "pregunta": "Cenário de plataforma IoT industrial - carregamento em massa de arquivos Parquet de @stage na tabela FACT. O que eles deveriam implementar? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "LIST @stage carrega dados na tabela",
+        "es_correcta": false,
+        "explicacion": "LIST enumera apenas arquivos."
+      },
+      {
+        "texto_opcion": "COPY INTO exporta dados da tabela para o cenário por padrão, sem opção",
+        "es_correcta": false,
+        "explicacion": "COPY INTO carrega na tabela; unload usa sintaxe diferente."
+      },
+      {
+        "texto_opcion": "INSERT linha por linha do palco com cursor apenas no aplicativo",
+        "es_correcta": false,
+        "explicacion": "Ineficiente vs CÓPIA."
+      },
+      {
+        "texto_opcion": "COPY INTO fato FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME ou lista de colunas",
+        "es_correcta": true,
+        "explicacion": "COPY INTO é o comando primário de carregamento em massa."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (australiaeast): detecte linhas incorretas durante o carregamento de CSV sem falhar no lote inteiro. Selecione o design mais apropriado. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Desative o tratamento de erros para pular linhas incorretas silenciosamente, sempre sem opção",
+        "es_correcta": false,
+        "explicacion": "Deve configurar o comportamento ON_ERROR explicitamente."
+      },
+      {
+        "texto_opcion": "A validação requer apenas Snowpipe",
+        "es_correcta": false,
+        "explicacion": "COPY suporta modos de validação."
+      },
+      {
+        "texto_opcion": "Linhas incorretas corrigidas automaticamente pelo redimensionamento do armazém",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      },
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE ou carregue para teste e rejeite o padrão de análise",
+        "es_correcta": true,
+        "explicacion": "Snowflake oferece suporte a opções de tratamento/validação de erros no carregamento."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Validação de carga"
+    ]
+  },
+  {
+    "pregunta": "Uma plataforma IoT industrial (janelas de lote por hora, região oeste da Europa) deve: carregar apenas arquivos que correspondam ao prefixo de data no caminho do estágio. Qual opção se adapta melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "PATTERN é um recurso de política de rede",
+        "es_correcta": false,
+        "explicacion": "Recurso errado."
+      },
+      {
+        "texto_opcion": "Carregue todos os arquivos, incluindo sempre os arquivos excluídos manualmente, renomeando os arquivos do laptop",
+        "es_correcta": false,
+        "explicacion": "Use PADRÃO em CÓPIA."
+      },
+      {
+        "texto_opcion": "PATTERN substitui a necessidade de palco",
+        "es_correcta": false,
+        "explicacion": "Estágio ainda necessário."
+      },
+      {
+        "texto_opcion": "Use o parâmetro PATTERN em COPY INTO (por exemplo, '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filtra arquivos preparados para carregamento."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Correspondência de padrões"
+    ]
+  },
+  {
+    "pregunta": "Uma concessionária de energia (dados históricos em escala de petabytes, região oeste da Europa) deve: preservar o nome do arquivo de origem na coluna de auditoria da tabela de destino. Qual opção se adapta melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Os metadados do nome do arquivo requerem apenas tabela externa",
+        "es_correcta": false,
+        "explicacion": "Disponível em metadados COPY."
+      },
+      {
+        "texto_opcion": "Use METADATA$FILENAME na lista COPY SELECT",
+        "es_correcta": true,
+        "explicacion": "As colunas de metadados capturam o contexto de carga."
+      },
+      {
+        "texto_opcion": "String de nome de arquivo codificado em cada COPY apenas manualmente",
+        "es_correcta": false,
+        "explicacion": "As funções METADATA são automatizadas."
+      },
+      {
+        "texto_opcion": "METADATA$FILENAME armazenado apenas em Fail-safe",
+        "es_correcta": false,
+        "explicacion": "Disponível em carregamento/consulta."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Carregamento de metadados"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidente (westeurope): carregue linhas JSON na coluna VARIANT. Selecione o design mais apropriado.",
+    "opciones": [
+      {
+        "texto_opcion": "JSON deve ser flattened antes de COPY sempre",
+        "es_correcta": false,
+        "explicacion": "Pode carregar JSON bruto para VARIANT."
+      },
+      {
+        "texto_opcion": "Converter JSON em CSV primeiro é sempre obrigatório",
+        "es_correcta": false,
+        "explicacion": "Carga JSON direta suportada."
+      },
+      {
+        "texto_opcion": "COPY INTO com FILE_FORMAT TYPE=JSON e coluna de destino VARIANT",
+        "es_correcta": true,
+        "explicacion": "JSON é carregado em VARIANT preservando a estrutura."
+      },
+      {
+        "texto_opcion": "VARIANT carrega apenas via Snowpipe nunca COPY",
+        "es_correcta": false,
+        "explicacion": "COPY suporta VARIANT."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Carga não estruturada"
+    ]
+  },
+  {
+    "pregunta": "Cenário da seguradora — exporte os resultados da consulta para S3 Parquet para parceiro. O que eles deveriam implementar? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "PUT descarrega tabela para S3",
+        "es_correcta": false,
+        "explicacion": "PUT carrega para o estágio interno; COPY descarrega."
+      },
+      {
+        "texto_opcion": "SELECT INTO OUTFILE local no caminho do laptop do servidor Snowflake",
+        "es_correcta": false,
+        "explicacion": "Use o estágio COPY INTO para descarregar a nuvem."
+      },
+      {
+        "texto_opcion": "Descarregar requer zero-copy clone",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      },
+      {
+        "texto_opcion": "COPY INTO @external_stage FROM (SELECT ...) FILE_FORMAT=(TYPE=PARQUET)",
+        "es_correcta": true,
+        "explicacion": "COPY INTO @stage descarrega os resultados da consulta em arquivos."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Descarregar"
+    ]
+  },
+  {
+    "pregunta": "Para uma carga de trabalho de operadora de telecomunicações com aproximadamente 50.000 eventos/s: reduza o tamanho do arquivo de carregamento para transferências CSV. Melhor escolha (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Apenas Parquet pode ser compactado",
+        "es_correcta": false,
+        "explicacion": "CSV/GZIP comum."
+      },
+      {
+        "texto_opcion": "Desative a compactação para ajudar o COPY a analisar sempre mais rápido",
+        "es_correcta": false,
+        "explicacion": "A compressão geralmente é positiva."
+      },
+      {
+        "texto_opcion": "Use arquivos compactados GZIP e formato de arquivo COMPRESSION=GZIP",
+        "es_correcta": true,
+        "explicacion": "Arquivos compactados reduzem o tempo de transferência e carregamento."
+      },
+      {
+        "texto_opcion": "Compactação definida no warehouse, não no formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "O formato/estágio do arquivo lida com a compactação."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Compressão"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (australiaeast): evite incorporar chaves AWS de longa duração na definição do estágio. Selecione o design mais apropriado. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use STORAGE INTEGRATION com confiança de função IAM para estágios S3",
+        "es_correcta": true,
+        "explicacion": "As integrações de armazenamento fornecem delegação segura de credenciais na nuvem."
+      },
+      {
+        "texto_opcion": "Desative a criptografia no bucket do cenário para obter velocidade",
+        "es_correcta": false,
+        "explicacion": "Risco de segurança."
+      },
+      {
+        "texto_opcion": "Cole a chave de acesso na string de consulta do URL do estágio no git",
+        "es_correcta": false,
+        "explicacion": "Vazamento secreto."
+      },
+      {
+        "texto_opcion": "Use credenciais de função PUBLIC para estágio",
+        "es_correcta": false,
+        "explicacion": "Inseguro."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Credenciais de estágio"
+    ]
+  },
+  {
+    "pregunta": "Cenário da seguradora — Transformação durante o carregamento com expressões de coluna leves. O que eles deveriam implementar? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "COPY INTO ... FROM (SELECIONE $1, TO_TIMESTAMP($2), ... FROM @estágio)",
+        "es_correcta": true,
+        "explicacion": "A transformação SELECT em COPY se aplica durante o carregamento."
+      },
+      {
+        "texto_opcion": "A transformação COPY desativa micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Os dados carregados ainda estão micro-partitioned."
+      },
+      {
+        "texto_opcion": "Transforme apenas com Snowpipe e não COPY",
+        "es_correcta": false,
+        "explicacion": "COPY oferece suporte a transformações SELECT."
+      },
+      {
+        "texto_opcion": "A transformação requer uma ferramenta ETL separada sempre antes do Snowflake",
+        "es_correcta": false,
+        "explicacion": "Transformações em carga suportadas."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Ordem de carga"
+    ]
+  },
+  {
+    "pregunta": "Uma concessionária de energia (dados históricos em escala de petabytes, região australiaeast) deve: carregar CSV local sem configuração de depósito de nuvem externo para teste. Qual opção se adapta melhor? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "O estágio interno exige sempre o bucket S3 do cliente",
+        "es_correcta": false,
+        "explicacion": "Os estágios internos são gerenciados pelo Snowflake."
+      },
+      {
+        "texto_opcion": "PUT faz upload para o SSD do armazém permanentemente como tabela",
+        "es_correcta": false,
+        "explicacion": "PUT carrega arquivos para teste e depois COPY para tabela."
+      },
+      {
+        "texto_opcion": "O estágio interno ignora o formato do arquivo",
+        "es_correcta": false,
+        "explicacion": "COPY ainda precisa do formato de arquivo."
+      },
+      {
+        "texto_opcion": "Use usuário/tabela/estágio interno nomeado e PUT/COPY INTO",
+        "es_correcta": true,
+        "explicacion": "Os estágios internos armazenam arquivos dentro do Snowflake para carregamento."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio interno"
+    ]
+  },
+  {
+    "pregunta": "Uma fintech de pagamentos (~50.000 eventos/s, região oeste da Europa) deve: carregar do S3 com credenciais integradas de forma segura. Qual opção se adapta melhor? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Crie um estágio externo com STORAGE INTEGRATION ou referências de credenciais cloud storage",
+        "es_correcta": true,
+        "explicacion": "Estágios externos apontam para caminhos cloud storage."
+      },
+      {
+        "texto_opcion": "O objeto de palco é igual a virtual warehouse",
+        "es_correcta": false,
+        "explicacion": "Diferentes tipos de objetos."
+      },
+      {
+        "texto_opcion": "COPIE diretamente do caminho do laptop C:\\data sem estágio",
+        "es_correcta": false,
+        "explicacion": "Use PUT para preparar ou URL de estágio externo."
+      },
+      {
+        "texto_opcion": "O estágio externo armazena dados na RAM dos serviços de nuvem",
+        "es_correcta": false,
+        "explicacion": "Os dados permanecem em cloud storage."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Estágio externo"
+    ]
+  },
+  {
+    "pregunta": "Cenário de mercado online – analise CSV com linha de cabeçalho e vírgulas entre aspas. O que eles deveriam implementar? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Carregue CSV como VARIANT apenas sem formato",
+        "es_correcta": false,
+        "explicacion": "O carregamento estruturado precisa de formato ou caminho JSON variant."
+      },
+      {
+        "texto_opcion": "Use o warehouse SIZE como formato de arquivo",
+        "es_correcta": false,
+        "explicacion": "Incorreto."
+      },
+      {
+        "texto_opcion": "Crie FILE FORMAT com TYPE=CSV, PARSE_HEADER/FIELD_OPTIONALLY_ENCLOSED_BY etc.",
+        "es_correcta": true,
+        "explicacion": "Os formatos de arquivo definem regras de análise para COPY."
+      },
+      {
+        "texto_opcion": "O formato do arquivo define clustering key",
+        "es_correcta": false,
+        "explicacion": "Objetos não relacionados."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Formato de arquivo"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidente (westeurope): carregamento em massa de arquivos Parquet de @stage na tabela FACT. Selecione o design mais apropriado. Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "INSERT linha por linha do palco com cursor apenas no aplicativo",
+        "es_correcta": false,
+        "explicacion": "Ineficiente vs CÓPIA."
+      },
+      {
+        "texto_opcion": "COPY INTO exporta dados da tabela para o cenário por padrão, sem opção",
+        "es_correcta": false,
+        "explicacion": "COPY INTO carrega na tabela; unload usa sintaxe diferente."
+      },
+      {
+        "texto_opcion": "LIST @stage carrega dados na tabela",
+        "es_correcta": false,
+        "explicacion": "LIST enumera apenas arquivos."
+      },
+      {
+        "texto_opcion": "COPY INTO fato FROM @stage FILE_FORMAT=(TYPE=PARQUET) MATCH_BY_COLUMN_NAME ou lista de colunas",
+        "es_correcta": true,
+        "explicacion": "COPY INTO é o comando primário de carregamento em massa."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "COPY INTO"
+    ]
+  },
+  {
+    "pregunta": "Revisão de incidentes (australiaeast): detecte linhas incorretas durante o carregamento de CSV sem falhar no lote inteiro. Selecione o design mais apropriado. Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Use ON_ERROR, VALIDATION_MODE ou carregue para teste e rejeite o padrão de análise",
+        "es_correcta": true,
+        "explicacion": "Snowflake oferece suporte a opções de tratamento/validação de erros no carregamento."
+      },
+      {
+        "texto_opcion": "Desative o tratamento de erros para pular linhas incorretas silenciosamente, sempre sem opção",
+        "es_correcta": false,
+        "explicacion": "Deve configurar o comportamento ON_ERROR explicitamente."
+      },
+      {
+        "texto_opcion": "Linhas incorretas corrigidas automaticamente pelo redimensionamento do armazém",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      },
+      {
+        "texto_opcion": "A validação requer apenas Snowpipe",
+        "es_correcta": false,
+        "explicacion": "COPY suporta modos de validação."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Validação de carga"
+    ]
+  },
+  {
+    "pregunta": "Uma operadora de telecomunicações (~50.000 eventos/s, região BrasilSul) deve: carregar apenas arquivos que correspondam ao prefixo de data no caminho do estágio. Qual opção se adapta melhor? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "PATTERN substitui a necessidade de palco",
+        "es_correcta": false,
+        "explicacion": "Estágio ainda necessário."
+      },
+      {
+        "texto_opcion": "Use o parâmetro PATTERN em COPY INTO (por exemplo, '.*2026-07-.*')",
+        "es_correcta": true,
+        "explicacion": "PATTERN filtra arquivos preparados para carregamento."
+      },
+      {
+        "texto_opcion": "Carregue todos os arquivos, incluindo sempre os arquivos excluídos manualmente, renomeando os arquivos do laptop",
+        "es_correcta": false,
+        "explicacion": "Use PADRÃO em CÓPIA."
+      },
+      {
+        "texto_opcion": "PATTERN é um recurso de política de rede",
+        "es_correcta": false,
+        "explicacion": "Recurso errado."
+      }
+    ],
+    "tags": [
+      "4.1",
+      "Correspondência de padrões"
+    ]
+  }
+]

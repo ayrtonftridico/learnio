@@ -1,0 +1,1568 @@
+[
+  {
+    "pregunta": "A online marketplace (~50,000 events/s, region australiaeast) must: auto-ingest new files arriving in S3 stage continuously. Which option fits best?",
+    "opciones": [
+      {
+        "texto_opcion": "Create PIPE with AUTO_INGEST=true tied to stage and cloud event notification",
+        "es_correcta": true,
+        "explicacion": "Snowpipe loads files on arrival via queue/notifications."
+      },
+      {
+        "texto_opcion": "PIPE object replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Pipe references stage."
+      },
+      {
+        "texto_opcion": "Snowpipe executes on client laptop when file downloaded",
+        "es_correcta": false,
+        "explicacion": "Serverless Snowpipe service loads."
+      },
+      {
+        "texto_opcion": "Schedule COPY every second with Task instead of Snowpipe always better",
+        "es_correcta": false,
+        "explicacion": "Snowpipe designed for continuous ingest."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): understand compute billing model for Snowpipe loads. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe uses serverless compute credits based on load activity (per Snowflake billing)",
+        "es_correcta": true,
+        "explicacion": "Snowpipe billed as serverless ingestion compute."
+      },
+      {
+        "texto_opcion": "Snowpipe billed as storage GB/day only always",
+        "es_correcta": false,
+        "explicacion": "Uses serverless credits."
+      },
+      {
+        "texto_opcion": "Free with external stage only",
+        "es_correcta": false,
+        "explicacion": "Still consumes serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe requires dedicated X-Large warehouse always on",
+        "es_correcta": false,
+        "explicacion": "Snowpipe is serverless ingestion."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe serverless"
+    ]
+  },
+  {
+    "pregunta": "stop loading during upstream maintenance window. Context: gaming studio, ~5 TB/day.",
+    "opciones": [
+      {
+        "texto_opcion": "Drop stage to pause pipe safely always",
+        "es_correcta": false,
+        "explicacion": "Breaks configuration; pause pipe instead."
+      },
+      {
+        "texto_opcion": "ALTER PIPE ... SET PIPE_EXECUTION_PAUSED=true",
+        "es_correcta": true,
+        "explicacion": "Pause pipe halts auto-ingest processing."
+      },
+      {
+        "texto_opcion": "Pause warehouse to stop Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless separate from user warehouse."
+      },
+      {
+        "texto_opcion": "Disable network policy pauses pipe automatically",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe pause"
+    ]
+  },
+  {
+    "pregunta": "For a online marketplace workload with ~5 TB/day: troubleshoot files not loaded by Snowpipe. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe sends errors only via postal mail",
+        "es_correcta": false,
+        "explicacion": "Use views/alerts."
+      },
+      {
+        "texto_opcion": "Only Fail-safe logs pipe errors",
+        "es_correcta": false,
+        "explicacion": "Use copy history views."
+      },
+      {
+        "texto_opcion": "LIST @stage shows load error messages always",
+        "es_correcta": false,
+        "explicacion": "LIST shows files; history shows load status."
+      },
+      {
+        "texto_opcion": "Query COPY_HISTORY / pipe history views for status and errors",
+        "es_correcta": true,
+        "explicacion": "Copy history shows load results per file."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Copy history"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): ingest row streams with low latency without files. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Snowpipe Streaming API/SDK for low-latency row ingestion",
+        "es_correcta": true,
+        "explicacion": "Streaming ingest avoids file batching latency."
+      },
+      {
+        "texto_opcion": "Snowpipe Streaming requires CSV files in S3 only",
+        "es_correcta": false,
+        "explicacion": "Streaming API ingests rows directly."
+      },
+      {
+        "texto_opcion": "Use PUT for streaming millions/sec rows only path",
+        "es_correcta": false,
+        "explicacion": "PUT file-based; streaming API for row stream."
+      },
+      {
+        "texto_opcion": "Streaming identical to bulk COPY always",
+        "es_correcta": false,
+        "explicacion": "Different latency/ mechanism."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe Streaming"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): S3 event triggers Snowpipe for new objects. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Time Travel to detect new S3 files",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Snowflake polls S3 every millisecond without notification always",
+        "es_correcta": false,
+        "explicacion": "Event-driven auto-ingest uses notifications."
+      },
+      {
+        "texto_opcion": "Notifications require public stage ACL world read",
+        "es_correcta": false,
+        "explicacion": "Secure integration patterns exist."
+      },
+      {
+        "texto_opcion": "Configure SQS/Event notification referencing Snowflake pipe notification channel",
+        "es_correcta": true,
+        "explicacion": "Auto-ingest relies on cloud event to Snowflake."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Notification"
+    ]
+  },
+  {
+    "pregunta": "handle same file delivered twice to pipe. Context: payments fintech, near-real-time dashboards.",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe tracks loaded files; duplicates typically skipped if already loaded successfully",
+        "es_correcta": true,
+        "explicacion": "Load metadata prevents reprocessing same file path."
+      },
+      {
+        "texto_opcion": "Must truncate table on duplicate file",
+        "es_correcta": false,
+        "explicacion": "Usually unnecessary."
+      },
+      {
+        "texto_opcion": "Duplicate files always duplicate all rows unconditionally",
+        "es_correcta": false,
+        "explicacion": "Snowpipe tracks file load history."
+      },
+      {
+        "texto_opcion": "Duplicates fixed by disabling micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Duplicate files"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — alert on Snowpipe load failures. What should they implement?",
+    "opciones": [
+      {
+        "texto_opcion": "Configure notification integration (email/cloud queue) with pipe error notifications",
+        "es_correcta": true,
+        "explicacion": "Notification integrations alert on pipe errors."
+      },
+      {
+        "texto_opcion": "Errors visible only in Query Profile",
+        "es_correcta": false,
+        "explicacion": "Use pipe/copy history and notifications."
+      },
+      {
+        "texto_opcion": "Manually refresh BI dashboard to see pipe errors",
+        "es_correcta": false,
+        "explicacion": "Unreliable."
+      },
+      {
+        "texto_opcion": "Disable ON_ERROR to get more alerts without integration",
+        "es_correcta": false,
+        "explicacion": "Configure notification integration."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Error notification"
+    ]
+  },
+  {
+    "pregunta": "For a energy utility workload with sub-second interactive queries: orchestrate hourly batch file load from stage with transforms. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe only supports hourly cron not events",
+        "es_correcta": false,
+        "explicacion": "Snowpipe event-driven; Tasks cron."
+      },
+      {
+        "texto_opcion": "Use Task scheduling COPY INTO or Snowpipe for continuous; Tasks for scheduled batch orchestration",
+        "es_correcta": true,
+        "explicacion": "Tasks schedule SQL; Snowpipe for event-driven files."
+      },
+      {
+        "texto_opcion": "PIPE executes MERGE automatically always without SQL",
+        "es_correcta": false,
+        "explicacion": "Pipe loads files; MERGE is separate SQL."
+      },
+      {
+        "texto_opcion": "Tasks replace COPY command entirely",
+        "es_correcta": false,
+        "explicacion": "Tasks execute COPY among other SQL."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe vs Task"
+    ]
+  },
+  {
+    "pregunta": "lightweight column cast during Snowpipe load. Context: online marketplace, ~200 million rows/day.",
+    "opciones": [
+      {
+        "texto_opcion": "Define COPY statement in pipe WITH TRANSFORM/select list as supported",
+        "es_correcta": true,
+        "explicacion": "Pipe contains COPY INTO with optional transforms."
+      },
+      {
+        "texto_opcion": "Snowpipe loads only raw strings never typed columns",
+        "es_correcta": false,
+        "explicacion": "Can load to typed columns."
+      },
+      {
+        "texto_opcion": "Transform disables auto-ingest",
+        "es_correcta": false,
+        "explicacion": "Transforms in COPY compatible with pipe."
+      },
+      {
+        "texto_opcion": "Transform requires external Spark cluster always",
+        "es_correcta": false,
+        "explicacion": "In-Snowflake COPY transforms."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Transform pipe"
+    ]
+  },
+  {
+    "pregunta": "For a media streaming company workload with hourly batch windows: compare Snowpipe micro-batch vs bulk COPY nightly. Best choice?",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe provides minutes-level latency; bulk COPY scheduled for throughput/cost batch windows",
+        "es_correcta": true,
+        "explicacion": "Choose based on latency vs batch efficiency."
+      },
+      {
+        "texto_opcion": "Latency improved by smaller warehouse only for Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless not user warehouse."
+      },
+      {
+        "texto_opcion": "Snowpipe loads entire account continuously without file events",
+        "es_correcta": false,
+        "explicacion": "Needs staged files/events."
+      },
+      {
+        "texto_opcion": "Bulk COPY always sub-second latency",
+        "es_correcta": false,
+        "explicacion": "Batch oriented."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Latency"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): least privilege for Snowpipe automation role. Select the most appropriate design.",
+    "opciones": [
+      {
+        "texto_opcion": "Pipe needs OWNERSHIP on account",
+        "es_correcta": false,
+        "explicacion": "Excessive."
+      },
+      {
+        "texto_opcion": "ACCOUNTADMIN required for every pipe",
+        "es_correcta": false,
+        "explicacion": "Over-privileged."
+      },
+      {
+        "texto_opcion": "PUBLIC executes all pipes",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Grant USAGE on pipe, stage, table INSERT, file format; avoid ACCOUNTADMIN",
+        "es_correcta": true,
+        "explicacion": "Minimal privileges on pipe pipeline objects."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Security pipe"
+    ]
+  },
+  {
+    "pregunta": "auto-ingest new files arriving in S3 stage continuously. Context: global retailer, sub-second interactive queries. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Schedule COPY every second with Task instead of Snowpipe always better",
+        "es_correcta": false,
+        "explicacion": "Snowpipe designed for continuous ingest."
+      },
+      {
+        "texto_opcion": "Snowpipe executes on client laptop when file downloaded",
+        "es_correcta": false,
+        "explicacion": "Serverless Snowpipe service loads."
+      },
+      {
+        "texto_opcion": "Create PIPE with AUTO_INGEST=true tied to stage and cloud event notification",
+        "es_correcta": true,
+        "explicacion": "Snowpipe loads files on arrival via queue/notifications."
+      },
+      {
+        "texto_opcion": "PIPE object replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Pipe references stage."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe"
+    ]
+  },
+  {
+    "pregunta": "understand compute billing model for Snowpipe loads. Context: industrial IoT platform, sub-second interactive queries. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe requires dedicated X-Large warehouse always on",
+        "es_correcta": false,
+        "explicacion": "Snowpipe is serverless ingestion."
+      },
+      {
+        "texto_opcion": "Free with external stage only",
+        "es_correcta": false,
+        "explicacion": "Still consumes serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe billed as storage GB/day only always",
+        "es_correcta": false,
+        "explicacion": "Uses serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe uses serverless compute credits based on load activity (per Snowflake billing)",
+        "es_correcta": true,
+        "explicacion": "Snowpipe billed as serverless ingestion compute."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe serverless"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — stop loading during upstream maintenance window. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Pause warehouse to stop Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless separate from user warehouse."
+      },
+      {
+        "texto_opcion": "ALTER PIPE ... SET PIPE_EXECUTION_PAUSED=true",
+        "es_correcta": true,
+        "explicacion": "Pause pipe halts auto-ingest processing."
+      },
+      {
+        "texto_opcion": "Disable network policy pauses pipe automatically",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Drop stage to pause pipe safely always",
+        "es_correcta": false,
+        "explicacion": "Breaks configuration; pause pipe instead."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe pause"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): troubleshoot files not loaded by Snowpipe. Select the most appropriate design. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe sends errors only via postal mail",
+        "es_correcta": false,
+        "explicacion": "Use views/alerts."
+      },
+      {
+        "texto_opcion": "Only Fail-safe logs pipe errors",
+        "es_correcta": false,
+        "explicacion": "Use copy history views."
+      },
+      {
+        "texto_opcion": "Query COPY_HISTORY / pipe history views for status and errors",
+        "es_correcta": true,
+        "explicacion": "Copy history shows load results per file."
+      },
+      {
+        "texto_opcion": "LIST @stage shows load error messages always",
+        "es_correcta": false,
+        "explicacion": "LIST shows files; history shows load status."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Copy history"
+    ]
+  },
+  {
+    "pregunta": "For a travel platform workload with hourly batch windows: ingest row streams with low latency without files. Best choice (variant 2)?",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe Streaming requires CSV files in S3 only",
+        "es_correcta": false,
+        "explicacion": "Streaming API ingests rows directly."
+      },
+      {
+        "texto_opcion": "Streaming identical to bulk COPY always",
+        "es_correcta": false,
+        "explicacion": "Different latency/ mechanism."
+      },
+      {
+        "texto_opcion": "Use Snowpipe Streaming API/SDK for low-latency row ingestion",
+        "es_correcta": true,
+        "explicacion": "Streaming ingest avoids file batching latency."
+      },
+      {
+        "texto_opcion": "Use PUT for streaming millions/sec rows only path",
+        "es_correcta": false,
+        "explicacion": "PUT file-based; streaming API for row stream."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe Streaming"
+    ]
+  },
+  {
+    "pregunta": "A insurance carrier (near-real-time dashboards, region australiaeast) must: S3 event triggers Snowpipe for new objects. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Time Travel to detect new S3 files",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Snowflake polls S3 every millisecond without notification always",
+        "es_correcta": false,
+        "explicacion": "Event-driven auto-ingest uses notifications."
+      },
+      {
+        "texto_opcion": "Notifications require public stage ACL world read",
+        "es_correcta": false,
+        "explicacion": "Secure integration patterns exist."
+      },
+      {
+        "texto_opcion": "Configure SQS/Event notification referencing Snowflake pipe notification channel",
+        "es_correcta": true,
+        "explicacion": "Auto-ingest relies on cloud event to Snowflake."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Notification"
+    ]
+  },
+  {
+    "pregunta": "Media streaming company scenario — handle same file delivered twice to pipe. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate files always duplicate all rows unconditionally",
+        "es_correcta": false,
+        "explicacion": "Snowpipe tracks file load history."
+      },
+      {
+        "texto_opcion": "Snowpipe tracks loaded files; duplicates typically skipped if already loaded successfully",
+        "es_correcta": true,
+        "explicacion": "Load metadata prevents reprocessing same file path."
+      },
+      {
+        "texto_opcion": "Duplicates fixed by disabling micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Must truncate table on duplicate file",
+        "es_correcta": false,
+        "explicacion": "Usually unnecessary."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Duplicate files"
+    ]
+  },
+  {
+    "pregunta": "A media streaming company (~50,000 events/s, region northeurope) must: alert on Snowpipe load failures. Which option fits best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Configure notification integration (email/cloud queue) with pipe error notifications",
+        "es_correcta": true,
+        "explicacion": "Notification integrations alert on pipe errors."
+      },
+      {
+        "texto_opcion": "Errors visible only in Query Profile",
+        "es_correcta": false,
+        "explicacion": "Use pipe/copy history and notifications."
+      },
+      {
+        "texto_opcion": "Disable ON_ERROR to get more alerts without integration",
+        "es_correcta": false,
+        "explicacion": "Configure notification integration."
+      },
+      {
+        "texto_opcion": "Manually refresh BI dashboard to see pipe errors",
+        "es_correcta": false,
+        "explicacion": "Unreliable."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Error notification"
+    ]
+  },
+  {
+    "pregunta": "orchestrate hourly batch file load from stage with transforms. Context: travel platform, ~50,000 events/s. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Task scheduling COPY INTO or Snowpipe for continuous; Tasks for scheduled batch orchestration",
+        "es_correcta": true,
+        "explicacion": "Tasks schedule SQL; Snowpipe for event-driven files."
+      },
+      {
+        "texto_opcion": "Tasks replace COPY command entirely",
+        "es_correcta": false,
+        "explicacion": "Tasks execute COPY among other SQL."
+      },
+      {
+        "texto_opcion": "Snowpipe only supports hourly cron not events",
+        "es_correcta": false,
+        "explicacion": "Snowpipe event-driven; Tasks cron."
+      },
+      {
+        "texto_opcion": "PIPE executes MERGE automatically always without SQL",
+        "es_correcta": false,
+        "explicacion": "Pipe loads files; MERGE is separate SQL."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe vs Task"
+    ]
+  },
+  {
+    "pregunta": "lightweight column cast during Snowpipe load. Context: travel platform, sub-second interactive queries. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Transform requires external Spark cluster always",
+        "es_correcta": false,
+        "explicacion": "In-Snowflake COPY transforms."
+      },
+      {
+        "texto_opcion": "Define COPY statement in pipe WITH TRANSFORM/select list as supported",
+        "es_correcta": true,
+        "explicacion": "Pipe contains COPY INTO with optional transforms."
+      },
+      {
+        "texto_opcion": "Snowpipe loads only raw strings never typed columns",
+        "es_correcta": false,
+        "explicacion": "Can load to typed columns."
+      },
+      {
+        "texto_opcion": "Transform disables auto-ingest",
+        "es_correcta": false,
+        "explicacion": "Transforms in COPY compatible with pipe."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Transform pipe"
+    ]
+  },
+  {
+    "pregunta": "Energy utility scenario — compare Snowpipe micro-batch vs bulk COPY nightly. What should they implement? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Bulk COPY always sub-second latency",
+        "es_correcta": false,
+        "explicacion": "Batch oriented."
+      },
+      {
+        "texto_opcion": "Snowpipe provides minutes-level latency; bulk COPY scheduled for throughput/cost batch windows",
+        "es_correcta": true,
+        "explicacion": "Choose based on latency vs batch efficiency."
+      },
+      {
+        "texto_opcion": "Snowpipe loads entire account continuously without file events",
+        "es_correcta": false,
+        "explicacion": "Needs staged files/events."
+      },
+      {
+        "texto_opcion": "Latency improved by smaller warehouse only for Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless not user warehouse."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Latency"
+    ]
+  },
+  {
+    "pregunta": "least privilege for Snowpipe automation role. Context: energy utility, hourly batch windows. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "PUBLIC executes all pipes",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Grant USAGE on pipe, stage, table INSERT, file format; avoid ACCOUNTADMIN",
+        "es_correcta": true,
+        "explicacion": "Minimal privileges on pipe pipeline objects."
+      },
+      {
+        "texto_opcion": "ACCOUNTADMIN required for every pipe",
+        "es_correcta": false,
+        "explicacion": "Over-privileged."
+      },
+      {
+        "texto_opcion": "Pipe needs OWNERSHIP on account",
+        "es_correcta": false,
+        "explicacion": "Excessive."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Security pipe"
+    ]
+  },
+  {
+    "pregunta": "Global retailer scenario — auto-ingest new files arriving in S3 stage continuously. What should they implement? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Schedule COPY every second with Task instead of Snowpipe always better",
+        "es_correcta": false,
+        "explicacion": "Snowpipe designed for continuous ingest."
+      },
+      {
+        "texto_opcion": "Create PIPE with AUTO_INGEST=true tied to stage and cloud event notification",
+        "es_correcta": true,
+        "explicacion": "Snowpipe loads files on arrival via queue/notifications."
+      },
+      {
+        "texto_opcion": "Snowpipe executes on client laptop when file downloaded",
+        "es_correcta": false,
+        "explicacion": "Serverless Snowpipe service loads."
+      },
+      {
+        "texto_opcion": "PIPE object replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Pipe references stage."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe"
+    ]
+  },
+  {
+    "pregunta": "For a global retailer workload with ~50,000 events/s: understand compute billing model for Snowpipe loads. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Free with external stage only",
+        "es_correcta": false,
+        "explicacion": "Still consumes serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe billed as storage GB/day only always",
+        "es_correcta": false,
+        "explicacion": "Uses serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe requires dedicated X-Large warehouse always on",
+        "es_correcta": false,
+        "explicacion": "Snowpipe is serverless ingestion."
+      },
+      {
+        "texto_opcion": "Snowpipe uses serverless compute credits based on load activity (per Snowflake billing)",
+        "es_correcta": true,
+        "explicacion": "Snowpipe billed as serverless ingestion compute."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe serverless"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): stop loading during upstream maintenance window. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Drop stage to pause pipe safely always",
+        "es_correcta": false,
+        "explicacion": "Breaks configuration; pause pipe instead."
+      },
+      {
+        "texto_opcion": "ALTER PIPE ... SET PIPE_EXECUTION_PAUSED=true",
+        "es_correcta": true,
+        "explicacion": "Pause pipe halts auto-ingest processing."
+      },
+      {
+        "texto_opcion": "Pause warehouse to stop Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless separate from user warehouse."
+      },
+      {
+        "texto_opcion": "Disable network policy pauses pipe automatically",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe pause"
+    ]
+  },
+  {
+    "pregunta": "For a online marketplace workload with near-real-time dashboards: troubleshoot files not loaded by Snowpipe. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe sends errors only via postal mail",
+        "es_correcta": false,
+        "explicacion": "Use views/alerts."
+      },
+      {
+        "texto_opcion": "LIST @stage shows load error messages always",
+        "es_correcta": false,
+        "explicacion": "LIST shows files; history shows load status."
+      },
+      {
+        "texto_opcion": "Only Fail-safe logs pipe errors",
+        "es_correcta": false,
+        "explicacion": "Use copy history views."
+      },
+      {
+        "texto_opcion": "Query COPY_HISTORY / pipe history views for status and errors",
+        "es_correcta": true,
+        "explicacion": "Copy history shows load results per file."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Copy history"
+    ]
+  },
+  {
+    "pregunta": "A travel platform (~5 TB/day, region eastus) must: ingest row streams with low latency without files. Which option fits best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use PUT for streaming millions/sec rows only path",
+        "es_correcta": false,
+        "explicacion": "PUT file-based; streaming API for row stream."
+      },
+      {
+        "texto_opcion": "Snowpipe Streaming requires CSV files in S3 only",
+        "es_correcta": false,
+        "explicacion": "Streaming API ingests rows directly."
+      },
+      {
+        "texto_opcion": "Use Snowpipe Streaming API/SDK for low-latency row ingestion",
+        "es_correcta": true,
+        "explicacion": "Streaming ingest avoids file batching latency."
+      },
+      {
+        "texto_opcion": "Streaming identical to bulk COPY always",
+        "es_correcta": false,
+        "explicacion": "Different latency/ mechanism."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe Streaming"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): S3 event triggers Snowpipe for new objects. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Notifications require public stage ACL world read",
+        "es_correcta": false,
+        "explicacion": "Secure integration patterns exist."
+      },
+      {
+        "texto_opcion": "Configure SQS/Event notification referencing Snowflake pipe notification channel",
+        "es_correcta": true,
+        "explicacion": "Auto-ingest relies on cloud event to Snowflake."
+      },
+      {
+        "texto_opcion": "Snowflake polls S3 every millisecond without notification always",
+        "es_correcta": false,
+        "explicacion": "Event-driven auto-ingest uses notifications."
+      },
+      {
+        "texto_opcion": "Use Time Travel to detect new S3 files",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Notification"
+    ]
+  },
+  {
+    "pregunta": "Incident review (australiaeast): handle same file delivered twice to pipe. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe tracks loaded files; duplicates typically skipped if already loaded successfully",
+        "es_correcta": true,
+        "explicacion": "Load metadata prevents reprocessing same file path."
+      },
+      {
+        "texto_opcion": "Must truncate table on duplicate file",
+        "es_correcta": false,
+        "explicacion": "Usually unnecessary."
+      },
+      {
+        "texto_opcion": "Duplicate files always duplicate all rows unconditionally",
+        "es_correcta": false,
+        "explicacion": "Snowpipe tracks file load history."
+      },
+      {
+        "texto_opcion": "Duplicates fixed by disabling micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Duplicate files"
+    ]
+  },
+  {
+    "pregunta": "A insurance carrier (petabyte-scale historical data, region australiaeast) must: alert on Snowpipe load failures. Which option fits best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Errors visible only in Query Profile",
+        "es_correcta": false,
+        "explicacion": "Use pipe/copy history and notifications."
+      },
+      {
+        "texto_opcion": "Manually refresh BI dashboard to see pipe errors",
+        "es_correcta": false,
+        "explicacion": "Unreliable."
+      },
+      {
+        "texto_opcion": "Configure notification integration (email/cloud queue) with pipe error notifications",
+        "es_correcta": true,
+        "explicacion": "Notification integrations alert on pipe errors."
+      },
+      {
+        "texto_opcion": "Disable ON_ERROR to get more alerts without integration",
+        "es_correcta": false,
+        "explicacion": "Configure notification integration."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Error notification"
+    ]
+  },
+  {
+    "pregunta": "For a travel platform workload with ~200 million rows/day: orchestrate hourly batch file load from stage with transforms. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Use Task scheduling COPY INTO or Snowpipe for continuous; Tasks for scheduled batch orchestration",
+        "es_correcta": true,
+        "explicacion": "Tasks schedule SQL; Snowpipe for event-driven files."
+      },
+      {
+        "texto_opcion": "Snowpipe only supports hourly cron not events",
+        "es_correcta": false,
+        "explicacion": "Snowpipe event-driven; Tasks cron."
+      },
+      {
+        "texto_opcion": "Tasks replace COPY command entirely",
+        "es_correcta": false,
+        "explicacion": "Tasks execute COPY among other SQL."
+      },
+      {
+        "texto_opcion": "PIPE executes MERGE automatically always without SQL",
+        "es_correcta": false,
+        "explicacion": "Pipe loads files; MERGE is separate SQL."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe vs Task"
+    ]
+  },
+  {
+    "pregunta": "Incident review (westeurope): lightweight column cast during Snowpipe load. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Define COPY statement in pipe WITH TRANSFORM/select list as supported",
+        "es_correcta": true,
+        "explicacion": "Pipe contains COPY INTO with optional transforms."
+      },
+      {
+        "texto_opcion": "Snowpipe loads only raw strings never typed columns",
+        "es_correcta": false,
+        "explicacion": "Can load to typed columns."
+      },
+      {
+        "texto_opcion": "Transform requires external Spark cluster always",
+        "es_correcta": false,
+        "explicacion": "In-Snowflake COPY transforms."
+      },
+      {
+        "texto_opcion": "Transform disables auto-ingest",
+        "es_correcta": false,
+        "explicacion": "Transforms in COPY compatible with pipe."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Transform pipe"
+    ]
+  },
+  {
+    "pregunta": "For a media streaming company workload with ~5 TB/day: compare Snowpipe micro-batch vs bulk COPY nightly. Best choice (variant 3)?",
+    "opciones": [
+      {
+        "texto_opcion": "Latency improved by smaller warehouse only for Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless not user warehouse."
+      },
+      {
+        "texto_opcion": "Snowpipe provides minutes-level latency; bulk COPY scheduled for throughput/cost batch windows",
+        "es_correcta": true,
+        "explicacion": "Choose based on latency vs batch efficiency."
+      },
+      {
+        "texto_opcion": "Snowpipe loads entire account continuously without file events",
+        "es_correcta": false,
+        "explicacion": "Needs staged files/events."
+      },
+      {
+        "texto_opcion": "Bulk COPY always sub-second latency",
+        "es_correcta": false,
+        "explicacion": "Batch oriented."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Latency"
+    ]
+  },
+  {
+    "pregunta": "Incident review (northeurope): least privilege for Snowpipe automation role. Select the most appropriate design. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "ACCOUNTADMIN required for every pipe",
+        "es_correcta": false,
+        "explicacion": "Over-privileged."
+      },
+      {
+        "texto_opcion": "PUBLIC executes all pipes",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Pipe needs OWNERSHIP on account",
+        "es_correcta": false,
+        "explicacion": "Excessive."
+      },
+      {
+        "texto_opcion": "Grant USAGE on pipe, stage, table INSERT, file format; avoid ACCOUNTADMIN",
+        "es_correcta": true,
+        "explicacion": "Minimal privileges on pipe pipeline objects."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Security pipe"
+    ]
+  },
+  {
+    "pregunta": "auto-ingest new files arriving in S3 stage continuously. Context: online marketplace, ~5 TB/day. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Schedule COPY every second with Task instead of Snowpipe always better",
+        "es_correcta": false,
+        "explicacion": "Snowpipe designed for continuous ingest."
+      },
+      {
+        "texto_opcion": "PIPE object replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Pipe references stage."
+      },
+      {
+        "texto_opcion": "Create PIPE with AUTO_INGEST=true tied to stage and cloud event notification",
+        "es_correcta": true,
+        "explicacion": "Snowpipe loads files on arrival via queue/notifications."
+      },
+      {
+        "texto_opcion": "Snowpipe executes on client laptop when file downloaded",
+        "es_correcta": false,
+        "explicacion": "Serverless Snowpipe service loads."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): understand compute billing model for Snowpipe loads. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Free with external stage only",
+        "es_correcta": false,
+        "explicacion": "Still consumes serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe uses serverless compute credits based on load activity (per Snowflake billing)",
+        "es_correcta": true,
+        "explicacion": "Snowpipe billed as serverless ingestion compute."
+      },
+      {
+        "texto_opcion": "Snowpipe billed as storage GB/day only always",
+        "es_correcta": false,
+        "explicacion": "Uses serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe requires dedicated X-Large warehouse always on",
+        "es_correcta": false,
+        "explicacion": "Snowpipe is serverless ingestion."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe serverless"
+    ]
+  },
+  {
+    "pregunta": "Travel platform scenario — stop loading during upstream maintenance window. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Pause warehouse to stop Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless separate from user warehouse."
+      },
+      {
+        "texto_opcion": "ALTER PIPE ... SET PIPE_EXECUTION_PAUSED=true",
+        "es_correcta": true,
+        "explicacion": "Pause pipe halts auto-ingest processing."
+      },
+      {
+        "texto_opcion": "Drop stage to pause pipe safely always",
+        "es_correcta": false,
+        "explicacion": "Breaks configuration; pause pipe instead."
+      },
+      {
+        "texto_opcion": "Disable network policy pauses pipe automatically",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe pause"
+    ]
+  },
+  {
+    "pregunta": "For a healthcare provider workload with ~5 TB/day: troubleshoot files not loaded by Snowpipe. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "LIST @stage shows load error messages always",
+        "es_correcta": false,
+        "explicacion": "LIST shows files; history shows load status."
+      },
+      {
+        "texto_opcion": "Query COPY_HISTORY / pipe history views for status and errors",
+        "es_correcta": true,
+        "explicacion": "Copy history shows load results per file."
+      },
+      {
+        "texto_opcion": "Snowpipe sends errors only via postal mail",
+        "es_correcta": false,
+        "explicacion": "Use views/alerts."
+      },
+      {
+        "texto_opcion": "Only Fail-safe logs pipe errors",
+        "es_correcta": false,
+        "explicacion": "Use copy history views."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Copy history"
+    ]
+  },
+  {
+    "pregunta": "Online marketplace scenario — ingest row streams with low latency without files. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Snowpipe Streaming requires CSV files in S3 only",
+        "es_correcta": false,
+        "explicacion": "Streaming API ingests rows directly."
+      },
+      {
+        "texto_opcion": "Use Snowpipe Streaming API/SDK for low-latency row ingestion",
+        "es_correcta": true,
+        "explicacion": "Streaming ingest avoids file batching latency."
+      },
+      {
+        "texto_opcion": "Use PUT for streaming millions/sec rows only path",
+        "es_correcta": false,
+        "explicacion": "PUT file-based; streaming API for row stream."
+      },
+      {
+        "texto_opcion": "Streaming identical to bulk COPY always",
+        "es_correcta": false,
+        "explicacion": "Different latency/ mechanism."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe Streaming"
+    ]
+  },
+  {
+    "pregunta": "Incident review (southeastasia): S3 event triggers Snowpipe for new objects. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Notifications require public stage ACL world read",
+        "es_correcta": false,
+        "explicacion": "Secure integration patterns exist."
+      },
+      {
+        "texto_opcion": "Snowflake polls S3 every millisecond without notification always",
+        "es_correcta": false,
+        "explicacion": "Event-driven auto-ingest uses notifications."
+      },
+      {
+        "texto_opcion": "Use Time Travel to detect new S3 files",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Configure SQS/Event notification referencing Snowflake pipe notification channel",
+        "es_correcta": true,
+        "explicacion": "Auto-ingest relies on cloud event to Snowflake."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Notification"
+    ]
+  },
+  {
+    "pregunta": "handle same file delivered twice to pipe. Context: healthcare provider, near-real-time dashboards. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicates fixed by disabling micro-partitions",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Snowpipe tracks loaded files; duplicates typically skipped if already loaded successfully",
+        "es_correcta": true,
+        "explicacion": "Load metadata prevents reprocessing same file path."
+      },
+      {
+        "texto_opcion": "Duplicate files always duplicate all rows unconditionally",
+        "es_correcta": false,
+        "explicacion": "Snowpipe tracks file load history."
+      },
+      {
+        "texto_opcion": "Must truncate table on duplicate file",
+        "es_correcta": false,
+        "explicacion": "Usually unnecessary."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Duplicate files"
+    ]
+  },
+  {
+    "pregunta": "alert on Snowpipe load failures. Context: industrial IoT platform, ~5 TB/day. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable ON_ERROR to get more alerts without integration",
+        "es_correcta": false,
+        "explicacion": "Configure notification integration."
+      },
+      {
+        "texto_opcion": "Manually refresh BI dashboard to see pipe errors",
+        "es_correcta": false,
+        "explicacion": "Unreliable."
+      },
+      {
+        "texto_opcion": "Configure notification integration (email/cloud queue) with pipe error notifications",
+        "es_correcta": true,
+        "explicacion": "Notification integrations alert on pipe errors."
+      },
+      {
+        "texto_opcion": "Errors visible only in Query Profile",
+        "es_correcta": false,
+        "explicacion": "Use pipe/copy history and notifications."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Error notification"
+    ]
+  },
+  {
+    "pregunta": "Incident review (brazilsouth): orchestrate hourly batch file load from stage with transforms. Select the most appropriate design. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Task scheduling COPY INTO or Snowpipe for continuous; Tasks for scheduled batch orchestration",
+        "es_correcta": true,
+        "explicacion": "Tasks schedule SQL; Snowpipe for event-driven files."
+      },
+      {
+        "texto_opcion": "PIPE executes MERGE automatically always without SQL",
+        "es_correcta": false,
+        "explicacion": "Pipe loads files; MERGE is separate SQL."
+      },
+      {
+        "texto_opcion": "Snowpipe only supports hourly cron not events",
+        "es_correcta": false,
+        "explicacion": "Snowpipe event-driven; Tasks cron."
+      },
+      {
+        "texto_opcion": "Tasks replace COPY command entirely",
+        "es_correcta": false,
+        "explicacion": "Tasks execute COPY among other SQL."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe vs Task"
+    ]
+  },
+  {
+    "pregunta": "Gaming studio scenario — lightweight column cast during Snowpipe load. What should they implement? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Define COPY statement in pipe WITH TRANSFORM/select list as supported",
+        "es_correcta": true,
+        "explicacion": "Pipe contains COPY INTO with optional transforms."
+      },
+      {
+        "texto_opcion": "Transform requires external Spark cluster always",
+        "es_correcta": false,
+        "explicacion": "In-Snowflake COPY transforms."
+      },
+      {
+        "texto_opcion": "Snowpipe loads only raw strings never typed columns",
+        "es_correcta": false,
+        "explicacion": "Can load to typed columns."
+      },
+      {
+        "texto_opcion": "Transform disables auto-ingest",
+        "es_correcta": false,
+        "explicacion": "Transforms in COPY compatible with pipe."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Transform pipe"
+    ]
+  },
+  {
+    "pregunta": "A telecom operator (sub-second interactive queries, region westeurope) must: compare Snowpipe micro-batch vs bulk COPY nightly. Which option fits best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Bulk COPY always sub-second latency",
+        "es_correcta": false,
+        "explicacion": "Batch oriented."
+      },
+      {
+        "texto_opcion": "Snowpipe loads entire account continuously without file events",
+        "es_correcta": false,
+        "explicacion": "Needs staged files/events."
+      },
+      {
+        "texto_opcion": "Snowpipe provides minutes-level latency; bulk COPY scheduled for throughput/cost batch windows",
+        "es_correcta": true,
+        "explicacion": "Choose based on latency vs batch efficiency."
+      },
+      {
+        "texto_opcion": "Latency improved by smaller warehouse only for Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless not user warehouse."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Latency"
+    ]
+  },
+  {
+    "pregunta": "For a online marketplace workload with strict GDPR residency: least privilege for Snowpipe automation role. Best choice (variant 4)?",
+    "opciones": [
+      {
+        "texto_opcion": "Grant USAGE on pipe, stage, table INSERT, file format; avoid ACCOUNTADMIN",
+        "es_correcta": true,
+        "explicacion": "Minimal privileges on pipe pipeline objects."
+      },
+      {
+        "texto_opcion": "PUBLIC executes all pipes",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "ACCOUNTADMIN required for every pipe",
+        "es_correcta": false,
+        "explicacion": "Over-privileged."
+      },
+      {
+        "texto_opcion": "Pipe needs OWNERSHIP on account",
+        "es_correcta": false,
+        "explicacion": "Excessive."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Security pipe"
+    ]
+  },
+  {
+    "pregunta": "Incident review (eastus): auto-ingest new files arriving in S3 stage continuously. Select the most appropriate design. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Create PIPE with AUTO_INGEST=true tied to stage and cloud event notification",
+        "es_correcta": true,
+        "explicacion": "Snowpipe loads files on arrival via queue/notifications."
+      },
+      {
+        "texto_opcion": "Snowpipe executes on client laptop when file downloaded",
+        "es_correcta": false,
+        "explicacion": "Serverless Snowpipe service loads."
+      },
+      {
+        "texto_opcion": "Schedule COPY every second with Task instead of Snowpipe always better",
+        "es_correcta": false,
+        "explicacion": "Snowpipe designed for continuous ingest."
+      },
+      {
+        "texto_opcion": "PIPE object replaces need for stage",
+        "es_correcta": false,
+        "explicacion": "Pipe references stage."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe"
+    ]
+  },
+  {
+    "pregunta": "Media streaming company scenario — understand compute billing model for Snowpipe loads. What should they implement? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Free with external stage only",
+        "es_correcta": false,
+        "explicacion": "Still consumes serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe billed as storage GB/day only always",
+        "es_correcta": false,
+        "explicacion": "Uses serverless credits."
+      },
+      {
+        "texto_opcion": "Snowpipe requires dedicated X-Large warehouse always on",
+        "es_correcta": false,
+        "explicacion": "Snowpipe is serverless ingestion."
+      },
+      {
+        "texto_opcion": "Snowpipe uses serverless compute credits based on load activity (per Snowflake billing)",
+        "es_correcta": true,
+        "explicacion": "Snowpipe billed as serverless ingestion compute."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe serverless"
+    ]
+  },
+  {
+    "pregunta": "For a media streaming company workload with ~200 million rows/day: stop loading during upstream maintenance window. Best choice (variant 5)?",
+    "opciones": [
+      {
+        "texto_opcion": "Drop stage to pause pipe safely always",
+        "es_correcta": false,
+        "explicacion": "Breaks configuration; pause pipe instead."
+      },
+      {
+        "texto_opcion": "ALTER PIPE ... SET PIPE_EXECUTION_PAUSED=true",
+        "es_correcta": true,
+        "explicacion": "Pause pipe halts auto-ingest processing."
+      },
+      {
+        "texto_opcion": "Pause warehouse to stop Snowpipe",
+        "es_correcta": false,
+        "explicacion": "Snowpipe serverless separate from user warehouse."
+      },
+      {
+        "texto_opcion": "Disable network policy pauses pipe automatically",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Pipe pause"
+    ]
+  },
+  {
+    "pregunta": "Industrial iot platform scenario — troubleshoot files not loaded by Snowpipe. What should they implement? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Only Fail-safe logs pipe errors",
+        "es_correcta": false,
+        "explicacion": "Use copy history views."
+      },
+      {
+        "texto_opcion": "Snowpipe sends errors only via postal mail",
+        "es_correcta": false,
+        "explicacion": "Use views/alerts."
+      },
+      {
+        "texto_opcion": "Query COPY_HISTORY / pipe history views for status and errors",
+        "es_correcta": true,
+        "explicacion": "Copy history shows load results per file."
+      },
+      {
+        "texto_opcion": "LIST @stage shows load error messages always",
+        "es_correcta": false,
+        "explicacion": "LIST shows files; history shows load status."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Copy history"
+    ]
+  },
+  {
+    "pregunta": "Telecom operator scenario — ingest row streams with low latency without files. What should they implement? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Streaming identical to bulk COPY always",
+        "es_correcta": false,
+        "explicacion": "Different latency/ mechanism."
+      },
+      {
+        "texto_opcion": "Snowpipe Streaming requires CSV files in S3 only",
+        "es_correcta": false,
+        "explicacion": "Streaming API ingests rows directly."
+      },
+      {
+        "texto_opcion": "Use Snowpipe Streaming API/SDK for low-latency row ingestion",
+        "es_correcta": true,
+        "explicacion": "Streaming ingest avoids file batching latency."
+      },
+      {
+        "texto_opcion": "Use PUT for streaming millions/sec rows only path",
+        "es_correcta": false,
+        "explicacion": "PUT file-based; streaming API for row stream."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Snowpipe Streaming"
+    ]
+  },
+  {
+    "pregunta": "Incident review (eastus): S3 event triggers Snowpipe for new objects. Select the most appropriate design. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Notifications require public stage ACL world read",
+        "es_correcta": false,
+        "explicacion": "Secure integration patterns exist."
+      },
+      {
+        "texto_opcion": "Snowflake polls S3 every millisecond without notification always",
+        "es_correcta": false,
+        "explicacion": "Event-driven auto-ingest uses notifications."
+      },
+      {
+        "texto_opcion": "Use Time Travel to detect new S3 files",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Configure SQS/Event notification referencing Snowflake pipe notification channel",
+        "es_correcta": true,
+        "explicacion": "Auto-ingest relies on cloud event to Snowflake."
+      }
+    ],
+    "tags": [
+      "4.2",
+      "Notification"
+    ]
+  }
+]
