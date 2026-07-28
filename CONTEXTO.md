@@ -92,8 +92,8 @@ Regras:
 
 | id | Vendor | bankCount | Mock Q / min |
 |----|--------|-----------|--------------|
-| `DE_associate_databricks` | Databricks | 1008 | 45 / 90 |
-| `DE_professional_databricks` | Databricks | 1009 | 59 / 120 |
+| `DE_associate_databricks` | Databricks | 1226 (+ mocks reais) | 45 / 90 |
+| `DE_professional_databricks` | Databricks | 1198 (+ mocks reais) | 59 / 120 |
 | `DP203_azure` | Microsoft | 900 | 50 / 120 |
 | `DEA_C01_aws` | AWS | 850 | 65 / 130 |
 | `PDE_google` | Google Cloud | 900 | 50 / 120 |
@@ -111,6 +111,7 @@ Regras:
 - Sem bloco de café/doação na UI
 - Quiz: atalhos `↑ ↓` (foco A–E), `→` confirma, `←`, `A–E`, `G` (ir para), `?`
 - Mock: `?mode=sim` ou botão Mock; timer = `durationMinutes`; N = `realExamQuestions`
+- Mock **balanceia domínios** (cotas pelo `peso` do `temario.json` quando existe; senão cotas iguais). Exclui pacotes “Real practice / study bank” (`90.x`, peso 0). Resultado mostra o mix por domínio.
 - Cache: home busca `exams.json?v=` + `CATALOG_VERSION` com `cache: 'no-store'` (GitHub Pages + browser cache atrasam muito)
 
 ---
@@ -158,7 +159,30 @@ Padrão de geração:
 
 Mitigação já aplicada: `tools/bankgen/rebalance_options.py` em EN e PT (equaliza comprimento e engorda distratores). Isso remove o atalho de tamanho; **não** transforma o banco em qualidade de prova oficial. Próximo passo desejável: reescrever distratores para serem alternativas técnicas plausíveis (começar por DE Professional + 4 novos).
 
-### 4.3 Checklist para adicionar um exame novo
+### 4.3 Import de provas / simulados “reais”
+
+Script: `tools/bankgen/import_real_mocks.py`
+
+Fontes usadas (só Databricks — qualidade editorial):
+
+1. Markdown em `Dataside/09_referencias/estudos_certificacao/`
+   - Associate: `prova_teste_…associate.md`, `simulado_2_…associate.md` → `90.1.json`, `90.2.json`
+   - Professional: `simulado_…professional.md` → `11.1.json`
+2. PassTest hand-written em `Dataside/07_projetos/passtest/core/script.js`
+   - Estrutura: `EXAM_DATA.providers[].certs[]` (`de-associate`, `de-professional`)
+   - Filtra `[Profundidade…]` e pads AWS/Azure; grava `90.3.json` / `11.2.json`
+
+Comandos:
+
+```bash
+python tools/bankgen/import_real_mocks.py          # MD + PassTest
+python tools/bankgen/import_real_mocks.py md       # só Markdown
+python tools/bankgen/import_real_mocks.py passtest # só PassTest
+```
+
+Não importar bancos template PassTest de AWS/Azure (qualidade ruim). SnowPro / PDE / dbt / DEA ainda sem dumps locais “reais”.
+
+### 4.4 Checklist para adicionar um exame novo
 
 1. Criar pasta `{id}/` com `temario.json`, `manifest.json`, `questions/`, `questions-pt/`
 2. Arquivos `{N.M}.json` alinhados ao temario; schema acima
@@ -249,6 +273,7 @@ Dependência: `deep_translator` (e rede para Google Translate).
 - Quatro exames novos: Azure DP-203, SnowPro Core, GCP PDE, dbt AE (EN+PT)
 - UI: filtros vendor, fontes novas, copy limpa, sem café
 - Correção do atalho “resposta mais longa”
+- Import de simulados reais (MD + PassTest Databricks) em seções `90.x` / `11.x`
 - Este documento para continuidade de contexto
 
 ---

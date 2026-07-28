@@ -961,6 +961,7 @@
       let focusedOpt = -1; // highlight index for ↑↓ / → confirm
       let studyFilter = 'all'; // all | pending | wrong
       let sectionTitles = {}; // "1" -> title
+      let domainWeights = {}; // "1" -> peso oficial (quando existir no temario)
       let simMode = false;
       let simAnswers = {}; // qid -> chosen orig index
       let simStartedAt = null;
@@ -1136,7 +1137,8 @@
         const mins = currentExam.durationMinutes || 90;
         if (!confirm(
           'Start a mock exam?\n\n' +
-          n + ' random questions, ' + mins + ' minutes\n' +
+          n + ' questions, ' + mins + ' minutes\n' +
+          'Balanced across exam domains (not pure random).\n' +
           'Answers are graded at the end (no instant reveal).\n' +
           'This does not change your practice progress.'
         )) {
@@ -1156,17 +1158,14 @@
         simAnswers = {};
         simStartedAt = new Date().toISOString();
         simEndsAt = Date.now() + mins * 60 * 1000;
-        filtered = shuffle(allQuestions).slice(0, n).map(q => {
-          // fresh option order for the mock
-          return Object.assign({}, q, { order: shuffle([...Array(q.opciones.length).keys()]) });
-        });
+        filtered = pickBalancedMock(allQuestions, n);
         currentIdx = 0;
         studyFilter = 'all';
         searchBox.value = '';
         filterWrap.querySelectorAll('.filter-pill').forEach(b => {
           b.classList.toggle('active', b.dataset.filter === 'all');
         });
-        simMetaEl.textContent = ' ' + n + ' q / ' + mins + ' min';
+        simMetaEl.textContent = ' ' + filtered.length + ' q / ' + mins + ' min · balanced';
         setSimChrome(true);
         stopSimTimer();
         tickSimTimer();
@@ -1261,6 +1260,18 @@
         history.replaceState(null, '', url);
 
         const wrong = items.filter(i => !i.correct);
+        const mix = mockDomainMix(filtered);
+        const mixHtml = mix.length
+          ? '<p class="sub" style="margin-top:14px;text-align:left;max-width:36rem;margin-left:auto;margin-right:auto">' +
+            '<span style="color:var(--ink-muted)">Domain mix</span><br>' +
+            mix.map(m =>
+              escapeHtml(m.domain) + ': <b>' + m.count + '</b>' +
+              (sectionTitles[m.domain]
+                ? ' <span style="color:var(--ink-faint)">(' + escapeHtml(String(sectionTitles[m.domain]).slice(0, 42)) + ')</span>'
+                : '')
+            ).join('<br>') +
+            '</p>'
+          : '';
         contentEl.innerHTML = '';
         const card = document.createElement('div');
         card.className = 'results-card';
@@ -1273,6 +1284,7 @@
             '<div class="stat"><b style="color:var(--bad)">' + (filtered.length - correct) + '</b><span>Missed</span></div>' +
             '<div class="stat"><b style="color:var(--amber)">' + pct + '%</b><span>Score</span></div>' +
           '</div>' +
+          mixHtml +
           '<div class="results-actions">' +
             '<button type="button" class="nav-btn" id="resPractice">Back to practice</button>' +
             '<button type="button" class="nav-btn" id="resRetry">New mock</button>' +
@@ -1438,10 +1450,17 @@
           syncLangButtons();
 
           sectionTitles = {};
+          domainWeights = {};
           try {
             const tem = await (await fetch(currentExam.path + '/temario.json')).json();
             (tem.temario || []).forEach(sec => {
-              sectionTitles[String(sec.seccion_numero)] = sec.seccion_titulo || '';
+              const id = String(sec.seccion_numero);
+              sectionTitles[id] = sec.seccion_titulo || '';
+              if (sec.peso != null && Number(sec.peso) > 0) {
+                domainWeights[id] = Number(sec.peso);
+              } else if (sec.peso != null && Number(sec.peso) === 0) {
+                domainWeights[id] = 0; // study-only / fora do blueprint
+              }
             });
           } catch (_) { /* temario opcional */ }
 
@@ -1491,6 +1510,160 @@
           [a[i], a[j]] = [a[j], a[i]];
         }
         return a;
+      }
+
+      /** Domínio = primeiro segmento do arquivo/tag (ex.: 2.3.json → "2"). */
+      function questionDomain(q) {
+        const tag0 = q.tags && q.tags[0] != null ? String(q.tags[0]) : '';
+        const file = (q.fileName || '').replace(/\.json$/i, '');
+        const raw = tag0 || file;
+        const part = raw.split(/[.\-_]/)[0];
+        return part || 'other';
+      }
+
+      function isStudyOnlyDomain(dom) {
+        if (/^(90|99)$/.test(dom)) return true;
+        if (Object.prototype.hasOwnProperty.call(domainWeights, dom) && !(domainWeights[dom] > 0)) {
+          return true;
+        }
+        const title = String(sectionTitles[dom] || '').toLowerCase();
+        return /real practice|study bank|simulad/.test(title);
+      }
+
+      /**
+       * Amostra o mock com cotas por domínio (pesos do temario quando houver).
+       * Evita cair quase só em um domínio quando o banco é desigual.
+       */
+      function pickBalancedMock(pool, n) {
+        const want = Math.min(Math.max(0, n | 0), pool.length);
+        if (!want) return [];
+
+        const byDom = new Map();
+        pool.forEach(q => {
+          const d = questionDomain(q);
+          if (isStudyOnlyDomain(d)) return;
+          if (!byDom.has(d)) byDom.set(d, []);
+          byDom.get(d).push(q);
+        });
+
+        let domains = [...byDom.keys()].filter(d => byDom.get(d).length > 0);
+        // Fallback: se tudo era study-only, usa o banco inteiro sem filtro.
+        if (!domains.length) {
+          return shuffle(pool).slice(0, want).map(q =>
+            Object.assign({}, q, { order: shuffle([...Array(q.opciones.length).keys()]) })
+          );
+        }
+
+        domains.forEach(d => byDom.set(d, shuffle(byDom.get(d))));
+
+        const hasOfficial = domains.some(d => domainWeights[d] > 0);
+        const weights = {};
+        if (hasOfficial) {
+          const withPeso = domains.filter(d => domainWeights[d] > 0);
+          const avg =
+            withPeso.reduce((s, d) => s + domainWeights[d], 0) / Math.max(1, withPeso.length);
+          domains.forEach(d => {
+            weights[d] = domainWeights[d] > 0 ? domainWeights[d] : avg;
+          });
+          // Preferir só domínios oficiais com peso > 0 quando a maioria tem peso.
+          if (withPeso.length >= Math.max(2, Math.ceil(domains.length * 0.5))) {
+            domains = withPeso;
+          }
+        } else {
+          domains.forEach(d => { weights[d] = 1; });
+        }
+
+        const avail = {};
+        domains.forEach(d => { avail[d] = byDom.get(d).length; });
+        const totalW = domains.reduce((s, d) => s + weights[d], 0) || 1;
+
+        const exact = {};
+        const quota = {};
+        domains.forEach(d => {
+          exact[d] = want * weights[d] / totalW;
+          quota[d] = Math.floor(exact[d]);
+        });
+        let leftover = want - domains.reduce((s, d) => s + quota[d], 0);
+        domains
+          .slice()
+          .sort((a, b) => (exact[b] - Math.floor(exact[b])) - (exact[a] - Math.floor(exact[a])))
+          .forEach(d => {
+            if (leftover <= 0) return;
+            quota[d] += 1;
+            leftover -= 1;
+          });
+
+        // Cap por disponibilidade e redistribui déficit.
+        let deficit = 0;
+        domains.forEach(d => {
+          if (quota[d] > avail[d]) {
+            deficit += quota[d] - avail[d];
+            quota[d] = avail[d];
+          }
+        });
+        while (deficit > 0) {
+          const donors = domains
+            .filter(d => avail[d] > quota[d])
+            .sort((a, b) => (avail[b] - quota[b]) - (avail[a] - quota[a]));
+          if (!donors.length) break;
+          let progressed = false;
+          for (const d of donors) {
+            if (deficit <= 0) break;
+            if (quota[d] < avail[d]) {
+              quota[d] += 1;
+              deficit -= 1;
+              progressed = true;
+            }
+          }
+          if (!progressed) break;
+        }
+
+        const picked = [];
+        const used = new Set();
+        domains.forEach(d => {
+          const take = byDom.get(d).slice(0, quota[d] || 0);
+          take.forEach(q => {
+            picked.push(q);
+            used.add(qid(q));
+          });
+        });
+
+        // Completa se ainda faltar (ex.: pool menor que N em algum domínio).
+        if (picked.length < want) {
+          const rest = shuffle(
+            pool.filter(q => !used.has(qid(q)) && !isStudyOnlyDomain(questionDomain(q)))
+          );
+          for (const q of rest) {
+            if (picked.length >= want) break;
+            picked.push(q);
+            used.add(qid(q));
+          }
+        }
+        if (picked.length < want) {
+          const rest2 = shuffle(pool.filter(q => !used.has(qid(q))));
+          for (const q of rest2) {
+            if (picked.length >= want) break;
+            picked.push(q);
+          }
+        }
+
+        return shuffle(picked).slice(0, want).map(q =>
+          Object.assign({}, q, { order: shuffle([...Array(q.opciones.length).keys()]) })
+        );
+      }
+
+      function mockDomainMix(sample) {
+        const counts = {};
+        sample.forEach(q => {
+          const d = questionDomain(q);
+          counts[d] = (counts[d] || 0) + 1;
+        });
+        return Object.keys(counts)
+          .sort((a, b) => Number(a) - Number(b) || String(a).localeCompare(String(b)))
+          .map(d => {
+            const label = sectionTitles[d] ? d + ' · ' + sectionTitles[d] : d;
+            return { domain: d, label, count: counts[d] };
+          });
       }
 
       function updateScore() {
