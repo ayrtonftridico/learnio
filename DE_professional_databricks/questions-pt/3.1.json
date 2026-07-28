@@ -1,0 +1,988 @@
+[
+  {
+    "pregunta": "Em uma fintech de pagamentos, silver de transações e chargebacks exige join com dimensão slowly changing. Estratégia?",
+    "opciones": [
+      {
+        "texto_opcion": "Join com condição temporal (between valid_from/valid_to) ou snapshot as-of date.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cross join dimensão completa.",
+        "es_correcta": false,
+        "explicacion": "Explode cardinalidade."
+      },
+      {
+        "texto_opcion": "Broadcast fato grande.",
+        "es_correcta": false,
+        "explicacion": "Fato grande não deve ser broadcast."
+      },
+      {
+        "texto_opcion": "Join só por id sem vigência.",
+        "es_correcta": false,
+        "explicacion": "Atribui versão errada da dimensão."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Join temporal"
+    ]
+  },
+  {
+    "pregunta": "Array de itens em pedidos e estoque de uma rede de varejo omnichannel precisa virar linhas. Função?",
+    "opciones": [
+      {
+        "texto_opcion": "collect_list no array.",
+        "es_correcta": false,
+        "explicacion": "Agrega em vez de desnormalizar."
+      },
+      {
+        "texto_opcion": "pivot array.",
+        "es_correcta": false,
+        "explicacion": "Pivot espera colunas, não elementos."
+      },
+      {
+        "texto_opcion": "explode() ou explode_outer() conforme tolerância a nulls.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "split string manual.",
+        "es_correcta": false,
+        "explicacion": "Frágil vs array nativo."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "explode"
+    ]
+  },
+  {
+    "pregunta": "Coluna valor de telemetria de sensores em uma operadora de IoT industrial chega como string '1.234,56'. Limpeza?",
+    "opciones": [
+      {
+        "texto_opcion": "regexp_replace + cast para decimal com locale considerado ou normalização prévia.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "int cast truncando.",
+        "es_correcta": false,
+        "explicacion": "Perde casas decimais."
+      },
+      {
+        "texto_opcion": "cast direto double.",
+        "es_correcta": false,
+        "explicacion": "Falha com separador locale."
+      },
+      {
+        "texto_opcion": "Ignorar linhas inválidas silenciosamente.",
+        "es_correcta": false,
+        "explicacion": "Perde volume sem métrica."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Tipagem e limpeza"
+    ]
+  },
+  {
+    "pregunta": "Duplicatas de prontuários e exames em um hospital universitário por chave id+timestamp. Remoção?",
+    "opciones": [
+      {
+        "texto_opcion": "delete físico imediato bronze.",
+        "es_correcta": false,
+        "explicacion": "Bronze deve permanecer append-only."
+      },
+      {
+        "texto_opcion": "distinct sem colunas.",
+        "es_correcta": false,
+        "explicacion": "Remove linhas legítimas distintas."
+      },
+      {
+        "texto_opcion": "dropDuplicates(['id','timestamp']) ou window ROW_NUMBER keep rn=1.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "groupBy max sem critério.",
+        "es_correcta": false,
+        "explicacion": "Escolha arbitrária de registro."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Duplicatas"
+    ]
+  },
+  {
+    "pregunta": "Em uma plataforma de streaming, nulos em coluna crítica de eventos de reprodução devem ser flag, não removidos. Padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "coalesce ou when(col.isNull(), lit('UNKNOWN')) + coluna de qualidade.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "dropna subset=[col].",
+        "es_correcta": false,
+        "explicacion": "Remove registros auditáveis."
+      },
+      {
+        "texto_opcion": "filter where col is not null.",
+        "es_correcta": false,
+        "explicacion": "Descarta linhas recuperáveis."
+      },
+      {
+        "texto_opcion": "fillna(0) sempre.",
+        "es_correcta": false,
+        "explicacion": "Zero pode distorcer métricas financeiras."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Tratamento nulos"
+    ]
+  },
+  {
+    "pregunta": "Sessões de sinistros e apólices em uma seguradora com gap de 30 min. Window?",
+    "opciones": [
+      {
+        "texto_opcion": "lag sem sessionization.",
+        "es_correcta": false,
+        "explicacion": "Não agrupa eventos contíguos."
+      },
+      {
+        "texto_opcion": " tumbling 30 min fixo.",
+        "es_correcta": false,
+        "explicacion": "Corta sessões reais incorretamente."
+      },
+      {
+        "texto_opcion": "session_window ou gap-based window sobre event_time.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "groupBy user only.",
+        "es_correcta": false,
+        "explicacion": "Ignora timeout entre eventos."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Session window"
+    ]
+  },
+  {
+    "pregunta": "Join skew em rotas e entregas de uma operadora logística por chave popular. Mitigação transform?",
+    "opciones": [
+      {
+        "texto_opcion": "Salting ou AQE skew join hints + repartition by key.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Aumentar shuffle partitions só.",
+        "es_correcta": false,
+        "explicacion": "Não resolve hotspot de chave."
+      },
+      {
+        "texto_opcion": "Cross join.",
+        "es_correcta": false,
+        "explicacion": "Produto cartesiano."
+      },
+      {
+        "texto_opcion": "Broadcast tabela grande.",
+        "es_correcta": false,
+        "explicacion": "Estoura memória."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Skew join transform"
+    ]
+  },
+  {
+    "pregunta": "Em uma cooperativa agrícola, struct aninhado de colheita e umidade do solo precisa flatten. Abordagem?",
+    "opciones": [
+      {
+        "texto_opcion": "to_json e parse loop.",
+        "es_correcta": false,
+        "explicacion": "Round-trip caro."
+      },
+      {
+        "texto_opcion": "collect_set struct.",
+        "es_correcta": false,
+        "explicacion": "Agrega em vez de flatten."
+      },
+      {
+        "texto_opcion": "select col.* ou selectExpr com dot notation após tipagem.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "RDD map manual.",
+        "es_correcta": false,
+        "explicacion": "Perde otimizações Catalyst."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Struct flatten"
+    ]
+  },
+  {
+    "pregunta": "Timezone de eventos de transações e chargebacks em uma fintech de pagamentos inconsistente. Padronização?",
+    "opciones": [
+      {
+        "texto_opcion": "to_utc_timestamp / from_utc_timestamp para TIMESTAMP padronizado.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "String concat timezone.",
+        "es_correcta": false,
+        "explicacion": "Não tipa corretamente."
+      },
+      {
+        "texto_opcion": "Assumir UTC sem converter.",
+        "es_correcta": false,
+        "explicacion": "Desloca janelas diárias."
+      },
+      {
+        "texto_opcion": "cast date truncando hora.",
+        "es_correcta": false,
+        "explicacion": "Perde granularidade."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Timezone"
+    ]
+  },
+  {
+    "pregunta": "Em uma rede de varejo omnichannel, silver de pedidos e estoque exige join com dimensão slowly changing. Estratégia?",
+    "opciones": [
+      {
+        "texto_opcion": "Broadcast fato grande.",
+        "es_correcta": false,
+        "explicacion": "Fato grande não deve ser broadcast."
+      },
+      {
+        "texto_opcion": "Join com condição temporal (between valid_from/valid_to) ou snapshot as-of date.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cross join dimensão completa.",
+        "es_correcta": false,
+        "explicacion": "Explode cardinalidade."
+      },
+      {
+        "texto_opcion": "Join só por id sem vigência.",
+        "es_correcta": false,
+        "explicacion": "Atribui versão errada da dimensão."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Join temporal"
+    ]
+  },
+  {
+    "pregunta": "Array de itens em telemetria de sensores de uma operadora de IoT industrial precisa virar linhas. Função?",
+    "opciones": [
+      {
+        "texto_opcion": "split string manual.",
+        "es_correcta": false,
+        "explicacion": "Frágil vs array nativo."
+      },
+      {
+        "texto_opcion": "collect_list no array.",
+        "es_correcta": false,
+        "explicacion": "Agrega em vez de desnormalizar."
+      },
+      {
+        "texto_opcion": "pivot array.",
+        "es_correcta": false,
+        "explicacion": "Pivot espera colunas, não elementos."
+      },
+      {
+        "texto_opcion": "explode() ou explode_outer() conforme tolerância a nulls.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "explode"
+    ]
+  },
+  {
+    "pregunta": "Coluna valor de prontuários e exames em um hospital universitário chega como string '1.234,56'. Limpeza?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignorar linhas inválidas silenciosamente.",
+        "es_correcta": false,
+        "explicacion": "Perde volume sem métrica."
+      },
+      {
+        "texto_opcion": "regexp_replace + cast para decimal com locale considerado ou normalização prévia.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "cast direto double.",
+        "es_correcta": false,
+        "explicacion": "Falha com separador locale."
+      },
+      {
+        "texto_opcion": "int cast truncando.",
+        "es_correcta": false,
+        "explicacion": "Perde casas decimais."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Tipagem e limpeza"
+    ]
+  },
+  {
+    "pregunta": "Duplicatas de eventos de reprodução em uma plataforma de streaming por chave id+timestamp. Remoção?",
+    "opciones": [
+      {
+        "texto_opcion": "delete físico imediato bronze.",
+        "es_correcta": false,
+        "explicacion": "Bronze deve permanecer append-only."
+      },
+      {
+        "texto_opcion": "groupBy max sem critério.",
+        "es_correcta": false,
+        "explicacion": "Escolha arbitrária de registro."
+      },
+      {
+        "texto_opcion": "distinct sem colunas.",
+        "es_correcta": false,
+        "explicacion": "Remove linhas legítimas distintas."
+      },
+      {
+        "texto_opcion": "dropDuplicates(['id','timestamp']) ou window ROW_NUMBER keep rn=1.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Duplicatas"
+    ]
+  },
+  {
+    "pregunta": "Em uma seguradora, nulos em coluna crítica de sinistros e apólices devem ser flag, não removidos. Padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "filter where col is not null.",
+        "es_correcta": false,
+        "explicacion": "Descarta linhas recuperáveis."
+      },
+      {
+        "texto_opcion": "coalesce ou when(col.isNull(), lit('UNKNOWN')) + coluna de qualidade.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "fillna(0) sempre.",
+        "es_correcta": false,
+        "explicacion": "Zero pode distorcer métricas financeiras."
+      },
+      {
+        "texto_opcion": "dropna subset=[col].",
+        "es_correcta": false,
+        "explicacion": "Remove registros auditáveis."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Tratamento nulos"
+    ]
+  },
+  {
+    "pregunta": "Sessões de rotas e entregas em uma operadora logística com gap de 30 min. Window?",
+    "opciones": [
+      {
+        "texto_opcion": "groupBy user only.",
+        "es_correcta": false,
+        "explicacion": "Ignora timeout entre eventos."
+      },
+      {
+        "texto_opcion": "lag sem sessionization.",
+        "es_correcta": false,
+        "explicacion": "Não agrupa eventos contíguos."
+      },
+      {
+        "texto_opcion": " tumbling 30 min fixo.",
+        "es_correcta": false,
+        "explicacion": "Corta sessões reais incorretamente."
+      },
+      {
+        "texto_opcion": "session_window ou gap-based window sobre event_time.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Session window"
+    ]
+  },
+  {
+    "pregunta": "Join skew em colheita e umidade do solo de uma cooperativa agrícola por chave popular. Mitigação transform?",
+    "opciones": [
+      {
+        "texto_opcion": "Aumentar shuffle partitions só.",
+        "es_correcta": false,
+        "explicacion": "Não resolve hotspot de chave."
+      },
+      {
+        "texto_opcion": "Salting ou AQE skew join hints + repartition by key.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cross join.",
+        "es_correcta": false,
+        "explicacion": "Produto cartesiano."
+      },
+      {
+        "texto_opcion": "Broadcast tabela grande.",
+        "es_correcta": false,
+        "explicacion": "Estoura memória."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Skew join transform"
+    ]
+  },
+  {
+    "pregunta": "Em uma fintech de pagamentos, struct aninhado de transações e chargebacks precisa flatten. Abordagem?",
+    "opciones": [
+      {
+        "texto_opcion": "RDD map manual.",
+        "es_correcta": false,
+        "explicacion": "Perde otimizações Catalyst."
+      },
+      {
+        "texto_opcion": "to_json e parse loop.",
+        "es_correcta": false,
+        "explicacion": "Round-trip caro."
+      },
+      {
+        "texto_opcion": "collect_set struct.",
+        "es_correcta": false,
+        "explicacion": "Agrega em vez de flatten."
+      },
+      {
+        "texto_opcion": "select col.* ou selectExpr com dot notation após tipagem.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Struct flatten"
+    ]
+  },
+  {
+    "pregunta": "Timezone de eventos de pedidos e estoque em uma rede de varejo omnichannel inconsistente. Padronização?",
+    "opciones": [
+      {
+        "texto_opcion": "Assumir UTC sem converter.",
+        "es_correcta": false,
+        "explicacion": "Desloca janelas diárias."
+      },
+      {
+        "texto_opcion": "to_utc_timestamp / from_utc_timestamp para TIMESTAMP padronizado.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "cast date truncando hora.",
+        "es_correcta": false,
+        "explicacion": "Perde granularidade."
+      },
+      {
+        "texto_opcion": "String concat timezone.",
+        "es_correcta": false,
+        "explicacion": "Não tipa corretamente."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Timezone"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora de IoT industrial, silver de telemetria de sensores exige join com dimensão slowly changing. Estratégia?",
+    "opciones": [
+      {
+        "texto_opcion": "Cross join dimensão completa.",
+        "es_correcta": false,
+        "explicacion": "Explode cardinalidade."
+      },
+      {
+        "texto_opcion": "Broadcast fato grande.",
+        "es_correcta": false,
+        "explicacion": "Fato grande não deve ser broadcast."
+      },
+      {
+        "texto_opcion": "Join com condição temporal (between valid_from/valid_to) ou snapshot as-of date.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Join só por id sem vigência.",
+        "es_correcta": false,
+        "explicacion": "Atribui versão errada da dimensão."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Join temporal"
+    ]
+  },
+  {
+    "pregunta": "Array de itens em prontuários e exames de um hospital universitário precisa virar linhas. Função?",
+    "opciones": [
+      {
+        "texto_opcion": "explode() ou explode_outer() conforme tolerância a nulls.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "collect_list no array.",
+        "es_correcta": false,
+        "explicacion": "Agrega em vez de desnormalizar."
+      },
+      {
+        "texto_opcion": "pivot array.",
+        "es_correcta": false,
+        "explicacion": "Pivot espera colunas, não elementos."
+      },
+      {
+        "texto_opcion": "split string manual.",
+        "es_correcta": false,
+        "explicacion": "Frágil vs array nativo."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "explode"
+    ]
+  },
+  {
+    "pregunta": "Coluna valor de eventos de reprodução em uma plataforma de streaming chega como string '1.234,56'. Limpeza?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignorar linhas inválidas silenciosamente.",
+        "es_correcta": false,
+        "explicacion": "Perde volume sem métrica."
+      },
+      {
+        "texto_opcion": "cast direto double.",
+        "es_correcta": false,
+        "explicacion": "Falha com separador locale."
+      },
+      {
+        "texto_opcion": "regexp_replace + cast para decimal com locale considerado ou normalização prévia.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "int cast truncando.",
+        "es_correcta": false,
+        "explicacion": "Perde casas decimais."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Tipagem e limpeza"
+    ]
+  },
+  {
+    "pregunta": "Duplicatas de sinistros e apólices em uma seguradora por chave id+timestamp. Remoção?",
+    "opciones": [
+      {
+        "texto_opcion": "dropDuplicates(['id','timestamp']) ou window ROW_NUMBER keep rn=1.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "delete físico imediato bronze.",
+        "es_correcta": false,
+        "explicacion": "Bronze deve permanecer append-only."
+      },
+      {
+        "texto_opcion": "distinct sem colunas.",
+        "es_correcta": false,
+        "explicacion": "Remove linhas legítimas distintas."
+      },
+      {
+        "texto_opcion": "groupBy max sem critério.",
+        "es_correcta": false,
+        "explicacion": "Escolha arbitrária de registro."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Duplicatas"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora logística, nulos em coluna crítica de rotas e entregas devem ser flag, não removidos. Padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "fillna(0) sempre.",
+        "es_correcta": false,
+        "explicacion": "Zero pode distorcer métricas financeiras."
+      },
+      {
+        "texto_opcion": "dropna subset=[col].",
+        "es_correcta": false,
+        "explicacion": "Remove registros auditáveis."
+      },
+      {
+        "texto_opcion": "coalesce ou when(col.isNull(), lit('UNKNOWN')) + coluna de qualidade.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "filter where col is not null.",
+        "es_correcta": false,
+        "explicacion": "Descarta linhas recuperáveis."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Tratamento nulos"
+    ]
+  },
+  {
+    "pregunta": "Sessões de colheita e umidade do solo em uma cooperativa agrícola com gap de 30 min. Window?",
+    "opciones": [
+      {
+        "texto_opcion": "session_window ou gap-based window sobre event_time.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "lag sem sessionization.",
+        "es_correcta": false,
+        "explicacion": "Não agrupa eventos contíguos."
+      },
+      {
+        "texto_opcion": " tumbling 30 min fixo.",
+        "es_correcta": false,
+        "explicacion": "Corta sessões reais incorretamente."
+      },
+      {
+        "texto_opcion": "groupBy user only.",
+        "es_correcta": false,
+        "explicacion": "Ignora timeout entre eventos."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Session window"
+    ]
+  },
+  {
+    "pregunta": "Join skew em transações e chargebacks de uma fintech de pagamentos por chave popular. Mitigação transform?",
+    "opciones": [
+      {
+        "texto_opcion": "Broadcast tabela grande.",
+        "es_correcta": false,
+        "explicacion": "Estoura memória."
+      },
+      {
+        "texto_opcion": "Aumentar shuffle partitions só.",
+        "es_correcta": false,
+        "explicacion": "Não resolve hotspot de chave."
+      },
+      {
+        "texto_opcion": "Salting ou AQE skew join hints + repartition by key.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cross join.",
+        "es_correcta": false,
+        "explicacion": "Produto cartesiano."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Skew join transform"
+    ]
+  },
+  {
+    "pregunta": "Em uma rede de varejo omnichannel, struct aninhado de pedidos e estoque precisa flatten. Abordagem?",
+    "opciones": [
+      {
+        "texto_opcion": "select col.* ou selectExpr com dot notation após tipagem.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "collect_set struct.",
+        "es_correcta": false,
+        "explicacion": "Agrega em vez de flatten."
+      },
+      {
+        "texto_opcion": "to_json e parse loop.",
+        "es_correcta": false,
+        "explicacion": "Round-trip caro."
+      },
+      {
+        "texto_opcion": "RDD map manual.",
+        "es_correcta": false,
+        "explicacion": "Perde otimizações Catalyst."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Struct flatten"
+    ]
+  },
+  {
+    "pregunta": "Timezone de eventos de telemetria de sensores em uma operadora de IoT industrial inconsistente. Padronização?",
+    "opciones": [
+      {
+        "texto_opcion": "String concat timezone.",
+        "es_correcta": false,
+        "explicacion": "Não tipa corretamente."
+      },
+      {
+        "texto_opcion": "cast date truncando hora.",
+        "es_correcta": false,
+        "explicacion": "Perde granularidade."
+      },
+      {
+        "texto_opcion": "to_utc_timestamp / from_utc_timestamp para TIMESTAMP padronizado.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Assumir UTC sem converter.",
+        "es_correcta": false,
+        "explicacion": "Desloca janelas diárias."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Timezone"
+    ]
+  },
+  {
+    "pregunta": "Em um hospital universitário, silver de prontuários e exames exige join com dimensão slowly changing. Estratégia?",
+    "opciones": [
+      {
+        "texto_opcion": "Join só por id sem vigência.",
+        "es_correcta": false,
+        "explicacion": "Atribui versão errada da dimensão."
+      },
+      {
+        "texto_opcion": "Broadcast fato grande.",
+        "es_correcta": false,
+        "explicacion": "Fato grande não deve ser broadcast."
+      },
+      {
+        "texto_opcion": "Cross join dimensão completa.",
+        "es_correcta": false,
+        "explicacion": "Explode cardinalidade."
+      },
+      {
+        "texto_opcion": "Join com condição temporal (between valid_from/valid_to) ou snapshot as-of date.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Join temporal"
+    ]
+  },
+  {
+    "pregunta": "Array de itens em eventos de reprodução de uma plataforma de streaming precisa virar linhas. Função?",
+    "opciones": [
+      {
+        "texto_opcion": "split string manual.",
+        "es_correcta": false,
+        "explicacion": "Frágil vs array nativo."
+      },
+      {
+        "texto_opcion": "explode() ou explode_outer() conforme tolerância a nulls.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "collect_list no array.",
+        "es_correcta": false,
+        "explicacion": "Agrega em vez de desnormalizar."
+      },
+      {
+        "texto_opcion": "pivot array.",
+        "es_correcta": false,
+        "explicacion": "Pivot espera colunas, não elementos."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "explode"
+    ]
+  },
+  {
+    "pregunta": "Coluna valor de sinistros e apólices em uma seguradora chega como string '1.234,56'. Limpeza?",
+    "opciones": [
+      {
+        "texto_opcion": "int cast truncando.",
+        "es_correcta": false,
+        "explicacion": "Perde casas decimais."
+      },
+      {
+        "texto_opcion": "Ignorar linhas inválidas silenciosamente.",
+        "es_correcta": false,
+        "explicacion": "Perde volume sem métrica."
+      },
+      {
+        "texto_opcion": "cast direto double.",
+        "es_correcta": false,
+        "explicacion": "Falha com separador locale."
+      },
+      {
+        "texto_opcion": "regexp_replace + cast para decimal com locale considerado ou normalização prévia.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Tipagem e limpeza"
+    ]
+  },
+  {
+    "pregunta": "Duplicatas de rotas e entregas em uma operadora logística por chave id+timestamp. Remoção?",
+    "opciones": [
+      {
+        "texto_opcion": "delete físico imediato bronze.",
+        "es_correcta": false,
+        "explicacion": "Bronze deve permanecer append-only."
+      },
+      {
+        "texto_opcion": "dropDuplicates(['id','timestamp']) ou window ROW_NUMBER keep rn=1.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "distinct sem colunas.",
+        "es_correcta": false,
+        "explicacion": "Remove linhas legítimas distintas."
+      },
+      {
+        "texto_opcion": "groupBy max sem critério.",
+        "es_correcta": false,
+        "explicacion": "Escolha arbitrária de registro."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Duplicatas"
+    ]
+  },
+  {
+    "pregunta": "Em uma cooperativa agrícola, nulos em coluna crítica de colheita e umidade do solo devem ser flag, não removidos. Padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "fillna(0) sempre.",
+        "es_correcta": false,
+        "explicacion": "Zero pode distorcer métricas financeiras."
+      },
+      {
+        "texto_opcion": "dropna subset=[col].",
+        "es_correcta": false,
+        "explicacion": "Remove registros auditáveis."
+      },
+      {
+        "texto_opcion": "filter where col is not null.",
+        "es_correcta": false,
+        "explicacion": "Descarta linhas recuperáveis."
+      },
+      {
+        "texto_opcion": "coalesce ou when(col.isNull(), lit('UNKNOWN')) + coluna de qualidade.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Tratamento nulos"
+    ]
+  },
+  {
+    "pregunta": "Sessões de transações e chargebacks em uma fintech de pagamentos com gap de 30 min. Window?",
+    "opciones": [
+      {
+        "texto_opcion": " tumbling 30 min fixo.",
+        "es_correcta": false,
+        "explicacion": "Corta sessões reais incorretamente."
+      },
+      {
+        "texto_opcion": "session_window ou gap-based window sobre event_time.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "lag sem sessionization.",
+        "es_correcta": false,
+        "explicacion": "Não agrupa eventos contíguos."
+      },
+      {
+        "texto_opcion": "groupBy user only.",
+        "es_correcta": false,
+        "explicacion": "Ignora timeout entre eventos."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Session window"
+    ]
+  },
+  {
+    "pregunta": "Join skew em pedidos e estoque de uma rede de varejo omnichannel por chave popular. Mitigação transform?",
+    "opciones": [
+      {
+        "texto_opcion": "Cross join.",
+        "es_correcta": false,
+        "explicacion": "Produto cartesiano."
+      },
+      {
+        "texto_opcion": "Aumentar shuffle partitions só.",
+        "es_correcta": false,
+        "explicacion": "Não resolve hotspot de chave."
+      },
+      {
+        "texto_opcion": "Broadcast tabela grande.",
+        "es_correcta": false,
+        "explicacion": "Estoura memória."
+      },
+      {
+        "texto_opcion": "Salting ou AQE skew join hints + repartition by key.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.1",
+      "Skew join transform"
+    ]
+  }
+]

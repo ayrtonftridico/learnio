@@ -1,0 +1,1597 @@
+[
+  {
+    "pregunta": "Em uma fintech de pagamentos, job Lakeflow executa bronze→silver→gold de transações e chargebacks. Como garantir silver só após bronze?",
+    "opciones": [
+      {
+        "texto_opcion": "Definir depends_on / upstream task no DAG do job apontando para task bronze.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Agendar horários fixos sem dependência.",
+        "es_correcta": false,
+        "explicacion": "Race condition se bronze atrasar."
+      },
+      {
+        "texto_opcion": "Notebook com sleep() de 30 min.",
+        "es_correcta": false,
+        "explicacion": "Frágil e desperdiça tempo de compute."
+      },
+      {
+        "texto_opcion": "Usar mesmo cluster para serializar.",
+        "es_correcta": false,
+        "explicacion": "Cluster compartilhado não impõe ordem lógica."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "DAG dependências"
+    ]
+  },
+  {
+    "pregunta": "Task A de uma rede de varejo omnichannel calcula watermark usado por task B no mesmo job de pedidos e estoque. Como passar valor?",
+    "opciones": [
+      {
+        "texto_opcion": "Variável global Python entre notebooks.",
+        "es_correcta": false,
+        "explicacion": "Isolamento de processo impede compartilhamento."
+      },
+      {
+        "texto_opcion": "Gravar arquivo temp no driver local.",
+        "es_correcta": false,
+        "explicacion": "Tasks podem rodar em workers diferentes."
+      },
+      {
+        "texto_opcion": "dbutils.jobs.taskValues.set/get ou task values do Lakeflow Jobs.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Parâmetro de cluster spark.conf.",
+        "es_correcta": false,
+        "explicacion": "Não é API de comunicação entre tasks."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Task values"
+    ]
+  },
+  {
+    "pregunta": "Job de telemetria de sensores em uma operadora de IoT industrial deve rodar com data_processamento diferente por ambiente. Melhor prática?",
+    "opciones": [
+      {
+        "texto_opcion": "Parâmetro de job {{job.parameters.data_processamento}} referenciado nos tasks.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Data hardcoded no SQL.",
+        "es_correcta": false,
+        "explicacion": "Quebra reprocessamento histórico."
+      },
+      {
+        "texto_opcion": "Editar notebook antes de cada run.",
+        "es_correcta": false,
+        "explicacion": "Manual e propenso a erro."
+      },
+      {
+        "texto_opcion": "Usar now() sempre.",
+        "es_correcta": false,
+        "explicacion": "Impossibilita backfill controlado."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Parâmetros job"
+    ]
+  },
+  {
+    "pregunta": "Task de ingestão de prontuários e exames em um hospital universitário falha por timeout esporádico de rede. Configuração?",
+    "opciones": [
+      {
+        "texto_opcion": "email_on_failure false.",
+        "es_correcta": false,
+        "explicacion": "Só suprime alerta; não reexecuta."
+      },
+      {
+        "texto_opcion": "Desabilitar timeout.",
+        "es_correcta": false,
+        "explicacion": "Task pode ficar presa indefinidamente."
+      },
+      {
+        "texto_opcion": "retries com intervalo e max_retries > 0 na definição da task.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "max_concurrent_runs = 0.",
+        "es_correcta": false,
+        "explicacion": "Controla concorrência do job, não retry de task."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retries"
+    ]
+  },
+  {
+    "pregunta": "Em uma plataforma de streaming, workload de eventos de reprodução é curto e intermitente. Qual compute reduz idle?",
+    "opciones": [
+      {
+        "texto_opcion": "Serverless job compute ou serverless para notebooks/tasks elegíveis.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cluster all-purpose 24/7.",
+        "es_correcta": false,
+        "explicacion": "Custo fixo alto para cargas esporádicas."
+      },
+      {
+        "texto_opcion": "Pool sem autoscale.",
+        "es_correcta": false,
+        "explicacion": "Ainda provisiona capacidade ociosa."
+      },
+      {
+        "texto_opcion": "Single node cluster oversized.",
+        "es_correcta": false,
+        "explicacion": "Gargalo e sem elasticidade."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Serverless jobs"
+    ]
+  },
+  {
+    "pregunta": "Pipeline de sinistros e apólices em uma seguradora precisa branch: se contagem=0, pular gold. Recurso?",
+    "opciones": [
+      {
+        "texto_opcion": "Dois jobs separados manualmente.",
+        "es_correcta": false,
+        "explicacion": "Operação manual propensa a erro."
+      },
+      {
+        "texto_opcion": "While loop infinito no notebook.",
+        "es_correcta": false,
+        "explicacion": "Consome slot de cluster."
+      },
+      {
+        "texto_opcion": "Conditional task ou if/else task no DAG do Lakeflow Job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Try/except no notebook sem branch no job.",
+        "es_correcta": false,
+        "explicacion": "Task anterior ainda marca sucesso parcial confuso."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Conditional task"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora logística, reprocessar rotas e entregas para lista de datas. Padrão de orquestração?",
+    "opciones": [
+      {
+        "texto_opcion": "For each task iterando parâmetro de datas ou job pai disparando runs parametrizados.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "UNION ALL de todas as datas num SQL.",
+        "es_correcta": false,
+        "explicacion": "Perde isolamento de falha por data."
+      },
+      {
+        "texto_opcion": "Trigger único sem parametrização.",
+        "es_correcta": false,
+        "explicacion": "Não cobre backlog."
+      },
+      {
+        "texto_opcion": "Copiar job manualmente por data.",
+        "es_correcta": false,
+        "explicacion": "Não escala operacionalmente."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "For each job"
+    ]
+  },
+  {
+    "pregunta": "Job crítico de colheita e umidade do solo em uma cooperativa agrícola falhou às 03:00. Como reexecutar só tasks falhas?",
+    "opciones": [
+      {
+        "texto_opcion": "Cancelar job e recriar do zero.",
+        "es_correcta": false,
+        "explicacion": "Perde metadados de run anterior."
+      },
+      {
+        "texto_opcion": "Editar código e commit sem rerun.",
+        "es_correcta": false,
+        "explicacion": "Não reexecuta tasks bem-sucedidas preservadas."
+      },
+      {
+        "texto_opcion": "Repair run (rerun) selecionando tasks com falha no Jobs UI ou API.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Reiniciar cluster manualmente.",
+        "es_correcta": false,
+        "explicacion": "Não dispara tasks pendentes automaticamente."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Repair run"
+    ]
+  },
+  {
+    "pregunta": "Em uma fintech de pagamentos, task B chama job filho de qualidade de transações e chargebacks. Tipo de task?",
+    "opciones": [
+      {
+        "texto_opcion": "Run job task referenciando job_id do filho.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Pipeline task DLT no meio do DAG.",
+        "es_correcta": false,
+        "explicacion": "DLT é pipeline contínuo; filho job é orquestração."
+      },
+      {
+        "texto_opcion": "SQL task sem permissão UC.",
+        "es_correcta": false,
+        "explicacion": "Pode falhar em objetos do filho."
+      },
+      {
+        "texto_opcion": "Notebook task duplicando código.",
+        "es_correcta": false,
+        "explicacion": "Duplica lógica e manutenção."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Run job task"
+    ]
+  },
+  {
+    "pregunta": "Git folder de uma rede de varejo omnichannel é fonte dos notebooks de pedidos e estoque. Benefício no job?",
+    "opciones": [
+      {
+        "texto_opcion": "Salvar só em DBFS sem Git.",
+        "es_correcta": false,
+        "explicacion": "Sem trilha de auditoria de código."
+      },
+      {
+        "texto_opcion": "Copiar notebook via UI.",
+        "es_correcta": false,
+        "explicacion": "Drift entre ambientes."
+      },
+      {
+        "texto_opcion": "Versionamento e promoção de código alinhados ao repo Git.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Exportar .dbc semanalmente.",
+        "es_correcta": false,
+        "explicacion": "Perde diff e revisão por PR."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Git source"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora de IoT industrial, SLA de telemetria de sensores exige alerta se job passar de 45 min. Onde configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "timeout_seconds na task e notification on failure/duration no job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Photon enabled flag.",
+        "es_correcta": false,
+        "explicacion": "Photon afeta performance, não alertas."
+      },
+      {
+        "texto_opcion": "print() no final do notebook.",
+        "es_correcta": false,
+        "explicacion": "Não dispara alerta proativo."
+      },
+      {
+        "texto_opcion": "Cluster policy apenas.",
+        "es_correcta": false,
+        "explicacion": "Policy limita recursos, não SLA temporal."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Timeout e alerta"
+    ]
+  },
+  {
+    "pregunta": "Em um hospital universitário, job Lakeflow executa bronze→silver→gold de prontuários e exames. Como garantir silver só após bronze?",
+    "opciones": [
+      {
+        "texto_opcion": "Notebook com sleep() de 30 min.",
+        "es_correcta": false,
+        "explicacion": "Frágil e desperdiça tempo de compute."
+      },
+      {
+        "texto_opcion": "Usar mesmo cluster para serializar.",
+        "es_correcta": false,
+        "explicacion": "Cluster compartilhado não impõe ordem lógica."
+      },
+      {
+        "texto_opcion": "Agendar horários fixos sem dependência.",
+        "es_correcta": false,
+        "explicacion": "Race condition se bronze atrasar."
+      },
+      {
+        "texto_opcion": "Definir depends_on / upstream task no DAG do job apontando para task bronze.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "DAG dependências"
+    ]
+  },
+  {
+    "pregunta": "Task A de uma plataforma de streaming calcula watermark usado por task B no mesmo job de eventos de reprodução. Como passar valor?",
+    "opciones": [
+      {
+        "texto_opcion": "Variável global Python entre notebooks.",
+        "es_correcta": false,
+        "explicacion": "Isolamento de processo impede compartilhamento."
+      },
+      {
+        "texto_opcion": "dbutils.jobs.taskValues.set/get ou task values do Lakeflow Jobs.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Gravar arquivo temp no driver local.",
+        "es_correcta": false,
+        "explicacion": "Tasks podem rodar em workers diferentes."
+      },
+      {
+        "texto_opcion": "Parâmetro de cluster spark.conf.",
+        "es_correcta": false,
+        "explicacion": "Não é API de comunicação entre tasks."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Task values"
+    ]
+  },
+  {
+    "pregunta": "Job de sinistros e apólices em uma seguradora deve rodar com data_processamento diferente por ambiente. Melhor prática?",
+    "opciones": [
+      {
+        "texto_opcion": "Data hardcoded no SQL.",
+        "es_correcta": false,
+        "explicacion": "Quebra reprocessamento histórico."
+      },
+      {
+        "texto_opcion": "Usar now() sempre.",
+        "es_correcta": false,
+        "explicacion": "Impossibilita backfill controlado."
+      },
+      {
+        "texto_opcion": "Editar notebook antes de cada run.",
+        "es_correcta": false,
+        "explicacion": "Manual e propenso a erro."
+      },
+      {
+        "texto_opcion": "Parâmetro de job {{job.parameters.data_processamento}} referenciado nos tasks.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Parâmetros job"
+    ]
+  },
+  {
+    "pregunta": "Task de ingestão de rotas e entregas em uma operadora logística falha por timeout esporádico de rede. Configuração?",
+    "opciones": [
+      {
+        "texto_opcion": "Desabilitar timeout.",
+        "es_correcta": false,
+        "explicacion": "Task pode ficar presa indefinidamente."
+      },
+      {
+        "texto_opcion": "retries com intervalo e max_retries > 0 na definição da task.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "email_on_failure false.",
+        "es_correcta": false,
+        "explicacion": "Só suprime alerta; não reexecuta."
+      },
+      {
+        "texto_opcion": "max_concurrent_runs = 0.",
+        "es_correcta": false,
+        "explicacion": "Controla concorrência do job, não retry de task."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retries"
+    ]
+  },
+  {
+    "pregunta": "Em uma cooperativa agrícola, workload de colheita e umidade do solo é curto e intermitente. Qual compute reduz idle?",
+    "opciones": [
+      {
+        "texto_opcion": "Single node cluster oversized.",
+        "es_correcta": false,
+        "explicacion": "Gargalo e sem elasticidade."
+      },
+      {
+        "texto_opcion": "Pool sem autoscale.",
+        "es_correcta": false,
+        "explicacion": "Ainda provisiona capacidade ociosa."
+      },
+      {
+        "texto_opcion": "Cluster all-purpose 24/7.",
+        "es_correcta": false,
+        "explicacion": "Custo fixo alto para cargas esporádicas."
+      },
+      {
+        "texto_opcion": "Serverless job compute ou serverless para notebooks/tasks elegíveis.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Serverless jobs"
+    ]
+  },
+  {
+    "pregunta": "Pipeline de transações e chargebacks em uma fintech de pagamentos precisa branch: se contagem=0, pular gold. Recurso?",
+    "opciones": [
+      {
+        "texto_opcion": "Try/except no notebook sem branch no job.",
+        "es_correcta": false,
+        "explicacion": "Task anterior ainda marca sucesso parcial confuso."
+      },
+      {
+        "texto_opcion": "Conditional task ou if/else task no DAG do Lakeflow Job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "While loop infinito no notebook.",
+        "es_correcta": false,
+        "explicacion": "Consome slot de cluster."
+      },
+      {
+        "texto_opcion": "Dois jobs separados manualmente.",
+        "es_correcta": false,
+        "explicacion": "Operação manual propensa a erro."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Conditional task"
+    ]
+  },
+  {
+    "pregunta": "Em uma rede de varejo omnichannel, reprocessar pedidos e estoque para lista de datas. Padrão de orquestração?",
+    "opciones": [
+      {
+        "texto_opcion": "Trigger único sem parametrização.",
+        "es_correcta": false,
+        "explicacion": "Não cobre backlog."
+      },
+      {
+        "texto_opcion": "UNION ALL de todas as datas num SQL.",
+        "es_correcta": false,
+        "explicacion": "Perde isolamento de falha por data."
+      },
+      {
+        "texto_opcion": "Copiar job manualmente por data.",
+        "es_correcta": false,
+        "explicacion": "Não escala operacionalmente."
+      },
+      {
+        "texto_opcion": "For each task iterando parâmetro de datas ou job pai disparando runs parametrizados.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "For each job"
+    ]
+  },
+  {
+    "pregunta": "Job crítico de telemetria de sensores em uma operadora de IoT industrial falhou às 03:00. Como reexecutar só tasks falhas?",
+    "opciones": [
+      {
+        "texto_opcion": "Editar código e commit sem rerun.",
+        "es_correcta": false,
+        "explicacion": "Não reexecuta tasks bem-sucedidas preservadas."
+      },
+      {
+        "texto_opcion": "Repair run (rerun) selecionando tasks com falha no Jobs UI ou API.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Reiniciar cluster manualmente.",
+        "es_correcta": false,
+        "explicacion": "Não dispara tasks pendentes automaticamente."
+      },
+      {
+        "texto_opcion": "Cancelar job e recriar do zero.",
+        "es_correcta": false,
+        "explicacion": "Perde metadados de run anterior."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Repair run"
+    ]
+  },
+  {
+    "pregunta": "Em um hospital universitário, task B chama job filho de qualidade de prontuários e exames. Tipo de task?",
+    "opciones": [
+      {
+        "texto_opcion": "Pipeline task DLT no meio do DAG.",
+        "es_correcta": false,
+        "explicacion": "DLT é pipeline contínuo; filho job é orquestração."
+      },
+      {
+        "texto_opcion": "Notebook task duplicando código.",
+        "es_correcta": false,
+        "explicacion": "Duplica lógica e manutenção."
+      },
+      {
+        "texto_opcion": "SQL task sem permissão UC.",
+        "es_correcta": false,
+        "explicacion": "Pode falhar em objetos do filho."
+      },
+      {
+        "texto_opcion": "Run job task referenciando job_id do filho.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Run job task"
+    ]
+  },
+  {
+    "pregunta": "Git folder de uma plataforma de streaming é fonte dos notebooks de eventos de reprodução. Benefício no job?",
+    "opciones": [
+      {
+        "texto_opcion": "Exportar .dbc semanalmente.",
+        "es_correcta": false,
+        "explicacion": "Perde diff e revisão por PR."
+      },
+      {
+        "texto_opcion": "Versionamento e promoção de código alinhados ao repo Git.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Salvar só em DBFS sem Git.",
+        "es_correcta": false,
+        "explicacion": "Sem trilha de auditoria de código."
+      },
+      {
+        "texto_opcion": "Copiar notebook via UI.",
+        "es_correcta": false,
+        "explicacion": "Drift entre ambientes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Git source"
+    ]
+  },
+  {
+    "pregunta": "Em uma seguradora, SLA de sinistros e apólices exige alerta se job passar de 45 min. Onde configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "print() no final do notebook.",
+        "es_correcta": false,
+        "explicacion": "Não dispara alerta proativo."
+      },
+      {
+        "texto_opcion": "Photon enabled flag.",
+        "es_correcta": false,
+        "explicacion": "Photon afeta performance, não alertas."
+      },
+      {
+        "texto_opcion": "Cluster policy apenas.",
+        "es_correcta": false,
+        "explicacion": "Policy limita recursos, não SLA temporal."
+      },
+      {
+        "texto_opcion": "timeout_seconds na task e notification on failure/duration no job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Timeout e alerta"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora logística, job Lakeflow executa bronze→silver→gold de rotas e entregas. Como garantir silver só após bronze?",
+    "opciones": [
+      {
+        "texto_opcion": "Agendar horários fixos sem dependência.",
+        "es_correcta": false,
+        "explicacion": "Race condition se bronze atrasar."
+      },
+      {
+        "texto_opcion": "Notebook com sleep() de 30 min.",
+        "es_correcta": false,
+        "explicacion": "Frágil e desperdiça tempo de compute."
+      },
+      {
+        "texto_opcion": "Definir depends_on / upstream task no DAG do job apontando para task bronze.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Usar mesmo cluster para serializar.",
+        "es_correcta": false,
+        "explicacion": "Cluster compartilhado não impõe ordem lógica."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "DAG dependências"
+    ]
+  },
+  {
+    "pregunta": "Task A de uma cooperativa agrícola calcula watermark usado por task B no mesmo job de colheita e umidade do solo. Como passar valor?",
+    "opciones": [
+      {
+        "texto_opcion": "dbutils.jobs.taskValues.set/get ou task values do Lakeflow Jobs.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Variável global Python entre notebooks.",
+        "es_correcta": false,
+        "explicacion": "Isolamento de processo impede compartilhamento."
+      },
+      {
+        "texto_opcion": "Parâmetro de cluster spark.conf.",
+        "es_correcta": false,
+        "explicacion": "Não é API de comunicação entre tasks."
+      },
+      {
+        "texto_opcion": "Gravar arquivo temp no driver local.",
+        "es_correcta": false,
+        "explicacion": "Tasks podem rodar em workers diferentes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Task values"
+    ]
+  },
+  {
+    "pregunta": "Job de transações e chargebacks em uma fintech de pagamentos deve rodar com data_processamento diferente por ambiente. Melhor prática?",
+    "opciones": [
+      {
+        "texto_opcion": "Usar now() sempre.",
+        "es_correcta": false,
+        "explicacion": "Impossibilita backfill controlado."
+      },
+      {
+        "texto_opcion": "Editar notebook antes de cada run.",
+        "es_correcta": false,
+        "explicacion": "Manual e propenso a erro."
+      },
+      {
+        "texto_opcion": "Parâmetro de job {{job.parameters.data_processamento}} referenciado nos tasks.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Data hardcoded no SQL.",
+        "es_correcta": false,
+        "explicacion": "Quebra reprocessamento histórico."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Parâmetros job"
+    ]
+  },
+  {
+    "pregunta": "Task de ingestão de pedidos e estoque em uma rede de varejo omnichannel falha por timeout esporádico de rede. Configuração?",
+    "opciones": [
+      {
+        "texto_opcion": "retries com intervalo e max_retries > 0 na definição da task.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Desabilitar timeout.",
+        "es_correcta": false,
+        "explicacion": "Task pode ficar presa indefinidamente."
+      },
+      {
+        "texto_opcion": "email_on_failure false.",
+        "es_correcta": false,
+        "explicacion": "Só suprime alerta; não reexecuta."
+      },
+      {
+        "texto_opcion": "max_concurrent_runs = 0.",
+        "es_correcta": false,
+        "explicacion": "Controla concorrência do job, não retry de task."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retries"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora de IoT industrial, workload de telemetria de sensores é curto e intermitente. Qual compute reduz idle?",
+    "opciones": [
+      {
+        "texto_opcion": "Cluster all-purpose 24/7.",
+        "es_correcta": false,
+        "explicacion": "Custo fixo alto para cargas esporádicas."
+      },
+      {
+        "texto_opcion": "Pool sem autoscale.",
+        "es_correcta": false,
+        "explicacion": "Ainda provisiona capacidade ociosa."
+      },
+      {
+        "texto_opcion": "Serverless job compute ou serverless para notebooks/tasks elegíveis.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Single node cluster oversized.",
+        "es_correcta": false,
+        "explicacion": "Gargalo e sem elasticidade."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Serverless jobs"
+    ]
+  },
+  {
+    "pregunta": "Pipeline de prontuários e exames em um hospital universitário precisa branch: se contagem=0, pular gold. Recurso?",
+    "opciones": [
+      {
+        "texto_opcion": "Conditional task ou if/else task no DAG do Lakeflow Job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Dois jobs separados manualmente.",
+        "es_correcta": false,
+        "explicacion": "Operação manual propensa a erro."
+      },
+      {
+        "texto_opcion": "While loop infinito no notebook.",
+        "es_correcta": false,
+        "explicacion": "Consome slot de cluster."
+      },
+      {
+        "texto_opcion": "Try/except no notebook sem branch no job.",
+        "es_correcta": false,
+        "explicacion": "Task anterior ainda marca sucesso parcial confuso."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Conditional task"
+    ]
+  },
+  {
+    "pregunta": "Em uma plataforma de streaming, reprocessar eventos de reprodução para lista de datas. Padrão de orquestração?",
+    "opciones": [
+      {
+        "texto_opcion": "Copiar job manualmente por data.",
+        "es_correcta": false,
+        "explicacion": "Não escala operacionalmente."
+      },
+      {
+        "texto_opcion": "UNION ALL de todas as datas num SQL.",
+        "es_correcta": false,
+        "explicacion": "Perde isolamento de falha por data."
+      },
+      {
+        "texto_opcion": "For each task iterando parâmetro de datas ou job pai disparando runs parametrizados.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Trigger único sem parametrização.",
+        "es_correcta": false,
+        "explicacion": "Não cobre backlog."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "For each job"
+    ]
+  },
+  {
+    "pregunta": "Job crítico de sinistros e apólices em uma seguradora falhou às 03:00. Como reexecutar só tasks falhas?",
+    "opciones": [
+      {
+        "texto_opcion": "Repair run (rerun) selecionando tasks com falha no Jobs UI ou API.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Editar código e commit sem rerun.",
+        "es_correcta": false,
+        "explicacion": "Não reexecuta tasks bem-sucedidas preservadas."
+      },
+      {
+        "texto_opcion": "Cancelar job e recriar do zero.",
+        "es_correcta": false,
+        "explicacion": "Perde metadados de run anterior."
+      },
+      {
+        "texto_opcion": "Reiniciar cluster manualmente.",
+        "es_correcta": false,
+        "explicacion": "Não dispara tasks pendentes automaticamente."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Repair run"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora logística, task B chama job filho de qualidade de rotas e entregas. Tipo de task?",
+    "opciones": [
+      {
+        "texto_opcion": "SQL task sem permissão UC.",
+        "es_correcta": false,
+        "explicacion": "Pode falhar em objetos do filho."
+      },
+      {
+        "texto_opcion": "Pipeline task DLT no meio do DAG.",
+        "es_correcta": false,
+        "explicacion": "DLT é pipeline contínuo; filho job é orquestração."
+      },
+      {
+        "texto_opcion": "Run job task referenciando job_id do filho.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Notebook task duplicando código.",
+        "es_correcta": false,
+        "explicacion": "Duplica lógica e manutenção."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Run job task"
+    ]
+  },
+  {
+    "pregunta": "Git folder de uma cooperativa agrícola é fonte dos notebooks de colheita e umidade do solo. Benefício no job?",
+    "opciones": [
+      {
+        "texto_opcion": "Versionamento e promoção de código alinhados ao repo Git.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Copiar notebook via UI.",
+        "es_correcta": false,
+        "explicacion": "Drift entre ambientes."
+      },
+      {
+        "texto_opcion": "Salvar só em DBFS sem Git.",
+        "es_correcta": false,
+        "explicacion": "Sem trilha de auditoria de código."
+      },
+      {
+        "texto_opcion": "Exportar .dbc semanalmente.",
+        "es_correcta": false,
+        "explicacion": "Perde diff e revisão por PR."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Git source"
+    ]
+  },
+  {
+    "pregunta": "Em uma fintech de pagamentos, SLA de transações e chargebacks exige alerta se job passar de 45 min. Onde configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "Cluster policy apenas.",
+        "es_correcta": false,
+        "explicacion": "Policy limita recursos, não SLA temporal."
+      },
+      {
+        "texto_opcion": "print() no final do notebook.",
+        "es_correcta": false,
+        "explicacion": "Não dispara alerta proativo."
+      },
+      {
+        "texto_opcion": "timeout_seconds na task e notification on failure/duration no job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Photon enabled flag.",
+        "es_correcta": false,
+        "explicacion": "Photon afeta performance, não alertas."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Timeout e alerta"
+    ]
+  },
+  {
+    "pregunta": "Em uma rede de varejo omnichannel, job Lakeflow executa bronze→silver→gold de pedidos e estoque. Como garantir silver só após bronze?",
+    "opciones": [
+      {
+        "texto_opcion": "Usar mesmo cluster para serializar.",
+        "es_correcta": false,
+        "explicacion": "Cluster compartilhado não impõe ordem lógica."
+      },
+      {
+        "texto_opcion": "Definir depends_on / upstream task no DAG do job apontando para task bronze.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Agendar horários fixos sem dependência.",
+        "es_correcta": false,
+        "explicacion": "Race condition se bronze atrasar."
+      },
+      {
+        "texto_opcion": "Notebook com sleep() de 30 min.",
+        "es_correcta": false,
+        "explicacion": "Frágil e desperdiça tempo de compute."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "DAG dependências"
+    ]
+  },
+  {
+    "pregunta": "Task A de uma operadora de IoT industrial calcula watermark usado por task B no mesmo job de telemetria de sensores. Como passar valor?",
+    "opciones": [
+      {
+        "texto_opcion": "Parâmetro de cluster spark.conf.",
+        "es_correcta": false,
+        "explicacion": "Não é API de comunicação entre tasks."
+      },
+      {
+        "texto_opcion": "Gravar arquivo temp no driver local.",
+        "es_correcta": false,
+        "explicacion": "Tasks podem rodar em workers diferentes."
+      },
+      {
+        "texto_opcion": "Variável global Python entre notebooks.",
+        "es_correcta": false,
+        "explicacion": "Isolamento de processo impede compartilhamento."
+      },
+      {
+        "texto_opcion": "dbutils.jobs.taskValues.set/get ou task values do Lakeflow Jobs.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Task values"
+    ]
+  },
+  {
+    "pregunta": "Job de prontuários e exames em um hospital universitário deve rodar com data_processamento diferente por ambiente. Melhor prática?",
+    "opciones": [
+      {
+        "texto_opcion": "Data hardcoded no SQL.",
+        "es_correcta": false,
+        "explicacion": "Quebra reprocessamento histórico."
+      },
+      {
+        "texto_opcion": "Parâmetro de job {{job.parameters.data_processamento}} referenciado nos tasks.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Editar notebook antes de cada run.",
+        "es_correcta": false,
+        "explicacion": "Manual e propenso a erro."
+      },
+      {
+        "texto_opcion": "Usar now() sempre.",
+        "es_correcta": false,
+        "explicacion": "Impossibilita backfill controlado."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Parâmetros job"
+    ]
+  },
+  {
+    "pregunta": "Task de ingestão de eventos de reprodução em uma plataforma de streaming falha por timeout esporádico de rede. Configuração?",
+    "opciones": [
+      {
+        "texto_opcion": "Desabilitar timeout.",
+        "es_correcta": false,
+        "explicacion": "Task pode ficar presa indefinidamente."
+      },
+      {
+        "texto_opcion": "max_concurrent_runs = 0.",
+        "es_correcta": false,
+        "explicacion": "Controla concorrência do job, não retry de task."
+      },
+      {
+        "texto_opcion": "email_on_failure false.",
+        "es_correcta": false,
+        "explicacion": "Só suprime alerta; não reexecuta."
+      },
+      {
+        "texto_opcion": "retries com intervalo e max_retries > 0 na definição da task.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retries"
+    ]
+  },
+  {
+    "pregunta": "Em uma seguradora, workload de sinistros e apólices é curto e intermitente. Qual compute reduz idle?",
+    "opciones": [
+      {
+        "texto_opcion": "Pool sem autoscale.",
+        "es_correcta": false,
+        "explicacion": "Ainda provisiona capacidade ociosa."
+      },
+      {
+        "texto_opcion": "Serverless job compute ou serverless para notebooks/tasks elegíveis.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cluster all-purpose 24/7.",
+        "es_correcta": false,
+        "explicacion": "Custo fixo alto para cargas esporádicas."
+      },
+      {
+        "texto_opcion": "Single node cluster oversized.",
+        "es_correcta": false,
+        "explicacion": "Gargalo e sem elasticidade."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Serverless jobs"
+    ]
+  },
+  {
+    "pregunta": "Pipeline de rotas e entregas em uma operadora logística precisa branch: se contagem=0, pular gold. Recurso?",
+    "opciones": [
+      {
+        "texto_opcion": "Try/except no notebook sem branch no job.",
+        "es_correcta": false,
+        "explicacion": "Task anterior ainda marca sucesso parcial confuso."
+      },
+      {
+        "texto_opcion": "While loop infinito no notebook.",
+        "es_correcta": false,
+        "explicacion": "Consome slot de cluster."
+      },
+      {
+        "texto_opcion": "Dois jobs separados manualmente.",
+        "es_correcta": false,
+        "explicacion": "Operação manual propensa a erro."
+      },
+      {
+        "texto_opcion": "Conditional task ou if/else task no DAG do Lakeflow Job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Conditional task"
+    ]
+  },
+  {
+    "pregunta": "Em uma cooperativa agrícola, reprocessar colheita e umidade do solo para lista de datas. Padrão de orquestração?",
+    "opciones": [
+      {
+        "texto_opcion": "Trigger único sem parametrização.",
+        "es_correcta": false,
+        "explicacion": "Não cobre backlog."
+      },
+      {
+        "texto_opcion": "For each task iterando parâmetro de datas ou job pai disparando runs parametrizados.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Copiar job manualmente por data.",
+        "es_correcta": false,
+        "explicacion": "Não escala operacionalmente."
+      },
+      {
+        "texto_opcion": "UNION ALL de todas as datas num SQL.",
+        "es_correcta": false,
+        "explicacion": "Perde isolamento de falha por data."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "For each job"
+    ]
+  },
+  {
+    "pregunta": "Job crítico de transações e chargebacks em uma fintech de pagamentos falhou às 03:00. Como reexecutar só tasks falhas?",
+    "opciones": [
+      {
+        "texto_opcion": "Cancelar job e recriar do zero.",
+        "es_correcta": false,
+        "explicacion": "Perde metadados de run anterior."
+      },
+      {
+        "texto_opcion": "Editar código e commit sem rerun.",
+        "es_correcta": false,
+        "explicacion": "Não reexecuta tasks bem-sucedidas preservadas."
+      },
+      {
+        "texto_opcion": "Reiniciar cluster manualmente.",
+        "es_correcta": false,
+        "explicacion": "Não dispara tasks pendentes automaticamente."
+      },
+      {
+        "texto_opcion": "Repair run (rerun) selecionando tasks com falha no Jobs UI ou API.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Repair run"
+    ]
+  },
+  {
+    "pregunta": "Em uma rede de varejo omnichannel, task B chama job filho de qualidade de pedidos e estoque. Tipo de task?",
+    "opciones": [
+      {
+        "texto_opcion": "Pipeline task DLT no meio do DAG.",
+        "es_correcta": false,
+        "explicacion": "DLT é pipeline contínuo; filho job é orquestração."
+      },
+      {
+        "texto_opcion": "Run job task referenciando job_id do filho.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "SQL task sem permissão UC.",
+        "es_correcta": false,
+        "explicacion": "Pode falhar em objetos do filho."
+      },
+      {
+        "texto_opcion": "Notebook task duplicando código.",
+        "es_correcta": false,
+        "explicacion": "Duplica lógica e manutenção."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Run job task"
+    ]
+  },
+  {
+    "pregunta": "Git folder de uma operadora de IoT industrial é fonte dos notebooks de telemetria de sensores. Benefício no job?",
+    "opciones": [
+      {
+        "texto_opcion": "Salvar só em DBFS sem Git.",
+        "es_correcta": false,
+        "explicacion": "Sem trilha de auditoria de código."
+      },
+      {
+        "texto_opcion": "Exportar .dbc semanalmente.",
+        "es_correcta": false,
+        "explicacion": "Perde diff e revisão por PR."
+      },
+      {
+        "texto_opcion": "Copiar notebook via UI.",
+        "es_correcta": false,
+        "explicacion": "Drift entre ambientes."
+      },
+      {
+        "texto_opcion": "Versionamento e promoção de código alinhados ao repo Git.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Git source"
+    ]
+  },
+  {
+    "pregunta": "Em um hospital universitário, SLA de prontuários e exames exige alerta se job passar de 45 min. Onde configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "print() no final do notebook.",
+        "es_correcta": false,
+        "explicacion": "Não dispara alerta proativo."
+      },
+      {
+        "texto_opcion": "timeout_seconds na task e notification on failure/duration no job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cluster policy apenas.",
+        "es_correcta": false,
+        "explicacion": "Policy limita recursos, não SLA temporal."
+      },
+      {
+        "texto_opcion": "Photon enabled flag.",
+        "es_correcta": false,
+        "explicacion": "Photon afeta performance, não alertas."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Timeout e alerta"
+    ]
+  },
+  {
+    "pregunta": "Em uma plataforma de streaming, job Lakeflow executa bronze→silver→gold de eventos de reprodução. Como garantir silver só após bronze?",
+    "opciones": [
+      {
+        "texto_opcion": "Definir depends_on / upstream task no DAG do job apontando para task bronze.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Agendar horários fixos sem dependência.",
+        "es_correcta": false,
+        "explicacion": "Race condition se bronze atrasar."
+      },
+      {
+        "texto_opcion": "Notebook com sleep() de 30 min.",
+        "es_correcta": false,
+        "explicacion": "Frágil e desperdiça tempo de compute."
+      },
+      {
+        "texto_opcion": "Usar mesmo cluster para serializar.",
+        "es_correcta": false,
+        "explicacion": "Cluster compartilhado não impõe ordem lógica."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "DAG dependências"
+    ]
+  },
+  {
+    "pregunta": "Task A de uma seguradora calcula watermark usado por task B no mesmo job de sinistros e apólices. Como passar valor?",
+    "opciones": [
+      {
+        "texto_opcion": "Variável global Python entre notebooks.",
+        "es_correcta": false,
+        "explicacion": "Isolamento de processo impede compartilhamento."
+      },
+      {
+        "texto_opcion": "Parâmetro de cluster spark.conf.",
+        "es_correcta": false,
+        "explicacion": "Não é API de comunicação entre tasks."
+      },
+      {
+        "texto_opcion": "dbutils.jobs.taskValues.set/get ou task values do Lakeflow Jobs.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Gravar arquivo temp no driver local.",
+        "es_correcta": false,
+        "explicacion": "Tasks podem rodar em workers diferentes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Task values"
+    ]
+  },
+  {
+    "pregunta": "Job de rotas e entregas em uma operadora logística deve rodar com data_processamento diferente por ambiente. Melhor prática?",
+    "opciones": [
+      {
+        "texto_opcion": "Parâmetro de job {{job.parameters.data_processamento}} referenciado nos tasks.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Usar now() sempre.",
+        "es_correcta": false,
+        "explicacion": "Impossibilita backfill controlado."
+      },
+      {
+        "texto_opcion": "Editar notebook antes de cada run.",
+        "es_correcta": false,
+        "explicacion": "Manual e propenso a erro."
+      },
+      {
+        "texto_opcion": "Data hardcoded no SQL.",
+        "es_correcta": false,
+        "explicacion": "Quebra reprocessamento histórico."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Parâmetros job"
+    ]
+  },
+  {
+    "pregunta": "Task de ingestão de colheita e umidade do solo em uma cooperativa agrícola falha por timeout esporádico de rede. Configuração?",
+    "opciones": [
+      {
+        "texto_opcion": "Desabilitar timeout.",
+        "es_correcta": false,
+        "explicacion": "Task pode ficar presa indefinidamente."
+      },
+      {
+        "texto_opcion": "email_on_failure false.",
+        "es_correcta": false,
+        "explicacion": "Só suprime alerta; não reexecuta."
+      },
+      {
+        "texto_opcion": "retries com intervalo e max_retries > 0 na definição da task.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "max_concurrent_runs = 0.",
+        "es_correcta": false,
+        "explicacion": "Controla concorrência do job, não retry de task."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retries"
+    ]
+  },
+  {
+    "pregunta": "Em uma fintech de pagamentos, workload de transações e chargebacks é curto e intermitente. Qual compute reduz idle?",
+    "opciones": [
+      {
+        "texto_opcion": "Serverless job compute ou serverless para notebooks/tasks elegíveis.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cluster all-purpose 24/7.",
+        "es_correcta": false,
+        "explicacion": "Custo fixo alto para cargas esporádicas."
+      },
+      {
+        "texto_opcion": "Pool sem autoscale.",
+        "es_correcta": false,
+        "explicacion": "Ainda provisiona capacidade ociosa."
+      },
+      {
+        "texto_opcion": "Single node cluster oversized.",
+        "es_correcta": false,
+        "explicacion": "Gargalo e sem elasticidade."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Serverless jobs"
+    ]
+  },
+  {
+    "pregunta": "Pipeline de pedidos e estoque em uma rede de varejo omnichannel precisa branch: se contagem=0, pular gold. Recurso?",
+    "opciones": [
+      {
+        "texto_opcion": "While loop infinito no notebook.",
+        "es_correcta": false,
+        "explicacion": "Consome slot de cluster."
+      },
+      {
+        "texto_opcion": "Dois jobs separados manualmente.",
+        "es_correcta": false,
+        "explicacion": "Operação manual propensa a erro."
+      },
+      {
+        "texto_opcion": "Conditional task ou if/else task no DAG do Lakeflow Job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Try/except no notebook sem branch no job.",
+        "es_correcta": false,
+        "explicacion": "Task anterior ainda marca sucesso parcial confuso."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Conditional task"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora de IoT industrial, reprocessar telemetria de sensores para lista de datas. Padrão de orquestração?",
+    "opciones": [
+      {
+        "texto_opcion": "For each task iterando parâmetro de datas ou job pai disparando runs parametrizados.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "UNION ALL de todas as datas num SQL.",
+        "es_correcta": false,
+        "explicacion": "Perde isolamento de falha por data."
+      },
+      {
+        "texto_opcion": "Trigger único sem parametrização.",
+        "es_correcta": false,
+        "explicacion": "Não cobre backlog."
+      },
+      {
+        "texto_opcion": "Copiar job manualmente por data.",
+        "es_correcta": false,
+        "explicacion": "Não escala operacionalmente."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "For each job"
+    ]
+  },
+  {
+    "pregunta": "Job crítico de prontuários e exames em um hospital universitário falhou às 03:00. Como reexecutar só tasks falhas?",
+    "opciones": [
+      {
+        "texto_opcion": "Cancelar job e recriar do zero.",
+        "es_correcta": false,
+        "explicacion": "Perde metadados de run anterior."
+      },
+      {
+        "texto_opcion": "Reiniciar cluster manualmente.",
+        "es_correcta": false,
+        "explicacion": "Não dispara tasks pendentes automaticamente."
+      },
+      {
+        "texto_opcion": "Repair run (rerun) selecionando tasks com falha no Jobs UI ou API.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Editar código e commit sem rerun.",
+        "es_correcta": false,
+        "explicacion": "Não reexecuta tasks bem-sucedidas preservadas."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Repair run"
+    ]
+  },
+  {
+    "pregunta": "Em uma plataforma de streaming, task B chama job filho de qualidade de eventos de reprodução. Tipo de task?",
+    "opciones": [
+      {
+        "texto_opcion": "Run job task referenciando job_id do filho.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Pipeline task DLT no meio do DAG.",
+        "es_correcta": false,
+        "explicacion": "DLT é pipeline contínuo; filho job é orquestração."
+      },
+      {
+        "texto_opcion": "SQL task sem permissão UC.",
+        "es_correcta": false,
+        "explicacion": "Pode falhar em objetos do filho."
+      },
+      {
+        "texto_opcion": "Notebook task duplicando código.",
+        "es_correcta": false,
+        "explicacion": "Duplica lógica e manutenção."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Run job task"
+    ]
+  },
+  {
+    "pregunta": "Git folder de uma seguradora é fonte dos notebooks de sinistros e apólices. Benefício no job?",
+    "opciones": [
+      {
+        "texto_opcion": "Exportar .dbc semanalmente.",
+        "es_correcta": false,
+        "explicacion": "Perde diff e revisão por PR."
+      },
+      {
+        "texto_opcion": "Copiar notebook via UI.",
+        "es_correcta": false,
+        "explicacion": "Drift entre ambientes."
+      },
+      {
+        "texto_opcion": "Versionamento e promoção de código alinhados ao repo Git.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Salvar só em DBFS sem Git.",
+        "es_correcta": false,
+        "explicacion": "Sem trilha de auditoria de código."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Git source"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora logística, SLA de rotas e entregas exige alerta se job passar de 45 min. Onde configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "timeout_seconds na task e notification on failure/duration no job.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Cluster policy apenas.",
+        "es_correcta": false,
+        "explicacion": "Policy limita recursos, não SLA temporal."
+      },
+      {
+        "texto_opcion": "print() no final do notebook.",
+        "es_correcta": false,
+        "explicacion": "Não dispara alerta proativo."
+      },
+      {
+        "texto_opcion": "Photon enabled flag.",
+        "es_correcta": false,
+        "explicacion": "Photon afeta performance, não alertas."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Timeout e alerta"
+    ]
+  }
+]

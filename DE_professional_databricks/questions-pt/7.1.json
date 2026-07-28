@@ -1,0 +1,988 @@
+[
+  {
+    "pregunta": "Novo analista precisa SELECT em gold_sales e USAGE no schema. Modelo mínimo Unity Catalog?",
+    "opciones": [
+      {
+        "texto_opcion": "Compartilhar PAT pessoal admin",
+        "es_correcta": false,
+        "explicacion": "Viola least privilege e auditoria."
+      },
+      {
+        "texto_opcion": "GRANT ALL PRIVILEGES no storage account",
+        "es_correcta": false,
+        "explicacion": "Excessivo; UC governa via grants SQL."
+      },
+      {
+        "texto_opcion": "Acesso direto ADLS bypass UC",
+        "es_correcta": false,
+        "explicacion": "Bypass quebra governança central."
+      },
+      {
+        "texto_opcion": "GRANT USAGE ON CATALOG/S SCHEMA + SELECT ON TABLE gold_sales ao grupo do analista",
+        "es_correcta": true,
+        "explicacion": "USAGE é prerequisite; SELECT concede leitura."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Grants UC"
+    ]
+  },
+  {
+    "pregunta": "Service principal ETL precisa escrever bronze e ler dimensões. Permissões?",
+    "opciones": [
+      {
+        "texto_opcion": "Account admin always",
+        "es_correcta": false,
+        "explicacion": "Violates least privilege."
+      },
+      {
+        "texto_opcion": "Metastore admin para SP",
+        "es_correcta": false,
+        "explicacion": "Excesso de privilégio."
+      },
+      {
+        "texto_opcion": "Public CAN MANAGE ALL",
+        "es_correcta": false,
+        "explicacion": "Inaceitável."
+      },
+      {
+        "texto_opcion": "MODIFY/WRITE bronze tables, SELECT dims, USAGE schemas; sem admin metastore",
+        "es_correcta": true,
+        "explicacion": "SP recebe só privilégios pipeline."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Least privilege"
+    ]
+  },
+  {
+    "pregunta": "Time de 40 analistas rotaciona. Melhor prática atribuição permissões?",
+    "opciones": [
+      {
+        "texto_opcion": "Shared admin user login",
+        "es_correcta": false,
+        "explicacion": "Sem accountability."
+      },
+      {
+        "texto_opcion": "Grants to groups; users inherit via group membership",
+        "es_correcta": true,
+        "explicacion": "Groups simplificam RBAC e auditoria."
+      },
+      {
+        "texto_opcion": "Embed credentials no notebook",
+        "es_correcta": false,
+        "explicacion": "Security anti-pattern."
+      },
+      {
+        "texto_opcion": "Individual grants per user only",
+        "es_correcta": false,
+        "explicacion": "Operacionalmente frágil."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Groups"
+    ]
+  },
+  {
+    "pregunta": "CI/CD job deploy usa qual identidade?",
+    "opciones": [
+      {
+        "texto_opcion": "Root cloud account keys in repo",
+        "es_correcta": false,
+        "explicacion": "Critical security flaw."
+      },
+      {
+        "texto_opcion": "Personal user admin token",
+        "es_correcta": false,
+        "explicacion": "Risco offboarding."
+      },
+      {
+        "texto_opcion": "Anonymous cluster",
+        "es_correcta": false,
+        "explicacion": "Sem controle acesso."
+      },
+      {
+        "texto_opcion": "Service principal com OAuth/PAT scoped e grants mínimos",
+        "es_correcta": true,
+        "explicacion": "Non-human identity para automação."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Service principal"
+    ]
+  },
+  {
+    "pregunta": "Table owner pode fazer o quê extra?",
+    "opciones": [
+      {
+        "texto_opcion": "Delete metastore",
+        "es_correcta": false,
+        "explicacion": "Não automaticamente."
+      },
+      {
+        "texto_opcion": "Bypass audit logs",
+        "es_correcta": false,
+        "explicacion": "Audit permanece."
+      },
+      {
+        "texto_opcion": "Grant/revoke permissions on owned object (depending on ownership rules)",
+        "es_correcta": true,
+        "explicacion": "Owners delegate access."
+      },
+      {
+        "texto_opcion": "Access all catalogs always",
+        "es_correcta": false,
+        "explicacion": "Ainda sujeito a hierarquia."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Ownership"
+    ]
+  },
+  {
+    "pregunta": "External table em ADLS path. Acesso requer?",
+    "opciones": [
+      {
+        "texto_opcion": "Grants UC on table/schema + privileges on external location/credential",
+        "es_correcta": true,
+        "explicacion": "Storage access via UC external locations."
+      },
+      {
+        "texto_opcion": "Hive grant legacy only",
+        "es_correcta": false,
+        "explicacion": "UC model preferred."
+      },
+      {
+        "texto_opcion": "Only SAS token in notebook",
+        "es_correcta": false,
+        "explicacion": "Bypass UC."
+      },
+      {
+        "texto_opcion": "Public container ACL",
+        "es_correcta": false,
+        "explicacion": "Inseguro."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "External location grants"
+    ]
+  },
+  {
+    "pregunta": "Engenheiro transforma silver→gold in-place. Privilege?",
+    "opciones": [
+      {
+        "texto_opcion": "MODIFY (INSERT/UPDATE/DELETE) on target tables + SELECT sources",
+        "es_correcta": true,
+        "explicacion": "Transform precisa write not just SELECT."
+      },
+      {
+        "texto_opcion": "No USAGE needed",
+        "es_correcta": false,
+        "explicacion": "USAGE required navigate hierarchy."
+      },
+      {
+        "texto_opcion": "BROWSE only",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "SELECT only on gold",
+        "es_correcta": false,
+        "explicacion": "Cannot write."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "SELECT vs MODIFY"
+    ]
+  },
+  {
+    "pregunta": "Quem cria metastore e external locations?",
+    "opciones": [
+      {
+        "texto_opcion": "SQL warehouse only",
+        "es_correcta": false,
+        "explicacion": "Different scope."
+      },
+      {
+        "texto_opcion": "Notebook viewer",
+        "es_correcta": false,
+        "explicacion": "Read only."
+      },
+      {
+        "texto_opcion": "Account admin / metastore admin roles",
+        "es_correcta": true,
+        "explicacion": "Platform-level setup."
+      },
+      {
+        "texto_opcion": "Any analyst",
+        "es_correcta": false,
+        "explicacion": "Insufficient privileges."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Account vs workspace admin"
+    ]
+  },
+  {
+    "pregunta": "Schema grant SELECT to group; new table created no schema. Group access?",
+    "opciones": [
+      {
+        "texto_opcion": "Automatic always without config",
+        "es_correcta": false,
+        "explicacion": "May require explicit grants."
+      },
+      {
+        "texto_opcion": "Default depends on inheritance settings; may need explicit table grant or USE SCHEMA privileges",
+        "es_correcta": true,
+        "explicacion": "UC inheritance configurable; verify defaults."
+      },
+      {
+        "texto_opcion": "Never inherits",
+        "es_correcta": false,
+        "explicacion": "Overgeneralization."
+      },
+      {
+        "texto_opcion": "Only owner can see",
+        "es_correcta": false,
+        "explicacion": "Too restrictive default."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Grant inheritance"
+    ]
+  },
+  {
+    "pregunta": "RLS via row filters requires?",
+    "opciones": [
+      {
+        "texto_opcion": "Public read all rows",
+        "es_correcta": false,
+        "explicacion": "Opposite of RLS."
+      },
+      {
+        "texto_opcion": "Any user defines filters",
+        "es_correcta": false,
+        "explicacion": "Typically admin-controlled."
+      },
+      {
+        "texto_opcion": "Disable Unity Catalog",
+        "es_correcta": false,
+        "explicacion": "RLS is UC feature."
+      },
+      {
+        "texto_opcion": "APPLY FILTER privilege and filter function defined by admin",
+        "es_correcta": true,
+        "explicacion": "RLS is governed feature."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Row level security setup"
+    ]
+  },
+  {
+    "pregunta": "Storage credential access managed how?",
+    "opciones": [
+      {
+        "texto_opcion": "Open ACL storage",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "GRANT on storage credential to principals needing external locations",
+        "es_correcta": true,
+        "explicacion": "Credentials separate securable object."
+      },
+      {
+        "texto_opcion": "Share in Slack",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Hardcode in spark.conf globally",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Credential grants"
+    ]
+  },
+  {
+    "pregunta": "Funcionário saiu. Ação imediata?",
+    "opciones": [
+      {
+        "texto_opcion": "Delete tables",
+        "es_correcta": false,
+        "explicacion": "Destructive unnecessary."
+      },
+      {
+        "texto_opcion": "Remove from groups, revoke direct grants, rotate SP secrets if shared",
+        "es_correcta": true,
+        "explicacion": "Offboarding hygiene."
+      },
+      {
+        "texto_opcion": "Ignore; UC auto revokes",
+        "es_correcta": false,
+        "explicacion": "Requires active admin action."
+      },
+      {
+        "texto_opcion": "Change table names",
+        "es_correcta": false,
+        "explicacion": "Doesn't revoke."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Revoke access"
+    ]
+  },
+  {
+    "pregunta": "Prod vs dev data separation best practice?",
+    "opciones": [
+      {
+        "texto_opcion": "Name prefix only without grants",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "Copy admin password",
+        "es_correcta": false,
+        "explicacion": "Bad practice."
+      },
+      {
+        "texto_opcion": "Single catalog all envs",
+        "es_correcta": false,
+        "explicacion": "Risk leakage."
+      },
+      {
+        "texto_opcion": "Separate catalogs/schemas with grants limiting cross-environment access",
+        "es_correcta": true,
+        "explicacion": "Environment isolation via UC hierarchy."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Catalog isolation"
+    ]
+  },
+  {
+    "pregunta": "Quem pode delegar grants em objeto?",
+    "opciones": [
+      {
+        "texto_opcion": "Any SELECT user",
+        "es_correcta": false,
+        "explicacion": "Cannot grant."
+      },
+      {
+        "texto_opcion": "Anonymous",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "External vendor default admin",
+        "es_correcta": false,
+        "explicacion": "Overprivileged."
+      },
+      {
+        "texto_opcion": "Principals with MANAGE or ownership per UC rules",
+        "es_correcta": true,
+        "explicacion": "Delegation controlled."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "MANAGE privilege"
+    ]
+  },
+  {
+    "pregunta": "Automação produção deve usar?",
+    "opciones": [
+      {
+        "texto_opcion": "Service principal with scoped OAuth",
+        "es_correcta": true,
+        "explicacion": "Auditable non-human identity."
+      },
+      {
+        "texto_opcion": "Personal PAT never rotated",
+        "es_correcta": false,
+        "explicacion": "Offboarding risk."
+      },
+      {
+        "texto_opcion": "Shared human login",
+        "es_correcta": false,
+        "explicacion": "No attribution."
+      },
+      {
+        "texto_opcion": "Git token only",
+        "es_correcta": false,
+        "explicacion": "Not UC identity."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "SP vs user PAT"
+    ]
+  },
+  {
+    "pregunta": "View com row filter; user SELECT view. Rows visible?",
+    "opciones": [
+      {
+        "texto_opcion": "Error always",
+        "es_correcta": false,
+        "explicacion": "Should filter not fail if configured."
+      },
+      {
+        "texto_opcion": "All rows always",
+        "es_correcta": false,
+        "explicacion": "Defeats RLS."
+      },
+      {
+        "texto_opcion": "Filtered per policy/mask definitions applied to underlying tables",
+        "es_correcta": true,
+        "explicacion": "Security enforced at query time."
+      },
+      {
+        "texto_opcion": "Only owner rows",
+        "es_correcta": false,
+        "explicacion": "Overgeneralization."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Dynamic view access"
+    ]
+  },
+  {
+    "pregunta": "Como auditar quem tem acesso a tabela sensível?",
+    "opciones": [
+      {
+        "texto_opcion": "Ask users informally",
+        "es_correcta": false,
+        "explicacion": "Unreliable."
+      },
+      {
+        "texto_opcion": "System tables/information_schema grants + audit logs",
+        "es_correcta": true,
+        "explicacion": "UC audit trail."
+      },
+      {
+        "texto_opcion": "Disable logging",
+        "es_correcta": false,
+        "explicacion": "Worse."
+      },
+      {
+        "texto_opcion": "Guess from notebook list",
+        "es_correcta": false,
+        "explicacion": "Incomplete."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Audit grants"
+    ]
+  },
+  {
+    "pregunta": "Unity Catalog central metastore shared workspaces. Grants?",
+    "opciones": [
+      {
+        "texto_opcion": "Per notebook only",
+        "es_correcta": false,
+        "explicacion": "Wrong layer."
+      },
+      {
+        "texto_opcion": "Per cluster tag only",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "Centralized on metastore objects apply across attached workspaces",
+        "es_correcta": true,
+        "explicacion": "Single governance plane."
+      },
+      {
+        "texto_opcion": "Local hive only",
+        "es_correcta": false,
+        "explicacion": "Legacy."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Cross-workspace UC"
+    ]
+  },
+  {
+    "pregunta": "Typical privileges engenharia vs analytics?",
+    "opciones": [
+      {
+        "texto_opcion": "Analysts MODIFY production",
+        "es_correcta": false,
+        "explicacion": "Risky."
+      },
+      {
+        "texto_opcion": "Engineers no USAGE",
+        "es_correcta": false,
+        "explicacion": "Cannot work."
+      },
+      {
+        "texto_opcion": "Everyone admin",
+        "es_correcta": false,
+        "explicacion": "No governance."
+      },
+      {
+        "texto_opcion": "Engineers MODIFY on staging/bronze/silver; analysts SELECT gold curated",
+        "es_correcta": true,
+        "explicacion": "Segregation by layer."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Data engineer role"
+    ]
+  },
+  {
+    "pregunta": "User needs SELECT secure view not base PII table. Grant?",
+    "opciones": [
+      {
+        "texto_opcion": "SELECT on view; deny direct SELECT on base where possible",
+        "es_correcta": true,
+        "explicacion": "Expose view not raw PII."
+      },
+      {
+        "texto_opcion": "Public link",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "SELECT on base PII",
+        "es_correcta": false,
+        "explicacion": "Exposes sensitive cols."
+      },
+      {
+        "texto_opcion": "GRANT ALL on storage",
+        "es_correcta": false,
+        "explicacion": "Too broad."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Grant on view"
+    ]
+  },
+  {
+    "pregunta": "Sync groups from IdP to Databricks groups. Benefit?",
+    "opciones": [
+      {
+        "texto_opcion": "No groups ever",
+        "es_correcta": false,
+        "explicacion": "Hard to manage at scale."
+      },
+      {
+        "texto_opcion": "One shared password",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Central identity management and automatic membership updates",
+        "es_correcta": true,
+        "explicacion": "SSO/SCIM integration."
+      },
+      {
+        "texto_opcion": "Manual user list in code",
+        "es_correcta": false,
+        "explicacion": "Stale quickly."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Workspace local groups"
+    ]
+  },
+  {
+    "pregunta": "USAGE ON SCHEMA permite?",
+    "opciones": [
+      {
+        "texto_opcion": "Create metastore",
+        "es_correcta": false,
+        "explicacion": "Admin only."
+      },
+      {
+        "texto_opcion": "Resolver objetos no schema (prerequisite para SELECT tables)",
+        "es_correcta": true,
+        "explicacion": "Navigate namespace."
+      },
+      {
+        "texto_opcion": "Delete catalog",
+        "es_correcta": false,
+        "explicacion": "Higher privilege."
+      },
+      {
+        "texto_opcion": "Write all tables automatic",
+        "es_correcta": false,
+        "explicacion": "Needs MODIFY per table."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "EXTERNAL USE SCHEMA"
+    ]
+  },
+  {
+    "pregunta": "User tries GRANT ALL via SQL injection in notebook comment. Defense?",
+    "opciones": [
+      {
+        "texto_opcion": "UC enforces authorization server-side; user lacks MANAGE/ownership",
+        "es_correcta": true,
+        "explicacion": "Grants validated by UC."
+      },
+      {
+        "texto_opcion": "Trust users",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "Disable SQL",
+        "es_correcta": false,
+        "explicacion": "Impractical."
+      },
+      {
+        "texto_opcion": "Comments execute grants",
+        "es_correcta": false,
+        "explicacion": "No."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Privilege escalation"
+    ]
+  },
+  {
+    "pregunta": "Consultor 30 dias acesso gold. Pattern?",
+    "opciones": [
+      {
+        "texto_opcion": "Share admin PAT permanent",
+        "es_correcta": false,
+        "explicacion": "Overexposed."
+      },
+      {
+        "texto_opcion": "Time-bound group membership + scheduled access review",
+        "es_correcta": true,
+        "explicacion": "Temporal access governance."
+      },
+      {
+        "texto_opcion": "Email CSV extracts daily",
+        "es_correcta": false,
+        "explicacion": "Bypasses controls."
+      },
+      {
+        "texto_opcion": "Add to metastore admin",
+        "es_correcta": false,
+        "explicacion": "Excessive."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Temporary access"
+    ]
+  },
+  {
+    "pregunta": "Dashboard consumers need?",
+    "opciones": [
+      {
+        "texto_opcion": "SELECT on underlying tables/views or dedicated semantic model permissions",
+        "es_correcta": true,
+        "explicacion": "Read path to data."
+      },
+      {
+        "texto_opcion": "Cluster admin",
+        "es_correcta": false,
+        "explicacion": "Not required consume."
+      },
+      {
+        "texto_opcion": "Can attach IAM admin",
+        "es_correcta": false,
+        "explicacion": "Wrong layer."
+      },
+      {
+        "texto_opcion": "MODIFY bronze",
+        "es_correcta": false,
+        "explicacion": "Excessive for BI."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Lakeview dashboards"
+    ]
+  },
+  {
+    "pregunta": "UC default when no grant?",
+    "opciones": [
+      {
+        "texto_opcion": "Allow write",
+        "es_correcta": false,
+        "explicacion": "Very insecure."
+      },
+      {
+        "texto_opcion": "Random",
+        "es_correcta": false,
+        "explicacion": "Not UC behavior."
+      },
+      {
+        "texto_opcion": "Deny access except owner/admin",
+        "es_correcta": true,
+        "explicacion": "Default secure."
+      },
+      {
+        "texto_opcion": "Allow all read",
+        "es_correcta": false,
+        "explicacion": "Insecure default."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Grant default deny"
+    ]
+  },
+  {
+    "pregunta": "Empresa adquire outra com metastore separado. Integração?",
+    "opciones": [
+      {
+        "texto_opcion": "Copy raw keys to prod",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Merge passwords",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Disable security",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Delta Sharing or federation rather merging grants arbitrarily",
+        "es_correcta": true,
+        "explicacion": "Cross-org patterns."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Multiple metastores"
+    ]
+  },
+  {
+    "pregunta": "DLT pipeline SP needs?",
+    "opciones": [
+      {
+        "texto_opcion": "Account admin",
+        "es_correcta": false,
+        "explicacion": "Too much."
+      },
+      {
+        "texto_opcion": "Storage owner Azure subscription",
+        "es_correcta": false,
+        "explicacion": "Excessive."
+      },
+      {
+        "texto_opcion": "No grants auto from DLT always sufficient",
+        "es_correcta": false,
+        "explicacion": "May need explicit config."
+      },
+      {
+        "texto_opcion": "CREATE/USE schema, MODIFY pipeline tables, READ sources, USE catalog",
+        "es_correcta": true,
+        "explicacion": "Scoped to pipeline assets."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Pipeline SP least privilege"
+    ]
+  },
+  {
+    "pregunta": "Audit log distinguishes?",
+    "opciones": [
+      {
+        "texto_opcion": "User identity vs service principal application ID",
+        "es_correcta": true,
+        "explicacion": "Distinct principal types."
+      },
+      {
+        "texto_opcion": "No audit for SP",
+        "es_correcta": false,
+        "explicacion": "Audited."
+      },
+      {
+        "texto_opcion": "Only IP address",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "All show as admin",
+        "es_correcta": false,
+        "explicacion": "Incorrect."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Human vs SP audit"
+    ]
+  },
+  {
+    "pregunta": "Revoke USAGE on schema affects?",
+    "opciones": [
+      {
+        "texto_opcion": "Upgrades cluster",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Deletes data files",
+        "es_correcta": false,
+        "explicacion": "Revoke != drop."
+      },
+      {
+        "texto_opcion": "No effect",
+        "es_correcta": false,
+        "explicacion": "Incorrect."
+      },
+      {
+        "texto_opcion": "May block access to objects in schema even if table grants existed",
+        "es_correcta": true,
+        "explicacion": "Hierarchy dependencies."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Revoke cascade"
+    ]
+  },
+  {
+    "pregunta": "No public IPs; access UC storage. Requirement?",
+    "opciones": [
+      {
+        "texto_opcion": "CSV on desktop",
+        "es_correcta": false,
+        "explicacion": "Not enterprise."
+      },
+      {
+        "texto_opcion": "Disable authentication",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "PrivateLink / secure cluster connectivity with proper network ACLs",
+        "es_correcta": true,
+        "explicacion": "Network layer complements UC grants."
+      },
+      {
+        "texto_opcion": "Open 0.0.0.0/0 always",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Secure cluster connectivity"
+    ]
+  },
+  {
+    "pregunta": "Compliance pede recertificação trimestral. Ferramenta?",
+    "opciones": [
+      {
+        "texto_opcion": "Only onboarding review",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "Access review reports from system tables + IdP group reviews",
+        "es_correcta": true,
+        "explicacion": "Periodic attestation."
+      },
+      {
+        "texto_opcion": "Email manager once",
+        "es_correcta": false,
+        "explicacion": "Not systematic."
+      },
+      {
+        "texto_opcion": "Never review",
+        "es_correcta": false,
+        "explicacion": "Compliance fail."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Grant review cadence"
+    ]
+  },
+  {
+    "pregunta": "Legacy table ACL vs UC?",
+    "opciones": [
+      {
+        "texto_opcion": "Use both conflicting forever",
+        "es_correcta": false,
+        "explicacion": "Confusion."
+      },
+      {
+        "texto_opcion": "UC is standard; migrate to UC grants for unified governance",
+        "es_correcta": true,
+        "explicacion": "UC supersedes hive ACL model."
+      },
+      {
+        "texto_opcion": "Disable UC use hive only",
+        "es_correcta": false,
+        "explicacion": "Regression."
+      },
+      {
+        "texto_opcion": "ACL in filename",
+        "es_correcta": false,
+        "explicacion": "Nonsense."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "Databricks SQL ACL"
+    ]
+  },
+  {
+    "pregunta": "Analyst should not create tables prod gold. Prevent?",
+    "opciones": [
+      {
+        "texto_opcion": "No CREATE TABLE on prod schemas; only engineers group",
+        "es_correcta": true,
+        "explicacion": "Prevent schema sprawl."
+      },
+      {
+        "texto_opcion": "Hide catalog name",
+        "es_correcta": false,
+        "explicacion": "Security by obscurity."
+      },
+      {
+        "texto_opcion": "GRANT CREATE to all",
+        "es_correcta": false,
+        "explicacion": "Violates policy."
+      },
+      {
+        "texto_opcion": "Hope analysts behave",
+        "es_correcta": false,
+        "explicacion": "Weak control."
+      }
+    ],
+    "tags": [
+      "7.1",
+      "CREATE TABLE privilege"
+    ]
+  }
+]

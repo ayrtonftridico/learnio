@@ -1,0 +1,872 @@
+[
+  {
+    "pregunta": "Fact 5TB filtros date + store_id alta cardinalidade updates frequentes. Design?",
+    "opciones": [
+      {
+        "texto_opcion": "Partition date + Liquid Clustering store_id ou clustering multi-coluna",
+        "es_correcta": true,
+        "explicacion": "Combina pruning temporal e flexibilidade updates."
+      },
+      {
+        "texto_opcion": "No layout",
+        "es_correcta": false,
+        "explicacion": "Performance poor."
+      },
+      {
+        "texto_opcion": "Partition store_id only",
+        "es_correcta": false,
+        "explicacion": "Alta cardinalidade small files."
+      },
+      {
+        "texto_opcion": "CSV daily",
+        "es_correcta": false,
+        "explicacion": "Loses Delta features."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Partition vs cluster"
+    ]
+  },
+  {
+    "pregunta": "Enforce uniqueness order_id?",
+    "opciones": [
+      {
+        "texto_opcion": "Unique only in comments",
+        "es_correcta": false,
+        "explicacion": "Not enforced."
+      },
+      {
+        "texto_opcion": "Duplicate allowed always",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Hope no duplicates",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      },
+      {
+        "texto_opcion": "CONSTRAINT PRIMARY KEY NOT ENFORCED or ENFORCED depending version + MERGE upsert pattern",
+        "es_correcta": true,
+        "explicacion": "PK constraints Delta UC."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Primary key Delta"
+    ]
+  },
+  {
+    "pregunta": "FK silver→gold declarative benefit?",
+    "opciones": [
+      {
+        "texto_opcion": "Deletes cascade automatic always physical",
+        "es_correcta": false,
+        "explicacion": "Depends implementation."
+      },
+      {
+        "texto_opcion": "Automatic join elimination always",
+        "es_correcta": false,
+        "explicacion": "Not primary FK benefit."
+      },
+      {
+        "texto_opcion": "FK replaces MERGE",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Documentation/metadata; limited enforcement options; logical integrity in pipelines",
+        "es_correcta": true,
+        "explicacion": "FK mainly informational in lakehouse often."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Foreign key"
+    ]
+  },
+  {
+    "pregunta": "delta.enableChangeDataFeed=true when?",
+    "opciones": [
+      {
+        "texto_opcion": "Never design time",
+        "es_correcta": false,
+        "explicacion": "Often enabled upfront incremental arch."
+      },
+      {
+        "texto_opcion": "Conflicts with PK",
+        "es_correcta": false,
+        "explicacion": "Compatible."
+      },
+      {
+        "texto_opcion": "Only after 10 years",
+        "es_correcta": false,
+        "explicacion": "Too late maybe."
+      },
+      {
+        "texto_opcion": "Downstream incremental consumers need row changes",
+        "es_correcta": true,
+        "explicacion": "Design for incremental."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Table properties design"
+    ]
+  },
+  {
+    "pregunta": "Good partition column?",
+    "opciones": [
+      {
+        "texto_opcion": "Random number",
+        "es_correcta": false,
+        "explicacion": "No pruning benefit."
+      },
+      {
+        "texto_opcion": "Low/moderate cardinality used in almost all queries (date)",
+        "es_correcta": true,
+        "explicacion": "Query pattern aligned."
+      },
+      {
+        "texto_opcion": "UUID column",
+        "es_correcta": false,
+        "explicacion": "Too high cardinality."
+      },
+      {
+        "texto_opcion": "Description text",
+        "es_correcta": false,
+        "explicacion": "Bad partition."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Partition column choice"
+    ]
+  },
+  {
+    "pregunta": "Replace partition when?",
+    "opciones": [
+      {
+        "texto_opcion": "Cluster all 100 columns",
+        "es_correcta": false,
+        "explicacion": "Overkill."
+      },
+      {
+        "texto_opcion": "Always replace all partitions day 1",
+        "es_correcta": false,
+        "explicacion": "Not always; evaluate."
+      },
+      {
+        "texto_opcion": "Never cluster",
+        "es_correcta": false,
+        "explicacion": "Miss benefits."
+      },
+      {
+        "texto_opcion": "High cardinality filter + churn updates/deletes",
+        "es_correcta": true,
+        "explicacion": "Clustering flexibility."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Clustering choice"
+    ]
+  },
+  {
+    "pregunta": "Meaning NOT ENFORCED PK?",
+    "opciones": [
+      {
+        "texto_opcion": "No meaning",
+        "es_correcta": false,
+        "explicacion": "Has meaning."
+      },
+      {
+        "texto_opcion": "Optimizer/metadata knows uniqueness; pipeline must enforce",
+        "es_correcta": true,
+        "explicacion": "Lakehouse pattern."
+      },
+      {
+        "texto_opcion": "Database rejects writes automatic",
+        "es_correcta": false,
+        "explicacion": "ENFORCED does; NOT ENFORCED doesn't block."
+      },
+      {
+        "texto_opcion": "Deprecated",
+        "es_correcta": false,
+        "explicacion": "Used."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Constraints NOT ENFORCED"
+    ]
+  },
+  {
+    "pregunta": "Fact filtros product_category + brand. ZORDER BY?",
+    "opciones": [
+      {
+        "texto_opcion": "product_category, brand if moderate cardinality combined filters",
+        "es_correcta": true,
+        "explicacion": "Align Z-order to filters."
+      },
+      {
+        "texto_opcion": "Only timestamp ingest",
+        "es_correcta": false,
+        "explicacion": "Not filter column."
+      },
+      {
+        "texto_opcion": "Never Z-order facts",
+        "es_correcta": false,
+        "explicacion": "Miss optimization."
+      },
+      {
+        "texto_opcion": "All columns",
+        "es_correcta": false,
+        "explicacion": "Dilutes."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Z-order design"
+    ]
+  },
+  {
+    "pregunta": "Design retention for compliance 7 years?",
+    "opciones": [
+      {
+        "texto_opcion": "Store only 1 day",
+        "es_correcta": false,
+        "explicacion": "Violates req."
+      },
+      {
+        "texto_opcion": "Retention 0 default fine",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      },
+      {
+        "texto_opcion": "Ignore legal",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Set deletedFileRetentionDuration/logRetention aligned legal before VACUUM jobs",
+        "es_correcta": true,
+        "explicacion": "Design-time compliance."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Table property retention"
+    ]
+  },
+  {
+    "pregunta": "Choose cluster keys how?",
+    "opciones": [
+      {
+        "texto_opcion": "Only unused columns",
+        "es_correcta": false,
+        "explicacion": "No benefit."
+      },
+      {
+        "texto_opcion": "Random columns",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Top filter columns in WHERE/JOIN moderate-high use not quasi-unique only",
+        "es_correcta": true,
+        "explicacion": "Keys from query patterns."
+      },
+      {
+        "texto_opcion": "Primary key always quasi-unique only",
+        "es_correcta": false,
+        "explicacion": "May not help skipping."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Liquid cluster keys"
+    ]
+  },
+  {
+    "pregunta": "Gold layer tables should be?",
+    "opciones": [
+      {
+        "texto_opcion": "Managed UC tables curated schema constraints documented",
+        "es_correcta": true,
+        "explicacion": "Gold standards."
+      },
+      {
+        "texto_opcion": "External unregistered",
+        "es_correcta": false,
+        "explicacion": "Weak governance."
+      },
+      {
+        "texto_opcion": "Raw CSV bronze naming gold_",
+        "es_correcta": false,
+        "explicacion": "Wrong layer."
+      },
+      {
+        "texto_opcion": "Wide denormalized only always",
+        "es_correcta": false,
+        "explicacion": "Domain dependent."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Design managed gold"
+    ]
+  },
+  {
+    "pregunta": "Need add new year partition column restructure?",
+    "opciones": [
+      {
+        "texto_opcion": "Impossible change partition",
+        "es_correcta": false,
+        "explicacion": "Can migrate."
+      },
+      {
+        "texto_opcion": "Delete all history",
+        "es_correcta": false,
+        "explicacion": "Extreme."
+      },
+      {
+        "texto_opcion": "Must new table always only",
+        "es_correcta": false,
+        "explicacion": "Often but not only path."
+      },
+      {
+        "texto_opcion": "Delta allows evolve partition columns with rewrite planning",
+        "es_correcta": true,
+        "explicacion": "Evolution possible with ops."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Partition evolution"
+    ]
+  },
+  {
+    "pregunta": "Monetary amounts type?",
+    "opciones": [
+      {
+        "texto_opcion": "STRING amounts",
+        "es_correcta": false,
+        "explicacion": "Breaks math."
+      },
+      {
+        "texto_opcion": "FLOAT currency",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "DOUBLE money always ok",
+        "es_correcta": false,
+        "explicacion": "Precision issues."
+      },
+      {
+        "texto_opcion": "DECIMAL(p,s) not double",
+        "es_correcta": true,
+        "explicacion": "Precision design."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Column types design"
+    ]
+  },
+  {
+    "pregunta": "Fact orders design key?",
+    "opciones": [
+      {
+        "texto_opcion": "Surrogate order_sk + business key order_id unique constraint",
+        "es_correcta": true,
+        "explicacion": "Dimensional modeling."
+      },
+      {
+        "texto_opcion": "Random uuid per row no business key",
+        "es_correcta": false,
+        "explicacion": "Traceability lost."
+      },
+      {
+        "texto_opcion": "Only natural key no surrogate",
+        "es_correcta": false,
+        "explicacion": "SCD harder sometimes."
+      },
+      {
+        "texto_opcion": "Duplicate keys ok",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Natural vs surrogate key"
+    ]
+  },
+  {
+    "pregunta": "Document in CREATE TABLE?",
+    "opciones": [
+      {
+        "texto_opcion": "Skip documentation",
+        "es_correcta": false,
+        "explicacion": "Debt."
+      },
+      {
+        "texto_opcion": "COMMENT on table/columns for discovery",
+        "es_correcta": true,
+        "explicacion": "Metadata design."
+      },
+      {
+        "texto_opcion": "Only wiki external",
+        "es_correcta": false,
+        "explicacion": "Less integrated."
+      },
+      {
+        "texto_opcion": "Hide schema",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Table comments design"
+    ]
+  },
+  {
+    "pregunta": "delta.bloomFilter columns for?",
+    "opciones": [
+      {
+        "texto_opcion": "Replace partition always",
+        "es_correcta": false,
+        "explicacion": "Complementary."
+      },
+      {
+        "texto_opcion": "Disable stats",
+        "es_correcta": false,
+        "explicacion": "Opposite."
+      },
+      {
+        "texto_opcion": "Full table scan analytics always",
+        "es_correcta": false,
+        "explicacion": "Bloom helps selective lookups."
+      },
+      {
+        "texto_opcion": "Point lookups high selectivity columns",
+        "es_correcta": true,
+        "explicacion": "Skip files point queries."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Bloom filters property"
+    ]
+  },
+  {
+    "pregunta": "Enable deletion vectors when?",
+    "opciones": [
+      {
+        "texto_opcion": "Only CSV tables",
+        "es_correcta": false,
+        "explicacion": "Delta feature."
+      },
+      {
+        "texto_opcion": "Frequent row-level deletes/updates to reduce rewrite overhead",
+        "es_correcta": true,
+        "explicacion": "DV design choice Delta."
+      },
+      {
+        "texto_opcion": "Conflicts with CDF always",
+        "es_correcta": false,
+        "explicacion": "Evaluate compatibility versions."
+      },
+      {
+        "texto_opcion": "Never on Delta",
+        "es_correcta": false,
+        "explicacion": "Feature exists."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Deletion vectors design"
+    ]
+  },
+  {
+    "pregunta": "bronze/silver/gold prefix convention?",
+    "opciones": [
+      {
+        "texto_opcion": "Layer prefix + domain entity naming standard",
+        "es_correcta": true,
+        "explicacion": "Clarity layers."
+      },
+      {
+        "texto_opcion": "All one table",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Random names",
+        "es_correcta": false,
+        "explicacion": "Confusion."
+      },
+      {
+        "texto_opcion": "Hide layer in name always",
+        "es_correcta": false,
+        "explicacion": "Less clear."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Table naming"
+    ]
+  },
+  {
+    "pregunta": "Streaming ingest design include?",
+    "opciones": [
+      {
+        "texto_opcion": "coalesce(1) each batch design",
+        "es_correcta": false,
+        "explicacion": "Bottleneck."
+      },
+      {
+        "texto_opcion": "Daily full reload design",
+        "es_correcta": false,
+        "explicacion": "Wasteful."
+      },
+      {
+        "texto_opcion": "optimizeWrite autoCompact + scheduled OPTIMIZE target file size property",
+        "es_correcta": true,
+        "explicacion": "Preventive design."
+      },
+      {
+        "texto_opcion": "Ignore file size",
+        "es_correcta": false,
+        "explicacion": "Debt."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Small file prevention design"
+    ]
+  },
+  {
+    "pregunta": "Design UC names catalog.schema.table consistently?",
+    "opciones": [
+      {
+        "texto_opcion": "Domain catalog layer schema entity table",
+        "es_correcta": true,
+        "explicacion": "Hierarchy clarity."
+      },
+      {
+        "texto_opcion": "User home paths tables",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Single part names only",
+        "es_correcta": false,
+        "explicacion": "Ambiguous UC."
+      },
+      {
+        "texto_opcion": "Random dots in names illegal",
+        "es_correcta": false,
+        "explicacion": "Follow rules."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Multi-part identifier"
+    ]
+  },
+  {
+    "pregunta": "ENFORCED PK Delta means?",
+    "opciones": [
+      {
+        "texto_opcion": "Same as comment",
+        "es_correcta": false,
+        "explicacion": "Actually enforced."
+      },
+      {
+        "texto_opcion": "Impossible Delta",
+        "es_correcta": false,
+        "explicacion": "Supported evolving."
+      },
+      {
+        "texto_opcion": "Writes violating PK rejected",
+        "es_correcta": true,
+        "explicacion": "Strong integrity."
+      },
+      {
+        "texto_opcion": "Only batch not streaming",
+        "es_correcta": false,
+        "explicacion": "Check docs streaming."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Constraint ENFORCED"
+    ]
+  },
+  {
+    "pregunta": "SCD1 table design requires?",
+    "opciones": [
+      {
+        "texto_opcion": "No keys",
+        "es_correcta": false,
+        "explicacion": "MERGE impossible."
+      },
+      {
+        "texto_opcion": "Only surrogate no natural",
+        "es_correcta": false,
+        "explicacion": "Hard match source."
+      },
+      {
+        "texto_opcion": "Wide JSON only no columns",
+        "es_correcta": false,
+        "explicacion": "Hard MERGE."
+      },
+      {
+        "texto_opcion": "Business key + columns update + audit timestamps",
+        "es_correcta": true,
+        "explicacion": "MERGE-friendly schema."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Design for MERGE"
+    ]
+  },
+  {
+    "pregunta": "Auto optimize properties set at?",
+    "opciones": [
+      {
+        "texto_opcion": "Runtime only spark conf unrelated table",
+        "es_correcta": false,
+        "explicacion": "Table props exist."
+      },
+      {
+        "texto_opcion": "Never set",
+        "es_correcta": false,
+        "explicacion": "Miss benefits."
+      },
+      {
+        "texto_opcion": "CREATE/ALTER TABLE design for write patterns",
+        "es_correcta": true,
+        "explicacion": "Design-time tuning."
+      },
+      {
+        "texto_opcion": "Only after 5 years",
+        "es_correcta": false,
+        "explicacion": "Late."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Table properties optimize"
+    ]
+  },
+  {
+    "pregunta": "All sales one mega-partition holiday?",
+    "opciones": [
+      {
+        "texto_opcion": "Combine partition date with sub-partition strategy or clustering within day",
+        "es_correcta": true,
+        "explicacion": "Handle skew days."
+      },
+      {
+        "texto_opcion": "Single partition table",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Drop holiday data",
+        "es_correcta": false,
+        "explicacion": "Bad business."
+      },
+      {
+        "texto_opcion": "Ignore skew",
+        "es_correcta": false,
+        "explicacion": "Slow queries."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Partition skew design"
+    ]
+  },
+  {
+    "pregunta": "Schema evolution design allow?",
+    "opciones": [
+      {
+        "texto_opcion": "Never evolve",
+        "es_correcta": false,
+        "explicacion": "Unrealistic."
+      },
+      {
+        "texto_opcion": "addColumns mergeSchema options documented contract",
+        "es_correcta": true,
+        "explicacion": "Controlled evolution."
+      },
+      {
+        "texto_opcion": "Drop columns prod no notice",
+        "es_correcta": false,
+        "explicacion": "Breaking."
+      },
+      {
+        "texto_opcion": "Breaking changes silent",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Type evolution"
+    ]
+  },
+  {
+    "pregunta": "Bronze append-only immutable design?",
+    "opciones": [
+      {
+        "texto_opcion": "Delete source fields bronze",
+        "es_correcta": false,
+        "explicacion": "Loses audit."
+      },
+      {
+        "texto_opcion": "Heavy aggregations bronze",
+        "es_correcta": false,
+        "explicacion": "Wrong layer."
+      },
+      {
+        "texto_opcion": "Only KPIs bronze",
+        "es_correcta": false,
+        "explicacion": "Wrong."
+      },
+      {
+        "texto_opcion": "Raw ingest minimal transform preserve source lineage",
+        "es_correcta": true,
+        "explicacion": "Medallion bronze pattern."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Design checkpoints"
+    ]
+  },
+  {
+    "pregunta": "Consumer needs incremental silver from bronze?",
+    "opciones": [
+      {
+        "texto_opcion": "Email deltas",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Full copy silver daily design only",
+        "es_correcta": false,
+        "explicacion": "Miss incremental."
+      },
+      {
+        "texto_opcion": "Disable transaction log",
+        "es_correcta": false,
+        "explicacion": "Impossible Delta."
+      },
+      {
+        "texto_opcion": "Enable CDF bronze; design silver MERGE incremental keys",
+        "es_correcta": true,
+        "explicacion": "Incremental architecture."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Table property CDF design"
+    ]
+  },
+  {
+    "pregunta": "New table unknown query patterns?",
+    "opciones": [
+      {
+        "texto_opcion": "Avoid Delta",
+        "es_correcta": false,
+        "explicacion": "Miss lakehouse."
+      },
+      {
+        "texto_opcion": "No maintenance ever",
+        "es_correcta": false,
+        "explicacion": "Degrades."
+      },
+      {
+        "texto_opcion": "Z-order 50 columns day one",
+        "es_correcta": false,
+        "explicacion": "Premature."
+      },
+      {
+        "texto_opcion": "Start Liquid Clustering adaptive; measure; refine",
+        "es_correcta": true,
+        "explicacion": "Adaptive modern default many cases."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Z-order vs liquid decision tree"
+    ]
+  },
+  {
+    "pregunta": "Silver enforces referential integrity to dim?",
+    "opciones": [
+      {
+        "texto_opcion": "No dims",
+        "es_correcta": false,
+        "explicacion": "Star incomplete."
+      },
+      {
+        "texto_opcion": "FK NOT ENFORCED + MERGE jobs validate orphans quarantine",
+        "es_correcta": true,
+        "explicacion": "Practical lakehouse integrity."
+      },
+      {
+        "texto_opcion": "FK ENFORCED only hope",
+        "es_correcta": false,
+        "explicacion": "Pipeline must handle."
+      },
+      {
+        "texto_opcion": "Ignore orphans",
+        "es_correcta": false,
+        "explicacion": "Quality issues."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "Design constraints FK"
+    ]
+  },
+  {
+    "pregunta": "Garantir amount > 0 na camada silver no design da tabela?",
+    "opciones": [
+      {
+        "texto_opcion": "Confiar apenas em comentário SQL",
+        "es_correcta": false,
+        "explicacion": "Não valida dados."
+      },
+      {
+        "texto_opcion": "CHECK constraint ENFORCED ou NOT ENFORCED conforme versão + validação em expectations/MERGE",
+        "es_correcta": true,
+        "explicacion": "Constraints documentam e podem reforçar qualidade na ingestão."
+      },
+      {
+        "texto_opcion": "Validar só no Power BI",
+        "es_correcta": false,
+        "explicacion": "Tarde demais no pipeline."
+      },
+      {
+        "texto_opcion": "Usar STRING para amount e filtrar depois",
+        "es_correcta": false,
+        "explicacion": "Tipo errado e validação tardia."
+      }
+    ],
+    "tags": [
+      "10.1",
+      "CHECK constraints"
+    ]
+  }
+]

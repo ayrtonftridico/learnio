@@ -1,0 +1,2014 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>learn.io — Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Quiz de estudo para certificações de Data Engineering — learn.io">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #121316;
+      --bg-raised: #1a1c21;
+      --bg-card: #1f2127;
+      --line: #2b2e36;
+      --ink: #e9e8e4;
+      --ink-dim: #9a9ca3;
+      --ink-faint: #63656d;
+      --amber: #d3963e;
+      --amber-dim: #8a672f;
+      --good: #5fb489;
+      --good-bg: rgba(95, 180, 137, 0.12);
+      --bad: #d3663f;
+      --bad-bg: rgba(211, 102, 63, 0.12);
+      --mono: 'IBM Plex Mono', monospace;
+      --serif: 'Fraunces', serif;
+      --sans: 'IBM Plex Sans', system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    body {
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ---------- Sidebar ---------- */
+    #sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--bg-raised);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #sidebar-head {
+      padding: 20px 18px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    #sidebar-head .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      color: var(--amber);
+      text-transform: uppercase;
+    }
+
+    #sidebar-head h1 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 20px;
+      margin: 6px 0 0;
+      line-height: 1.15;
+    }
+
+    #filter-wrap {
+      display: flex;
+      gap: 6px;
+      padding: 10px 18px 0;
+      border-bottom: none;
+    }
+
+    .filter-pill {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: .04em;
+      padding: 6px 4px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink-faint);
+      cursor: pointer;
+      transition: border-color .12s, color .12s, background .12s;
+    }
+
+    .filter-pill:hover {
+      color: var(--ink);
+      border-color: var(--amber-dim);
+    }
+
+    .filter-pill.active {
+      color: var(--amber);
+      border-color: rgba(211, 150, 62, .45);
+      background: rgba(211, 150, 62, .1);
+    }
+
+    #search-wrap {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    #sidebar-foot a {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-dim);
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      text-align: center;
+      transition: border-color .12s, color .12s;
+    }
+
+    #sidebar-foot a:hover {
+      color: var(--amber);
+      border-color: var(--amber-dim);
+    }
+
+    #sidebar-foot .nav-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    #sim-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 8px 40px;
+      background: rgba(211, 150, 62, 0.1);
+      border-bottom: 1px solid rgba(211, 150, 62, 0.28);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--amber);
+    }
+
+    #sim-banner.active {
+      display: flex;
+    }
+
+    #sim-banner .timer.warn {
+      color: var(--bad);
+    }
+
+    #sim-banner .sim-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .opt.selected {
+      border-color: var(--amber-dim);
+      background: rgba(211, 150, 62, 0.08);
+    }
+
+    .opt.selected .letter {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    .opt.focused {
+      border-color: var(--amber);
+      box-shadow: 0 0 0 1px rgba(211, 150, 62, 0.35);
+    }
+
+    .opt.focused .letter {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    .results-card {
+      width: 100%;
+      max-width: 720px;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 34px 38px;
+    }
+
+    .results-card h2 {
+      font-family: var(--serif);
+      font-size: 28px;
+      margin: 0 0 8px;
+      font-weight: 600;
+    }
+
+    .results-card .sub {
+      color: var(--ink-dim);
+      font-size: 14px;
+      margin: 0 0 22px;
+      line-height: 1.5;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .results-grid .stat {
+      background: var(--bg-raised);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .results-grid .stat b {
+      display: block;
+      font-family: var(--serif);
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+
+    .results-grid .stat span {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-faint);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .results-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    #searchBox {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 13px;
+      font-family: var(--sans);
+    }
+
+    #searchBox:focus {
+      outline: none;
+      border-color: var(--amber-dim);
+    }
+
+    #file-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0 18px;
+    }
+
+    .section-group {
+      margin-top: 6px;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: .06em;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      padding: 10px 18px 4px;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 18px 6px 26px;
+      cursor: pointer;
+      font-size: 13.5px;
+      color: var(--ink-dim);
+      border-left: 2px solid transparent;
+      position: relative;
+    }
+
+    .file-item .num {
+      font-family: var(--mono);
+      color: var(--ink-faint);
+      font-size: 11.5px;
+      min-width: 30px;
+    }
+
+    .file-item:hover {
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .file-item.active {
+      color: var(--amber);
+      border-left-color: var(--amber);
+      background: rgba(211, 150, 62, 0.06);
+    }
+
+    .file-item .count {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--ink-faint);
+      white-space: nowrap;
+    }
+
+    .file-item .count .c-right {
+      color: var(--good);
+    }
+
+    .file-item .count .c-wrong {
+      color: var(--bad);
+    }
+
+    .file-item .count .c-tot {
+      color: var(--ink-faint);
+    }
+
+    #empty-hint {
+      padding: 18px;
+      font-size: 12.5px;
+      color: var(--ink-faint);
+      line-height: 1.6;
+    }
+
+    /* ---------- Main ---------- */
+    #main {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 40px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      flex-wrap: wrap;
+    }
+
+    #rail {
+      height: 3px;
+      background: var(--line);
+      width: 100%;
+      flex-basis: 100%;
+      order: 3;
+      margin: 4px 0 0;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    #rail > i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+      transition: width .2s ease;
+    }
+
+    .icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      color: var(--ink-dim);
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn:hover {
+      color: var(--amber);
+      border-color: var(--amber-dim);
+    }
+
+    #help-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      z-index: 40;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    #help-modal.open {
+      display: flex;
+    }
+
+    #help-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 28px 26px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
+    }
+
+    #help-panel h2 {
+      font-family: var(--serif);
+      font-size: 22px;
+      margin: 0 0 14px;
+      font-weight: 600;
+    }
+
+    #help-panel dl {
+      margin: 0;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px 14px;
+      font-size: 13.5px;
+    }
+
+    #help-panel dt {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--amber);
+    }
+
+    #help-panel dd {
+      margin: 0;
+      color: var(--ink-dim);
+    }
+
+    #help-panel .close-row {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    #progress {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-dim);
+    }
+
+    #progress b {
+      color: var(--amber);
+    }
+
+    #score {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-dim);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    #score .val {
+      color: var(--good);
+      font-weight: 600;
+    }
+
+    #score .wrong {
+      color: var(--bad);
+      font-weight: 600;
+    }
+
+    #score .sep {
+      color: var(--ink-faint);
+    }
+
+    #tagbar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: .03em;
+      color: var(--ink-dim);
+      border: 1px solid var(--line);
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    #content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px 40px 80px;
+    }
+
+    #welcome {
+      max-width: 560px;
+      margin: auto;
+      text-align: center;
+      color: var(--ink-dim);
+    }
+
+    #welcome h2 {
+      font-family: var(--serif);
+      font-size: 26px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    #welcome p {
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 34px 38px;
+      position: relative;
+    }
+
+    .stamp {
+      position: absolute;
+      top: -14px;
+      right: 28px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: .08em;
+      color: var(--bg);
+      background: var(--amber);
+      padding: 4px 10px;
+      border-radius: 3px;
+      transform: rotate(2deg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    .qnum {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--amber);
+      letter-spacing: .06em;
+      margin-bottom: 10px;
+    }
+
+    .qtext {
+      font-family: var(--serif);
+      font-size: 20px;
+      line-height: 1.5;
+      font-weight: 500;
+      color: var(--ink);
+      margin: 0 0 26px;
+      white-space: pre-wrap;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .opt {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 13px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--bg-raised);
+      cursor: pointer;
+      transition: border-color .12s, background .12s;
+    }
+
+    .opt:hover {
+      border-color: var(--amber-dim);
+    }
+
+    .opt .letter {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--ink-faint);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      width: 22px;
+      height: 22px;
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .opt .txt {
+      font-size: 14.5px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+
+    .opt .expl {
+      font-size: 12.5px;
+      color: var(--ink-dim);
+      line-height: 1.6;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      display: none;
+    }
+
+    .opt.answered .letter {
+      border-color: transparent;
+    }
+
+    .opt.correct {
+      border-color: var(--good);
+      background: var(--good-bg);
+    }
+
+    .opt.correct .letter {
+      background: var(--good);
+      color: #0e1310;
+    }
+
+    .opt.incorrect {
+      border-color: var(--bad);
+      background: var(--bad-bg);
+    }
+
+    .opt.incorrect .letter {
+      background: var(--bad);
+      color: #160e0b;
+    }
+
+    .opt.answered .expl {
+      display: block;
+    }
+
+    .opt.dimmed {
+      opacity: .55;
+    }
+
+    .opt.locked {
+      cursor: default;
+    }
+
+    #nav-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      width: 100%;
+      max-width: 720px;
+      margin-top: 22px;
+    }
+
+    .nav-btn {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--bg-card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 9px 18px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      border-color: var(--amber-dim);
+      color: var(--amber);
+    }
+
+    .nav-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    #jump-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #jump-wrap label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    #jumpInput {
+      width: 82px;
+      padding: 7px 9px;
+      border-radius: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    #jumpInput:focus {
+      outline: none;
+      border-color: var(--amber-dim);
+    }
+
+    #jump-status {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--ink-faint);
+    }
+
+    #jump-status.warn {
+      color: var(--bad);
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    @media (max-width:760px) {
+      #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+        transition: transform .2s;
+        z-index: 20;
+      }
+
+      #sidebar.open {
+        transform: translateX(0);
+      }
+
+      #topbar {
+        padding: 14px 16px;
+      }
+
+      #content {
+        padding: 22px 16px 60px;
+      }
+
+      .card {
+        padding: 24px 20px;
+      }
+
+      #menu-toggle {
+        display: inline-flex;
+      }
+    }
+
+    #menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--ink);
+      font-size: 18px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    #lang-switch {
+      display: inline-flex;
+      align-items: stretch;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-card);
+      flex-shrink: 0;
+    }
+
+    #lang-switch button {
+      border: none;
+      background: transparent;
+      color: var(--ink-dim);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .06em;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+
+    #lang-switch button + button {
+      border-left: 1px solid var(--line);
+    }
+
+    #lang-switch button:hover:not(:disabled):not(.active) {
+      color: var(--ink);
+      background: rgba(233, 232, 228, 0.04);
+    }
+
+    #lang-switch button.active {
+      background: rgba(211, 150, 62, 0.16);
+      color: var(--amber);
+    }
+
+    #lang-switch button:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+
+  <aside id="sidebar">
+    <div id="sidebar-head">
+      <div class="eyebrow"><a href="index.html" style="color:inherit;text-decoration:none">← learn.io</a></div>
+      <h1 id="examTitle">Quiz</h1>
+    </div>
+    <div id="filter-wrap" role="group" aria-label="Study filter">
+      <button type="button" class="filter-pill active" data-filter="all">All</button>
+      <button type="button" class="filter-pill" data-filter="pending">Pending</button>
+      <button type="button" class="filter-pill" data-filter="wrong">Wrong</button>
+    </div>
+    <div id="search-wrap">
+      <input id="searchBox" type="text" placeholder="Search text or tag…">
+    </div>
+    <div id="file-list">
+      <div id="empty-hint">Loading bank…</div>
+    </div>
+    <div id="sidebar-foot">
+      <button type="button" class="nav-btn" id="simBtn" style="width:100%;justify-content:center;padding:8px 10px;font-size:12px;">Mock exam</button>
+      <button type="button" class="nav-btn" id="exportBtn" style="width:100%;justify-content:center;padding:8px 10px;font-size:12px;">Export history</button>
+      <a href="#" id="helpLink">Shortcuts (?)</a>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="topbar">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button id="menu-toggle" aria-label="Open menu">☰</button>
+        <div id="progress">No data loaded</div>
+        <div id="score"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div id="tagbar"></div>
+        <div id="lang-switch" role="group" aria-label="Question bank language">
+          <button type="button" data-lang="pt" class="active" title="Portuguese (questions-pt)">PT</button>
+          <button type="button" data-lang="en" title="English (questions)">EN</button>
+        </div>
+        <button type="button" class="icon-btn" id="helpBtn" title="Shortcuts" aria-label="Shortcuts">?</button>
+        <button id="resetBtn" class="nav-btn" style="display:none;padding:6px 12px;font-size:12px;">Reset</button>
+      </div>
+      <div id="rail" aria-hidden="true"><i id="railFill"></i></div>
+    </div>
+    <div id="sim-banner">
+      <div>
+        <strong>Mock exam</strong>
+        <span id="simMeta"></span>
+        · <span class="timer" id="simTimer">--:--</span>
+      </div>
+      <div class="sim-actions">
+        <button type="button" class="nav-btn" id="simFinishBtn" style="padding:6px 12px;font-size:12px;">Finish</button>
+        <button type="button" class="nav-btn" id="simAbortBtn" style="padding:6px 12px;font-size:12px;">Abort</button>
+      </div>
+    </div>
+    <div id="content">
+      <div id="welcome">
+        <h2 id="welcomeTitle">Loading…</h2>
+        <p id="welcomeBody">Opening the selected certification bank.</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="help-modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div id="help-panel">
+      <h2 id="helpTitle">Shortcuts</h2>
+      <dl>
+        <dt>↑ ↓</dt><dd>Move highlight across A–E</dd>
+        <dt>→</dt><dd>Confirm highlighted option (or next if already answered)</dd>
+        <dt>←</dt><dd>Previous question</dd>
+        <dt>A–E</dt><dd>Pick an option directly</dd>
+        <dt>G</dt><dd>Jump to number (e.g. 75 or 4.2 12)</dd>
+        <dt>?</dt><dd>Toggle this help</dd>
+        <dt>Esc</dt><dd>Close help</dd>
+      </dl>
+      <div class="close-row">
+        <button type="button" class="nav-btn" id="helpClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const fileListEl = document.getElementById('file-list');
+      const contentEl = document.getElementById('content');
+      const progressEl = document.getElementById('progress');
+      const tagbarEl = document.getElementById('tagbar');
+      const searchBox = document.getElementById('searchBox');
+      const menuToggle = document.getElementById('menu-toggle');
+      const sidebar = document.getElementById('sidebar');
+      const scoreEl = document.getElementById('score');
+      const resetBtn = document.getElementById('resetBtn');
+      const langSwitch = document.getElementById('lang-switch');
+      const railFill = document.getElementById('railFill');
+      const helpModal = document.getElementById('help-modal');
+      const filterWrap = document.getElementById('filter-wrap');
+
+      function openHelp() { helpModal.classList.add('open'); }
+      function closeHelp() { helpModal.classList.remove('open'); }
+      document.getElementById('helpBtn').addEventListener('click', openHelp);
+      document.getElementById('helpLink').addEventListener('click', (e) => { e.preventDefault(); openHelp(); });
+      document.getElementById('helpClose').addEventListener('click', closeHelp);
+      helpModal.addEventListener('click', (e) => { if (e.target === helpModal) closeHelp(); });
+
+      menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+      // flat list of {question, tags, options, fileName, sectionLabel, indexInFile}
+      let allQuestions = [];
+      let filtered = [];
+      let currentIdx = 0;
+      let filesLoaded = []; // {name, count}
+      let currentOptDivs = []; // option elements for the question on screen (keyboard select)
+      let focusedOpt = -1; // highlight index for ↑↓ / → confirm
+      let studyFilter = 'all'; // all | pending | wrong
+      let sectionTitles = {}; // "1" -> title
+      let simMode = false;
+      let simAnswers = {}; // qid -> chosen orig index
+      let simStartedAt = null;
+      let simEndsAt = null;
+      let simTimerId = null;
+      let practiceSnapshot = null; // { filtered, currentIdx, studyFilter } when entering sim
+      const HISTORY_KEY = 'learnioHistory';
+
+      // ---------- Exam catalog + progress ----------
+      const params = new URLSearchParams(location.search);
+      const examId = params.get('exam') || '';
+      const wantSimOnLoad = params.get('mode') === 'sim';
+      let simAutostartDone = false;
+      let uiLang = (params.get('lang') || localStorage.getItem('learnioLang') || 'pt').toLowerCase();
+      if (uiLang !== 'en' && uiLang !== 'pt') uiLang = 'pt';
+      let PROGRESS_KEY = 'learnioQuiz_' + (examId || 'manual') + '_' + uiLang;
+      let progress = {};
+      let currentExam = null;
+      let enAvailable = false;
+
+      const simBanner = document.getElementById('sim-banner');
+      const simTimerEl = document.getElementById('simTimer');
+      const simMetaEl = document.getElementById('simMeta');
+      const simBtn = document.getElementById('simBtn');
+      const exportBtn = document.getElementById('exportBtn');
+      const simFinishBtn = document.getElementById('simFinishBtn');
+      const simAbortBtn = document.getElementById('simAbortBtn');
+
+      syncLangButtons(); // EN desabilitado até provar que existe pasta questions/
+
+      function questionsDirFor(lang) {
+        return lang === 'en' ? 'questions' : 'questions-pt';
+      }
+
+      function syncLangButtons() {
+        langSwitch.querySelectorAll('button').forEach(btn => {
+          const lang = btn.dataset.lang;
+          btn.classList.toggle('active', lang === uiLang);
+          if (lang === 'en') btn.disabled = !enAvailable;
+          else btn.disabled = false;
+        });
+      }
+
+      function setUiLang(lang) {
+        if (lang !== 'pt' && lang !== 'en') return;
+        if (lang === 'en' && !enAvailable) return;
+        if (simMode) {
+          alert('Finish or abort the mock exam before switching language.');
+          return;
+        }
+        // os bancos PT e EN são paralelos: manter a questão atual na troca
+        const current = filtered[currentIdx];
+        const keepAt = current ? { fileName: current.fileName, idxInFile: current.idxInFile } : null;
+        uiLang = lang;
+        localStorage.setItem('learnioLang', uiLang);
+        const url = new URL(location.href);
+        url.searchParams.set('lang', uiLang);
+        history.replaceState(null, '', url);
+        PROGRESS_KEY = 'learnioQuiz_' + (examId || 'manual') + '_' + uiLang;
+        progress = loadProgress();
+        syncLangButtons();
+        if (examId) autoLoadExam(examId, keepAt);
+      }
+
+      langSwitch.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-lang]');
+        if (!btn || btn.disabled) return;
+        if (btn.dataset.lang === uiLang) return;
+        setUiLang(btn.dataset.lang);
+      });
+
+      function loadHistory() {
+        try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+        catch (e) { return []; }
+      }
+      function saveHistory(list) {
+        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(-100))); } catch (e) { }
+      }
+
+      function downloadBlob(filename, text, mime) {
+        const blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function exportHistory() {
+        const history = loadHistory();
+        const practiceRows = [];
+        allQuestions.forEach(q => {
+          const p = progress[qid(q)];
+          if (!p) return;
+          practiceRows.push({
+            examId: examId || (currentExam && currentExam.id) || '',
+            mode: 'practice',
+            lang: uiLang,
+            file: q.fileName,
+            idx: q.idxInFile,
+            correct: !!p.correct,
+            chosen: p.chosen
+          });
+        });
+
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          exam: currentExam ? {
+            id: currentExam.id,
+            short: currentExam.short,
+            title: currentExam.title
+          } : null,
+          lang: uiLang,
+          practiceProgress: practiceRows,
+          mockSessions: history.filter(h => !examId || h.examId === examId)
+        };
+
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        const base = 'learnio-history-' + (examId || 'all') + '-' + stamp;
+        downloadBlob(base + '.json', JSON.stringify(payload, null, 2), 'application/json');
+
+        const csvLines = ['mode,examId,lang,file,idx,correct,chosen,sessionId,startedAt'];
+        practiceRows.forEach(r => {
+          csvLines.push(['practice', r.examId, r.lang, r.file, r.idx, r.correct, r.chosen, '', ''].join(','));
+        });
+        (payload.mockSessions || []).forEach(s => {
+          (s.items || []).forEach(it => {
+            csvLines.push([
+              'mock', s.examId, s.lang, it.file, it.idx, it.correct, it.chosen,
+              s.id || '', s.startedAt || ''
+            ].join(','));
+          });
+        });
+        downloadBlob(base + '.csv', csvLines.join('\n'), 'text/csv;charset=utf-8');
+      }
+
+      function stopSimTimer() {
+        if (simTimerId) { clearInterval(simTimerId); simTimerId = null; }
+      }
+
+      function formatMmSs(ms) {
+        const total = Math.max(0, Math.ceil(ms / 1000));
+        const m = Math.floor(total / 60);
+        const s = total % 60;
+        return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+      }
+
+      function tickSimTimer() {
+        if (!simEndsAt) return;
+        const left = simEndsAt - Date.now();
+        simTimerEl.textContent = formatMmSs(left);
+        simTimerEl.classList.toggle('warn', left <= 5 * 60 * 1000);
+        if (left <= 0) finishSim(true);
+      }
+
+      function setSimChrome(active) {
+        simBanner.classList.toggle('active', active);
+        simBtn.disabled = active || !allQuestions.length;
+        filterWrap.style.opacity = active ? '0.4' : '1';
+        filterWrap.style.pointerEvents = active ? 'none' : '';
+        searchBox.disabled = active;
+        langSwitch.querySelectorAll('button').forEach(b => {
+          if (active) b.disabled = true;
+          else syncLangButtons();
+        });
+      }
+
+      function startSim() {
+        if (!allQuestions.length || !currentExam) return;
+        if (simMode) return;
+        const n = Math.min(currentExam.realExamQuestions || 45, allQuestions.length);
+        const mins = currentExam.durationMinutes || 90;
+        if (!confirm(
+          'Start a mock exam?\n\n' +
+          n + ' random questions · ' + mins + ' minutes\n' +
+          'Answers are graded at the end (no instant reveal).\n' +
+          'This does not change your practice progress.'
+        )) {
+          const url = new URL(location.href);
+          url.searchParams.delete('mode');
+          history.replaceState(null, '', url);
+          return;
+        }
+
+        practiceSnapshot = {
+          filtered: filtered.slice(),
+          currentIdx,
+          studyFilter,
+          search: searchBox.value
+        };
+        simMode = true;
+        simAnswers = {};
+        simStartedAt = new Date().toISOString();
+        simEndsAt = Date.now() + mins * 60 * 1000;
+        filtered = shuffle(allQuestions).slice(0, n).map(q => {
+          // fresh option order for the mock
+          return Object.assign({}, q, { order: shuffle([...Array(q.opciones.length).keys()]) });
+        });
+        currentIdx = 0;
+        studyFilter = 'all';
+        searchBox.value = '';
+        filterWrap.querySelectorAll('.filter-pill').forEach(b => {
+          b.classList.toggle('active', b.dataset.filter === 'all');
+        });
+        simMetaEl.textContent = ' · ' + n + ' q · ' + mins + ' min';
+        setSimChrome(true);
+        stopSimTimer();
+        tickSimTimer();
+        simTimerId = setInterval(tickSimTimer, 1000);
+        const url = new URL(location.href);
+        url.searchParams.set('mode', 'sim');
+        history.replaceState(null, '', url);
+        renderQuestion();
+        updateScore();
+      }
+
+      function abortSim() {
+        if (!simMode) return;
+        if (!confirm('Abort this mock exam? Progress for this session will be discarded.')) return;
+        exitSim(false);
+      }
+
+      function exitSim(showPractice) {
+        stopSimTimer();
+        simMode = false;
+        simAnswers = {};
+        simStartedAt = null;
+        simEndsAt = null;
+        setSimChrome(false);
+        const url = new URL(location.href);
+        url.searchParams.delete('mode');
+        history.replaceState(null, '', url);
+        if (practiceSnapshot) {
+          filtered = practiceSnapshot.filtered;
+          currentIdx = practiceSnapshot.currentIdx || 0;
+          studyFilter = practiceSnapshot.studyFilter || 'all';
+          searchBox.value = practiceSnapshot.search || '';
+          filterWrap.querySelectorAll('.filter-pill').forEach(b => {
+            b.classList.toggle('active', b.dataset.filter === studyFilter);
+          });
+          practiceSnapshot = null;
+        } else {
+          applyFilters(false);
+          return;
+        }
+        if (showPractice !== false) {
+          updateScore();
+          renderQuestion();
+        }
+      }
+
+      function finishSim(fromTimer) {
+        if (!simMode) return;
+        stopSimTimer();
+        const items = filtered.map(q => {
+          const id = qid(q);
+          const chosen = Object.prototype.hasOwnProperty.call(simAnswers, id) ? simAnswers[id] : null;
+          const correctIdx = q.opciones.findIndex(o => o.es_correcta === true);
+          const correct = chosen !== null && chosen === correctIdx;
+          return {
+            file: q.fileName,
+            idx: q.idxInFile,
+            chosen,
+            correctIdx,
+            correct,
+            pregunta: q.pregunta
+          };
+        });
+        const answered = items.filter(i => i.chosen !== null).length;
+        const correct = items.filter(i => i.correct).length;
+        const pct = answered ? Math.round((correct / filtered.length) * 100) : 0;
+        const session = {
+          id: 'sim_' + Date.now(),
+          examId: currentExam.id,
+          examShort: currentExam.short,
+          lang: uiLang,
+          mode: 'mock',
+          startedAt: simStartedAt,
+          endedAt: new Date().toISOString(),
+          timedOut: !!fromTimer,
+          durationMinutes: currentExam.durationMinutes,
+          questionCount: filtered.length,
+          answered,
+          correct,
+          pct,
+          items
+        };
+        const hist = loadHistory();
+        hist.push(session);
+        saveHistory(hist);
+
+        // Keep simMode true briefly for review navigation of wrong answers via results UI
+        simMode = false;
+        setSimChrome(false);
+        const url = new URL(location.href);
+        url.searchParams.delete('mode');
+        history.replaceState(null, '', url);
+
+        const wrong = items.filter(i => !i.correct);
+        contentEl.innerHTML = '';
+        const card = document.createElement('div');
+        card.className = 'results-card';
+        card.innerHTML =
+          '<h2>' + (fromTimer ? 'Time is up' : 'Mock exam finished') + '</h2>' +
+          '<p class="sub">' + escapeHtml(currentExam.short) + ' · ' + filtered.length + ' questions · ' +
+          (uiLang === 'en' ? 'EN' : 'PT') + '</p>' +
+          '<div class="results-grid">' +
+            '<div class="stat"><b style="color:var(--good)">' + correct + '</b><span>Correct</span></div>' +
+            '<div class="stat"><b style="color:var(--bad)">' + (filtered.length - correct) + '</b><span>Missed</span></div>' +
+            '<div class="stat"><b style="color:var(--amber)">' + pct + '%</b><span>Score</span></div>' +
+          '</div>' +
+          '<div class="results-actions">' +
+            '<button type="button" class="nav-btn" id="resPractice">Back to practice</button>' +
+            '<button type="button" class="nav-btn" id="resRetry">New mock</button>' +
+            '<button type="button" class="nav-btn" id="resExport">Export history</button>' +
+            (wrong.length ? '<button type="button" class="nav-btn" id="resReview">Review missed (' + wrong.length + ')</button>' : '') +
+          '</div>';
+        contentEl.appendChild(card);
+        progressEl.innerHTML = 'Mock result · <b>' + pct + '%</b>';
+        scoreEl.innerHTML = '<span class="val">' + correct + ' ✓</span><span class="wrong">' + (filtered.length - correct) + ' ✗</span>';
+        if (railFill) railFill.style.width = '100%';
+
+        document.getElementById('resPractice').addEventListener('click', () => {
+          practiceSnapshot = practiceSnapshot || { filtered: allQuestions.slice(), currentIdx: 0, studyFilter: 'all', search: '' };
+          exitSim(true);
+        });
+        document.getElementById('resRetry').addEventListener('click', () => {
+          practiceSnapshot = practiceSnapshot || { filtered: allQuestions.slice(), currentIdx: 0, studyFilter: 'all', search: '' };
+          exitSim(false);
+          startSim();
+        });
+        document.getElementById('resExport').addEventListener('click', exportHistory);
+        const rev = document.getElementById('resReview');
+        if (rev) {
+          rev.addEventListener('click', () => {
+            // Load missed into filtered with practice-style reveal using a temp overlay on progress
+            const missed = wrong.map(w => {
+              const q = allQuestions.find(x => x.fileName === w.file && x.idxInFile === w.idx);
+              return q;
+            }).filter(Boolean);
+            // Merge mock answers into a review-only map by temporarily painting via progress clone
+            missed.forEach(q => {
+              const w = wrong.find(x => x.file === q.fileName && x.idx === q.idxInFile);
+              if (!w || w.chosen === null) return;
+              // store for review render without writing practice progress
+              q._reviewChosen = w.chosen;
+            });
+            filtered = missed;
+            currentIdx = 0;
+            simMode = false;
+            practiceSnapshot = practiceSnapshot || { filtered: allQuestions.slice(), currentIdx: 0, studyFilter: 'all', search: '' };
+            renderQuestion();
+          });
+        }
+      }
+
+      simBtn.addEventListener('click', startSim);
+      exportBtn.addEventListener('click', exportHistory);
+      simFinishBtn.addEventListener('click', () => {
+        if (!confirm('Submit the mock exam now?')) return;
+        finishSim(false);
+      });
+      simAbortBtn.addEventListener('click', abortSim);
+
+      function loadProgress() {
+        try {
+          const raw = localStorage.getItem(PROGRESS_KEY);
+          if (raw) return JSON.parse(raw);
+          if (uiLang === 'pt' && examId) {
+            const legacy = localStorage.getItem('learnioQuiz_' + examId);
+            if (legacy) {
+              localStorage.setItem(PROGRESS_KEY, legacy);
+              return JSON.parse(legacy);
+            }
+          }
+          return {};
+        } catch (e) { return {}; }
+      }
+      function saveProgress() {
+        try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) { }
+      }
+      function qid(q) { return q.fileName + '#' + q.idxInFile; }
+
+      function ingestParsedFiles(items, keepAt = null) {
+        // items: [{name, arr}]
+        allQuestions = [];
+        filesLoaded = [];
+        items.forEach(({ name, arr }) => {
+          arr.forEach((q, i) => {
+            const opciones = q.opciones || [];
+            allQuestions.push({
+              pregunta: q.pregunta || '(sem texto)',
+              tags: q.tags || [],
+              opciones: opciones,
+              fileName: name,
+              idxInFile: i + 1,
+              order: shuffle([...Array(opciones.length).keys()])
+            });
+          });
+          filesLoaded.push({ name: name, count: arr.length });
+        });
+        buildSidebar();
+        searchBox.value = '';
+        studyFilter = 'all';
+        filterWrap.querySelectorAll('.filter-pill').forEach(b => {
+          b.classList.toggle('active', b.dataset.filter === 'all');
+        });
+        filtered = allQuestions.slice();
+        currentIdx = 0;
+        if (keepAt) {
+          const at = filtered.findIndex(q => q.fileName === keepAt.fileName && q.idxInFile === keepAt.idxInFile);
+          if (at >= 0) currentIdx = at;
+        }
+        progress = loadProgress();
+        updateScore();
+        renderQuestion();
+        if (wantSimOnLoad && !simMode && !simAutostartDone) {
+          simAutostartDone = true;
+          setTimeout(() => { if (!simMode) startSim(); }, 200);
+        }
+      }
+
+      async function probeEnBank(examPath) {
+        try {
+          const res = await fetch(examPath + '/questions/manifest.json');
+          // some exams keep a single root manifest; try listing via fetch of known first file later
+          if (res.ok) return true;
+        } catch (_) { /* ignore */ }
+        try {
+          // probe via exam root manifest + questions/ file
+          const man = await (await fetch(examPath + '/manifest.json')).json();
+          const first = (man.files || [])[0];
+          if (!first) return false;
+          const probe = await fetch(examPath + '/questions/' + first, { method: 'HEAD' });
+          if (probe.ok) return true;
+          // some servers don't support HEAD
+          const get = await fetch(examPath + '/questions/' + first);
+          return get.ok;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      // O bloco #welcome é destruído no primeiro render; recriar a cada uso
+      // mantém autoLoadExam reutilizável na troca de idioma.
+      function showStatus(title, bodyHtml) {
+        contentEl.innerHTML =
+          '<div id="welcome"><h2 id="welcomeTitle"></h2><p id="welcomeBody"></p></div>';
+        document.getElementById('welcomeTitle').textContent = title;
+        document.getElementById('welcomeBody').innerHTML = bodyHtml;
+      }
+
+      async function autoLoadExam(id, keepAt = null) {
+        const examTitle = document.getElementById('examTitle');
+        try {
+          const catalog = await (await fetch('exams.json')).json();
+          currentExam = (catalog.exams || []).find(e => e.id === id);
+          if (!currentExam) throw new Error('Prova não encontrada em exams.json: ' + id);
+          examTitle.textContent = currentExam.short;
+          document.title = currentExam.short + ' — learn.io';
+          PROGRESS_KEY = 'learnioQuiz_' + id + '_' + uiLang;
+          progress = loadProgress();
+
+          enAvailable = await probeEnBank(currentExam.path);
+          if (uiLang === 'en' && !enAvailable) {
+            uiLang = 'pt';
+            localStorage.setItem('learnioLang', 'pt');
+            const url = new URL(location.href);
+            url.searchParams.set('lang', 'pt');
+            history.replaceState(null, '', url);
+            PROGRESS_KEY = 'learnioQuiz_' + id + '_pt';
+            progress = loadProgress();
+          }
+          syncLangButtons();
+
+          sectionTitles = {};
+          try {
+            const tem = await (await fetch(currentExam.path + '/temario.json')).json();
+            (tem.temario || []).forEach(sec => {
+              sectionTitles[String(sec.seccion_numero)] = sec.seccion_titulo || '';
+            });
+          } catch (_) { /* temario opcional */ }
+
+          const qDir = questionsDirFor(uiLang);
+          showStatus('Loading ' + currentExam.short + '…', 'Fetching <code>' + qDir + '/</code>');
+
+          const base = currentExam.path + '/' + qDir + '/';
+          let files = [];
+          try {
+            const man = await (await fetch(currentExam.path + '/manifest.json')).json();
+            files = man.files || [];
+          } catch (_) {
+            files = [];
+          }
+          if (!files.length) throw new Error('manifest.json sem lista de arquivos');
+
+          files.sort((a, b) => {
+            const pa = a.replace(/\.json$/i, '').split('.').map(Number);
+            const pb = b.replace(/\.json$/i, '').split('.').map(Number);
+            return (pa[0] - pb[0]) || ((pa[1] || 0) - (pb[1] || 0));
+          });
+
+          const items = [];
+          for (const name of files) {
+            const arr = await (await fetch(base + name)).json();
+            items.push({ name, arr: Array.isArray(arr) ? arr : [arr] });
+          }
+          ingestParsedFiles(items, keepAt);
+        } catch (err) {
+          console.error(err);
+          showStatus(
+            'Could not load the question bank',
+            'Open this site over HTTP (not <code>file://</code>) and pick an exam from the ' +
+            '<a href="index.html" style="color:var(--amber)">home page</a>.<br><br>Error: ' +
+            String(err.message || err)
+          );
+          if (examTitle && currentExam) examTitle.textContent = currentExam.short;
+          syncLangButtons();
+        }
+      }
+
+      // Fisher-Yates shuffle
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function updateScore() {
+        if (!allQuestions.length) {
+          scoreEl.innerHTML = '';
+          resetBtn.style.display = 'none';
+          if (railFill) railFill.style.width = '0%';
+          simBtn.disabled = true;
+          return;
+        }
+        simBtn.disabled = simMode;
+        if (simMode) {
+          const answered = filtered.filter(q => Object.prototype.hasOwnProperty.call(simAnswers, qid(q))).length;
+          const cover = filtered.length ? Math.round((answered / filtered.length) * 100) : 0;
+          scoreEl.innerHTML =
+            `<span>${answered}/${filtered.length} answered</span>` +
+            `<span class="sep">·</span><span>graded at the end</span>`;
+          resetBtn.style.display = 'none';
+          if (railFill) railFill.style.width = cover + '%';
+          return;
+        }
+        let answered = 0, correct = 0;
+        allQuestions.forEach(q => {
+          const p = progress[qid(q)];
+          if (p) { answered++; if (p.correct) correct++; }
+        });
+        const pct = answered ? Math.round((correct / answered) * 100) : 0;
+        const cover = Math.round((answered / allQuestions.length) * 100);
+        scoreEl.innerHTML =
+          `<span class="val">${correct} ✓</span>` +
+          `<span class="wrong">${answered - correct} ✗</span>` +
+          `<span class="sep">·</span>` +
+          `<span>${answered}/${allQuestions.length}</span>` +
+          (answered ? `<span class="sep">·</span><span>${pct}% correct</span>` : '');
+        resetBtn.style.display = 'inline-flex';
+        if (railFill) railFill.style.width = cover + '%';
+        updateSidebarStats();
+      }
+
+      function matchesStudyFilter(q) {
+        const p = progress[qid(q)];
+        if (studyFilter === 'pending') return !p;
+        if (studyFilter === 'wrong') return p && p.correct === false;
+        return true;
+      }
+
+      function applyFilters(preferKeep = true) {
+        if (simMode) return;
+        const keep = preferKeep && filtered[currentIdx] ? filtered[currentIdx] : null;
+        const term = searchBox.value.trim().toLowerCase();
+        filtered = allQuestions.filter(q => {
+          if (!matchesStudyFilter(q)) return false;
+          if (!term) return true;
+          return q.pregunta.toLowerCase().includes(term) ||
+            (q.tags || []).some(t => String(t).toLowerCase().includes(term)) ||
+            (q.opciones || []).some(o => (o.texto_opcion || '').toLowerCase().includes(term));
+        });
+        if (keep) {
+          const at = filtered.findIndex(q => q.fileName === keep.fileName && q.idxInFile === keep.idxInFile);
+          currentIdx = at >= 0 ? at : 0;
+        } else {
+          currentIdx = 0;
+        }
+        renderQuestion();
+      }
+
+      filterWrap.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-filter]');
+        if (!btn) return;
+        studyFilter = btn.dataset.filter;
+        filterWrap.querySelectorAll('.filter-pill').forEach(b => {
+          b.classList.toggle('active', b.dataset.filter === studyFilter);
+        });
+        applyFilters(false);
+      });
+
+      resetBtn.addEventListener('click', () => {
+        if (simMode) return;
+        if (!confirm('Clear all practice answers and the score for this exam? This cannot be undone.')) return;
+        progress = {};
+        saveProgress();
+        allQuestions.forEach(q => { q.order = shuffle([...Array(q.opciones.length).keys()]); });
+        updateScore();
+        renderQuestion();
+      });
+
+      function naturalSectionKey(name) {
+        // "3.8.json" -> section "3", sub 8 ; "1.json" -> section "1", sub 0
+        const base = name.replace(/\.json$/i, '');
+        const parts = base.split('.').map(p => parseInt(p, 10));
+        return { section: parts[0] || 0, sub: parts.length > 1 ? parts[1] : 0, base };
+      }
+
+      // auto-load when ?exam= is present
+      if (examId) {
+        autoLoadExam(examId);
+      } else {
+        showStatus('Choose an exam', 'Go back to the <a href="index.html" style="color:var(--amber)">home page</a> and pick a certification.');
+        syncLangButtons();
+      }
+
+      function buildSidebar() {
+        fileListEl.innerHTML = '';
+        // Group by section number
+        const groups = {};
+        filesLoaded.forEach(f => {
+          const key = naturalSectionKey(f.name);
+          groups[key.section] = groups[key.section] || [];
+          groups[key.section].push(f);
+        });
+        const sectionKeys = Object.keys(groups).map(Number).sort((a, b) => a - b);
+
+        let runningIdx = 0;
+        const fileStartIndex = {}; // fileName -> starting index in allQuestions (EN)
+        let acc = 0;
+        filesLoaded.forEach(f => { fileStartIndex[f.name] = acc; acc += f.count; });
+
+        sectionKeys.forEach(secNum => {
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'section-group';
+          const label = document.createElement('div');
+          label.className = 'section-label';
+          const title = sectionTitles[String(secNum)];
+          label.textContent = title
+            ? ('Section ' + secNum + ' · ' + title)
+            : ('Section ' + secNum);
+          label.title = title || '';
+          groupDiv.appendChild(label);
+
+          groups[secNum].forEach(f => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.dataset.file = f.name;
+            const numSpan = document.createElement('span');
+            numSpan.className = 'num';
+            numSpan.textContent = f.name.replace('.json', '');
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = f.error ? 'erro de leitura' : '';
+            const countSpan = document.createElement('span');
+            countSpan.className = 'count';
+            countSpan.dataset.file = f.name;
+            item.appendChild(numSpan);
+            item.appendChild(nameSpan);
+            item.appendChild(countSpan);
+            item.addEventListener('click', () => {
+              const startIdx = fileStartIndex[f.name];
+              filtered = allQuestions.slice();
+              currentIdx = allQuestions.indexOf(allQuestions.find((q, gi) => gi === startIdx));
+              currentIdx = startIdx;
+              renderQuestion();
+              highlightActiveFile(f.name);
+              sidebar.classList.remove('open');
+            });
+            groupDiv.appendChild(item);
+          });
+          fileListEl.appendChild(groupDiv);
+        });
+        updateSidebarStats();
+      }
+
+      // Per-file right/wrong/unanswered, shown in the sidebar count column
+      function updateSidebarStats() {
+        const stats = {}; // fileName -> {right, wrong, total}
+        allQuestions.forEach(q => {
+          const s = stats[q.fileName] || (stats[q.fileName] = { right: 0, wrong: 0, total: 0 });
+          s.total++;
+          const p = progress[qid(q)];
+          if (p) { p.correct ? s.right++ : s.wrong++; }
+        });
+        document.querySelectorAll('.count[data-file]').forEach(el => {
+          const s = stats[el.dataset.file] || { right: 0, wrong: 0, total: 0 };
+          const done = s.right + s.wrong;
+          if (!done) {
+            el.innerHTML = `<span class="c-tot">${s.total} q.</span>`;
+          } else {
+            el.innerHTML =
+              `<span class="c-right">${s.right}✓</span> ` +
+              `<span class="c-wrong">${s.wrong}✗</span> ` +
+              `<span class="c-tot">/${s.total}</span>`;
+          }
+        });
+      }
+
+      function highlightActiveFile(name) {
+        document.querySelectorAll('.file-item').forEach(el => {
+          el.classList.toggle('active', el.dataset.file === name);
+        });
+      }
+
+      searchBox.addEventListener('input', () => applyFilters(true));
+
+      function letterFor(i) { return String.fromCharCode(65 + i); }
+
+      function renderQuestion() {
+        if (!filtered.length) {
+          const hint = studyFilter === 'wrong'
+            ? 'No wrong answers in this filter — nice, or you have not missed any yet.'
+            : studyFilter === 'pending'
+              ? 'Nothing pending. Change the filter or clear search.'
+              : 'No questions match, or the bank is not loaded yet.';
+          contentEl.innerHTML = '<div id="welcome"><h2>No results</h2><p>' + hint + '</p></div>';
+          progressEl.textContent = '0 of 0';
+          tagbarEl.innerHTML = '';
+          return;
+        }
+        if (currentIdx < 0) currentIdx = 0;
+        if (currentIdx >= filtered.length) currentIdx = filtered.length - 1;
+
+        const q = filtered[currentIdx];
+        const modeLabel = simMode ? 'Mock' : 'Q';
+        progressEl.innerHTML = `${modeLabel} <b>${currentIdx + 1}</b> of ${filtered.length} · <span style="color:var(--ink-faint)">${q.fileName.replace(/\.json$/i, '')} #${q.idxInFile}</span>`;
+        tagbarEl.innerHTML = (q.tags || []).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('');
+        highlightActiveFile(q.fileName);
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const stamp = document.createElement('div');
+        stamp.className = 'stamp';
+        stamp.textContent = q.fileName.replace('.json', '') + ' · #' + q.idxInFile;
+        card.appendChild(stamp);
+
+        const qnum = document.createElement('div');
+        qnum.className = 'qnum';
+        qnum.textContent = simMode ? 'MOCK EXAM' : 'QUESTION';
+        card.appendChild(qnum);
+
+        const qtext = document.createElement('div');
+        qtext.className = 'qtext';
+        qtext.textContent = q.pregunta;
+        card.appendChild(qtext);
+
+        const optionsWrap = document.createElement('div');
+        optionsWrap.className = 'options';
+
+        const id = qid(q);
+        if (!q.order || q.order.length !== (q.opciones || []).length) {
+          q.order = shuffle([...Array((q.opciones || []).length).keys()]);
+        }
+
+        const reviewChosen = typeof q._reviewChosen === 'number' ? q._reviewChosen : null;
+        const optDivs = [];
+
+        q.order.forEach((origIdx, displayPos) => {
+          const op = q.opciones[origIdx];
+          const optDiv = document.createElement('div');
+          optDiv.className = 'opt';
+          optDiv.dataset.orig = origIdx;
+
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = letterFor(displayPos);
+
+          const right = document.createElement('div');
+          right.style.flex = '1';
+
+          const txt = document.createElement('div');
+          txt.className = 'txt';
+          txt.textContent = op.texto_opcion || '';
+
+          const expl = document.createElement('div');
+          expl.className = 'expl';
+          expl.textContent = op.explicacion || '';
+
+          right.appendChild(txt);
+          right.appendChild(expl);
+          optDiv.appendChild(letter);
+          optDiv.appendChild(right);
+
+          optDiv.addEventListener('click', () => {
+            if (simMode) {
+              simAnswers[id] = origIdx;
+              optDivs.forEach(el => el.classList.toggle('selected', Number(el.dataset.orig) === origIdx));
+              updateScore();
+              return;
+            }
+            if (reviewChosen !== null) return; // review-only
+            if (progress[id]) return;
+            progress[id] = {
+              chosen: origIdx,
+              correct: q.opciones[origIdx].es_correcta === true
+            };
+            saveProgress();
+            paintAnswered();
+            updateScore();
+            if (studyFilter === 'pending' || (studyFilter === 'wrong' && progress[id].correct)) {
+              setTimeout(() => {
+                const nextQ = filtered[currentIdx + 1];
+                applyFilters(false);
+                if (nextQ) {
+                  const at = filtered.findIndex(x => x.fileName === nextQ.fileName && x.idxInFile === nextQ.idxInFile);
+                  currentIdx = at >= 0 ? at : Math.min(currentIdx, Math.max(filtered.length - 1, 0));
+                } else {
+                  currentIdx = Math.min(currentIdx, Math.max(filtered.length - 1, 0));
+                }
+                renderQuestion();
+              }, 650);
+            }
+          });
+
+          optDivs.push(optDiv);
+          optionsWrap.appendChild(optDiv);
+        });
+        currentOptDivs = optDivs;
+        focusedOpt = -1;
+        if (simMode) {
+          const chosen = simAnswers[id];
+          if (typeof chosen === 'number') {
+            const fi = optDivs.findIndex(el => Number(el.dataset.orig) === chosen);
+            if (fi >= 0) focusedOpt = fi;
+          }
+        }
+
+        function paintFocus() {
+          optDivs.forEach((el, i) => el.classList.toggle('focused', i === focusedOpt));
+        }
+
+        function paintAnswered() {
+          const p = progress[id] || (reviewChosen !== null ? { chosen: reviewChosen, correct: q.opciones[reviewChosen] && q.opciones[reviewChosen].es_correcta === true } : null);
+          if (!p) return;
+          optDivs.forEach(el => {
+            const oi = Number(el.dataset.orig);
+            el.classList.add('answered', 'locked');
+            if (q.opciones[oi].es_correcta === true) {
+              el.classList.add('correct');
+            } else if (oi === p.chosen) {
+              el.classList.add('incorrect');
+            } else {
+              el.classList.add('dimmed');
+            }
+          });
+        }
+
+        paintFocus();
+        if (simMode) {
+          const chosen = simAnswers[id];
+          if (typeof chosen === 'number') {
+            optDivs.forEach(el => el.classList.toggle('selected', Number(el.dataset.orig) === chosen));
+          }
+        } else {
+          paintAnswered();
+        }
+
+        card.appendChild(optionsWrap);
+        contentEl.innerHTML = '';
+        contentEl.appendChild(card);
+
+        const navControls = document.createElement('div');
+        navControls.id = 'nav-controls';
+        navControls.innerHTML = `
+      <button class="nav-btn" id="prevBtn">← Prev</button>
+      <div id="jump-wrap">
+        <label for="jumpInput">Go to</label>
+        <input id="jumpInput" type="text" inputmode="numeric" autocomplete="off"
+               placeholder="${currentIdx + 1}" title="List number (75) or section + number (4.2 12) · shortcut: G">
+        <span id="jump-status"></span>
+      </div>
+      <button class="nav-btn" id="nextBtn">Next →</button>
+    `;
+        contentEl.appendChild(navControls);
+
+        document.getElementById('prevBtn').disabled = currentIdx === 0;
+        document.getElementById('nextBtn').disabled = currentIdx === filtered.length - 1;
+        document.getElementById('prevBtn').addEventListener('click', () => { currentIdx--; renderQuestion(); scrollTop(); });
+        document.getElementById('nextBtn').addEventListener('click', () => { currentIdx++; renderQuestion(); scrollTop(); });
+
+        const jumpInput = document.getElementById('jumpInput');
+        jumpInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); applyJump(jumpInput.value); }
+          if (e.key === 'Escape') { jumpInput.value = ''; jumpInput.blur(); }
+        });
+      }
+
+      function jumpStatus(msg) {
+        const el = document.getElementById('jump-status');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.toggle('warn', Boolean(msg));
+      }
+
+      // Localiza uma questão pelo arquivo; se a busca ativa a esconder, limpa o filtro.
+      function goToQuestion(match, label) {
+        let target = filtered.findIndex(match);
+        if (target < 0) {
+          const inBank = allQuestions.findIndex(match);
+          if (inBank < 0) { jumpStatus('sem ' + label); return false; }
+          searchBox.value = '';
+          filtered = allQuestions.slice();
+          target = inBank;
+        }
+        currentIdx = target;
+        renderQuestion();
+        scrollTop();
+        return true;
+      }
+
+      // Aceita "75" (posição na lista atual), "4.2 12" / "4.2#12" (seção + número
+      // dentro do arquivo) ou "4.2" (início da seção).
+      function applyJump(raw) {
+        const text = String(raw || '').trim();
+        if (!text) return;
+
+        const scoped = text.match(/^(\d+(?:\.\d+)?)\s*[#:\s\/-]\s*(\d+)$/);
+        if (scoped) {
+          const fileName = scoped[1] + '.json';
+          const num = parseInt(scoped[2], 10);
+          goToQuestion(q => q.fileName === fileName && q.idxInFile === num, scoped[1] + ' #' + num);
+          return;
+        }
+
+        if (/^\d+\.\d+$/.test(text)) {
+          const fileName = text + '.json';
+          goToQuestion(q => q.fileName === fileName && q.idxInFile === 1, text);
+          return;
+        }
+
+        if (/^\d+$/.test(text)) {
+          const n = parseInt(text, 10);
+          if (n < 1 || n > filtered.length) { jumpStatus('use 1–' + filtered.length); return; }
+          currentIdx = n - 1;
+          renderQuestion();
+          scrollTop();
+          return;
+        }
+
+        jumpStatus('ex.: 75 ou 4.2 12');
+      }
+
+      function escapeHtml(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      // Keyboard: arrows navigate, A–E select an option, G foca o campo "Ir para"
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && helpModal.classList.contains('open')) {
+          closeHelp();
+          return;
+        }
+        if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+          const active = document.activeElement;
+          if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+          e.preventDefault();
+          helpModal.classList.contains('open') ? closeHelp() : openHelp();
+          return;
+        }
+        if (!filtered.length) return;
+        // ignore when typing in the search box or in the jump field
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        if (helpModal.classList.contains('open')) return;
+
+        if (e.key.toLowerCase() === 'g') {
+          const jumpInput = document.getElementById('jumpInput');
+          if (jumpInput) { e.preventDefault(); jumpInput.focus(); jumpInput.select(); return; }
+        }
+
+        // ↑↓ move highlight across options (do not confirm)
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          if (!currentOptDivs.length) return;
+          e.preventDefault();
+          if (focusedOpt < 0) {
+            focusedOpt = e.key === 'ArrowDown' ? 0 : currentOptDivs.length - 1;
+          } else {
+            focusedOpt = e.key === 'ArrowDown'
+              ? (focusedOpt + 1) % currentOptDivs.length
+              : (focusedOpt - 1 + currentOptDivs.length) % currentOptDivs.length;
+          }
+          currentOptDivs.forEach((el, i) => el.classList.toggle('focused', i === focusedOpt));
+          return;
+        }
+
+        // → confirm highlighted option; if already answered, go next
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const q = filtered[currentIdx];
+          const answered = q && (simMode
+            ? Object.prototype.hasOwnProperty.call(simAnswers, qid(q))
+            : !!progress[qid(q)]);
+          if (answered) {
+            if (currentIdx < filtered.length - 1) {
+              currentIdx++; renderQuestion(); scrollTop();
+            }
+            return;
+          }
+          if (focusedOpt < 0 && currentOptDivs.length) focusedOpt = 0;
+          if (focusedOpt >= 0 && focusedOpt < currentOptDivs.length) {
+            currentOptDivs[focusedOpt].click();
+          }
+          return;
+        }
+
+        if (e.key === 'ArrowLeft' && currentIdx > 0) {
+          e.preventDefault();
+          currentIdx--; renderQuestion(); scrollTop();
+          return;
+        }
+
+        // A/B/C/D/E (and 1–5) select an option directly — single-char keys only
+        // (ArrowDown was matching "a".."e" via string comparison before)
+        const k = e.key.length === 1 ? e.key.toLowerCase() : '';
+        let pos = -1;
+        if (k >= 'a' && k <= 'e') pos = k.charCodeAt(0) - 97;
+        else if (k >= '1' && k <= '5') pos = k.charCodeAt(0) - 49;
+        if (pos >= 0 && pos < currentOptDivs.length) {
+          e.preventDefault();
+          focusedOpt = pos;
+          currentOptDivs.forEach((el, i) => el.classList.toggle('focused', i === focusedOpt));
+          currentOptDivs[pos].click();
+        }
+      });
+
+      function scrollTop() {
+        window.scrollTo(0, 0);
+        contentEl.scrollTop = 0;
+        document.getElementById('main').scrollTop = 0;
+      }
+    })();
+  </script>
+</body>
+
+</html>

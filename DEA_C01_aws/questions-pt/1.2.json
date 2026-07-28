@@ -1,0 +1,1481 @@
+[
+  {
+    "pregunta": "A fintech de pagamentos precisa replicar mudanças contínuas de Amazon RDS PostgreSQL para S3 em Parquet para analytics. Qual serviço é mais adequado?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS Database Migration Service com task CDC e endpoint S3.",
+        "es_correcta": true,
+        "explicacion": "DMS suporta CDC de engines relacionais e entrega contínua em S3."
+      },
+      {
+        "texto_opcion": "AWS DataSync copiando snapshots diários do RDS no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "DataSync não captura CDC relacional nativo."
+      },
+      {
+        "texto_opcion": "Snowball Edge importando dump semanal avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Batch semanal não atende CDC contínuo."
+      },
+      {
+        "texto_opcion": "Amazon Data Firehose lendo WAL PostgreSQL considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Firehose não substitui CDC relacional DMS."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DMS CDC"
+    ]
+  },
+  {
+    "pregunta": "Parceiros externos enviam arquivos CSV de 2 TB/mês via SFTP para ingestão no lake. Qual serviço gerenciado elimina servidor SFTP self-managed?",
+    "opciones": [
+      {
+        "texto_opcion": "EC2 com OpenSSH e cron manual avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Operação, patching e HA ficam por conta do cliente."
+      },
+      {
+        "texto_opcion": "API Gateway HTTP POST de arquivos no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Não é SFTP e exige mudança de parceiros."
+      },
+      {
+        "texto_opcion": "AWS Transfer Family com servidor SFTP integrado ao S3.",
+        "es_correcta": true,
+        "explicacion": "Transfer Family oferece SFTP/FTPS gerenciado com landing direto em S3."
+      },
+      {
+        "texto_opcion": "AWS DataSync agent SFTP neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "DataSync sincroniza; Transfer Family é servidor SFTP gerenciado para parceiros."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer Family"
+    ]
+  },
+  {
+    "pregunta": "Incidente #3 — operação eu-west-1 da plataforma de IoT industrial: O squad de analytics precisa sincronizar 50 TB de NFS on-premises para S3 com agendamento e verificação de integridade. Qual serviço?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync com task agendada e verificação por checksum.",
+        "es_correcta": true,
+        "explicacion": "DataSync otimiza transferência em larga escala com agendamento e validação."
+      },
+      {
+        "texto_opcion": "DMS full load único avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "DMS é para bancos relacionais, não NFS genérico."
+      },
+      {
+        "texto_opcion": "aws s3 cp recursivo via script cron considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Sem otimização de rede, verificação robusta e bandwidth scheduling."
+      },
+      {
+        "texto_opcion": "Snowball para transferência diária conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Snowball é físico; inadequado para sync diário recorrente online."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #4 — time de dados (ap-southeast-1): Migração inicial de 500 GB de arquivos históricos de datacenter com link de 100 Mbps instável. Qual opção acelera a carga inicial com menor impacto na rede?",
+    "opciones": [
+      {
+        "texto_opcion": "Kinesis Data Streams dos arquivos conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Streaming não é ideal para arquivos históricos massivos."
+      },
+      {
+        "texto_opcion": "DataSync contínuo de todo o volume histórico considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Link lento prolonga migração inicial por semanas."
+      },
+      {
+        "texto_opcion": "AWS Snowball Edge para seed bulk seguido de sync incremental online.",
+        "es_correcta": true,
+        "explicacion": "Snowball move bulk offline; sync posterior captura delta via DataSync/DMS."
+      },
+      {
+        "texto_opcion": "Transfer Family SFTP contínuo avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "SFTP online sofre no link instável para centenas de TB."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Snowball"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #5 — startup de mídia streaming em sa-east-1: Após landing de milhares de arquivos pequenos no S3, o time de dados quer disparar transformação Glue apenas quando lote diário completa. Qual padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "Evento S3 → EventBridge com regra que aguarda prefixo/contagem ou manifest de lote.",
+        "es_correcta": true,
+        "explicacion": "EventBridge pode orquestrar condições de lote antes de acionar Glue."
+      },
+      {
+        "texto_opcion": "Polling Athena a cada 5 min considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Ineficiente e caro para detecção de lote."
+      },
+      {
+        "texto_opcion": "Glue trigger por cada objeto individual neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Milhares de triggers elevam custo e fragmentam jobs."
+      },
+      {
+        "texto_opcion": "CloudWatch alarm manual conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Não é event-driven por chegada de arquivos."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Compactação S3"
+    ]
+  },
+  {
+    "pregunta": "Task DMS CDC apresenta lag crescente e LOB columns grandes. Qual tuning inicial?",
+    "opciones": [
+      {
+        "texto_opcion": "Desabilitar CDC e usar full load diário conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Perde near-real-time e aumenta carga no source."
+      },
+      {
+        "texto_opcion": "Migrar target para DynamoDB sem schema mapping no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "DynamoDB exige modelagem diferente de CDC relacional."
+      },
+      {
+        "texto_opcion": "Ajustar LOB settings (limited/size) e aumentar capacidade da replication instance.",
+        "es_correcta": true,
+        "explicacion": "LOBs grandes impactam throughput; instance subdimensionada amplifica lag."
+      },
+      {
+        "texto_opcion": "Reduzir retention S3 target considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Retention target não resolve lag de replicação."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Evento S3 batch"
+    ]
+  },
+  {
+    "pregunta": "Parceiro envia arquivos multi-GB via Transfer Family SFTP. Uploads falham no meio. O que configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "Habilitar multipart upload no S3 via Transfer Family e retomar sessões SFTP.",
+        "es_correcta": true,
+        "explicacion": "Multipart permite retomada de partes grandes sem reiniciar arquivo inteiro."
+      },
+      {
+        "texto_opcion": "Limitar tamanho máximo a 100 MB neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Não escala para arquivos multi-GB legítimos."
+      },
+      {
+        "texto_opcion": "Desabilitar criptografia SSE-KMS avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Criptografia raramente causa falha de multipart; retomada resolve interrupções."
+      },
+      {
+        "texto_opcion": "Copiar via e-mail para operador no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Não escala nem automatiza pipeline."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync S3"
+    ]
+  },
+  {
+    "pregunta": "Incidente #8 — operação ap-southeast-1 da operadora telecom: Cargas batch diárias podem ser reenviadas por parceiros. Como evitar duplicatas no lake?",
+    "opciones": [
+      {
+        "texto_opcion": "Append cego sempre considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Duplica registros em reenvios."
+      },
+      {
+        "texto_opcion": "Truncar bucket S3 diariamente no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Perde histórico e viola auditoria."
+      },
+      {
+        "texto_opcion": "Particionar por dt= e usar merge idempotente no Glue/Spark com chave de negócio.",
+        "es_correcta": true,
+        "explicacion": "Partição por data + merge por chave garante reprocessamento seguro."
+      },
+      {
+        "texto_opcion": "Desabilitar versionamento S3 neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Versionamento ajuda auditoria; não substitui lógica idempotente."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DMS troubleshooting"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #9 — equipe de plataforma (sa-east-1): Volume único de 500 GB precisa chegar em 48 h; link dedicado 1 Gbps disponível. Qual opção é mais rápida e cost-effective?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync online aproveitando link 1 Gbps.",
+        "es_correcta": true,
+        "explicacion": "Com bandwidth adequado, DataSync online completa antes de logística Snowball."
+      },
+      {
+        "texto_opcion": "E-mail de arquivos zipados neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Não escala para TB/PB."
+      },
+      {
+        "texto_opcion": "Transfer Family SFTP sem paralelismo.",
+        "es_correcta": false,
+        "explicacion": "SFTP single-stream pode subutilizar 1 Gbps."
+      },
+      {
+        "texto_opcion": "Snowball mesmo com link 1 Gbps no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Logística física adiciona dias desnecessários."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer multipart"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #10 — cooperativa agrícola em us-east-1: DMS grava Parquet particionado no S3. Tabelas Glue Catalog desatualizadas após novas partições. Solução?",
+    "opciones": [
+      {
+        "texto_opcion": "Consultar S3 ListObjects em cada query Athena no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Ineficiente; catalog centraliza metadados."
+      },
+      {
+        "texto_opcion": "Recriar bucket S3 diariamente conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Destrutivo e desnecessário."
+      },
+      {
+        "texto_opcion": "Agendar AWS Glue Crawler ou usar partition projection/atualização automática.",
+        "es_correcta": true,
+        "explicacion": "Crawler descobre novas partições; projection evita crawl frequente em padrões previsíveis."
+      },
+      {
+        "texto_opcion": "Desabilitar particionamento avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Piora performance analítica."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Idempotência batch"
+    ]
+  },
+  {
+    "pregunta": "Migração one-time de Oracle on-premises para Aurora PostgreSQL com janela curta. Estratégia DMS?",
+    "opciones": [
+      {
+        "texto_opcion": "Full load + CDC com task DMS e cutover após validação de consistência.",
+        "es_correcta": true,
+        "explicacion": "Full load migra baseline; CDC captura delta durante transição."
+      },
+      {
+        "texto_opcion": "Export CSV manual neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Não mantém CDC contínuo pós-cutover."
+      },
+      {
+        "texto_opcion": "Snowball para Aurora avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Snowball não carrega diretamente em Aurora relacional."
+      },
+      {
+        "texto_opcion": "CDC apenas sem full load considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "CDC sem baseline inicial deixa tabelas vazias/incompletas."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync vs Snowball"
+    ]
+  },
+  {
+    "pregunta": "Arquivos landing no S3 devem compactar small files antes de catalogar. Orquestração mínima?",
+    "opciones": [
+      {
+        "texto_opcion": "Redshift COPY direto dos small files neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "COPY de milhares de arquivos pequenos é lento e caro."
+      },
+      {
+        "texto_opcion": "Athena CTAS manual diária conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Manual e não reativo a cada landing batch."
+      },
+      {
+        "texto_opcion": "Evento S3 → Lambda/Glue job de compactação → Crawler/atualização de partições.",
+        "es_correcta": true,
+        "explicacion": "Pipeline event-driven compacta antes de expor ao analytics."
+      },
+      {
+        "texto_opcion": "Crawler antes da compactação no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Cataloga arquivos pequenos ineficientes."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Crawler pós-DMS"
+    ]
+  },
+  {
+    "pregunta": "Incidente #13 — operação sa-east-1 da seguradora: Workloads compartilham arquivos via Amazon EFS e precisam réplica em bucket S3 para analytics. Serviço?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync entre EFS e S3.",
+        "es_correcta": true,
+        "explicacion": "DataSync suporta EFS como origem/destino com transferência otimizada."
+      },
+      {
+        "texto_opcion": "Snowball de EFS diário neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Impraticável para sync recorrente online."
+      },
+      {
+        "texto_opcion": "DMS replicando EFS no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "DMS não replica filesystem EFS."
+      },
+      {
+        "texto_opcion": "Firehose de arquivos EFS.",
+        "es_correcta": false,
+        "explicacion": "Firehose é streaming de records, não sync de arquivos."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DMS CDC"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #14 — squad de analytics (us-east-1): Planta offshore sem conectividade confiável precisa coletar 2 TB e enviar depois. Opção?",
+    "opciones": [
+      {
+        "texto_opcion": "Kinesis Data Streams contínuo avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Requer conectividade estável."
+      },
+      {
+        "texto_opcion": "Transfer Family SFTP neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Depende de rede confiável."
+      },
+      {
+        "texto_opcion": "AWS Snowball Edge Storage/C compute local + retorno físico para import S3.",
+        "es_correcta": true,
+        "explicacion": "Snowball Edge opera offline no edge e importa bulk na nuvem."
+      },
+      {
+        "texto_opcion": "DataSync hourly no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Falha com conectividade intermitente crônica."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer Family"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #15 — proptech em eu-west-1: Parceiro legado exige FTPS explícito para entrega regulatória. Serviço AWS?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS Transfer Family com protocolo FTPS.",
+        "es_correcta": true,
+        "explicacion": "Transfer Family suporta SFTP, FTPS e FTP conforme requisito do parceiro."
+      },
+      {
+        "texto_opcion": "Direct Connect sem endpoint conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Direct Connect é rede, não protocolo de arquivo."
+      },
+      {
+        "texto_opcion": "S3 presigned URL apenas considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Parceiro exige FTPS, não HTTP."
+      },
+      {
+        "texto_opcion": "CloudFront FTP avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "CloudFront não é servidor FTPS de ingestão."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync"
+    ]
+  },
+  {
+    "pregunta": "CDC DMS para S3 deve gerar arquivos columnar para Athena. Formato recomendado?",
+    "opciones": [
+      {
+        "texto_opcion": "XML agregado por task no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "XML não é padrão analítico no lake."
+      },
+      {
+        "texto_opcion": "CSV não comprimido neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "CSV aumenta custo de scan Athena."
+      },
+      {
+        "texto_opcion": "Parquet com particionamento por data/coluna de negócio via settings DMS S3 endpoint.",
+        "es_correcta": true,
+        "explicacion": "Parquet columnar reduz scan Athena; particionamento melhora pruning."
+      },
+      {
+        "texto_opcion": "JSON linha a linha sem compressão conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "JSON row-based é ineficiente para analytics."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Snowball"
+    ]
+  },
+  {
+    "pregunta": "A redes sociais precisa replicar mudanças contínuas de Amazon RDS PostgreSQL para S3 em Parquet para analytics. Qual serviço é mais adequado?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS Database Migration Service com task CDC e endpoint S3.",
+        "es_correcta": true,
+        "explicacion": "DMS suporta CDC de engines relacionais e entrega contínua em S3."
+      },
+      {
+        "texto_opcion": "AWS DataSync copiando snapshots diários do RDS conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "DataSync não captura CDC relacional nativo."
+      },
+      {
+        "texto_opcion": "Snowball Edge importando dump semanal avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Batch semanal não atende CDC contínuo."
+      },
+      {
+        "texto_opcion": "Amazon Data Firehose lendo WAL PostgreSQL neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Firehose não substitui CDC relacional DMS."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Compactação S3"
+    ]
+  },
+  {
+    "pregunta": "Incidente #18 — operação us-east-1 da banco digital: Parceiros externos enviam arquivos CSV de 1 PB/mês via SFTP para ingestão no lake. Qual serviço gerenciado elimina servidor SFTP self-managed?",
+    "opciones": [
+      {
+        "texto_opcion": "EC2 com OpenSSH e cron manual neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Operação, patching e HA ficam por conta do cliente."
+      },
+      {
+        "texto_opcion": "AWS DataSync agent SFTP considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "DataSync sincroniza; Transfer Family é servidor SFTP gerenciado para parceiros."
+      },
+      {
+        "texto_opcion": "AWS Transfer Family com servidor SFTP integrado ao S3.",
+        "es_correcta": true,
+        "explicacion": "Transfer Family oferece SFTP/FTPS gerenciado com landing direto em S3."
+      },
+      {
+        "texto_opcion": "API Gateway HTTP POST de arquivos conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Não é SFTP e exige mudança de parceiros."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Evento S3 batch"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #19 — engenharia de ML (eu-west-1): O squad de analytics precisa sincronizar 2 TB de NFS on-premises para S3 com agendamento e verificação de integridade. Qual serviço?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync com task agendada e verificação por checksum.",
+        "es_correcta": true,
+        "explicacion": "DataSync otimiza transferência em larga escala com agendamento e validação."
+      },
+      {
+        "texto_opcion": "aws s3 cp recursivo via script cron avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Sem otimização de rede, verificação robusta e bandwidth scheduling."
+      },
+      {
+        "texto_opcion": "DMS full load único conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "DMS é para bancos relacionais, não NFS genérico."
+      },
+      {
+        "texto_opcion": "Snowball para transferência diária considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Snowball é físico; inadequado para sync diário recorrente online."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync S3"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #20 — laboratório farmacêutico em ap-southeast-1: Migração inicial de 200 TB de arquivos históricos de datacenter com link de 100 Mbps instável. Qual opção acelera a carga inicial com menor impacto na rede?",
+    "opciones": [
+      {
+        "texto_opcion": "Transfer Family SFTP contínuo avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "SFTP online sofre no link instável para centenas de TB."
+      },
+      {
+        "texto_opcion": "DataSync contínuo de todo o volume histórico conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Link lento prolonga migração inicial por semanas."
+      },
+      {
+        "texto_opcion": "AWS Snowball Edge para seed bulk seguido de sync incremental online.",
+        "es_correcta": true,
+        "explicacion": "Snowball move bulk offline; sync posterior captura delta via DataSync/DMS."
+      },
+      {
+        "texto_opcion": "Kinesis Data Streams dos arquivos considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Streaming não é ideal para arquivos históricos massivos."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DMS troubleshooting"
+    ]
+  },
+  {
+    "pregunta": "Após landing de milhares de arquivos pequenos no S3, o time de dados quer disparar transformação Glue apenas quando lote diário completa. Qual padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "Evento S3 → EventBridge com regra que aguarda prefixo/contagem ou manifest de lote.",
+        "es_correcta": true,
+        "explicacion": "EventBridge pode orquestrar condições de lote antes de acionar Glue."
+      },
+      {
+        "texto_opcion": "Glue trigger por cada objeto individual considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Milhares de triggers elevam custo e fragmentam jobs."
+      },
+      {
+        "texto_opcion": "Polling Athena a cada 5 min conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Ineficiente e caro para detecção de lote."
+      },
+      {
+        "texto_opcion": "CloudWatch alarm manual neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Não é event-driven por chegada de arquivos."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer multipart"
+    ]
+  },
+  {
+    "pregunta": "Incidente #23 — operação eu-west-1 da plataforma de IoT industrial: Parceiro envia arquivos multi-GB via Transfer Family SFTP. Uploads falham no meio. O que configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "Habilitar multipart upload no S3 via Transfer Family e retomar sessões SFTP.",
+        "es_correcta": true,
+        "explicacion": "Multipart permite retomada de partes grandes sem reiniciar arquivo inteiro."
+      },
+      {
+        "texto_opcion": "Limitar tamanho máximo a 100 MB avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Não escala para arquivos multi-GB legítimos."
+      },
+      {
+        "texto_opcion": "Desabilitar criptografia SSE-KMS considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Criptografia raramente causa falha de multipart; retomada resolve interrupções."
+      },
+      {
+        "texto_opcion": "Copiar via e-mail para operador conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Não escala nem automatiza pipeline."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync vs Snowball"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #24 — time de dados (ap-southeast-1): Cargas batch diárias podem ser reenviadas por parceiros. Como evitar duplicatas no lake?",
+    "opciones": [
+      {
+        "texto_opcion": "Truncar bucket S3 diariamente avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Perde histórico e viola auditoria."
+      },
+      {
+        "texto_opcion": "Desabilitar versionamento S3 neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Versionamento ajuda auditoria; não substitui lógica idempotente."
+      },
+      {
+        "texto_opcion": "Particionar por dt= e usar merge idempotente no Glue/Spark com chave de negócio.",
+        "es_correcta": true,
+        "explicacion": "Partição por data + merge por chave garante reprocessamento seguro."
+      },
+      {
+        "texto_opcion": "Append cego sempre considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Duplica registros em reenvios."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Crawler pós-DMS"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #25 — startup de mídia streaming em sa-east-1: Volume único de 200 TB precisa chegar em 48 h; link dedicado 1 Gbps disponível. Qual opção é mais rápida e cost-effective?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync online aproveitando link 1 Gbps.",
+        "es_correcta": true,
+        "explicacion": "Com bandwidth adequado, DataSync online completa antes de logística Snowball."
+      },
+      {
+        "texto_opcion": "E-mail de arquivos zipados considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Não escala para TB/PB."
+      },
+      {
+        "texto_opcion": "Transfer Family SFTP sem paralelismo neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "SFTP single-stream pode subutilizar 1 Gbps."
+      },
+      {
+        "texto_opcion": "Snowball mesmo com link 1 Gbps avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Logística física adiciona dias desnecessários."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DMS CDC"
+    ]
+  },
+  {
+    "pregunta": "DMS grava Parquet particionado no S3. Tabelas Glue Catalog desatualizadas após novas partições. Solução?",
+    "opciones": [
+      {
+        "texto_opcion": "Recriar bucket S3 diariamente considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Destrutivo e desnecessário."
+      },
+      {
+        "texto_opcion": "Desabilitar particionamento avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Piora performance analítica."
+      },
+      {
+        "texto_opcion": "Agendar AWS Glue Crawler ou usar partition projection/atualização automática.",
+        "es_correcta": true,
+        "explicacion": "Crawler descobre novas partições; projection evita crawl frequente em padrões previsíveis."
+      },
+      {
+        "texto_opcion": "Consultar S3 ListObjects em cada query Athena neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Ineficiente; catalog centraliza metadados."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer Family"
+    ]
+  },
+  {
+    "pregunta": "Incidente #28 — operação ap-southeast-1 da operadora telecom: Arquivos landing no S3 devem compactar small files antes de catalogar. Orquestração mínima?",
+    "opciones": [
+      {
+        "texto_opcion": "Crawler antes da compactação neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Cataloga arquivos pequenos ineficientes."
+      },
+      {
+        "texto_opcion": "Athena CTAS manual diária avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Manual e não reativo a cada landing batch."
+      },
+      {
+        "texto_opcion": "Evento S3 → Lambda/Glue job de compactação → Crawler/atualização de partições.",
+        "es_correcta": true,
+        "explicacion": "Pipeline event-driven compacta antes de expor ao analytics."
+      },
+      {
+        "texto_opcion": "Redshift COPY direto dos small files conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "COPY de milhares de arquivos pequenos é lento e caro."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Snowball"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #29 — equipe de plataforma (sa-east-1): Workloads compartilham arquivos via Amazon EFS e precisam réplica em bucket S3 para analytics. Serviço?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync entre EFS e S3.",
+        "es_correcta": true,
+        "explicacion": "DataSync suporta EFS como origem/destino com transferência otimizada."
+      },
+      {
+        "texto_opcion": "Snowball de EFS diário no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Impraticável para sync recorrente online."
+      },
+      {
+        "texto_opcion": "Firehose de arquivos EFS neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Firehose é streaming de records, não sync de arquivos."
+      },
+      {
+        "texto_opcion": "DMS replicando EFS conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "DMS não replica filesystem EFS."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Compactação S3"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #30 — cooperativa agrícola em us-east-1: Planta offshore sem conectividade confiável precisa coletar 1 PB e enviar depois. Opção?",
+    "opciones": [
+      {
+        "texto_opcion": "DataSync hourly no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Falha com conectividade intermitente crônica."
+      },
+      {
+        "texto_opcion": "Kinesis Data Streams contínuo considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Requer conectividade estável."
+      },
+      {
+        "texto_opcion": "AWS Snowball Edge Storage/C compute local + retorno físico para import S3.",
+        "es_correcta": true,
+        "explicacion": "Snowball Edge opera offline no edge e importa bulk na nuvem."
+      },
+      {
+        "texto_opcion": "Transfer Family SFTP conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Depende de rede confiável."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Evento S3 batch"
+    ]
+  },
+  {
+    "pregunta": "Parceiro legado exige FTPS explícito para entrega regulatória. Serviço AWS?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS Transfer Family com protocolo FTPS.",
+        "es_correcta": true,
+        "explicacion": "Transfer Family suporta SFTP, FTPS e FTP conforme requisito do parceiro."
+      },
+      {
+        "texto_opcion": "Direct Connect sem endpoint considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Direct Connect é rede, não protocolo de arquivo."
+      },
+      {
+        "texto_opcion": "S3 presigned URL apenas avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Parceiro exige FTPS, não HTTP."
+      },
+      {
+        "texto_opcion": "CloudFront FTP conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "CloudFront não é servidor FTPS de ingestão."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync S3"
+    ]
+  },
+  {
+    "pregunta": "Incidente #33 — operação sa-east-1 da seguradora: A seguradora precisa replicar mudanças contínuas de Amazon RDS PostgreSQL para S3 em Parquet para analytics. Qual serviço é mais adequado?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS Database Migration Service com task CDC e endpoint S3.",
+        "es_correcta": true,
+        "explicacion": "DMS suporta CDC de engines relacionais e entrega contínua em S3."
+      },
+      {
+        "texto_opcion": "Amazon Data Firehose lendo WAL PostgreSQL neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Firehose não substitui CDC relacional DMS."
+      },
+      {
+        "texto_opcion": "Snowball Edge importando dump semanal conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Batch semanal não atende CDC contínuo."
+      },
+      {
+        "texto_opcion": "AWS DataSync copiando snapshots diários do RDS no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "DataSync não captura CDC relacional nativo."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer multipart"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #34 — squad de analytics (us-east-1): Parceiros externos enviam arquivos CSV de 50 TB/mês via SFTP para ingestão no lake. Qual serviço gerenciado elimina servidor SFTP self-managed?",
+    "opciones": [
+      {
+        "texto_opcion": "API Gateway HTTP POST de arquivos no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Não é SFTP e exige mudança de parceiros."
+      },
+      {
+        "texto_opcion": "EC2 com OpenSSH e cron manual neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Operação, patching e HA ficam por conta do cliente."
+      },
+      {
+        "texto_opcion": "AWS Transfer Family com servidor SFTP integrado ao S3.",
+        "es_correcta": true,
+        "explicacion": "Transfer Family oferece SFTP/FTPS gerenciado com landing direto em S3."
+      },
+      {
+        "texto_opcion": "AWS DataSync agent SFTP avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "DataSync sincroniza; Transfer Family é servidor SFTP gerenciado para parceiros."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Idempotência batch"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #35 — proptech em eu-west-1: O squad de analytics precisa sincronizar 1 PB de NFS on-premises para S3 com agendamento e verificação de integridade. Qual serviço?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync com task agendada e verificação por checksum.",
+        "es_correcta": true,
+        "explicacion": "DataSync otimiza transferência em larga escala com agendamento e validação."
+      },
+      {
+        "texto_opcion": "aws s3 cp recursivo via script cron neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Sem otimização de rede, verificação robusta e bandwidth scheduling."
+      },
+      {
+        "texto_opcion": "DMS full load único no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "DMS é para bancos relacionais, não NFS genérico."
+      },
+      {
+        "texto_opcion": "Snowball para transferência diária avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Snowball é físico; inadequado para sync diário recorrente online."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync vs Snowball"
+    ]
+  },
+  {
+    "pregunta": "Migração inicial de 10 TB de arquivos históricos de datacenter com link de 100 Mbps instável. Qual opção acelera a carga inicial com menor impacto na rede?",
+    "opciones": [
+      {
+        "texto_opcion": "Transfer Family SFTP contínuo no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "SFTP online sofre no link instável para centenas de TB."
+      },
+      {
+        "texto_opcion": "Kinesis Data Streams dos arquivos neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Streaming não é ideal para arquivos históricos massivos."
+      },
+      {
+        "texto_opcion": "AWS Snowball Edge para seed bulk seguido de sync incremental online.",
+        "es_correcta": true,
+        "explicacion": "Snowball move bulk offline; sync posterior captura delta via DataSync/DMS."
+      },
+      {
+        "texto_opcion": "DataSync contínuo de todo o volume histórico avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Link lento prolonga migração inicial por semanas."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Crawler pós-DMS"
+    ]
+  },
+  {
+    "pregunta": "Incidente #38 — operação us-east-1 da banco digital: Task DMS CDC apresenta lag crescente e LOB columns grandes. Qual tuning inicial?",
+    "opciones": [
+      {
+        "texto_opcion": "Migrar target para DynamoDB sem schema mapping avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "DynamoDB exige modelagem diferente de CDC relacional."
+      },
+      {
+        "texto_opcion": "Desabilitar CDC e usar full load diário no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Perde near-real-time e aumenta carga no source."
+      },
+      {
+        "texto_opcion": "Ajustar LOB settings (limited/size) e aumentar capacidade da replication instance.",
+        "es_correcta": true,
+        "explicacion": "LOBs grandes impactam throughput; instance subdimensionada amplifica lag."
+      },
+      {
+        "texto_opcion": "Reduzir retention S3 target considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Retention target não resolve lag de replicação."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer Family"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #39 — engenharia de ML (eu-west-1): Parceiro envia arquivos multi-GB via Transfer Family SFTP. Uploads falham no meio. O que configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "Habilitar multipart upload no S3 via Transfer Family e retomar sessões SFTP.",
+        "es_correcta": true,
+        "explicacion": "Multipart permite retomada de partes grandes sem reiniciar arquivo inteiro."
+      },
+      {
+        "texto_opcion": "Copiar via e-mail para operador conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Não escala nem automatiza pipeline."
+      },
+      {
+        "texto_opcion": "Desabilitar criptografia SSE-KMS considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Criptografia raramente causa falha de multipart; retomada resolve interrupções."
+      },
+      {
+        "texto_opcion": "Limitar tamanho máximo a 100 MB no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Não escala para arquivos multi-GB legítimos."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #40 — laboratório farmacêutico em ap-southeast-1: Cargas batch diárias podem ser reenviadas por parceiros. Como evitar duplicatas no lake?",
+    "opciones": [
+      {
+        "texto_opcion": "Desabilitar versionamento S3 no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Versionamento ajuda auditoria; não substitui lógica idempotente."
+      },
+      {
+        "texto_opcion": "Append cego sempre neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Duplica registros em reenvios."
+      },
+      {
+        "texto_opcion": "Particionar por dt= e usar merge idempotente no Glue/Spark com chave de negócio.",
+        "es_correcta": true,
+        "explicacion": "Partição por data + merge por chave garante reprocessamento seguro."
+      },
+      {
+        "texto_opcion": "Truncar bucket S3 diariamente considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Perde histórico e viola auditoria."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Snowball"
+    ]
+  },
+  {
+    "pregunta": "Volume único de 10 TB precisa chegar em 48 h; link dedicado 1 Gbps disponível. Qual opção é mais rápida e cost-effective?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync online aproveitando link 1 Gbps.",
+        "es_correcta": true,
+        "explicacion": "Com bandwidth adequado, DataSync online completa antes de logística Snowball."
+      },
+      {
+        "texto_opcion": "E-mail de arquivos zipados no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Não escala para TB/PB."
+      },
+      {
+        "texto_opcion": "Transfer Family SFTP sem paralelismo conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "SFTP single-stream pode subutilizar 1 Gbps."
+      },
+      {
+        "texto_opcion": "Snowball mesmo com link 1 Gbps neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Logística física adiciona dias desnecessários."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Compactação S3"
+    ]
+  },
+  {
+    "pregunta": "Incidente #43 — operação eu-west-1 da plataforma de IoT industrial: Migração one-time de Oracle on-premises para Aurora PostgreSQL com janela curta. Estratégia DMS?",
+    "opciones": [
+      {
+        "texto_opcion": "Full load + CDC com task DMS e cutover após validação de consistência.",
+        "es_correcta": true,
+        "explicacion": "Full load migra baseline; CDC captura delta durante transição."
+      },
+      {
+        "texto_opcion": "CDC apenas sem full load avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "CDC sem baseline inicial deixa tabelas vazias/incompletas."
+      },
+      {
+        "texto_opcion": "Export CSV manual no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Não mantém CDC contínuo pós-cutover."
+      },
+      {
+        "texto_opcion": "Snowball para Aurora conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Snowball não carrega diretamente em Aurora relacional."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync S3"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #44 — time de dados (ap-southeast-1): Arquivos landing no S3 devem compactar small files antes de catalogar. Orquestração mínima?",
+    "opciones": [
+      {
+        "texto_opcion": "Redshift COPY direto dos small files no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "COPY de milhares de arquivos pequenos é lento e caro."
+      },
+      {
+        "texto_opcion": "Athena CTAS manual diária neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Manual e não reativo a cada landing batch."
+      },
+      {
+        "texto_opcion": "Evento S3 → Lambda/Glue job de compactação → Crawler/atualização de partições.",
+        "es_correcta": true,
+        "explicacion": "Pipeline event-driven compacta antes de expor ao analytics."
+      },
+      {
+        "texto_opcion": "Crawler antes da compactação conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Cataloga arquivos pequenos ineficientes."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DMS troubleshooting"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #45 — startup de mídia streaming em sa-east-1: Workloads compartilham arquivos via Amazon EFS e precisam réplica em bucket S3 para analytics. Serviço?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync entre EFS e S3.",
+        "es_correcta": true,
+        "explicacion": "DataSync suporta EFS como origem/destino com transferência otimizada."
+      },
+      {
+        "texto_opcion": "Firehose de arquivos EFS.",
+        "es_correcta": false,
+        "explicacion": "Firehose é streaming de records, não sync de arquivos."
+      },
+      {
+        "texto_opcion": "Snowball de EFS diário avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Impraticável para sync recorrente online."
+      },
+      {
+        "texto_opcion": "DMS replicando EFS neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "DMS não replica filesystem EFS."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer multipart"
+    ]
+  },
+  {
+    "pregunta": "Planta offshore sem conectividade confiável precisa coletar 50 TB e enviar depois. Opção?",
+    "opciones": [
+      {
+        "texto_opcion": "Transfer Family SFTP considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Depende de rede confiável."
+      },
+      {
+        "texto_opcion": "DataSync hourly avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Falha com conectividade intermitente crônica."
+      },
+      {
+        "texto_opcion": "AWS Snowball Edge Storage/C compute local + retorno físico para import S3.",
+        "es_correcta": true,
+        "explicacion": "Snowball Edge opera offline no edge e importa bulk na nuvem."
+      },
+      {
+        "texto_opcion": "Kinesis Data Streams contínuo conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Requer conectividade estável."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Idempotência batch"
+    ]
+  },
+  {
+    "pregunta": "Incidente #48 — operação ap-southeast-1 da operadora telecom: CDC DMS para S3 deve gerar arquivos columnar para Athena. Formato recomendado?",
+    "opciones": [
+      {
+        "texto_opcion": "XML agregado por task avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "XML não é padrão analítico no lake."
+      },
+      {
+        "texto_opcion": "CSV não comprimido considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "CSV aumenta custo de scan Athena."
+      },
+      {
+        "texto_opcion": "Parquet com particionamento por data/coluna de negócio via settings DMS S3 endpoint.",
+        "es_correcta": true,
+        "explicacion": "Parquet columnar reduz scan Athena; particionamento melhora pruning."
+      },
+      {
+        "texto_opcion": "JSON linha a linha sem compressão conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "JSON row-based é ineficiente para analytics."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Crawler pós-DMS"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #49 — equipe de plataforma (sa-east-1): A estúdio de games precisa replicar mudanças contínuas de Amazon RDS PostgreSQL para S3 em Parquet para analytics. Qual serviço é mais adequado?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS Database Migration Service com task CDC e endpoint S3.",
+        "es_correcta": true,
+        "explicacion": "DMS suporta CDC de engines relacionais e entrega contínua em S3."
+      },
+      {
+        "texto_opcion": "AWS DataSync copiando snapshots diários do RDS no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "DataSync não captura CDC relacional nativo."
+      },
+      {
+        "texto_opcion": "Amazon Data Firehose lendo WAL PostgreSQL avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Firehose não substitui CDC relacional DMS."
+      },
+      {
+        "texto_opcion": "Snowball Edge importando dump semanal neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Batch semanal não atende CDC contínuo."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DMS CDC"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #50 — cooperativa agrícola em us-east-1: Parceiros externos enviam arquivos CSV de 2 TB/mês via SFTP para ingestão no lake. Qual serviço gerenciado elimina servidor SFTP self-managed?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync agent SFTP neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "DataSync sincroniza; Transfer Family é servidor SFTP gerenciado para parceiros."
+      },
+      {
+        "texto_opcion": "EC2 com OpenSSH e cron manual considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Operação, patching e HA ficam por conta do cliente."
+      },
+      {
+        "texto_opcion": "AWS Transfer Family com servidor SFTP integrado ao S3.",
+        "es_correcta": true,
+        "explicacion": "Transfer Family oferece SFTP/FTPS gerenciado com landing direto em S3."
+      },
+      {
+        "texto_opcion": "API Gateway HTTP POST de arquivos no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Não é SFTP e exige mudança de parceiros."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer Family"
+    ]
+  },
+  {
+    "pregunta": "O squad de analytics precisa sincronizar 50 TB de NFS on-premises para S3 com agendamento e verificação de integridade. Qual serviço?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync com task agendada e verificação por checksum.",
+        "es_correcta": true,
+        "explicacion": "DataSync otimiza transferência em larga escala com agendamento e validação."
+      },
+      {
+        "texto_opcion": "aws s3 cp recursivo via script cron conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Sem otimização de rede, verificação robusta e bandwidth scheduling."
+      },
+      {
+        "texto_opcion": "Snowball para transferência diária avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Snowball é físico; inadequado para sync diário recorrente online."
+      },
+      {
+        "texto_opcion": "DMS full load único considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "DMS é para bancos relacionais, não NFS genérico."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync"
+    ]
+  },
+  {
+    "pregunta": "Migração inicial de 500 GB de arquivos históricos de datacenter com link de 100 Mbps instável. Qual opção acelera a carga inicial com menor impacto na rede?",
+    "opciones": [
+      {
+        "texto_opcion": "Kinesis Data Streams dos arquivos considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Streaming não é ideal para arquivos históricos massivos."
+      },
+      {
+        "texto_opcion": "DataSync contínuo de todo o volume histórico conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Link lento prolonga migração inicial por semanas."
+      },
+      {
+        "texto_opcion": "AWS Snowball Edge para seed bulk seguido de sync incremental online.",
+        "es_correcta": true,
+        "explicacion": "Snowball move bulk offline; sync posterior captura delta via DataSync/DMS."
+      },
+      {
+        "texto_opcion": "Transfer Family SFTP contínuo avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "SFTP online sofre no link instável para centenas de TB."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Snowball"
+    ]
+  },
+  {
+    "pregunta": "Incidente #53 — operação sa-east-1 da seguradora: Após landing de milhares de arquivos pequenos no S3, o time de dados quer disparar transformação Glue apenas quando lote diário completa. Qual padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "Evento S3 → EventBridge com regra que aguarda prefixo/contagem ou manifest de lote.",
+        "es_correcta": true,
+        "explicacion": "EventBridge pode orquestrar condições de lote antes de acionar Glue."
+      },
+      {
+        "texto_opcion": "CloudWatch alarm manual considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Não é event-driven por chegada de arquivos."
+      },
+      {
+        "texto_opcion": "Polling Athena a cada 5 min neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Ineficiente e caro para detecção de lote."
+      },
+      {
+        "texto_opcion": "Glue trigger por cada objeto individual avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Milhares de triggers elevam custo e fragmentam jobs."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Compactação S3"
+    ]
+  },
+  {
+    "pregunta": "Auditoria #54 — squad de analytics (us-east-1): Task DMS CDC apresenta lag crescente e LOB columns grandes. Qual tuning inicial?",
+    "opciones": [
+      {
+        "texto_opcion": "Reduzir retention S3 target no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Retention target não resolve lag de replicação."
+      },
+      {
+        "texto_opcion": "Desabilitar CDC e usar full load diário conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Perde near-real-time e aumenta carga no source."
+      },
+      {
+        "texto_opcion": "Ajustar LOB settings (limited/size) e aumentar capacidade da replication instance.",
+        "es_correcta": true,
+        "explicacion": "LOBs grandes impactam throughput; instance subdimensionada amplifica lag."
+      },
+      {
+        "texto_opcion": "Migrar target para DynamoDB sem schema mapping neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "DynamoDB exige modelagem diferente de CDC relacional."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Evento S3 batch"
+    ]
+  },
+  {
+    "pregunta": "Planejamento #55 — proptech em eu-west-1: Parceiro envia arquivos multi-GB via Transfer Family SFTP. Uploads falham no meio. O que configurar?",
+    "opciones": [
+      {
+        "texto_opcion": "Habilitar multipart upload no S3 via Transfer Family e retomar sessões SFTP.",
+        "es_correcta": true,
+        "explicacion": "Multipart permite retomada de partes grandes sem reiniciar arquivo inteiro."
+      },
+      {
+        "texto_opcion": "Desabilitar criptografia SSE-KMS avaliando trade-offs operacionais.",
+        "es_correcta": false,
+        "explicacion": "Criptografia raramente causa falha de multipart; retomada resolve interrupções."
+      },
+      {
+        "texto_opcion": "Copiar via e-mail para operador no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Não escala nem automatiza pipeline."
+      },
+      {
+        "texto_opcion": "Limitar tamanho máximo a 100 MB considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Não escala para arquivos multi-GB legítimos."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DataSync S3"
+    ]
+  },
+  {
+    "pregunta": "Cargas batch diárias podem ser reenviadas por parceiros. Como evitar duplicatas no lake?",
+    "opciones": [
+      {
+        "texto_opcion": "Desabilitar versionamento S3 considerando custo, escala e latência.",
+        "es_correcta": false,
+        "explicacion": "Versionamento ajuda auditoria; não substitui lógica idempotente."
+      },
+      {
+        "texto_opcion": "Truncar bucket S3 diariamente conforme requisitos do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Perde histórico e viola auditoria."
+      },
+      {
+        "texto_opcion": "Particionar por dt= e usar merge idempotente no Glue/Spark com chave de negócio.",
+        "es_correcta": true,
+        "explicacion": "Partição por data + merge por chave garante reprocessamento seguro."
+      },
+      {
+        "texto_opcion": "Append cego sempre no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Duplica registros em reenvios."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "DMS troubleshooting"
+    ]
+  },
+  {
+    "pregunta": "Volume único de 500 GB precisa chegar em 48 h; link dedicado 1 Gbps disponível. Qual opção é mais rápida e cost-effective?",
+    "opciones": [
+      {
+        "texto_opcion": "AWS DataSync online aproveitando link 1 Gbps.",
+        "es_correcta": true,
+        "explicacion": "Com bandwidth adequado, DataSync online completa antes de logística Snowball."
+      },
+      {
+        "texto_opcion": "Transfer Family SFTP sem paralelismo.",
+        "es_correcta": false,
+        "explicacion": "SFTP single-stream pode subutilizar 1 Gbps."
+      },
+      {
+        "texto_opcion": "Snowball mesmo com link 1 Gbps no cenário descrito.",
+        "es_correcta": false,
+        "explicacion": "Logística física adiciona dias desnecessários."
+      },
+      {
+        "texto_opcion": "E-mail de arquivos zipados neste contexto de produção.",
+        "es_correcta": false,
+        "explicacion": "Não escala para TB/PB."
+      }
+    ],
+    "tags": [
+      "1.2",
+      "Transfer multipart"
+    ]
+  }
+]

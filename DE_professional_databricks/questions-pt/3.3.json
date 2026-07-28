@@ -1,0 +1,959 @@
+[
+  {
+    "pregunta": "Em uma fintech de pagamentos, updates/deletes de transações e chargebacks chegam do OLTP. Padrão silver?",
+    "opciones": [
+      {
+        "texto_opcion": "MERGE INTO com matched update/delete e not matched insert.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Overwrite partition diária.",
+        "es_correcta": false,
+        "explicacion": "Caro e perde granularidade CDC."
+      },
+      {
+        "texto_opcion": "DELETE all + INSERT.",
+        "es_correcta": false,
+        "explicacion": "Janela inconsistente para leitores."
+      },
+      {
+        "texto_opcion": "Append only ignoring deletes.",
+        "es_correcta": false,
+        "explicacion": "Tabela fica stale."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "MERGE CDC"
+    ]
+  },
+  {
+    "pregunta": "Streaming de pedidos e estoque em uma rede de varejo omnichannel com upsert micro-batch. API?",
+    "opciones": [
+      {
+        "texto_opcion": "outputMode complete.",
+        "es_correcta": false,
+        "explicacion": "Reescreve tabela enorme."
+      },
+      {
+        "texto_opcion": "append sem merge.",
+        "es_correcta": false,
+        "explicacion": "Duplica em at-least-once."
+      },
+      {
+        "texto_opcion": "foreachBatch aplicando MERGE idempotente por batch.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "trigger once manual.",
+        "es_correcta": false,
+        "explicacion": "Não contínuo."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "foreachBatch MERGE"
+    ]
+  },
+  {
+    "pregunta": "Change Data Feed habilitado em Delta de telemetria de sensores em uma operadora de IoT industrial. Uso?",
+    "opciones": [
+      {
+        "texto_opcion": "table_changes ou readChangeFeed para consumir inserts/updates/deletes incrementais.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "COPY INTO incremental.",
+        "es_correcta": false,
+        "explicacion": "COPY não lê change feed nativo."
+      },
+      {
+        "texto_opcion": "DESCRIBE HISTORY only.",
+        "es_correcta": false,
+        "explicacion": "History não substitui feed row-level."
+      },
+      {
+        "texto_opcion": "VACUUM para CDC.",
+        "es_correcta": false,
+        "explicacion": "Remove arquivos antigos."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Change Data Feed"
+    ]
+  },
+  {
+    "pregunta": "Em um hospital universitário, reprocessamento de prontuários e exames não pode duplicar efeitos. Requisito?",
+    "opciones": [
+      {
+        "texto_opcion": "Confiar exactly-once Kafka.",
+        "es_correcta": false,
+        "explicacion": "Downstream merge ainda deve ser idempotente."
+      },
+      {
+        "texto_opcion": "UUID random por run.",
+        "es_correcta": false,
+        "explicacion": "Impede dedup."
+      },
+      {
+        "texto_opcion": "Idempotência via chave natural + MERGE ou dedup por sequence/version.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Append e DISTINCT tardio.",
+        "es_correcta": false,
+        "explicacion": "Custo alto e janela suja."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Idempotência"
+    ]
+  },
+  {
+    "pregunta": "sequence_num em CDC de eventos de reprodução em uma plataforma de streaming desempata updates. Coluna MERGE?",
+    "opciones": [
+      {
+        "texto_opcion": "sequence_by ou condição WHEN MATCHED AND source.seq > target.seq.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Ignorar sequence.",
+        "es_correcta": false,
+        "explicacion": "Updates antigos sobrescrevem novos."
+      },
+      {
+        "texto_opcion": "ORDER BY random.",
+        "es_correcta": false,
+        "explicacion": "Não determinístico."
+      },
+      {
+        "texto_opcion": "Usar ingest_time only.",
+        "es_correcta": false,
+        "explicacion": "Ingest não reflete ordem OLTP."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "sequence_by"
+    ]
+  },
+  {
+    "pregunta": "Em uma seguradora, soft delete flag em sinistros e apólices. MERGE?",
+    "opciones": [
+      {
+        "texto_opcion": "Filter only gold read.",
+        "es_correcta": false,
+        "explicacion": "Silver inconsistente."
+      },
+      {
+        "texto_opcion": "Ignorar deletes CDC.",
+        "es_correcta": false,
+        "explicacion": "Registros excluídos permanecem ativos."
+      },
+      {
+        "texto_opcion": "WHEN MATCHED AND op='D' THEN UPDATE SET deleted=true ou DELETE conforme política.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Hard delete bronze.",
+        "es_correcta": false,
+        "explicacion": "Bronze imutável."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Soft delete CDC"
+    ]
+  },
+  {
+    "pregunta": "Late arriving CDC de rotas e entregas em uma operadora logística. MERGE ainda válido?",
+    "opciones": [
+      {
+        "texto_opcion": "Sim, desde que chave+sequence determine versão correta independente da chegada.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Disable CDF.",
+        "es_correcta": false,
+        "explicacion": "Remove trilha incremental."
+      },
+      {
+        "texto_opcion": "Reprocess full table daily.",
+        "es_correcta": false,
+        "explicacion": "Caro desnecessário."
+      },
+      {
+        "texto_opcion": "Descartar late events.",
+        "es_correcta": false,
+        "explicacion": "Perde correções válidas."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Late CDC"
+    ]
+  },
+  {
+    "pregunta": "Em uma cooperativa agrícola, SCD Type 2 para colheita e umidade do solo via CDC. Padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate rows sem fechamento.",
+        "es_correcta": false,
+        "explicacion": "Múltiplas versões abertas."
+      },
+      {
+        "texto_opcion": "Type 1 only.",
+        "es_correcta": false,
+        "explicacion": "Não preserva histórico."
+      },
+      {
+        "texto_opcion": "MERGE fechando valid_to na linha atual e insert nova versão quando atributos mudam.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Overwrite dimension.",
+        "es_correcta": false,
+        "explicacion": "Perde histórico."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "SCD2 MERGE"
+    ]
+  },
+  {
+    "pregunta": "Batch idempotente após falha mid-merge de transações e chargebacks em uma fintech de pagamentos. Delta garante?",
+    "opciones": [
+      {
+        "texto_opcion": "Transação ACID: merge falho não commitado; retry reaplica batch completo com mesma chave.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Manual fs delete.",
+        "es_correcta": false,
+        "explicacion": "Corrompe tabela."
+      },
+      {
+        "texto_opcion": "Partial files visíveis.",
+        "es_correcta": false,
+        "explicacion": "Delta evita via atomic commit."
+      },
+      {
+        "texto_opcion": "Disable transaction log.",
+        "es_correcta": false,
+        "explicacion": "Quebra ACID."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "ACID retry"
+    ]
+  },
+  {
+    "pregunta": "Em uma rede de varejo omnichannel, updates/deletes de pedidos e estoque chegam do OLTP. Padrão silver?",
+    "opciones": [
+      {
+        "texto_opcion": "Append only ignoring deletes.",
+        "es_correcta": false,
+        "explicacion": "Tabela fica stale."
+      },
+      {
+        "texto_opcion": "MERGE INTO com matched update/delete e not matched insert.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "DELETE all + INSERT.",
+        "es_correcta": false,
+        "explicacion": "Janela inconsistente para leitores."
+      },
+      {
+        "texto_opcion": "Overwrite partition diária.",
+        "es_correcta": false,
+        "explicacion": "Caro e perde granularidade CDC."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "MERGE CDC"
+    ]
+  },
+  {
+    "pregunta": "Streaming de telemetria de sensores em uma operadora de IoT industrial com upsert micro-batch. API?",
+    "opciones": [
+      {
+        "texto_opcion": "outputMode complete.",
+        "es_correcta": false,
+        "explicacion": "Reescreve tabela enorme."
+      },
+      {
+        "texto_opcion": "trigger once manual.",
+        "es_correcta": false,
+        "explicacion": "Não contínuo."
+      },
+      {
+        "texto_opcion": "append sem merge.",
+        "es_correcta": false,
+        "explicacion": "Duplica em at-least-once."
+      },
+      {
+        "texto_opcion": "foreachBatch aplicando MERGE idempotente por batch.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "foreachBatch MERGE"
+    ]
+  },
+  {
+    "pregunta": "Change Data Feed habilitado em Delta de prontuários e exames em um hospital universitário. Uso?",
+    "opciones": [
+      {
+        "texto_opcion": "DESCRIBE HISTORY only.",
+        "es_correcta": false,
+        "explicacion": "History não substitui feed row-level."
+      },
+      {
+        "texto_opcion": "table_changes ou readChangeFeed para consumir inserts/updates/deletes incrementais.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "COPY INTO incremental.",
+        "es_correcta": false,
+        "explicacion": "COPY não lê change feed nativo."
+      },
+      {
+        "texto_opcion": "VACUUM para CDC.",
+        "es_correcta": false,
+        "explicacion": "Remove arquivos antigos."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Change Data Feed"
+    ]
+  },
+  {
+    "pregunta": "Em uma plataforma de streaming, reprocessamento de eventos de reprodução não pode duplicar efeitos. Requisito?",
+    "opciones": [
+      {
+        "texto_opcion": "Confiar exactly-once Kafka.",
+        "es_correcta": false,
+        "explicacion": "Downstream merge ainda deve ser idempotente."
+      },
+      {
+        "texto_opcion": "Append e DISTINCT tardio.",
+        "es_correcta": false,
+        "explicacion": "Custo alto e janela suja."
+      },
+      {
+        "texto_opcion": "UUID random por run.",
+        "es_correcta": false,
+        "explicacion": "Impede dedup."
+      },
+      {
+        "texto_opcion": "Idempotência via chave natural + MERGE ou dedup por sequence/version.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Idempotência"
+    ]
+  },
+  {
+    "pregunta": "sequence_num em CDC de sinistros e apólices em uma seguradora desempata updates. Coluna MERGE?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignorar sequence.",
+        "es_correcta": false,
+        "explicacion": "Updates antigos sobrescrevem novos."
+      },
+      {
+        "texto_opcion": "sequence_by ou condição WHEN MATCHED AND source.seq > target.seq.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Usar ingest_time only.",
+        "es_correcta": false,
+        "explicacion": "Ingest não reflete ordem OLTP."
+      },
+      {
+        "texto_opcion": "ORDER BY random.",
+        "es_correcta": false,
+        "explicacion": "Não determinístico."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "sequence_by"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora logística, soft delete flag em rotas e entregas. MERGE?",
+    "opciones": [
+      {
+        "texto_opcion": "Filter only gold read.",
+        "es_correcta": false,
+        "explicacion": "Silver inconsistente."
+      },
+      {
+        "texto_opcion": "Ignorar deletes CDC.",
+        "es_correcta": false,
+        "explicacion": "Registros excluídos permanecem ativos."
+      },
+      {
+        "texto_opcion": "Hard delete bronze.",
+        "es_correcta": false,
+        "explicacion": "Bronze imutável."
+      },
+      {
+        "texto_opcion": "WHEN MATCHED AND op='D' THEN UPDATE SET deleted=true ou DELETE conforme política.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Soft delete CDC"
+    ]
+  },
+  {
+    "pregunta": "Late arriving CDC de colheita e umidade do solo em uma cooperativa agrícola. MERGE ainda válido?",
+    "opciones": [
+      {
+        "texto_opcion": "Reprocess full table daily.",
+        "es_correcta": false,
+        "explicacion": "Caro desnecessário."
+      },
+      {
+        "texto_opcion": "Sim, desde que chave+sequence determine versão correta independente da chegada.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Disable CDF.",
+        "es_correcta": false,
+        "explicacion": "Remove trilha incremental."
+      },
+      {
+        "texto_opcion": "Descartar late events.",
+        "es_correcta": false,
+        "explicacion": "Perde correções válidas."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Late CDC"
+    ]
+  },
+  {
+    "pregunta": "Em uma fintech de pagamentos, SCD Type 2 para transações e chargebacks via CDC. Padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "Duplicate rows sem fechamento.",
+        "es_correcta": false,
+        "explicacion": "Múltiplas versões abertas."
+      },
+      {
+        "texto_opcion": "Overwrite dimension.",
+        "es_correcta": false,
+        "explicacion": "Perde histórico."
+      },
+      {
+        "texto_opcion": "Type 1 only.",
+        "es_correcta": false,
+        "explicacion": "Não preserva histórico."
+      },
+      {
+        "texto_opcion": "MERGE fechando valid_to na linha atual e insert nova versão quando atributos mudam.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "SCD2 MERGE"
+    ]
+  },
+  {
+    "pregunta": "Batch idempotente após falha mid-merge de pedidos e estoque em uma rede de varejo omnichannel. Delta garante?",
+    "opciones": [
+      {
+        "texto_opcion": "Manual fs delete.",
+        "es_correcta": false,
+        "explicacion": "Corrompe tabela."
+      },
+      {
+        "texto_opcion": "Transação ACID: merge falho não commitado; retry reaplica batch completo com mesma chave.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Partial files visíveis.",
+        "es_correcta": false,
+        "explicacion": "Delta evita via atomic commit."
+      },
+      {
+        "texto_opcion": "Disable transaction log.",
+        "es_correcta": false,
+        "explicacion": "Quebra ACID."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "ACID retry"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora de IoT industrial, updates/deletes de telemetria de sensores chegam do OLTP. Padrão silver?",
+    "opciones": [
+      {
+        "texto_opcion": "Overwrite partition diária.",
+        "es_correcta": false,
+        "explicacion": "Caro e perde granularidade CDC."
+      },
+      {
+        "texto_opcion": "DELETE all + INSERT.",
+        "es_correcta": false,
+        "explicacion": "Janela inconsistente para leitores."
+      },
+      {
+        "texto_opcion": "MERGE INTO com matched update/delete e not matched insert.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Append only ignoring deletes.",
+        "es_correcta": false,
+        "explicacion": "Tabela fica stale."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "MERGE CDC"
+    ]
+  },
+  {
+    "pregunta": "Streaming de prontuários e exames em um hospital universitário com upsert micro-batch. API?",
+    "opciones": [
+      {
+        "texto_opcion": "foreachBatch aplicando MERGE idempotente por batch.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "outputMode complete.",
+        "es_correcta": false,
+        "explicacion": "Reescreve tabela enorme."
+      },
+      {
+        "texto_opcion": "append sem merge.",
+        "es_correcta": false,
+        "explicacion": "Duplica em at-least-once."
+      },
+      {
+        "texto_opcion": "trigger once manual.",
+        "es_correcta": false,
+        "explicacion": "Não contínuo."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "foreachBatch MERGE"
+    ]
+  },
+  {
+    "pregunta": "Change Data Feed habilitado em Delta de eventos de reprodução em uma plataforma de streaming. Uso?",
+    "opciones": [
+      {
+        "texto_opcion": "DESCRIBE HISTORY only.",
+        "es_correcta": false,
+        "explicacion": "History não substitui feed row-level."
+      },
+      {
+        "texto_opcion": "COPY INTO incremental.",
+        "es_correcta": false,
+        "explicacion": "COPY não lê change feed nativo."
+      },
+      {
+        "texto_opcion": "table_changes ou readChangeFeed para consumir inserts/updates/deletes incrementais.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "VACUUM para CDC.",
+        "es_correcta": false,
+        "explicacion": "Remove arquivos antigos."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Change Data Feed"
+    ]
+  },
+  {
+    "pregunta": "Em uma seguradora, reprocessamento de sinistros e apólices não pode duplicar efeitos. Requisito?",
+    "opciones": [
+      {
+        "texto_opcion": "Idempotência via chave natural + MERGE ou dedup por sequence/version.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "UUID random por run.",
+        "es_correcta": false,
+        "explicacion": "Impede dedup."
+      },
+      {
+        "texto_opcion": "Append e DISTINCT tardio.",
+        "es_correcta": false,
+        "explicacion": "Custo alto e janela suja."
+      },
+      {
+        "texto_opcion": "Confiar exactly-once Kafka.",
+        "es_correcta": false,
+        "explicacion": "Downstream merge ainda deve ser idempotente."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Idempotência"
+    ]
+  },
+  {
+    "pregunta": "sequence_num em CDC de rotas e entregas em uma operadora logística desempata updates. Coluna MERGE?",
+    "opciones": [
+      {
+        "texto_opcion": "Usar ingest_time only.",
+        "es_correcta": false,
+        "explicacion": "Ingest não reflete ordem OLTP."
+      },
+      {
+        "texto_opcion": "Ignorar sequence.",
+        "es_correcta": false,
+        "explicacion": "Updates antigos sobrescrevem novos."
+      },
+      {
+        "texto_opcion": "sequence_by ou condição WHEN MATCHED AND source.seq > target.seq.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "ORDER BY random.",
+        "es_correcta": false,
+        "explicacion": "Não determinístico."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "sequence_by"
+    ]
+  },
+  {
+    "pregunta": "Em uma cooperativa agrícola, soft delete flag em colheita e umidade do solo. MERGE?",
+    "opciones": [
+      {
+        "texto_opcion": "WHEN MATCHED AND op='D' THEN UPDATE SET deleted=true ou DELETE conforme política.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Filter only gold read.",
+        "es_correcta": false,
+        "explicacion": "Silver inconsistente."
+      },
+      {
+        "texto_opcion": "Ignorar deletes CDC.",
+        "es_correcta": false,
+        "explicacion": "Registros excluídos permanecem ativos."
+      },
+      {
+        "texto_opcion": "Hard delete bronze.",
+        "es_correcta": false,
+        "explicacion": "Bronze imutável."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Soft delete CDC"
+    ]
+  },
+  {
+    "pregunta": "Late arriving CDC de transações e chargebacks em uma fintech de pagamentos. MERGE ainda válido?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable CDF.",
+        "es_correcta": false,
+        "explicacion": "Remove trilha incremental."
+      },
+      {
+        "texto_opcion": "Descartar late events.",
+        "es_correcta": false,
+        "explicacion": "Perde correções válidas."
+      },
+      {
+        "texto_opcion": "Sim, desde que chave+sequence determine versão correta independente da chegada.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Reprocess full table daily.",
+        "es_correcta": false,
+        "explicacion": "Caro desnecessário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Late CDC"
+    ]
+  },
+  {
+    "pregunta": "Em uma rede de varejo omnichannel, SCD Type 2 para pedidos e estoque via CDC. Padrão?",
+    "opciones": [
+      {
+        "texto_opcion": "MERGE fechando valid_to na linha atual e insert nova versão quando atributos mudam.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Type 1 only.",
+        "es_correcta": false,
+        "explicacion": "Não preserva histórico."
+      },
+      {
+        "texto_opcion": "Overwrite dimension.",
+        "es_correcta": false,
+        "explicacion": "Perde histórico."
+      },
+      {
+        "texto_opcion": "Duplicate rows sem fechamento.",
+        "es_correcta": false,
+        "explicacion": "Múltiplas versões abertas."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "SCD2 MERGE"
+    ]
+  },
+  {
+    "pregunta": "Batch idempotente após falha mid-merge de telemetria de sensores em uma operadora de IoT industrial. Delta garante?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable transaction log.",
+        "es_correcta": false,
+        "explicacion": "Quebra ACID."
+      },
+      {
+        "texto_opcion": "Partial files visíveis.",
+        "es_correcta": false,
+        "explicacion": "Delta evita via atomic commit."
+      },
+      {
+        "texto_opcion": "Transação ACID: merge falho não commitado; retry reaplica batch completo com mesma chave.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Manual fs delete.",
+        "es_correcta": false,
+        "explicacion": "Corrompe tabela."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "ACID retry"
+    ]
+  },
+  {
+    "pregunta": "Em um hospital universitário, updates/deletes de prontuários e exames chegam do OLTP. Padrão silver?",
+    "opciones": [
+      {
+        "texto_opcion": "DELETE all + INSERT.",
+        "es_correcta": false,
+        "explicacion": "Janela inconsistente para leitores."
+      },
+      {
+        "texto_opcion": "Overwrite partition diária.",
+        "es_correcta": false,
+        "explicacion": "Caro e perde granularidade CDC."
+      },
+      {
+        "texto_opcion": "Append only ignoring deletes.",
+        "es_correcta": false,
+        "explicacion": "Tabela fica stale."
+      },
+      {
+        "texto_opcion": "MERGE INTO com matched update/delete e not matched insert.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "MERGE CDC"
+    ]
+  },
+  {
+    "pregunta": "Streaming de eventos de reprodução em uma plataforma de streaming com upsert micro-batch. API?",
+    "opciones": [
+      {
+        "texto_opcion": "append sem merge.",
+        "es_correcta": false,
+        "explicacion": "Duplica em at-least-once."
+      },
+      {
+        "texto_opcion": "foreachBatch aplicando MERGE idempotente por batch.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "outputMode complete.",
+        "es_correcta": false,
+        "explicacion": "Reescreve tabela enorme."
+      },
+      {
+        "texto_opcion": "trigger once manual.",
+        "es_correcta": false,
+        "explicacion": "Não contínuo."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "foreachBatch MERGE"
+    ]
+  },
+  {
+    "pregunta": "Change Data Feed habilitado em Delta de sinistros e apólices em uma seguradora. Uso?",
+    "opciones": [
+      {
+        "texto_opcion": "DESCRIBE HISTORY only.",
+        "es_correcta": false,
+        "explicacion": "History não substitui feed row-level."
+      },
+      {
+        "texto_opcion": "VACUUM para CDC.",
+        "es_correcta": false,
+        "explicacion": "Remove arquivos antigos."
+      },
+      {
+        "texto_opcion": "COPY INTO incremental.",
+        "es_correcta": false,
+        "explicacion": "COPY não lê change feed nativo."
+      },
+      {
+        "texto_opcion": "table_changes ou readChangeFeed para consumir inserts/updates/deletes incrementais.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Change Data Feed"
+    ]
+  },
+  {
+    "pregunta": "Em uma operadora logística, reprocessamento de rotas e entregas não pode duplicar efeitos. Requisito?",
+    "opciones": [
+      {
+        "texto_opcion": "UUID random por run.",
+        "es_correcta": false,
+        "explicacion": "Impede dedup."
+      },
+      {
+        "texto_opcion": "Idempotência via chave natural + MERGE ou dedup por sequence/version.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Append e DISTINCT tardio.",
+        "es_correcta": false,
+        "explicacion": "Custo alto e janela suja."
+      },
+      {
+        "texto_opcion": "Confiar exactly-once Kafka.",
+        "es_correcta": false,
+        "explicacion": "Downstream merge ainda deve ser idempotente."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Idempotência"
+    ]
+  },
+  {
+    "pregunta": "sequence_num em CDC de colheita e umidade do solo em uma cooperativa agrícola desempata updates. Coluna MERGE?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignorar sequence.",
+        "es_correcta": false,
+        "explicacion": "Updates antigos sobrescrevem novos."
+      },
+      {
+        "texto_opcion": "ORDER BY random.",
+        "es_correcta": false,
+        "explicacion": "Não determinístico."
+      },
+      {
+        "texto_opcion": "Usar ingest_time only.",
+        "es_correcta": false,
+        "explicacion": "Ingest não reflete ordem OLTP."
+      },
+      {
+        "texto_opcion": "sequence_by ou condição WHEN MATCHED AND source.seq > target.seq.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "sequence_by"
+    ]
+  },
+  {
+    "pregunta": "Em uma fintech de pagamentos, soft delete flag em transações e chargebacks. MERGE?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignorar deletes CDC.",
+        "es_correcta": false,
+        "explicacion": "Registros excluídos permanecem ativos."
+      },
+      {
+        "texto_opcion": "WHEN MATCHED AND op='D' THEN UPDATE SET deleted=true ou DELETE conforme política.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Filter only gold read.",
+        "es_correcta": false,
+        "explicacion": "Silver inconsistente."
+      },
+      {
+        "texto_opcion": "Hard delete bronze.",
+        "es_correcta": false,
+        "explicacion": "Bronze imutável."
+      }
+    ],
+    "tags": [
+      "3.3",
+      "Soft delete CDC"
+    ]
+  }
+]

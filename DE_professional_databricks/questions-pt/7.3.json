@@ -1,0 +1,959 @@
+[
+  {
+    "pregunta": "VACUUM com retention 0 horas em prod. Risco?",
+    "opciones": [
+      {
+        "texto_opcion": "Apenas acelera queries",
+        "es_correcta": false,
+        "explicacion": "VACUUM não otimiza layout ativo."
+      },
+      {
+        "texto_opcion": "Sem risco sempre",
+        "es_correcta": false,
+        "explicacion": "Perigoso em prod."
+      },
+      {
+        "texto_opcion": "Habilita CDF automaticamente",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
+      },
+      {
+        "texto_opcion": "Remove arquivos ainda referenciados por time travel/consumers; quebra compliance e queries históricas",
+        "es_correcta": true,
+        "explicacion": "Retention mínima deve respeitar SLA e legal hold."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "VACUUM safe"
+    ]
+  },
+  {
+    "pregunta": "Legal exige 7 anos dados; Delta retention default menor. Ação?",
+    "opciones": [
+      {
+        "texto_opcion": "VACUUM hourly retention 0",
+        "es_correcta": false,
+        "explicacion": "Viola retenção."
+      },
+      {
+        "texto_opcion": "Aumentar deletedFileRetentionDuration e data retention conforme política antes VACUUM agressivo",
+        "es_correcta": true,
+        "explicacion": "Align Delta retention with legal requirements."
+      },
+      {
+        "texto_opcion": "Delete metastore",
+        "es_correcta": false,
+        "explicacion": "Não remove requisito legal."
+      },
+      {
+        "texto_opcion": "Ignorar legislação",
+        "es_correcta": false,
+        "explicacion": "Risco legal."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Retention policy"
+    ]
+  },
+  {
+    "pregunta": "Right to erasure pedido. Implementação Delta?",
+    "opciones": [
+      {
+        "texto_opcion": "DELETE/MERGE removing user rows + eventual VACUUM após retention window + audit log",
+        "es_correcta": true,
+        "explicacion": "Erasure workflow documented."
+      },
+      {
+        "texto_opcion": "DROP TABLE entire",
+        "es_correcta": false,
+        "explicacion": "Overkill unless required."
+      },
+      {
+        "texto_opcion": "Mask only equals erasure",
+        "es_correcta": false,
+        "explicacion": "Insuficiente legalmente se dados persistem."
+      },
+      {
+        "texto_opcion": "Ignore request",
+        "es_correcta": false,
+        "explicacion": "Illegal."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "GDPR delete"
+    ]
+  },
+  {
+    "pregunta": "Titular brasileiro solicita eliminação. Equivalente GDPR process?",
+    "opciones": [
+      {
+        "texto_opcion": "Export to marketing",
+        "es_correcta": false,
+        "explicacion": "Wrong."
+      },
+      {
+        "texto_opcion": "Delay infinitely",
+        "es_correcta": false,
+        "explicacion": "Non-compliant."
+      },
+      {
+        "texto_opcion": "Only EU GDPR applies",
+        "es_correcta": false,
+        "explicacion": "LGPD also applies BR."
+      },
+      {
+        "texto_opcion": "Localizar dados pessoais cross tables; delete/anonymize; confirmar; auditar",
+        "es_correcta": true,
+        "explicacion": "LGPD similar data subject rights."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "LGPD"
+    ]
+  },
+  {
+    "pregunta": "Credenciais API no notebook. Correto?",
+    "opciones": [
+      {
+        "texto_opcion": "Email password",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Plaintext job parameter committed",
+        "es_correcta": false,
+        "explicacion": "Exposure."
+      },
+      {
+        "texto_opcion": "Hardcode in repo",
+        "es_correcta": false,
+        "explicacion": "Leak via git."
+      },
+      {
+        "texto_opcion": "Databricks secrets scope referenced via dbutils.secrets.get",
+        "es_correcta": true,
+        "explicacion": "Never hardcode secrets."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Secrets scope"
+    ]
+  },
+  {
+    "pregunta": "Quem acessa secret scope?",
+    "opciones": [
+      {
+        "texto_opcion": "ACL on secret scope granting read to specific principals",
+        "es_correcta": true,
+        "explicacion": "Scoped secret access."
+      },
+      {
+        "texto_opcion": "Secrets public in spark.conf",
+        "es_correcta": false,
+        "explicacion": "Exposure."
+      },
+      {
+        "texto_opcion": "All workspace users default read",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Print secret debug",
+        "es_correcta": false,
+        "explicacion": "Leak."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Secret ACL"
+    ]
+  },
+  {
+    "pregunta": "Rotação chave API. Processo?",
+    "opciones": [
+      {
+        "texto_opcion": "Share secret Slack",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Update secret version; redeploy jobs; revoke old after validation",
+        "es_correcta": true,
+        "explicacion": "Rotation hygiene."
+      },
+      {
+        "texto_opcion": "One secret forever in code",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Never rotate",
+        "es_correcta": false,
+        "explicacion": "Risk compromise."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Rotate secrets"
+    ]
+  },
+  {
+    "pregunta": "Auditor pergunta se deletes são irreversíveis. Resposta?",
+    "opciones": [
+      {
+        "texto_opcion": "CSV backup only proof",
+        "es_correcta": false,
+        "explicacion": "Insufficient enterprise."
+      },
+      {
+        "texto_opcion": "Delta never deletes",
+        "es_correcta": false,
+        "explicacion": "Deletes exist with retention."
+      },
+      {
+        "texto_opcion": "After retention period post-VACUUM physical delete; until then time travel may retain",
+        "es_correcta": true,
+        "explicacion": "Explain Delta retention model."
+      },
+      {
+        "texto_opcion": "Deletes instant permanent always",
+        "es_correcta": false,
+        "explicacion": "Until VACUUM/retention."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Compliance audit VACUUM"
+    ]
+  },
+  {
+    "pregunta": "Processo judicial bloqueia delete usuário X. Ação?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore legal",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      },
+      {
+        "texto_opcion": "Drop catalog",
+        "es_correcta": false,
+        "explicacion": "Excessive."
+      },
+      {
+        "texto_opcion": "Suspend erasure workflow for held records; tag/legal hold metadata",
+        "es_correcta": true,
+        "explicacion": "Hold overrides normal delete."
+      },
+      {
+        "texto_opcion": "Delete anyway",
+        "es_correcta": false,
+        "explicacion": "Contempt risk."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Legal hold"
+    ]
+  },
+  {
+    "pregunta": "Data at rest encryption responsibility cloud+Databricks?",
+    "opciones": [
+      {
+        "texto_opcion": "Notebook password enough",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Customer zero encryption duty",
+        "es_correcta": false,
+        "explicacion": "Incorrect fully."
+      },
+      {
+        "texto_opcion": "Cloud storage encryption (SSE) + platform controls; customer manages keys optional CMK",
+        "es_correcta": true,
+        "explicacion": "Shared responsibility."
+      },
+      {
+        "texto_opcion": "Plaintext default recommended",
+        "es_correcta": false,
+        "explicacion": "No."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Encryption"
+    ]
+  },
+  {
+    "pregunta": "Retention PII shorter than aggregates. Strategy?",
+    "opciones": [
+      {
+        "texto_opcion": "Keep PII forever for fun",
+        "es_correcta": false,
+        "explicacion": "Non-compliant."
+      },
+      {
+        "texto_opcion": "Delete/anonymize PII columns while retaining aggregated gold stats",
+        "es_correcta": true,
+        "explicacion": "Minimization principle."
+      },
+      {
+        "texto_opcion": "No documentation",
+        "es_correcta": false,
+        "explicacion": "Audit fail."
+      },
+      {
+        "texto_opcion": "Delete all aggregates",
+        "es_correcta": false,
+        "explicacion": "May break business."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "PII retention"
+    ]
+  },
+  {
+    "pregunta": "Job parameter references secret scope key. Benefit?",
+    "opciones": [
+      {
+        "texto_opcion": "Secret in git bundle",
+        "es_correcta": false,
+        "explicacion": "Exposure if committed."
+      },
+      {
+        "texto_opcion": "Secret in table name",
+        "es_correcta": false,
+        "explicacion": "Absurd."
+      },
+      {
+        "texto_opcion": "Secrets not visible in UI/logs/job definition plaintext",
+        "es_correcta": true,
+        "explicacion": "Secure injection."
+      },
+      {
+        "texto_opcion": "Secret visible all users",
+        "es_correcta": false,
+        "explicacion": "Defeats purpose."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Secrets in jobs"
+    ]
+  },
+  {
+    "pregunta": "Compliance officer confunde. Esclarecimento?",
+    "opciones": [
+      {
+        "texto_opcion": "OPTIMIZE layout; VACUUM removes obsolete files per retention",
+        "es_correcta": true,
+        "explicacion": "Different operations."
+      },
+      {
+        "texto_opcion": "VACUUM adds data",
+        "es_correcta": false,
+        "explicacion": "Removes."
+      },
+      {
+        "texto_opcion": "OPTIMIZE deletes legal records instantly",
+        "es_correcta": false,
+        "explicacion": "Not purpose."
+      },
+      {
+        "texto_opcion": "Same command",
+        "es_correcta": false,
+        "explicacion": "Different."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "VACUUM vs OPTIMIZE"
+    ]
+  },
+  {
+    "pregunta": "Dados BR must stay BR region. Control?",
+    "opciones": [
+      {
+        "texto_opcion": "Random region ok",
+        "es_correcta": false,
+        "explicacion": "May violate law."
+      },
+      {
+        "texto_opcion": "Deploy workspace/metastore/storage in required region; block cross-region copies",
+        "es_correcta": true,
+        "explicacion": "Residency architecture."
+      },
+      {
+        "texto_opcion": "Email export daily",
+        "es_correcta": false,
+        "explicacion": "Leak."
+      },
+      {
+        "texto_opcion": "Ignore residency",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Data residency"
+    ]
+  },
+  {
+    "pregunta": "User delete en bronze; gold SCD still has PII?",
+    "opciones": [
+      {
+        "texto_opcion": "Propagate erasure downstream gold/dims via orchestrated delete MERGE",
+        "es_correcta": true,
+        "explicacion": "End-to-end erasure."
+      },
+      {
+        "texto_opcion": "Rebuild universe",
+        "es_correcta": false,
+        "explicacion": "Overkill if MERGE possible."
+      },
+      {
+        "texto_opcion": "Hope GC cleans",
+        "es_correcta": false,
+        "explicacion": "Not automatic."
+      },
+      {
+        "texto_opcion": "Bronze only sufficient always",
+        "es_correcta": false,
+        "explicacion": "Downstream copies remain."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Delete propagation"
+    ]
+  },
+  {
+    "pregunta": "Audit logs retention vs data retention?",
+    "opciones": [
+      {
+        "texto_opcion": "Same always automatic",
+        "es_correcta": false,
+        "explicacion": "Configure explicitly."
+      },
+      {
+        "texto_opcion": "Audit logs may need separate longer retention for compliance evidence",
+        "es_correcta": true,
+        "explicacion": "Independent policies."
+      },
+      {
+        "texto_opcion": "Delete audit to save space illegal scenarios",
+        "es_correcta": false,
+        "explicacion": "Compliance risk."
+      },
+      {
+        "texto_opcion": "Audit optional",
+        "es_correcta": false,
+        "explicacion": "Often required."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Audit retention"
+    ]
+  },
+  {
+    "pregunta": "Automate con Azure Key Vault/AWS Secrets Manager integration?",
+    "opciones": [
+      {
+        "texto_opcion": "Never rotate",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Use cloud secret backend integrated with Databricks secret scopes",
+        "es_correcta": true,
+        "explicacion": "Enterprise pattern."
+      },
+      {
+        "texto_opcion": "Manual sticky note",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Commit rotation script with password",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Secret rotation automation"
+    ]
+  },
+  {
+    "pregunta": "Safe production schedule?",
+    "opciones": [
+      {
+        "texto_opcion": "After confirming retention hours > max time travel SLA + legal minimum; off-peak",
+        "es_correcta": true,
+        "explicacion": "Safe vacuum cadence."
+      },
+      {
+        "texto_opcion": "Never vacuum ever",
+        "es_correcta": false,
+        "explicacion": "Storage bloat."
+      },
+      {
+        "texto_opcion": "RETAIN 0 hourly peak",
+        "es_correcta": false,
+        "explicacion": "Dangerous."
+      },
+      {
+        "texto_opcion": "Vacuum before backup legal",
+        "es_correcta": false,
+        "explicacion": "Bad order."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "VACUUM schedule"
+    ]
+  },
+  {
+    "pregunta": "Replace name with irreversible hash retaining analytics key. Technique?",
+    "opciones": [
+      {
+        "texto_opcion": "Base64 only",
+        "es_correcta": false,
+        "explicacion": "Reversible trivially."
+      },
+      {
+        "texto_opcion": "Keep plaintext backup 'just in case'",
+        "es_correcta": false,
+        "explicacion": "Violates minimization."
+      },
+      {
+        "texto_opcion": "First letter only always enough",
+        "es_correcta": false,
+        "explicacion": "May re-identify."
+      },
+      {
+        "texto_opcion": "Cryptographic hash salt/pepper with governance",
+        "es_correcta": true,
+        "explicacion": "Pseudonymization."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Anonymization"
+    ]
+  },
+  {
+    "pregunta": "Marketing consent revoked. Data action?",
+    "opciones": [
+      {
+        "texto_opcion": "Sell data",
+        "es_correcta": false,
+        "explicacion": "Worse."
+      },
+      {
+        "texto_opcion": "Continue marketing",
+        "es_correcta": false,
+        "explicacion": "Illegal."
+      },
+      {
+        "texto_opcion": "Ignore consent",
+        "es_correcta": false,
+        "explicacion": "Non-compliant."
+      },
+      {
+        "texto_opcion": "Stop processing for marketing; delete/marketing tables update preferences",
+        "es_correcta": true,
+        "explicacion": "Purpose limitation."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Consent withdrawal"
+    ]
+  },
+  {
+    "pregunta": "Prevent secrets in cluster logs?",
+    "opciones": [
+      {
+        "texto_opcion": "Print env all",
+        "es_correcta": false,
+        "explicacion": "Leak."
+      },
+      {
+        "texto_opcion": "Disable all logs",
+        "es_correcta": false,
+        "explicacion": "Ops issue."
+      },
+      {
+        "texto_opcion": "Never log secret values; use redaction; secure exception handling",
+        "es_correcta": true,
+        "explicacion": "Logging discipline."
+      },
+      {
+        "texto_opcion": "Log secret debug",
+        "es_correcta": false,
+        "explicacion": "Leak."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Secrets logging"
+    ]
+  },
+  {
+    "pregunta": "Soft delete flag vs physical DELETE compliance?",
+    "opciones": [
+      {
+        "texto_opcion": "Soft delete always enough GDPR",
+        "es_correcta": false,
+        "explicacion": "Often not final erasure."
+      },
+      {
+        "texto_opcion": "Regulations may require physical delete/anonymization after retention; soft delete insufficient alone",
+        "es_correcta": true,
+        "explicacion": "Depends legal interpretation."
+      },
+      {
+        "texto_opcion": "Hide flag=deleted without purge",
+        "es_correcta": false,
+        "explicacion": "Data remains."
+      },
+      {
+        "texto_opcion": "Never physical delete",
+        "es_correcta": false,
+        "explicacion": "May violate minimization erasure."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Compliance DELETE"
+    ]
+  },
+  {
+    "pregunta": "Share EU data US workspace?",
+    "opciones": [
+      {
+        "texto_opcion": "Legal mechanisms SCCs/adequacy + Databricks region controls",
+        "es_correcta": true,
+        "explicacion": "Transfer compliance."
+      },
+      {
+        "texto_opcion": "Email CSV cross border",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Public bucket",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Ignore regulations",
+        "es_correcta": false,
+        "explicacion": "Risk fines."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Cross-border transfer"
+    ]
+  },
+  {
+    "pregunta": "Delta property controlling deleted files retention?",
+    "opciones": [
+      {
+        "texto_opcion": "delta.autoOptimize only",
+        "es_correcta": false,
+        "explicacion": "Different."
+      },
+      {
+        "texto_opcion": "fs.defaultFS",
+        "es_correcta": false,
+        "explicacion": "Hadoop conf."
+      },
+      {
+        "texto_opcion": "spark.executor.memory",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "deletedFileRetentionDuration / logRetentionDuration table properties",
+        "es_correcta": true,
+        "explicacion": "Delta retention knobs."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Retention config property"
+    ]
+  },
+  {
+    "pregunta": "Emergency DBA password access?",
+    "opciones": [
+      {
+        "texto_opcion": "No audit",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "Break-glass procedure audited with temporary elevation",
+        "es_correcta": true,
+        "explicacion": "Controlled emergency access."
+      },
+      {
+        "texto_opcion": "Embed in notebook title",
+        "es_correcta": false,
+        "explicacion": "Leak."
+      },
+      {
+        "texto_opcion": "Publish password wiki",
+        "es_correcta": false,
+        "explicacion": "Leak."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Break glass secrets"
+    ]
+  },
+  {
+    "pregunta": "Extra care minors data processing?",
+    "opciones": [
+      {
+        "texto_opcion": "Publish minors data",
+        "es_correcta": false,
+        "explicacion": "Illegal."
+      },
+      {
+        "texto_opcion": "Same as adults always",
+        "es_correcta": false,
+        "explicacion": "May be wrong legally."
+      },
+      {
+        "texto_opcion": "Ignore age",
+        "es_correcta": false,
+        "explicacion": "Risk."
+      },
+      {
+        "texto_opcion": "Parental consent and enhanced protections per regulation",
+        "es_correcta": true,
+        "explicacion": "Special category care."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "GDPR children data"
+    ]
+  },
+  {
+    "pregunta": "Demonstrate erasure completed?",
+    "opciones": [
+      {
+        "texto_opcion": "Verbal claim",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "Screenshot notebook",
+        "es_correcta": false,
+        "explicacion": "Weak alone."
+      },
+      {
+        "texto_opcion": "Delete log only",
+        "es_correcta": false,
+        "explicacion": "Need verification."
+      },
+      {
+        "texto_opcion": "Audit ticket + query verification + deletion job logs",
+        "es_correcta": true,
+        "explicacion": "Evidence pack."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Proof of delete"
+    ]
+  },
+  {
+    "pregunta": "Python wheel on DBFS contains API key. Fix?",
+    "opciones": [
+      {
+        "texto_opcion": "Commit wheel git",
+        "es_correcta": false,
+        "explicacion": "Exposure."
+      },
+      {
+        "texto_opcion": "Rename variable",
+        "es_correcta": false,
+        "explicacion": "Still there."
+      },
+      {
+        "texto_opcion": "Remove key; load from secret scope at runtime",
+        "es_correcta": true,
+        "explicacion": "No secrets in artifacts."
+      },
+      {
+        "texto_opcion": "Obfuscate base64 in wheel",
+        "es_correcta": false,
+        "explicacion": "Still extractable."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Secrets in wheel"
+    ]
+  },
+  {
+    "pregunta": "Set retention below legal hold requirement. Result?",
+    "opciones": [
+      {
+        "texto_opcion": "Free performance always",
+        "es_correcta": false,
+        "explicacion": "Risk legal."
+      },
+      {
+        "texto_opcion": "Improves compliance",
+        "es_correcta": false,
+        "explicacion": "Opposite."
+      },
+      {
+        "texto_opcion": "Enables CDF forever",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Potential destruction of evidence/data subject records unlawfully",
+        "es_correcta": true,
+        "explicacion": "Must align retention legal."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "VACUUM legal minimum"
+    ]
+  },
+  {
+    "pregunta": "Separate prod PCI workspace?",
+    "opciones": [
+      {
+        "texto_opcion": "Network isolation, separate metastore/catalog, strict grants",
+        "es_correcta": true,
+        "explicacion": "Environment segregation."
+      },
+      {
+        "texto_opcion": "Shared admin password",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      },
+      {
+        "texto_opcion": "PCI in public notebook",
+        "es_correcta": false,
+        "explicacion": "Violation."
+      },
+      {
+        "texto_opcion": "One workspace all data",
+        "es_correcta": false,
+        "explicacion": "Scope creep risk."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Workspace isolation compliance"
+    ]
+  },
+  {
+    "pregunta": "LGPD/GDPR requires processing records?",
+    "opciones": [
+      {
+        "texto_opcion": "Verbal only",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "Maintain RoPA documenting purposes, retention, legal bases",
+        "es_correcta": true,
+        "explicacion": "Governance documentation."
+      },
+      {
+        "texto_opcion": "No documentation",
+        "es_correcta": false,
+        "explicacion": "Fine risk."
+      },
+      {
+        "texto_opcion": "Hide processing",
+        "es_correcta": false,
+        "explicacion": "Illegal."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Data processing register"
+    ]
+  },
+  {
+    "pregunta": "dev/prod secret separation?",
+    "opciones": [
+      {
+        "texto_opcion": "One scope all envs",
+        "es_correcta": false,
+        "explicacion": "Misuse prod keys in dev."
+      },
+      {
+        "texto_opcion": "Share PAT all engineers prod",
+        "es_correcta": false,
+        "explicacion": "Overexposed."
+      },
+      {
+        "texto_opcion": "Separate scopes/keys per environment prevent prod creds in dev",
+        "es_correcta": true,
+        "explicacion": "Blast radius reduction."
+      },
+      {
+        "texto_opcion": "Commit prod keys dev repo",
+        "es_correcta": false,
+        "explicacion": "Leak."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Secret scope per env"
+    ]
+  },
+  {
+    "pregunta": "Auditor precisa consultar snapshot de tabela de 60 dias atrás. Pré-requisito?",
+    "opciones": [
+      {
+        "texto_opcion": "Retention Delta e VACUUM configurados para manter history/files além de 60 dias",
+        "es_correcta": true,
+        "explicacion": "Time travel depende de versões ainda disponíveis no log e storage."
+      },
+      {
+        "texto_opcion": "Exportar CSV mensal substitui requisito",
+        "es_correcta": false,
+        "explicacion": "Não equivale a time travel nativo."
+      },
+      {
+        "texto_opcion": "VACUUM RETAIN 0 diário",
+        "es_correcta": false,
+        "explicacion": "Remove versões necessárias ao time travel."
+      },
+      {
+        "texto_opcion": "Desabilitar transaction log",
+        "es_correcta": false,
+        "explicacion": "Impossível em Delta."
+      }
+    ],
+    "tags": [
+      "7.3",
+      "Time travel retention"
+    ]
+  }
+]

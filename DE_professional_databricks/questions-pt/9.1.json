@@ -1,0 +1,988 @@
+[
+  {
+    "pregunta": "Job lento; Spark UI mostra stage 3 com 90% tempo. Próximo passo?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignorar stage 3",
+        "es_correcta": false,
+        "explicacion": "Miss bottleneck."
+      },
+      {
+        "texto_opcion": "Drill into stage 3 tasks: skew, spill, GC, shuffle read metrics",
+        "es_correcta": true,
+        "explicacion": "Stage-level drilldown localiza gargalo."
+      },
+      {
+        "texto_opcion": "Aumentar workers random",
+        "es_correcta": false,
+        "explicacion": "Pode não atacar causa."
+      },
+      {
+        "texto_opcion": "Reiniciar cluster sem análise",
+        "es_correcta": false,
+        "explicacion": "Perde diagnóstico."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Spark UI stages"
+    ]
+  },
+  {
+    "pregunta": "Tasks durations 10s vs 2h mesma stage. Diagnóstico?",
+    "opciones": [
+      {
+        "texto_opcion": "Data skew on partition key; consider AQE salting",
+        "es_correcta": true,
+        "explicacion": "Classic skew symptom."
+      },
+      {
+        "texto_opcion": "Network always",
+        "es_correcta": false,
+        "explicacion": "Possible but skew common."
+      },
+      {
+        "texto_opcion": "Driver failure",
+        "es_correcta": false,
+        "explicacion": "Different symptom."
+      },
+      {
+        "texto_opcion": "CSV corruption only",
+        "es_correcta": false,
+        "explicacion": "Too narrow."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Task skew UI"
+    ]
+  },
+  {
+    "pregunta": "Executor lost OOM in Spark UI. Tuning direction?",
+    "opciones": [
+      {
+        "texto_opcion": "Reduce partition size, increase memory, eliminate collect/broadcast abuse",
+        "es_correcta": true,
+        "explicacion": "OOM memory pressure fixes."
+      },
+      {
+        "texto_opcion": "Only add columns",
+        "es_correcta": false,
+        "explicacion": "Worse."
+      },
+      {
+        "texto_opcion": "Disable Spark",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Ignore OOM",
+        "es_correcta": false,
+        "explicacion": "Job fails."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "OOM executor"
+    ]
+  },
+  {
+    "pregunta": "Tasks spend 40% GC. Likely?",
+    "opciones": [
+      {
+        "texto_opcion": "Photon bug always",
+        "es_correcta": false,
+        "explicacion": "Not default assumption."
+      },
+      {
+        "texto_opcion": "Too few columns",
+        "es_correcta": false,
+        "explicacion": "Unlikely cause."
+      },
+      {
+        "texto_opcion": "Heap pressure oversized partitions or cached objects; tune memory fraction/partition size",
+        "es_correcta": true,
+        "explicacion": "GC high indicates memory issues."
+      },
+      {
+        "texto_opcion": "Need more VACUUM",
+        "es_correcta": false,
+        "explicacion": "Unrelated runtime GC."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "GC time high"
+    ]
+  },
+  {
+    "pregunta": "Stage dominated remote shuffle read. Optimize?",
+    "opciones": [
+      {
+        "texto_opcion": "Add UDF each column",
+        "es_correcta": false,
+        "explicacion": "Worse."
+      },
+      {
+        "texto_opcion": "Only increase driver cores",
+        "es_correcta": false,
+        "explicacion": "Executors shuffle."
+      },
+      {
+        "texto_opcion": "Reduce shuffle bytes, broadcast small dims, filter early, AQE",
+        "es_correcta": true,
+        "explicacion": "Shuffle reduction strategies."
+      },
+      {
+        "texto_opcion": "Disable shuffle permanently",
+        "es_correcta": false,
+        "explicacion": "Impossible many joins."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Shuffle read heavy"
+    ]
+  },
+  {
+    "pregunta": "Massive spill to disk in task metrics. Meaning?",
+    "opciones": [
+      {
+        "texto_opcion": "Need more catalogs",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Success indicator",
+        "es_correcta": false,
+        "explicacion": "Opposite."
+      },
+      {
+        "texto_opcion": "Memory insufficient for aggregation/join partition; tune size or memory",
+        "es_correcta": true,
+        "explicacion": "Spill diagnostic clear."
+      },
+      {
+        "texto_opcion": "Disk too fast",
+        "es_correcta": false,
+        "explicacion": "Nonsense."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Spill disk"
+    ]
+  },
+  {
+    "pregunta": "collect() caused driver OOM. Fix?",
+    "opciones": [
+      {
+        "texto_opcion": "Increase driver to infinite",
+        "es_correcta": false,
+        "explicacion": "Band-aid; anti-pattern remains."
+      },
+      {
+        "texto_opcion": "Remove collect on large datasets; use write/show limited sample",
+        "es_correcta": true,
+        "explicacion": "Driver shouldn't hold full data."
+      },
+      {
+        "texto_opcion": "More shuffle partitions only",
+        "es_correcta": false,
+        "explicacion": "Doesn't fix collect."
+      },
+      {
+        "texto_opcion": "Disable audit",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Driver OOM"
+    ]
+  },
+  {
+    "pregunta": "Transient failure cluster spot loss. Repair strategy?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable retries",
+        "es_correcta": false,
+        "explicacion": "Fragile."
+      },
+      {
+        "texto_opcion": "Delete data",
+        "es_correcta": false,
+        "explicacion": "Extreme."
+      },
+      {
+        "texto_opcion": "Retry job with checkpoint/idempotent sink; consider on-demand workers",
+        "es_correcta": true,
+        "explicacion": "Resilience pattern."
+      },
+      {
+        "texto_opcion": "Manual rerun duplicate risk without idempotency",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Job repair retry"
+    ]
+  },
+  {
+    "pregunta": "Where open Spark UI job cluster?",
+    "opciones": [
+      {
+        "texto_opcion": "Email support",
+        "es_correcta": false,
+        "explicacion": "Self-serve UI."
+      },
+      {
+        "texto_opcion": "GitHub",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Only local laptop",
+        "es_correcta": false,
+        "explicacion": "Remote cluster UI hosted."
+      },
+      {
+        "texto_opcion": "Driver UI link from cluster page or job run details",
+        "es_correcta": true,
+        "explicacion": "Standard access path."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Spark UI access"
+    ]
+  },
+  {
+    "pregunta": "Spark UI: job contains multiple stages because?",
+    "opciones": [
+      {
+        "texto_opcion": "Only errors create stages",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Shuffle boundaries/wide dependencies split stages",
+        "es_correcta": true,
+        "explicacion": "DAG structure."
+      },
+      {
+        "texto_opcion": "One SQL line one stage always",
+        "es_correcta": false,
+        "explicacion": "False."
+      },
+      {
+        "texto_opcion": "Random Spark",
+        "es_correcta": false,
+        "explicacion": "Has reasons."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Stage vs job"
+    ]
+  },
+  {
+    "pregunta": "Custom accumulator shows unexpected zero. Check?",
+    "opciones": [
+      {
+        "texto_opcion": "Verify updated inside transformations/actions; not only in lazy paths unexecuted",
+        "es_correcta": true,
+        "explicacion": "Lazy evaluation pitfalls."
+      },
+      {
+        "texto_opcion": "Accumulator broken always",
+        "es_correcta": false,
+        "explicacion": "Usage issue common."
+      },
+      {
+        "texto_opcion": "Need VACUUM",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Photon disables accumulators",
+        "es_correcta": false,
+        "explicacion": "Not issue."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Accumulators debug"
+    ]
+  },
+  {
+    "pregunta": "Spark SQL tab helps debug?",
+    "opciones": [
+      {
+        "texto_opcion": "Replaces cluster logs entirely",
+        "es_correcta": false,
+        "explicacion": "Complement."
+      },
+      {
+        "texto_opcion": "Only Python",
+        "es_correcta": false,
+        "explicacion": "SQL too."
+      },
+      {
+        "texto_opcion": "No plans shown",
+        "es_correcta": false,
+        "explicacion": "Shows plans."
+      },
+      {
+        "texto_opcion": "Shows executed queries plan duration linked jobs",
+        "es_correcta": true,
+        "explicacion": "SQL workload debug."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "SQL tab UI"
+    ]
+  },
+  {
+    "pregunta": "Explain shows Cartesian product warning. Action?",
+    "opciones": [
+      {
+        "texto_opcion": "Run again luck",
+        "es_correcta": false,
+        "explicacion": "Same plan."
+      },
+      {
+        "texto_opcion": "Fix join condition missing/incorrect",
+        "es_correcta": true,
+        "explicacion": "Cartesian explosion root cause."
+      },
+      {
+        "texto_opcion": "Add memory",
+        "es_correcta": false,
+        "explicacion": "Doesn't fix cartesian."
+      },
+      {
+        "texto_opcion": "Disable UI",
+        "es_correcta": false,
+        "explicacion": "Useless."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Broken query plan"
+    ]
+  },
+  {
+    "pregunta": "Speculative tasks enabled duplicate work slow node. When helpful?",
+    "opciones": [
+      {
+        "texto_opcion": "For storage VACUUM",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Only driver",
+        "es_correcta": false,
+        "explicacion": "Executors speculated."
+      },
+      {
+        "texto_opcion": "Always disable mandatory",
+        "es_correcta": false,
+        "explicacion": "Can help stragglers."
+      },
+      {
+        "texto_opcion": "Straggler mitigation on unstable nodes",
+        "es_correcta": true,
+        "explicacion": "Speculation trades waste for latency."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Speculation"
+    ]
+  },
+  {
+    "pregunta": "Executor lost heartbeat. Causes include?",
+    "opciones": [
+      {
+        "texto_opcion": "Only coding bug always",
+        "es_correcta": false,
+        "explicacion": "Too narrow."
+      },
+      {
+        "texto_opcion": "Unity Catalog",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Z-ORDER",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Spot preemption, OOM, node issue, long GC",
+        "es_correcta": true,
+        "explicacion": "Multiple infra/app causes."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Executor lost"
+    ]
+  },
+  {
+    "pregunta": "Broadcast join fails timeout. Spark UI shows?",
+    "opciones": [
+      {
+        "texto_opcion": "Nothing",
+        "es_correcta": false,
+        "explicacion": "Shows in plan/stages."
+      },
+      {
+        "texto_opcion": "Large broadcast attempt or slow transfer; check table size estimate",
+        "es_correcta": true,
+        "explicacion": "Broadcast issues visible in plan."
+      },
+      {
+        "texto_opcion": "Secret leak",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "Only driver GC irrelevant",
+        "es_correcta": false,
+        "explicacion": "Related possibly."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Broadcast timeout debug"
+    ]
+  },
+  {
+    "pregunta": "Many null keys concentrate one task. UI pattern?",
+    "opciones": [
+      {
+        "texto_opcion": "Single task huge shuffle read/write null bucket",
+        "es_correcta": true,
+        "explicacion": "Null skew common."
+      },
+      {
+        "texto_opcion": "No shuffle",
+        "es_correcta": false,
+        "explicacion": "Join likely shuffles."
+      },
+      {
+        "texto_opcion": "Perfect balance",
+        "es_correcta": false,
+        "explicacion": "Opposite."
+      },
+      {
+        "texto_opcion": "Driver only work",
+        "es_correcta": false,
+        "explicacion": "Executors process."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Data skew join key null"
+    ]
+  },
+  {
+    "pregunta": "Cached RDD inconsistent after upstream bug fix?",
+    "opciones": [
+      {
+        "texto_opcion": "Keep cache forever",
+        "es_correcta": false,
+        "explicacion": "Stale results."
+      },
+      {
+        "texto_opcion": "VACUUM cache",
+        "es_correcta": false,
+        "explicacion": "Nonsense."
+      },
+      {
+        "texto_opcion": "Restart universe",
+        "es_correcta": false,
+        "explicacion": "Overkill."
+      },
+      {
+        "texto_opcion": "Uncache and recompute; clear stale cache",
+        "es_correcta": true,
+        "explicacion": "Cache invalidation."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Repair cached data"
+    ]
+  },
+  {
+    "pregunta": "Analysis shows single task killed external OOM killer?",
+    "opciones": [
+      {
+        "texto_opcion": "Container memory limit lower than Spark memory config; align overhead",
+        "es_correcta": true,
+        "explicacion": "K8s/YARN OOM killer distinct."
+      },
+      {
+        "texto_opcion": "Only driver",
+        "es_correcta": false,
+        "explicacion": "Executor too."
+      },
+      {
+        "texto_opcion": "Fix with more columns",
+        "es_correcta": false,
+        "explicacion": "Worse."
+      },
+      {
+        "texto_opcion": "Impossible",
+        "es_correcta": false,
+        "explicacion": "Happens."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Job fails no OOM"
+    ]
+  },
+  {
+    "pregunta": "Export metrics for long-term debug?",
+    "opciones": [
+      {
+        "texto_opcion": "Println debug only",
+        "es_correcta": false,
+        "explicacion": "Insufficient scale."
+      },
+      {
+        "texto_opcion": "Only screenshot UI",
+        "es_correcta": false,
+        "explicacion": "Ephemeral."
+      },
+      {
+        "texto_opcion": "Spark listener / cluster driver logs / Ganglia metrics legacy",
+        "es_correcta": true,
+        "explicacion": "Observability integration."
+      },
+      {
+        "texto_opcion": "No export ever",
+        "es_correcta": false,
+        "explicacion": "False."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Spark listener logs"
+    ]
+  },
+  {
+    "pregunta": "Same stage pattern repeats many times. Cause?",
+    "opciones": [
+      {
+        "texto_opcion": "Need more tables",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      },
+      {
+        "texto_opcion": "UI glitch only",
+        "es_correcta": false,
+        "explicacion": "Real executions."
+      },
+      {
+        "texto_opcion": "Loop submitting jobs or multiple actions in notebook cells",
+        "es_correcta": true,
+        "explicacion": "Notebook pattern issue."
+      },
+      {
+        "texto_opcion": "Spark bug always",
+        "es_correcta": false,
+        "explicacion": "Check code."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Stage duplicate"
+    ]
+  },
+  {
+    "pregunta": "Stage slow Python UDF row-by-row. UI?",
+    "opciones": [
+      {
+        "texto_opcion": "Tasks CPU bound low throughput; consider pandas UDF or SQL native",
+        "es_correcta": true,
+        "explicacion": "UDF perf visible tasks long CPU."
+      },
+      {
+        "texto_opcion": "Photon accelerates Python UDF fully",
+        "es_correcta": false,
+        "explicacion": "Limited."
+      },
+      {
+        "texto_opcion": "Shuffle only issue always",
+        "es_correcta": false,
+        "explicacion": "UDF CPU bound possible."
+      },
+      {
+        "texto_opcion": "Delete cluster",
+        "es_correcta": false,
+        "explicacion": "Tune first."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Python UDF bottleneck"
+    ]
+  },
+  {
+    "pregunta": "One straggler task after skew join enabled partially. Next?",
+    "opciones": [
+      {
+        "texto_opcion": "Drop table",
+        "es_correcta": false,
+        "explicacion": "Extreme."
+      },
+      {
+        "texto_opcion": "Disable AQE",
+        "es_correcta": false,
+        "explicacion": "Usually worse."
+      },
+      {
+        "texto_opcion": "Celebrate",
+        "es_correcta": false,
+        "explicacion": "May still slow."
+      },
+      {
+        "texto_opcion": "Manual skew hint or salt hot keys remaining",
+        "es_correcta": true,
+        "explicacion": "Residual skew possible."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Fix straggler"
+    ]
+  },
+  {
+    "pregunta": "Driver GC dominates. Common notebook cause?",
+    "opciones": [
+      {
+        "texto_opcion": "Executor shuffle always",
+        "es_correcta": false,
+        "explicacion": "Driver diff."
+      },
+      {
+        "texto_opcion": "collect(), large broadcast driver-side plans, too many Spark jobs in driver",
+        "es_correcta": true,
+        "explicacion": "Driver-side patterns."
+      },
+      {
+        "texto_opcion": "Too many catalogs",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Storage slow",
+        "es_correcta": false,
+        "explicacion": "Less common driver GC cause."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Driver high GC"
+    ]
+  },
+  {
+    "pregunta": "Misconfigured spark.sql.shuffle.partitions=10 on 5TB. Symptom?",
+    "opciones": [
+      {
+        "texto_opcion": "Metadata leak",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Massive tasks OOM/spill in UI",
+        "es_correcta": true,
+        "explicacion": "Too few partitions."
+      },
+      {
+        "texto_opcion": "Instant success",
+        "es_correcta": false,
+        "explicacion": "Unlikely."
+      },
+      {
+        "texto_opcion": "Driver only warning",
+        "es_correcta": false,
+        "explicacion": "Executors suffer."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Repair job config"
+    ]
+  },
+  {
+    "pregunta": "Compare past run after cluster terminated?",
+    "opciones": [
+      {
+        "texto_opcion": "Re-run exact cluster always required",
+        "es_correcta": false,
+        "explicacion": "History helps."
+      },
+      {
+        "texto_opcion": "Only memory",
+        "es_correcta": false,
+        "explicacion": "If not persisted lost."
+      },
+      {
+        "texto_opcion": "Spark history server if enabled / job run retained metrics",
+        "es_correcta": true,
+        "explicacion": "Post-mortem analysis."
+      },
+      {
+        "texto_opcion": "Impossible after terminate",
+        "es_correcta": false,
+        "explicacion": "History server helps."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "History server"
+    ]
+  },
+  {
+    "pregunta": "Task fails with FileNotFoundException Delta. Debug?",
+    "opciones": [
+      {
+        "texto_opcion": "Always Photon",
+        "es_correcta": false,
+        "explicacion": "Not necessarily."
+      },
+      {
+        "texto_opcion": "Delete UC",
+        "es_correcta": false,
+        "explicacion": "Extreme."
+      },
+      {
+        "texto_opcion": "Version mismatch, VACUUM too aggressive, concurrent writers",
+        "es_correcta": true,
+        "explicacion": "Delta file missing causes."
+      },
+      {
+        "texto_opcion": "Ignore retry",
+        "es_correcta": false,
+        "explicacion": "May transient."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Task failure tab"
+    ]
+  },
+  {
+    "pregunta": "Filter pushdown not happening. Check UI SQL plan?",
+    "opciones": [
+      {
+        "texto_opcion": "Verify predicate on partition/cluster columns; UDF blocking pushdown",
+        "es_correcta": true,
+        "explicacion": "Plan analysis."
+      },
+      {
+        "texto_opcion": "Ignore plan",
+        "es_correcta": false,
+        "explicacion": "Miss tuning."
+      },
+      {
+        "texto_opcion": "Only add memory",
+        "es_correcta": false,
+        "explicacion": "May not pushdown."
+      },
+      {
+        "texto_opcion": "Random hint broadcast fact 1TB",
+        "es_correcta": false,
+        "explicacion": "Bad."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Optimize failed stage"
+    ]
+  },
+  {
+    "pregunta": "Two jobs OPTIMIZE same table. Symptom?",
+    "opciones": [
+      {
+        "texto_opcion": "Speed up both",
+        "es_correcta": false,
+        "explicacion": "Contention."
+      },
+      {
+        "texto_opcion": "Merge tables automatic",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Always safe",
+        "es_correcta": false,
+        "explicacion": "Can conflict."
+      },
+      {
+        "texto_opcion": "Conflict exceptions or long lock contention in logs",
+        "es_correcta": true,
+        "explicacion": "Concurrent maintenance risk."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Concurrent job conflict"
+    ]
+  },
+  {
+    "pregunta": "Process: OOM → increase partitions → spill persists → ?",
+    "opciones": [
+      {
+        "texto_opcion": "Single knob always",
+        "es_correcta": false,
+        "explicacion": "Multi-step."
+      },
+      {
+        "texto_opcion": "Give up",
+        "es_correcta": false,
+        "explicacion": "Engineering continues."
+      },
+      {
+        "texto_opcion": "Further increase partitions or memory or reduce columns cached",
+        "es_correcta": true,
+        "explicacion": "Iterative Spark tuning."
+      },
+      {
+        "texto_opcion": "Only VACUUM",
+        "es_correcta": false,
+        "explicacion": "Unrelated."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Memory tuning iterative"
+    ]
+  },
+  {
+    "pregunta": "Streaming query terminated unexpectedly. Recovery?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore lag",
+        "es_correcta": false,
+        "explicacion": "May stale."
+      },
+      {
+        "texto_opcion": "Convert batch silently without validation",
+        "es_correcta": false,
+        "explicacion": "Risky."
+      },
+      {
+        "texto_opcion": "Fix root cause; restart from checkpoint; verify schema/options",
+        "es_correcta": true,
+        "explicacion": "Streaming recovery pattern."
+      },
+      {
+        "texto_opcion": "Delete checkpoint always first",
+        "es_correcta": false,
+        "explicacion": "Loses exactly once state carelessly."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Repair streaming query"
+    ]
+  },
+  {
+    "pregunta": "Job run page vs Spark UI relationship?",
+    "opciones": [
+      {
+        "texto_opcion": "Spark UI only local IDE",
+        "es_correcta": false,
+        "explicacion": "Remote driver."
+      },
+      {
+        "texto_opcion": "Job run links to driver Spark UI for that execution",
+        "es_correcta": true,
+        "explicacion": "Navigate between."
+      },
+      {
+        "texto_opcion": "Job page replaces Spark UI entirely",
+        "es_correcta": false,
+        "explicacion": "Complement."
+      },
+      {
+        "texto_opcion": "Unrelated systems",
+        "es_correcta": false,
+        "explicacion": "Linked."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Cluster vs job metrics"
+    ]
+  },
+  {
+    "pregunta": "Compare plan AQE on/off for diagnosis?",
+    "opciones": [
+      {
+        "texto_opcion": "Never disable",
+        "es_correcta": false,
+        "explicacion": "Valid debug."
+      },
+      {
+        "texto_opcion": "Required prod forever off",
+        "es_correcta": false,
+        "explicacion": "No."
+      },
+      {
+        "texto_opcion": "Temporarily disable adaptive to see baseline shuffle partitions behavior",
+        "es_correcta": true,
+        "explicacion": "Diagnostic technique."
+      },
+      {
+        "texto_opcion": "Deletes data",
+        "es_correcta": false,
+        "explicacion": "No."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Debug AQE off"
+    ]
+  },
+  {
+    "pregunta": "After fix OOM, document what?",
+    "opciones": [
+      {
+        "texto_opcion": "It works now",
+        "es_correcta": false,
+        "explicacion": "Insufficient."
+      },
+      {
+        "texto_opcion": "Secret config",
+        "es_correcta": false,
+        "explicacion": "Document safely."
+      },
+      {
+        "texto_opcion": "Root cause, metric evidence Spark UI, config changes, prevention",
+        "es_correcta": true,
+        "explicacion": "Postmortem quality."
+      },
+      {
+        "texto_opcion": "Blame user",
+        "es_correcta": false,
+        "explicacion": "Unprofessional."
+      }
+    ],
+    "tags": [
+      "9.1",
+      "Root cause doc"
+    ]
+  }
+]
