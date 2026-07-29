@@ -40,7 +40,7 @@ Não é um LMS. É um hub de quizzes + catálogo.
 ```
 {id}/
   manifest.json      # lista de arquivos + count
-  temario.json       # seções / subtemas / pesos (quando houver)
+  temario.json       # programa da prova: seções / subtemas / pesos (quando houver)
   questions/         # EN
   questions-pt/      # PT-BR
 ```
@@ -54,7 +54,20 @@ Runtime do quiz:
 5. Histórico de mocks: `learnioHistory`
 6. Idioma UI: `learnioLang` (`en` default)
 
-### Schema de questão (nomes em espanhol, texto EN ou PT)
+### Schema de questão (chaves legadas; texto EN ou PT)
+
+Os **nomes dos campos** no JSON vieram de um schema antigo em espanhol e **não devem ser renomeados** (o `quiz.html` depende deles). O **conteúdo** do texto é EN ou PT-BR.
+
+| Campo (fixo) | Significado |
+|---------------|-------------|
+| `pregunta` | enunciado |
+| `opciones` | alternativas |
+| `texto_opcion` | texto da alternativa |
+| `es_correcta` | se a alternativa é a correta |
+| `explicacion` | explicação da alternativa |
+| `tags` | `[id do subtema, rótulo curto]` |
+
+Arquivo de programa/syllabus por exame: `temario.json` (nome de arquivo legado; = programa da prova).
 
 Cada arquivo `1.1.json` etc. é um **array**:
 
@@ -68,17 +81,17 @@ Cada arquivo `1.1.json` etc. é um **array**:
       "explicacion": "..."
     }
   ],
-  "tags": ["1.1", "Label curto"]
+  "tags": ["1.1", "Rótulo curto"]
 }
 ```
 
 Regras:
 
-- Sempre **4** opções (Associate seção 1 histórica pode ter 5)
+- Sempre **4** alternativas (Associate seção 1 histórica pode ter 5)
 - Exatamente **uma** `es_correcta: true`
-- Toda opção tem `explicacion`
+- Toda alternativa tem `explicacion`
 - `tags[0]` = id do subtema (= nome do arquivo sem `.json`)
-- UI **embaralha** a ordem das opções na exibição
+- UI **embaralha** a ordem das alternativas na exibição
 
 ### `exams.json` (campos importantes)
 
@@ -112,8 +125,8 @@ Regras:
 - Quiz: atalhos `↑ ↓` (foco A–E), `→` confirma, `←`, `A–E`, `G` (ir para), `?`
 - Mock: `?mode=sim` ou botão Mock; timer = `durationMinutes`; N = `realExamQuestions`
 - Mock **balanceia domínios** (cotas pelo `peso` do `temario.json` quando existe; senão cotas iguais). Exclui pacotes “Real practice / study bank” (`90.x`, peso 0). Resultado mostra o mix por domínio.
-- Mock é também estudo: após cada resposta mostra **explicações** (correta + erradas) e trava a escolha. No fim: revisar missed, **correct** e all.
-- Cache: home busca `exams.json?v=` + `CATALOG_VERSION` com `cache: 'no-store'` (GitHub Pages + browser cache atrasam muito)
+- Mock: após cada resposta mostra **explicações** (correta + erradas) e trava a escolha. No mock, **esconde tags/tópico** (evita vazar o domínio). No fim: revisar missed, correct e all.
+- Cache: home busca `exams.json?v=` + `CATALOG_VERSION`; quiz busca bancos com `BANK_VERSION` + `cache: 'no-store'`
 
 ---
 
