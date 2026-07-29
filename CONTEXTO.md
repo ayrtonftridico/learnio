@@ -293,4 +293,4 @@ Dependência: `deep_translator` (e rede para Google Translate).
 
 ---
 
-*Atualizado em 2026-07-28. Se divergir do repo, o código e o `exams.json` vencem.*
+*Atualizado em 2026-07-29. Se divergir do repo, o código e o `exams.json` vencem.*
