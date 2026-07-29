@@ -112,6 +112,7 @@ Regras:
 - Quiz: atalhos `↑ ↓` (foco A–E), `→` confirma, `←`, `A–E`, `G` (ir para), `?`
 - Mock: `?mode=sim` ou botão Mock; timer = `durationMinutes`; N = `realExamQuestions`
 - Mock **balanceia domínios** (cotas pelo `peso` do `temario.json` quando existe; senão cotas iguais). Exclui pacotes “Real practice / study bank” (`90.x`, peso 0). Resultado mostra o mix por domínio.
+- Mock é também estudo: após cada resposta mostra **explicações** (correta + erradas) e trava a escolha. No fim: revisar missed, **correct** e all.
 - Cache: home busca `exams.json?v=` + `CATALOG_VERSION` com `cache: 'no-store'` (GitHub Pages + browser cache atrasam muito)
 
 ---

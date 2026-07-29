@@ -968,6 +968,7 @@
       let simEndsAt = null;
       let simTimerId = null;
       let practiceSnapshot = null; // { filtered, currentIdx, studyFilter } when entering sim
+      let lastMockReview = null; // [{ q, item }, ...] after finish, for review UI
       const HISTORY_KEY = 'learnioHistory';
 
       // ---------- Exam catalog + progress ----------
@@ -1139,7 +1140,8 @@
           'Start a mock exam?\n\n' +
           n + ' questions, ' + mins + ' minutes\n' +
           'Balanced across exam domains (not pure random).\n' +
-          'Answers are graded at the end (no instant reveal).\n' +
+          'After each answer you see explanations (study mode).\n' +
+          'Final score is shown when you finish.\n' +
           'This does not change your practice progress.'
         )) {
           const url = new URL(location.href);
@@ -1260,6 +1262,17 @@
         history.replaceState(null, '', url);
 
         const wrong = items.filter(i => !i.correct);
+        const rights = items.filter(i => i.correct);
+        lastMockReview = filtered.map(q => {
+          const id = qid(q);
+          const item = items.find(it => it.file === q.fileName && it.idx === q.idxInFile) || {
+            file: q.fileName,
+            idx: q.idxInFile,
+            chosen: Object.prototype.hasOwnProperty.call(simAnswers, id) ? simAnswers[id] : null,
+            correct: false
+          };
+          return { q, item };
+        });
         const mix = mockDomainMix(filtered);
         const mixHtml = mix.length
           ? '<p class="sub" style="margin-top:14px;text-align:left;max-width:36rem;margin-left:auto;margin-right:auto">' +
@@ -1289,7 +1302,9 @@
             '<button type="button" class="nav-btn" id="resPractice">Back to practice</button>' +
             '<button type="button" class="nav-btn" id="resRetry">New mock</button>' +
             '<button type="button" class="nav-btn" id="resExport">Export history</button>' +
-            (wrong.length ? '<button type="button" class="nav-btn" id="resReview">Review missed (' + wrong.length + ')</button>' : '') +
+            (wrong.length ? '<button type="button" class="nav-btn" id="resReviewWrong">Review missed (' + wrong.length + ')</button>' : '') +
+            (rights.length ? '<button type="button" class="nav-btn" id="resReviewRight">Review correct (' + rights.length + ')</button>' : '') +
+            (lastMockReview.length ? '<button type="button" class="nav-btn" id="resReviewAll">Review all (' + lastMockReview.length + ')</button>' : '') +
           '</div>';
         contentEl.appendChild(card);
         progressEl.innerHTML = 'Mock result: <b>' + pct + '%</b>';
@@ -1306,28 +1321,35 @@
           startSim();
         });
         document.getElementById('resExport').addEventListener('click', exportHistory);
-        const rev = document.getElementById('resReview');
-        if (rev) {
-          rev.addEventListener('click', () => {
-            // Load missed into filtered with practice-style reveal using a temp overlay on progress
-            const missed = wrong.map(w => {
-              const q = allQuestions.find(x => x.fileName === w.file && x.idxInFile === w.idx);
-              return q;
-            }).filter(Boolean);
-            // Merge mock answers into a review-only map by temporarily painting via progress clone
-            missed.forEach(q => {
-              const w = wrong.find(x => x.file === q.fileName && x.idx === q.idxInFile);
-              if (!w || w.chosen === null) return;
-              // store for review render without writing practice progress
-              q._reviewChosen = w.chosen;
-            });
-            filtered = missed;
-            currentIdx = 0;
-            simMode = false;
-            practiceSnapshot = practiceSnapshot || { filtered: allQuestions.slice(), currentIdx: 0, studyFilter: 'all', search: '' };
-            renderQuestion();
+
+        function beginMockReview(kind) {
+          if (!lastMockReview || !lastMockReview.length) return;
+          let pack = lastMockReview;
+          if (kind === 'wrong') pack = lastMockReview.filter(x => !x.item.correct);
+          if (kind === 'right') pack = lastMockReview.filter(x => x.item.correct);
+          if (!pack.length) return;
+          // limpa flags antigas
+          lastMockReview.forEach(({ q }) => {
+            delete q._reviewMode;
+            delete q._reviewChosen;
           });
+          pack.forEach(({ q, item }) => {
+            q._reviewMode = true;
+            q._reviewChosen = typeof item.chosen === 'number' ? item.chosen : null;
+          });
+          filtered = pack.map(x => x.q);
+          currentIdx = 0;
+          simMode = false;
+          practiceSnapshot = practiceSnapshot || { filtered: allQuestions.slice(), currentIdx: 0, studyFilter: 'all', search: '' };
+          renderQuestion();
         }
+
+        const rw = document.getElementById('resReviewWrong');
+        if (rw) rw.addEventListener('click', () => beginMockReview('wrong'));
+        const rr = document.getElementById('resReviewRight');
+        if (rr) rr.addEventListener('click', () => beginMockReview('right'));
+        const ra = document.getElementById('resReviewAll');
+        if (ra) ra.addEventListener('click', () => beginMockReview('all'));
       }
 
       simBtn.addEventListener('click', startSim);
@@ -1677,10 +1699,18 @@
         simBtn.disabled = simMode;
         if (simMode) {
           const answered = filtered.filter(q => Object.prototype.hasOwnProperty.call(simAnswers, qid(q))).length;
+          const right = filtered.filter(q => {
+            const c = simAnswers[qid(q)];
+            if (typeof c !== 'number') return false;
+            return q.opciones[c] && q.opciones[c].es_correcta === true;
+          }).length;
           const cover = filtered.length ? Math.round((answered / filtered.length) * 100) : 0;
           scoreEl.innerHTML =
             `<span>${answered}/${filtered.length} answered</span>` +
-            `<span class="sep">·</span><span>graded at the end</span>`;
+            (answered
+              ? `<span class="sep">·</span><span class="val">${right} ✓</span><span class="wrong">${answered - right} ✗</span>`
+              : '') +
+            `<span class="sep">·</span><span>feedback on answer</span>`;
           resetBtn.style.display = 'none';
           if (railFill) railFill.style.width = cover + '%';
           return;
@@ -1907,6 +1937,7 @@
         }
 
         const reviewChosen = typeof q._reviewChosen === 'number' ? q._reviewChosen : null;
+        const reviewMode = q._reviewMode === true;
         const optDivs = [];
 
         q.order.forEach((origIdx, displayPos) => {
@@ -1936,13 +1967,14 @@
           optDiv.appendChild(right);
 
           optDiv.addEventListener('click', () => {
+            if (reviewMode) return;
             if (simMode) {
+              if (Object.prototype.hasOwnProperty.call(simAnswers, id)) return; // locked after first pick
               simAnswers[id] = origIdx;
-              optDivs.forEach(el => el.classList.toggle('selected', Number(el.dataset.orig) === origIdx));
+              paintSimAnswered();
               updateScore();
               return;
             }
-            if (reviewChosen !== null) return; // review-only
             if (progress[id]) return;
             progress[id] = {
               chosen: origIdx,
@@ -1983,15 +2015,14 @@
           optDivs.forEach((el, i) => el.classList.toggle('focused', i === focusedOpt));
         }
 
-        function paintAnswered() {
-          const p = progress[id] || (reviewChosen !== null ? { chosen: reviewChosen, correct: q.opciones[reviewChosen] && q.opciones[reviewChosen].es_correcta === true } : null);
-          if (!p) return;
+        function paintReveal(chosenOrig) {
           optDivs.forEach(el => {
             const oi = Number(el.dataset.orig);
             el.classList.add('answered', 'locked');
+            el.classList.remove('selected', 'focused');
             if (q.opciones[oi].es_correcta === true) {
               el.classList.add('correct');
-            } else if (oi === p.chosen) {
+            } else if (typeof chosenOrig === 'number' && oi === chosenOrig) {
               el.classList.add('incorrect');
             } else {
               el.classList.add('dimmed');
@@ -1999,11 +2030,26 @@
           });
         }
 
+        function paintSimAnswered() {
+          const chosen = simAnswers[id];
+          if (typeof chosen !== 'number') return;
+          paintReveal(chosen);
+        }
+
+        function paintAnswered() {
+          if (reviewMode) {
+            paintReveal(reviewChosen);
+            return;
+          }
+          const p = progress[id];
+          if (!p) return;
+          paintReveal(p.chosen);
+        }
+
         paintFocus();
         if (simMode) {
-          const chosen = simAnswers[id];
-          if (typeof chosen === 'number') {
-            optDivs.forEach(el => el.classList.toggle('selected', Number(el.dataset.orig) === chosen));
+          if (Object.prototype.hasOwnProperty.call(simAnswers, id)) {
+            paintSimAnswered();
           }
         } else {
           paintAnswered();
