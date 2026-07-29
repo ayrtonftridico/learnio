@@ -3,7 +3,7 @@
     "pregunta": "Um engenheiro de dados deseja ler uma tabela PostgreSQL `orders` em um Spark DataFrame. Qual código carrega corretamente a tabela usando JDBC?",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option \\\n    .option \\\n    .option.option \\\n    .load()\n```.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"jdbc:postgresql://host:5432/mydb\") \\\n    .option(\"dbtable\", \"orders\") \\\n    .option(\"user\", \"admin\").option(\"password\", \"secret\") \\\n    .load()\n```",
         "es_correcta": true,
         "explicacion": "Este é o padrão de leitura JDBC correto: `format(\"jdbc\")`, uma URL JDBC válida, `dbtable` para o nome da tabela e credenciais passadas via `.option()`."
       },
@@ -90,7 +90,7 @@
     "pregunta": "Um engenheiro de dados precisa ler apenas pedidos feitos após 01/01/2024 de uma tabela remota do SQL Server. Qual abordagem envia o filtro para o servidor de banco de dados em vez de filtrar no Spark?",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option.option AS t\") \\\n    .load()\n```.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\",\n        \"(SELECT * FROM orders WHERE order_date > '2024-01-01') AS t\") \\\n    .load()\n```",
         "es_correcta": true,
         "explicacion": "Envolver uma subconsulta como `dbtable` faz com que a cláusula WHERE seja executada no servidor de banco de dados antes que os dados sejam transferidos para o Spark — este é o padrão de empilhamento padrão."
       },
@@ -148,7 +148,7 @@
     "pregunta": "Qual das opções a seguir configura corretamente uma leitura paralela JDBC em uma coluna `transaction_id` variando de 1 a 1.000.000?",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option.option \\\n    .option \\\n    .option.option \\\n   .",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"transactions\") \\\n    .option(\"partitionColumn\", \"transaction_id\") \\\n    .option(\"lowerBound\", 1).option(\"upperBound\", 1000000) \\\n    .option(\"numPartitions\", 10).load()\n```",
         "es_correcta": true,
         "explicacion": "Todas as quatro opções necessárias são fornecidas: `partitionColumn`, `lowerBound`, `upperBound` e `numPartitions`. O Spark dividirá o intervalo de ID em 10 fatias iguais."
       },
@@ -206,7 +206,7 @@
     "pregunta": "Um engenheiro de dados deseja escrever um Spark DataFrame de volta em uma tabela PostgreSQL chamada `summary`. A tabela já existe e deve ser totalmente substituída. Qual código consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf.write.format(\"jdbc\") \\\n    .option.option \\\n    .option.option \\\n    .mode.save()\n```.",
+        "texto_opcion": "```python\ndf.write.format(\"jdbc\") \\\n    .option(\"url\", url).option(\"dbtable\", \"summary\") \\\n    .option(\"user\", user).option(\"password\", pwd) \\\n    .mode(\"overwrite\").save()\n```",
         "es_correcta": true,
         "explicacion": "`mode(\"overwrite\")` com JDBC descarta e recria a tabela de destino antes de inserir as novas linhas, substituindo totalmente o conteúdo existente."
       },
@@ -298,7 +298,7 @@
         "explicacion": "O conector JDBC do Spark não possui uma chave de opção `query`. SQL personalizado deve ser passado como uma subconsulta através da opção `dbtable`."
       },
       {
-        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option \\\n    .option AS t\") \\\n    .load()\n```.",
+        "texto_opcion": "```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", url) \\\n    .option(\"dbtable\", \"(SELECT id, name FROM customers WHERE active=1) AS t\") \\\n    .load()\n```",
         "es_correcta": true,
         "explicacion": "Colocar a consulta entre parênteses e fornecer um alias a torna uma subconsulta válida que o Spark trata como uma tabela virtual. Este é o padrão padrão para SQL customizado em leituras JDBC."
       },

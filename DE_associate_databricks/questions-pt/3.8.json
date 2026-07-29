@@ -192,7 +192,7 @@
         "explicacion": "`@dp.expect_or_drop` requer exatamente dois argumentos de string (nome, restrição), não uma lista. Use `@dp.expect_all_or_drop` para múltiplas regras."
       },
       {
-        "texto_opcion": "```python\n@dp.table()\n@dp.expect_all_or_drop\ndef clean_orders():\n    return spark.readStream.table\n```.",
+        "texto_opcion": "```python\n@dp.table()\n@dp.expect_all_or_drop({\n    \"valid_id\": \"id IS NOT NULL\",\n    \"positive_qty\": \"quantity > 0\"\n})\ndef clean_orders():\n    return spark.readStream.table(\"bronze.orders\")\n```",
         "es_correcta": true,
         "explicacion": "`@dp.expect_all_or_drop` aceita um ditado de pares `{name: restrição}` e descarta qualquer registro que falhe em pelo menos uma regra."
       }
@@ -730,7 +730,7 @@
       {
         "texto_opcion": "Nada — o pipeline tenta novamente automaticamente após um intervalo configurável",
         "es_correcta": false,
-        "explicacion": "As novas tentativas automáticas não resolvem falhas de qualidade de dados. Uma expectativa de FALHA requer intervenção humana explícita."
+        "explicacion": "As novas tentativas automáticas não resolvem falhas de qualidade de dados. Uma expectativa FAIL requer intervenção humana explícita."
       },
       {
         "texto_opcion": "O pipeline ignora os registros violados na próxima execução e continua automaticamente",
@@ -873,7 +873,7 @@
     "pregunta": "Um engenheiro de dados precisa configurar uma camada Gold materialized view com aplicação de qualidade. A equipe deseja que os registros com `total_sales < 0` sejam **descartados** e os registros com uma região `NULL` sejam **avisados, mas retidos**. Qual código SDP Python está correto?",
     "opciones": [
       {
-        "texto_opcion": "```python\n@dp.materialized_view()\n@dp.expect\n@dp.expect_or_drop\ndef gold_sales_summary():\n    return spark.read.table\n```.",
+        "texto_opcion": "```python\n@dp.materialized_view()\n@dp.expect(\"warn_null_region\", \"region IS NOT NULL\")\n@dp.expect_or_drop(\"drop_negative_sales\", \"total_sales >= 0\")\ndef gold_sales_summary():\n    return spark.read.table(\"silver.orders\")\n```",
         "es_correcta": true,
         "explicacion": "O empilhamento `@dp.expect` (WARN) e `@dp.expect_or_drop` (DROP) aplica ações diferentes a cada regra independentemente no mesmo conjunto de dados."
       },

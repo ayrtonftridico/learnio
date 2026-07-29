@@ -970,6 +970,7 @@
       let practiceSnapshot = null; // { filtered, currentIdx, studyFilter } when entering sim
       let lastMockReview = null; // [{ q, item }, ...] after finish, for review UI
       const HISTORY_KEY = 'learnioHistory';
+      const BANK_VERSION = '20260729a'; // bust cache of question JSON on GitHub Pages
 
       // ---------- Exam catalog + progress ----------
       const params = new URLSearchParams(location.search);
@@ -1492,7 +1493,7 @@
           const base = currentExam.path + '/' + qDir + '/';
           let files = [];
           try {
-            const man = await (await fetch(currentExam.path + '/manifest.json')).json();
+            const man = await (await fetch(currentExam.path + '/manifest.json?v=' + BANK_VERSION, { cache: 'no-store' })).json();
             files = man.files || [];
           } catch (_) {
             files = [];
@@ -1507,7 +1508,7 @@
 
           const items = [];
           for (const name of files) {
-            const arr = await (await fetch(base + name)).json();
+            const arr = await (await fetch(base + name + '?v=' + BANK_VERSION, { cache: 'no-store' })).json();
             items.push({ name, arr: Array.isArray(arr) ? arr : [arr] });
           }
           ingestParsedFiles(items, keepAt);

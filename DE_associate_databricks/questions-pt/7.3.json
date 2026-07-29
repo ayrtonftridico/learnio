@@ -195,7 +195,7 @@
         "explicacion": "`GROUP_MEMBER()` não é uma função SQL do Databricks. Use `is_account_group_member('group-name')` para UDFs de filtro de linha/máscara de coluna Unity Catalog."
       },
       {
-        "texto_opcion": "`is_account_group_member()` — this checks **account-level** groups and is preferred for Unity Catalog.",
+        "texto_opcion": "`is_account_group_member()` — this checks **account-level** groups and is preferred for Unity Catalog, avoiding scope issues with workspace-local groups.",
         "es_correcta": true,
         "explicacion": "`is_account_group_member()` funciona com grupos em nível de conta, que são o escopo correto para Unity Catalog. `is_member()` usa grupos locais de workspace, que podem não estar alinhados com o modelo de grupo entre workspaces do UC."
       }
@@ -244,7 +244,7 @@
         "explicacion": "Subconsultas dentro de UDFs de máscara de coluna são suportadas, mas fortemente desencorajadas para desempenho – elas são executadas por linha. `USING COLUMNS` é o padrão correto para passar o contexto da linha para a função de máscara."
       },
       {
-        "texto_opcion": "A assinatura da função inclui a coluna adicional como parâmetro e a máscara é aplicada com `USING COLUMNS (departamento)`:\n```sql\nALTER TABLE funcionários\nALTER COLUMN salário\nDEFINIR MÁSCARA dept_salary_mask\nUSANDO COLUNAS (departamento);\n```",
+        "texto_opcion": "A assinatura da função inclui a coluna adicional como parâmetro e a máscara é aplicada com `USING COLUMNS (departamento)`:\n```sql\nALTER TABLE employees\nALTER COLUMN salary\nSET MASK dept_salary_mask\nUSING COLUMNS (department);\n```",
         "es_correcta": true,
         "explicacion": "`USING COLUMNS` passa valores de coluna adicionais para a função de máscara como argumentos extras. A função usa `(salário, departamento)` - `salário` é a coluna mascarada primária, `departamento` é a coluna de contexto passada por meio de `USING COLUMNS`."
       },
@@ -329,7 +329,7 @@
     "pregunta": "Qual comando SQL aplica um filtro de linha no momento da criação da tabela?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders\n)\nWITH ROW FILTER catalog.schema.region_filter ON (region);\n```.",
+        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (\n  order_id BIGINT,\n  region STRING,\n  amount DECIMAL(10,2)\n)\nWITH ROW FILTER catalog.schema.region_filter ON (region);\n```",
         "es_correcta": true,
         "explicacion": "Filtros de linha podem ser aplicados na criação da tabela usando a cláusula `WITH ROW FILTER ... ON (...)` na instrução `CREATE TABLE`. Isso garante que a política esteja ativa desde a primeira inserção de dados."
       },
@@ -389,7 +389,7 @@
     "pregunta": "Um engenheiro de dados deseja usar `current_user()` em um filtro de linha para permitir que cada usuário veja apenas seus próprios registros. A coluna `created_by` armazena o email do usuário. Qual UDF implementa isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS BOOLEAN\nRETURN.",
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS BOOLEAN\nRETURN is_account_group_member('admin')\n    OR current_user() = created_by;\n```",
         "es_correcta": true,
         "explicacion": "Isso usa `current_user()` corretamente para comparar a identidade do usuário que está consultando com a coluna `created_by`. Os administradores ignoram o filtro. A função retorna BOOLEAN conforme necessário para filtros de linha."
       },
