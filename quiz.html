@@ -970,7 +970,7 @@
       let practiceSnapshot = null; // { filtered, currentIdx, studyFilter } when entering sim
       let lastMockReview = null; // [{ q, item }, ...] after finish, for review UI
       const HISTORY_KEY = 'learnioHistory';
-      const BANK_VERSION = '20260729a'; // bust cache of question JSON on GitHub Pages
+      const BANK_VERSION = '20260729b'; // bust cache of question JSON on GitHub Pages
 
       // ---------- Exam catalog + progress ----------
       const params = new URLSearchParams(location.search);
@@ -1907,17 +1907,25 @@
 
         const q = filtered[currentIdx];
         const modeLabel = simMode ? 'Mock' : 'Q';
-        progressEl.innerHTML = `${modeLabel} <b>${currentIdx + 1}</b> of ${filtered.length} / <span style="color:var(--ink-faint)">${q.fileName.replace(/\.json$/i, '')} #${q.idxInFile}</span>`;
-        tagbarEl.innerHTML = (q.tags || []).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('');
+        const hideTopic = simMode; // tags/seção vazam o domínio no mock
+        if (hideTopic) {
+          progressEl.innerHTML = `${modeLabel} <b>${currentIdx + 1}</b> of ${filtered.length}`;
+          tagbarEl.innerHTML = '';
+        } else {
+          progressEl.innerHTML = `${modeLabel} <b>${currentIdx + 1}</b> of ${filtered.length} / <span style="color:var(--ink-faint)">${q.fileName.replace(/\.json$/i, '')} #${q.idxInFile}</span>`;
+          tagbarEl.innerHTML = (q.tags || []).map(t => `<span class="tag">${escapeHtml(String(t))}</span>`).join('');
+        }
         highlightActiveFile(q.fileName);
 
         const card = document.createElement('div');
         card.className = 'card';
 
-        const stamp = document.createElement('div');
-        stamp.className = 'stamp';
-        stamp.textContent = q.fileName.replace('.json', '') + ' #' + q.idxInFile;
-        card.appendChild(stamp);
+        if (!hideTopic) {
+          const stamp = document.createElement('div');
+          stamp.className = 'stamp';
+          stamp.textContent = q.fileName.replace('.json', '') + ' #' + q.idxInFile;
+          card.appendChild(stamp);
+        }
 
         const qnum = document.createElement('div');
         qnum.className = 'qnum';
