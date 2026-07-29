@@ -15,7 +15,7 @@
       {
         "texto_opcion": "O comando `databricks bundle activate` não foi executado antes da implantação",
         "es_correcta": false,
-        "explicacion": "`bundle validar` captura erros de sintaxe YAML, mas não consegue detectar diferenças lógicas ou comportamentais causadas por configurações de ambiente inconsistentes. A causa raiz é a falta de uma abordagem IaC unificada."
+        "explicacion": "`bundle validate` captura erros de sintaxe YAML, mas não consegue detectar diferenças lógicas ou comportamentais causadas por configurações de ambiente inconsistentes. A causa raiz é a falta de uma abordagem IaC unificada."
       },
       {
         "texto_opcion": "Configuração manual e inconsistente entre ambientes — o mesmo pipeline não foi implantado com as mesmas.",
@@ -60,7 +60,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados tem o seguinte snippet `databricks.yml`:\n\n```yaml\ntargets:\n  dev:\n    default: true\n    mode: development\n  staging:\n    mode: production\n  prod:\n    mode: production\n    git:\n      branch: main\n```\n\nO engenheiro executa `databricks bundle deploy` do branch `feature/fix-123`. Qual destino recebe a implantação?",
+    "pregunta": "Um engenheiro de dados tem o seguinte snippet `databricks.yml`:\n\n```yaml\ntargets:\n  dev:\n    default: true\n    mode: development\n  staging:\n    mode: production\n  prod:\n    mode: production\n    git:\n      branch: main\n```\n\nO engenheiro executa `databricks bundle deploy` do branch `feature/fix-123`. Qual destino recebe o deploy?",
     "opciones": [
       {
         "texto_opcion": "`dev` — é o alvo `default: true` e não tem restrição de branch.",
@@ -68,7 +68,7 @@
         "explicacion": "Sem um sinalizador `-t`, o destino `default: true` (`dev`) é selecionado. O modo de desenvolvimento não tem validação `git.branch`, então a implantação prossegue independentemente do branch atual."
       },
       {
-        "texto_opcion": "`prod` — os pacotes sempre preferem o destino de produção.",
+        "texto_opcion": "`prod` — bundles always prefer the production target",
         "es_correcta": false,
         "explicacion": "Não há preferência por metas de produção. Sem `-t`, apenas o destino `default: true` é usado."
       },
@@ -301,24 +301,24 @@
     "pregunta": "Um engenheiro de dados usa `${bundle.target}` no nome do job:\n\n```yaml\nresources:\n  jobs:\n    etl_job:\n      name: \"ETL Pipeline [${bundle.target}]\"\n```\n\nQuando implantado em `staging`, qual é o nome do job? O alvo tem `mode: production`.",
     "opciones": [
       {
-        "texto_opcion": "`ETL Pipeline [staging]` — `${bundle.target}` resolve para o nome da chave de destino.",
-        "es_correcta": true,
-        "explicacion": "`${bundle.target}` resolve para a chave YAML do destino atual (`staging`). O modo de produção não adiciona um prefixo — apenas o modo de desenvolvimento adiciona `[dev <username>]`."
-      },
-      {
-        "texto_opcion": "`[dev alice]ETL Pipeline [staging]` — o modo de produção ainda adiciona o prefixo dev",
+        "texto_opcion": "`ETL Pipeline [${bundle.target}]` — substitutions are not resolved for job names",
         "es_correcta": false,
         "explicacion": "O prefixo `[dev <username>]` é aplicado apenas por `mode: development`. O modo de produção não adiciona nenhum prefixo."
       },
       {
-        "texto_opcion": "`ETL Pipeline [produção]` — `mode: production` substitui o nome do destino por `production`",
+        "texto_opcion": "`ETL Pipeline [production]` — `mode: production` overrides the target name to `production`.",
         "es_correcta": false,
         "explicacion": "`${bundle.target}` resolve para a chave YAML exatamente como escrita (`staging`), não para o nome do modo (`production`)."
       },
       {
-        "texto_opcion": "`ETL Pipeline [${bundle.target}]` — as substituições não são resolvidas para nomes de jobs",
+        "texto_opcion": "`[dev alice]ETL Pipeline [staging]` — production mode still adds the dev prefix",
         "es_correcta": false,
         "explicacion": "As substituições são resolvidas no momento da implantação para todos os campos YAML, incluindo `name`. A sequência literal não aparece na tarefa implementada."
+      },
+      {
+        "texto_opcion": "`ETL Pipeline [staging]` — `${bundle.target}` resolves to the target key name.",
+        "es_correcta": true,
+        "explicacion": "`${bundle.target}` resolve para a chave YAML do destino atual (`staging`). O modo de produção não adiciona um prefixo — apenas o modo de desenvolvimento adiciona `[dev <username>]`."
       }
     ],
     "tags": [
@@ -402,7 +402,7 @@
       {
         "texto_opcion": "Quando o estado real de um recurso implantado (job, pipeline) diverge do estado desejado definido na configuração do pacote.",
         "es_correcta": true,
-        "explicacion": "O desvio de configuração ocorre quando alterações ad hoc (via UI, chamadas CLI diretas ou hotfixes) são aplicadas a recursos implantados sem atualizar o YAML de origem. A próxima implantação do pacote corrige o desvio."
+        "explicacion": "O desvio de configuração ocorre quando alterações ad hoc (via UI, chamadas CLI diretas ou hotfixes) são aplicadas a recursos implantados sem atualizar o YAML de origem. A próxima bundle deploy corrige o desvio."
       },
       {
         "texto_opcion": "Quando uma variável de pacote muda gradualmente seu valor em diversas implantações, os valores das variáveis não mudam por si próprios — eles são definidos.",
@@ -446,27 +446,27 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados deseja visualizar quais alterações uma implantação de pacote de produção faria antes de realmente executá-lo. Qual comando consegue isso?",
+    "pregunta": "Um engenheiro de dados deseja visualizar quais alterações um deploy de bundle de produção faria antes de realmente executá-lo. Qual comando consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "`pacote databricks implantar -t prod --dry-run`",
+        "texto_opcion": "`databricks bundle validate -t prod`",
         "es_correcta": false,
         "explicacion": "`--dry-run` não é um sinalizador válido para `bundle deploy`. Use `databricks bundle plan -t prod` para uma visualização sem alterações."
       },
       {
-        "texto_opcion": "`pacote databricks validar -t prod`",
-        "es_correcta": false,
-        "explicacion": "`bundle validar` verifica a sintaxe e o esquema YAML, não quais alterações seriam aplicadas aos recursos existentes. Use o `bundle plan` para visualizar as alterações no nível do recurso."
-      },
-      {
-        "texto_opcion": "`resumo do pacote databricks -t prod`",
-        "es_correcta": false,
-        "explicacion": "`bundle summary` mostra detalhes do que foi implantado anteriormente. Ele não prevê mudanças futuras como o `plano de pacote` faz."
-      },
-      {
-        "texto_opcion": "`plano de pacote databricks -t prod`.",
+        "texto_opcion": "`databricks bundle plan -t prod`.",
         "es_correcta": true,
         "explicacion": "`databricks bundle plan` visualiza as alterações (criar/atualizar/excluir por recurso) que uma implantação aplicaria, sem fazer quaisquer alterações reais. É ideal para detectar desvios ou visualizar o que uma promoção faria."
+      },
+      {
+        "texto_opcion": "`databricks bundle summary -t prod`",
+        "es_correcta": false,
+        "explicacion": "`bundle summary` verifica a sintaxe e o esquema YAML, não quais alterações seriam aplicadas aos recursos existentes. Use o `bundle plan` para visualizar as alterações no nível do recurso."
+      },
+      {
+        "texto_opcion": "`databricks bundle deploy -t prod --dry-run`",
+        "es_correcta": false,
+        "explicacion": "`bundle summary` mostra detalhes do que foi implantado anteriormente. Ele não prevê mudanças futuras como o `bundle plan` faz."
       }
     ],
     "tags": [
@@ -475,7 +475,7 @@
     ]
   },
   {
-    "pregunta": "Um engenheiro de dados usa o seguinte pipeline de promoção CI/CD completo. Coloque as etapas na ordem correta:\n\n- A) `pacote de databricks implantar -t prod`\n- B) `pacote de databricks validar -t staging`\n- C) `databricks bundle deploy -t staging`\n- D) Portão de aprovação manual\n- E) Executar testes de integração na preparação\n\nQual é a sequência correta?",
+    "pregunta": "Um engenheiro de dados usa o seguinte pipeline de promoção CI/CD completo. Coloque as etapas na ordem correta:\n\n- A) `databricks bundle deploy -t prod`\n- B) `databricks bundle validate -t staging`\n- C) `databricks bundle deploy -t staging`\n- D) Portão de aprovação manual\n- E) Executar testes de integração na preparação\n\nQual é a sequência correta?",
     "opciones": [
       {
         "texto_opcion": "C → B → E → A → D, a validação (B) deve acontecer antes da.",
@@ -537,9 +537,9 @@
     "pregunta": "A equipe de um engenheiro de dados deseja evitar que quaisquer alterações manuais nos recursos de produção persistam. Que regra de governança eles deveriam aplicar?",
     "opciones": [
       {
-        "texto_opcion": "Agende a validação do pacote databricks para ser executado de hora em hora para detectar e reverter alterações.",
+        "texto_opcion": "Agende a validação do databricks bundle para ser executado de hora em hora para detectar e reverter alterações.",
         "es_correcta": false,
-        "explicacion": "`bundle validar` verifica apenas a sintaxe YAML - ele não detecta desvios no estado implantado. `bundle plan` detecta desvios e `bundle deploy` corrige-os. No entanto, evitar desvios por meio de permissões é mais robusto."
+        "explicacion": "`bundle validate` verifica apenas a sintaxe YAML - ele não detecta desvios no estado implantado. `bundle plan` detecta desvios e `bundle deploy` corrige-os. No entanto, evitar desvios por meio de permissões é mais robusto."
       },
       {
         "texto_opcion": "Grant `CAN_MANAGE` em recursos de produção apenas para a entidade de serviço CI/CD — remova.",
@@ -604,7 +604,7 @@
       {
         "texto_opcion": "Para validar a sintaxe YAML e a resolução de variáveis antes de implantar na preparação",
         "es_correcta": false,
-        "explicacion": "A validação de sintaxe e variável é feita por `bundle validar`, não por testes de integração. Os testes de integração são executados após a implantação temporária para verificar o comportamento real."
+        "explicacion": "A validação de sintaxe e variável é feita por `bundle validate`, não por testes de integração. Os testes de integração são executados após a implantação temporária para verificar o comportamento real."
       },
       {
         "texto_opcion": "Para substituir os testes unitários – os testes de integração são suficientes e os testes unitários são opcionais.",
@@ -723,12 +723,12 @@
       {
         "texto_opcion": "A execução de `bundle deploy` substitui periodicamente quaisquer alterações manuais da UI de volta ao estado.",
         "es_correcta": true,
-        "explicacion": "Como o `bundle deploy` é idempotente, agendá-lo regularmente (por exemplo, todas as noites) garante que quaisquer alterações fora da banda sejam corrigidas automaticamente. Isso transforma a implantação do pacote em um ciclo de reconciliação contínuo."
+        "explicacion": "Como o `bundle deploy` é idempotente, agendá-lo regularmente (por exemplo, todas as noites) garante que quaisquer alterações fora da banda sejam corrigidas automaticamente. Isso transforma a bundle deploy em um ciclo de reconciliação contínuo."
       },
       {
         "texto_opcion": "O Databricks agenda automaticamente implantações de pacotes a cada 24 horas como um recurso da plataforma",
         "es_correcta": false,
-        "explicacion": "Não há agendamento automático de implantação de pacote integrado na plataforma Databricks. As equipes devem configurar explicitamente as execuções agendadas em seus pipelines CI/CD."
+        "explicacion": "Não há agendamento automático de bundle deploy integrado na plataforma Databricks. As equipes devem configurar explicitamente as execuções agendadas em seus pipelines CI/CD."
       },
       {
         "texto_opcion": "As implantações programadas de pacotes substituem a necessidade de pipelines CI/CD em solicitações pull",
@@ -746,22 +746,22 @@
     "pregunta": "Um engenheiro de dados usa a substituição `${bundle.target}` para marcar recursos implantados:\n\n```yaml\nresources:\n  jobs:\n    etl_job:\n      name: \"ETL Job\"\n      tags:\n        environment: ${bundle.target}\n        team: data-engineering\n```\n\nQuando implantado no teste, qual é o valor da tag `environment`?",
     "opciones": [
       {
-        "texto_opcion": "`staging` — `${bundle.target}` resolve o nome exato da chave do destino ativo.",
-        "es_correcta": true,
-        "explicacion": "`${bundle.target}` resolve para a chave YAML do destino atual. Como o destino é denominado `staging`, o valor da tag é `staging`."
-      },
-      {
-        "texto_opcion": "`produção` — a tag reflete a configuração `mode`, não o nome do destino",
+        "texto_opcion": "`${bundle.target}` — custom tags do not support substitutions",
         "es_correcta": false,
         "explicacion": "`${bundle.target}` reflete o nome da chave de destino, não o valor `mode`. Mesmo com `mode: production`, a tag resolve para a chave do destino (`staging`)."
       },
       {
-        "texto_opcion": "`${bundle.target}` — tags personalizadas não suportam substituições",
+        "texto_opcion": "No tag is applied — `${bundle.target}` is only valid in `name` and `workspace` fields.",
         "es_correcta": false,
         "explicacion": "As substituições de pacotes funcionam em todos os campos YAML, incluindo tags. O valor resolvido é `staging`."
       },
       {
-        "texto_opcion": "Nenhuma tag é aplicada — `${bundle.target}` só é válido nos campos `name` e `workspace`.",
+        "texto_opcion": "`staging` — `${bundle.target}` resolves to the exact key name of the active target.",
+        "es_correcta": true,
+        "explicacion": "`${bundle.target}` resolve para a chave YAML do destino atual. Como o destino é denominado `staging`, o valor da tag é `staging`."
+      },
+      {
+        "texto_opcion": "`production` — the tag reflects the `mode` setting, not the target name",
         "es_correcta": false,
         "explicacion": "Não há restrições em nível de campo para substituições de bundles. `${bundle.target}` funciona em tags, parâmetros, nomes, caminhos e todos os outros campos de string."
       }
@@ -805,24 +805,24 @@
     "pregunta": "Um engenheiro de dados tem a seguinte etapa do GitHub Actions:\n\n```yaml\n- name: Deploy to production\n  env:\n    DATABRICKS_HOST: ${{ vars.PROD_HOST }}\n    DATABRICKS_CLIENT_ID: ${{ vars.PROD_CLIENT_ID }}\n  run: |\n    databricks bundle validate -t prod\n    databricks bundle deploy -t prod\n```\n\nPor que esta etapa executa `validate` antes de `deploy` no mesmo job?",
     "opciones": [
       {
-        "texto_opcion": "Como verificação de segurança final – o valide detecta quaisquer problemas de configuração com o destino de.",
+        "texto_opcion": "As a final safety check — validate catches any configuration issues with the prod target before making changes to.",
         "es_correcta": true,
         "explicacion": "Executar `validate` imediatamente antes de `deploy` é uma medida de segurança para cintos e suspensórios. Mesmo que a validação seja executada no PR aberto, a revalidação no momento da implantação captura quaisquer alterações feitas entre a mesclagem do PR e a implantação do produto."
       },
       {
-        "texto_opcion": "`bundle deploy` requer que `bundle validar` seja executado primeiro - é um comando pré-requisito",
+        "texto_opcion": "`bundle deploy` requires `bundle validate` to be run first — it is a prerequisite command",
         "es_correcta": false,
-        "explicacion": "`bundle validar` não é um pré-requisito obrigatório para `bundle deploy`. A CLI executa sua própria validação interna antes da implantação. Executá-lo explicitamente é uma etapa de segurança recomendada, não um requisito."
+        "explicacion": "`bundle validate` não é um pré-requisito obrigatório para `bundle deploy`. A CLI executa sua própria validação interna antes da implantação. Executá-lo explicitamente é uma etapa de segurança recomendada, não um requisito."
       },
       {
-        "texto_opcion": "`bundle validar` gera o token de autenticação necessário para que `bundle deploy` se conecte ao workspace",
+        "texto_opcion": "`bundle validate` generates the auth token needed for `bundle deploy` to connect to the workspace",
         "es_correcta": false,
-        "explicacion": "`bundle validar` é uma verificação YAML do lado do cliente sem geração de token de autenticação. A autenticação vem das variáveis ​​de ambiente (`DATABRICKS_HOST`, `DATABRICKS_CLIENT_ID`)."
+        "explicacion": "`bundle validate` é uma verificação YAML do lado do cliente sem geração de token de autenticação. A autenticação vem das variáveis ​​de ambiente (`DATABRICKS_HOST`, `DATABRICKS_CLIENT_ID`)."
       },
       {
-        "texto_opcion": "A execução de ambos em sequência evita o bloqueio de implantação no workspace de produção",
+        "texto_opcion": "Running both in sequence avoids the deployment lock on the production workspace, the deployment lock is managed by `bundle deploy`",
         "es_correcta": false,
-        "explicacion": "O bloqueio de implantação é gerenciado por `bundle deploy`, não por `bundle validar`. A execução de `validate` não afeta o bloqueio de implantação."
+        "explicacion": "O bloqueio de implantação é gerenciado por `bundle deploy`, não por `bundle validate`. A execução de `validate` não afeta o bloqueio de implantação."
       }
     ],
     "tags": [
@@ -881,7 +881,7 @@
       {
         "texto_opcion": "Faça a correção diretamente na UI – correções rápidas na UI são aceitáveis como uma exceção documentada",
         "es_correcta": false,
-        "explicacion": "Correções de UI criam desvios de configuração. A próxima implantação do pacote irá sobrescrevê-los, fazendo com que a correção desapareça. Todas as alterações devem ser refletidas no YAML."
+        "explicacion": "Correções de UI criam desvios de configuração. A próxima bundle deploy irá sobrescrevê-los, fazendo com que a correção desapareça. Todas as alterações devem ser refletidas no YAML."
       }
     ],
     "tags": [
