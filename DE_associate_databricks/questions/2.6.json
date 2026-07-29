@@ -3,11 +3,6 @@
     "pregunta": "A data engineer loads a JSON file where each record contains a nested object. After loading, they run:\n\n```python\ndf = spark.read.format(\"json\").load(\"/data/events\")\ndf.printSchema()\n```\n\nWhat does Spark do with the nested JSON object by default?",
     "opciones": [
       {
-        "texto_opcion": "Spark stores the nested object as a raw JSON string column.",
-        "es_correcta": false,
-        "explicacion": "Raw string storage requires `format('text')`. The JSON reader parses structure by default."
-      },
-      {
         "texto_opcion": "Spark raises a parse error because nested objects are not supported.",
         "es_correcta": false,
         "explicacion": "Spark's JSON reader fully supports nested objects and arrays."
@@ -18,9 +13,14 @@
         "explicacion": "Spark's JSON reader performs schema inference and maps nested JSON objects to `StructType`, preserving the hierarchy."
       },
       {
-        "texto_opcion": "Spark flattens all nested fields into top-level columns",
+        "texto_opcion": "Spark flattens all nested fields into top-level columns — spark does not auto-flatten.",
         "es_correcta": false,
         "explicacion": "Spark does not auto-flatten. Flattening requires explicit `select` with dot notation or `*` expansion."
+      },
+      {
+        "texto_opcion": "Spark stores the nested object as a raw JSON string column — raw string storage requires `format('text')`.",
+        "es_correcta": false,
+        "explicacion": "Raw string storage requires `format('text')`. The JSON reader parses structure by default."
       }
     ],
     "tags": [
@@ -32,9 +32,9 @@
     "pregunta": "A data engineer has a DataFrame with this schema:\n\n```\nroot\n |-- order_id: string\n |-- customer: struct<name:string, city:string>\n```\n\nWhich expression correctly extracts the `city` field?",
     "opciones": [
       {
-        "texto_opcion": "`df.select)`, `explode` is for arrays and maps, not structs.",
-        "es_correcta": false,
-        "explicacion": "`explode` is for arrays and maps, not structs."
+        "texto_opcion": "`df.select(\"customer.city\")`.",
+        "es_correcta": true,
+        "explicacion": "Dot notation inside a string column path is the standard way to access nested struct fields in Spark."
       },
       {
         "texto_opcion": "`df.select(\"customer[city]\")`, bracket notation with a string.",
@@ -42,14 +42,14 @@
         "explicacion": "Bracket notation with a string key is for map types, not structs."
       },
       {
-        "texto_opcion": "`df.select(\"customer.city\")`.",
-        "es_correcta": true,
-        "explicacion": "Dot notation inside a string column path is the standard way to access nested struct fields in Spark."
-      },
-      {
         "texto_opcion": "`df.select(col(\"customer\").city)`, column objects don't.",
         "es_correcta": false,
         "explicacion": "Column objects don't expose struct fields as Python attributes. Use `col(\"customer.city\")` instead."
+      },
+      {
+        "texto_opcion": "`df.select)`, `explode` is for arrays and maps, not structs.",
+        "es_correcta": false,
+        "explicacion": "`explode` is for arrays and maps, not structs."
       }
     ],
     "tags": [
@@ -61,16 +61,6 @@
     "pregunta": "A data engineer runs:\n\n```python\ndf = spark.read.format(\"json\").load(\"/data/logs\")\ndf2 = df.select(\"metadata.*\")\n```\n\nWhat does `metadata.*` do?",
     "opciones": [
       {
-        "texto_opcion": "Returns the `metadata` column as a single JSON string",
-        "es_correcta": false,
-        "explicacion": "To serialize a struct back to JSON you need `to_json(col('metadata'))`, not `.*`."
-      },
-      {
-        "texto_opcion": "Expands all fields of the `metadata` struct into separate top-level.",
-        "es_correcta": true,
-        "explicacion": "The `.*` operator on a struct column promotes all its child fields to the top level of the DataFrame."
-      },
-      {
         "texto_opcion": "Raises an error because `*` is not valid inside a column path.",
         "es_correcta": false,
         "explicacion": "`struct.*` is valid Spark SQL syntax and works in both SQL and `select` string expressions."
@@ -79,6 +69,16 @@
         "texto_opcion": "Filters rows where `metadata` is not null, `.*` performs field expansion",
         "es_correcta": false,
         "explicacion": "`.*` performs field expansion, not null filtering."
+      },
+      {
+        "texto_opcion": "Expands all fields of the `metadata` struct into separate top-level.",
+        "es_correcta": true,
+        "explicacion": "The `.*` operator on a struct column promotes all its child fields to the top level of the DataFrame."
+      },
+      {
+        "texto_opcion": "Returns the `metadata` column as a single JSON string.",
+        "es_correcta": false,
+        "explicacion": "To serialize a struct back to JSON you need `to_json(col('metadata'))`, not `.*`."
       }
     ],
     "tags": [
@@ -90,9 +90,9 @@
     "pregunta": "A JSON dataset has an array field `tags`. A data engineer needs one row per tag per event. Which function should they use?",
     "opciones": [
       {
-        "texto_opcion": "`explode(col(\"tags\"))`.",
-        "es_correcta": true,
-        "explicacion": "`explode` generates one row per array element, which is exactly what's needed to unnest the `tags` array."
+        "texto_opcion": "`collect_list(col(\"tags\"))`, `collect_list` aggregates values.",
+        "es_correcta": false,
+        "explicacion": "`collect_list` aggregates values into an array — the opposite of what is needed."
       },
       {
         "texto_opcion": "`posexplode(col(\"tags\"))`, `posexplode` also returns the.",
@@ -105,9 +105,9 @@
         "explicacion": "`flatten` merges nested arrays into a single array; it does not generate rows."
       },
       {
-        "texto_opcion": "`collect_list(col(\"tags\"))`, `collect_list` aggregates values.",
-        "es_correcta": false,
-        "explicacion": "`collect_list` aggregates values into an array — the opposite of what is needed."
+        "texto_opcion": "`explode(col(\"tags\"))`.",
+        "es_correcta": true,
+        "explicacion": "`explode` generates one row per array element, which is exactly what's needed to unnest the `tags` array."
       }
     ],
     "tags": [
@@ -119,24 +119,24 @@
     "pregunta": "A data engineer needs to parse a JSON string stored in a column `payload` with schema `STRUCT<event:STRING, ts:TIMESTAMP>`. Which code is correct?\n\n```python\nfrom pyspark.sql.functions import from_json\nfrom pyspark.sql.types import StructType, StructField, StringType, TimestampType\n```",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf.select, \"$\").alias)\n```, `get_json_object` extracts a single scalar path as a string, not a full typed struct.",
-        "es_correcta": false,
-        "explicacion": "`get_json_object` extracts a single scalar path as a string, not a full typed struct."
-      },
-      {
         "texto_opcion": "```python\ndf.select(json_tuple(col(\"payload\"), \"event\", \"ts\"))\n```, `json_tuple` extracts fields as plain strings with no type casting.",
         "es_correcta": false,
         "explicacion": "`json_tuple` extracts fields as plain strings with no type casting — not equivalent to a typed struct."
       },
       {
-        "texto_opcion": "```python\ndf.select.cast)\n```, you cannot cast a string to a struct type directly with `.cast()`.",
-        "es_correcta": false,
-        "explicacion": "You cannot cast a string to a struct type directly with `.cast()`. `from_json` is required."
-      },
-      {
         "texto_opcion": "```python\nschema = StructType), StructField)])\ndf.select, schema).alias)\n```.",
         "es_correcta": true,
         "explicacion": "`from_json` parses a JSON string column using a provided schema, producing a struct column."
+      },
+      {
+        "texto_opcion": "```python\ndf.select, \"$\").alias)\n```, `get_json_object` extracts a single scalar path as a string, not a full typed struct.",
+        "es_correcta": false,
+        "explicacion": "`get_json_object` extracts a single scalar path as a string, not a full typed struct."
+      },
+      {
+        "texto_opcion": "```python\ndf.select.cast)\n```, you cannot cast a string to a struct type directly with `.cast()` — you cannot cast a string to a struct type directly with `.cast()`. `from_json` is required.",
+        "es_correcta": false,
+        "explicacion": "You cannot cast a string to a struct type directly with `.cast()`. `from_json` is required."
       }
     ],
     "tags": [
@@ -148,16 +148,6 @@
     "pregunta": "A data engineer reads a multi-line JSON file where each record spans several lines. The default read fails. Which option fixes it?\n\n```python\ndf = spark.read.format(\"json\").load(\"/data/records.json\")\n```",
     "opciones": [
       {
-        "texto_opcion": "Add `.option(\"inferSchema\", True)` before `.load()`.",
-        "es_correcta": false,
-        "explicacion": "`inferSchema` controls type inference, not multi-line parsing."
-      },
-      {
-        "texto_opcion": "Add `.option(\"multiLine\", True)` before `.load()`.",
-        "es_correcta": true,
-        "explicacion": "By default Spark expects one JSON record per line. `multiLine=True` allows records that span multiple lines."
-      },
-      {
         "texto_opcion": "Add `.option(\"wholeFile\", True)` before `.load()`.",
         "es_correcta": false,
         "explicacion": "`wholeFile` is not a valid Spark JSON reader option. The correct option is `multiLine`."
@@ -166,6 +156,16 @@
         "texto_opcion": "Switch to `format(\"text\")` and parse manually.",
         "es_correcta": false,
         "explicacion": "This works but is unnecessary; the JSON reader's `multiLine` option is the correct and simpler solution."
+      },
+      {
+        "texto_opcion": "Add `.option(\"multiLine\", True)` before `.load()`.",
+        "es_correcta": true,
+        "explicacion": "By default Spark expects one JSON record per line. `multiLine=True` allows records that span multiple lines."
+      },
+      {
+        "texto_opcion": "Add `.option(\"inferSchema\", True)` before `.load()`.",
+        "es_correcta": false,
+        "explicacion": "`inferSchema` controls type inference, not multi-line parsing."
       }
     ],
     "tags": [
@@ -177,24 +177,24 @@
     "pregunta": "A data engineer queries a VARIANT column in Databricks SQL:\n\n```sql\nSELECT event_data:user_id::STRING AS user_id\nFROM raw_events\n```\n\nWhat does the `::STRING` part do?",
     "opciones": [
       {
+        "texto_opcion": "Aliases the extracted field as `STRING` — `AS user_id` provides the alias; `::STRING` is the type cast.",
+        "es_correcta": false,
+        "explicacion": "`AS user_id` provides the alias; `::STRING` is the type cast."
+      },
+      {
         "texto_opcion": "Casts the extracted VARIANT value to a STRING type.",
         "es_correcta": true,
         "explicacion": "In VARIANT syntax, `::TYPE` is the cast operator that converts the semi-structured value to a typed SQL column."
       },
       {
-        "texto_opcion": "Filters rows where `user_id` is a string",
+        "texto_opcion": "Filters rows where `user_id` is a string — `::TYPE` performs a cast, not a.",
         "es_correcta": false,
         "explicacion": "`::TYPE` performs a cast, not a filter. Use a `WHERE` clause to filter by type."
       },
       {
-        "texto_opcion": "Concatenates `user_id` with an empty string",
+        "texto_opcion": "Concatenates `user_id` with an empty string — `::` is the VARIANT cast operator, not string concatenation.",
         "es_correcta": false,
         "explicacion": "`::` is the VARIANT cast operator, not string concatenation."
-      },
-      {
-        "texto_opcion": "Aliases the extracted field as `STRING`",
-        "es_correcta": false,
-        "explicacion": "`AS user_id` provides the alias; `::STRING` is the type cast."
       }
     ],
     "tags": [
@@ -206,9 +206,9 @@
     "pregunta": "Which Databricks data type is designed to store semi-structured data with flexible, schema-less fields that can be queried directly with path expressions?",
     "opciones": [
       {
-        "texto_opcion": "`VARIANT`.",
-        "es_correcta": true,
-        "explicacion": "VARIANT is Databricks' native type for semi-structured data, allowing flexible field extraction without pre-defining a schema."
+        "texto_opcion": "`STRING`, sTRING stores raw text. Path extraction requires.",
+        "es_correcta": false,
+        "explicacion": "STRING stores raw text. Path extraction requires parsing functions like `get_json_object`, unlike VARIANT."
       },
       {
         "texto_opcion": "`MAP<STRING, STRING>`, mAP requires uniform value types and.",
@@ -221,9 +221,9 @@
         "explicacion": "STRUCT requires a fixed, defined schema at creation time — not schema-less."
       },
       {
-        "texto_opcion": "`STRING`, sTRING stores raw text. Path extraction requires.",
-        "es_correcta": false,
-        "explicacion": "STRING stores raw text. Path extraction requires parsing functions like `get_json_object`, unlike VARIANT."
+        "texto_opcion": "`VARIANT`.",
+        "es_correcta": true,
+        "explicacion": "VARIANT is Databricks' native type for semi-structured data, allowing flexible field extraction without pre-defining a schema."
       }
     ],
     "tags": [
@@ -235,9 +235,14 @@
     "pregunta": "A data engineer has a VARIANT column `event_data` and runs:\n\n```sql\nSELECT event_data:details:location::STRING\nFROM events\n```\n\nWhat does this query extract?",
     "opciones": [
       {
-        "texto_opcion": "The entire `details` object as a STRING, `event_data:details` extracts.",
+        "texto_opcion": "Raises a syntax error — nested path access is not supported in VARIANT.",
         "es_correcta": false,
-        "explicacion": "`event_data:details` extracts `details`. The additional `:location` step drills into its `location` field."
+        "explicacion": "VARIANT fully supports multi-level path navigation using chained colon notation."
+      },
+      {
+        "texto_opcion": "A concatenation of `details` and `location` field names.",
+        "es_correcta": false,
+        "explicacion": "The colon syntax is path navigation on VARIANT, not string concatenation."
       },
       {
         "texto_opcion": "The `location` field nested inside the `details` object, cast to STRING.",
@@ -245,14 +250,9 @@
         "explicacion": "Colon-path notation on VARIANT supports chaining to traverse nested objects. `::STRING` casts the final extracted value."
       },
       {
-        "texto_opcion": "Raises a syntax error — nested path access is not supported in VARIANT.",
+        "texto_opcion": "The entire `details` object as a STRING, `event_data:details` extracts.",
         "es_correcta": false,
-        "explicacion": "VARIANT fully supports multi-level path navigation using chained colon notation."
-      },
-      {
-        "texto_opcion": "A concatenation of `details` and `location` field names",
-        "es_correcta": false,
-        "explicacion": "The colon syntax is path navigation on VARIANT, not string concatenation."
+        "explicacion": "`event_data:details` extracts `details`. The additional `:location` step drills into its `location` field."
       }
     ],
     "tags": [
@@ -264,6 +264,11 @@
     "pregunta": "A data engineer wants to store raw API responses (JSON with unpredictable schemas) in a Delta table for later processing. Which column type is most appropriate?",
     "opciones": [
       {
+        "texto_opcion": "`VARIANT`.",
+        "es_correcta": true,
+        "explicacion": "VARIANT is purpose-built for storing semi-structured data with evolving or unknown schemas, avoiding rigid struct definitions."
+      },
+      {
         "texto_opcion": "`STRING`, sTRING would work, but querying nested fields.",
         "es_correcta": false,
         "explicacion": "STRING would work, but querying nested fields requires `get_json_object` on every access — VARIANT is more efficient and ergonomic."
@@ -272,11 +277,6 @@
         "texto_opcion": "`BINARY`, bINARY stores raw bytes with no built-in path.",
         "es_correcta": false,
         "explicacion": "BINARY stores raw bytes with no built-in path extraction capabilities."
-      },
-      {
-        "texto_opcion": "`VARIANT`.",
-        "es_correcta": true,
-        "explicacion": "VARIANT is purpose-built for storing semi-structured data with evolving or unknown schemas, avoiding rigid struct definitions."
       },
       {
         "texto_opcion": "`STRUCT<data: STRING>`, a STRUCT wrapping a STRING still.",
@@ -293,9 +293,9 @@
     "pregunta": "A data engineer reads a JSON dataset and notices many columns contain `null` because some records have extra fields others don't. The engineer wants schema inference to capture all possible fields. Which option helps?\n\n```python\ndf = spark.read.format(\"json\")\n```",
     "opciones": [
       {
-        "texto_opcion": "Add `.option(\"columnNameOfCorruptRecord\", \"_corrupt\")` and sample more records.",
+        "texto_opcion": "Add `.option(\"mode\", \"PERMISSIVE\")` to capture all fields.",
         "es_correcta": false,
-        "explicacion": "`columnNameOfCorruptRecord` captures malformed rows, not missing schema fields."
+        "explicacion": "`PERMISSIVE` mode handles malformed records, not sparse optional fields."
       },
       {
         "texto_opcion": "Add `.option` so all records are used for schema inference.",
@@ -303,12 +303,12 @@
         "explicacion": "By default Spark samples a fraction of rows. Setting `samplingRatio=1.0` forces all rows to be scanned, capturing every optional field."
       },
       {
-        "texto_opcion": "Add `.option(\"mode\", \"PERMISSIVE\")` to capture all fields",
+        "texto_opcion": "Add `.option(\"columnNameOfCorruptRecord\", \"_corrupt\")` and sample more records.",
         "es_correcta": false,
-        "explicacion": "`PERMISSIVE` mode handles malformed records, not sparse optional fields."
+        "explicacion": "`columnNameOfCorruptRecord` captures malformed rows, not missing schema fields."
       },
       {
-        "texto_opcion": "Add `.option(\"inferSchema\", False)` to prevent null columns",
+        "texto_opcion": "Add `.option(\"inferSchema\", False)` to prevent null columns.",
         "es_correcta": false,
         "explicacion": "Disabling `inferSchema` reads everything as STRING and doesn't solve the sparse field problem."
       }
@@ -322,12 +322,7 @@
     "pregunta": "A data engineer runs the following code:\n\n```python\nfrom pyspark.sql.functions import get_json_object\ndf.select(get_json_object(col(\"payload\"), \"\\$.address.zip\")).show()\n```\n\nWhat does `.address.zip` represent?",
     "opciones": [
       {
-        "texto_opcion": "A regex pattern to extract zip codes, `get_json_object` uses.",
-        "es_correcta": false,
-        "explicacion": "`get_json_object` uses JSONPath, not regex. Use `regexp_extract` for regex-based extraction."
-      },
-      {
-        "texto_opcion": "A file system path inside the JSON document",
+        "texto_opcion": "A file system path inside the JSON document.",
         "es_correcta": false,
         "explicacion": "`$` is the JSONPath root symbol, not a file path indicator."
       },
@@ -337,9 +332,14 @@
         "explicacion": "`get_json_object` uses JSONPath syntax. `$` is the root, `.address.zip` traverses the nested path."
       },
       {
-        "texto_opcion": "A SQL column reference using dot notation",
+        "texto_opcion": "A SQL column reference using dot notation — this is JSONPath notation, not SQL.",
         "es_correcta": false,
         "explicacion": "This is JSONPath notation, not SQL dot notation. `get_json_object` requires JSONPath strings."
+      },
+      {
+        "texto_opcion": "A regex pattern to extract zip codes, `get_json_object` uses.",
+        "es_correcta": false,
+        "explicacion": "`get_json_object` uses JSONPath, not regex. Use `regexp_extract` for regex-based extraction."
       }
     ],
     "tags": [
@@ -351,14 +351,14 @@
     "pregunta": "A Delta table has a `VARIANT` column `event`. A data engineer wants rows where the `status` field inside `event` equals `'error'`. Which SQL is correct?",
     "opciones": [
       {
+        "texto_opcion": "`SELECT * FROM logs WHERE event.status = 'error'` — dot notation is for STRUCT columns.",
+        "es_correcta": false,
+        "explicacion": "Dot notation is for STRUCT columns. VARIANT requires colon-based path syntax."
+      },
+      {
         "texto_opcion": "`SELECT * FROM logs WHERE event:status::STRING = 'error'`.",
         "es_correcta": true,
         "explicacion": "Colon path navigation extracts the field from VARIANT and `::STRING` casts it for comparison."
-      },
-      {
-        "texto_opcion": "`SELECT * FROM logs WHERE event.status = 'error'`",
-        "es_correcta": false,
-        "explicacion": "Dot notation is for STRUCT columns. VARIANT requires colon-based path syntax."
       },
       {
         "texto_opcion": "`SELECT * FROM logs WHERE get_json_object(event, '$.status') = 'error'`",
@@ -366,7 +366,7 @@
         "explicacion": "`get_json_object` works on STRING columns, not VARIANT columns."
       },
       {
-        "texto_opcion": "`SELECT * FROM logs WHERE event['status'] = 'error'`",
+        "texto_opcion": "`SELECT * FROM logs WHERE event['status'] = 'error'` — bracket notation is for MAP types.",
         "es_correcta": false,
         "explicacion": "Bracket notation is for MAP types. VARIANT uses colon path syntax."
       }
@@ -385,19 +385,19 @@
         "explicacion": "`from_json` parses a JSON string column using an explicit schema, producing a typed struct from which `region` can be accessed."
       },
       {
-        "texto_opcion": "Cast `meta` to `STRUCT<region:STRING>` using `.cast()`",
+        "texto_opcion": "Use `schema_of_json(col(\"meta\"))` to extract `region` — `schema_of_json` returns the inferred schema as a string — it doesn't parse data.",
+        "es_correcta": false,
+        "explicacion": "`schema_of_json` returns the inferred schema as a string — it doesn't parse data. It's used to build schema strings, not extract values."
+      },
+      {
+        "texto_opcion": "Cast `meta` to `STRUCT<region:STRING>` using `.cast()` — spark does not support casting STRING to STRUCT directly. `from_json` is required.",
         "es_correcta": false,
         "explicacion": "Spark does not support casting STRING to STRUCT directly. `from_json` is required."
       },
       {
-        "texto_opcion": "Use `explode(col(\"meta\"))` to expand the JSON",
+        "texto_opcion": "Use `explode(col(\"meta\"))` to expand the JSON — `explode` operates on arrays and maps, not JSON strings.",
         "es_correcta": false,
         "explicacion": "`explode` operates on arrays and maps, not JSON strings."
-      },
-      {
-        "texto_opcion": "Use `schema_of_json(col(\"meta\"))` to extract `region`",
-        "es_correcta": false,
-        "explicacion": "`schema_of_json` returns the inferred schema as a string — it doesn't parse data. It's used to build schema strings, not extract values."
       }
     ],
     "tags": [
@@ -409,24 +409,24 @@
     "pregunta": "A data engineer reads a JSON file and wants to capture malformed records without failing the job. Which read mode should they use?\n\n```python\ndf = spark.read.format(\"json\").option(\"mode\", ???).load(\"/data/raw\")\n```",
     "opciones": [
       {
-        "texto_opcion": "`RESCUE`, `RESCUE` is Auto Loader's rescued data column.",
-        "es_correcta": false,
-        "explicacion": "`RESCUE` is Auto Loader's rescued data column feature, not a standard Spark JSON read mode."
-      },
-      {
-        "texto_opcion": "`FAILFAST`, `FAILFAST` immediately throws an exception on the.",
-        "es_correcta": false,
-        "explicacion": "`FAILFAST` immediately throws an exception on the first malformed record."
-      },
-      {
         "texto_opcion": "`DROPMALFORMED`, `DROPMALFORMED` silently discards bad rows —.",
         "es_correcta": false,
         "explicacion": "`DROPMALFORMED` silently discards bad rows — it doesn't capture them."
       },
       {
+        "texto_opcion": "`RESCUE`, `RESCUE` is Auto Loader's rescued data column.",
+        "es_correcta": false,
+        "explicacion": "`RESCUE` is Auto Loader's rescued data column feature, not a standard Spark JSON read mode."
+      },
+      {
         "texto_opcion": "`PERMISSIVE`.",
         "es_correcta": true,
         "explicacion": "PERMISSIVE (the default) stores malformed records in a `_corrupt_record` column instead of failing the job."
+      },
+      {
+        "texto_opcion": "`FAILFAST`, `FAILFAST` immediately throws an exception on the.",
+        "es_correcta": false,
+        "explicacion": "`FAILFAST` immediately throws an exception on the first malformed record."
       }
     ],
     "tags": [
@@ -438,11 +438,6 @@
     "pregunta": "A data engineer needs to convert a struct column `address` back into a JSON string for downstream export. Which function is correct?",
     "opciones": [
       {
-        "texto_opcion": "`json_tuple(col(\"address\"))`, `json_tuple` extracts fields.",
-        "es_correcta": false,
-        "explicacion": "`json_tuple` extracts fields from a JSON string — it doesn't serialize a struct."
-      },
-      {
         "texto_opcion": "`to_json(col(\"address\"))`.",
         "es_correcta": true,
         "explicacion": "`to_json` serializes a struct, array, or map column into a JSON string, which is the inverse of `from_json`."
@@ -451,6 +446,11 @@
         "texto_opcion": "`cast(col(\"address\"), \"string\")`, casting a struct to STRING.",
         "es_correcta": false,
         "explicacion": "Casting a struct to STRING produces a Spark internal format like `[val1, val2]`, not valid JSON."
+      },
+      {
+        "texto_opcion": "`json_tuple(col(\"address\"))`, `json_tuple` extracts fields.",
+        "es_correcta": false,
+        "explicacion": "`json_tuple` extracts fields from a JSON string — it doesn't serialize a struct."
       },
       {
         "texto_opcion": "`schema_of_json(col(\"address\"))`, `schema_of_json` returns a.",
@@ -467,16 +467,6 @@
     "pregunta": "A data engineer has an array column `items` of type `ARRAY<STRUCT<name:STRING, qty:INT>>`. Which code extracts the `name` from each element after exploding?\n\n```python\nfrom pyspark.sql.functions import explode, col\n```",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf.select(explode(col(\"items.name\")))\n```",
-        "es_correcta": false,
-        "explicacion": "`items.name` on an ARRAY<STRUCT> returns an ARRAY<STRING>; you'd then need to explode that, not the struct."
-      },
-      {
-        "texto_opcion": "```python\ndf.select).alias(\"item\")).select)\n```.",
-        "es_correcta": true,
-        "explicacion": "`explode` produces one struct row per element; dot notation then accesses the `name` field of the resulting struct."
-      },
-      {
         "texto_opcion": "```python\ndf.select(col(\"items[0].name\"))\n```",
         "es_correcta": false,
         "explicacion": "Index access only retrieves the first element. `explode` is needed to generate a row per element."
@@ -485,6 +475,16 @@
         "texto_opcion": "```python\ndf.select).alias(\"item\")).select\n```",
         "es_correcta": false,
         "explicacion": "`flatten` merges nested arrays — it doesn't generate rows from a single-level array of structs."
+      },
+      {
+        "texto_opcion": "```python\ndf.select).alias(\"item\")).select)\n```.",
+        "es_correcta": true,
+        "explicacion": "`explode` produces one struct row per element; dot notation then accesses the `name` field of the resulting struct."
+      },
+      {
+        "texto_opcion": "```python\ndf.select(explode(col(\"items.name\")))\n```",
+        "es_correcta": false,
+        "explicacion": "`items.name` on an ARRAY<STRUCT> returns an ARRAY<STRING>; you'd then need to explode that, not the struct."
       }
     ],
     "tags": [
@@ -496,11 +496,6 @@
     "pregunta": "A data engineer needs to read only the first element of an array column `scores` of type `ARRAY<INT>`. Which expression is correct?",
     "opciones": [
       {
-        "texto_opcion": "`element_at(col(\"scores\"), 0)`, `element_at` uses 1-based.",
-        "es_correcta": false,
-        "explicacion": "`element_at` uses 1-based indexing in Spark SQL — index 0 would return null or raise an error."
-      },
-      {
         "texto_opcion": "`col(\"scores\")[0]`.",
         "es_correcta": true,
         "explicacion": "Spark supports 0-based integer index access on array columns using bracket notation on a Column object."
@@ -509,6 +504,11 @@
         "texto_opcion": "`col(\"scores\").first()`, column objects have no `.first()`.",
         "es_correcta": false,
         "explicacion": "Column objects have no `.first()` method. `first()` is a DataFrame aggregation function."
+      },
+      {
+        "texto_opcion": "`element_at(col(\"scores\"), 0)`, `element_at` uses 1-based.",
+        "es_correcta": false,
+        "explicacion": "`element_at` uses 1-based indexing in Spark SQL — index 0 would return null or raise an error."
       },
       {
         "texto_opcion": "`explode(col(\"scores\")).limit(1)`, `explode` generates rows.",
@@ -530,7 +530,12 @@
         "explicacion": "Auto Loader's rescued data column stores any fields that don't fit the schema — including extra/unexpected keys — as a JSON string."
       },
       {
-        "texto_opcion": "PERMISSIVE mode stores extra fields in `_corrupt_record`",
+        "texto_opcion": "Schema evolution, triggered by setting `mergeSchema=True` — `mergeSchema` adds new columns to the schema.",
+        "es_correcta": false,
+        "explicacion": "`mergeSchema` adds new columns to the schema over time but doesn't capture values in the same run."
+      },
+      {
+        "texto_opcion": "PERMISSIVE mode stores extra fields in `_corrupt_record` — `_corrupt_record` captures malformed JSON, not.",
         "es_correcta": false,
         "explicacion": "`_corrupt_record` captures malformed JSON, not valid records with extra fields."
       },
@@ -538,11 +543,6 @@
         "texto_opcion": "Setting `.option(\"inferSchema\", True)` causes the schema to expand automatically.",
         "es_correcta": false,
         "explicacion": "`inferSchema` in Auto Loader requires a schema inference location and won't capture unexpected fields mid-stream."
-      },
-      {
-        "texto_opcion": "Schema evolution, triggered by setting `mergeSchema=True`",
-        "es_correcta": false,
-        "explicacion": "`mergeSchema` adds new columns to the schema over time but doesn't capture values in the same run."
       }
     ],
     "tags": [
@@ -553,6 +553,11 @@
   {
     "pregunta": "A data engineer wants to check the inferred schema of a sample JSON string without reading a full file. Which function helps?\n\n```python\nsample = '{\"id\": 1, \"tags\": [\"a\", \"b\"]}'\n```",
     "opciones": [
+      {
+        "texto_opcion": "`from_json(lit(sample), 'auto')`, `from_json` requires an.",
+        "es_correcta": false,
+        "explicacion": "`from_json` requires an explicit schema; `'auto'` is not a valid schema argument."
+      },
       {
         "texto_opcion": "`get_json_object(lit(sample), '$')`, `get_json_object` extracts a.",
         "es_correcta": false,
@@ -567,11 +572,6 @@
         "texto_opcion": "`schema_of_json(sample)`.",
         "es_correcta": true,
         "explicacion": "`schema_of_json` returns a DDL-style schema string inferred from the provided JSON sample — useful for building schema strings dynamically."
-      },
-      {
-        "texto_opcion": "`from_json(lit(sample), 'auto')`, `from_json` requires an.",
-        "es_correcta": false,
-        "explicacion": "`from_json` requires an explicit schema; `'auto'` is not a valid schema argument."
       }
     ],
     "tags": [
@@ -583,14 +583,9 @@
     "pregunta": "A data engineer needs to read a folder of JSON files where different files have different schemas, and wants all fields from all files in one DataFrame. Which option enables this?\n\n```python\ndf = spark.read.format(\"json\").load(\"/data/mixed\")\n```",
     "opciones": [
       {
-        "texto_opcion": "Add `.option(\"mergeSchema\", True)`.",
-        "es_correcta": true,
-        "explicacion": "`mergeSchema=True` unions the schemas of all files, adding null values where a file doesn't have a particular field."
-      },
-      {
-        "texto_opcion": "Add `.option(\"inferSchema\", True)`",
+        "texto_opcion": "Add `.option(\"recursiveFileLookup\", True)`",
         "es_correcta": false,
-        "explicacion": "`inferSchema=True` infers types but defaults to sampling — it doesn't necessarily merge schemas across files."
+        "explicacion": "`recursiveFileLookup` discovers files in nested subdirectories — it doesn't merge schemas."
       },
       {
         "texto_opcion": "Add `.option(\"multiLine\", True)`, `multiLine` addresses.",
@@ -598,9 +593,14 @@
         "explicacion": "`multiLine` addresses multi-line JSON records, not schema differences across files."
       },
       {
-        "texto_opcion": "Add `.option(\"recursiveFileLookup\", True)`",
+        "texto_opcion": "Add `.option(\"inferSchema\", True)` — `inferSchema=True` infers types.",
         "es_correcta": false,
-        "explicacion": "`recursiveFileLookup` discovers files in nested subdirectories — it doesn't merge schemas."
+        "explicacion": "`inferSchema=True` infers types but defaults to sampling — it doesn't necessarily merge schemas across files."
+      },
+      {
+        "texto_opcion": "Add `.option(\"mergeSchema\", True)`.",
+        "es_correcta": true,
+        "explicacion": "`mergeSchema=True` unions the schemas of all files, adding null values where a file doesn't have a particular field."
       }
     ],
     "tags": [
@@ -617,14 +617,14 @@
         "explicacion": "`arrays_zip` combines multiple same-length arrays element-wise into an array of structs."
       },
       {
+        "texto_opcion": "A cross-join of all elements from both arrays — `arrays_zip` is positional (element 0 with.",
+        "es_correcta": false,
+        "explicacion": "`arrays_zip` is positional (element 0 with element 0), not a cross product."
+      },
+      {
         "texto_opcion": "A single concatenated array containing all elements from both columns.",
         "es_correcta": false,
         "explicacion": "Concatenation is done with `array_union` or `concat`. `arrays_zip` pairs elements by index."
-      },
-      {
-        "texto_opcion": "A cross-join of all elements from both arrays",
-        "es_correcta": false,
-        "explicacion": "`arrays_zip` is positional (element 0 with element 0), not a cross product."
       },
       {
         "texto_opcion": "A map from `names` keys to `scores` values, use `map_from_arrays` to create a.",
@@ -670,11 +670,6 @@
     "pregunta": "A data engineer has a nested JSON field `event.user.address.country` and needs it as a top-level column. Which PySpark code is correct?",
     "opciones": [
       {
-        "texto_opcion": "`df.select(get_json_object(col(\"event\"), \"$.user.address.country\").alias(\"country\"))`",
-        "es_correcta": false,
-        "explicacion": "`get_json_object` works on STRING columns containing JSON. After parsing, `event` is a STRUCT, not a string."
-      },
-      {
         "texto_opcion": "`df.select(col(\"event.user.address.country\").alias(\"country\"))`.",
         "es_correcta": true,
         "explicacion": "Spark supports chained dot notation on nested struct columns. Each dot traverses one struct level."
@@ -685,7 +680,12 @@
         "explicacion": "Bracket notation with string keys works for MAP types, not nested STRUCT columns."
       },
       {
-        "texto_opcion": "`df.withColumn(\"country\", col(\"event\").user.address.country)`",
+        "texto_opcion": "`df.select(get_json_object(col(\"event\"), \"$.user.address.country\").alias(\"country\"))`",
+        "es_correcta": false,
+        "explicacion": "`get_json_object` works on STRING columns containing JSON. After parsing, `event` is a STRUCT, not a string."
+      },
+      {
+        "texto_opcion": "`df.withColumn(\"country\", col(\"event\").user.address.country)`.",
         "es_correcta": false,
         "explicacion": "Python attribute chaining on Column objects is not supported. Use string dot notation: `col(\"event.user.address.country\")`."
       }
@@ -709,14 +709,14 @@
         "explicacion": "These options address malformed records and schema sampling — neither handles top-level JSON arrays."
       },
       {
-        "texto_opcion": "`.option(\"recursiveFileLookup\", True)` and `.option(\"mergeSchema\", True)`",
-        "es_correcta": false,
-        "explicacion": "These options handle nested directories and schema merging, not top-level JSON array parsing."
-      },
-      {
         "texto_opcion": "`.option(\"columnNameOfCorruptRecord\", \"_bad\")` and `.option(\"inferSchema\", True)`",
         "es_correcta": false,
         "explicacion": "`columnNameOfCorruptRecord` only captures bad rows — it does not enable reading top-level JSON arrays, so pairing it with `inferSchema=True` still returns no rows."
+      },
+      {
+        "texto_opcion": "`.option(\"recursiveFileLookup\", True)` and `.option(\"mergeSchema\", True)`",
+        "es_correcta": false,
+        "explicacion": "These options handle nested directories and schema merging, not top-level JSON array parsing."
       }
     ],
     "tags": [

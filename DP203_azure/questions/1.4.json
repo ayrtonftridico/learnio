@@ -3,24 +3,24 @@
     "pregunta": "What partition key strategy fits a Cosmos DB container with even high-volume reads by device_id?",
     "opciones": [
       {
-        "texto_opcion": "Omit partition key, cosmos containers require a partition key.",
-        "es_correcta": false,
-        "explicacion": "Cosmos containers require a partition key."
-      },
-      {
         "texto_opcion": "Use device_id as the partition key.",
         "es_correcta": true,
         "explicacion": "Partition key should match high-cardinality access patterns for even RU distribution."
       },
       {
-        "texto_opcion": "Use a constant 'all' as partition key, hot partition and RU throttling.",
-        "es_correcta": false,
-        "explicacion": "Hot partition and RU throttling."
-      },
-      {
         "texto_opcion": "Partition only by year, low cardinality creates hot partitions.",
         "es_correcta": false,
         "explicacion": "Low cardinality creates hot partitions."
+      },
+      {
+        "texto_opcion": "Omit partition key, cosmos containers require a partition key.",
+        "es_correcta": false,
+        "explicacion": "Cosmos containers require a partition key."
+      },
+      {
+        "texto_opcion": "Use a constant 'all' as partition key, hot partition and RU throttling.",
+        "es_correcta": false,
+        "explicacion": "Hot partition and RU throttling."
       }
     ],
     "tags": [
@@ -32,11 +32,6 @@
     "pregunta": "A industrial IoT platform (petabyte-scale historical data, region westeurope) must: track historical attribute changes for customers with valid_from/valid_to in the warehouse. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "SCD Type 1 overwrite only prioritized for operational.",
-        "es_correcta": false,
-        "explicacion": "Type 1 loses history."
-      },
-      {
         "texto_opcion": "Implement Slowly Changing Dimension Type 2.",
         "es_correcta": true,
         "explicacion": "SCD2 preserves history with versioned rows and effective dates."
@@ -45,6 +40,11 @@
         "texto_opcion": "Store only current row in Redis, cache is not the system of.",
         "es_correcta": false,
         "explicacion": "Cache is not the system of record for SCD history."
+      },
+      {
+        "texto_opcion": "SCD Type 1 overwrite only prioritized for operational.",
+        "es_correcta": false,
+        "explicacion": "Type 1 loses history."
       },
       {
         "texto_opcion": "Delete and reload daily without versions, no historical tracking.",
@@ -61,9 +61,9 @@
     "pregunta": "correct typos in product names without keeping prior spellings. Context: logistics carrier, hourly batch windows.",
     "opciones": [
       {
-        "texto_opcion": "Delete the dimension entirely applied across environments configured.",
+        "texto_opcion": "SCD Type 3 for every typo with unlimited columns prioritized for operational.",
         "es_correcta": false,
-        "explicacion": "Breaks facts."
+        "explicacion": "Unmaintainable."
       },
       {
         "texto_opcion": "SCD Type 1 overwrite of the attribute.",
@@ -71,9 +71,9 @@
         "explicacion": "Type 1 updates in place when history is not required."
       },
       {
-        "texto_opcion": "SCD Type 3 for every typo with unlimited columns prioritized for operational.",
+        "texto_opcion": "Delete the dimension entirely applied across environments configured.",
         "es_correcta": false,
-        "explicacion": "Unmaintainable."
+        "explicacion": "Breaks facts."
       },
       {
         "texto_opcion": "Always SCD2 for typo fixes, creates unnecessary versions for corrections.",
@@ -90,7 +90,17 @@
     "pregunta": "A payments fintech (petabyte-scale historical data, region westeurope) must: Cosmos RU throttling concentrates on one partition key value. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Disable indexing entirely as the only fix, may hurt reads; does not fix hot PK.",
+        "texto_opcion": "Only raise RU and keep a constant key, scales cost without fixing concentration as the default production choice in this scenario.",
+        "es_correcta": false,
+        "explicacion": "Scales cost without fixing concentration."
+      },
+      {
+        "texto_opcion": "Redesign partition key for higher cardinality / synthetic salt if needed.",
+        "es_correcta": true,
+        "explicacion": "Hot partitions require key redesign to spread RU consumption."
+      },
+      {
+        "texto_opcion": "Disable indexing entirely as the only fix, may hurt reads; does not fix hot PK applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "May hurt reads; does not fix hot PK."
       },
@@ -98,16 +108,6 @@
         "texto_opcion": "Switch to a single shared throughput of 400 RU forever, too low and unrelated to hot key design.",
         "es_correcta": false,
         "explicacion": "Too low and unrelated to hot key design."
-      },
-      {
-        "texto_opcion": "Redesign partition key for higher cardinality / synthetic salt if needed",
-        "es_correcta": true,
-        "explicacion": "Hot partitions require key redesign to spread RU consumption."
-      },
-      {
-        "texto_opcion": "Only raise RU and keep a constant key, scales cost without fixing concentration.",
-        "es_correcta": false,
-        "explicacion": "Scales cost without fixing concentration."
       }
     ],
     "tags": [
@@ -129,12 +129,12 @@
         "explicacion": "Hurts relational analytics."
       },
       {
-        "texto_opcion": "Store all metrics as Cosmos documents without grain design",
+        "texto_opcion": "Store all metrics as Cosmos documents without grain design — weak dimensional analytics pattern.",
         "es_correcta": false,
         "explicacion": "Weak dimensional analytics pattern."
       },
       {
-        "texto_opcion": "One wide denormalized OLTP 5NF copy only, hard for BI, hard for BI",
+        "texto_opcion": "One wide denormalized OLTP 5NF copy only, hard for BI, hard for BI — hard for BI; not a dimensional serving design.",
         "es_correcta": false,
         "explicacion": "Hard for BI; not a dimensional serving design."
       }
@@ -153,9 +153,9 @@
         "explicacion": "Emails change and collide."
       },
       {
-        "texto_opcion": "Generate warehouse surrogate keys and map natural keys via.",
-        "es_correcta": true,
-        "explicacion": "Surrogates isolate the warehouse from source key conflicts."
+        "texto_opcion": "Skip keys and join on fuzzy names only configured end-to-end.",
+        "es_correcta": false,
+        "explicacion": "Unreliable."
       },
       {
         "texto_opcion": "Concatenate all columns as the key prioritized for configured.",
@@ -163,9 +163,9 @@
         "explicacion": "Unstable and huge."
       },
       {
-        "texto_opcion": "Skip keys and join on fuzzy names only configured end-to-end.",
-        "es_correcta": false,
-        "explicacion": "Unreliable."
+        "texto_opcion": "Generate warehouse surrogate keys and map natural keys via.",
+        "es_correcta": true,
+        "explicacion": "Surrogates isolate the warehouse from source key conflicts."
       }
     ],
     "tags": [
@@ -177,24 +177,24 @@
     "pregunta": "Incident review (westeurope): need both operational point reads and Spark analytics on Cosmos data. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Duplicate into Excel for analytics used as the main path.",
-        "es_correcta": false,
-        "explicacion": "Not scalable."
-      },
-      {
         "texto_opcion": "Run heavy Spark scans on the transactional store only all day",
         "es_correcta": false,
         "explicacion": "Impacts OLTP latency."
       },
       {
-        "texto_opcion": "Enable Cosmos DB analytical store / Synapse Link pattern.",
-        "es_correcta": true,
-        "explicacion": "Analytical store enables HTAP-style analytics without heavy OLTP impact."
-      },
-      {
         "texto_opcion": "Export manually to USB nightly as the primary design for.",
         "es_correcta": false,
         "explicacion": "Not cloud-native."
+      },
+      {
+        "texto_opcion": "Duplicate into Excel for analytics used as the main path.",
+        "es_correcta": false,
+        "explicacion": "Not scalable."
+      },
+      {
+        "texto_opcion": "Enable Cosmos DB analytical store / Synapse Link pattern.",
+        "es_correcta": true,
+        "explicacion": "Analytical store enables HTAP-style analytics without heavy OLTP impact."
       }
     ],
     "tags": [
@@ -211,9 +211,9 @@
         "explicacion": "Cost grows unboundedly."
       },
       {
-        "texto_opcion": "Rely on client apps remembering to purge selected to meet.",
-        "es_correcta": false,
-        "explicacion": "Unreliable."
+        "texto_opcion": "Configure Cosmos DB TTL on items or container.",
+        "es_correcta": true,
+        "explicacion": "TTL expires old documents without custom delete jobs."
       },
       {
         "texto_opcion": "Delete the container every night, destroys current data too.",
@@ -221,9 +221,9 @@
         "explicacion": "Destroys current data too."
       },
       {
-        "texto_opcion": "Configure Cosmos DB TTL on items or container.",
-        "es_correcta": true,
-        "explicacion": "TTL expires old documents without custom delete jobs."
+        "texto_opcion": "Rely on client apps remembering to purge selected to meet.",
+        "es_correcta": false,
+        "explicacion": "Unreliable."
       }
     ],
     "tags": [
@@ -235,9 +235,9 @@
     "pregunta": "many-to-many between orders and promotions in the warehouse. Context: energy utility, ~50,000 events/s.",
     "opciones": [
       {
-        "texto_opcion": "Create a bridge table resolving the M:N relationship.",
-        "es_correcta": true,
-        "explicacion": "Bridge tables model many-to-many in dimensional designs."
+        "texto_opcion": "Store M:N only in a PowerPoint diagram selected to meet the.",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
       },
       {
         "texto_opcion": "Duplicate promotion arrays inside every order row without grain",
@@ -245,14 +245,14 @@
         "explicacion": "Explodes and confuses measures."
       },
       {
-        "texto_opcion": "Store M:N only in a PowerPoint diagram selected to meet the.",
-        "es_correcta": false,
-        "explicacion": "Not queryable."
-      },
-      {
         "texto_opcion": "Ignore promotions in modeling as the primary design for.",
         "es_correcta": false,
         "explicacion": "Loses analytics."
+      },
+      {
+        "texto_opcion": "Create a bridge table resolving the M:N relationship.",
+        "es_correcta": true,
+        "explicacion": "Bridge tables model many-to-many in dimensional designs."
       }
     ],
     "tags": [
@@ -264,24 +264,24 @@
     "pregunta": "Telecom operator scenario — invoice_number appears on the fact with no other descriptive attributes. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Model invoice_number as a degenerate dimension on the fact.",
-        "es_correcta": true,
-        "explicacion": "Degenerate dimensions keep transactional IDs on facts without a dim table."
-      },
-      {
         "texto_opcion": "Put invoice numbers in Key Vault selected to meet the adopted as the.",
         "es_correcta": false,
         "explicacion": "Wrong service."
       },
       {
-        "texto_opcion": "Hash distribute on a constant adopted as the standard selected to meet the.",
-        "es_correcta": false,
-        "explicacion": "Causes skew."
-      },
-      {
         "texto_opcion": "Create an empty dimension with only the number and no attributes always",
         "es_correcta": false,
         "explicacion": "Often unnecessary overhead."
+      },
+      {
+        "texto_opcion": "Model invoice_number as a degenerate dimension on the fact.",
+        "es_correcta": true,
+        "explicacion": "Degenerate dimensions keep transactional IDs on facts without a dim table."
+      },
+      {
+        "texto_opcion": "Hash distribute on a constant adopted as the standard selected to meet the.",
+        "es_correcta": false,
+        "explicacion": "Causes skew."
       }
     ],
     "tags": [
@@ -293,19 +293,19 @@
     "pregunta": "A travel platform (~5 TB/day, region southeastasia) must: global app needs strongest read-your-writes for payment ledgers in one region. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Use only table storage entity group transactions across accounts",
+        "texto_opcion": "Disable replication and use FTP sync configured end-to-end for often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
-        "explicacion": "Wrong service comparison."
+        "explicacion": "Not Cosmos design."
       },
       {
-        "texto_opcion": "Always Eventual for payment ledgers with no review",
+        "texto_opcion": "Always Eventual for payment ledgers with no review — may violate financial read requirements prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "May violate financial read requirements."
       },
       {
-        "texto_opcion": "Disable replication and use FTP sync configured end-to-end for.",
+        "texto_opcion": "Use only table storage entity group transactions across accounts configured end-to-end for the stated workload.",
         "es_correcta": false,
-        "explicacion": "Not Cosmos design."
+        "explicacion": "Wrong service comparison."
       },
       {
         "texto_opcion": "Choose appropriate Cosmos consistency (e.g., Session or Strong where required)",
@@ -322,11 +322,6 @@
     "pregunta": "Incident review (brazilsouth): many low-cardinality flags clutter the fact grain. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Combine flags into a junk dimension.",
-        "es_correcta": true,
-        "explicacion": "Junk dimensions tidy miscellaneous indicators without many fact columns."
-      },
-      {
         "texto_opcion": "Put flags in blob filenames only selected to meet the as the default production choice here.",
         "es_correcta": false,
         "explicacion": "Not query-friendly."
@@ -337,9 +332,14 @@
         "explicacion": "Clutters fact width."
       },
       {
-        "texto_opcion": "Encode flags in the distribution key randomly, breaks distribution design.",
+        "texto_opcion": "Encode flags in the distribution key randomly, breaks distribution design selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Breaks distribution design."
+      },
+      {
+        "texto_opcion": "Combine flags into a junk dimension.",
+        "es_correcta": true,
+        "explicacion": "Junk dimensions tidy miscellaneous indicators without many fact columns."
       }
     ],
     "tags": [
@@ -351,9 +351,9 @@
     "pregunta": "Online marketplace scenario — downstream processors must react to Cosmos inserts/updates continuously. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Use Cosmos DB change feed to drive incremental consumers.",
-        "es_correcta": true,
-        "explicacion": "Change feed provides an ordered stream of item changes for pipelines."
+        "texto_opcion": "Full container scan every second applied across prioritized for.",
+        "es_correcta": false,
+        "explicacion": "Expensive and slow."
       },
       {
         "texto_opcion": "Only webhook from a human clicking save prioritized for.",
@@ -361,9 +361,9 @@
         "explicacion": "Not scalable."
       },
       {
-        "texto_opcion": "Full container scan every second applied across prioritized for.",
-        "es_correcta": false,
-        "explicacion": "Expensive and slow."
+        "texto_opcion": "Use Cosmos DB change feed to drive incremental consumers.",
+        "es_correcta": true,
+        "explicacion": "Change feed provides an ordered stream of item changes for pipelines."
       },
       {
         "texto_opcion": "Poll by guessing IDs configured end-to-end for this workload.",
@@ -380,11 +380,6 @@
     "pregunta": "A media streaming company (strict GDPR residency, region southeastasia) must: business needs previous and current product category only—not full history. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "SCD1 only as the primary design for this requirement.",
-        "es_correcta": false,
-        "explicacion": "Loses previous value."
-      },
-      {
         "texto_opcion": "Delete categories weekly, loses history entirely.",
         "es_correcta": false,
         "explicacion": "Loses history entirely."
@@ -398,6 +393,11 @@
         "texto_opcion": "SCD2 with unlimited versions when only prior value is needed",
         "es_correcta": false,
         "explicacion": "Heavier than required."
+      },
+      {
+        "texto_opcion": "SCD1 only as the primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Loses previous value."
       }
     ],
     "tags": [
@@ -409,14 +409,14 @@
     "pregunta": "Cosmos DB container will serve high-volume reads keyed by device_id with even traffic. Context: insurance carrier, sub-second interactive queries. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Partition only by year, low cardinality creates hot partitions.",
-        "es_correcta": false,
-        "explicacion": "Low cardinality creates hot partitions."
-      },
-      {
         "texto_opcion": "Use a constant 'all' as partition key, hot partition and RU throttling.",
         "es_correcta": false,
         "explicacion": "Hot partition and RU throttling."
+      },
+      {
+        "texto_opcion": "Partition only by year, low cardinality creates hot partitions.",
+        "es_correcta": false,
+        "explicacion": "Low cardinality creates hot partitions."
       },
       {
         "texto_opcion": "Use device_id as the partition key.",
@@ -438,14 +438,14 @@
     "pregunta": "Payments fintech scenario — track historical attribute changes for customers with valid_from/valid_to in the warehouse. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "SCD Type 1 overwrite only as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Type 1 loses history."
-      },
-      {
         "texto_opcion": "Store only current row in Redis, cache is not the system of.",
         "es_correcta": false,
         "explicacion": "Cache is not the system of record for SCD history."
+      },
+      {
+        "texto_opcion": "Delete and reload daily without versions, no historical tracking.",
+        "es_correcta": false,
+        "explicacion": "No historical tracking."
       },
       {
         "texto_opcion": "Implement Slowly Changing Dimension Type 2.",
@@ -453,9 +453,9 @@
         "explicacion": "SCD2 preserves history with versioned rows and effective dates."
       },
       {
-        "texto_opcion": "Delete and reload daily without versions, no historical tracking.",
+        "texto_opcion": "SCD Type 1 overwrite only as the default production choice here.",
         "es_correcta": false,
-        "explicacion": "No historical tracking."
+        "explicacion": "Type 1 loses history."
       }
     ],
     "tags": [
@@ -472,12 +472,12 @@
         "explicacion": "Type 1 updates in place when history is not required."
       },
       {
-        "texto_opcion": "Always SCD2 for typo fixes, creates unnecessary versions for corrections.",
+        "texto_opcion": "Always SCD2 for typo fixes, creates unnecessary versions for corrections as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Creates unnecessary versions for corrections."
       },
       {
-        "texto_opcion": "Delete the dimension entirely as the primary design for prioritized for.",
+        "texto_opcion": "Delete the dimension entirely as the primary design for prioritized for plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Breaks facts."
       },
@@ -496,24 +496,24 @@
     "pregunta": "Telecom operator scenario — Cosmos RU throttling concentrates on one partition key value. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Disable indexing entirely as the only fix, may hurt reads; does not fix hot PK.",
+        "texto_opcion": "Disable indexing entirely as the only fix, may hurt reads; does not fix hot PK configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "May hurt reads; does not fix hot PK."
-      },
-      {
-        "texto_opcion": "Only raise RU and keep a constant key, scales cost without fixing concentration.",
-        "es_correcta": false,
-        "explicacion": "Scales cost without fixing concentration."
-      },
-      {
-        "texto_opcion": "Redesign partition key for higher cardinality / synthetic salt if needed",
-        "es_correcta": true,
-        "explicacion": "Hot partitions require key redesign to spread RU consumption."
       },
       {
         "texto_opcion": "Switch to a single shared throughput of 400 RU forever, too low and unrelated to hot key design.",
         "es_correcta": false,
         "explicacion": "Too low and unrelated to hot key design."
+      },
+      {
+        "texto_opcion": "Only raise RU and keep a constant key, scales cost without fixing concentration configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Scales cost without fixing concentration."
+      },
+      {
+        "texto_opcion": "Redesign partition key for higher cardinality / synthetic salt if needed.",
+        "es_correcta": true,
+        "explicacion": "Hot partitions require key redesign to spread RU consumption."
       }
     ],
     "tags": [
@@ -525,14 +525,14 @@
     "pregunta": "A insurance carrier (~200 million rows/day, region southeastasia) must: serving layer for BI should separate facts from descriptive dimensions. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Model a star schema (facts + dimensions) in Synapse Dedicated SQL.",
-        "es_correcta": true,
-        "explicacion": "Star schemas optimize analytical joins and BI usability."
-      },
-      {
-        "texto_opcion": "Store all metrics as Cosmos documents without grain design",
+        "texto_opcion": "Store all metrics as Cosmos documents without grain design — weak dimensional analytics pattern.",
         "es_correcta": false,
         "explicacion": "Weak dimensional analytics pattern."
+      },
+      {
+        "texto_opcion": "One wide denormalized OLTP 5NF copy only, hard for BI, hard for BI — hard for BI; not a dimensional serving design.",
+        "es_correcta": false,
+        "explicacion": "Hard for BI; not a dimensional serving design."
       },
       {
         "texto_opcion": "Put dimensions inside JSON strings in one column only, hurts relational analytics.",
@@ -540,9 +540,9 @@
         "explicacion": "Hurts relational analytics."
       },
       {
-        "texto_opcion": "One wide denormalized OLTP 5NF copy only, hard for BI, hard for BI",
-        "es_correcta": false,
-        "explicacion": "Hard for BI; not a dimensional serving design."
+        "texto_opcion": "Model a star schema (facts + dimensions) in Synapse Dedicated SQL.",
+        "es_correcta": true,
+        "explicacion": "Star schemas optimize analytical joins and BI usability."
       }
     ],
     "tags": [
@@ -583,11 +583,6 @@
     "pregunta": "Insurance carrier scenario — need both operational point reads and Spark analytics on Cosmos data. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Run heavy Spark scans on the transactional store only all day",
-        "es_correcta": false,
-        "explicacion": "Impacts OLTP latency."
-      },
-      {
         "texto_opcion": "Export manually to USB nightly applied across environments.",
         "es_correcta": false,
         "explicacion": "Not cloud-native."
@@ -596,6 +591,11 @@
         "texto_opcion": "Enable Cosmos DB analytical store / Synapse Link pattern.",
         "es_correcta": true,
         "explicacion": "Analytical store enables HTAP-style analytics without heavy OLTP impact."
+      },
+      {
+        "texto_opcion": "Run heavy Spark scans on the transactional store only all day",
+        "es_correcta": false,
+        "explicacion": "Impacts OLTP latency."
       },
       {
         "texto_opcion": "Duplicate into Excel for analytics as the default applied across.",
@@ -617,14 +617,14 @@
         "explicacion": "TTL expires old documents without custom delete jobs."
       },
       {
-        "texto_opcion": "Never delete and raise RU forever, cost grows unboundedly.",
-        "es_correcta": false,
-        "explicacion": "Cost grows unboundedly."
-      },
-      {
         "texto_opcion": "Rely on client apps remembering to purge applied across.",
         "es_correcta": false,
         "explicacion": "Unreliable."
+      },
+      {
+        "texto_opcion": "Never delete and raise RU forever, cost grows unboundedly.",
+        "es_correcta": false,
+        "explicacion": "Cost grows unboundedly."
       },
       {
         "texto_opcion": "Delete the container every night, destroys current data too.",
@@ -641,11 +641,6 @@
     "pregunta": "A media streaming company (~200 million rows/day, region australiaeast) must: many-to-many between orders and promotions in the warehouse. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Store M:N only in a PowerPoint diagram prioritized for selected to meet.",
-        "es_correcta": false,
-        "explicacion": "Not queryable."
-      },
-      {
         "texto_opcion": "Create a bridge table resolving the M:N relationship.",
         "es_correcta": true,
         "explicacion": "Bridge tables model many-to-many in dimensional designs."
@@ -654,6 +649,11 @@
         "texto_opcion": "Ignore promotions in modeling selected to meet the stated constraints.",
         "es_correcta": false,
         "explicacion": "Loses analytics."
+      },
+      {
+        "texto_opcion": "Store M:N only in a PowerPoint diagram prioritized for selected to meet.",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
       },
       {
         "texto_opcion": "Duplicate promotion arrays inside every order row without grain",
@@ -670,9 +670,9 @@
     "pregunta": "Logistics carrier scenario — invoice_number appears on the fact with no other descriptive attributes. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Create an empty dimension with only the number and no attributes always",
+        "texto_opcion": "Hash distribute on a constant adopted as the standard selected to meet the.",
         "es_correcta": false,
-        "explicacion": "Often unnecessary overhead."
+        "explicacion": "Causes skew."
       },
       {
         "texto_opcion": "Model invoice_number as a degenerate dimension on the fact.",
@@ -680,14 +680,14 @@
         "explicacion": "Degenerate dimensions keep transactional IDs on facts without a dim table."
       },
       {
+        "texto_opcion": "Create an empty dimension with only the number and no attributes always",
+        "es_correcta": false,
+        "explicacion": "Often unnecessary overhead."
+      },
+      {
         "texto_opcion": "Put invoice numbers in Key Vault adopted as the standard used as the main.",
         "es_correcta": false,
         "explicacion": "Wrong service."
-      },
-      {
-        "texto_opcion": "Hash distribute on a constant adopted as the standard selected to meet the.",
-        "es_correcta": false,
-        "explicacion": "Causes skew."
       }
     ],
     "tags": [
@@ -699,24 +699,24 @@
     "pregunta": "Healthcare provider scenario — global app needs strongest read-your-writes for payment ledgers in one region. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Disable replication and use FTP sync as the primary design for.",
+        "texto_opcion": "Disable replication and use FTP sync as the primary design for often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Not Cosmos design."
-      },
-      {
-        "texto_opcion": "Always Eventual for payment ledgers with no review",
-        "es_correcta": false,
-        "explicacion": "May violate financial read requirements."
-      },
-      {
-        "texto_opcion": "Use only table storage entity group transactions across accounts",
-        "es_correcta": false,
-        "explicacion": "Wrong service comparison."
       },
       {
         "texto_opcion": "Choose appropriate Cosmos consistency (e.g., Session or Strong where required)",
         "es_correcta": true,
         "explicacion": "Consistency level trades latency/availability for correctness needs."
+      },
+      {
+        "texto_opcion": "Always Eventual for payment ledgers with no review — may violate financial read requirements applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "May violate financial read requirements."
+      },
+      {
+        "texto_opcion": "Use only table storage entity group transactions across accounts as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Wrong service comparison."
       }
     ],
     "tags": [
@@ -728,6 +728,16 @@
     "pregunta": "many low-cardinality flags clutter the fact grain. Context: online marketplace, near-real-time dashboards. Constraint set #2.",
     "opciones": [
       {
+        "texto_opcion": "Add 40 boolean columns to every fact forever configured as the primary design.",
+        "es_correcta": false,
+        "explicacion": "Clutters fact width."
+      },
+      {
+        "texto_opcion": "Combine flags into a junk dimension.",
+        "es_correcta": true,
+        "explicacion": "Junk dimensions tidy miscellaneous indicators without many fact columns."
+      },
+      {
         "texto_opcion": "Encode flags in the distribution key randomly, breaks distribution design.",
         "es_correcta": false,
         "explicacion": "Breaks distribution design."
@@ -736,16 +746,6 @@
         "texto_opcion": "Put flags in blob filenames only as the primary design for configured.",
         "es_correcta": false,
         "explicacion": "Not query-friendly."
-      },
-      {
-        "texto_opcion": "Combine flags into a junk dimension.",
-        "es_correcta": true,
-        "explicacion": "Junk dimensions tidy miscellaneous indicators without many fact columns."
-      },
-      {
-        "texto_opcion": "Add 40 boolean columns to every fact forever configured as the primary design.",
-        "es_correcta": false,
-        "explicacion": "Clutters fact width."
       }
     ],
     "tags": [
@@ -762,11 +762,6 @@
         "explicacion": "Unreliable."
       },
       {
-        "texto_opcion": "Only webhook from a human clicking save applied across.",
-        "es_correcta": false,
-        "explicacion": "Not scalable."
-      },
-      {
         "texto_opcion": "Full container scan every second configured end-to-end for.",
         "es_correcta": false,
         "explicacion": "Expensive and slow."
@@ -775,6 +770,11 @@
         "texto_opcion": "Use Cosmos DB change feed to drive incremental consumers.",
         "es_correcta": true,
         "explicacion": "Change feed provides an ordered stream of item changes for pipelines."
+      },
+      {
+        "texto_opcion": "Only webhook from a human clicking save applied across.",
+        "es_correcta": false,
+        "explicacion": "Not scalable."
       }
     ],
     "tags": [
@@ -791,6 +791,11 @@
         "explicacion": "Type 3 keeps limited history in columns when full versioning is unnecessary."
       },
       {
+        "texto_opcion": "SCD2 with unlimited versions when only prior value is needed",
+        "es_correcta": false,
+        "explicacion": "Heavier than required."
+      },
+      {
         "texto_opcion": "SCD1 only adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Loses previous value."
@@ -799,11 +804,6 @@
         "texto_opcion": "Delete categories weekly, loses history entirely.",
         "es_correcta": false,
         "explicacion": "Loses history entirely."
-      },
-      {
-        "texto_opcion": "SCD2 with unlimited versions when only prior value is needed",
-        "es_correcta": false,
-        "explicacion": "Heavier than required."
       }
     ],
     "tags": [
@@ -815,6 +815,16 @@
     "pregunta": "Incident review (brazilsouth): Cosmos DB container will serve high-volume reads keyed by device_id with even traffic. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "Use device_id as the partition key.",
+        "es_correcta": true,
+        "explicacion": "Partition key should match high-cardinality access patterns for even RU distribution."
+      },
+      {
+        "texto_opcion": "Partition only by year, low cardinality creates hot partitions.",
+        "es_correcta": false,
+        "explicacion": "Low cardinality creates hot partitions."
+      },
+      {
         "texto_opcion": "Use a constant 'all' as partition key, hot partition and RU throttling.",
         "es_correcta": false,
         "explicacion": "Hot partition and RU throttling."
@@ -823,16 +833,6 @@
         "texto_opcion": "Omit partition key, cosmos containers require a partition key.",
         "es_correcta": false,
         "explicacion": "Cosmos containers require a partition key."
-      },
-      {
-        "texto_opcion": "Partition only by year, low cardinality creates hot partitions.",
-        "es_correcta": false,
-        "explicacion": "Low cardinality creates hot partitions."
-      },
-      {
-        "texto_opcion": "Use device_id as the partition key.",
-        "es_correcta": true,
-        "explicacion": "Partition key should match high-cardinality access patterns for even RU distribution."
       }
     ],
     "tags": [
@@ -844,24 +844,24 @@
     "pregunta": "Incident review (westeurope): track historical attribute changes for customers with valid_from/valid_to in the warehouse. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Implement Slowly Changing Dimension Type 2.",
-        "es_correcta": true,
-        "explicacion": "SCD2 preserves history with versioned rows and effective dates."
-      },
-      {
         "texto_opcion": "SCD Type 1 overwrite only used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Type 1 loses history."
       },
       {
-        "texto_opcion": "Store only current row in Redis, cache is not the system of.",
-        "es_correcta": false,
-        "explicacion": "Cache is not the system of record for SCD history."
+        "texto_opcion": "Implement Slowly Changing Dimension Type 2.",
+        "es_correcta": true,
+        "explicacion": "SCD2 preserves history with versioned rows and effective dates."
       },
       {
         "texto_opcion": "Delete and reload daily without versions, no historical tracking.",
         "es_correcta": false,
         "explicacion": "No historical tracking."
+      },
+      {
+        "texto_opcion": "Store only current row in Redis, cache is not the system of.",
+        "es_correcta": false,
+        "explicacion": "Cache is not the system of record for SCD history."
       }
     ],
     "tags": [
@@ -873,24 +873,24 @@
     "pregunta": "Incident review (eastus): correct typos in product names without keeping prior spellings. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "Delete the dimension entirely used as the main path in configured end-to-end configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Breaks facts."
+      },
+      {
         "texto_opcion": "SCD Type 3 for every typo with unlimited columns used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Unmaintainable."
       },
       {
-        "texto_opcion": "Delete the dimension entirely used as the main path in configured end-to-end.",
+        "texto_opcion": "Always SCD2 for typo fixes, creates unnecessary versions for corrections prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
-        "explicacion": "Breaks facts."
+        "explicacion": "Creates unnecessary versions for corrections."
       },
       {
         "texto_opcion": "SCD Type 1 overwrite of the attribute.",
         "es_correcta": true,
         "explicacion": "Type 1 updates in place when history is not required."
-      },
-      {
-        "texto_opcion": "Always SCD2 for typo fixes, creates unnecessary versions for corrections.",
-        "es_correcta": false,
-        "explicacion": "Creates unnecessary versions for corrections."
       }
     ],
     "tags": [
@@ -902,24 +902,24 @@
     "pregunta": "For a payments fintech workload with strict GDPR residency: Cosmos RU throttling concentrates on one partition key value. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Redesign partition key for higher cardinality / synthetic salt if needed",
-        "es_correcta": true,
-        "explicacion": "Hot partitions require key redesign to spread RU consumption."
-      },
-      {
-        "texto_opcion": "Disable indexing entirely as the only fix, may hurt reads; does not fix hot PK.",
-        "es_correcta": false,
-        "explicacion": "May hurt reads; does not fix hot PK."
-      },
-      {
         "texto_opcion": "Switch to a single shared throughput of 400 RU forever, too low and unrelated to hot key design.",
         "es_correcta": false,
         "explicacion": "Too low and unrelated to hot key design."
       },
       {
-        "texto_opcion": "Only raise RU and keep a constant key, scales cost without fixing concentration.",
+        "texto_opcion": "Redesign partition key for higher cardinality / synthetic salt if needed.",
+        "es_correcta": true,
+        "explicacion": "Hot partitions require key redesign to spread RU consumption."
+      },
+      {
+        "texto_opcion": "Only raise RU and keep a constant key, scales cost without fixing concentration plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Scales cost without fixing concentration."
+      },
+      {
+        "texto_opcion": "Disable indexing entirely as the only fix, may hurt reads; does not fix hot PK selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "May hurt reads; does not fix hot PK."
       }
     ],
     "tags": [
@@ -931,22 +931,22 @@
     "pregunta": "A healthcare provider (near-real-time dashboards, region southeastasia) must: serving layer for BI should separate facts from descriptive dimensions. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Model a star schema (facts + dimensions) in Synapse Dedicated SQL.",
-        "es_correcta": true,
-        "explicacion": "Star schemas optimize analytical joins and BI usability."
-      },
-      {
-        "texto_opcion": "One wide denormalized OLTP 5NF copy only, hard for BI, hard for BI",
-        "es_correcta": false,
-        "explicacion": "Hard for BI; not a dimensional serving design."
-      },
-      {
         "texto_opcion": "Put dimensions inside JSON strings in one column only, hurts relational analytics.",
         "es_correcta": false,
         "explicacion": "Hurts relational analytics."
       },
       {
-        "texto_opcion": "Store all metrics as Cosmos documents without grain design",
+        "texto_opcion": "Model a star schema (facts + dimensions) in Synapse Dedicated SQL.",
+        "es_correcta": true,
+        "explicacion": "Star schemas optimize analytical joins and BI usability."
+      },
+      {
+        "texto_opcion": "One wide denormalized OLTP 5NF copy only, hard for BI, hard for BI — hard for BI; not a dimensional serving design.",
+        "es_correcta": false,
+        "explicacion": "Hard for BI; not a dimensional serving design."
+      },
+      {
+        "texto_opcion": "Store all metrics as Cosmos documents without grain design — weak dimensional analytics pattern.",
         "es_correcta": false,
         "explicacion": "Weak dimensional analytics pattern."
       }
@@ -960,14 +960,14 @@
     "pregunta": "natural keys from sources collide across systems for the same customer. Context: logistics carrier, hourly batch windows. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Concatenate all columns as the key configured end-to-end for.",
-        "es_correcta": false,
-        "explicacion": "Unstable and huge."
-      },
-      {
         "texto_opcion": "Skip keys and join on fuzzy names only adopted as the configured end-to-end.",
         "es_correcta": false,
         "explicacion": "Unreliable."
+      },
+      {
+        "texto_opcion": "Generate warehouse surrogate keys and map natural keys via.",
+        "es_correcta": true,
+        "explicacion": "Surrogates isolate the warehouse from source key conflicts."
       },
       {
         "texto_opcion": "Use email as the only immutable key forever, emails change and collide.",
@@ -975,9 +975,9 @@
         "explicacion": "Emails change and collide."
       },
       {
-        "texto_opcion": "Generate warehouse surrogate keys and map natural keys via.",
-        "es_correcta": true,
-        "explicacion": "Surrogates isolate the warehouse from source key conflicts."
+        "texto_opcion": "Concatenate all columns as the key configured end-to-end for adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Unstable and huge."
       }
     ],
     "tags": [
@@ -989,24 +989,24 @@
     "pregunta": "A insurance carrier (near-real-time dashboards, region brazilsouth) must: need both operational point reads and Spark analytics on Cosmos data. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Run heavy Spark scans on the transactional store only all day",
-        "es_correcta": false,
-        "explicacion": "Impacts OLTP latency."
-      },
-      {
         "texto_opcion": "Enable Cosmos DB analytical store / Synapse Link pattern.",
         "es_correcta": true,
         "explicacion": "Analytical store enables HTAP-style analytics without heavy OLTP impact."
       },
       {
-        "texto_opcion": "Duplicate into Excel for analytics configured end-to-end.",
-        "es_correcta": false,
-        "explicacion": "Not scalable."
-      },
-      {
         "texto_opcion": "Export manually to USB nightly used as the main path in.",
         "es_correcta": false,
         "explicacion": "Not cloud-native."
+      },
+      {
+        "texto_opcion": "Run heavy Spark scans on the transactional store only all day",
+        "es_correcta": false,
+        "explicacion": "Impacts OLTP latency."
+      },
+      {
+        "texto_opcion": "Duplicate into Excel for analytics configured end-to-end.",
+        "es_correcta": false,
+        "explicacion": "Not scalable."
       }
     ],
     "tags": [
@@ -1017,11 +1017,6 @@
   {
     "pregunta": "A gaming studio (~50,000 events/s, region southeastasia) must: Cosmos telemetry older than 30 days can expire automatically. Which option fits best? Constraint set #3.",
     "opciones": [
-      {
-        "texto_opcion": "Configure Cosmos DB TTL on items or container.",
-        "es_correcta": true,
-        "explicacion": "TTL expires old documents without custom delete jobs."
-      },
       {
         "texto_opcion": "Never delete and raise RU forever, cost grows unboundedly.",
         "es_correcta": false,
@@ -1036,6 +1031,11 @@
         "texto_opcion": "Delete the container every night, destroys current data too.",
         "es_correcta": false,
         "explicacion": "Destroys current data too."
+      },
+      {
+        "texto_opcion": "Configure Cosmos DB TTL on items or container.",
+        "es_correcta": true,
+        "explicacion": "TTL expires old documents without custom delete jobs."
       }
     ],
     "tags": [
@@ -1047,24 +1047,24 @@
     "pregunta": "A industrial IoT platform (sub-second interactive queries, region southeastasia) must: many-to-many between orders and promotions in the warehouse. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Ignore promotions in modeling configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Loses analytics."
-      },
-      {
-        "texto_opcion": "Store M:N only in a PowerPoint diagram applied across configured.",
-        "es_correcta": false,
-        "explicacion": "Not queryable."
-      },
-      {
         "texto_opcion": "Create a bridge table resolving the M:N relationship.",
         "es_correcta": true,
         "explicacion": "Bridge tables model many-to-many in dimensional designs."
       },
       {
+        "texto_opcion": "Ignore promotions in modeling configured end-to-end for this workload.",
+        "es_correcta": false,
+        "explicacion": "Loses analytics."
+      },
+      {
         "texto_opcion": "Duplicate promotion arrays inside every order row without grain",
         "es_correcta": false,
         "explicacion": "Explodes and confuses measures."
+      },
+      {
+        "texto_opcion": "Store M:N only in a PowerPoint diagram applied across configured.",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
       }
     ],
     "tags": [
@@ -1076,24 +1076,24 @@
     "pregunta": "For a insurance carrier workload with sub-second interactive queries: invoice_number appears on the fact with no other descriptive attributes. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Model invoice_number as a degenerate dimension on the fact.",
-        "es_correcta": true,
-        "explicacion": "Degenerate dimensions keep transactional IDs on facts without a dim table."
-      },
-      {
         "texto_opcion": "Put invoice numbers in Key Vault selected to meet the adopted as the.",
         "es_correcta": false,
         "explicacion": "Wrong service."
       },
       {
-        "texto_opcion": "Hash distribute on a constant adopted as the standard selected to meet the.",
-        "es_correcta": false,
-        "explicacion": "Causes skew."
-      },
-      {
         "texto_opcion": "Create an empty dimension with only the number and no attributes always",
         "es_correcta": false,
         "explicacion": "Often unnecessary overhead."
+      },
+      {
+        "texto_opcion": "Model invoice_number as a degenerate dimension on the fact.",
+        "es_correcta": true,
+        "explicacion": "Degenerate dimensions keep transactional IDs on facts without a dim table."
+      },
+      {
+        "texto_opcion": "Hash distribute on a constant adopted as the standard selected to meet the.",
+        "es_correcta": false,
+        "explicacion": "Causes skew."
       }
     ],
     "tags": [
@@ -1105,24 +1105,24 @@
     "pregunta": "global app needs strongest read-your-writes for payment ledgers in one region. Context: industrial IoT platform, ~200 million rows/day. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Disable replication and use FTP sync applied across.",
+        "texto_opcion": "Always Eventual for payment ledgers with no review — may violate financial read requirements configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "May violate financial read requirements."
+      },
+      {
+        "texto_opcion": "Disable replication and use FTP sync applied across as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Not Cosmos design."
+      },
+      {
+        "texto_opcion": "Use only table storage entity group transactions across accounts adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Wrong service comparison."
       },
       {
         "texto_opcion": "Choose appropriate Cosmos consistency (e.g., Session or Strong where required)",
         "es_correcta": true,
         "explicacion": "Consistency level trades latency/availability for correctness needs."
-      },
-      {
-        "texto_opcion": "Use only table storage entity group transactions across accounts",
-        "es_correcta": false,
-        "explicacion": "Wrong service comparison."
-      },
-      {
-        "texto_opcion": "Always Eventual for payment ledgers with no review",
-        "es_correcta": false,
-        "explicacion": "May violate financial read requirements."
       }
     ],
     "tags": [
@@ -1134,24 +1134,24 @@
     "pregunta": "A healthcare provider (~200 million rows/day, region brazilsouth) must: many low-cardinality flags clutter the fact grain. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Add 40 boolean columns to every fact forever used as the selected to meet the.",
-        "es_correcta": false,
-        "explicacion": "Clutters fact width."
-      },
-      {
         "texto_opcion": "Encode flags in the distribution key randomly, breaks distribution design.",
         "es_correcta": false,
         "explicacion": "Breaks distribution design."
       },
       {
-        "texto_opcion": "Combine flags into a junk dimension.",
-        "es_correcta": true,
-        "explicacion": "Junk dimensions tidy miscellaneous indicators without many fact columns."
-      },
-      {
         "texto_opcion": "Put flags in blob filenames only as the primary design for prioritized for.",
         "es_correcta": false,
         "explicacion": "Not query-friendly."
+      },
+      {
+        "texto_opcion": "Add 40 boolean columns to every fact forever used as the selected to meet the.",
+        "es_correcta": false,
+        "explicacion": "Clutters fact width."
+      },
+      {
+        "texto_opcion": "Combine flags into a junk dimension.",
+        "es_correcta": true,
+        "explicacion": "Junk dimensions tidy miscellaneous indicators without many fact columns."
       }
     ],
     "tags": [

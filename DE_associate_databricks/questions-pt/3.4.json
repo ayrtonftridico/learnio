@@ -8,12 +8,7 @@
         "explicacion": "`withColumn` substitui uma coluna se o nome já existir, em vez de gerar um erro ou criar uma duplicata."
       },
       {
-        "texto_opcion": "A nova coluna é ignorada silenciosamente e a coluna `tax` original é mantida.",
-        "es_correcta": false,
-        "explicacion": "Ocorre o oposto — a nova coluna computada substitui a original."
-      },
-      {
-        "texto_opcion": "Spark lança uma `AnalysisException` para um nome de coluna duplicado",
+        "texto_opcion": "Spark lança uma `AnalysisException` para um nome de coluna duplicado.",
         "es_correcta": false,
         "explicacion": "Uma exceção só ocorre se você tentar criar duas colunas com o mesmo nome em um único `select`, não com `withColumn`."
       },
@@ -21,6 +16,11 @@
         "texto_opcion": "Uma segunda coluna chamada `tax` é anexada, resultando em duas colunas com o mesmo nome.",
         "es_correcta": false,
         "explicacion": "`withColumn` substitui colunas existentes por nome; não cria duplicatas."
+      },
+      {
+        "texto_opcion": "A nova coluna é ignorada silenciosamente e a coluna `tax` original é mantida.",
+        "es_correcta": false,
+        "explicacion": "Ocorre o oposto — a nova coluna computada substitui a original."
       }
     ],
     "tags": [
@@ -47,7 +47,7 @@
         "explicacion": "DataFrames não possuem um método `remove`; `drop` é o método correto."
       },
       {
-        "texto_opcion": "`df.filter(\"notas_internas\", \"debug_flag\")`",
+        "texto_opcion": "`df.filter(\"notas_internas\", \"debug_flag\")`.",
         "es_correcta": false,
         "explicacion": "`filter` opera em linhas com base em uma condição, não na remoção de colunas."
       }
@@ -61,9 +61,9 @@
     "pregunta": "Um engenheiro de dados deseja renomear `cust_id` para `customer_id` em `df` sem afetar nenhuma outra coluna.\n\nQual código está correto?",
     "opciones": [
       {
-        "texto_opcion": "`df.withColumnRenamed(\"cust_id\", \"customer_id\")`.",
-        "es_correcta": true,
-        "explicacion": "`withColumnRenamed` renomeia uma única coluna por nome e deixa todas as outras colunas inalteradas."
+        "texto_opcion": "`df.alias(\"cust_id\", \"customer_id\")`, `alias` é usado para renomear.",
+        "es_correcta": false,
+        "explicacion": "`alias` é usado para renomear um DataFrame ou referência de coluna em expressões, não para renomear uma coluna no local."
       },
       {
         "texto_opcion": "`df.rename`, pySpark DataFrames não possui um método `rename`.",
@@ -71,14 +71,14 @@
         "explicacion": "PySpark DataFrames não possui um método `rename`."
       },
       {
-        "texto_opcion": "`df.withColumn(\"customer_id\", \"cust_id\")`",
+        "texto_opcion": "`df.withColumn(\"customer_id\", \"cust_id\")` — isso cria uma nova coluna de string literal.",
         "es_correcta": false,
         "explicacion": "Isso cria uma nova coluna de string literal chamada `customer_id`; ele não renomeia `cust_id` e a coluna original permanece."
       },
       {
-        "texto_opcion": "`df.alias(\"cust_id\", \"customer_id\")`, `alias` é usado para renomear.",
-        "es_correcta": false,
-        "explicacion": "`alias` é usado para renomear um DataFrame ou referência de coluna em expressões, não para renomear uma coluna no local."
+        "texto_opcion": "`df.withColumnRenamed(\"cust_id\", \"customer_id\")`.",
+        "es_correcta": true,
+        "explicacion": "`withColumnRenamed` renomeia uma única coluna por nome e deixa todas as outras colunas inalteradas."
       }
     ],
     "tags": [
@@ -90,9 +90,14 @@
     "pregunta": "Uma tabela `vendas` contém:\n\n| id_pedido | região | montante |\n|----------|--------|--------|\n| 1 | Oeste | 250 |\n| 2 | Leste | nulo |\n| 3 | Oeste | 100 |\n\nQual código retorna apenas as linhas onde `amount` não é nulo?",
     "opciones": [
       {
-        "texto_opcion": "`vendas.filter(col(\"quantidade\") != \"null\")`",
+        "texto_opcion": "`vendas.dropna()`, `dropna()` elimina linhas com nulos em.",
         "es_correcta": false,
-        "explicacion": "Comparar com a string `\"null\"` não corresponde à semântica SQL/Spark NULL e não filtrará valores nulos corretamente."
+        "explicacion": "`dropna()` elimina linhas com nulos em qualquer coluna por padrão, o que funciona aqui, mas não é tão direcionado quanto a filtragem em `amount` especificamente e não é o código mostrado como o equivalente direto do filtro pretendido."
+      },
+      {
+        "texto_opcion": "`vendas.where(col(\"valor\").isNull())` — isso retorna o oposto.",
+        "es_correcta": false,
+        "explicacion": "Isso retorna o oposto - apenas as linhas onde `amount` É nulo."
       },
       {
         "texto_opcion": "`vendas.filter(col(\"quantidade\").isNotNull())`.",
@@ -100,14 +105,9 @@
         "explicacion": "`isNotNull()` exclui corretamente linhas onde `amount` é nulo, retornando order_id 1 e 3."
       },
       {
-        "texto_opcion": "`vendas.dropna()`, `dropna()` elimina linhas com nulos em.",
+        "texto_opcion": "`vendas.filter(col(\"quantidade\") != \"null\")`",
         "es_correcta": false,
-        "explicacion": "`dropna()` elimina linhas com nulos em qualquer coluna por padrão, o que funciona aqui, mas não é tão direcionado quanto a filtragem em `amount` especificamente e não é o código mostrado como o equivalente direto do filtro pretendido."
-      },
-      {
-        "texto_opcion": "`vendas.where(col(\"valor\").isNull())`",
-        "es_correcta": false,
-        "explicacion": "Isso retorna o oposto - apenas as linhas onde `amount` É nulo."
+        "explicacion": "Comparar com a string `\"null\"` não corresponde à semântica SQL/Spark NULL e não filtrará valores nulos corretamente."
       }
     ],
     "tags": [
@@ -124,7 +124,12 @@
         "explicacion": "`explode()` cria uma nova linha para cada elemento do array, duplicando todos os outros valores de coluna nas novas linhas."
       },
       {
-        "texto_opcion": "Apenas o primeiro elemento do array é mantido na coluna `tag`",
+        "texto_opcion": "A matriz é convertida em uma única string separada por vírgula na coluna `tag`.",
+        "es_correcta": false,
+        "explicacion": "Esse comportamento descreve `concat_ws`, não `explode`."
+      },
+      {
+        "texto_opcion": "Apenas o primeiro elemento do array é mantido na coluna `tag`.",
         "es_correcta": false,
         "explicacion": "`explode()` mantém todos os elementos, gerando uma linha por elemento em vez de truncar para a primeira."
       },
@@ -132,11 +137,6 @@
         "texto_opcion": "A coluna `tags` original é eliminada e substituída pelo comprimento do array.",
         "es_correcta": false,
         "explicacion": "Isso descreve `size(col(\"tags\"))`, não `explode`."
-      },
-      {
-        "texto_opcion": "A matriz é convertida em uma única string separada por vírgula na coluna `tag`.",
-        "es_correcta": false,
-        "explicacion": "Esse comportamento descreve `concat_ws`, não `explode`."
       }
     ],
     "tags": [
@@ -148,24 +148,24 @@
     "pregunta": "Um engenheiro de dados deseja dividir uma coluna `nome_completo` (por exemplo, `\"Jane Doe\"`) em colunas `primeiro_nome` e `último_nome`.\n\nQual código consegue isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "`df.withColumn(\"primeiro_nome\", explode(split(col(\"nome_completo\"), \" \")))`",
-        "es_correcta": false,
-        "explicacion": "`explode` criaria várias linhas por nome em vez de duas colunas separadas, o que não é o resultado desejado."
-      },
-      {
-        "texto_opcion": "`df.split(\"nome_completo\", \" \", [\"primeiro_nome\", \"sobrenome\"])`, não existe método `split` em DataFrame",
-        "es_correcta": false,
-        "explicacion": "Não existe método `split` em DataFrame; `split` é uma função de coluna usada dentro de `withColumn` ou `select`."
-      },
-      {
-        "texto_opcion": "`df.withColumn(\"primeiro_nome\", \"sobrenome\", split(col(\"nome_completo\"), \" \"))`",
+        "texto_opcion": "`df.withColumn(\"primeiro_nome\", \"sobrenome\", split(col(\"nome_completo\"), \" \"))` — `withColumn` aceita apenas um nome de coluna e uma expressão de coluna como argumentos; esta sintaxe é inválida.",
         "es_correcta": false,
         "explicacion": "`withColumn` aceita apenas um nome de coluna e uma expressão de coluna como argumentos; esta sintaxe é inválida."
+      },
+      {
+        "texto_opcion": "`df.withColumn(\"primeiro_nome\", explode(split(col(\"nome_completo\"), \" \")))` — `explode` criaria várias linhas por nome em vez de duas colunas separadas, o que não é o resultado desejado.",
+        "es_correcta": false,
+        "explicacion": "`explode` criaria várias linhas por nome em vez de duas colunas separadas, o que não é o resultado desejado."
       },
       {
         "texto_opcion": "`df.withColumn(\"primeiro_nome\", split(col(\"nome_completo\"), \" \")[0]).withColumn(\"sobrenome\", split(col(\"nome_completo\"), \" \")[1])`",
         "es_correcta": true,
         "explicacion": "`split()` retorna um array de substrings; indexar `[0]` e `[1]` extrai corretamente as partes do nome e do sobrenome."
+      },
+      {
+        "texto_opcion": "`df.split(\"nome_completo\", \" \", [\"primeiro_nome\", \"sobrenome\"])`, não existe método `split` em DataFrame — não existe método `split` em DataFrame — não existe método `split` em DataFrame; `split` é uma função de coluna usada dentro de `withColumn` ou `select`.",
+        "es_correcta": false,
+        "explicacion": "Não existe método `split` em DataFrame; `split` é uma função de coluna usada dentro de `withColumn` ou `select`."
       }
     ],
     "tags": [
@@ -182,11 +182,6 @@
         "explicacion": "`isin()` verifica a associação em uma lista de valores, combinando corretamente as linhas com qualquer um dos status."
       },
       {
-        "texto_opcion": "`transactions_df.where(col(\"status\").contains(\"concluído\", \"pendente\"))`",
-        "es_correcta": false,
-        "explicacion": "`contains()` verifica uma substring dentro de um único valor de string e não aceita vários argumentos para teste de associação."
-      },
-      {
         "texto_opcion": "`transactions_df.filter(col(\"status\") == \"concluído\" ou \"pendente\")`",
         "es_correcta": false,
         "explicacion": "O operador `or` do Python não funciona conforme esperado com expressões de coluna e não produzirá a lógica de filtro correta."
@@ -195,6 +190,11 @@
         "texto_opcion": "`transactions_df.filter(col(\"status\") == [\"concluído\", \"pendente\"])`",
         "es_correcta": false,
         "explicacion": "Comparar uma coluna diretamente a uma lista com `==` não é válido para testes de adesão no PySpark."
+      },
+      {
+        "texto_opcion": "`transactions_df.where(col(\"status\").contains(\"concluído\", \"pendente\"))`",
+        "es_correcta": false,
+        "explicacion": "`contains()` verifica uma substring dentro de um único valor de string e não aceita vários argumentos para teste de associação."
       }
     ],
     "tags": [
@@ -206,24 +206,24 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```python\ndf2 = df.select(\"id\", \"name\", \"amount\")\n```\n\nQual é o efeito no DataFrame `df2` resultante em comparação com `df`?",
     "opciones": [
       {
-        "texto_opcion": "`df2` contém todas as colunas originais mais as três colunas listadas duplicadas",
+        "texto_opcion": "`df2` é idêntico a `df` já que `select` não altera a estrutura da coluna — `select()` altera a estrutura da coluna - limita o resultado apenas às colunas especificadas.",
+        "es_correcta": false,
+        "explicacion": "`select()` altera a estrutura da coluna - limita o resultado apenas às colunas especificadas."
+      },
+      {
+        "texto_opcion": "`df2` contém todas as colunas originais mais as três colunas listadas duplicadas — `select()` não preserva colunas não listadas.",
         "es_correcta": false,
         "explicacion": "`select()` não preserva colunas não listadas; ele retorna apenas as colunas especificadas explicitamente."
+      },
+      {
+        "texto_opcion": "Um erro é gerado porque `select` requer pelo menos uma função de transformação — `select()` funciona bem com nomes de colunas simples; nenhuma função de transformação é necessária.",
+        "es_correcta": false,
+        "explicacion": "`select()` funciona bem com nomes de colunas simples; nenhuma função de transformação é necessária."
       },
       {
         "texto_opcion": "`df2` contém apenas as colunas `id`, `name` e `amount`; todas as outras colunas são excluídas.",
         "es_correcta": true,
         "explicacion": "`select()` retorna um novo DataFrame apenas com as colunas especificadas, descartando quaisquer colunas não listadas."
-      },
-      {
-        "texto_opcion": "Um erro é gerado porque `select` requer pelo menos uma função de transformação",
-        "es_correcta": false,
-        "explicacion": "`select()` funciona bem com nomes de colunas simples; nenhuma função de transformação é necessária."
-      },
-      {
-        "texto_opcion": "`df2` é idêntico a `df` já que `select` não altera a estrutura da coluna",
-        "es_correcta": false,
-        "explicacion": "`select()` altera a estrutura da coluna - limita o resultado apenas às colunas especificadas."
       }
     ],
     "tags": [
@@ -235,24 +235,24 @@
     "pregunta": "Um DataFrame `events_df` possui uma coluna `event_time` do tipo timestamp. Um engenheiro de dados deseja adicionar uma nova coluna `event_date` contendo apenas a parte da data.\n\nQual código está correto?",
     "opciones": [
       {
-        "texto_opcion": "`events_df.dropColumn(\"event_time\").addColumn(\"event_date\")`",
-        "es_correcta": false,
-        "explicacion": "Nem `dropColumn` nem `addColumn` são métodos PySpark DataFrame válidos."
-      },
-      {
-        "texto_opcion": "`events_df.withColumn(\"data_evento\", col(\"hora_evento\").data())`",
-        "es_correcta": false,
-        "explicacion": "Objetos de coluna não possuem um método `.date()` no PySpark."
-      },
-      {
         "texto_opcion": "`events_df.withColumn(\"data_do_evento\", to_date(col(\"hora_do_evento\")))`.",
         "es_correcta": true,
         "explicacion": "`to_date()` extrai a parte da data de uma coluna de carimbo de data/hora, que é exatamente o que é necessário."
       },
       {
+        "texto_opcion": "`events_df.withColumn(\"data_evento\", col(\"hora_evento\").data())`.",
+        "es_correcta": false,
+        "explicacion": "Objetos de coluna não possuem um método `.date()` no PySpark."
+      },
+      {
         "texto_opcion": "`events_df.withColumn(\"data_evento\", formato_data(col(\"hora_evento\")))`",
         "es_correcta": false,
         "explicacion": "`date_format()` requer um argumento de string de formato e retorna uma string, não um tipo de data, portanto esta chamada está incompleta e incorreta conforme escrita."
+      },
+      {
+        "texto_opcion": "`events_df.dropColumn(\"event_time\").addColumn(\"event_date\")`.",
+        "es_correcta": false,
+        "explicacion": "Nem `dropColumn` nem `addColumn` são métodos PySpark DataFrame válidos."
       }
     ],
     "tags": [
@@ -264,14 +264,14 @@
     "pregunta": "Dado um DataFrame `products_df` com uma coluna `price`, um engenheiro de dados executa:\n\n```python\nproducts_df.filter(col(\"price\") > 100).count()\n```\n\nO que esse código retorna?",
     "opciones": [
       {
-        "texto_opcion": "Um novo DataFrame contendo linhas onde `price` é maior que 100",
-        "es_correcta": false,
-        "explicacion": "A ação `.count()` converte o DataFrame filtrado em um único valor inteiro, não em DataFrame."
+        "texto_opcion": "Um número inteiro que representa o número de linhas em que `preço` é maior que 100.",
+        "es_correcta": true,
+        "explicacion": "`filter()` retorna um DataFrame de linhas correspondentes e `count()` retorna o número de linhas nesse resultado como um número inteiro."
       },
       {
-        "texto_opcion": "Um booleano que indica se alguma linha tem `preço` maior que 100",
+        "texto_opcion": "Um novo DataFrame contendo linhas onde `price` é maior que 100 — a ação `.count()` converte o DataFrame filtrado em um.",
         "es_correcta": false,
-        "explicacion": "Esse comportamento descreve métodos como `.isEmpty()`, não `.count()`, que retorna uma contagem de linhas."
+        "explicacion": "A ação `.count()` converte o DataFrame filtrado em um único valor inteiro, não em DataFrame."
       },
       {
         "texto_opcion": "A soma de todos os valores de `preço` maiores que 100, `count()` retorna o número de linhas",
@@ -279,9 +279,9 @@
         "explicacion": "`count()` retorna o número de linhas, não uma soma; `sum()` seria necessário para um total."
       },
       {
-        "texto_opcion": "Um número inteiro que representa o número de linhas em que `preço` é maior que 100.",
-        "es_correcta": true,
-        "explicacion": "`filter()` retorna um DataFrame de linhas correspondentes e `count()` retorna o número de linhas nesse resultado como um número inteiro."
+        "texto_opcion": "Um booleano que indica se alguma linha tem `preço` maior que 100 — esse comportamento descreve métodos como.",
+        "es_correcta": false,
+        "explicacion": "Esse comportamento descreve métodos como `.isEmpty()`, não `.count()`, que retorna uma contagem de linhas."
       }
     ],
     "tags": [
@@ -293,24 +293,24 @@
     "pregunta": "Um engenheiro de dados possui uma coluna `raw_json` do tipo string contendo texto formatado em JSON. O engenheiro deseja adicionar novas colunas `user_id` e `action` extraídas deste JSON.\n\nQual abordagem adiciona corretamente as duas colunas?",
     "opciones": [
       {
-        "texto_opcion": "Analise `raw_json` com `from_json()` em uma estrutura e, em seguida, use `withColumn` com notação de ponto para extrair `user_id` e `action`.",
-        "es_correcta": true,
-        "explicacion": "`from_json()` converte uma string JSON em uma coluna estruturada de acordo com um esquema, após o qual os campos podem ser extraídos com notação de ponto, por exemplo. `col(\"parsed.user_id\")`."
+        "texto_opcion": "Use `explode(col(\"raw_json\"))` para converter a string JSON em colunas separadas — `explode()` opera em colunas de array ou mapa para produzir múltiplas linhas, não em strings JSON para produzir colunas.",
+        "es_correcta": false,
+        "explicacion": "`explode()` opera em colunas de array ou mapa para produzir múltiplas linhas, não em strings JSON para produzir colunas."
       },
       {
-        "texto_opcion": "Use `df.withColumn(\"user_id\", \"action\", raw_json)` para extrair os dois campos em uma chamada",
+        "texto_opcion": "Use `df.withColumn(\"user_id\", \"action\", raw_json)` para extrair os dois campos em uma chamada — `withColumn` aceita apenas um único nome de coluna e uma única expressão de coluna, não vários nomes.",
         "es_correcta": false,
         "explicacion": "`withColumn` aceita apenas um único nome de coluna e uma única expressão de coluna, não vários nomes."
       },
       {
-        "texto_opcion": "Chame `df.json(\"raw_json\")` para expandir automaticamente todos os campos JSON em colunas",
+        "texto_opcion": "Chame `df.json(\"raw_json\")` para expandir automaticamente todos os campos JSON em colunas — não existe um método `.json()` em um DataFrame para este propósito; É necessário `from_json` com um esquema explícito.",
         "es_correcta": false,
         "explicacion": "Não existe um método `.json()` em um DataFrame para este propósito; É necessário `from_json` com um esquema explícito."
       },
       {
-        "texto_opcion": "Use `explode(col(\"raw_json\"))` para converter a string JSON em colunas separadas",
-        "es_correcta": false,
-        "explicacion": "`explode()` opera em colunas de array ou mapa para produzir múltiplas linhas, não em strings JSON para produzir colunas."
+        "texto_opcion": "Analise `raw_json` com `from_json()` em uma estrutura e, em seguida, use `withColumn` com notação de ponto para extrair `user_id` e `action`.",
+        "es_correcta": true,
+        "explicacion": "`from_json()` converte uma string JSON em uma coluna estruturada de acordo com um esquema, após o qual os campos podem ser extraídos com notação de ponto, por exemplo. `col(\"parsed.user_id\")`."
       }
     ],
     "tags": [
@@ -322,7 +322,12 @@
     "pregunta": "Uma tabela `inventário` contém:\n\n| sku | armazém | quantidade |\n|------|-----------|-----|\n| A100 | Nova York | 50 |\n| A100 | LA | 0 |\n| B200 | Nova York | 0 |\n\nUm engenheiro de dados executa:\n\n```python\ndf.filter(col(\"qty\") == 0).drop(\"warehouse\")\n```\n\nO que isso retorna?",
     "opciones": [
       {
-        "texto_opcion": "Um DataFrame com todas as três linhas, mas apenas as colunas `sku` e `qty`",
+        "texto_opcion": "Um DataFrame com as linhas para A100/LA e B200/NYC, contendo apenas as colunas `sku` e `qty`.",
+        "es_correcta": true,
+        "explicacion": "`filter` primeiro mantém apenas as linhas onde `qty` é igual a 0 (A100/LA e B200/NYC), então `drop` remove a coluna `warehouse` dessas linhas."
+      },
+      {
+        "texto_opcion": "Um DataFrame com todas as três linhas, mas apenas as colunas `sku` e `qty` — a etapa `filter(col(\"qty\") == 0)` remove linhas onde `qty` não é zero, portanto.",
         "es_correcta": false,
         "explicacion": "A etapa `filter(col(\"qty\") == 0)` remove linhas onde `qty` não é zero, portanto a linha A100/NYC é excluída."
       },
@@ -332,12 +337,7 @@
         "explicacion": "A100/NYC tem `qty = 50`, portanto não satisfaz `qty == 0` e é excluído; também `drop` remove a coluna `warehouse`."
       },
       {
-        "texto_opcion": "Um DataFrame com as linhas para A100/LA e B200/NYC, contendo apenas as colunas `sku` e `qty`.",
-        "es_correcta": true,
-        "explicacion": "`filter` primeiro mantém apenas as linhas onde `qty` é igual a 0 (A100/LA e B200/NYC), então `drop` remove a coluna `warehouse` dessas linhas."
-      },
-      {
-        "texto_opcion": "Um erro, porque `drop` não pode ser encadeado após `filter`",
+        "texto_opcion": "Um erro, porque `drop` não pode ser encadeado após `filter` — o encadeamento de transformações DataFrame como `filter`.",
         "es_correcta": false,
         "explicacion": "O encadeamento de transformações DataFrame como `filter` seguido de `drop` é válido e comumente usado no PySpark."
       }
@@ -351,24 +351,24 @@
     "pregunta": "Um engenheiro de dados deseja adicionar uma coluna `is_high_value` que seja `True` quando `amount > 1000` e `False` caso contrário.\n\nQual código implementa isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "`df.withColumn(\"is_high_value\", col(\"quantidade\") > 1000, Verdadeiro, Falso)`",
-        "es_correcta": false,
-        "explicacion": "`withColumn` aceita apenas dois argumentos - um nome de coluna e uma expressão de coluna - portanto, esta assinatura de chamada é inválida."
-      },
-      {
         "texto_opcion": "`df.filter(\"é_valor_alto\", col(\"quantidade\") > 1000)`, `filter()` é usado para remover linhas com base.",
         "es_correcta": false,
         "explicacion": "`filter()` é usado para remover linhas com base em uma condição, não para adicionar uma nova coluna."
       },
       {
-        "texto_opcion": "`df.withColumn(\"is_high_value\", if col(\"quantidade\") > 1000: Verdadeiro senão: Falso)`",
-        "es_correcta": false,
-        "explicacion": "As instruções `if/else` do Python não podem ser usadas inline como uma expressão de coluna desta forma; esta é uma sintaxe inválida."
-      },
-      {
         "texto_opcion": "`df.withColumn > 1000, Verdadeiro).caso contrário(Falso))`.",
         "es_correcta": true,
         "explicacion": "`when().otherwise()` é o padrão PySpark padrão para lógica de coluna condicional, produzindo corretamente um sinalizador booleano."
+      },
+      {
+        "texto_opcion": "`df.withColumn(\"is_high_value\", col(\"quantidade\") > 1000, Verdadeiro, Falso)`.",
+        "es_correcta": false,
+        "explicacion": "`withColumn` aceita apenas dois argumentos - um nome de coluna e uma expressão de coluna - portanto, esta assinatura de chamada é inválida."
+      },
+      {
+        "texto_opcion": "`df.withColumn(\"is_high_value\", if col(\"quantidade\") > 1000: Verdadeiro senão: Falso)`.",
+        "es_correcta": false,
+        "explicacion": "As instruções `if/else` do Python não podem ser usadas inline como uma expressão de coluna desta forma; esta é uma sintaxe inválida."
       }
     ],
     "tags": [
@@ -380,17 +380,7 @@
     "pregunta": "Um engenheiro de dados executa o seguinte em um DataFrame `df` contendo uma coluna `region` com valores `'us'`, `'eu'` e `null`:\n\n```python\ndf.na.fill(\"unknown\", subset=[\"region\"])\n```\n\nQual é o efeito deste código?",
     "opciones": [
       {
-        "texto_opcion": "Todas as linhas com `região` nula são eliminadas de DataFrame",
-        "es_correcta": false,
-        "explicacion": "Eliminar linhas com nulos é o comportamento de `na.drop()`, não de `na.fill()`."
-      },
-      {
-        "texto_opcion": "Todos os valores nulos na coluna `region` são substituídos pela string `\"unknown\"`.",
-        "es_correcta": true,
-        "explicacion": "`na.fill()` com um parâmetro `subset` substitui valores nulos apenas nas colunas especificadas, aqui preenchendo nulos em `region` com `\"unknown\"`."
-      },
-      {
-        "texto_opcion": "Ocorre um erro porque `fill` requer um valor de substituição numérico",
+        "texto_opcion": "Ocorre um erro porque `fill` requer um valor de substituição numérico.",
         "es_correcta": false,
         "explicacion": "`na.fill()` aceita valores de substituição de string para colunas do tipo string; nenhum erro ocorre."
       },
@@ -398,6 +388,16 @@
         "texto_opcion": "Cada valor na coluna `região`, nulo ou não, é substituído por `\"desconhecido\"`.",
         "es_correcta": false,
         "explicacion": "`na.fill()` substitui apenas valores nulos; valores não nulos existentes como `'us'` e `'eu'` permanecem inalterados."
+      },
+      {
+        "texto_opcion": "Todos os valores nulos na coluna `region` são substituídos pela string `\"unknown\"`.",
+        "es_correcta": true,
+        "explicacion": "`na.fill()` com um parâmetro `subset` substitui valores nulos apenas nas colunas especificadas, aqui preenchendo nulos em `region` com `\"unknown\"`."
+      },
+      {
+        "texto_opcion": "Todas as linhas com `região` nula são eliminadas de DataFrame.",
+        "es_correcta": false,
+        "explicacion": "Eliminar linhas com nulos é o comportamento de `na.drop()`, não de `na.fill()`."
       }
     ],
     "tags": [
@@ -409,9 +409,9 @@
     "pregunta": "Um engenheiro de dados precisa desduplicar linhas com base na coluna `email`, mantendo apenas uma linha por e-mail exclusivo, independentemente dos valores em outras colunas.\n\nQual código está correto?",
     "opciones": [
       {
-        "texto_opcion": "`df.dropDuplicates([\"e-mail\"])`.",
-        "es_correcta": true,
-        "explicacion": "`dropDuplicates` com uma lista de colunas remove linhas duplicadas com base apenas nas colunas especificadas, mantendo uma linha por `email` exclusivo."
+        "texto_opcion": "`df.groupBy(\"email\").first()`, `groupBy` seguido por.",
+        "es_correcta": false,
+        "explicacion": "`groupBy` seguido por `first()` não é uma sintaxe válida para recuperar linhas desduplicadas; `groupBy` requer uma função de agregação."
       },
       {
         "texto_opcion": "`df.distinct(\"e-mail\")`, `distinct()` não aceita argumentos.",
@@ -419,14 +419,14 @@
         "explicacion": "`distinct()` não aceita argumentos de coluna; remove duplicatas considerando todas as colunas da linha."
       },
       {
-        "texto_opcion": "`df.filter(col(\"email\").isDistinct())`",
+        "texto_opcion": "`df.filter(col(\"email\").isDistinct())` — não existe um método `isDistinct()`.",
         "es_correcta": false,
         "explicacion": "Não existe um método `isDistinct()` em uma coluna no PySpark."
       },
       {
-        "texto_opcion": "`df.groupBy(\"email\").first()`, `groupBy` seguido por.",
-        "es_correcta": false,
-        "explicacion": "`groupBy` seguido por `first()` não é uma sintaxe válida para recuperar linhas desduplicadas; `groupBy` requer uma função de agregação."
+        "texto_opcion": "`df.dropDuplicates([\"e-mail\"])`.",
+        "es_correcta": true,
+        "explicacion": "`dropDuplicates` com uma lista de colunas remove linhas duplicadas com base apenas nas colunas especificadas, mantendo uma linha por `email` exclusivo."
       }
     ],
     "tags": [
@@ -438,24 +438,24 @@
     "pregunta": "Um engenheiro de dados está trabalhando com um DataFrame `df` que possui uma coluna `scores` do tipo `array<int>`. Eles correm:\n\n```python\ndf.withColumn(\"num_scores\", size(col(\"scores\")))\n```\n\nO que contém a nova coluna `num_scores`?",
     "opciones": [
       {
+        "texto_opcion": "A soma de todos os valores na matriz `scores`.",
+        "es_correcta": false,
+        "explicacion": "A soma dos elementos do array requer lógica no estilo `agregate()` ou `expr(\"array_sum(scores)\")`, não `size()`."
+      },
+      {
         "texto_opcion": "O número de elementos na matriz `scores` para cada linha.",
         "es_correcta": true,
         "explicacion": "`size()` retorna a contagem de elementos em uma coluna de array (ou mapa)."
       },
       {
-        "texto_opcion": "A soma de todos os valores na matriz `scores`",
+        "texto_opcion": "Uma nova linha para cada elemento na matriz `scores`.",
         "es_correcta": false,
-        "explicacion": "A soma dos elementos do array requer lógica no estilo `agregate()` ou `expr(\"array_sum(scores)\")`, não `size()`."
+        "explicacion": "Produzir uma linha por elemento do array é o comportamento de `explode()`, não de `size()`."
       },
       {
         "texto_opcion": "O valor máximo na matriz `scores`, encontrar o máximo requer.",
         "es_correcta": false,
         "explicacion": "Encontrar o máximo requer `array_max()`, não `size()`."
-      },
-      {
-        "texto_opcion": "Uma nova linha para cada elemento na matriz `scores`.",
-        "es_correcta": false,
-        "explicacion": "Produzir uma linha por elemento do array é o comportamento de `explode()`, não de `size()`."
       }
     ],
     "tags": [
@@ -467,7 +467,7 @@
     "pregunta": "Um engenheiro de dados deseja reordenar colunas em `df` para que `customer_id` apareça primeiro, seguido por todas as colunas restantes em sua ordem original.\n\nQual código consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "`df.withColumn(\"customer_id\", primeiro(\"customer_id\"))`",
+        "texto_opcion": "`df.withColumn(\"customer_id\", primeiro(\"customer_id\"))`.",
         "es_correcta": false,
         "explicacion": "`withColumn` com `first()` é uma operação agregada e não altera a ordem das colunas."
       },
@@ -477,14 +477,14 @@
         "explicacion": "`sort()` reordena as linhas com base nos valores das colunas, não na ordem das colunas em si."
       },
       {
-        "texto_opcion": "`df.reorder(\"customer_id\")`, não existe um método `reordenar` em.",
-        "es_correcta": false,
-        "explicacion": "Não existe um método `reordenar` em um PySpark DataFrame."
-      },
-      {
         "texto_opcion": "`df.select(\"customer_id\", *[c para c em df.columns if c!= \"customer_id\"])`",
         "es_correcta": true,
         "explicacion": "Isso seleciona `customer_id` primeiro e, em seguida, descompacta os nomes das colunas restantes em sua ordem original, alcançando a reordenação desejada."
+      },
+      {
+        "texto_opcion": "`df.reorder(\"customer_id\")`, não existe um método `reordenar` em.",
+        "es_correcta": false,
+        "explicacion": "Não existe um método `reordenar` em um PySpark DataFrame."
       }
     ],
     "tags": [
@@ -501,14 +501,14 @@
         "explicacion": "`na.drop(subset=[\"country\"])` remove linhas onde `country` é nulo, eliminando apenas a linha u2."
       },
       {
-        "texto_opcion": "3 linhas — `na.drop` com `subset` apenas sinaliza nulos sem remover linhas",
-        "es_correcta": false,
-        "explicacion": "`na.drop()` remove ativamente linhas com nulos no subconjunto especificado; não apenas os sinaliza."
-      },
-      {
         "texto_opcion": "0 linhas — `na.drop` remove todas as linhas se existir algum nulo em qualquer lugar do DataFrame.",
         "es_correcta": false,
         "explicacion": "Com `subset` especificado, apenas os nulos nessa coluna são considerados, não o DataFrame inteiro."
+      },
+      {
+        "texto_opcion": "3 linhas — `na.drop` com `subset` apenas sinaliza nulos sem remover linhas — `na.drop()` remove ativamente linhas com nulos no subconjunto.",
+        "es_correcta": false,
+        "explicacion": "`na.drop()` remove ativamente linhas com nulos no subconjunto especificado; não apenas os sinaliza."
       },
       {
         "texto_opcion": "1 linha — apenas as linhas sem nulos em nenhum lugar são mantidas, como `subset=[\"country\"]` é especificado",
@@ -530,19 +530,19 @@
         "explicacion": "`.cast()` em uma coluna converte seu tipo, e reatribuí-lo via `withColumn` atualiza a coluna `amount` para o tipo double."
       },
       {
-        "texto_opcion": "`df.withColumn(\"quantia\", double(col(\"quantidade\")))`",
+        "texto_opcion": "`df.withColumn(\"quantia\", double(col(\"quantidade\")))`.",
         "es_correcta": false,
         "explicacion": "Não há função `double()` em `pyspark.sql.functions`; `.cast(\"double\")` é a abordagem correta."
-      },
-      {
-        "texto_opcion": "`df.convertColumn(\"quantia\", \"duplo\")`",
-        "es_correcta": false,
-        "explicacion": "`convertColumn` não é um método PySpark DataFrame válido."
       },
       {
         "texto_opcion": "`df.amount.astype(\"duplo\")`, `.astype()` é um método pandas",
         "es_correcta": false,
         "explicacion": "`.astype()` é um método pandas, não uma coluna PySpark ou método DataFrame."
+      },
+      {
+        "texto_opcion": "`df.convertColumn(\"quantia\", \"duplo\")` — `convertColumn` não é um método.",
+        "es_correcta": false,
+        "explicacion": "`convertColumn` não é um método PySpark DataFrame válido."
       }
     ],
     "tags": [
@@ -554,14 +554,14 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```python\ndf2 = df.select(col(\"amount\").alias(\"total\"))\n```\n\nQuais colunas o `df2` contém?",
     "opciones": [
       {
-        "texto_opcion": "Um DataFrame vazio, já que `alias` não pode ser usado dentro de `select`.",
-        "es_correcta": false,
-        "explicacion": "Usar `.alias()` dentro de `select()` é um padrão PySpark padrão e válido."
-      },
-      {
         "texto_opcion": "Apenas uma coluna, denominada `total`, contendo os valores de `amount`.",
         "es_correcta": true,
         "explicacion": "`select` com uma única coluna com alias retorna um DataFrame com apenas essa coluna, renomeada via `.alias()`."
+      },
+      {
+        "texto_opcion": "Duas colunas: `amount` e `total`, ambas com os mesmos valores.",
+        "es_correcta": false,
+        "explicacion": "`select()` retorna apenas as colunas listadas explicitamente; o nome da coluna `amount` original não é preservado junto com o alias."
       },
       {
         "texto_opcion": "Todas as colunas originais de `df`, com `amount` renomeado para `total`.",
@@ -569,9 +569,9 @@
         "explicacion": "`select()` descarta quaisquer colunas não listadas explicitamente, então apenas `total` permanece."
       },
       {
-        "texto_opcion": "Duas colunas: `amount` e `total`, ambas com os mesmos valores",
+        "texto_opcion": "Um DataFrame vazio, já que `alias` não pode ser usado dentro de `select`.",
         "es_correcta": false,
-        "explicacion": "`select()` retorna apenas as colunas listadas explicitamente; o nome da coluna `amount` original não é preservado junto com o alias."
+        "explicacion": "Usar `.alias()` dentro de `select()` é um padrão PySpark padrão e válido."
       }
     ],
     "tags": [
@@ -588,19 +588,19 @@
         "explicacion": "Converter a coluna para minúsculas com `lower()` antes de verificar `contains(\"urgente\")` garante que a correspondência não faz distinção entre maiúsculas e minúsculas."
       },
       {
-        "texto_opcion": "`df.filter(col(\"descrição\").ignoreCase(\"urgente\"))`",
-        "es_correcta": false,
-        "explicacion": "Objetos de coluna não possuem um método `ignoreCase()` no PySpark."
-      },
-      {
-        "texto_opcion": "`df.filter(col(\"descrição\").contains(\"urgente\"))`",
+        "texto_opcion": "`df.filter(col(\"descrição\").contains(\"urgente\"))`.",
         "es_correcta": false,
         "explicacion": "`contains()` sozinho diferencia maiúsculas de minúsculas e perderia valores como `\"Urgente\"` ou `\"URGENTE\"`."
       },
       {
-        "texto_opcion": "`df.filter(col(\"descrição\") == \"urgente\")`",
+        "texto_opcion": "`df.filter(col(\"descrição\") == \"urgente\")`.",
         "es_correcta": false,
         "explicacion": "Isso verifica a igualdade exata da string `\"urgente\"`, não uma correspondência de substring."
+      },
+      {
+        "texto_opcion": "`df.filter(col(\"descrição\").ignoreCase(\"urgente\"))`",
+        "es_correcta": false,
+        "explicacion": "Objetos de coluna não possuem um método `ignoreCase()` no PySpark."
       }
     ],
     "tags": [
@@ -612,12 +612,12 @@
     "pregunta": "Um engenheiro de dados executa o seguinte em um DataFrame com uma coluna `metadados` do tipo `map<string,string>`:\n\n```python\ndf.withColumn(\"owner\", col(\"metadata\")[\"owner\"])\n```\n\nQual será o resultado se o mapa de `metadados` de uma linha não contiver a chave `\"proprietário\"`?",
     "opciones": [
       {
-        "texto_opcion": "A coluna `proprietário` dessa linha é `null`.",
-        "es_correcta": true,
-        "explicacion": "Quando uma chave de pesquisa do mapa está faltando, o PySpark retorna `null` para essa linha em vez de gerar um erro."
+        "texto_opcion": "A coluna `proprietário` tem como padrão uma string vazia `\"\"`.",
+        "es_correcta": false,
+        "explicacion": "O padrão para uma chave de mapa ausente é `null`, não uma string vazia."
       },
       {
-        "texto_opcion": "A consulta inteira falha com um `KeyError`",
+        "texto_opcion": "A consulta inteira falha com um `KeyError` — a indexação do mapa PySpark não.",
         "es_correcta": false,
         "explicacion": "A indexação do mapa PySpark não gera um `KeyError` para chaves ausentes; ele retorna nulo."
       },
@@ -627,9 +627,9 @@
         "explicacion": "Chaves de mapa ausentes não causam remoção de linha; a linha permanece com um valor nulo na nova coluna."
       },
       {
-        "texto_opcion": "A coluna `proprietário` tem como padrão uma string vazia `\"\"`.",
-        "es_correcta": false,
-        "explicacion": "O padrão para uma chave de mapa ausente é `null`, não uma string vazia."
+        "texto_opcion": "A coluna `proprietário` dessa linha é `null`.",
+        "es_correcta": true,
+        "explicacion": "Quando uma chave de pesquisa do mapa está faltando, o PySpark retorna `null` para essa linha em vez de gerar um erro."
       }
     ],
     "tags": [
@@ -641,24 +641,24 @@
     "pregunta": "Um engenheiro de dados tem um DataFrame `df` com colunas `first_name` e `last_name` e deseja adicionar uma coluna `full_name` que as concatena com um espaço.\n\nQual código está correto?",
     "opciones": [
       {
-        "texto_opcion": "`df.withColumn(\"nome_completo\", concat_ws(\" \", col(\"primeiro_nome\"), col(\"sobrenome\")))`.",
-        "es_correcta": true,
-        "explicacion": "`concat_ws()` concatena múltiplas colunas com o separador especificado, produzindo aqui `\"primeiro último\"`."
-      },
-      {
-        "texto_opcion": "`df.withColumn(\"nome_completo\", col(\"primeiro_nome\") + \" \" + col(\"sobrenome\"))`",
-        "es_correcta": false,
-        "explicacion": "O operador `+` realiza adição aritmética em colunas, não concatenação de strings, e não produzirá o resultado esperado em tipos de string."
-      },
-      {
-        "texto_opcion": "`df.withColumn(\"nome_completo\", merge(col(\"primeiro_nome\"), col(\"sobrenome\")))`",
+        "texto_opcion": "`df.withColumn(\"nome_completo\", merge(col(\"primeiro_nome\"), col(\"sobrenome\")))`.",
         "es_correcta": false,
         "explicacion": "Não há função `merge()` em `pyspark.sql.functions` para concatenação de strings."
       },
       {
-        "texto_opcion": "`df.withColumn(\"nome_completo\", join(col(\"primeiro_nome\"), col(\"sobrenome\")))`",
+        "texto_opcion": "`df.withColumn(\"nome_completo\", join(col(\"primeiro_nome\"), col(\"sobrenome\")))`.",
         "es_correcta": false,
         "explicacion": "`join()` é usado para combinar DataFrames, não para concatenar valores de colunas de string."
+      },
+      {
+        "texto_opcion": "`df.withColumn(\"nome_completo\", col(\"primeiro_nome\") + \" \" + col(\"sobrenome\"))`.",
+        "es_correcta": false,
+        "explicacion": "O operador `+` realiza adição aritmética em colunas, não concatenação de strings, e não produzirá o resultado esperado em tipos de string."
+      },
+      {
+        "texto_opcion": "`df.withColumn(\"nome_completo\", concat_ws(\" \", col(\"primeiro_nome\"), col(\"sobrenome\")))`.",
+        "es_correcta": true,
+        "explicacion": "`concat_ws()` concatena múltiplas colunas com o separador especificado, produzindo aqui `\"primeiro último\"`."
       }
     ],
     "tags": [
@@ -670,14 +670,9 @@
     "pregunta": "Um engenheiro de dados precisa manter as linhas de `df` onde `created_at` está entre `'2024-01-01'` e `'2024-01-31'` inclusive.\n\nQual código implementa isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "`df.filter(col(\"criado_em\").between(\"2024-01-01\", \"2024-01-31\"))`.",
-        "es_correcta": true,
-        "explicacion": "`.between()` executa uma verificação de intervalo inclusivo, selecionando corretamente as linhas onde `created_at` se enquadra nas datas fornecidas."
-      },
-      {
-        "texto_opcion": "`df.filter(col(\"created_at\") > \"2024-01-01\" e col(\"created_at\") < \"2024-01-31\")`",
+        "texto_opcion": "`df.where(\"criado_em\" em [\"2024-01-01\", \"2024-01-31\"])` — esta verificação `in` do Python corresponde.",
         "es_correcta": false,
-        "explicacion": "O `and` do Python não funciona corretamente com expressões de coluna; o operador `&` entre parênteses seria necessário e isso também exclui as datas limite."
+        "explicacion": "Esta verificação `in` do Python corresponde apenas às duas strings de limite exatas, não ao intervalo de datas completo entre elas."
       },
       {
         "texto_opcion": "`df.filter.range)`, não existe um método `.range()` em uma coluna no PySpark.",
@@ -685,9 +680,14 @@
         "explicacion": "Não existe um método `.range()` em uma coluna no PySpark."
       },
       {
-        "texto_opcion": "`df.where(\"criado_em\" em [\"2024-01-01\", \"2024-01-31\"])`",
+        "texto_opcion": "`df.filter(col(\"created_at\") > \"2024-01-01\" e col(\"created_at\") < \"2024-01-31\")`",
         "es_correcta": false,
-        "explicacion": "Esta verificação `in` do Python corresponde apenas às duas strings de limite exatas, não ao intervalo de datas completo entre elas."
+        "explicacion": "O `and` do Python não funciona corretamente com expressões de coluna; o operador `&` entre parênteses seria necessário e isso também exclui as datas limite."
+      },
+      {
+        "texto_opcion": "`df.filter(col(\"criado_em\").between(\"2024-01-01\", \"2024-01-31\"))`.",
+        "es_correcta": true,
+        "explicacion": "`.between()` executa uma verificação de intervalo inclusivo, selecionando corretamente as linhas onde `created_at` se enquadra nas datas fornecidas."
       }
     ],
     "tags": [
@@ -699,22 +699,22 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```python\ndf.select(\"order_id\", explode(col(\"items\")).alias(\"item\"))\n```\n\nem um DataFrame onde `items` é `array<struct<sku:string, qty:int>>`. Qual é a aparência do DataFrame resultante?",
     "opciones": [
       {
-        "texto_opcion": "Uma única linha por `order_id` com a matriz `items` inalterada",
-        "es_correcta": false,
-        "explicacion": "`explode` expande o array em múltiplas linhas; isso não deixa a coluna da matriz inalterada."
-      },
-      {
         "texto_opcion": "Uma linha por elemento do array, com `order_id` e uma coluna struct `item` contendo `sku` e `qty`.",
         "es_correcta": true,
         "explicacion": "`explode` em uma matriz de structs produz uma linha por elemento struct, preservando os campos struct como uma única coluna aninhada chamada `item`."
       },
       {
-        "texto_opcion": "Uma linha por elemento da matriz, com colunas de nível superior separadas `sku` e.",
+        "texto_opcion": "Uma linha por elemento da matriz, com colunas de nível superior separadas `sku` e — `explode` sozinho mantém a estrutura intacta como uma coluna.",
         "es_correcta": false,
         "explicacion": "`explode` sozinho mantém a estrutura intacta como uma coluna; nivelar campos struct em colunas de nível superior requer uma etapa `select(\"item.*\")` adicional."
       },
       {
-        "texto_opcion": "Um erro, porque `explode` não pode operar em matrizes de estruturas",
+        "texto_opcion": "Uma única linha por `order_id` com a matriz `items` inalterada — `explode` expande o array em múltiplas linhas — `explode` expande o array em múltiplas linhas.",
+        "es_correcta": false,
+        "explicacion": "`explode` expande o array em múltiplas linhas; isso não deixa a coluna da matriz inalterada."
+      },
+      {
+        "texto_opcion": "Um erro, porque `explode` não pode operar em matrizes de estruturas — `explode` funciona corretamente em arrays de qualquer tipo.",
         "es_correcta": false,
         "explicacion": "`explode` funciona corretamente em arrays de qualquer tipo de elemento, incluindo structs."
       }

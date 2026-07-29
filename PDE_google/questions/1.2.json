@@ -3,22 +3,22 @@
     "pregunta": "Incident review (australiaeast): fail the pipeline if row counts or checksums between source and BigQuery diverge beyond threshold. Select the most appropriate design.",
     "opciones": [
       {
+        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable applied across environments for operational consistency often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Too late and unreliable."
+      },
+      {
         "texto_opcion": "Add explicit data validation/quality checks (e.g., Dataflow asserts, Great Expectations-style, or Dataplex DQ)",
         "es_correcta": true,
         "explicacion": "Automated validation catches fidelity issues before serving consumers."
       },
       {
-        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable.",
-        "es_correcta": false,
-        "explicacion": "Too late and unreliable."
-      },
-      {
-        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness.",
+        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness as a primary design for this requirement used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "CPU does not prove data correctness."
       },
       {
-        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here.",
+        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Hides fidelity problems."
       }
@@ -32,24 +32,24 @@
     "pregunta": "A industrial IoT platform (~5 TB/day, region southeastasia) must: need multi-statement transactional updates with strong consistency for financial ledgers. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Use GCS objects as the ledger with no consistency model selected to meet the stated constraints.",
+        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics.",
+        "es_correcta": true,
+        "explicacion": "True high-contention OLTP ACID belongs in Spanner/Cloud SQL/AlloyDB; BQ is analytical-first."
+      },
+      {
+        "texto_opcion": "Use GCS objects as the ledger with no consistency model selected to meet the stated constraints as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Not ACID."
       },
       {
-        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR.",
-        "es_correcta": false,
-        "explicacion": "Cache is not durable SoR."
-      },
-      {
-        "texto_opcion": "Append conflicting JSON files without reconciliation as the primary design for this requirement.",
+        "texto_opcion": "Append conflicting JSON files without reconciliation as the primary design for this requirement configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Race conditions."
       },
       {
-        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics",
-        "es_correcta": true,
-        "explicacion": "True high-contention OLTP ACID belongs in Spanner/Cloud SQL/AlloyDB; BQ is analytical-first."
+        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Cache is not durable SoR."
       }
     ],
     "tags": [
@@ -61,22 +61,22 @@
     "pregunta": "Incident review (eastus): streaming pipeline must avoid double-counting payments under retries. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Accept all duplicates in dashboards used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Breaks fidelity."
-      },
-      {
         "texto_opcion": "Design idempotent sinks / dedupe keys (e.g., Dataflow exactly-once with deterministic IDs into BigQuery)",
         "es_correcta": true,
         "explicacion": "Idempotency and engine exactly-once features prevent duplicate business events."
       },
       {
-        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe adopted as the standard.",
+        "texto_opcion": "Accept all duplicates in dashboards used as the main path in this architecture often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Breaks fidelity."
+      },
+      {
+        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe adopted as the standard plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Duplicates on retry."
       },
       {
-        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here.",
+        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Increases replay risk."
       }
@@ -90,12 +90,7 @@
     "pregunta": "Energy utility scenario — RPO of minutes for a Cloud SQL OLTP database supporting analytics extracts. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Store only screenshots of the admin console, not a recovery strategy.",
-        "es_correcta": false,
-        "explicacion": "Not a recovery strategy."
-      },
-      {
-        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO",
+        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO.",
         "es_correcta": true,
         "explicacion": "HA + point-in-time recovery align operational RPO/RTO targets."
       },
@@ -103,6 +98,11 @@
         "texto_opcion": "No backups to save money, unacceptable data loss risk, unacceptable data loss risk.",
         "es_correcta": false,
         "explicacion": "Unacceptable data loss risk."
+      },
+      {
+        "texto_opcion": "Store only screenshots of the admin console, not a recovery strategy.",
+        "es_correcta": false,
+        "explicacion": "Not a recovery strategy."
       },
       {
         "texto_opcion": "Weekly manual mysqldump only, rPO of days, not minutes, rPO of days, not minutes.",
@@ -119,22 +119,22 @@
     "pregunta": "A energy utility (petabyte-scale historical data, region westeurope) must: Dataflow batch job should resume cleanly after worker preemption. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints",
+        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Poor resilience."
       },
       {
-        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry.",
-        "es_correcta": false,
-        "explicacion": "Double-applies on retry."
-      },
-      {
-        "texto_opcion": "Disable autoscaling and ignore failures applied across adopted as the.",
+        "texto_opcion": "Disable autoscaling and ignore failures applied across adopted as the often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Fragile."
       },
       {
-        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes",
+        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Double-applies on retry."
+      },
+      {
+        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes.",
         "es_correcta": true,
         "explicacion": "Dataflow handles worker failures; sinks must remain idempotent for safe replay."
       }
@@ -148,24 +148,24 @@
     "pregunta": "Upstream JSON schema drifts weekly. How do you protect pipeline fidelity?",
     "opciones": [
       {
-        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers.",
-        "es_correcta": false,
-        "explicacion": "Ideal but still need defensive consumers."
-      },
-      {
-        "texto_opcion": "Fail forever with no dead-letter on any new field used as the main path in this architecture.",
+        "texto_opcion": "Fail forever with no dead-letter on any new field used as the main path in this architecture configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Brittle operations."
+      },
+      {
+        "texto_opcion": "Drop all unknown fields silently without logging configured end-to-end for this workload used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Hidden data loss."
+      },
+      {
+        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Ideal but still need defensive consumers."
       },
       {
         "texto_opcion": "Use schema-aware handling (dead-letter, schema registry patterns, nullable evolution, Dataflow schema inference carefully)",
         "es_correcta": true,
         "explicacion": "Controlled schema evolution and DLQ protect pipeline fidelity."
-      },
-      {
-        "texto_opcion": "Drop all unknown fields silently without logging configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Hidden data loss."
       }
     ],
     "tags": [
@@ -177,22 +177,22 @@
     "pregunta": "streaming aggregates must include late events within a allowed lateness bound. Context: gaming studio, petabyte-scale historical data.",
     "opciones": [
       {
-        "texto_opcion": "Drop all late events always, may violate fidelity SLAs, may violate fidelity SLAs.",
-        "es_correcta": false,
-        "explicacion": "May violate fidelity SLAs."
-      },
-      {
-        "texto_opcion": "Ignore timestamps and count wall-clock only, incorrect analytics under delay.",
-        "es_correcta": false,
-        "explicacion": "Incorrect analytics under delay."
-      },
-      {
-        "texto_opcion": "Configure event-time windows with allowed lateness and triggering in Apache Beam/Dataflow",
+        "texto_opcion": "Configure event-time windows with allowed lateness and triggering in Apache Beam/Dataflow.",
         "es_correcta": true,
         "explicacion": "Event-time processing with lateness handles out-of-order arrivals correctly."
       },
       {
-        "texto_opcion": "Use only processing-time forever with no watermarks, misses late correctness.",
+        "texto_opcion": "Drop all late events always, may violate fidelity SLAs, may violate fidelity SLAs prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "May violate fidelity SLAs."
+      },
+      {
+        "texto_opcion": "Ignore timestamps and count wall-clock only, incorrect analytics under delay plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Incorrect analytics under delay."
+      },
+      {
+        "texto_opcion": "Use only processing-time forever with no watermarks, misses late correctness used as the main path in this architecture as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Misses late correctness."
       }
@@ -206,24 +206,24 @@
     "pregunta": "Payments fintech scenario — finance requires daily reconciliation between Pub/Sub ingress counts and BigQuery fact rows. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Emit pipeline metrics and run scheduled reconciliation queries/alerts on mismatches",
-        "es_correcta": true,
-        "explicacion": "Operational reconciliation closes the loop on end-to-end fidelity."
-      },
-      {
-        "texto_opcion": "Only check disk free space, irrelevant to row fidelity, irrelevant to row fidelity.",
+        "texto_opcion": "Only check disk free space, irrelevant to row fidelity, irrelevant to row fidelity configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Irrelevant to row fidelity."
       },
       {
-        "texto_opcion": "Assume success if the job shows RUNNING, running ≠ correct counts.",
-        "es_correcta": false,
-        "explicacion": "Running ≠ correct counts."
-      },
-      {
-        "texto_opcion": "Never compare source and sink selected to meet the stated constraints.",
+        "texto_opcion": "Never compare source and sink selected to meet the stated constraints applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Blind operations."
+      },
+      {
+        "texto_opcion": "Emit pipeline metrics and run scheduled reconciliation queries/alerts on mismatches.",
+        "es_correcta": true,
+        "explicacion": "Operational reconciliation closes the loop on end-to-end fidelity."
+      },
+      {
+        "texto_opcion": "Assume success if the job shows RUNNING, running ≠ correct counts selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Running ≠ correct counts."
       }
     ],
     "tags": [
@@ -235,9 +235,9 @@
     "pregunta": "Payments fintech scenario — SQL ELT models in BigQuery need documented tests for null keys and referential integrity. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Disable CI on model changes as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Removes safety net."
+        "texto_opcion": "Use Dataform assertions/tests in the transformation project.",
+        "es_correcta": true,
+        "explicacion": "Dataform supports tested, versioned SQL transformations with assertions."
       },
       {
         "texto_opcion": "Skip tests because SQL looks fine, regressions slip through.",
@@ -250,9 +250,9 @@
         "explicacion": "Not executable."
       },
       {
-        "texto_opcion": "Use Dataform assertions/tests in the transformation project.",
-        "es_correcta": true,
-        "explicacion": "Dataform supports tested, versioned SQL transformations with assertions."
+        "texto_opcion": "Disable CI on model changes as the default production choice here.",
+        "es_correcta": false,
+        "explicacion": "Removes safety net."
       }
     ],
     "tags": [
@@ -264,9 +264,9 @@
     "pregunta": "malformed Pub/Sub messages should not block the healthy stream. Context: healthcare provider, hourly batch windows.",
     "opciones": [
       {
-        "texto_opcion": "Crash the entire pipeline on first bad message forever used as the selected to meet.",
+        "texto_opcion": "Delete malformed messages with no audit trail, loses forensic/replay value.",
         "es_correcta": false,
-        "explicacion": "Poor availability."
+        "explicacion": "Loses forensic/replay value."
       },
       {
         "texto_opcion": "Publish malformed messages to production dashboards raw, pollutes serving layer.",
@@ -274,14 +274,14 @@
         "explicacion": "Pollutes serving layer."
       },
       {
+        "texto_opcion": "Crash the entire pipeline on first bad message forever used as the selected to meet.",
+        "es_correcta": false,
+        "explicacion": "Poor availability."
+      },
+      {
         "texto_opcion": "Route poison messages to a dead-letter topic/table with alerting.",
         "es_correcta": true,
         "explicacion": "DLQ isolates bad records while healthy traffic continues."
-      },
-      {
-        "texto_opcion": "Delete malformed messages with no audit trail, loses forensic/replay value.",
-        "es_correcta": false,
-        "explicacion": "Loses forensic/replay value."
       }
     ],
     "tags": [
@@ -293,24 +293,24 @@
     "pregunta": "For a gaming studio workload with ~50,000 events/s: protect critical BigQuery datasets against accidental DELETE/DML mistakes. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Use time travel, snapshots/clones, and controlled IAM; consider scheduled exports for long retention",
-        "es_correcta": true,
-        "explicacion": "BigQuery time travel and table snapshots support recovery from operator error."
-      },
-      {
-        "texto_opcion": "No recovery plan because BigQuery is managed, still need retention/IAM controls.",
+        "texto_opcion": "No recovery plan because BigQuery is managed, still need retention/IAM controls applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Still need retention/IAM controls."
       },
       {
-        "texto_opcion": "Grant everyone dataOwner to speed recovery, increases accident likelihood.",
+        "texto_opcion": "Grant everyone dataOwner to speed recovery, increases accident likelihood plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Increases accident likelihood."
       },
       {
-        "texto_opcion": "Only keep results in a laptop cache applied across environments for consistency.",
+        "texto_opcion": "Only keep results in a laptop cache applied across environments for consistency as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Not durable."
+      },
+      {
+        "texto_opcion": "Use time travel, snapshots/clones, and controlled IAM; consider scheduled exports for long retention.",
+        "es_correcta": true,
+        "explicacion": "BigQuery time travel and table snapshots support recovery from operator error."
       }
     ],
     "tags": [
@@ -322,24 +322,24 @@
     "pregunta": "For a industrial IoT platform workload with ~200 million rows/day: analytics serving must survive a zonal outage with minimal downtime. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Run one non-HA Cloud SQL without failover, weak for critical RTO, weak for critical RTO.",
+        "texto_opcion": "Run one non-HA Cloud SQL without failover, weak for critical RTO, weak for critical RTO as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Weak for critical RTO."
+      },
+      {
+        "texto_opcion": "Single zone VM with local disk only as the warehouse selected to meet the stated constraints often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Zonal SPOF."
+      },
+      {
+        "texto_opcion": "Disable replication to cut cost always used as the main path in this architecture often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Raises outage impact."
       },
       {
         "texto_opcion": "Use multi-region or regional HA configurations appropriate to each service (e.g., multi-region GCS/BQ, HA Cloud SQL)",
         "es_correcta": true,
         "explicacion": "HA topology choices must match RTO across storage and compute."
-      },
-      {
-        "texto_opcion": "Single zone VM with local disk only as the warehouse selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Zonal SPOF."
-      },
-      {
-        "texto_opcion": "Disable replication to cut cost always used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Raises outage impact."
       }
     ],
     "tags": [
@@ -351,24 +351,24 @@
     "pregunta": "Incident review (westeurope): design pipelines so SLA breaches on Composer DAGs page on-call quickly. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "No alerts; check the UI once a month as the primary design for this requirement.",
+        "texto_opcion": "No alerts; check the UI once a month as the primary design for this requirement prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Too slow."
       },
       {
-        "texto_opcion": "Define DAG SLAs/alerting on failed/up_for_retry tasks integrated with Cloud Monitoring",
+        "texto_opcion": "Define DAG SLAs/alerting on failed/up_for_retry tasks integrated with Cloud Monitoring.",
         "es_correcta": true,
         "explicacion": "Orchestration-level SLAs catch missed schedules before business impact grows."
       },
       {
-        "texto_opcion": "Alert only on VM CPU in unrelated projects adopted as the standard prioritized for.",
-        "es_correcta": false,
-        "explicacion": "Wrong signal."
-      },
-      {
-        "texto_opcion": "Disable task retries and hope prioritized for operational simplicity.",
+        "texto_opcion": "Disable task retries and hope prioritized for operational simplicity adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Fragile."
+      },
+      {
+        "texto_opcion": "Alert only on VM CPU in unrelated projects adopted as the standard prioritized for plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Wrong signal."
       }
     ],
     "tags": [
@@ -380,24 +380,24 @@
     "pregunta": "Incident review (northeurope): analysts use LLM-assisted SQL generation; wrong joins must not silently hit production. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Grant bigquery.admin to the LLM service account broadly prioritized for.",
-        "es_correcta": false,
-        "explicacion": "Excess privilege."
-      },
-      {
-        "texto_opcion": "Disable dry-run and cost controls, risk of runaway queries, risk of runaway queries.",
+        "texto_opcion": "Disable dry-run and cost controls, risk of runaway queries, risk of runaway queries as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Risk of runaway queries."
       },
       {
-        "texto_opcion": "Auto-run any generated SQL as Admin on prod configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Dangerous."
-      },
-      {
-        "texto_opcion": "Require review, dry-run/cost checks, and scoped IAM; validate generated SQL before wide runs",
+        "texto_opcion": "Require review, dry-run/cost checks, and scoped IAM; validate generated SQL before wide runs.",
         "es_correcta": true,
         "explicacion": "Human/process guardrails keep assisted query generation from harming fidelity or spend."
+      },
+      {
+        "texto_opcion": "Grant bigquery.admin to the LLM service account broadly prioritized for plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Excess privilege."
+      },
+      {
+        "texto_opcion": "Auto-run any generated SQL as Admin on prod configured end-to-end for this workload prioritized for simplicity, though it.",
+        "es_correcta": false,
+        "explicacion": "Dangerous."
       }
     ],
     "tags": [
@@ -409,24 +409,24 @@
     "pregunta": "A telecom operator (hourly batch windows, region australiaeast) must: Cloud Data Fusion pipelines should gate promotion on data quality rules. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Always write sinks before any checks, pollutes curated zones, pollutes curated zones.",
-        "es_correcta": false,
-        "explicacion": "Pollutes curated zones."
-      },
-      {
-        "texto_opcion": "Only validate in email threads adopted as the standard pattern for the team.",
+        "texto_opcion": "Only validate in email threads adopted as the standard pattern for the team plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Not automated."
       },
       {
-        "texto_opcion": "Add wrangler/quality directives and fail pipelines on rule breaches before sink commit",
+        "texto_opcion": "Skip profiling because Fusion is managed selected to meet the stated constraints often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Managed ≠ validated."
+      },
+      {
+        "texto_opcion": "Add wrangler/quality directives and fail pipelines on rule breaches before sink commit.",
         "es_correcta": true,
         "explicacion": "Embedded quality gates improve fidelity in low-code ETL."
       },
       {
-        "texto_opcion": "Skip profiling because Fusion is managed selected to meet the stated constraints.",
+        "texto_opcion": "Always write sinks before any checks, pollutes curated zones, pollutes curated zones selected to meet the constraints described here.",
         "es_correcta": false,
-        "explicacion": "Managed ≠ validated."
+        "explicacion": "Pollutes curated zones."
       }
     ],
     "tags": [
@@ -438,24 +438,24 @@
     "pregunta": "Healthcare provider scenario — fail the pipeline if row counts or checksums between source and BigQuery diverge beyond threshold. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Hides fidelity problems."
-      },
-      {
-        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable.",
-        "es_correcta": false,
-        "explicacion": "Too late and unreliable."
-      },
-      {
         "texto_opcion": "Add explicit data validation/quality checks (e.g., Dataflow asserts, Great Expectations-style, or Dataplex DQ)",
         "es_correcta": true,
         "explicacion": "Automated validation catches fidelity issues before serving consumers."
       },
       {
-        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness.",
+        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Hides fidelity problems."
+      },
+      {
+        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "CPU does not prove data correctness."
+      },
+      {
+        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable as a primary design for this requirement configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Too late and unreliable."
       }
     ],
     "tags": [
@@ -467,24 +467,24 @@
     "pregunta": "need multi-statement transactional updates with strong consistency for financial ledgers. Context: media streaming company, strict GDPR residency. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Append conflicting JSON files without reconciliation selected to meet the stated constraints.",
+        "texto_opcion": "Append conflicting JSON files without reconciliation selected to meet the stated constraints often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Race conditions."
       },
       {
-        "texto_opcion": "Use GCS objects as the ledger with no consistency model adopted as the standard pattern for the team.",
+        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics.",
+        "es_correcta": true,
+        "explicacion": "True high-contention OLTP ACID belongs in Spanner/Cloud SQL/AlloyDB; BQ is analytical-first."
+      },
+      {
+        "texto_opcion": "Use GCS objects as the ledger with no consistency model adopted as the standard pattern for the team selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Not ACID."
       },
       {
-        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR, cache is not durable SoR.",
+        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR, cache is not durable SoR used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Cache is not durable SoR."
-      },
-      {
-        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics",
-        "es_correcta": true,
-        "explicacion": "True high-contention OLTP ACID belongs in Spanner/Cloud SQL/AlloyDB; BQ is analytical-first."
       }
     ],
     "tags": [
@@ -496,17 +496,17 @@
     "pregunta": "streaming pipeline must avoid double-counting payments under retries. Context: gaming studio, ~200 million rows/day. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here.",
+        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Increases replay risk."
       },
       {
-        "texto_opcion": "Accept all duplicates in dashboards selected to meet the stated constraints.",
+        "texto_opcion": "Accept all duplicates in dashboards selected to meet the stated constraints used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Breaks fidelity."
       },
       {
-        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe used as the main path.",
+        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe used as the main path often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Duplicates on retry."
       },
@@ -525,9 +525,9 @@
     "pregunta": "Incident review (northeurope): RPO of minutes for a Cloud SQL OLTP database supporting analytics extracts. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Store only screenshots of the admin console, not a recovery strategy.",
-        "es_correcta": false,
-        "explicacion": "Not a recovery strategy."
+        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO.",
+        "es_correcta": true,
+        "explicacion": "HA + point-in-time recovery align operational RPO/RTO targets."
       },
       {
         "texto_opcion": "No backups to save money, unacceptable data loss risk, unacceptable data loss risk.",
@@ -535,14 +535,14 @@
         "explicacion": "Unacceptable data loss risk."
       },
       {
-        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO",
-        "es_correcta": true,
-        "explicacion": "HA + point-in-time recovery align operational RPO/RTO targets."
-      },
-      {
         "texto_opcion": "Weekly manual mysqldump only, rPO of days, not minutes, rPO of days, not minutes.",
         "es_correcta": false,
         "explicacion": "RPO of days, not minutes."
+      },
+      {
+        "texto_opcion": "Store only screenshots of the admin console, not a recovery strategy.",
+        "es_correcta": false,
+        "explicacion": "Not a recovery strategy."
       }
     ],
     "tags": [
@@ -554,24 +554,24 @@
     "pregunta": "Incident review (westeurope): Dataflow batch job should resume cleanly after worker preemption. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints",
+        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes.",
+        "es_correcta": true,
+        "explicacion": "Dataflow handles worker failures; sinks must remain idempotent for safe replay."
+      },
+      {
+        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Poor resilience."
       },
       {
-        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry.",
+        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Double-applies on retry."
       },
       {
-        "texto_opcion": "Disable autoscaling and ignore failures adopted as the standard.",
+        "texto_opcion": "Disable autoscaling and ignore failures adopted as the standard often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Fragile."
-      },
-      {
-        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes",
-        "es_correcta": true,
-        "explicacion": "Dataflow handles worker failures; sinks must remain idempotent for safe replay."
       }
     ],
     "tags": [
@@ -583,24 +583,24 @@
     "pregunta": "Incident review (westeurope): upstream JSON fields appear/disappear weekly and break rigid parsers. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Drop all unknown fields silently without logging applied across environments for consistency.",
-        "es_correcta": false,
-        "explicacion": "Hidden data loss."
-      },
-      {
-        "texto_opcion": "Fail forever with no dead-letter on any new field prioritized for operational simplicity in this case.",
-        "es_correcta": false,
-        "explicacion": "Brittle operations."
-      },
-      {
         "texto_opcion": "Use schema-aware handling (dead-letter, schema registry patterns, nullable evolution, Dataflow schema inference carefully)",
         "es_correcta": true,
         "explicacion": "Controlled schema evolution and DLQ protect pipeline fidelity."
       },
       {
-        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers.",
+        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers adopted as the standard pattern for the team adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Ideal but still need defensive consumers."
+      },
+      {
+        "texto_opcion": "Fail forever with no dead-letter on any new field prioritized for operational simplicity in this case applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Brittle operations."
+      },
+      {
+        "texto_opcion": "Drop all unknown fields silently without logging applied across environments for consistency prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Hidden data loss."
       }
     ],
     "tags": [
@@ -612,24 +612,24 @@
     "pregunta": "A global retailer (petabyte-scale historical data, region australiaeast) must: streaming aggregates must include late events within a allowed lateness bound. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Drop all late events always, may violate fidelity SLAs, may violate fidelity SLAs.",
-        "es_correcta": false,
-        "explicacion": "May violate fidelity SLAs."
-      },
-      {
-        "texto_opcion": "Ignore timestamps and count wall-clock only, incorrect analytics under delay.",
-        "es_correcta": false,
-        "explicacion": "Incorrect analytics under delay."
-      },
-      {
-        "texto_opcion": "Use only processing-time forever with no watermarks, misses late correctness.",
+        "texto_opcion": "Use only processing-time forever with no watermarks, misses late correctness prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Misses late correctness."
       },
       {
-        "texto_opcion": "Configure event-time windows with allowed lateness and triggering in Apache Beam/Dataflow",
+        "texto_opcion": "Configure event-time windows with allowed lateness and triggering in Apache Beam/Dataflow.",
         "es_correcta": true,
         "explicacion": "Event-time processing with lateness handles out-of-order arrivals correctly."
+      },
+      {
+        "texto_opcion": "Drop all late events always, may violate fidelity SLAs, may violate fidelity SLAs prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "May violate fidelity SLAs."
+      },
+      {
+        "texto_opcion": "Ignore timestamps and count wall-clock only, incorrect analytics under delay plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Incorrect analytics under delay."
       }
     ],
     "tags": [
@@ -641,24 +641,24 @@
     "pregunta": "finance requires daily reconciliation between Pub/Sub ingress counts and BigQuery fact rows. Context: telecom operator, strict GDPR residency. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Never compare source and sink configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Blind operations."
-      },
-      {
-        "texto_opcion": "Emit pipeline metrics and run scheduled reconciliation queries/alerts on mismatches",
-        "es_correcta": true,
-        "explicacion": "Operational reconciliation closes the loop on end-to-end fidelity."
-      },
-      {
-        "texto_opcion": "Only check disk free space, irrelevant to row fidelity, irrelevant to row fidelity.",
+        "texto_opcion": "Only check disk free space, irrelevant to row fidelity, irrelevant to row fidelity selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Irrelevant to row fidelity."
       },
       {
-        "texto_opcion": "Assume success if the job shows RUNNING, running ≠ correct counts.",
+        "texto_opcion": "Emit pipeline metrics and run scheduled reconciliation queries/alerts on mismatches.",
+        "es_correcta": true,
+        "explicacion": "Operational reconciliation closes the loop on end-to-end fidelity."
+      },
+      {
+        "texto_opcion": "Assume success if the job shows RUNNING, running ≠ correct counts configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Running ≠ correct counts."
+      },
+      {
+        "texto_opcion": "Never compare source and sink configured end-to-end for this workload configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Blind operations."
       }
     ],
     "tags": [
@@ -675,14 +675,14 @@
         "explicacion": "Regressions slip through."
       },
       {
-        "texto_opcion": "Only validate in PowerPoint applied across environments for consistency prioritized for.",
-        "es_correcta": false,
-        "explicacion": "Not executable."
-      },
-      {
         "texto_opcion": "Disable CI on model changes applied across environments for consistency used as the main path.",
         "es_correcta": false,
         "explicacion": "Removes safety net."
+      },
+      {
+        "texto_opcion": "Only validate in PowerPoint applied across environments for consistency prioritized for.",
+        "es_correcta": false,
+        "explicacion": "Not executable."
       },
       {
         "texto_opcion": "Use Dataform assertions/tests in the transformation project.",
@@ -699,16 +699,6 @@
     "pregunta": "malformed Pub/Sub messages should not block the healthy stream. Context: gaming studio, hourly batch windows. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Crash the entire pipeline on first bad message forever configured adopted as the.",
-        "es_correcta": false,
-        "explicacion": "Poor availability."
-      },
-      {
-        "texto_opcion": "Publish malformed messages to production dashboards raw, pollutes serving layer.",
-        "es_correcta": false,
-        "explicacion": "Pollutes serving layer."
-      },
-      {
         "texto_opcion": "Route poison messages to a dead-letter topic/table with alerting.",
         "es_correcta": true,
         "explicacion": "DLQ isolates bad records while healthy traffic continues."
@@ -717,6 +707,16 @@
         "texto_opcion": "Delete malformed messages with no audit trail, loses forensic/replay value.",
         "es_correcta": false,
         "explicacion": "Loses forensic/replay value."
+      },
+      {
+        "texto_opcion": "Crash the entire pipeline on first bad message forever configured adopted as the.",
+        "es_correcta": false,
+        "explicacion": "Poor availability."
+      },
+      {
+        "texto_opcion": "Publish malformed messages to production dashboards raw, pollutes serving layer.",
+        "es_correcta": false,
+        "explicacion": "Pollutes serving layer."
       }
     ],
     "tags": [
@@ -728,24 +728,24 @@
     "pregunta": "A healthcare provider (hourly batch windows, region northeurope) must: protect critical BigQuery datasets against accidental DELETE/DML mistakes. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Only keep results in a laptop cache selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Not durable."
-      },
-      {
-        "texto_opcion": "Use time travel, snapshots/clones, and controlled IAM; consider scheduled exports for long retention",
+        "texto_opcion": "Use time travel, snapshots/clones, and controlled IAM; consider scheduled exports for long retention.",
         "es_correcta": true,
         "explicacion": "BigQuery time travel and table snapshots support recovery from operator error."
       },
       {
-        "texto_opcion": "Grant everyone dataOwner to speed recovery, increases accident likelihood.",
+        "texto_opcion": "No recovery plan because BigQuery is managed, still need retention/IAM controls selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Still need retention/IAM controls."
+      },
+      {
+        "texto_opcion": "Grant everyone dataOwner to speed recovery, increases accident likelihood selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Increases accident likelihood."
       },
       {
-        "texto_opcion": "No recovery plan because BigQuery is managed, still need retention/IAM controls.",
+        "texto_opcion": "Only keep results in a laptop cache selected to meet the stated constraints plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
-        "explicacion": "Still need retention/IAM controls."
+        "explicacion": "Not durable."
       }
     ],
     "tags": [
@@ -757,17 +757,12 @@
     "pregunta": "Logistics carrier scenario — analytics serving must survive a zonal outage with minimal downtime. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Single zone VM with local disk only as the warehouse applied across environments for consistency.",
-        "es_correcta": false,
-        "explicacion": "Zonal SPOF."
-      },
-      {
-        "texto_opcion": "Run one non-HA Cloud SQL without failover, weak for critical RTO, weak for critical RTO.",
+        "texto_opcion": "Run one non-HA Cloud SQL without failover, weak for critical RTO, weak for critical RTO as a primary design for this requirement applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Weak for critical RTO."
       },
       {
-        "texto_opcion": "Disable replication to cut cost always as the primary design for this requirement applied across.",
+        "texto_opcion": "Disable replication to cut cost always as the primary design for this requirement applied across used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Raises outage impact."
       },
@@ -775,6 +770,11 @@
         "texto_opcion": "Use multi-region or regional HA configurations appropriate to each service (e.g., multi-region GCS/BQ, HA Cloud SQL)",
         "es_correcta": true,
         "explicacion": "HA topology choices must match RTO across storage and compute."
+      },
+      {
+        "texto_opcion": "Single zone VM with local disk only as the warehouse applied across environments for consistency applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Zonal SPOF."
       }
     ],
     "tags": [
@@ -786,24 +786,24 @@
     "pregunta": "Travel platform scenario — design pipelines so SLA breaches on Composer DAGs page on-call quickly. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Alert only on VM CPU in unrelated projects applied across prioritized for.",
-        "es_correcta": false,
-        "explicacion": "Wrong signal."
-      },
-      {
-        "texto_opcion": "Define DAG SLAs/alerting on failed/up_for_retry tasks integrated with Cloud Monitoring",
+        "texto_opcion": "Define DAG SLAs/alerting on failed/up_for_retry tasks integrated with Cloud Monitoring.",
         "es_correcta": true,
         "explicacion": "Orchestration-level SLAs catch missed schedules before business impact grows."
       },
       {
-        "texto_opcion": "Disable task retries and hope prioritized for operational simplicity.",
-        "es_correcta": false,
-        "explicacion": "Fragile."
-      },
-      {
-        "texto_opcion": "No alerts; check the UI once a month configured end-to-end for this workload.",
+        "texto_opcion": "No alerts; check the UI once a month configured end-to-end for this workload as a primary design for this requirement prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Too slow."
+      },
+      {
+        "texto_opcion": "Alert only on VM CPU in unrelated projects applied across prioritized for prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Wrong signal."
+      },
+      {
+        "texto_opcion": "Disable task retries and hope prioritized for operational simplicity configured end-to-end for the stated workload selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Fragile."
       }
     ],
     "tags": [
@@ -815,24 +815,24 @@
     "pregunta": "Incident review (australiaeast): analysts use LLM-assisted SQL generation; wrong joins must not silently hit production. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Auto-run any generated SQL as Admin on prod configured end-to-end for this workload.",
+        "texto_opcion": "Grant bigquery.admin to the LLM service account broadly adopted as the configured applied across environments for operational consistency.",
         "es_correcta": false,
-        "explicacion": "Dangerous."
+        "explicacion": "Excess privilege."
       },
       {
-        "texto_opcion": "Disable dry-run and cost controls, risk of runaway queries, risk of runaway queries.",
-        "es_correcta": false,
-        "explicacion": "Risk of runaway queries."
-      },
-      {
-        "texto_opcion": "Require review, dry-run/cost checks, and scoped IAM; validate generated SQL before wide runs",
+        "texto_opcion": "Require review, dry-run/cost checks, and scoped IAM; validate generated SQL before wide runs.",
         "es_correcta": true,
         "explicacion": "Human/process guardrails keep assisted query generation from harming fidelity or spend."
       },
       {
-        "texto_opcion": "Grant bigquery.admin to the LLM service account broadly adopted as the configured.",
+        "texto_opcion": "Auto-run any generated SQL as Admin on prod configured end-to-end for this workload adopted as the standard pattern for the team.",
         "es_correcta": false,
-        "explicacion": "Excess privilege."
+        "explicacion": "Dangerous."
+      },
+      {
+        "texto_opcion": "Disable dry-run and cost controls, risk of runaway queries, risk of runaway queries as the default production choice in this scenario.",
+        "es_correcta": false,
+        "explicacion": "Risk of runaway queries."
       }
     ],
     "tags": [
@@ -844,24 +844,24 @@
     "pregunta": "For a healthcare provider workload with petabyte-scale historical data: Cloud Data Fusion pipelines should gate promotion on data quality rules. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Skip profiling because Fusion is managed selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Managed ≠ validated."
-      },
-      {
-        "texto_opcion": "Only validate in email threads as the primary design for this requirement.",
-        "es_correcta": false,
-        "explicacion": "Not automated."
-      },
-      {
-        "texto_opcion": "Add wrangler/quality directives and fail pipelines on rule breaches before sink commit",
+        "texto_opcion": "Add wrangler/quality directives and fail pipelines on rule breaches before sink commit.",
         "es_correcta": true,
         "explicacion": "Embedded quality gates improve fidelity in low-code ETL."
       },
       {
-        "texto_opcion": "Always write sinks before any checks, pollutes curated zones, pollutes curated zones.",
+        "texto_opcion": "Only validate in email threads as the primary design for this requirement often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Not automated."
+      },
+      {
+        "texto_opcion": "Always write sinks before any checks, pollutes curated zones, pollutes curated zones configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Pollutes curated zones."
+      },
+      {
+        "texto_opcion": "Skip profiling because Fusion is managed selected to meet the stated constraints as a primary design for this requirement That makes it a weaker fit against the main constraint in the prompt..",
+        "es_correcta": false,
+        "explicacion": "Managed ≠ validated."
       }
     ],
     "tags": [
@@ -873,17 +873,7 @@
     "pregunta": "Incident review (eastus): fail the pipeline if row counts or checksums between source and BigQuery diverge beyond threshold. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable.",
-        "es_correcta": false,
-        "explicacion": "Too late and unreliable."
-      },
-      {
-        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Hides fidelity problems."
-      },
-      {
-        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness.",
+        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness as a primary design for this requirement applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "CPU does not prove data correctness."
       },
@@ -891,6 +881,16 @@
         "texto_opcion": "Add explicit data validation/quality checks (e.g., Dataflow asserts, Great Expectations-style, or Dataplex DQ)",
         "es_correcta": true,
         "explicacion": "Automated validation catches fidelity issues before serving consumers."
+      },
+      {
+        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Hides fidelity problems."
+      },
+      {
+        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable applied across environments for operational consistency configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Too late and unreliable."
       }
     ],
     "tags": [
@@ -902,24 +902,24 @@
     "pregunta": "For a global retailer workload with sub-second interactive queries: need multi-statement transactional updates with strong consistency for financial ledgers. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Use GCS objects as the ledger with no consistency model adopted as the standard pattern for the team.",
+        "texto_opcion": "Use GCS objects as the ledger with no consistency model adopted as the standard pattern for the team plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Not ACID."
       },
       {
-        "texto_opcion": "Append conflicting JSON files without reconciliation adopted as the standard pattern for the team.",
+        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics.",
+        "es_correcta": true,
+        "explicacion": "True high-contention OLTP ACID belongs in Spanner/Cloud SQL/AlloyDB; BQ is analytical-first."
+      },
+      {
+        "texto_opcion": "Append conflicting JSON files without reconciliation adopted as the standard pattern for the team often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Race conditions."
       },
       {
-        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR, cache is not durable SoR.",
+        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR, cache is not durable SoR adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Cache is not durable SoR."
-      },
-      {
-        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics",
-        "es_correcta": true,
-        "explicacion": "True high-contention OLTP ACID belongs in Spanner/Cloud SQL/AlloyDB; BQ is analytical-first."
       }
     ],
     "tags": [
@@ -931,14 +931,14 @@
     "pregunta": "A gaming studio (hourly batch windows, region northeurope) must: streaming pipeline must avoid double-counting payments under retries. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Accept all duplicates in dashboards used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Breaks fidelity."
-      },
-      {
-        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe as the default.",
+        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe as the default often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Duplicates on retry."
+      },
+      {
+        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Increases replay risk."
       },
       {
         "texto_opcion": "Design idempotent sinks / dedupe keys (e.g., Dataflow exactly-once with deterministic IDs into BigQuery)",
@@ -946,9 +946,9 @@
         "explicacion": "Idempotency and engine exactly-once features prevent duplicate business events."
       },
       {
-        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here.",
+        "texto_opcion": "Accept all duplicates in dashboards used as the main path in this architecture used as the main path in this architecture.",
         "es_correcta": false,
-        "explicacion": "Increases replay risk."
+        "explicacion": "Breaks fidelity."
       }
     ],
     "tags": [
@@ -960,9 +960,9 @@
     "pregunta": "A travel platform (near-real-time dashboards, region westeurope) must: RPO of minutes for a Cloud SQL OLTP database supporting analytics extracts. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO",
-        "es_correcta": true,
-        "explicacion": "HA + point-in-time recovery align operational RPO/RTO targets."
+        "texto_opcion": "Store only screenshots of the admin console, not a recovery strategy.",
+        "es_correcta": false,
+        "explicacion": "Not a recovery strategy."
       },
       {
         "texto_opcion": "No backups to save money, unacceptable data loss risk, unacceptable data loss risk.",
@@ -975,9 +975,9 @@
         "explicacion": "RPO of days, not minutes."
       },
       {
-        "texto_opcion": "Store only screenshots of the admin console, not a recovery strategy.",
-        "es_correcta": false,
-        "explicacion": "Not a recovery strategy."
+        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO.",
+        "es_correcta": true,
+        "explicacion": "HA + point-in-time recovery align operational RPO/RTO targets."
       }
     ],
     "tags": [
@@ -989,24 +989,24 @@
     "pregunta": "Telecom operator scenario — Dataflow batch job should resume cleanly after worker preemption. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Disable autoscaling and ignore failures selected to meet the.",
-        "es_correcta": false,
-        "explicacion": "Fragile."
+        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes.",
+        "es_correcta": true,
+        "explicacion": "Dataflow handles worker failures; sinks must remain idempotent for safe replay."
       },
       {
-        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints",
+        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Poor resilience."
       },
       {
-        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry.",
+        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Double-applies on retry."
       },
       {
-        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes",
-        "es_correcta": true,
-        "explicacion": "Dataflow handles worker failures; sinks must remain idempotent for safe replay."
+        "texto_opcion": "Disable autoscaling and ignore failures selected to meet the as the default production choice in this scenario.",
+        "es_correcta": false,
+        "explicacion": "Fragile."
       }
     ],
     "tags": [
@@ -1018,7 +1018,17 @@
     "pregunta": "A logistics carrier (near-real-time dashboards, region brazilsouth) must: upstream JSON fields appear/disappear weekly and break rigid parsers. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Drop all unknown fields silently without logging as the primary design for this requirement.",
+        "texto_opcion": "Fail forever with no dead-letter on any new field selected to meet the stated constraints often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Brittle operations."
+      },
+      {
+        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Ideal but still need defensive consumers."
+      },
+      {
+        "texto_opcion": "Drop all unknown fields silently without logging as the primary design for this requirement selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Hidden data loss."
       },
@@ -1026,16 +1036,6 @@
         "texto_opcion": "Use schema-aware handling (dead-letter, schema registry patterns, nullable evolution, Dataflow schema inference carefully)",
         "es_correcta": true,
         "explicacion": "Controlled schema evolution and DLQ protect pipeline fidelity."
-      },
-      {
-        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers.",
-        "es_correcta": false,
-        "explicacion": "Ideal but still need defensive consumers."
-      },
-      {
-        "texto_opcion": "Fail forever with no dead-letter on any new field selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Brittle operations."
       }
     ],
     "tags": [
@@ -1047,24 +1047,24 @@
     "pregunta": "For a insurance carrier workload with hourly batch windows: streaming aggregates must include late events within a allowed lateness bound. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Use only processing-time forever with no watermarks, misses late correctness.",
+        "texto_opcion": "Use only processing-time forever with no watermarks, misses late correctness as a primary design for this requirement selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Misses late correctness."
       },
       {
-        "texto_opcion": "Drop all late events always, may violate fidelity SLAs, may violate fidelity SLAs.",
+        "texto_opcion": "Ignore timestamps and count wall-clock only, incorrect analytics under delay prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
-        "explicacion": "May violate fidelity SLAs."
+        "explicacion": "Incorrect analytics under delay."
       },
       {
-        "texto_opcion": "Configure event-time windows with allowed lateness and triggering in Apache Beam/Dataflow",
+        "texto_opcion": "Configure event-time windows with allowed lateness and triggering in Apache Beam/Dataflow.",
         "es_correcta": true,
         "explicacion": "Event-time processing with lateness handles out-of-order arrivals correctly."
       },
       {
-        "texto_opcion": "Ignore timestamps and count wall-clock only, incorrect analytics under delay.",
+        "texto_opcion": "Drop all late events always, may violate fidelity SLAs, may violate fidelity SLAs often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
-        "explicacion": "Incorrect analytics under delay."
+        "explicacion": "May violate fidelity SLAs."
       }
     ],
     "tags": [
@@ -1076,24 +1076,24 @@
     "pregunta": "Healthcare provider scenario — finance requires daily reconciliation between Pub/Sub ingress counts and BigQuery fact rows. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Never compare source and sink used as the main path in this architecture.",
+        "texto_opcion": "Never compare source and sink used as the main path in this architecture configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Blind operations."
       },
       {
-        "texto_opcion": "Emit pipeline metrics and run scheduled reconciliation queries/alerts on mismatches",
+        "texto_opcion": "Emit pipeline metrics and run scheduled reconciliation queries/alerts on mismatches.",
         "es_correcta": true,
         "explicacion": "Operational reconciliation closes the loop on end-to-end fidelity."
       },
       {
-        "texto_opcion": "Only check disk free space, irrelevant to row fidelity, irrelevant to row fidelity.",
-        "es_correcta": false,
-        "explicacion": "Irrelevant to row fidelity."
-      },
-      {
-        "texto_opcion": "Assume success if the job shows RUNNING, running ≠ correct counts.",
+        "texto_opcion": "Assume success if the job shows RUNNING, running ≠ correct counts used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Running ≠ correct counts."
+      },
+      {
+        "texto_opcion": "Only check disk free space, irrelevant to row fidelity, irrelevant to row fidelity prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Irrelevant to row fidelity."
       }
     ],
     "tags": [
@@ -1105,9 +1105,9 @@
     "pregunta": "SQL ELT models in BigQuery need documented tests for null keys and referential integrity. Context: healthcare provider, ~5 TB/day. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Only validate in PowerPoint as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Not executable."
+        "texto_opcion": "Use Dataform assertions/tests in the transformation project.",
+        "es_correcta": true,
+        "explicacion": "Dataform supports tested, versioned SQL transformations with assertions."
       },
       {
         "texto_opcion": "Disable CI on model changes selected to meet the stated constraints.",
@@ -1115,14 +1115,14 @@
         "explicacion": "Removes safety net."
       },
       {
-        "texto_opcion": "Use Dataform assertions/tests in the transformation project.",
-        "es_correcta": true,
-        "explicacion": "Dataform supports tested, versioned SQL transformations with assertions."
-      },
-      {
         "texto_opcion": "Skip tests because SQL looks fine, regressions slip through.",
         "es_correcta": false,
         "explicacion": "Regressions slip through."
+      },
+      {
+        "texto_opcion": "Only validate in PowerPoint as the default production choice here.",
+        "es_correcta": false,
+        "explicacion": "Not executable."
       }
     ],
     "tags": [
@@ -1163,24 +1163,24 @@
     "pregunta": "Incident review (eastus): protect critical BigQuery datasets against accidental DELETE/DML mistakes. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Only keep results in a laptop cache as the primary design for this requirement.",
+        "texto_opcion": "Only keep results in a laptop cache as the primary design for this requirement often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Not durable."
       },
       {
-        "texto_opcion": "Use time travel, snapshots/clones, and controlled IAM; consider scheduled exports for long retention",
-        "es_correcta": true,
-        "explicacion": "BigQuery time travel and table snapshots support recovery from operator error."
+        "texto_opcion": "No recovery plan because BigQuery is managed, still need retention/IAM controls often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Still need retention/IAM controls."
       },
       {
-        "texto_opcion": "Grant everyone dataOwner to speed recovery, increases accident likelihood.",
+        "texto_opcion": "Grant everyone dataOwner to speed recovery, increases accident likelihood as a primary design for this requirement often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Increases accident likelihood."
       },
       {
-        "texto_opcion": "No recovery plan because BigQuery is managed, still need retention/IAM controls.",
-        "es_correcta": false,
-        "explicacion": "Still need retention/IAM controls."
+        "texto_opcion": "Use time travel, snapshots/clones, and controlled IAM; consider scheduled exports for long retention.",
+        "es_correcta": true,
+        "explicacion": "BigQuery time travel and table snapshots support recovery from operator error."
       }
     ],
     "tags": [
@@ -1192,12 +1192,12 @@
     "pregunta": "For a travel platform workload with near-real-time dashboards: analytics serving must survive a zonal outage with minimal downtime. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Run one non-HA Cloud SQL without failover, weak for critical RTO, weak for critical RTO.",
+        "texto_opcion": "Disable replication to cut cost always adopted as the standard pattern for the team used as the main path in this architecture applied across environments for operational consistency.",
         "es_correcta": false,
-        "explicacion": "Weak for critical RTO."
+        "explicacion": "Raises outage impact."
       },
       {
-        "texto_opcion": "Single zone VM with local disk only as the warehouse used as the main path in this architecture.",
+        "texto_opcion": "Single zone VM with local disk only as the warehouse used as the main path in this architecture as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Zonal SPOF."
       },
@@ -1207,9 +1207,9 @@
         "explicacion": "HA topology choices must match RTO across storage and compute."
       },
       {
-        "texto_opcion": "Disable replication to cut cost always adopted as the standard pattern for the team.",
+        "texto_opcion": "Run one non-HA Cloud SQL without failover, weak for critical RTO, weak for critical RTO often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
-        "explicacion": "Raises outage impact."
+        "explicacion": "Weak for critical RTO."
       }
     ],
     "tags": [
@@ -1221,24 +1221,24 @@
     "pregunta": "A logistics carrier (sub-second interactive queries, region australiaeast) must: design pipelines so SLA breaches on Composer DAGs page on-call quickly. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "No alerts; check the UI once a month applied across environments for consistency.",
+        "texto_opcion": "Alert only on VM CPU in unrelated projects applied across configured applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Wrong signal."
+      },
+      {
+        "texto_opcion": "No alerts; check the UI once a month applied across environments for consistency configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Too slow."
       },
       {
-        "texto_opcion": "Disable task retries and hope configured end-to-end for this workload.",
+        "texto_opcion": "Disable task retries and hope configured end-to-end for this workload often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Fragile."
       },
       {
-        "texto_opcion": "Define DAG SLAs/alerting on failed/up_for_retry tasks integrated with Cloud Monitoring",
+        "texto_opcion": "Define DAG SLAs/alerting on failed/up_for_retry tasks integrated with Cloud Monitoring.",
         "es_correcta": true,
         "explicacion": "Orchestration-level SLAs catch missed schedules before business impact grows."
-      },
-      {
-        "texto_opcion": "Alert only on VM CPU in unrelated projects applied across configured.",
-        "es_correcta": false,
-        "explicacion": "Wrong signal."
       }
     ],
     "tags": [
@@ -1250,24 +1250,24 @@
     "pregunta": "A gaming studio (~5 TB/day, region australiaeast) must: analysts use LLM-assisted SQL generation; wrong joins must not silently hit production. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Require review, dry-run/cost checks, and scoped IAM; validate generated SQL before wide runs",
+        "texto_opcion": "Disable dry-run and cost controls, risk of runaway queries prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Risk of runaway queries."
+      },
+      {
+        "texto_opcion": "Require review, dry-run/cost checks, and scoped IAM; validate generated SQL before wide runs.",
         "es_correcta": true,
         "explicacion": "Human/process guardrails keep assisted query generation from harming fidelity or spend."
       },
       {
-        "texto_opcion": "Auto-run any generated SQL as Admin on prod used as the main path in.",
-        "es_correcta": false,
-        "explicacion": "Dangerous."
-      },
-      {
-        "texto_opcion": "Grant bigquery.admin to the LLM service account broadly as the primary.",
+        "texto_opcion": "Grant bigquery.admin to the LLM service account broadly as the primary used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Excess privilege."
       },
       {
-        "texto_opcion": "Disable dry-run and cost controls, risk of runaway queries.",
+        "texto_opcion": "Auto-run any generated SQL as Admin on prod used as the main path in as the default production choice in this scenario.",
         "es_correcta": false,
-        "explicacion": "Risk of runaway queries."
+        "explicacion": "Dangerous."
       }
     ],
     "tags": [
@@ -1279,24 +1279,24 @@
     "pregunta": "For a healthcare provider workload with petabyte-scale historical data: Cloud Data Fusion pipelines should gate promotion on data quality rules. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Only validate in email threads as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Not automated."
-      },
-      {
-        "texto_opcion": "Add wrangler/quality directives and fail pipelines on rule breaches before sink commit",
+        "texto_opcion": "Add wrangler/quality directives and fail pipelines on rule breaches before sink commit.",
         "es_correcta": true,
         "explicacion": "Embedded quality gates improve fidelity in low-code ETL."
       },
       {
-        "texto_opcion": "Always write sinks before any checks, pollutes curated zones.",
+        "texto_opcion": "Always write sinks before any checks, pollutes curated zones plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Pollutes curated zones."
       },
       {
-        "texto_opcion": "Skip profiling because Fusion is managed applied across environments.",
+        "texto_opcion": "Skip profiling because Fusion is managed applied across environments as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Managed ≠ validated."
+      },
+      {
+        "texto_opcion": "Only validate in email threads as the default production choice here often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Not automated."
       }
     ],
     "tags": [
@@ -1308,12 +1308,12 @@
     "pregunta": "Energy utility scenario — fail the pipeline if row counts or checksums between source and BigQuery diverge beyond threshold. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here.",
+        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
-        "explicacion": "Hides fidelity problems."
+        "explicacion": "Too late and unreliable."
       },
       {
-        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness.",
+        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "CPU does not prove data correctness."
       },
@@ -1323,9 +1323,9 @@
         "explicacion": "Automated validation catches fidelity issues before serving consumers."
       },
       {
-        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable.",
+        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here selected to meet the constraints described here.",
         "es_correcta": false,
-        "explicacion": "Too late and unreliable."
+        "explicacion": "Hides fidelity problems."
       }
     ],
     "tags": [
@@ -1337,24 +1337,24 @@
     "pregunta": "Media streaming company scenario — need multi-statement transactional updates with strong consistency for financial ledgers. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use GCS objects as the ledger with no consistency model used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Not ACID."
-      },
-      {
-        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR, cache is not durable SoR.",
-        "es_correcta": false,
-        "explicacion": "Cache is not durable SoR."
-      },
-      {
-        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics",
+        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics.",
         "es_correcta": true,
         "explicacion": "True high-contention OLTP ACID belongs in Spanner/Cloud SQL/AlloyDB; BQ is analytical-first."
       },
       {
-        "texto_opcion": "Append conflicting JSON files without reconciliation used as the main path in this architecture.",
+        "texto_opcion": "Append conflicting JSON files without reconciliation used as the main path in this architecture used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Race conditions."
+      },
+      {
+        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR, cache is not durable SoR configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Cache is not durable SoR."
+      },
+      {
+        "texto_opcion": "Use GCS objects as the ledger with no consistency model used as the main path in this architecture used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Not ACID."
       }
     ],
     "tags": [
@@ -1366,19 +1366,19 @@
     "pregunta": "Online marketplace scenario — streaming pipeline must avoid double-counting payments under retries. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Accept all duplicates in dashboards prioritized for operational simplicity in this case.",
+        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe configured end-to-end applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Duplicates on retry."
+      },
+      {
+        "texto_opcion": "Accept all duplicates in dashboards prioritized for operational simplicity in this case configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Breaks fidelity."
       },
       {
-        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here.",
+        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Increases replay risk."
-      },
-      {
-        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe configured end-to-end.",
-        "es_correcta": false,
-        "explicacion": "Duplicates on retry."
       },
       {
         "texto_opcion": "Design idempotent sinks / dedupe keys (e.g., Dataflow exactly-once with deterministic IDs into BigQuery)",
@@ -1395,14 +1395,14 @@
     "pregunta": "A media streaming company (sub-second interactive queries, region northeurope) must: RPO of minutes for a Cloud SQL OLTP database supporting analytics extracts. Which option fits best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Weekly manual mysqldump only, rPO of days, not minutes, rPO of days, not minutes.",
-        "es_correcta": false,
-        "explicacion": "RPO of days, not minutes."
-      },
-      {
-        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO",
+        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO.",
         "es_correcta": true,
         "explicacion": "HA + point-in-time recovery align operational RPO/RTO targets."
+      },
+      {
+        "texto_opcion": "No backups to save money, unacceptable data loss risk, unacceptable data loss risk.",
+        "es_correcta": false,
+        "explicacion": "Unacceptable data loss risk."
       },
       {
         "texto_opcion": "Store only screenshots of the admin console, not a recovery strategy.",
@@ -1410,9 +1410,9 @@
         "explicacion": "Not a recovery strategy."
       },
       {
-        "texto_opcion": "No backups to save money, unacceptable data loss risk, unacceptable data loss risk.",
+        "texto_opcion": "Weekly manual mysqldump only, rPO of days, not minutes, rPO of days, not minutes.",
         "es_correcta": false,
-        "explicacion": "Unacceptable data loss risk."
+        "explicacion": "RPO of days, not minutes."
       }
     ],
     "tags": [
@@ -1424,24 +1424,24 @@
     "pregunta": "Travel platform scenario — Dataflow batch job should resume cleanly after worker preemption. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints",
-        "es_correcta": false,
-        "explicacion": "Poor resilience."
-      },
-      {
-        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry.",
-        "es_correcta": false,
-        "explicacion": "Double-applies on retry."
-      },
-      {
-        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes",
+        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes.",
         "es_correcta": true,
         "explicacion": "Dataflow handles worker failures; sinks must remain idempotent for safe replay."
       },
       {
-        "texto_opcion": "Disable autoscaling and ignore failures applied across as the default.",
+        "texto_opcion": "Disable autoscaling and ignore failures applied across as the default used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Fragile."
+      },
+      {
+        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Poor resilience."
+      },
+      {
+        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Double-applies on retry."
       }
     ],
     "tags": [
@@ -1453,17 +1453,7 @@
     "pregunta": "For a payments fintech workload with ~200 million rows/day: upstream JSON fields appear/disappear weekly and break rigid parsers. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Drop all unknown fields silently without logging as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Hidden data loss."
-      },
-      {
-        "texto_opcion": "Fail forever with no dead-letter on any new field selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Brittle operations."
-      },
-      {
-        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers.",
+        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Ideal but still need defensive consumers."
       },
@@ -1471,6 +1461,16 @@
         "texto_opcion": "Use schema-aware handling (dead-letter, schema registry patterns, nullable evolution, Dataflow schema inference carefully)",
         "es_correcta": true,
         "explicacion": "Controlled schema evolution and DLQ protect pipeline fidelity."
+      },
+      {
+        "texto_opcion": "Fail forever with no dead-letter on any new field selected to meet the stated constraints often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Brittle operations."
+      },
+      {
+        "texto_opcion": "Drop all unknown fields silently without logging as the default production choice here often seen in legacy designs but not ideal for this case plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Hidden data loss."
       }
     ],
     "tags": [
@@ -1482,24 +1482,24 @@
     "pregunta": "Insurance carrier scenario — streaming aggregates must include late events within a allowed lateness bound. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Ignore timestamps and count wall-clock only, incorrect analytics under delay.",
+        "texto_opcion": "Configure event-time windows with allowed lateness and triggering in Apache Beam/Dataflow.",
+        "es_correcta": true,
+        "explicacion": "Event-time processing with lateness handles out-of-order arrivals correctly."
+      },
+      {
+        "texto_opcion": "Ignore timestamps and count wall-clock only, incorrect analytics under delay applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Incorrect analytics under delay."
       },
       {
-        "texto_opcion": "Drop all late events always, may violate fidelity SLAs, may violate fidelity SLAs.",
-        "es_correcta": false,
-        "explicacion": "May violate fidelity SLAs."
-      },
-      {
-        "texto_opcion": "Use only processing-time forever with no watermarks, misses late correctness.",
+        "texto_opcion": "Use only processing-time forever with no watermarks, misses late correctness often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Misses late correctness."
       },
       {
-        "texto_opcion": "Configure event-time windows with allowed lateness and triggering in Apache Beam/Dataflow",
-        "es_correcta": true,
-        "explicacion": "Event-time processing with lateness handles out-of-order arrivals correctly."
+        "texto_opcion": "Drop all late events always, may violate fidelity SLAs, may violate fidelity SLAs used as the main path in this architecture That makes it a weaker fit against the main constraint in the prompt..",
+        "es_correcta": false,
+        "explicacion": "May violate fidelity SLAs."
       }
     ],
     "tags": [
@@ -1511,24 +1511,24 @@
     "pregunta": "For a travel platform workload with hourly batch windows: finance requires daily reconciliation between Pub/Sub ingress counts and BigQuery fact rows. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Emit pipeline metrics and run scheduled reconciliation queries/alerts on mismatches",
-        "es_correcta": true,
-        "explicacion": "Operational reconciliation closes the loop on end-to-end fidelity."
-      },
-      {
-        "texto_opcion": "Only check disk free space, irrelevant to row fidelity, irrelevant to row fidelity.",
+        "texto_opcion": "Only check disk free space, irrelevant to row fidelity, irrelevant to row fidelity configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Irrelevant to row fidelity."
       },
       {
-        "texto_opcion": "Assume success if the job shows RUNNING, running ≠ correct counts.",
+        "texto_opcion": "Never compare source and sink used as the main path in this architecture plausible at first glance, yet applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Blind operations."
+      },
+      {
+        "texto_opcion": "Assume success if the job shows RUNNING, running ≠ correct counts often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Running ≠ correct counts."
       },
       {
-        "texto_opcion": "Never compare source and sink used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Blind operations."
+        "texto_opcion": "Emit pipeline metrics and run scheduled reconciliation queries/alerts on mismatches.",
+        "es_correcta": true,
+        "explicacion": "Operational reconciliation closes the loop on end-to-end fidelity."
       }
     ],
     "tags": [
@@ -1540,6 +1540,16 @@
     "pregunta": "A media streaming company (~5 TB/day, region southeastasia) must: SQL ELT models in BigQuery need documented tests for null keys and referential integrity. Which option fits best? Constraint set #4.",
     "opciones": [
       {
+        "texto_opcion": "Use Dataform assertions/tests in the transformation project.",
+        "es_correcta": true,
+        "explicacion": "Dataform supports tested, versioned SQL transformations with assertions."
+      },
+      {
+        "texto_opcion": "Skip tests because SQL looks fine, regressions slip through.",
+        "es_correcta": false,
+        "explicacion": "Regressions slip through."
+      },
+      {
         "texto_opcion": "Only validate in PowerPoint selected to meet the stated constraints.",
         "es_correcta": false,
         "explicacion": "Not executable."
@@ -1548,16 +1558,6 @@
         "texto_opcion": "Disable CI on model changes as the primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Removes safety net."
-      },
-      {
-        "texto_opcion": "Skip tests because SQL looks fine, regressions slip through.",
-        "es_correcta": false,
-        "explicacion": "Regressions slip through."
-      },
-      {
-        "texto_opcion": "Use Dataform assertions/tests in the transformation project.",
-        "es_correcta": true,
-        "explicacion": "Dataform supports tested, versioned SQL transformations with assertions."
       }
     ],
     "tags": [
@@ -1569,16 +1569,6 @@
     "pregunta": "Incident review (northeurope): malformed Pub/Sub messages should not block the healthy stream. Select the most appropriate design. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Publish malformed messages to production dashboards raw, pollutes serving layer.",
-        "es_correcta": false,
-        "explicacion": "Pollutes serving layer."
-      },
-      {
-        "texto_opcion": "Delete malformed messages with no audit trail, loses forensic/replay value.",
-        "es_correcta": false,
-        "explicacion": "Loses forensic/replay value."
-      },
-      {
         "texto_opcion": "Route poison messages to a dead-letter topic/table with alerting.",
         "es_correcta": true,
         "explicacion": "DLQ isolates bad records while healthy traffic continues."
@@ -1587,6 +1577,16 @@
         "texto_opcion": "Crash the entire pipeline on first bad message forever prioritized for.",
         "es_correcta": false,
         "explicacion": "Poor availability."
+      },
+      {
+        "texto_opcion": "Delete malformed messages with no audit trail, loses forensic/replay value.",
+        "es_correcta": false,
+        "explicacion": "Loses forensic/replay value."
+      },
+      {
+        "texto_opcion": "Publish malformed messages to production dashboards raw, pollutes serving layer.",
+        "es_correcta": false,
+        "explicacion": "Pollutes serving layer."
       }
     ],
     "tags": [
@@ -1598,24 +1598,24 @@
     "pregunta": "protect critical BigQuery datasets against accidental DELETE/DML mistakes. Context: payments fintech, ~50,000 events/s. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Only keep results in a laptop cache as the primary design for this requirement.",
+        "texto_opcion": "Only keep results in a laptop cache as the primary design for this requirement as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Not durable."
       },
       {
-        "texto_opcion": "Grant everyone dataOwner to speed recovery, increases accident likelihood.",
+        "texto_opcion": "No recovery plan because BigQuery is managed, still need retention/IAM controls as a primary design for this requirement.",
         "es_correcta": false,
-        "explicacion": "Increases accident likelihood."
+        "explicacion": "Still need retention/IAM controls."
       },
       {
-        "texto_opcion": "Use time travel, snapshots/clones, and controlled IAM; consider scheduled exports for long retention",
+        "texto_opcion": "Use time travel, snapshots/clones, and controlled IAM; consider scheduled exports for long retention.",
         "es_correcta": true,
         "explicacion": "BigQuery time travel and table snapshots support recovery from operator error."
       },
       {
-        "texto_opcion": "No recovery plan because BigQuery is managed, still need retention/IAM controls.",
+        "texto_opcion": "Grant everyone dataOwner to speed recovery, increases accident likelihood selected to meet the constraints described here.",
         "es_correcta": false,
-        "explicacion": "Still need retention/IAM controls."
+        "explicacion": "Increases accident likelihood."
       }
     ],
     "tags": [
@@ -1627,14 +1627,14 @@
     "pregunta": "Incident review (australiaeast): analytics serving must survive a zonal outage with minimal downtime. Select the most appropriate design. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Single zone VM with local disk only as the warehouse used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Zonal SPOF."
-      },
-      {
-        "texto_opcion": "Disable replication to cut cost always selected to meet the stated constraints used as the main path in this architecture.",
+        "texto_opcion": "Disable replication to cut cost always selected to meet the stated constraints used as the main path in this architecture prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Raises outage impact."
+      },
+      {
+        "texto_opcion": "Run one non-HA Cloud SQL without failover, weak for critical RTO, weak for critical RTO selected to meet the constraints described here plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Weak for critical RTO."
       },
       {
         "texto_opcion": "Use multi-region or regional HA configurations appropriate to each service (e.g., multi-region GCS/BQ, HA Cloud SQL)",
@@ -1642,9 +1642,9 @@
         "explicacion": "HA topology choices must match RTO across storage and compute."
       },
       {
-        "texto_opcion": "Run one non-HA Cloud SQL without failover, weak for critical RTO, weak for critical RTO.",
+        "texto_opcion": "Single zone VM with local disk only as the warehouse used as the main path in this architecture often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
-        "explicacion": "Weak for critical RTO."
+        "explicacion": "Zonal SPOF."
       }
     ],
     "tags": [
@@ -1656,22 +1656,22 @@
     "pregunta": "Logistics carrier scenario — design pipelines so SLA breaches on Composer DAGs page on-call quickly. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "No alerts; check the UI once a month prioritized for operational applied across.",
-        "es_correcta": false,
-        "explicacion": "Too slow."
-      },
-      {
-        "texto_opcion": "Disable task retries and hope applied across environments for consistency.",
+        "texto_opcion": "Disable task retries and hope applied across environments for consistency often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Fragile."
       },
       {
-        "texto_opcion": "Alert only on VM CPU in unrelated projects as the default production choice here.",
+        "texto_opcion": "Alert only on VM CPU in unrelated projects as the default production choice here prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Wrong signal."
       },
       {
-        "texto_opcion": "Define DAG SLAs/alerting on failed/up_for_retry tasks integrated with Cloud Monitoring",
+        "texto_opcion": "No alerts; check the UI once a month prioritized for operational applied across often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Too slow."
+      },
+      {
+        "texto_opcion": "Define DAG SLAs/alerting on failed/up_for_retry tasks integrated with Cloud Monitoring.",
         "es_correcta": true,
         "explicacion": "Orchestration-level SLAs catch missed schedules before business impact grows."
       }
@@ -1685,24 +1685,24 @@
     "pregunta": "For a healthcare provider workload with ~200 million rows/day: analysts use LLM-assisted SQL generation; wrong joins must not silently hit production. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Disable dry-run and cost controls, risk of runaway queries, risk of runaway queries.",
+        "texto_opcion": "Require review, dry-run/cost checks, and scoped IAM; validate generated SQL before wide runs.",
+        "es_correcta": true,
+        "explicacion": "Human/process guardrails keep assisted query generation from harming fidelity or spend."
+      },
+      {
+        "texto_opcion": "Disable dry-run and cost controls, risk of runaway queries, risk of runaway queries often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Risk of runaway queries."
       },
       {
-        "texto_opcion": "Grant bigquery.admin to the LLM service account broadly applied across.",
-        "es_correcta": false,
-        "explicacion": "Excess privilege."
-      },
-      {
-        "texto_opcion": "Auto-run any generated SQL as Admin on prod applied across environments.",
+        "texto_opcion": "Auto-run any generated SQL as Admin on prod applied across environments configured end-to-end for the stated workload prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Dangerous."
       },
       {
-        "texto_opcion": "Require review, dry-run/cost checks, and scoped IAM; validate generated SQL before wide runs",
-        "es_correcta": true,
-        "explicacion": "Human/process guardrails keep assisted query generation from harming fidelity or spend."
+        "texto_opcion": "Grant bigquery.admin to the LLM service account broadly applied across applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Excess privilege."
       }
     ],
     "tags": [
@@ -1714,24 +1714,24 @@
     "pregunta": "Incident review (eastus): Cloud Data Fusion pipelines should gate promotion on data quality rules. Select the most appropriate design. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Always write sinks before any checks, pollutes curated zones, pollutes curated zones.",
-        "es_correcta": false,
-        "explicacion": "Pollutes curated zones."
-      },
-      {
-        "texto_opcion": "Add wrangler/quality directives and fail pipelines on rule breaches before sink commit",
+        "texto_opcion": "Add wrangler/quality directives and fail pipelines on rule breaches before sink commit.",
         "es_correcta": true,
         "explicacion": "Embedded quality gates improve fidelity in low-code ETL."
       },
       {
-        "texto_opcion": "Skip profiling because Fusion is managed as the primary design for.",
+        "texto_opcion": "Always write sinks before any checks, pollutes curated zones, pollutes curated zones prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
-        "explicacion": "Managed ≠ validated."
+        "explicacion": "Pollutes curated zones."
       },
       {
-        "texto_opcion": "Only validate in email threads adopted as the standard pattern for the team.",
+        "texto_opcion": "Only validate in email threads adopted as the standard pattern for the team as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Not automated."
+      },
+      {
+        "texto_opcion": "Skip profiling because Fusion is managed as the primary design for adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Managed ≠ validated."
       }
     ],
     "tags": [
@@ -1743,24 +1743,24 @@
     "pregunta": "Healthcare provider scenario — fail the pipeline if row counts or checksums between source and BigQuery diverge beyond threshold. What should they implement? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness.",
+        "texto_opcion": "Skip checks and only monitor CPU, cPU does not prove data correctness used as the main path in this architecture adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "CPU does not prove data correctness."
+      },
+      {
+        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable as the default production choice in this scenario adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Too late and unreliable."
+      },
+      {
+        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Hides fidelity problems."
       },
       {
         "texto_opcion": "Add explicit data validation/quality checks (e.g., Dataflow asserts, Great Expectations-style, or Dataplex DQ)",
         "es_correcta": true,
         "explicacion": "Automated validation catches fidelity issues before serving consumers."
-      },
-      {
-        "texto_opcion": "Rely on end users to notice wrong totals, too late and unreliable.",
-        "es_correcta": false,
-        "explicacion": "Too late and unreliable."
-      },
-      {
-        "texto_opcion": "Delete failed loads silently, hides fidelity problems; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Hides fidelity problems."
       }
     ],
     "tags": [
@@ -1772,24 +1772,24 @@
     "pregunta": "For a industrial IoT platform workload with ~50,000 events/s: need multi-statement transactional updates with strong consistency for financial ledgers. Best choice (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR, cache is not durable SoR.",
+        "texto_opcion": "Memorystore alone as system of record for financial truth, cache is not durable SoR, cache is not durable SoR prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Cache is not durable SoR."
       },
       {
-        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics",
+        "texto_opcion": "Prefer Spanner or transactional relational stores; use BigQuery carefully with DML patterns suited to analytics.",
         "es_correcta": true,
         "explicacion": "True high-contention OLTP ACID belongs in Spanner/Cloud SQL/AlloyDB; BQ is analytical-first."
       },
       {
-        "texto_opcion": "Use GCS objects as the ledger with no consistency model used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Not ACID."
-      },
-      {
-        "texto_opcion": "Append conflicting JSON files without reconciliation as the default production choice here.",
+        "texto_opcion": "Append conflicting JSON files without reconciliation as the default production choice here configured end-to-end for the stated workload selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Race conditions."
+      },
+      {
+        "texto_opcion": "Use GCS objects as the ledger with no consistency model used as the main path in this architecture often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Not ACID."
       }
     ],
     "tags": [
@@ -1801,7 +1801,17 @@
     "pregunta": "Telecom operator scenario — streaming pipeline must avoid double-counting payments under retries. What should they implement? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Accept all duplicates in dashboards applied across environments for consistency.",
+        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Increases replay risk."
+      },
+      {
+        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe prioritized for applied across environments for operational consistency configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Duplicates on retry."
+      },
+      {
+        "texto_opcion": "Accept all duplicates in dashboards applied across environments for consistency prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Breaks fidelity."
       },
@@ -1809,16 +1819,6 @@
         "texto_opcion": "Design idempotent sinks / dedupe keys (e.g., Dataflow exactly-once with deterministic IDs into BigQuery)",
         "es_correcta": true,
         "explicacion": "Idempotency and engine exactly-once features prevent duplicate business events."
-      },
-      {
-        "texto_opcion": "Fire-and-forget inserts with random IDs and no dedupe prioritized for.",
-        "es_correcta": false,
-        "explicacion": "Duplicates on retry."
-      },
-      {
-        "texto_opcion": "Disable checkpoints permanently, increases replay risk; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Increases replay risk."
       }
     ],
     "tags": [
@@ -1829,11 +1829,6 @@
   {
     "pregunta": "RPO of minutes for a Cloud SQL OLTP database supporting analytics extracts. Context: media streaming company, ~200 million rows/day. Constraint set #5.",
     "opciones": [
-      {
-        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO",
-        "es_correcta": true,
-        "explicacion": "HA + point-in-time recovery align operational RPO/RTO targets."
-      },
       {
         "texto_opcion": "No backups to save money, unacceptable data loss risk, unacceptable data loss risk.",
         "es_correcta": false,
@@ -1848,6 +1843,11 @@
         "texto_opcion": "Store only screenshots of the admin console, not a recovery strategy.",
         "es_correcta": false,
         "explicacion": "Not a recovery strategy."
+      },
+      {
+        "texto_opcion": "Enable high availability and continuous backups/PITR appropriate to the RPO.",
+        "es_correcta": true,
+        "explicacion": "HA + point-in-time recovery align operational RPO/RTO targets."
       }
     ],
     "tags": [
@@ -1859,24 +1859,24 @@
     "pregunta": "Dataflow batch job should resume cleanly after worker preemption. Context: online marketplace, ~200 million rows/day. Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints",
-        "es_correcta": false,
-        "explicacion": "Poor resilience."
+        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes.",
+        "es_correcta": true,
+        "explicacion": "Dataflow handles worker failures; sinks must remain idempotent for safe replay."
       },
       {
-        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry.",
+        "texto_opcion": "Write non-idempotent increments without keys, double-applies on retry selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Double-applies on retry."
       },
       {
-        "texto_opcion": "Disable autoscaling and ignore failures prioritized for selected to meet.",
+        "texto_opcion": "Disable autoscaling and ignore failures prioritized for selected to meet plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Fragile."
       },
       {
-        "texto_opcion": "Rely on Dataflow's managed runner checkpointing/fusion with idempotent writes",
-        "es_correcta": true,
-        "explicacion": "Dataflow handles worker failures; sinks must remain idempotent for safe replay."
+        "texto_opcion": "Run only on a single preemptible VM script with no checkpoints prioritized for simplicity, though it.",
+        "es_correcta": false,
+        "explicacion": "Poor resilience."
       }
     ],
     "tags": [
@@ -1888,12 +1888,17 @@
     "pregunta": "Incident review (eastus): upstream JSON fields appear/disappear weekly and break rigid parsers. Select the most appropriate design. Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Drop all unknown fields silently without logging applied across environments for consistency.",
+        "texto_opcion": "Drop all unknown fields silently without logging applied across environments for consistency applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Hidden data loss."
       },
       {
-        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers.",
+        "texto_opcion": "Fail forever with no dead-letter on any new field applied across environments for consistency prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Brittle operations."
+      },
+      {
+        "texto_opcion": "Force producers to never change schemas without process, ideal but still need defensive consumers as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Ideal but still need defensive consumers."
       },
@@ -1901,11 +1906,6 @@
         "texto_opcion": "Use schema-aware handling (dead-letter, schema registry patterns, nullable evolution, Dataflow schema inference carefully)",
         "es_correcta": true,
         "explicacion": "Controlled schema evolution and DLQ protect pipeline fidelity."
-      },
-      {
-        "texto_opcion": "Fail forever with no dead-letter on any new field applied across environments for consistency.",
-        "es_correcta": false,
-        "explicacion": "Brittle operations."
       }
     ],
     "tags": [

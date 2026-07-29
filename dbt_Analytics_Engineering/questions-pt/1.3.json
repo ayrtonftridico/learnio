@@ -8,9 +8,9 @@
         "explicacion": "source() é para fontes brutas, não para modelos dbt."
       },
       {
-        "texto_opcion": "Código `analytics.stg_orders`, ignora o roteamento e a.",
+        "texto_opcion": "Copiar stg_orders SQL embutido, quebra modularidade e linhagem.",
         "es_correcta": false,
-        "explicacion": "Ignora o roteamento e a linhagem do ambiente."
+        "explicacion": "Quebra modularidade e linhagem."
       },
       {
         "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`.",
@@ -18,9 +18,9 @@
         "explicacion": "ref() resolve dependências e constrói o DAG com relações conscientes do ambiente."
       },
       {
-        "texto_opcion": "Copiar stg_orders SQL embutido, quebra modularidade e linhagem.",
+        "texto_opcion": "Código `analytics.stg_orders`, ignora o roteamento e a.",
         "es_correcta": false,
-        "explicacion": "Quebra modularidade e linhagem."
+        "explicacion": "Ignora o roteamento e a linhagem do ambiente."
       }
     ],
     "tags": [
@@ -32,14 +32,9 @@
     "pregunta": "Para um repositório analítico BigQuery com jobs noturnos: o modelo lê a tabela de destino bruta carregada pelo ELT fora do dbt. Melhor prática?",
     "opciones": [
       {
-        "texto_opcion": "Apenas banco de dados.schema.table de código rígido",
+        "texto_opcion": "Crie um modelo vazio sem SQL, não define a tabela externa como origem.",
         "es_correcta": false,
-        "explicacion": "Perde source freshness e linhagem em documentos."
-      },
-      {
-        "texto_opcion": "ref('raw_orders') sem modelo, ref espera um modelo dbt",
-        "es_correcta": false,
-        "explicacion": "ref espera um modelo dbt, não uma tabela bruta externa."
+        "explicacion": "Não define a tabela externa como origem."
       },
       {
         "texto_opcion": "Use `{{ source('raw', 'orders') }}` declarado nas fontes YAML.",
@@ -47,9 +42,14 @@
         "explicacion": "source() faz referência a fontes declaradas e permite testes de atualização."
       },
       {
-        "texto_opcion": "Crie um modelo vazio sem SQL, não define a tabela externa como origem.",
+        "texto_opcion": "Apenas banco de dados.schema.table de código rígido — perde source freshness e linhagem em documentos.",
         "es_correcta": false,
-        "explicacion": "Não define a tabela externa como origem."
+        "explicacion": "Perde source freshness e linhagem em documentos."
+      },
+      {
+        "texto_opcion": "ref('raw_orders') sem modelo, ref espera um modelo dbt.",
+        "es_correcta": false,
+        "explicacion": "ref espera um modelo dbt, não uma tabela bruta externa."
       }
     ],
     "tags": [
@@ -61,24 +61,24 @@
     "pregunta": "apenas o downstream de `stg_customers` foi alterado e deve ser reconstruído. Contexto: um job dbt Cloud multiambiente.",
     "opciones": [
       {
-        "texto_opcion": "Execute manualmente o SQL do warehouse por tabela",
-        "es_correcta": false,
-        "explicacion": "Fora do dbt orchestration."
-      },
-      {
         "texto_opcion": "--select +stg_customers somente upstream, direção errada",
         "es_correcta": false,
         "explicacion": "Direção errada; precisa de downstream + sufixo."
       },
       {
-        "texto_opcion": "dbt run sem selecionar todas as vezes",
+        "texto_opcion": "Execute `dbt run --select stg_customers+`.",
+        "es_correcta": true,
+        "explicacion": "+ seleciona dependentes downstream no DAG."
+      },
+      {
+        "texto_opcion": "dbt run sem selecionar todas as vezes — reconstrói todo o projeto.",
         "es_correcta": false,
         "explicacion": "Reconstrói todo o projeto desnecessariamente."
       },
       {
-        "texto_opcion": "Execute `dbt run --select stg_customers+`.",
-        "es_correcta": true,
-        "explicacion": "+ seleciona dependentes downstream no DAG."
+        "texto_opcion": "Execute manualmente o SQL do warehouse por tabela",
+        "es_correcta": false,
+        "explicacion": "Fora do dbt orchestration."
       }
     ],
     "tags": [
@@ -90,24 +90,24 @@
     "pregunta": "a solução requer a reconstrução de um mercado e de todos os seus pais. Contexto: um repositório analítico BigQuery.",
     "opciones": [
       {
-        "texto_opcion": "Elimine os modelos filhos primeiro manualmente, arriscado; seletor controla a ordem.",
-        "es_correcta": false,
-        "explicacion": "Arriscado; seletor controla a ordem."
-      },
-      {
         "texto_opcion": "Execute `dbt run --select +fct_orders`.",
         "es_correcta": true,
         "explicacion": "+ prefixo seleciona ancestrais upstream do modelo."
       },
       {
-        "texto_opcion": "--select fct_orders+ para pais, o sufixo + está a jusante",
-        "es_correcta": false,
-        "explicacion": "O sufixo + está a jusante; prefixo + é upstream."
-      },
-      {
-        "texto_opcion": "dbt test apenas, não reconstrói modelos; not the best fit here.",
+        "texto_opcion": "dbt test apenas, não reconstrói modelos; not the best fit here como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "Não reconstrói modelos."
+      },
+      {
+        "texto_opcion": "Elimine os modelos filhos primeiro manualmente, arriscado; seletor controla a ordem.",
+        "es_correcta": false,
+        "explicacion": "Arriscado; seletor controla a ordem."
+      },
+      {
+        "texto_opcion": "--select fct_orders+ para pais, o sufixo + está a jusante — o sufixo + está a jusante; prefixo + é upstream.",
+        "es_correcta": false,
+        "explicacion": "O sufixo + está a jusante; prefixo + é upstream."
       }
     ],
     "tags": [
@@ -119,14 +119,14 @@
     "pregunta": "revisão do projeto dbt - um mercado financeiro com SLAs rígidos. execute a pasta de teste e exclua modelos obsoletos marcados como legado. O que a equipe deve fazer?",
     "opciones": [
       {
-        "texto_opcion": "Execute o projeto inteiro sempre, computação de resíduos, computação de resíduos.",
-        "es_correcta": false,
-        "explicacion": "Computação de resíduos."
-      },
-      {
         "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`.",
         "es_correcta": true,
         "explicacion": "Os operadores gráficos combinam filtros de caminho, marcação e exclusão."
+      },
+      {
+        "texto_opcion": "Execute o projeto inteiro sempre, computação de resíduos, computação de resíduos.",
+        "es_correcta": false,
+        "explicacion": "Computação de resíduos."
       },
       {
         "texto_opcion": "Use apenas o nome do modelo sem caminho/tag, mais difícil de manter em escala.",
@@ -148,14 +148,14 @@
     "pregunta": "revisão do projeto dbt — um medalhão lakehouse construído com dbt. a lógica intermediária usada uma vez não deve se materializar. O que a equipe deve fazer?",
     "opciones": [
       {
-        "texto_opcion": "Use seeds para intermediários, ferramenta errada para transformações.",
-        "es_correcta": false,
-        "explicacion": "Ferramenta errada para transformações."
-      },
-      {
         "texto_opcion": "Materialize cada passo como tabela, expansão e custo da mesa.",
         "es_correcta": false,
         "explicacion": "Expansão e custo da mesa."
+      },
+      {
+        "texto_opcion": "Use o modelo ephemeral ou um SQL CTE via ref para ephemeral.",
+        "es_correcta": true,
+        "explicacion": "Ephemeral/CTE evita tabelas extras no armazém."
       },
       {
         "texto_opcion": "Duplicar SQL em cinco modelos as the primary design for configured.",
@@ -163,9 +163,9 @@
         "explicacion": "Carga de manutenção."
       },
       {
-        "texto_opcion": "Use o modelo ephemeral ou um SQL CTE via ref para ephemeral.",
-        "es_correcta": true,
-        "explicacion": "Ephemeral/CTE evita tabelas extras no armazém."
+        "texto_opcion": "Use seeds para intermediários, ferramenta errada para transformações.",
+        "es_correcta": false,
+        "explicacion": "Ferramenta errada para transformações."
       }
     ],
     "tags": [
@@ -177,24 +177,24 @@
     "pregunta": "Em um projeto de armazém Snowflake: a compilação do dbt falha citando uma dependência cíclica. Qual abordagem dbt é melhor?",
     "opciones": [
       {
-        "texto_opcion": "Ignore o erro e execute --full-refresh, o ciclo permanece, o ciclo permanece; a execução falha.",
-        "es_correcta": false,
-        "explicacion": "O ciclo permanece; a execução falha."
-      },
-      {
-        "texto_opcion": "Substitua ref() por tabelas codificadas, quebra a linhagem permanentemente.",
+        "texto_opcion": "Substitua ref() por tabelas codificadas, quebra a linhagem permanentemente como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "Quebra a linhagem permanentemente."
-      },
-      {
-        "texto_opcion": "Adicione ciclos para 'desempenho' as the default selected to adopted as the.",
-        "es_correcta": false,
-        "explicacion": "Projeto dbt inválido."
       },
       {
         "texto_opcion": "Remova cadeias circulares ref() para que DAG seja acíclico.",
         "es_correcta": true,
         "explicacion": "dbt requer um gráfico acíclico direcionado; ciclos quebram compilação."
+      },
+      {
+        "texto_opcion": "Adicione ciclos para 'desempenho' as the default selected to adopted as the selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Projeto dbt inválido."
+      },
+      {
+        "texto_opcion": "Ignore o erro e execute --full-refresh, o ciclo permanece, o ciclo permanece; a execução falha.",
+        "es_correcta": false,
+        "explicacion": "O ciclo permanece; a execução falha."
       }
     ],
     "tags": [
@@ -235,16 +235,6 @@
     "pregunta": "revisão do projeto dbt - um repositório analítico BigQuery. model depende de um modelo instalado a partir de um pacote dbt. O que a equipe deve fazer?",
     "opciones": [
       {
-        "texto_opcion": "Remover pacotes.yml, desinstala dependências de pacotes, desinstala dependências de pacotes.",
-        "es_correcta": false,
-        "explicacion": "Desinstala dependências de pacotes."
-      },
-      {
-        "texto_opcion": "Copie o pacote SQL para o projeto manualmente, atualizações do pacote Forks.",
-        "es_correcta": false,
-        "explicacion": "Atualizações do pacote Forks."
-      },
-      {
         "texto_opcion": "Pacote de código rígido esquema.table, interrupções nas atualizações de pacotes.",
         "es_correcta": false,
         "explicacion": "Interrupções nas atualizações de pacotes."
@@ -253,6 +243,16 @@
         "texto_opcion": "Use `ref` ou configure o namespace do pacote.",
         "es_correcta": true,
         "explicacion": "As referências de pacote resolvem modelos de pacotes instalados no DAG."
+      },
+      {
+        "texto_opcion": "Remover pacotes.yml, desinstala dependências de pacotes, desinstala dependências de pacotes.",
+        "es_correcta": false,
+        "explicacion": "Desinstala dependências de pacotes."
+      },
+      {
+        "texto_opcion": "Copie o pacote SQL para o projeto manualmente, atualizações do pacote Forks priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Atualizações do pacote Forks."
       }
     ],
     "tags": [
@@ -264,24 +264,24 @@
     "pregunta": "o modelo único precisa de tabela, enquanto o padrão da pasta é visualizar. Contexto: um job dbt Cloud multiambiente.",
     "opciones": [
       {
-        "texto_opcion": "Desative o modelo, não se aplica a tabela materialization",
-        "es_correcta": false,
-        "explicacion": "Não se aplica a tabela materialization."
-      },
-      {
-        "texto_opcion": "Editar arquivos/alvo compilados, os artefatos gerados são substituídos.",
-        "es_correcta": false,
-        "explicacion": "Os artefatos gerados são substituídos."
-      },
-      {
         "texto_opcion": "Defina `{{ config }}` no topo do modelo SQL.",
         "es_correcta": true,
         "explicacion": "A configuração em nível de modelo substitui os padrões de pasta em dbt_project.yml."
       },
       {
+        "texto_opcion": "Editar arquivos/alvo compilados, os artefatos gerados são substituídos adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "es_correcta": false,
+        "explicacion": "Os artefatos gerados são substituídos."
+      },
+      {
         "texto_opcion": "Alterar o padrão global para tabela para todos os testes, substitui a intenção de outros modelos.",
         "es_correcta": false,
         "explicacion": "Substitui a intenção de outros modelos."
+      },
+      {
+        "texto_opcion": "Desative o modelo, não se aplica a tabela materialization usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "Não se aplica a tabela materialization."
       }
     ],
     "tags": [
@@ -293,6 +293,11 @@
     "pregunta": "a consulta exploratória não deve ser construída na produção DAG. Contexto: uma equipe de análise de produto usando dbt.",
     "opciones": [
       {
+        "texto_opcion": "Adicionar a seeds, seeds são dados CSV, não SQL analítico.",
+        "es_correcta": false,
+        "explicacion": "Seeds são dados CSV, não SQL analítico."
+      },
+      {
         "texto_opcion": "Execute a consulta apenas na planilha e perca o controle de versão",
         "es_correcta": false,
         "explicacion": "Não reproduzível."
@@ -301,11 +306,6 @@
         "texto_opcion": "Coloque o SQL no diretório `analyses/`.",
         "es_correcta": true,
         "explicacion": "as análises são compiladas, mas não são materializadas ou executadas por padrão."
-      },
-      {
-        "texto_opcion": "Adicionar a seeds, seeds são dados CSV, não SQL analítico.",
-        "es_correcta": false,
-        "explicacion": "Seeds são dados CSV, não SQL analítico."
       },
       {
         "texto_opcion": "Coloque uma consulta ad hoc em models/as table prioritized for.",
@@ -322,16 +322,6 @@
     "pregunta": "Para um mercado financeiro com SLAs rígidos com jobs noturnos: execute modelos que sejam tag:nightly e path:marts. Melhor prática?",
     "opciones": [
       {
-        "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`.",
-        "es_correcta": true,
-        "explicacion": "A interseção de vírgula restringe a seleção a modelos que correspondam a todos os predicados."
-      },
-      {
-        "texto_opcion": "Selecione por UUID, dbt seleciona por nome/tag/caminho, não por UUID.",
-        "es_correcta": false,
-        "explicacion": "dbt seleciona por nome/tag/caminho, não por UUID."
-      },
-      {
         "texto_opcion": "Significado de seleção separada por espaço OU incorretamente",
         "es_correcta": false,
         "explicacion": "A sintaxe do operador gráfico deve corresponder aos documentos."
@@ -340,6 +330,16 @@
         "texto_opcion": "Execute testes apenas com dbt run, dbt run não executa testes.",
         "es_correcta": false,
         "explicacion": "dbt run não executa testes."
+      },
+      {
+        "texto_opcion": "Selecione por UUID, dbt seleciona por nome/tag/caminho, não por UUID.",
+        "es_correcta": false,
+        "explicacion": "dbt seleciona por nome/tag/caminho, não por UUID."
+      },
+      {
+        "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`.",
+        "es_correcta": true,
+        "explicacion": "A interseção de vírgula restringe a seleção a modelos que correspondam a todos os predicados."
       }
     ],
     "tags": [
@@ -351,24 +351,24 @@
     "pregunta": "Em um projeto de warehouse Snowflake: declare tabelas brutas para atualização e linhagem em documentos. Qual abordagem dbt é melhor?",
     "opciones": [
       {
-        "texto_opcion": "Coloque o bloco de fontes dentro de um modelo .sql",
-        "es_correcta": false,
-        "explicacion": "YAML pertence aos arquivos de esquema."
-      },
-      {
-        "texto_opcion": "Único documento no README, não analisado por dbt.",
+        "texto_opcion": "Único documento no README, não analisado por dbt selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Não analisado por dbt."
       },
       {
-        "texto_opcion": "Defina fontes em YAML em `sources:` com banco de dados/esquema/tabelas",
-        "es_correcta": true,
-        "explicacion": "fontes YAML registra tabelas externas para source() e atualização."
+        "texto_opcion": "Coloque o bloco de fontes dentro de um modelo .sql — yAML pertence aos arquivos de esquema.",
+        "es_correcta": false,
+        "explicacion": "YAML pertence aos arquivos de esquema."
       },
       {
-        "texto_opcion": "Use exposures para tabelas brutas, exposures documenta o uso.",
+        "texto_opcion": "Use exposures para tabelas brutas, exposures documenta o uso — exposures documenta o uso downstream, não as fontes brutas.",
         "es_correcta": false,
         "explicacion": "exposures documenta o uso downstream, não as fontes brutas."
+      },
+      {
+        "texto_opcion": "Defina fontes em YAML em `sources:` com banco de dados/esquema/tabelas.",
+        "es_correcta": true,
+        "explicacion": "fontes YAML registra tabelas externas para source() e atualização."
       }
     ],
     "tags": [
@@ -390,14 +390,14 @@
         "explicacion": "Ignora o roteamento e a linhagem do ambiente."
       },
       {
-        "texto_opcion": "Use source() para outro modelo dbt, source() é para fontes brutas",
-        "es_correcta": false,
-        "explicacion": "source() é para fontes brutas, não para modelos dbt."
-      },
-      {
         "texto_opcion": "Copiar stg_orders SQL embutido, quebra modularidade e linhagem.",
         "es_correcta": false,
         "explicacion": "Quebra modularidade e linhagem."
+      },
+      {
+        "texto_opcion": "Use source() para outro modelo dbt, source() é para fontes brutas",
+        "es_correcta": false,
+        "explicacion": "source() é para fontes brutas, não para modelos dbt."
       }
     ],
     "tags": [
@@ -414,19 +414,19 @@
         "explicacion": "Não define a tabela externa como origem."
       },
       {
-        "texto_opcion": "Apenas banco de dados.schema.table de código rígido",
+        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declarado nas fontes YAML.",
+        "es_correcta": true,
+        "explicacion": "source() faz referência a fontes declaradas e permite testes de atualização."
+      },
+      {
+        "texto_opcion": "Apenas banco de dados.schema.table de código rígido — perde source freshness e linhagem em documentos.",
         "es_correcta": false,
         "explicacion": "Perde source freshness e linhagem em documentos."
       },
       {
-        "texto_opcion": "ref('raw_orders') sem modelo, ref espera um modelo dbt",
+        "texto_opcion": "ref('raw_orders') sem modelo, ref espera um modelo dbt.",
         "es_correcta": false,
         "explicacion": "ref espera um modelo dbt, não uma tabela bruta externa."
-      },
-      {
-        "texto_opcion": "Use `{{ source('raw', 'orders') }}` declarado nas fontes YAML.",
-        "es_correcta": true,
-        "explicacion": "source() faz referência a fontes declaradas e permite testes de atualização."
       }
     ],
     "tags": [
@@ -438,14 +438,9 @@
     "pregunta": "revisão do projeto dbt - um job dbt Cloud multiambiente. apenas o downstream de `stg_customers` foi alterado e deve ser reconstruído. O que a equipe deve fazer? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "dbt run sem selecionar todas as vezes",
+        "texto_opcion": "Execute manualmente o SQL do warehouse por tabela",
         "es_correcta": false,
-        "explicacion": "Reconstrói todo o projeto desnecessariamente."
-      },
-      {
-        "texto_opcion": "--select +stg_customers somente upstream, direção errada",
-        "es_correcta": false,
-        "explicacion": "Direção errada; precisa de downstream + sufixo."
+        "explicacion": "Fora do dbt orchestration."
       },
       {
         "texto_opcion": "Execute `dbt run --select stg_customers+`.",
@@ -453,9 +448,14 @@
         "explicacion": "+ seleciona dependentes downstream no DAG."
       },
       {
-        "texto_opcion": "Execute manualmente o SQL do warehouse por tabela",
+        "texto_opcion": "dbt run sem selecionar todas as vezes — reconstrói todo o projeto.",
         "es_correcta": false,
-        "explicacion": "Fora do dbt orchestration."
+        "explicacion": "Reconstrói todo o projeto desnecessariamente."
+      },
+      {
+        "texto_opcion": "--select +stg_customers somente upstream, direção errada",
+        "es_correcta": false,
+        "explicacion": "Direção errada; precisa de downstream + sufixo."
       }
     ],
     "tags": [
@@ -467,24 +467,24 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um pipeline de CI usando dbt Core: fix requer a reconstrução de um mart e todos os seus pais. Selecione a resposta correta. Conjunto de restrições nº 2.",
     "opciones": [
       {
+        "texto_opcion": "dbt test apenas, não reconstrói modelos; not the best fit here plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Não reconstrói modelos."
+      },
+      {
+        "texto_opcion": "--select fct_orders+ para pais, o sufixo + está a jusante — o sufixo + está a jusante; prefixo + é upstream.",
+        "es_correcta": false,
+        "explicacion": "O sufixo + está a jusante; prefixo + é upstream."
+      },
+      {
         "texto_opcion": "Elimine os modelos filhos primeiro manualmente, arriscado; seletor controla a ordem.",
         "es_correcta": false,
         "explicacion": "Arriscado; seletor controla a ordem."
       },
       {
-        "texto_opcion": "--select fct_orders+ para pais, o sufixo + está a jusante",
-        "es_correcta": false,
-        "explicacion": "O sufixo + está a jusante; prefixo + é upstream."
-      },
-      {
         "texto_opcion": "Execute `dbt run --select +fct_orders`.",
         "es_correcta": true,
         "explicacion": "+ prefixo seleciona ancestrais upstream do modelo."
-      },
-      {
-        "texto_opcion": "dbt test apenas, não reconstrói modelos; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Não reconstrói modelos."
       }
     ],
     "tags": [
@@ -495,11 +495,6 @@
   {
     "pregunta": "Durante a solução de problemas `dbt build` em um medalhão lakehouse construído com dbt: execute a pasta de teste e exclua modelos obsoletos marcados como legado. Selecione a resposta correta. Conjunto de restrições nº 2.",
     "opciones": [
-      {
-        "texto_opcion": "Excluir renomeando arquivos aleatoriamente as the primary used as the main path in.",
-        "es_correcta": false,
-        "explicacion": "Não declarativo."
-      },
       {
         "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`.",
         "es_correcta": true,
@@ -514,6 +509,11 @@
         "texto_opcion": "Execute o projeto inteiro sempre, computação de resíduos, computação de resíduos.",
         "es_correcta": false,
         "explicacion": "Computação de resíduos."
+      },
+      {
+        "texto_opcion": "Excluir renomeando arquivos aleatoriamente as the primary used as the main path in.",
+        "es_correcta": false,
+        "explicacion": "Não declarativo."
       }
     ],
     "tags": [
@@ -530,6 +530,11 @@
         "explicacion": "Expansão e custo da mesa."
       },
       {
+        "texto_opcion": "Duplicar SQL em cinco modelos used as the main path in applied across.",
+        "es_correcta": false,
+        "explicacion": "Carga de manutenção."
+      },
+      {
         "texto_opcion": "Use seeds para intermediários, ferramenta errada para transformações.",
         "es_correcta": false,
         "explicacion": "Ferramenta errada para transformações."
@@ -538,11 +543,6 @@
         "texto_opcion": "Use o modelo ephemeral ou um SQL CTE via ref para ephemeral.",
         "es_correcta": true,
         "explicacion": "Ephemeral/CTE evita tabelas extras no armazém."
-      },
-      {
-        "texto_opcion": "Duplicar SQL em cinco modelos used as the main path in applied across.",
-        "es_correcta": false,
-        "explicacion": "Carga de manutenção."
       }
     ],
     "tags": [
@@ -559,19 +559,19 @@
         "explicacion": "dbt requer um gráfico acíclico direcionado; ciclos quebram compilação."
       },
       {
-        "texto_opcion": "Substitua ref() por tabelas codificadas, quebra a linhagem permanentemente.",
+        "texto_opcion": "Ignore o erro e execute --full-refresh, o ciclo permanece, o ciclo permanece; a execução falha.",
         "es_correcta": false,
-        "explicacion": "Quebra a linhagem permanentemente."
+        "explicacion": "O ciclo permanece; a execução falha."
       },
       {
-        "texto_opcion": "Adicione ciclos para 'desempenho' adopted as the standard selected to meet the.",
+        "texto_opcion": "Adicione ciclos para 'desempenho' adopted as the standard selected to meet the adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Projeto dbt inválido."
       },
       {
-        "texto_opcion": "Ignore o erro e execute --full-refresh, o ciclo permanece, o ciclo permanece; a execução falha.",
+        "texto_opcion": "Substitua ref() por tabelas codificadas, quebra a linhagem permanentemente comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
-        "explicacion": "O ciclo permanece; a execução falha."
+        "explicacion": "Quebra a linhagem permanentemente."
       }
     ],
     "tags": [
@@ -588,11 +588,6 @@
         "explicacion": "Difícil de testar e manter."
       },
       {
-        "texto_opcion": "Modelos Mart source() diretamente com lógica pesada, casais marts para layout bruto.",
-        "es_correcta": false,
-        "explicacion": "Casais marts para layout bruto."
-      },
-      {
         "texto_opcion": "Pule a preparação e use apenas seeds, seeds não são fontes ativas, seeds não são fontes ativas.",
         "es_correcta": false,
         "explicacion": "Seeds não são fontes ativas."
@@ -601,6 +596,11 @@
         "texto_opcion": "Construa modelos de teste com source() e refaça o teste de marts.",
         "es_correcta": true,
         "explicacion": "A preparação isola as alterações de origem e padroniza a nomenclatura."
+      },
+      {
+        "texto_opcion": "Modelos Mart source() diretamente com lógica pesada, casais marts para layout bruto.",
+        "es_correcta": false,
+        "explicacion": "Casais marts para layout bruto."
       }
     ],
     "tags": [
@@ -612,24 +612,24 @@
     "pregunta": "revisão do projeto dbt — uma equipe de plataforma que publica pacotes compartilhados. model depende de um modelo instalado a partir de um pacote dbt. O que a equipe deve fazer? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Pacote de código rígido esquema.table, interrupções nas atualizações de pacotes.",
-        "es_correcta": false,
-        "explicacion": "Interrupções nas atualizações de pacotes."
-      },
-      {
-        "texto_opcion": "Copie o pacote SQL para o projeto manualmente, atualizações do pacote Forks.",
+        "texto_opcion": "Copie o pacote SQL para o projeto manualmente, atualizações do pacote Forks selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Atualizações do pacote Forks."
-      },
-      {
-        "texto_opcion": "Use `ref` ou configure o namespace do pacote.",
-        "es_correcta": true,
-        "explicacion": "As referências de pacote resolvem modelos de pacotes instalados no DAG."
       },
       {
         "texto_opcion": "Remover pacotes.yml, desinstala dependências de pacotes, desinstala dependências de pacotes.",
         "es_correcta": false,
         "explicacion": "Desinstala dependências de pacotes."
+      },
+      {
+        "texto_opcion": "Pacote de código rígido esquema.table, interrupções nas atualizações de pacotes.",
+        "es_correcta": false,
+        "explicacion": "Interrupções nas atualizações de pacotes."
+      },
+      {
+        "texto_opcion": "Use `ref` ou configure o namespace do pacote.",
+        "es_correcta": true,
+        "explicacion": "As referências de pacote resolvem modelos de pacotes instalados no DAG."
       }
     ],
     "tags": [
@@ -641,12 +641,7 @@
     "pregunta": "Para uma implantação do Databricks SQL warehouse com jobs noturnos: o modelo único precisa de tabela enquanto a pasta é padronizada para visualização. Melhor prática? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Defina `{{ config }}` no topo do modelo SQL.",
-        "es_correcta": true,
-        "explicacion": "A configuração em nível de modelo substitui os padrões de pasta em dbt_project.yml."
-      },
-      {
-        "texto_opcion": "Desative o modelo, não se aplica a tabela materialization",
+        "texto_opcion": "Desative o modelo, não se aplica a tabela materialization plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
         "explicacion": "Não se aplica a tabela materialization."
       },
@@ -656,9 +651,14 @@
         "explicacion": "Substitui a intenção de outros modelos."
       },
       {
-        "texto_opcion": "Editar arquivos/alvo compilados, os artefatos gerados são substituídos.",
+        "texto_opcion": "Editar arquivos/alvo compilados, os artefatos gerados são substituídos usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
         "explicacion": "Os artefatos gerados são substituídos."
+      },
+      {
+        "texto_opcion": "Defina `{{ config }}` no topo do modelo SQL.",
+        "es_correcta": true,
+        "explicacion": "A configuração em nível de modelo substitui os padrões de pasta em dbt_project.yml."
       }
     ],
     "tags": [
@@ -670,24 +670,24 @@
     "pregunta": "Para uma equipe de plataforma que publica pacotes compartilhados com jobs noturnos: a consulta exploratória não deve ser construída na produção DAG. Melhor prática? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Coloque uma consulta ad hoc em models/as table used as the main path.",
-        "es_correcta": false,
-        "explicacion": "Polui a produção DAG."
-      },
-      {
         "texto_opcion": "Coloque o SQL no diretório `analyses/`.",
         "es_correcta": true,
         "explicacion": "as análises são compiladas, mas não são materializadas ou executadas por padrão."
       },
       {
-        "texto_opcion": "Execute a consulta apenas na planilha e perca o controle de versão",
-        "es_correcta": false,
-        "explicacion": "Não reproduzível."
-      },
-      {
         "texto_opcion": "Adicionar a seeds, seeds são dados CSV, não SQL analítico.",
         "es_correcta": false,
         "explicacion": "Seeds são dados CSV, não SQL analítico."
+      },
+      {
+        "texto_opcion": "Coloque uma consulta ad hoc em models/as table used as the main path.",
+        "es_correcta": false,
+        "explicacion": "Polui a produção DAG."
+      },
+      {
+        "texto_opcion": "Execute a consulta apenas na planilha e perca o controle de versão",
+        "es_correcta": false,
+        "explicacion": "Não reproduzível."
       }
     ],
     "tags": [
@@ -699,14 +699,14 @@
     "pregunta": "Para uma equipe de plataforma que publica pacotes compartilhados com jobs noturnos: execute modelos que sejam tag:nightly e path:marts. Melhor prática? Conjunto de restrições nº 2.",
     "opciones": [
       {
+        "texto_opcion": "Significado de seleção separada por espaço OU incorretamente",
+        "es_correcta": false,
+        "explicacion": "A sintaxe do operador gráfico deve corresponder aos documentos."
+      },
+      {
         "texto_opcion": "Execute testes apenas com dbt run, dbt run não executa testes.",
         "es_correcta": false,
         "explicacion": "dbt run não executa testes."
-      },
-      {
-        "texto_opcion": "Selecione por UUID, dbt seleciona por nome/tag/caminho, não por UUID.",
-        "es_correcta": false,
-        "explicacion": "dbt seleciona por nome/tag/caminho, não por UUID."
       },
       {
         "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`.",
@@ -714,9 +714,9 @@
         "explicacion": "A interseção de vírgula restringe a seleção a modelos que correspondam a todos os predicados."
       },
       {
-        "texto_opcion": "Significado de seleção separada por espaço OU incorretamente",
+        "texto_opcion": "Selecione por UUID, dbt seleciona por nome/tag/caminho, não por UUID.",
         "es_correcta": false,
-        "explicacion": "A sintaxe do operador gráfico deve corresponder aos documentos."
+        "explicacion": "dbt seleciona por nome/tag/caminho, não por UUID."
       }
     ],
     "tags": [
@@ -728,24 +728,24 @@
     "pregunta": "Durante a solução de problemas `dbt build` em uma equipe de plataforma que publica pacotes compartilhados: declare tabelas brutas para atualização e linhagem em documentos. Selecione a resposta correta. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Use exposures para tabelas brutas, exposures documenta o uso.",
+        "texto_opcion": "Coloque o bloco de fontes dentro de um modelo .sql — yAML pertence aos arquivos de esquema.",
         "es_correcta": false,
-        "explicacion": "exposures documenta o uso downstream, não as fontes brutas."
+        "explicacion": "YAML pertence aos arquivos de esquema."
       },
       {
-        "texto_opcion": "Único documento no README, não analisado por dbt.",
-        "es_correcta": false,
-        "explicacion": "Não analisado por dbt."
-      },
-      {
-        "texto_opcion": "Defina fontes em YAML em `sources:` com banco de dados/esquema/tabelas",
+        "texto_opcion": "Defina fontes em YAML em `sources:` com banco de dados/esquema/tabelas.",
         "es_correcta": true,
         "explicacion": "fontes YAML registra tabelas externas para source() e atualização."
       },
       {
-        "texto_opcion": "Coloque o bloco de fontes dentro de um modelo .sql",
+        "texto_opcion": "Único documento no README, não analisado por dbt como escolha padrão de produção neste cenário.",
         "es_correcta": false,
-        "explicacion": "YAML pertence aos arquivos de esquema."
+        "explicacion": "Não analisado por dbt."
+      },
+      {
+        "texto_opcion": "Use exposures para tabelas brutas, exposures documenta o uso — exposures documenta o uso downstream, não as fontes brutas.",
+        "es_correcta": false,
+        "explicacion": "exposures documenta o uso downstream, não as fontes brutas."
       }
     ],
     "tags": [
@@ -762,14 +762,14 @@
         "explicacion": "Quebra modularidade e linhagem."
       },
       {
-        "texto_opcion": "Use source() para outro modelo dbt, source() é para fontes brutas",
-        "es_correcta": false,
-        "explicacion": "source() é para fontes brutas, não para modelos dbt."
-      },
-      {
         "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`.",
         "es_correcta": true,
         "explicacion": "ref() resolve dependências e constrói o DAG com relações conscientes do ambiente."
+      },
+      {
+        "texto_opcion": "Use source() para outro modelo dbt, source() é para fontes brutas",
+        "es_correcta": false,
+        "explicacion": "source() é para fontes brutas, não para modelos dbt."
       },
       {
         "texto_opcion": "Código `analytics.stg_orders`, ignora o roteamento e a.",
@@ -786,24 +786,24 @@
     "pregunta": "Para um job dbt Cloud multiambiente com jobs noturnos: o modelo lê a tabela de destino bruta carregada pelo ELT fora do dbt. Melhor prática? Conjunto de restrições nº 3.",
     "opciones": [
       {
+        "texto_opcion": "Apenas banco de dados.schema.table de código rígido — perde source freshness e linhagem em documentos.",
+        "es_correcta": false,
+        "explicacion": "Perde source freshness e linhagem em documentos."
+      },
+      {
         "texto_opcion": "Use `{{ source('raw', 'orders') }}` declarado nas fontes YAML.",
         "es_correcta": true,
         "explicacion": "source() faz referência a fontes declaradas e permite testes de atualização."
       },
       {
-        "texto_opcion": "Crie um modelo vazio sem SQL, não define a tabela externa como origem.",
-        "es_correcta": false,
-        "explicacion": "Não define a tabela externa como origem."
-      },
-      {
-        "texto_opcion": "ref('raw_orders') sem modelo, ref espera um modelo dbt",
+        "texto_opcion": "ref('raw_orders') sem modelo, ref espera um modelo dbt.",
         "es_correcta": false,
         "explicacion": "ref espera um modelo dbt, não uma tabela bruta externa."
       },
       {
-        "texto_opcion": "Apenas banco de dados.schema.table de código rígido",
+        "texto_opcion": "Crie um modelo vazio sem SQL, não define a tabela externa como origem.",
         "es_correcta": false,
-        "explicacion": "Perde source freshness e linhagem em documentos."
+        "explicacion": "Não define a tabela externa como origem."
       }
     ],
     "tags": [
@@ -815,9 +815,9 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um monorepo com três projetos dbt: apenas o downstream de `stg_customers` foi alterado e deve ser reconstruído. Selecione a resposta correta. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "--select +stg_customers somente upstream, direção errada",
+        "texto_opcion": "Execute manualmente o SQL do warehouse por tabela",
         "es_correcta": false,
-        "explicacion": "Direção errada; precisa de downstream + sufixo."
+        "explicacion": "Fora do dbt orchestration."
       },
       {
         "texto_opcion": "Execute `dbt run --select stg_customers+`.",
@@ -825,14 +825,14 @@
         "explicacion": "+ seleciona dependentes downstream no DAG."
       },
       {
-        "texto_opcion": "dbt run sem selecionar todas as vezes",
+        "texto_opcion": "dbt run sem selecionar todas as vezes — reconstrói todo o projeto.",
         "es_correcta": false,
         "explicacion": "Reconstrói todo o projeto desnecessariamente."
       },
       {
-        "texto_opcion": "Execute manualmente o SQL do warehouse por tabela",
+        "texto_opcion": "--select +stg_customers somente upstream, direção errada",
         "es_correcta": false,
-        "explicacion": "Fora do dbt orchestration."
+        "explicacion": "Direção errada; precisa de downstream + sufixo."
       }
     ],
     "tags": [
@@ -844,6 +844,16 @@
     "pregunta": "a solução requer a reconstrução de um mercado e de todos os seus pais. Contexto: um repositório analítico BigQuery. Conjunto de restrições nº 3.",
     "opciones": [
       {
+        "texto_opcion": "dbt test apenas, não reconstrói modelos; not the best fit here priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Não reconstrói modelos."
+      },
+      {
+        "texto_opcion": "--select fct_orders+ para pais, o sufixo + está a jusante — o sufixo + está a jusante; prefixo + é upstream.",
+        "es_correcta": false,
+        "explicacion": "O sufixo + está a jusante; prefixo + é upstream."
+      },
+      {
         "texto_opcion": "Execute `dbt run --select +fct_orders`.",
         "es_correcta": true,
         "explicacion": "+ prefixo seleciona ancestrais upstream do modelo."
@@ -852,16 +862,6 @@
         "texto_opcion": "Elimine os modelos filhos primeiro manualmente, arriscado; seletor controla a ordem.",
         "es_correcta": false,
         "explicacion": "Arriscado; seletor controla a ordem."
-      },
-      {
-        "texto_opcion": "dbt test apenas, não reconstrói modelos; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Não reconstrói modelos."
-      },
-      {
-        "texto_opcion": "--select fct_orders+ para pais, o sufixo + está a jusante",
-        "es_correcta": false,
-        "explicacion": "O sufixo + está a jusante; prefixo + é upstream."
       }
     ],
     "tags": [
@@ -902,6 +902,16 @@
     "pregunta": "revisão do projeto dbt - uma equipe de análise de produto usando dbt. a lógica intermediária usada uma vez não deve se materializar. O que a equipe deve fazer? Conjunto de restrições nº 3.",
     "opciones": [
       {
+        "texto_opcion": "Use o modelo ephemeral ou um SQL CTE via ref para ephemeral.",
+        "es_correcta": true,
+        "explicacion": "Ephemeral/CTE evita tabelas extras no armazém."
+      },
+      {
+        "texto_opcion": "Duplicar SQL em cinco modelos configured end-to-end for this workload.",
+        "es_correcta": false,
+        "explicacion": "Carga de manutenção."
+      },
+      {
         "texto_opcion": "Use seeds para intermediários, ferramenta errada para transformações.",
         "es_correcta": false,
         "explicacion": "Ferramenta errada para transformações."
@@ -910,16 +920,6 @@
         "texto_opcion": "Materialize cada passo como tabela, expansão e custo da mesa.",
         "es_correcta": false,
         "explicacion": "Expansão e custo da mesa."
-      },
-      {
-        "texto_opcion": "Duplicar SQL em cinco modelos configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Carga de manutenção."
-      },
-      {
-        "texto_opcion": "Use o modelo ephemeral ou um SQL CTE via ref para ephemeral.",
-        "es_correcta": true,
-        "explicacion": "Ephemeral/CTE evita tabelas extras no armazém."
       }
     ],
     "tags": [
@@ -931,14 +931,14 @@
     "pregunta": "Para um repositório analítico BigQuery com jobs noturnos: a compilação do dbt falha citando uma dependência cíclica. Melhor prática? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Adicione ciclos para 'desempenho' used as the main path in applied across.",
-        "es_correcta": false,
-        "explicacion": "Projeto dbt inválido."
-      },
-      {
-        "texto_opcion": "Substitua ref() por tabelas codificadas, quebra a linhagem permanentemente.",
+        "texto_opcion": "Substitua ref() por tabelas codificadas, quebra a linhagem permanentemente aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Quebra a linhagem permanentemente."
+      },
+      {
+        "texto_opcion": "Adicione ciclos para 'desempenho' used as the main path in applied across usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "Projeto dbt inválido."
       },
       {
         "texto_opcion": "Ignore o erro e execute --full-refresh, o ciclo permanece, o ciclo permanece; a execução falha.",
@@ -965,9 +965,9 @@
         "explicacion": "Difícil de testar e manter."
       },
       {
-        "texto_opcion": "Construa modelos de teste com source() e refaça o teste de marts.",
-        "es_correcta": true,
-        "explicacion": "A preparação isola as alterações de origem e padroniza a nomenclatura."
+        "texto_opcion": "Modelos Mart source() diretamente com lógica pesada, casais marts para layout bruto.",
+        "es_correcta": false,
+        "explicacion": "Casais marts para layout bruto."
       },
       {
         "texto_opcion": "Pule a preparação e use apenas seeds, seeds não são fontes ativas, seeds não são fontes ativas.",
@@ -975,9 +975,9 @@
         "explicacion": "Seeds não são fontes ativas."
       },
       {
-        "texto_opcion": "Modelos Mart source() diretamente com lógica pesada, casais marts para layout bruto.",
-        "es_correcta": false,
-        "explicacion": "Casais marts para layout bruto."
+        "texto_opcion": "Construa modelos de teste com source() e refaça o teste de marts.",
+        "es_correcta": true,
+        "explicacion": "A preparação isola as alterações de origem e padroniza a nomenclatura."
       }
     ],
     "tags": [
@@ -989,9 +989,9 @@
     "pregunta": "revisão do projeto dbt — uma equipe de plataforma que publica pacotes compartilhados. model depende de um modelo instalado a partir de um pacote dbt. O que a equipe deve fazer? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Copie o pacote SQL para o projeto manualmente, atualizações do pacote Forks.",
-        "es_correcta": false,
-        "explicacion": "Atualizações do pacote Forks."
+        "texto_opcion": "Use `ref` ou configure o namespace do pacote.",
+        "es_correcta": true,
+        "explicacion": "As referências de pacote resolvem modelos de pacotes instalados no DAG."
       },
       {
         "texto_opcion": "Remover pacotes.yml, desinstala dependências de pacotes, desinstala dependências de pacotes.",
@@ -1004,9 +1004,9 @@
         "explicacion": "Interrupções nas atualizações de pacotes."
       },
       {
-        "texto_opcion": "Use `ref` ou configure o namespace do pacote.",
-        "es_correcta": true,
-        "explicacion": "As referências de pacote resolvem modelos de pacotes instalados no DAG."
+        "texto_opcion": "Copie o pacote SQL para o projeto manualmente, atualizações do pacote Forks priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Atualizações do pacote Forks."
       }
     ],
     "tags": [
@@ -1018,12 +1018,12 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um pipeline de CI usando dbt Core: o modelo único precisa de tabela enquanto a pasta é padronizada para visualização. Selecione a resposta correta. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Desative o modelo, não se aplica a tabela materialization",
+        "texto_opcion": "Alterar o padrão global para tabela para todos os testes, substitui a intenção de outros modelos.",
         "es_correcta": false,
-        "explicacion": "Não se aplica a tabela materialization."
+        "explicacion": "Substitui a intenção de outros modelos."
       },
       {
-        "texto_opcion": "Editar arquivos/alvo compilados, os artefatos gerados são substituídos.",
+        "texto_opcion": "Editar arquivos/alvo compilados, os artefatos gerados são substituídos comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Os artefatos gerados são substituídos."
       },
@@ -1033,9 +1033,9 @@
         "explicacion": "A configuração em nível de modelo substitui os padrões de pasta em dbt_project.yml."
       },
       {
-        "texto_opcion": "Alterar o padrão global para tabela para todos os testes, substitui a intenção de outros modelos.",
+        "texto_opcion": "Desative o modelo, não se aplica a tabela materialization usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
-        "explicacion": "Substitui a intenção de outros modelos."
+        "explicacion": "Não se aplica a tabela materialization."
       }
     ],
     "tags": [
@@ -1047,6 +1047,16 @@
     "pregunta": "Para uma implantação SQL warehouse do Databricks com jobs noturnos: a consulta exploratória não deve ser criada na produção DAG. Melhor prática? Conjunto de restrições nº 3.",
     "opciones": [
       {
+        "texto_opcion": "Coloque uma consulta ad hoc em models/as table selected to meet the.",
+        "es_correcta": false,
+        "explicacion": "Polui a produção DAG."
+      },
+      {
+        "texto_opcion": "Adicionar a seeds, seeds são dados CSV, não SQL analítico.",
+        "es_correcta": false,
+        "explicacion": "Seeds são dados CSV, não SQL analítico."
+      },
+      {
         "texto_opcion": "Execute a consulta apenas na planilha e perca o controle de versão",
         "es_correcta": false,
         "explicacion": "Não reproduzível."
@@ -1055,16 +1065,6 @@
         "texto_opcion": "Coloque o SQL no diretório `analyses/`.",
         "es_correcta": true,
         "explicacion": "as análises são compiladas, mas não são materializadas ou executadas por padrão."
-      },
-      {
-        "texto_opcion": "Adicionar a seeds, seeds são dados CSV, não SQL analítico.",
-        "es_correcta": false,
-        "explicacion": "Seeds são dados CSV, não SQL analítico."
-      },
-      {
-        "texto_opcion": "Coloque uma consulta ad hoc em models/as table selected to meet the.",
-        "es_correcta": false,
-        "explicacion": "Polui a produção DAG."
       }
     ],
     "tags": [
@@ -1075,11 +1075,6 @@
   {
     "pregunta": "Para um mercado financeiro com SLAs rígidos com jobs noturnos: execute modelos que sejam tag:nightly e path:marts. Melhor prática? Conjunto de restrições nº 3.",
     "opciones": [
-      {
-        "texto_opcion": "Significado de seleção separada por espaço OU incorretamente",
-        "es_correcta": false,
-        "explicacion": "A sintaxe do operador gráfico deve corresponder aos documentos."
-      },
       {
         "texto_opcion": "Use `dbt run --select tag:nightly,path:models/marts`.",
         "es_correcta": true,
@@ -1094,6 +1089,11 @@
         "texto_opcion": "Selecione por UUID, dbt seleciona por nome/tag/caminho, não por UUID.",
         "es_correcta": false,
         "explicacion": "dbt seleciona por nome/tag/caminho, não por UUID."
+      },
+      {
+        "texto_opcion": "Significado de seleção separada por espaço OU incorretamente",
+        "es_correcta": false,
+        "explicacion": "A sintaxe do operador gráfico deve corresponder aos documentos."
       }
     ],
     "tags": [
@@ -1105,22 +1105,22 @@
     "pregunta": "Durante a solução de problemas `dbt build` em um monorepo com três projetos dbt: declare tabelas brutas para atualização e linhagem em documentos. Selecione a resposta correta. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Único documento no README, não analisado por dbt.",
-        "es_correcta": false,
-        "explicacion": "Não analisado por dbt."
-      },
-      {
-        "texto_opcion": "Defina fontes em YAML em `sources:` com banco de dados/esquema/tabelas",
+        "texto_opcion": "Defina fontes em YAML em `sources:` com banco de dados/esquema/tabelas.",
         "es_correcta": true,
         "explicacion": "fontes YAML registra tabelas externas para source() e atualização."
       },
       {
-        "texto_opcion": "Coloque o bloco de fontes dentro de um modelo .sql",
+        "texto_opcion": "Único documento no README, não analisado por dbt aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "Não analisado por dbt."
+      },
+      {
+        "texto_opcion": "Coloque o bloco de fontes dentro de um modelo .sql — yAML pertence aos arquivos de esquema.",
         "es_correcta": false,
         "explicacion": "YAML pertence aos arquivos de esquema."
       },
       {
-        "texto_opcion": "Use exposures para tabelas brutas, exposures documenta o uso.",
+        "texto_opcion": "Use exposures para tabelas brutas, exposures documenta o uso — exposures documenta o uso downstream, não as fontes brutas.",
         "es_correcta": false,
         "explicacion": "exposures documenta o uso downstream, não as fontes brutas."
       }
@@ -1134,9 +1134,9 @@
     "pregunta": "o modelo SQL deve ler outro modelo dbt `stg_orders`. Contexto: um monorepo com três projetos dbt. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Copiar stg_orders SQL embutido, quebra modularidade e linhagem.",
-        "es_correcta": false,
-        "explicacion": "Quebra modularidade e linhagem."
+        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`.",
+        "es_correcta": true,
+        "explicacion": "ref() resolve dependências e constrói o DAG com relações conscientes do ambiente."
       },
       {
         "texto_opcion": "Use source() para outro modelo dbt, source() é para fontes brutas",
@@ -1149,9 +1149,9 @@
         "explicacion": "Ignora o roteamento e a linhagem do ambiente."
       },
       {
-        "texto_opcion": "Use `SELECT ... FROM {{ ref('stg_orders') }}`.",
-        "es_correcta": true,
-        "explicacion": "ref() resolve dependências e constrói o DAG com relações conscientes do ambiente."
+        "texto_opcion": "Copiar stg_orders SQL embutido, quebra modularidade e linhagem.",
+        "es_correcta": false,
+        "explicacion": "Quebra modularidade e linhagem."
       }
     ],
     "tags": [
@@ -1163,7 +1163,17 @@
     "pregunta": "o modelo lê a tabela de destino bruta carregada pelo ELT fora do dbt. Contexto: um pipeline de CI usando dbt Core. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Apenas banco de dados.schema.table de código rígido",
+        "texto_opcion": "Crie um modelo vazio sem SQL, não define a tabela externa como origem.",
+        "es_correcta": false,
+        "explicacion": "Não define a tabela externa como origem."
+      },
+      {
+        "texto_opcion": "ref('raw_orders') sem modelo, ref espera um modelo dbt.",
+        "es_correcta": false,
+        "explicacion": "ref espera um modelo dbt, não uma tabela bruta externa."
+      },
+      {
+        "texto_opcion": "Apenas banco de dados.schema.table de código rígido — perde source freshness e linhagem em documentos.",
         "es_correcta": false,
         "explicacion": "Perde source freshness e linhagem em documentos."
       },
@@ -1171,16 +1181,6 @@
         "texto_opcion": "Use `{{ source('raw', 'orders') }}` declarado nas fontes YAML.",
         "es_correcta": true,
         "explicacion": "source() faz referência a fontes declaradas e permite testes de atualização."
-      },
-      {
-        "texto_opcion": "Crie um modelo vazio sem SQL, não define a tabela externa como origem.",
-        "es_correcta": false,
-        "explicacion": "Não define a tabela externa como origem."
-      },
-      {
-        "texto_opcion": "ref('raw_orders') sem modelo, ref espera um modelo dbt",
-        "es_correcta": false,
-        "explicacion": "ref espera um modelo dbt, não uma tabela bruta externa."
       }
     ],
     "tags": [
@@ -1197,9 +1197,9 @@
         "explicacion": "Direção errada; precisa de downstream + sufixo."
       },
       {
-        "texto_opcion": "dbt run sem selecionar todas as vezes",
+        "texto_opcion": "Execute manualmente o SQL do warehouse por tabela",
         "es_correcta": false,
-        "explicacion": "Reconstrói todo o projeto desnecessariamente."
+        "explicacion": "Fora do dbt orchestration."
       },
       {
         "texto_opcion": "Execute `dbt run --select stg_customers+`.",
@@ -1207,9 +1207,9 @@
         "explicacion": "+ seleciona dependentes downstream no DAG."
       },
       {
-        "texto_opcion": "Execute manualmente o SQL do warehouse por tabela",
+        "texto_opcion": "dbt run sem selecionar todas as vezes — reconstrói todo o projeto.",
         "es_correcta": false,
-        "explicacion": "Fora do dbt orchestration."
+        "explicacion": "Reconstrói todo o projeto desnecessariamente."
       }
     ],
     "tags": [
@@ -1221,22 +1221,22 @@
     "pregunta": "Para um repositório analítico BigQuery com jobs noturnos: a correção requer a reconstrução de um mercado e de todos os seus pais. Melhor prática? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Elimine os modelos filhos primeiro manualmente, arriscado; seletor controla a ordem.",
-        "es_correcta": false,
-        "explicacion": "Arriscado; seletor controla a ordem."
-      },
-      {
         "texto_opcion": "Execute `dbt run --select +fct_orders`.",
         "es_correcta": true,
         "explicacion": "+ prefixo seleciona ancestrais upstream do modelo."
       },
       {
-        "texto_opcion": "dbt test apenas, não reconstrói modelos; not the best fit here.",
+        "texto_opcion": "dbt test apenas, não reconstrói modelos; not the best fit here configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Não reconstrói modelos."
       },
       {
-        "texto_opcion": "--select fct_orders+ para pais, o sufixo + está a jusante",
+        "texto_opcion": "Elimine os modelos filhos primeiro manualmente, arriscado; seletor controla a ordem.",
+        "es_correcta": false,
+        "explicacion": "Arriscado; seletor controla a ordem."
+      },
+      {
+        "texto_opcion": "--select fct_orders+ para pais, o sufixo + está a jusante — o sufixo + está a jusante; prefixo + é upstream.",
         "es_correcta": false,
         "explicacion": "O sufixo + está a jusante; prefixo + é upstream."
       }
@@ -1250,16 +1250,6 @@
     "pregunta": "execute a pasta de teste e exclua modelos obsoletos marcados como legado. Contexto: um mercado financeiro com SLAs rígidos. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Use apenas o nome do modelo sem caminho/tag, mais difícil de manter em escala.",
-        "es_correcta": false,
-        "explicacion": "Mais difícil de manter em escala."
-      },
-      {
-        "texto_opcion": "Excluir renomeando arquivos aleatoriamente selected to configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Não declarativo."
-      },
-      {
         "texto_opcion": "Use `dbt run --select path:models/staging --exclude tag:legacy`.",
         "es_correcta": true,
         "explicacion": "Os operadores gráficos combinam filtros de caminho, marcação e exclusão."
@@ -1268,6 +1258,16 @@
         "texto_opcion": "Execute o projeto inteiro sempre, computação de resíduos, computação de resíduos.",
         "es_correcta": false,
         "explicacion": "Computação de resíduos."
+      },
+      {
+        "texto_opcion": "Use apenas o nome do modelo sem caminho/tag, mais difícil de manter em escala selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Mais difícil de manter em escala."
+      },
+      {
+        "texto_opcion": "Excluir renomeando arquivos aleatoriamente selected to configured end-to-end for this workload.",
+        "es_correcta": false,
+        "explicacion": "Não declarativo."
       }
     ],
     "tags": [
@@ -1279,14 +1279,14 @@
     "pregunta": "Para um pipeline de CI usando dbt Core com jobs noturnos: a lógica intermediária usada uma vez não deve se materializar. Melhor prática? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Materialize cada passo como tabela, expansão e custo da mesa.",
-        "es_correcta": false,
-        "explicacion": "Expansão e custo da mesa."
-      },
-      {
         "texto_opcion": "Use o modelo ephemeral ou um SQL CTE via ref para ephemeral.",
         "es_correcta": true,
         "explicacion": "Ephemeral/CTE evita tabelas extras no armazém."
+      },
+      {
+        "texto_opcion": "Use seeds para intermediários, ferramenta errada para transformações.",
+        "es_correcta": false,
+        "explicacion": "Ferramenta errada para transformações."
       },
       {
         "texto_opcion": "Duplicar SQL em cinco modelos as the primary design for configured.",
@@ -1294,9 +1294,9 @@
         "explicacion": "Carga de manutenção."
       },
       {
-        "texto_opcion": "Use seeds para intermediários, ferramenta errada para transformações.",
+        "texto_opcion": "Materialize cada passo como tabela, expansão e custo da mesa.",
         "es_correcta": false,
-        "explicacion": "Ferramenta errada para transformações."
+        "explicacion": "Expansão e custo da mesa."
       }
     ],
     "tags": [
@@ -1308,24 +1308,24 @@
     "pregunta": "Em um pipeline de CI usando dbt Core: a compilação do dbt falha citando uma dependência cíclica. Qual abordagem dbt é melhor? Conjunto de restrições nº 4.",
     "opciones": [
       {
+        "texto_opcion": "Adicione ciclos para 'desempenho' prioritized for configured adopted as the configurado de ponta a ponta para o workload descrito.",
+        "es_correcta": false,
+        "explicacion": "Projeto dbt inválido."
+      },
+      {
         "texto_opcion": "Ignore o erro e execute --full-refresh, o ciclo permanece, o ciclo permanece; a execução falha.",
         "es_correcta": false,
         "explicacion": "O ciclo permanece; a execução falha."
       },
       {
-        "texto_opcion": "Remova cadeias circulares ref() para que DAG seja acíclico.",
-        "es_correcta": true,
-        "explicacion": "dbt requer um gráfico acíclico direcionado; ciclos quebram compilação."
-      },
-      {
-        "texto_opcion": "Substitua ref() por tabelas codificadas, quebra a linhagem permanentemente.",
+        "texto_opcion": "Substitua ref() por tabelas codificadas, quebra a linhagem permanentemente priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
         "es_correcta": false,
         "explicacion": "Quebra a linhagem permanentemente."
       },
       {
-        "texto_opcion": "Adicione ciclos para 'desempenho' prioritized for configured adopted as the.",
-        "es_correcta": false,
-        "explicacion": "Projeto dbt inválido."
+        "texto_opcion": "Remova cadeias circulares ref() para que DAG seja acíclico.",
+        "es_correcta": true,
+        "explicacion": "dbt requer um gráfico acíclico direcionado; ciclos quebram compilação."
       }
     ],
     "tags": [
@@ -1337,14 +1337,14 @@
     "pregunta": "Para um mercado financeiro com SLAs rígidos com jobs noturnos: as fontes de matéria-prima devem ser levemente limpas antes dos mercados. Melhor prática? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Construa modelos de teste com source() e refaça o teste de marts.",
-        "es_correcta": true,
-        "explicacion": "A preparação isola as alterações de origem e padroniza a nomenclatura."
-      },
-      {
         "texto_opcion": "Pule a preparação e use apenas seeds, seeds não são fontes ativas, seeds não são fontes ativas.",
         "es_correcta": false,
         "explicacion": "Seeds não são fontes ativas."
+      },
+      {
+        "texto_opcion": "Um modelo monolítico de 5.000 linhas, difícil de testar e manter, difícil de testar e manter.",
+        "es_correcta": false,
+        "explicacion": "Difícil de testar e manter."
       },
       {
         "texto_opcion": "Modelos Mart source() diretamente com lógica pesada, casais marts para layout bruto.",
@@ -1352,9 +1352,9 @@
         "explicacion": "Casais marts para layout bruto."
       },
       {
-        "texto_opcion": "Um modelo monolítico de 5.000 linhas, difícil de testar e manter, difícil de testar e manter.",
-        "es_correcta": false,
-        "explicacion": "Difícil de testar e manter."
+        "texto_opcion": "Construa modelos de teste com source() e refaça o teste de marts.",
+        "es_correcta": true,
+        "explicacion": "A preparação isola as alterações de origem e padroniza a nomenclatura."
       }
     ],
     "tags": [
@@ -1366,9 +1366,9 @@
     "pregunta": "Para uma equipe de análise de produto que usa dbt com jobs noturnos: o modelo depende de um modelo instalado a partir de um pacote dbt. Melhor prática? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Pacote de código rígido esquema.table, interrupções nas atualizações de pacotes.",
-        "es_correcta": false,
-        "explicacion": "Interrupções nas atualizações de pacotes."
+        "texto_opcion": "Use `ref` ou configure o namespace do pacote.",
+        "es_correcta": true,
+        "explicacion": "As referências de pacote resolvem modelos de pacotes instalados no DAG."
       },
       {
         "texto_opcion": "Remover pacotes.yml, desinstala dependências de pacotes, desinstala dependências de pacotes.",
@@ -1376,14 +1376,14 @@
         "explicacion": "Desinstala dependências de pacotes."
       },
       {
-        "texto_opcion": "Use `ref` ou configure o namespace do pacote.",
-        "es_correcta": true,
-        "explicacion": "As referências de pacote resolvem modelos de pacotes instalados no DAG."
-      },
-      {
-        "texto_opcion": "Copie o pacote SQL para o projeto manualmente, atualizações do pacote Forks.",
+        "texto_opcion": "Copie o pacote SQL para o projeto manualmente, atualizações do pacote Forks comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Atualizações do pacote Forks."
+      },
+      {
+        "texto_opcion": "Pacote de código rígido esquema.table, interrupções nas atualizações de pacotes.",
+        "es_correcta": false,
+        "explicacion": "Interrupções nas atualizações de pacotes."
       }
     ],
     "tags": [

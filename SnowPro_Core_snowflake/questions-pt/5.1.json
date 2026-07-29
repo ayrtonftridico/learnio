@@ -3,9 +3,9 @@
     "pregunta": "Para uma carga de trabalho de provedor de saúde com aproximadamente 5 TB/dia: armazene documentos JSON semiestruturados na coluna da tabela. Melhor escolha?",
     "opciones": [
       {
-        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto.",
-        "es_correcta": false,
-        "explicacion": "Pode inserir VARIANT bruto."
+        "texto_opcion": "Use a coluna VARIANT para armazenar estruturas JSON/objeto.",
+        "es_correcta": true,
+        "explicacion": "VARIANT contém dados semiestruturados com esquema flexível."
       },
       {
         "texto_opcion": "Armazene JSON apenas como VARCHAR sempre para analisar, vARIANT optimized para semiestruturado.",
@@ -18,9 +18,9 @@
         "explicacion": "Tipo de coluna nativa."
       },
       {
-        "texto_opcion": "Use a coluna VARIANT para armazenar estruturas JSON/objeto.",
-        "es_correcta": true,
-        "explicacion": "VARIANT contém dados semiestruturados com esquema flexível."
+        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Pode inserir VARIANT bruto."
       }
     ],
     "tags": [
@@ -32,24 +32,24 @@
     "pregunta": "Cenário de varejista global — insira a string JSON em VARIANT do SQL. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT",
+        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Direção de função errada."
+      },
+      {
+        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT.",
         "es_correcta": true,
         "explicacion": "PARSE_JSON converte texto em VARIANT."
       },
       {
-        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL selected to meet the adopted as the standard.",
+        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL selected to meet the adopted as the standard comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Disponível em SQL."
       },
       {
-        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor.",
+        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Função do lado do servidor."
-      },
-      {
-        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada.",
-        "es_correcta": false,
-        "explicacion": "Direção de função errada."
       }
     ],
     "tags": [
@@ -61,9 +61,9 @@
     "pregunta": "Revisão de incidente (eastus): explode a matriz de itens na coluna de eventos VARIANT para análise. Selecione o design mais apropriado.",
     "opciones": [
       {
-        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre",
+        "texto_opcion": "FLATTEN mescla linhas em menos partições fisicamente, expansão lógica de linhas na consulta.",
         "es_correcta": false,
-        "explicacion": "Os dados aninhados requerem FLATTEN para expansão de linha."
+        "explicacion": "Expansão lógica de linhas na consulta."
       },
       {
         "texto_opcion": "Use LATERAL FLATTEN(entrada => eventos, caminho => 'itens').",
@@ -71,12 +71,12 @@
         "explicacion": "FLATTEN converte matrizes/objetos aninhados em linhas."
       },
       {
-        "texto_opcion": "FLATTEN mescla linhas em menos partições fisicamente, expansão lógica de linhas na consulta.",
+        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre — os dados aninhados requerem FLATTEN para expansão de linha.",
         "es_correcta": false,
-        "explicacion": "Expansão lógica de linhas na consulta."
+        "explicacion": "Os dados aninhados requerem FLATTEN para expansão de linha."
       },
       {
-        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT.",
+        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "FLATTEN opera em VARIANT."
       }
@@ -89,6 +89,11 @@
   {
     "pregunta": "Uma concessionária de energia (~50.000 eventos/s, região australiaeast) deve: extrair o campo user.name dos dados da coluna VARIANT. Qual opção se adapta melhor?",
     "opciones": [
+      {
+        "texto_opcion": "A extração requer a exportação de JSON para o estágio primeiro",
+        "es_correcta": false,
+        "explicacion": "Consulta no local."
+      },
       {
         "texto_opcion": "Use dados:user.name ou GET_PATH(data, 'user.name').",
         "es_correcta": true,
@@ -103,11 +108,6 @@
         "texto_opcion": "Notação de dois pontos apenas em formato de arquivo, não SQL",
         "es_correcta": false,
         "explicacion": "Funciona em SQL em VARIANT."
-      },
-      {
-        "texto_opcion": "A extração requer a exportação de JSON para o estágio primeiro",
-        "es_correcta": false,
-        "explicacion": "Consulta no local."
       }
     ],
     "tags": [
@@ -119,24 +119,24 @@
     "pregunta": "Uma empresa de streaming de mídia (painéis quase em tempo real, região eastus) deve: armazenar a lista ordenada separadamente do documento objeto. Qual opção se adapta melhor?",
     "opciones": [
       {
-        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado.",
-        "es_correcta": false,
-        "explicacion": "ARRAY/VARIANT suportado."
+        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT.",
+        "es_correcta": true,
+        "explicacion": "ARRAY lida com coleções ordenadas."
       },
       {
-        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna.",
+        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
         "explicacion": "Pode ser do tipo coluna."
+      },
+      {
+        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado adotado como padrão da equipe.",
+        "es_correcta": false,
+        "explicacion": "ARRAY/VARIANT suportado."
       },
       {
         "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes.",
         "es_correcta": false,
         "explicacion": "FLATTEN lida com matrizes."
-      },
-      {
-        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT",
-        "es_correcta": true,
-        "explicacion": "ARRAY lida com coleções ordenadas."
       }
     ],
     "tags": [
@@ -148,6 +148,11 @@
     "pregunta": "Cenário de empresa de streaming de mídia – armazene pares de valores-chave com tipo de dados OBJECT. O que eles deveriam implementar?",
     "opciones": [
       {
+        "texto_opcion": "As chaves devem ser apenas numéricas, chaves de string típicas, chaves de string típicas.",
+        "es_correcta": false,
+        "explicacion": "Chaves de string típicas."
+      },
+      {
         "texto_opcion": "Objetos apenas no Iceberg externo sempre, existem tipos nativos OBJECT/VARIANT.",
         "es_correcta": false,
         "explicacion": "Existem tipos nativos OBJECT/VARIANT."
@@ -156,11 +161,6 @@
         "texto_opcion": "OBJECT requer formato de arquivo CSV, digite recurso do sistema, digite recurso do sistema.",
         "es_correcta": false,
         "explicacion": "Digite recurso do sistema."
-      },
-      {
-        "texto_opcion": "As chaves devem ser apenas numéricas, chaves de string típicas, chaves de string típicas.",
-        "es_correcta": false,
-        "explicacion": "Chaves de string típicas."
       },
       {
         "texto_opcion": "Use estruturas de objeto OBJECT ou VARIANT com OBJECT_CONSTRUCT.",
@@ -177,24 +177,24 @@
     "pregunta": "Cenário varejista global – acelere filtros em campos aninhados usados em cada consulta. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Desative micro-partitions em tabelas VARIANT, não suportado/desejado.",
+        "texto_opcion": "Desative micro-partitions em tabelas VARIANT, não suportado/desejado aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Não suportado/desejado."
       },
       {
-        "texto_opcion": "Use tokenização externa para flatten JSON applied across configured.",
-        "es_correcta": false,
-        "explicacion": "Recurso errado."
-      },
-      {
-        "texto_opcion": "Extraia o campo quente para a coluna relacional digitada; cluster opcional nele",
+        "texto_opcion": "Extraia o campo quente para a coluna relacional digitada; cluster opcional nele.",
         "es_correcta": true,
         "explicacion": "Colunas relacionais são melhor podadas do que caminhos VARIANT profundos."
       },
       {
-        "texto_opcion": "Mantenha todos os campos apenas em VARIANT para sempre para desempenho",
+        "texto_opcion": "Mantenha todos os campos apenas em VARIANT para sempre para desempenho configurado de ponta a ponta para selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Extraia caminhos quentes."
+      },
+      {
+        "texto_opcion": "Use tokenização externa para flatten JSON applied across configured plausível à primeira vista, porém adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "es_correcta": false,
+        "explicacion": "Recurso errado."
       }
     ],
     "tags": [
@@ -206,14 +206,9 @@
     "pregunta": "Para uma carga de trabalho de plataforma IoT industrial com painéis quase em tempo real: consulte linhas JSON carregadas sem esquema predefinido. Melhor escolha?",
     "opciones": [
       {
-        "texto_opcion": "Carregue em VARIANT e consulte com notação de caminho; evoluir o esquema de forma flexível",
+        "texto_opcion": "Carregue em VARIANT e consulte com notação de caminho; evoluir o esquema de forma flexível.",
         "es_correcta": true,
         "explicacion": "Padrão de esquema na leitura com VARIANT."
-      },
-      {
-        "texto_opcion": "Exigir esquema CSV rígido antes de qualquer ingestão de JSON, vARIANT suporta esquema flexível.",
-        "es_correcta": false,
-        "explicacion": "VARIANT suporta esquema flexível."
       },
       {
         "texto_opcion": "Converta todos os JSON em 100 tabelas separadas sempre antecipadamente, pesado inicial; VARIANT flexível.",
@@ -224,6 +219,11 @@
         "texto_opcion": "Consultas JSON são executadas apenas no lado do cliente, sQL do lado do servidor, sQL do lado do servidor.",
         "es_correcta": false,
         "explicacion": "SQL do lado do servidor."
+      },
+      {
+        "texto_opcion": "Exigir esquema CSV rígido antes de qualquer ingestão de JSON, vARIANT suporta esquema flexível.",
+        "es_correcta": false,
+        "explicacion": "VARIANT suporta esquema flexível."
       }
     ],
     "tags": [
@@ -235,9 +235,14 @@
     "pregunta": "Cenário da operadora de telecomunicações – chaves ausentes em documentos VARIANT. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Chaves ausentes retornam NULL no acesso ao caminho; lidar com COALESCE/TRY variants",
+        "texto_opcion": "Chaves ausentes retornam NULL no acesso ao caminho; lidar com COALESCE/TRY variants.",
         "es_correcta": true,
         "explicacion": "O acesso ao caminho semiestruturado produz NULL se estiver ausente."
+      },
+      {
+        "texto_opcion": "Deve reconstruir a tabela para adicionar novas chaves sempre adopted as the.",
+        "es_correcta": false,
+        "explicacion": "VARIANT flexível."
       },
       {
         "texto_opcion": "Chave ausente gera erro sempre interrompendo a consulta, resultado normalmente NULL.",
@@ -248,11 +253,6 @@
         "texto_opcion": "Exclusão de chaves NULL micro-partitions adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Não relacionado."
-      },
-      {
-        "texto_opcion": "Deve reconstruir a tabela para adicionar novas chaves sempre adopted as the.",
-        "es_correcta": false,
-        "explicacion": "VARIANT flexível."
       }
     ],
     "tags": [
@@ -264,12 +264,7 @@
     "pregunta": "Revisão de incidentes (sudestesia): matrizes aninhadas em vários níveis na carga útil do evento. Selecione o design mais apropriado.",
     "opciones": [
       {
-        "texto_opcion": "Único FLATTEN sempre expande todas as profundidades automaticamente ilimitadas",
-        "es_correcta": false,
-        "explicacion": "Pode precisar de FLATTEN/path encadeado."
-      },
-      {
-        "texto_opcion": "Em vez disso, converta para Excel pivot adopted as the standard selected to meet the.",
+        "texto_opcion": "Em vez disso, converta para Excel pivot adopted as the standard selected to meet the adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Não escalável."
       },
@@ -279,9 +274,14 @@
         "explicacion": "Os padrões SQL FLATTEN geralmente são suficientes."
       },
       {
-        "texto_opcion": "Encadeie operações FLATTEN ou use caminho/padrões recursivos flatten apropriados",
+        "texto_opcion": "Encadeie operações FLATTEN ou use caminho/padrões recursivos flatten apropriados.",
         "es_correcta": true,
         "explicacion": "Múltiplas etapas FLATTEN lidam com hierarquias aninhadas."
+      },
+      {
+        "texto_opcion": "Único FLATTEN sempre expande todas as profundidades automaticamente ilimitadas — pode precisar de FLATTEN/path encadeado.",
+        "es_correcta": false,
+        "explicacion": "Pode precisar de FLATTEN/path encadeado."
       }
     ],
     "tags": [
@@ -293,11 +293,6 @@
     "pregunta": "Cenário de mercado online - converta o campo numérico VARIANT em NUMBER para agregação. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Transmitir para NUMBER desativa Time Travel prioritized as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Não relacionado."
-      },
-      {
         "texto_opcion": "Use ::NUMBER ou TO_NUMBER na expressão de caminho extraída.",
         "es_correcta": true,
         "explicacion": "As conversões explícitas permitem agregações."
@@ -308,9 +303,14 @@
         "explicacion": "Precisa de um tipo numérico consistente."
       },
       {
-        "texto_opcion": "Agregação somente em caminhos VARCHAR sempre, converter para tipo numérico.",
+        "texto_opcion": "Agregação somente em caminhos VARCHAR sempre, converter para tipo numérico priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
         "es_correcta": false,
         "explicacion": "Converter para tipo numérico."
+      },
+      {
+        "texto_opcion": "Transmitir para NUMBER desativa Time Travel prioritized as the default production choice here.",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
       }
     ],
     "tags": [
@@ -322,24 +322,24 @@
     "pregunta": "Revisão de incidente (australiaeast): escolha VARIANT vs colunas normalizadas para telemetria esparsa. Selecione o design mais apropriado.",
     "opciones": [
       {
-        "texto_opcion": "Sempre normalize todo o JSON antecipadamente, independentemente da dispersão",
+        "texto_opcion": "Sempre normalize todo o JSON antecipadamente, independentemente da dispersão usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
         "explicacion": "Sobrecarga operacional."
       },
       {
-        "texto_opcion": "VARIANT para esquemas esparsos/em evolução; colunas relacionais para filtros/junções frequentes e pesadas",
+        "texto_opcion": "VARIANT para esquemas esparsos/em evolução; colunas relacionais para filtros/junções frequentes e pesadas.",
         "es_correcta": true,
         "explicacion": "Combine o armazenamento com os padrões de acesso."
       },
       {
-        "texto_opcion": "Colunas relacionais não podem ser carregadas de JSON, pode extrair durante a carga.",
-        "es_correcta": false,
-        "explicacion": "Pode extrair durante a carga."
-      },
-      {
-        "texto_opcion": "VARIANT proíbe totalmente a adesão, pode ingressar em campos extraídos.",
+        "texto_opcion": "VARIANT proíbe totalmente a adesão, pode ingressar em campos extraídos configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Pode ingressar em campos extraídos."
+      },
+      {
+        "texto_opcion": "Colunas relacionais não podem ser carregadas de JSON, pode extrair durante a carga selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Pode extrair durante a carga."
       }
     ],
     "tags": [
@@ -351,14 +351,9 @@
     "pregunta": "Uma operadora de telecomunicações (dados históricos em escala de petabytes, região australiaeast) deve: armazenar documentos JSON semiestruturados na coluna da tabela. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto.",
-        "es_correcta": false,
-        "explicacion": "Pode inserir VARIANT bruto."
-      },
-      {
-        "texto_opcion": "VARIANT requer sempre tabela externa, tipo de coluna nativa, tipo de coluna nativa.",
-        "es_correcta": false,
-        "explicacion": "Tipo de coluna nativa."
+        "texto_opcion": "Use a coluna VARIANT para armazenar estruturas JSON/objeto.",
+        "es_correcta": true,
+        "explicacion": "VARIANT contém dados semiestruturados com esquema flexível."
       },
       {
         "texto_opcion": "Armazene JSON apenas como VARCHAR sempre para analisar, vARIANT optimized para semiestruturado.",
@@ -366,9 +361,14 @@
         "explicacion": "VARIANT optimized para semiestruturado."
       },
       {
-        "texto_opcion": "Use a coluna VARIANT para armazenar estruturas JSON/objeto.",
-        "es_correcta": true,
-        "explicacion": "VARIANT contém dados semiestruturados com esquema flexível."
+        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Pode inserir VARIANT bruto."
+      },
+      {
+        "texto_opcion": "VARIANT requer sempre tabela externa, tipo de coluna nativa, tipo de coluna nativa.",
+        "es_correcta": false,
+        "explicacion": "Tipo de coluna nativa."
       }
     ],
     "tags": [
@@ -380,22 +380,22 @@
     "pregunta": "Uma empresa de streaming de mídia (~50.000 eventos/s, região eastus) deve: inserir a string JSON em VARIANT do SQL. Qual opção se adapta melhor?",
     "opciones": [
       {
-        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT",
-        "es_correcta": true,
-        "explicacion": "PARSE_JSON converte texto em VARIANT."
-      },
-      {
-        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL applied across prioritized for.",
+        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL applied across prioritized for como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "Disponível em SQL."
       },
       {
-        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada.",
+        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT.",
+        "es_correcta": true,
+        "explicacion": "PARSE_JSON converte texto em VARIANT."
+      },
+      {
+        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "Direção de função errada."
       },
       {
-        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor.",
+        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Função do lado do servidor."
       }
@@ -409,12 +409,17 @@
     "pregunta": "Cenário de fintech de pagamentos – explodir uma série de itens na coluna de eventos VARIANT para análise. O que eles deveriam implementar?",
     "opciones": [
       {
+        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre — os dados aninhados requerem FLATTEN para expansão de linha.",
+        "es_correcta": false,
+        "explicacion": "Os dados aninhados requerem FLATTEN para expansão de linha."
+      },
+      {
         "texto_opcion": "Use LATERAL FLATTEN(entrada => eventos, caminho => 'itens').",
         "es_correcta": true,
         "explicacion": "FLATTEN converte matrizes/objetos aninhados em linhas."
       },
       {
-        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT.",
+        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
         "explicacion": "FLATTEN opera em VARIANT."
       },
@@ -422,11 +427,6 @@
         "texto_opcion": "FLATTEN mescla linhas em menos partições fisicamente, expansão lógica de linhas na consulta.",
         "es_correcta": false,
         "explicacion": "Expansão lógica de linhas na consulta."
-      },
-      {
-        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre",
-        "es_correcta": false,
-        "explicacion": "Os dados aninhados requerem FLATTEN para expansão de linha."
       }
     ],
     "tags": [
@@ -438,24 +438,24 @@
     "pregunta": "Cenário da seguradora — extraia o campo user.name dos dados da coluna VARIANT. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Use JOIN para armazenar caminhos VARIANT, operadores de caminho em SQL.",
-        "es_correcta": false,
-        "explicacion": "Operadores de caminho em SQL."
-      },
-      {
         "texto_opcion": "Use dados:user.name ou GET_PATH(data, 'user.name').",
         "es_correcta": true,
         "explicacion": "A sintaxe do caminho extrai campos aninhados."
       },
       {
-        "texto_opcion": "A extração requer a exportação de JSON para o estágio primeiro",
-        "es_correcta": false,
-        "explicacion": "Consulta no local."
-      },
-      {
         "texto_opcion": "Notação de dois pontos apenas em formato de arquivo, não SQL",
         "es_correcta": false,
         "explicacion": "Funciona em SQL em VARIANT."
+      },
+      {
+        "texto_opcion": "Use JOIN para armazenar caminhos VARIANT, operadores de caminho em SQL.",
+        "es_correcta": false,
+        "explicacion": "Operadores de caminho em SQL."
+      },
+      {
+        "texto_opcion": "A extração requer a exportação de JSON para o estágio primeiro",
+        "es_correcta": false,
+        "explicacion": "Consulta no local."
       }
     ],
     "tags": [
@@ -467,24 +467,24 @@
     "pregunta": "Cenário da operadora de telecomunicações — armazene a lista ordenada separadamente do documento objeto. O que eles deveriam implementar? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado.",
+        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "Pode ser do tipo coluna."
+      },
+      {
+        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "ARRAY/VARIANT suportado."
       },
       {
-        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT",
-        "es_correcta": true,
-        "explicacion": "ARRAY lida com coleções ordenadas."
-      },
-      {
-        "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes.",
+        "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
         "es_correcta": false,
         "explicacion": "FLATTEN lida com matrizes."
       },
       {
-        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna.",
-        "es_correcta": false,
-        "explicacion": "Pode ser do tipo coluna."
+        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT.",
+        "es_correcta": true,
+        "explicacion": "ARRAY lida com coleções ordenadas."
       }
     ],
     "tags": [
@@ -496,24 +496,24 @@
     "pregunta": "Revisão de incidentes (eastus): armazena pares de valores-chave com tipo de dados OBJECT. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "OBJECT requer formato de arquivo CSV, digite recurso do sistema, digite recurso do sistema.",
-        "es_correcta": false,
-        "explicacion": "Digite recurso do sistema."
-      },
-      {
-        "texto_opcion": "Objetos apenas no Iceberg externo sempre, existem tipos nativos OBJECT/VARIANT.",
-        "es_correcta": false,
-        "explicacion": "Existem tipos nativos OBJECT/VARIANT."
-      },
-      {
         "texto_opcion": "Use estruturas de objeto OBJECT ou VARIANT com OBJECT_CONSTRUCT.",
         "es_correcta": true,
         "explicacion": "O tipo OBJECT representa mapas/objetos."
       },
       {
+        "texto_opcion": "OBJECT requer formato de arquivo CSV, digite recurso do sistema, digite recurso do sistema.",
+        "es_correcta": false,
+        "explicacion": "Digite recurso do sistema."
+      },
+      {
         "texto_opcion": "As chaves devem ser apenas numéricas, chaves de string típicas, chaves de string típicas.",
         "es_correcta": false,
         "explicacion": "Chaves de string típicas."
+      },
+      {
+        "texto_opcion": "Objetos apenas no Iceberg externo sempre, existem tipos nativos OBJECT/VARIANT.",
+        "es_correcta": false,
+        "explicacion": "Existem tipos nativos OBJECT/VARIANT."
       }
     ],
     "tags": [
@@ -525,24 +525,24 @@
     "pregunta": "Uma empresa de streaming de mídia (painéis quase em tempo real, região eastus) deve: acelerar filtros em campos aninhados usados em cada consulta. Qual opção se adapta melhor? Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "Desative micro-partitions em tabelas VARIANT, não suportado/desejado.",
+        "texto_opcion": "Desative micro-partitions em tabelas VARIANT, não suportado/desejado aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Não suportado/desejado."
       },
       {
-        "texto_opcion": "Mantenha todos os campos apenas em VARIANT para sempre para desempenho",
+        "texto_opcion": "Use tokenização externa para flatten JSON applied across prioritized for adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
-        "explicacion": "Extraia caminhos quentes."
+        "explicacion": "Recurso errado."
       },
       {
-        "texto_opcion": "Extraia o campo quente para a coluna relacional digitada; cluster opcional nele",
+        "texto_opcion": "Extraia o campo quente para a coluna relacional digitada; cluster opcional nele.",
         "es_correcta": true,
         "explicacion": "Colunas relacionais são melhor podadas do que caminhos VARIANT profundos."
       },
       {
-        "texto_opcion": "Use tokenização externa para flatten JSON applied across prioritized for.",
+        "texto_opcion": "Mantenha todos os campos apenas em VARIANT para sempre para desempenho priorizado por simplicidade, mas adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
-        "explicacion": "Recurso errado."
+        "explicacion": "Extraia caminhos quentes."
       }
     ],
     "tags": [
@@ -569,7 +569,7 @@
         "explicacion": "Pesado inicial; VARIANT flexível."
       },
       {
-        "texto_opcion": "Carregue em VARIANT e consulte com notação de caminho; evoluir o esquema de forma flexível",
+        "texto_opcion": "Carregue em VARIANT e consulte com notação de caminho; evoluir o esquema de forma flexível.",
         "es_correcta": true,
         "explicacion": "Padrão de esquema na leitura com VARIANT."
       }
@@ -583,19 +583,19 @@
     "pregunta": "faltando chaves em documentos VARIANT. Contexto: fintech de pagamentos, consultas interativas em menos de um segundo.",
     "opciones": [
       {
-        "texto_opcion": "Deve reconstruir a tabela para adicionar novas chaves sempre applied across.",
-        "es_correcta": false,
-        "explicacion": "VARIANT flexível."
-      },
-      {
         "texto_opcion": "Exclusão de chaves NULL micro-partitions applied across environments for consistency.",
         "es_correcta": false,
         "explicacion": "Não relacionado."
       },
       {
-        "texto_opcion": "Chaves ausentes retornam NULL no acesso ao caminho; lidar com COALESCE/TRY variants",
+        "texto_opcion": "Chaves ausentes retornam NULL no acesso ao caminho; lidar com COALESCE/TRY variants.",
         "es_correcta": true,
         "explicacion": "O acesso ao caminho semiestruturado produz NULL se estiver ausente."
+      },
+      {
+        "texto_opcion": "Deve reconstruir a tabela para adicionar novas chaves sempre applied across.",
+        "es_correcta": false,
+        "explicacion": "VARIANT flexível."
       },
       {
         "texto_opcion": "Chave ausente gera erro sempre interrompendo a consulta, resultado normalmente NULL.",
@@ -612,12 +612,7 @@
     "pregunta": "Revisão de incidentes (norte da Europa): matrizes aninhadas em vários níveis na carga útil do evento. Selecione o design mais apropriado. Conjunto de restrições nº 2.",
     "opciones": [
       {
-        "texto_opcion": "flatten recursivo requer UDF em Java apenas sempre, os padrões SQL FLATTEN geralmente são suficientes.",
-        "es_correcta": false,
-        "explicacion": "Os padrões SQL FLATTEN geralmente são suficientes."
-      },
-      {
-        "texto_opcion": "Encadeie operações FLATTEN ou use caminho/padrões recursivos flatten apropriados",
+        "texto_opcion": "Encadeie operações FLATTEN ou use caminho/padrões recursivos flatten apropriados.",
         "es_correcta": true,
         "explicacion": "Múltiplas etapas FLATTEN lidam com hierarquias aninhadas."
       },
@@ -625,6 +620,11 @@
         "texto_opcion": "Em vez disso, converta para Excel pivot selected to meet the stated constraints prioritized for operational simplicity in this case.",
         "es_correcta": false,
         "explicacion": "Não escalável."
+      },
+      {
+        "texto_opcion": "flatten recursivo requer UDF em Java apenas sempre, os padrões SQL FLATTEN geralmente são suficientes selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Os padrões SQL FLATTEN geralmente são suficientes."
       },
       {
         "texto_opcion": "Único FLATTEN sempre expande todas as profundidades automaticamente ilimitadas, pode precisar de FLATTEN/path encadeado.",
@@ -641,9 +641,9 @@
     "pregunta": "Para uma carga de trabalho de transportadora logística com dados históricos em escala de petabytes: converta o campo numérico VARIANT em NUMBER para agregação. Melhor escolha (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Transmitir para NUMBER desativa Time Travel prioritized selected to meet the.",
+        "texto_opcion": "VARIANT agrega SUM automaticamente sem conversão sempre, precisa de um tipo numérico consistente.",
         "es_correcta": false,
-        "explicacion": "Não relacionado."
+        "explicacion": "Precisa de um tipo numérico consistente."
       },
       {
         "texto_opcion": "Use ::NUMBER ou TO_NUMBER na expressão de caminho extraída.",
@@ -651,14 +651,14 @@
         "explicacion": "As conversões explícitas permitem agregações."
       },
       {
-        "texto_opcion": "VARIANT agrega SUM automaticamente sem conversão sempre, precisa de um tipo numérico consistente.",
-        "es_correcta": false,
-        "explicacion": "Precisa de um tipo numérico consistente."
-      },
-      {
-        "texto_opcion": "Agregação somente em caminhos VARCHAR sempre, converter para tipo numérico.",
+        "texto_opcion": "Agregação somente em caminhos VARCHAR sempre, converter para tipo numérico selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Converter para tipo numérico."
+      },
+      {
+        "texto_opcion": "Transmitir para NUMBER desativa Time Travel prioritized selected to meet the priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Não relacionado."
       }
     ],
     "tags": [
@@ -670,22 +670,22 @@
     "pregunta": "escolha VARIANT vs colunas normalizadas para telemetria esparsa. Contexto: concessionária de energia, ~5 TB/dia.",
     "opciones": [
       {
-        "texto_opcion": "VARIANT proíbe totalmente a adesão, pode ingressar em campos extraídos.",
-        "es_correcta": false,
-        "explicacion": "Pode ingressar em campos extraídos."
-      },
-      {
-        "texto_opcion": "VARIANT para esquemas esparsos/em evolução; colunas relacionais para filtros/junções frequentes e pesadas",
+        "texto_opcion": "VARIANT para esquemas esparsos/em evolução; colunas relacionais para filtros/junções frequentes e pesadas.",
         "es_correcta": true,
         "explicacion": "Combine o armazenamento com os padrões de acesso."
       },
       {
-        "texto_opcion": "Colunas relacionais não podem ser carregadas de JSON, pode extrair durante a carga.",
+        "texto_opcion": "Colunas relacionais não podem ser carregadas de JSON, pode extrair durante a carga como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "Pode extrair durante a carga."
       },
       {
-        "texto_opcion": "Sempre normalize todo o JSON antecipadamente, independentemente da dispersão",
+        "texto_opcion": "VARIANT proíbe totalmente a adesão, pode ingressar em campos extraídos plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Pode ingressar em campos extraídos."
+      },
+      {
+        "texto_opcion": "Sempre normalize todo o JSON antecipadamente, independentemente da dispersão como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "Sobrecarga operacional."
       }
@@ -704,7 +704,12 @@
         "explicacion": "VARIANT optimized para semiestruturado."
       },
       {
-        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto.",
+        "texto_opcion": "VARIANT requer sempre tabela externa, tipo de coluna nativa, tipo de coluna nativa.",
+        "es_correcta": false,
+        "explicacion": "Tipo de coluna nativa."
+      },
+      {
+        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Pode inserir VARIANT bruto."
       },
@@ -712,11 +717,6 @@
         "texto_opcion": "Use a coluna VARIANT para armazenar estruturas JSON/objeto.",
         "es_correcta": true,
         "explicacion": "VARIANT contém dados semiestruturados com esquema flexível."
-      },
-      {
-        "texto_opcion": "VARIANT requer sempre tabela externa, tipo de coluna nativa, tipo de coluna nativa.",
-        "es_correcta": false,
-        "explicacion": "Tipo de coluna nativa."
       }
     ],
     "tags": [
@@ -728,24 +728,24 @@
     "pregunta": "Cenário de estúdio de jogos - insira a string JSON em VARIANT do SQL. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada.",
+        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL adopted as the standard applied across aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "Disponível em SQL."
+      },
+      {
+        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada plausível à primeira vista, porém.",
         "es_correcta": false,
         "explicacion": "Direção de função errada."
       },
       {
-        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor.",
-        "es_correcta": false,
-        "explicacion": "Função do lado do servidor."
-      },
-      {
-        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT",
+        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT.",
         "es_correcta": true,
         "explicacion": "PARSE_JSON converte texto em VARIANT."
       },
       {
-        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL adopted as the standard applied across.",
+        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
-        "explicacion": "Disponível em SQL."
+        "explicacion": "Função do lado do servidor."
       }
     ],
     "tags": [
@@ -757,9 +757,9 @@
     "pregunta": "Uma fintech de pagamentos (~5 TB/dia, região australiaeast) deve: explodir o conjunto de itens na coluna de eventos VARIANT para análise. Qual opção se adapta melhor?",
     "opciones": [
       {
-        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT.",
+        "texto_opcion": "FLATTEN mescla linhas em menos partições fisicamente, expansão lógica de linhas na consulta.",
         "es_correcta": false,
-        "explicacion": "FLATTEN opera em VARIANT."
+        "explicacion": "Expansão lógica de linhas na consulta."
       },
       {
         "texto_opcion": "Use LATERAL FLATTEN(entrada => eventos, caminho => 'itens').",
@@ -767,14 +767,14 @@
         "explicacion": "FLATTEN converte matrizes/objetos aninhados em linhas."
       },
       {
-        "texto_opcion": "FLATTEN mescla linhas em menos partições fisicamente, expansão lógica de linhas na consulta.",
-        "es_correcta": false,
-        "explicacion": "Expansão lógica de linhas na consulta."
-      },
-      {
-        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre",
+        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre — os dados aninhados requerem FLATTEN para expansão de linha.",
         "es_correcta": false,
         "explicacion": "Os dados aninhados requerem FLATTEN para expansão de linha."
+      },
+      {
+        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "FLATTEN opera em VARIANT."
       }
     ],
     "tags": [
@@ -786,16 +786,6 @@
     "pregunta": "Revisão de incidente (australiaeast): extraia o campo user.name dos dados da coluna VARIANT. Selecione o design mais apropriado.",
     "opciones": [
       {
-        "texto_opcion": "Use JOIN para armazenar caminhos VARIANT, operadores de caminho em SQL.",
-        "es_correcta": false,
-        "explicacion": "Operadores de caminho em SQL."
-      },
-      {
-        "texto_opcion": "Notação de dois pontos apenas em formato de arquivo, não SQL",
-        "es_correcta": false,
-        "explicacion": "Funciona em SQL em VARIANT."
-      },
-      {
         "texto_opcion": "A extração requer a exportação de JSON para o estágio primeiro",
         "es_correcta": false,
         "explicacion": "Consulta no local."
@@ -804,6 +794,16 @@
         "texto_opcion": "Use dados:user.name ou GET_PATH(data, 'user.name').",
         "es_correcta": true,
         "explicacion": "A sintaxe do caminho extrai campos aninhados."
+      },
+      {
+        "texto_opcion": "Notação de dois pontos apenas em formato de arquivo, não SQL",
+        "es_correcta": false,
+        "explicacion": "Funciona em SQL em VARIANT."
+      },
+      {
+        "texto_opcion": "Use JOIN para armazenar caminhos VARIANT, operadores de caminho em SQL.",
+        "es_correcta": false,
+        "explicacion": "Operadores de caminho em SQL."
       }
     ],
     "tags": [
@@ -815,24 +815,24 @@
     "pregunta": "Para uma carga de trabalho de estúdio de jogos com aproximadamente 5 TB/dia: armazene a lista ordenada separadamente do documento do objeto. Melhor escolha (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado.",
-        "es_correcta": false,
-        "explicacion": "ARRAY/VARIANT suportado."
-      },
-      {
-        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna.",
-        "es_correcta": false,
-        "explicacion": "Pode ser do tipo coluna."
-      },
-      {
-        "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes.",
+        "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
         "es_correcta": false,
         "explicacion": "FLATTEN lida com matrizes."
       },
       {
-        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT",
+        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "Pode ser do tipo coluna."
+      },
+      {
+        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT.",
         "es_correcta": true,
         "explicacion": "ARRAY lida com coleções ordenadas."
+      },
+      {
+        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado como desenho principal para este requisito.",
+        "es_correcta": false,
+        "explicacion": "ARRAY/VARIANT suportado."
       }
     ],
     "tags": [
@@ -843,6 +843,11 @@
   {
     "pregunta": "Um provedor de serviços de saúde (residência estrita do GDPR, região australiaeast) deve: armazenar pares de valores-chave com tipo de dados OBJECT. Qual opção se adapta melhor? Conjunto de restrições nº 3.",
     "opciones": [
+      {
+        "texto_opcion": "Objetos apenas no Iceberg externo sempre, existem tipos nativos OBJECT/VARIANT.",
+        "es_correcta": false,
+        "explicacion": "Existem tipos nativos OBJECT/VARIANT."
+      },
       {
         "texto_opcion": "As chaves devem ser apenas numéricas, chaves de string típicas, chaves de string típicas.",
         "es_correcta": false,
@@ -857,11 +862,6 @@
         "texto_opcion": "OBJECT requer formato de arquivo CSV, digite recurso do sistema, digite recurso do sistema.",
         "es_correcta": false,
         "explicacion": "Digite recurso do sistema."
-      },
-      {
-        "texto_opcion": "Objetos apenas no Iceberg externo sempre, existem tipos nativos OBJECT/VARIANT.",
-        "es_correcta": false,
-        "explicacion": "Existem tipos nativos OBJECT/VARIANT."
       }
     ],
     "tags": [
@@ -873,24 +873,24 @@
     "pregunta": "Cenário de empresa de streaming de mídia – acelere filtros em campos aninhados usados em cada consulta. O que eles deveriam implementar? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Desative micro-partitions em tabelas VARIANT, não suportado/desejado.",
+        "texto_opcion": "Use tokenização externa para flatten JSON selected to meet the usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
-        "explicacion": "Não suportado/desejado."
+        "explicacion": "Recurso errado."
       },
       {
-        "texto_opcion": "Mantenha todos os campos apenas em VARIANT para sempre para desempenho",
-        "es_correcta": false,
-        "explicacion": "Extraia caminhos quentes."
-      },
-      {
-        "texto_opcion": "Extraia o campo quente para a coluna relacional digitada; cluster opcional nele",
+        "texto_opcion": "Extraia o campo quente para a coluna relacional digitada; cluster opcional nele.",
         "es_correcta": true,
         "explicacion": "Colunas relacionais são melhor podadas do que caminhos VARIANT profundos."
       },
       {
-        "texto_opcion": "Use tokenização externa para flatten JSON selected to meet the.",
+        "texto_opcion": "Mantenha todos os campos apenas em VARIANT para sempre para desempenho priorizado por simplicidade, mas.",
         "es_correcta": false,
-        "explicacion": "Recurso errado."
+        "explicacion": "Extraia caminhos quentes."
+      },
+      {
+        "texto_opcion": "Desative micro-partitions em tabelas VARIANT, não suportado/desejado selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Não suportado/desejado."
       }
     ],
     "tags": [
@@ -902,24 +902,24 @@
     "pregunta": "Cenário do provedor de saúde – consulte linhas JSON carregadas sem esquema predefinido. O que eles deveriam implementar? Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Carregue em VARIANT e consulte com notação de caminho; evoluir o esquema de forma flexível",
-        "es_correcta": true,
-        "explicacion": "Padrão de esquema na leitura com VARIANT."
-      },
-      {
         "texto_opcion": "Converta todos os JSON em 100 tabelas separadas sempre antecipadamente, pesado inicial; VARIANT flexível.",
         "es_correcta": false,
         "explicacion": "Pesado inicial; VARIANT flexível."
       },
       {
-        "texto_opcion": "Consultas JSON são executadas apenas no lado do cliente, sQL do lado do servidor, sQL do lado do servidor.",
-        "es_correcta": false,
-        "explicacion": "SQL do lado do servidor."
+        "texto_opcion": "Carregue em VARIANT e consulte com notação de caminho; evoluir o esquema de forma flexível.",
+        "es_correcta": true,
+        "explicacion": "Padrão de esquema na leitura com VARIANT."
       },
       {
         "texto_opcion": "Exigir esquema CSV rígido antes de qualquer ingestão de JSON, vARIANT suporta esquema flexível.",
         "es_correcta": false,
         "explicacion": "VARIANT suporta esquema flexível."
+      },
+      {
+        "texto_opcion": "Consultas JSON são executadas apenas no lado do cliente, sQL do lado do servidor, sQL do lado do servidor.",
+        "es_correcta": false,
+        "explicacion": "SQL do lado do servidor."
       }
     ],
     "tags": [
@@ -946,7 +946,7 @@
         "explicacion": "VARIANT flexível."
       },
       {
-        "texto_opcion": "Chaves ausentes retornam NULL no acesso ao caminho; lidar com COALESCE/TRY variants",
+        "texto_opcion": "Chaves ausentes retornam NULL no acesso ao caminho; lidar com COALESCE/TRY variants.",
         "es_correcta": true,
         "explicacion": "O acesso ao caminho semiestruturado produz NULL se estiver ausente."
       }
@@ -960,24 +960,24 @@
     "pregunta": "Revisão de incidentes (westeurope): matrizes aninhadas em vários níveis na carga útil do evento. Selecione o design mais apropriado. Conjunto de restrições nº 3.",
     "opciones": [
       {
-        "texto_opcion": "Em vez disso, converta para Excel pivot applied across environments.",
-        "es_correcta": false,
-        "explicacion": "Não escalável."
-      },
-      {
-        "texto_opcion": "flatten recursivo requer UDF em Java apenas sempre, os padrões SQL FLATTEN geralmente são suficientes.",
-        "es_correcta": false,
-        "explicacion": "Os padrões SQL FLATTEN geralmente são suficientes."
-      },
-      {
-        "texto_opcion": "Encadeie operações FLATTEN ou use caminho/padrões recursivos flatten apropriados",
+        "texto_opcion": "Encadeie operações FLATTEN ou use caminho/padrões recursivos flatten apropriados.",
         "es_correcta": true,
         "explicacion": "Múltiplas etapas FLATTEN lidam com hierarquias aninhadas."
       },
       {
-        "texto_opcion": "Único FLATTEN sempre expande todas as profundidades automaticamente ilimitadas",
+        "texto_opcion": "flatten recursivo requer UDF em Java apenas sempre, os padrões SQL FLATTEN geralmente são suficientes como desenho principal para este requisito.",
+        "es_correcta": false,
+        "explicacion": "Os padrões SQL FLATTEN geralmente são suficientes."
+      },
+      {
+        "texto_opcion": "Único FLATTEN sempre expande todas as profundidades automaticamente ilimitadas — pode precisar de FLATTEN/path encadeado.",
         "es_correcta": false,
         "explicacion": "Pode precisar de FLATTEN/path encadeado."
+      },
+      {
+        "texto_opcion": "Em vez disso, converta para Excel pivot applied across environments aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "Não escalável."
       }
     ],
     "tags": [
@@ -989,7 +989,7 @@
     "pregunta": "Uma operadora de telecomunicações (~50.000 eventos/s, região australiaeast) deve: converter o campo numérico VARIANT em NUMBER para agregação. Qual opção se adapta melhor?",
     "opciones": [
       {
-        "texto_opcion": "Transmitir para NUMBER desativa Time Travel adopted as the configured end-to-end.",
+        "texto_opcion": "Transmitir para NUMBER desativa Time Travel adopted as the configured end-to-end adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Não relacionado."
       },
@@ -999,14 +999,14 @@
         "explicacion": "As conversões explícitas permitem agregações."
       },
       {
-        "texto_opcion": "Agregação somente em caminhos VARCHAR sempre, converter para tipo numérico.",
-        "es_correcta": false,
-        "explicacion": "Converter para tipo numérico."
-      },
-      {
         "texto_opcion": "VARIANT agrega SUM automaticamente sem conversão sempre, precisa de um tipo numérico consistente.",
         "es_correcta": false,
         "explicacion": "Precisa de um tipo numérico consistente."
+      },
+      {
+        "texto_opcion": "Agregação somente em caminhos VARCHAR sempre, converter para tipo numérico configurado de ponta a ponta para o workload descrito.",
+        "es_correcta": false,
+        "explicacion": "Converter para tipo numérico."
       }
     ],
     "tags": [
@@ -1018,24 +1018,24 @@
     "pregunta": "Um prestador de cuidados de saúde (janelas de lote horárias, região norte da Europa) deve: escolher VARIANT vs colunas normalizadas para telemetria esparsa. Qual opção se adapta melhor?",
     "opciones": [
       {
-        "texto_opcion": "Colunas relacionais não podem ser carregadas de JSON, pode extrair durante a carga.",
-        "es_correcta": false,
-        "explicacion": "Pode extrair durante a carga."
-      },
-      {
-        "texto_opcion": "Sempre normalize todo o JSON antecipadamente, independentemente da dispersão",
-        "es_correcta": false,
-        "explicacion": "Sobrecarga operacional."
-      },
-      {
-        "texto_opcion": "VARIANT proíbe totalmente a adesão, pode ingressar em campos extraídos.",
+        "texto_opcion": "VARIANT proíbe totalmente a adesão, pode ingressar em campos extraídos selecionado para atender as restrições citadas adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Pode ingressar em campos extraídos."
       },
       {
-        "texto_opcion": "VARIANT para esquemas esparsos/em evolução; colunas relacionais para filtros/junções frequentes e pesadas",
+        "texto_opcion": "VARIANT para esquemas esparsos/em evolução; colunas relacionais para filtros/junções frequentes e pesadas.",
         "es_correcta": true,
         "explicacion": "Combine o armazenamento com os padrões de acesso."
+      },
+      {
+        "texto_opcion": "Colunas relacionais não podem ser carregadas de JSON, pode extrair durante a carga comum em desenhos legados, porém inadequado neste caso.",
+        "es_correcta": false,
+        "explicacion": "Pode extrair durante a carga."
+      },
+      {
+        "texto_opcion": "Sempre normalize todo o JSON antecipadamente, independentemente da dispersão como escolha padrão de produção neste cenário selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Sobrecarga operacional."
       }
     ],
     "tags": [
@@ -1047,6 +1047,16 @@
     "pregunta": "Uma operadora de telecomunicações (~5 TB/dia, região australiaeast) deve: armazenar documentos JSON semiestruturados na coluna da tabela. Qual opção se adapta melhor? Conjunto de restrições nº 4.",
     "opciones": [
       {
+        "texto_opcion": "Armazene JSON apenas como VARCHAR sempre para analisar, vARIANT optimized para semiestruturado.",
+        "es_correcta": false,
+        "explicacion": "VARIANT optimized para semiestruturado."
+      },
+      {
+        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto como desenho principal para este requisito.",
+        "es_correcta": false,
+        "explicacion": "Pode inserir VARIANT bruto."
+      },
+      {
         "texto_opcion": "VARIANT requer sempre tabela externa, tipo de coluna nativa, tipo de coluna nativa.",
         "es_correcta": false,
         "explicacion": "Tipo de coluna nativa."
@@ -1055,16 +1065,6 @@
         "texto_opcion": "Use a coluna VARIANT para armazenar estruturas JSON/objeto.",
         "es_correcta": true,
         "explicacion": "VARIANT contém dados semiestruturados com esquema flexível."
-      },
-      {
-        "texto_opcion": "Armazene JSON apenas como VARCHAR sempre para analisar, vARIANT optimized para semiestruturado.",
-        "es_correcta": false,
-        "explicacion": "VARIANT optimized para semiestruturado."
-      },
-      {
-        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto.",
-        "es_correcta": false,
-        "explicacion": "Pode inserir VARIANT bruto."
       }
     ],
     "tags": [
@@ -1076,22 +1076,22 @@
     "pregunta": "Para uma carga de trabalho de provedor de saúde com aproximadamente 50.000 eventos/s: insira a string JSON em VARIANT do SQL. Melhor escolha (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT",
+        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT.",
         "es_correcta": true,
         "explicacion": "PARSE_JSON converte texto em VARIANT."
       },
       {
-        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL prioritized for configured.",
+        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL prioritized for configured priorizado por simplicidade, mas.",
         "es_correcta": false,
         "explicacion": "Disponível em SQL."
       },
       {
-        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor.",
+        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "Função do lado do servidor."
       },
       {
-        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada.",
+        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada configurado de ponta a ponta para.",
         "es_correcta": false,
         "explicacion": "Direção de função errada."
       }
@@ -1105,7 +1105,12 @@
     "pregunta": "Um prestador de cuidados de saúde (~50.000 eventos/s, região sul do Brasil) deve: explodir a matriz de itens na coluna de eventos VARIANT para análise. Qual opção se adapta melhor?",
     "opciones": [
       {
-        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre",
+        "texto_opcion": "FLATTEN mescla linhas em menos partições fisicamente, expansão lógica de linhas na consulta.",
+        "es_correcta": false,
+        "explicacion": "Expansão lógica de linhas na consulta."
+      },
+      {
+        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre — os dados aninhados requerem FLATTEN para expansão de linha.",
         "es_correcta": false,
         "explicacion": "Os dados aninhados requerem FLATTEN para expansão de linha."
       },
@@ -1115,14 +1120,9 @@
         "explicacion": "FLATTEN converte matrizes/objetos aninhados em linhas."
       },
       {
-        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT.",
+        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "FLATTEN opera em VARIANT."
-      },
-      {
-        "texto_opcion": "FLATTEN mescla linhas em menos partições fisicamente, expansão lógica de linhas na consulta.",
-        "es_correcta": false,
-        "explicacion": "Expansão lógica de linhas na consulta."
       }
     ],
     "tags": [
@@ -1139,14 +1139,14 @@
         "explicacion": "Consulta no local."
       },
       {
-        "texto_opcion": "Notação de dois pontos apenas em formato de arquivo, não SQL",
-        "es_correcta": false,
-        "explicacion": "Funciona em SQL em VARIANT."
-      },
-      {
         "texto_opcion": "Use JOIN para armazenar caminhos VARIANT, operadores de caminho em SQL.",
         "es_correcta": false,
         "explicacion": "Operadores de caminho em SQL."
+      },
+      {
+        "texto_opcion": "Notação de dois pontos apenas em formato de arquivo, não SQL",
+        "es_correcta": false,
+        "explicacion": "Funciona em SQL em VARIANT."
       },
       {
         "texto_opcion": "Use dados:user.name ou GET_PATH(data, 'user.name').",
@@ -1163,24 +1163,24 @@
     "pregunta": "armazene a lista ordenada separadamente do documento objeto. Contexto: varejista global, dados históricos em escala de petabytes. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT",
-        "es_correcta": true,
-        "explicacion": "ARRAY lida com coleções ordenadas."
+        "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "FLATTEN lida com matrizes."
       },
       {
-        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado.",
+        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "ARRAY/VARIANT suportado."
       },
       {
-        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna.",
-        "es_correcta": false,
-        "explicacion": "Pode ser do tipo coluna."
+        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT.",
+        "es_correcta": true,
+        "explicacion": "ARRAY lida com coleções ordenadas."
       },
       {
-        "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes.",
+        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna selecionado para atender as restrições citadas.",
         "es_correcta": false,
-        "explicacion": "FLATTEN lida com matrizes."
+        "explicacion": "Pode ser do tipo coluna."
       }
     ],
     "tags": [
@@ -1192,9 +1192,9 @@
     "pregunta": "Para uma carga de trabalho de provedor de saúde com aproximadamente 200 milhões de linhas/dia: armazene pares de valores-chave com tipo de dados OBJECT. Melhor escolha (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "As chaves devem ser apenas numéricas, chaves de string típicas, chaves de string típicas.",
-        "es_correcta": false,
-        "explicacion": "Chaves de string típicas."
+        "texto_opcion": "Use estruturas de objeto OBJECT ou VARIANT com OBJECT_CONSTRUCT.",
+        "es_correcta": true,
+        "explicacion": "O tipo OBJECT representa mapas/objetos."
       },
       {
         "texto_opcion": "Objetos apenas no Iceberg externo sempre, existem tipos nativos OBJECT/VARIANT.",
@@ -1202,14 +1202,14 @@
         "explicacion": "Existem tipos nativos OBJECT/VARIANT."
       },
       {
-        "texto_opcion": "Use estruturas de objeto OBJECT ou VARIANT com OBJECT_CONSTRUCT.",
-        "es_correcta": true,
-        "explicacion": "O tipo OBJECT representa mapas/objetos."
-      },
-      {
         "texto_opcion": "OBJECT requer formato de arquivo CSV, digite recurso do sistema, digite recurso do sistema.",
         "es_correcta": false,
         "explicacion": "Digite recurso do sistema."
+      },
+      {
+        "texto_opcion": "As chaves devem ser apenas numéricas, chaves de string típicas, chaves de string típicas.",
+        "es_correcta": false,
+        "explicacion": "Chaves de string típicas."
       }
     ],
     "tags": [
@@ -1221,24 +1221,24 @@
     "pregunta": "acelerar filtros em campos aninhados usados em cada consulta. Contexto: fintech de pagamentos, ~5 TB/dia. Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Mantenha todos os campos apenas em VARIANT para sempre para desempenho",
+        "texto_opcion": "Desative micro-partitions em tabelas VARIANT, não suportado/desejado priorizado por simplicidade, mas comum em desenhos legados, porém inadequado neste caso.",
+        "es_correcta": false,
+        "explicacion": "Não suportado/desejado."
+      },
+      {
+        "texto_opcion": "Mantenha todos os campos apenas em VARIANT para sempre para desempenho comum em desenhos legados, porém como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "Extraia caminhos quentes."
       },
       {
-        "texto_opcion": "Use tokenização externa para flatten JSON prioritized for.",
+        "texto_opcion": "Use tokenização externa para flatten JSON prioritized for plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
         "explicacion": "Recurso errado."
       },
       {
-        "texto_opcion": "Extraia o campo quente para a coluna relacional digitada; cluster opcional nele",
+        "texto_opcion": "Extraia o campo quente para a coluna relacional digitada; cluster opcional nele.",
         "es_correcta": true,
         "explicacion": "Colunas relacionais são melhor podadas do que caminhos VARIANT profundos."
-      },
-      {
-        "texto_opcion": "Desative micro-partitions em tabelas VARIANT, não suportado/desejado.",
-        "es_correcta": false,
-        "explicacion": "Não suportado/desejado."
       }
     ],
     "tags": [
@@ -1250,9 +1250,9 @@
     "pregunta": "Um estúdio de jogos (consultas interativas em subsegundos, região Brasil Sul) deve: consultar linhas JSON carregadas sem esquema predefinido. Qual opção se adapta melhor? Conjunto de restrições nº 4.",
     "opciones": [
       {
-        "texto_opcion": "Exigir esquema CSV rígido antes de qualquer ingestão de JSON, vARIANT suporta esquema flexível.",
+        "texto_opcion": "Consultas JSON são executadas apenas no lado do cliente, sQL do lado do servidor, sQL do lado do servidor.",
         "es_correcta": false,
-        "explicacion": "VARIANT suporta esquema flexível."
+        "explicacion": "SQL do lado do servidor."
       },
       {
         "texto_opcion": "Converta todos os JSON em 100 tabelas separadas sempre antecipadamente, pesado inicial; VARIANT flexível.",
@@ -1260,14 +1260,14 @@
         "explicacion": "Pesado inicial; VARIANT flexível."
       },
       {
-        "texto_opcion": "Carregue em VARIANT e consulte com notação de caminho; evoluir o esquema de forma flexível",
+        "texto_opcion": "Carregue em VARIANT e consulte com notação de caminho; evoluir o esquema de forma flexível.",
         "es_correcta": true,
         "explicacion": "Padrão de esquema na leitura com VARIANT."
       },
       {
-        "texto_opcion": "Consultas JSON são executadas apenas no lado do cliente, sQL do lado do servidor, sQL do lado do servidor.",
+        "texto_opcion": "Exigir esquema CSV rígido antes de qualquer ingestão de JSON, vARIANT suporta esquema flexível.",
         "es_correcta": false,
-        "explicacion": "SQL do lado do servidor."
+        "explicacion": "VARIANT suporta esquema flexível."
       }
     ],
     "tags": [
@@ -1279,9 +1279,9 @@
     "pregunta": "Cenário do prestador de cuidados de saúde – chaves ausentes em documentos VARIANT. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Deve reconstruir a tabela para adicionar novas chaves sempre applied across.",
-        "es_correcta": false,
-        "explicacion": "VARIANT flexível."
+        "texto_opcion": "Chaves ausentes retornam NULL no acesso ao caminho; lidar com COALESCE/TRY variants.",
+        "es_correcta": true,
+        "explicacion": "O acesso ao caminho semiestruturado produz NULL se estiver ausente."
       },
       {
         "texto_opcion": "Exclusão de chaves NULL micro-partitions as the default production choice here.",
@@ -1294,9 +1294,9 @@
         "explicacion": "Resultado normalmente NULL."
       },
       {
-        "texto_opcion": "Chaves ausentes retornam NULL no acesso ao caminho; lidar com COALESCE/TRY variants",
-        "es_correcta": true,
-        "explicacion": "O acesso ao caminho semiestruturado produz NULL se estiver ausente."
+        "texto_opcion": "Deve reconstruir a tabela para adicionar novas chaves sempre applied across.",
+        "es_correcta": false,
+        "explicacion": "VARIANT flexível."
       }
     ],
     "tags": [
@@ -1308,24 +1308,24 @@
     "pregunta": "matrizes aninhadas em vários níveis na carga útil do evento. Contexto: fintech de pagamentos, residência estrita do GDPR. Conjunto de restrições nº 4.",
     "opciones": [
       {
+        "texto_opcion": "Em vez disso, converta para Excel pivot prioritized for operational priorizado por simplicidade, mas.",
+        "es_correcta": false,
+        "explicacion": "Não escalável."
+      },
+      {
         "texto_opcion": "flatten recursivo requer UDF em Java apenas sempre, os padrões SQL FLATTEN geralmente são suficientes.",
         "es_correcta": false,
         "explicacion": "Os padrões SQL FLATTEN geralmente são suficientes."
       },
       {
-        "texto_opcion": "Único FLATTEN sempre expande todas as profundidades automaticamente ilimitadas",
+        "texto_opcion": "Único FLATTEN sempre expande todas as profundidades automaticamente ilimitadas — pode precisar de FLATTEN/path encadeado.",
         "es_correcta": false,
         "explicacion": "Pode precisar de FLATTEN/path encadeado."
       },
       {
-        "texto_opcion": "Encadeie operações FLATTEN ou use caminho/padrões recursivos flatten apropriados",
+        "texto_opcion": "Encadeie operações FLATTEN ou use caminho/padrões recursivos flatten apropriados.",
         "es_correcta": true,
         "explicacion": "Múltiplas etapas FLATTEN lidam com hierarquias aninhadas."
-      },
-      {
-        "texto_opcion": "Em vez disso, converta para Excel pivot prioritized for operational.",
-        "es_correcta": false,
-        "explicacion": "Não escalável."
       }
     ],
     "tags": [
@@ -1337,17 +1337,12 @@
     "pregunta": "Para uma carga de trabalho de provedor de saúde com aproximadamente 200 milhões de linhas/dia: converta o campo numérico VARIANT em NUMBER para agregação. Melhor escolha (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Transmitir para NUMBER desativa Time Travel configured prioritized for.",
+        "texto_opcion": "Transmitir para NUMBER desativa Time Travel configured prioritized for configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Não relacionado."
       },
       {
-        "texto_opcion": "VARIANT agrega SUM automaticamente sem conversão sempre, precisa de um tipo numérico consistente.",
-        "es_correcta": false,
-        "explicacion": "Precisa de um tipo numérico consistente."
-      },
-      {
-        "texto_opcion": "Agregação somente em caminhos VARCHAR sempre, converter para tipo numérico.",
+        "texto_opcion": "Agregação somente em caminhos VARCHAR sempre, converter para tipo numérico priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
         "es_correcta": false,
         "explicacion": "Converter para tipo numérico."
       },
@@ -1355,6 +1350,11 @@
         "texto_opcion": "Use ::NUMBER ou TO_NUMBER na expressão de caminho extraída.",
         "es_correcta": true,
         "explicacion": "As conversões explícitas permitem agregações."
+      },
+      {
+        "texto_opcion": "VARIANT agrega SUM automaticamente sem conversão sempre, precisa de um tipo numérico consistente.",
+        "es_correcta": false,
+        "explicacion": "Precisa de um tipo numérico consistente."
       }
     ],
     "tags": [
@@ -1366,24 +1366,24 @@
     "pregunta": "Cenário de transportadora logística - escolha VARIANT vs colunas normalizadas para telemetria esparsa. O que eles deveriam implementar?",
     "opciones": [
       {
-        "texto_opcion": "Sempre normalize todo o JSON antecipadamente, independentemente da dispersão",
+        "texto_opcion": "Colunas relacionais não podem ser carregadas de JSON, pode extrair durante a carga usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "Pode extrair durante a carga."
+      },
+      {
+        "texto_opcion": "Sempre normalize todo o JSON antecipadamente, independentemente da dispersão como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "Sobrecarga operacional."
       },
       {
-        "texto_opcion": "VARIANT proíbe totalmente a adesão, pode ingressar em campos extraídos.",
-        "es_correcta": false,
-        "explicacion": "Pode ingressar em campos extraídos."
-      },
-      {
-        "texto_opcion": "VARIANT para esquemas esparsos/em evolução; colunas relacionais para filtros/junções frequentes e pesadas",
+        "texto_opcion": "VARIANT para esquemas esparsos/em evolução; colunas relacionais para filtros/junções frequentes e pesadas.",
         "es_correcta": true,
         "explicacion": "Combine o armazenamento com os padrões de acesso."
       },
       {
-        "texto_opcion": "Colunas relacionais não podem ser carregadas de JSON, pode extrair durante a carga.",
+        "texto_opcion": "VARIANT proíbe totalmente a adesão, pode ingressar em campos extraídos aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
-        "explicacion": "Pode extrair durante a carga."
+        "explicacion": "Pode ingressar em campos extraídos."
       }
     ],
     "tags": [
@@ -1394,11 +1394,6 @@
   {
     "pregunta": "Cenário de plataforma IoT industrial – armazene documentos JSON semiestruturados na coluna da tabela. O que eles deveriam implementar? Conjunto de restrições nº 5.",
     "opciones": [
-      {
-        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto.",
-        "es_correcta": false,
-        "explicacion": "Pode inserir VARIANT bruto."
-      },
       {
         "texto_opcion": "Armazene JSON apenas como VARCHAR sempre para analisar, vARIANT optimized para semiestruturado.",
         "es_correcta": false,
@@ -1413,6 +1408,11 @@
         "texto_opcion": "VARIANT requer sempre tabela externa, tipo de coluna nativa, tipo de coluna nativa.",
         "es_correcta": false,
         "explicacion": "Tipo de coluna nativa."
+      },
+      {
+        "texto_opcion": "JSON deve ser flattened antes da inserção sempre, pode inserir VARIANT bruto como escolha padrão de produção neste cenário.",
+        "es_correcta": false,
+        "explicacion": "Pode inserir VARIANT bruto."
       }
     ],
     "tags": [
@@ -1424,22 +1424,22 @@
     "pregunta": "Revisão de incidente (sudestesia): insira a string JSON em VARIANT do SQL. Selecione o design mais apropriado.",
     "opciones": [
       {
-        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor.",
-        "es_correcta": false,
-        "explicacion": "Função do lado do servidor."
-      },
-      {
-        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada.",
+        "texto_opcion": "Use TO_CHAR para analisar JSON em VARIANT, direção de função errada selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Direção de função errada."
       },
       {
-        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT",
+        "texto_opcion": "A análise JSON acontece no laptop Cloud Services, função do lado do servidor plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Função do lado do servidor."
+      },
+      {
+        "texto_opcion": "Use PARSE_JSON(string_expr) ou INSERT com conversão literal JSON para VARIANT.",
         "es_correcta": true,
         "explicacion": "PARSE_JSON converte texto em VARIANT."
       },
       {
-        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL selected to meet the configured end-to-end.",
+        "texto_opcion": "PARSE_JSON apenas em Snowpipe não SQL selected to meet the configured end-to-end configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Disponível em SQL."
       }
@@ -1453,17 +1453,7 @@
     "pregunta": "explode a matriz de itens na coluna de eventos VARIANT para análise. Contexto: varejista global, consultas interativas em menos de um segundo.",
     "opciones": [
       {
-        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT.",
-        "es_correcta": false,
-        "explicacion": "FLATTEN opera em VARIANT."
-      },
-      {
-        "texto_opcion": "Use LATERAL FLATTEN(entrada => eventos, caminho => 'itens').",
-        "es_correcta": true,
-        "explicacion": "FLATTEN converte matrizes/objetos aninhados em linhas."
-      },
-      {
-        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre",
+        "texto_opcion": "SELECT * expande arrays automaticamente sem FLATTEN sempre — os dados aninhados requerem FLATTEN para expansão de linha.",
         "es_correcta": false,
         "explicacion": "Os dados aninhados requerem FLATTEN para expansão de linha."
       },
@@ -1471,6 +1461,16 @@
         "texto_opcion": "FLATTEN mescla linhas em menos partições fisicamente, expansão lógica de linhas na consulta.",
         "es_correcta": false,
         "explicacion": "Expansão lógica de linhas na consulta."
+      },
+      {
+        "texto_opcion": "Use LATERAL FLATTEN(entrada => eventos, caminho => 'itens').",
+        "es_correcta": true,
+        "explicacion": "FLATTEN converte matrizes/objetos aninhados em linhas."
+      },
+      {
+        "texto_opcion": "FLATTEN substitui a necessidade de VARIANT, fLATTEN opera em VARIANT configurado de ponta a ponta para o workload descrito.",
+        "es_correcta": false,
+        "explicacion": "FLATTEN opera em VARIANT."
       }
     ],
     "tags": [
@@ -1482,24 +1482,24 @@
     "pregunta": "extraia o campo user.name dos dados da coluna VARIANT. Contexto: operadora de telecomunicações, janelas de lote por hora.",
     "opciones": [
       {
-        "texto_opcion": "Use JOIN para armazenar caminhos VARIANT, operadores de caminho em SQL.",
-        "es_correcta": false,
-        "explicacion": "Operadores de caminho em SQL."
-      },
-      {
-        "texto_opcion": "A extração requer a exportação de JSON para o estágio primeiro",
-        "es_correcta": false,
-        "explicacion": "Consulta no local."
-      },
-      {
         "texto_opcion": "Use dados:user.name ou GET_PATH(data, 'user.name').",
         "es_correcta": true,
         "explicacion": "A sintaxe do caminho extrai campos aninhados."
       },
       {
+        "texto_opcion": "Use JOIN para armazenar caminhos VARIANT, operadores de caminho em SQL.",
+        "es_correcta": false,
+        "explicacion": "Operadores de caminho em SQL."
+      },
+      {
         "texto_opcion": "Notação de dois pontos apenas em formato de arquivo, não SQL",
         "es_correcta": false,
         "explicacion": "Funciona em SQL em VARIANT."
+      },
+      {
+        "texto_opcion": "A extração requer a exportação de JSON para o estágio primeiro",
+        "es_correcta": false,
+        "explicacion": "Consulta no local."
       }
     ],
     "tags": [
@@ -1511,22 +1511,22 @@
     "pregunta": "Para uma carga de trabalho de estúdio de jogos com residência estrita no GDPR: armazene a lista ordenada separadamente do documento do objeto. Melhor escolha (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado.",
+        "texto_opcion": "Matrizes proibidas no Snowflake sempre usam CSV, aRRAY/VARIANT suportado priorizado por simplicidade, mas.",
         "es_correcta": false,
         "explicacion": "ARRAY/VARIANT suportado."
       },
       {
-        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna.",
-        "es_correcta": false,
-        "explicacion": "Pode ser do tipo coluna."
-      },
-      {
-        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT",
+        "texto_opcion": "Use o tipo de coluna ARRAY ou VARIANT contendo array; construir com ARRAY_CONSTRUCT.",
         "es_correcta": true,
         "explicacion": "ARRAY lida com coleções ordenadas."
       },
       {
-        "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes.",
+        "texto_opcion": "ARRAY armazenado apenas no estágio e não na tabela, pode ser do tipo coluna aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "Pode ser do tipo coluna."
+      },
+      {
+        "texto_opcion": "FLATTEN não pode processar matrizes, fLATTEN lida com matrizes, fLATTEN lida com matrizes plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
         "explicacion": "FLATTEN lida com matrizes."
       }
@@ -1540,14 +1540,14 @@
     "pregunta": "Cenário de concessionária de energia - armazene pares de valores-chave com tipo de dados OBJECT. O que eles deveriam implementar? Conjunto de restrições nº 5.",
     "opciones": [
       {
-        "texto_opcion": "OBJECT requer formato de arquivo CSV, digite recurso do sistema, digite recurso do sistema.",
-        "es_correcta": false,
-        "explicacion": "Digite recurso do sistema."
-      },
-      {
         "texto_opcion": "Use estruturas de objeto OBJECT ou VARIANT com OBJECT_CONSTRUCT.",
         "es_correcta": true,
         "explicacion": "O tipo OBJECT representa mapas/objetos."
+      },
+      {
+        "texto_opcion": "Objetos apenas no Iceberg externo sempre, existem tipos nativos OBJECT/VARIANT.",
+        "es_correcta": false,
+        "explicacion": "Existem tipos nativos OBJECT/VARIANT."
       },
       {
         "texto_opcion": "As chaves devem ser apenas numéricas, chaves de string típicas, chaves de string típicas.",
@@ -1555,9 +1555,9 @@
         "explicacion": "Chaves de string típicas."
       },
       {
-        "texto_opcion": "Objetos apenas no Iceberg externo sempre, existem tipos nativos OBJECT/VARIANT.",
+        "texto_opcion": "OBJECT requer formato de arquivo CSV, digite recurso do sistema, digite recurso do sistema.",
         "es_correcta": false,
-        "explicacion": "Existem tipos nativos OBJECT/VARIANT."
+        "explicacion": "Digite recurso do sistema."
       }
     ],
     "tags": [

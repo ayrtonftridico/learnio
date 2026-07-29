@@ -3,24 +3,24 @@
     "pregunta": "Qual é o princípio básico que distingue ABAC (Controle de acesso baseado em atributos) das tradicionais máscaras de coluna e filtros de linha em nível de tabela?",
     "opciones": [
       {
+        "texto_opcion": "ABAC usa aprendizado de máquina para detectar e mascarar automaticamente colunas PII sem qualquer configuração — aBAC é um modelo de controle de acesso baseado em políticas que usa tags governadas – não é detecção automática baseada em ML. A equipe de governação define políticas e etiquetas manualmente.",
+        "es_correcta": false,
+        "explicacion": "ABAC é um modelo de controle de acesso baseado em políticas que usa tags governadas – não é detecção automática baseada em ML. A equipe de governação define políticas e etiquetas manualmente."
+      },
+      {
+        "texto_opcion": "ABAC substitui GRANT/REVOKE usando um modelo deny por padrão para todas as colunas da tabela — aBAC complementa o modelo de privilégio GRANT/REVOKE - não o substitui. Os usuários ainda precisam de SELECT nas tabelas; ABAC controla o que eles veem nessas tabelas (mascaramento/filtragem) priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "ABAC complementa o modelo de privilégio GRANT/REVOKE - não o substitui. Os usuários ainda precisam de SELECT nas tabelas; ABAC controla o que eles veem nessas tabelas (mascaramento/filtragem)."
+      },
+      {
         "texto_opcion": "ABAC usa **tags controladas** para acionar políticas automaticamente — em vez de executar `ALTER TABLE SET MASK` em cada tabela, uma única política se aplica a todos os objetos que possuem a tag correspondente.",
         "es_correcta": true,
         "explicacion": "ABAC muda da configuração explícita por tabela para a automação orientada por tags. Qualquer objeto marcado com a tag governada correspondente herda automaticamente a política, incluindo novas tabelas criadas no futuro."
       },
       {
-        "texto_opcion": "ABAC usa aprendizado de máquina para detectar e mascarar automaticamente colunas PII sem qualquer configuração",
-        "es_correcta": false,
-        "explicacion": "ABAC é um modelo de controle de acesso baseado em políticas que usa tags governadas – não é detecção automática baseada em ML. A equipe de governação define políticas e etiquetas manualmente."
-      },
-      {
-        "texto_opcion": "ABAC restringe o acesso com base nos atributos do usuário, como cargo e departamento, armazenados nos sistemas de RH.",
+        "texto_opcion": "ABAC restringe o acesso com base nos atributos do usuário, como cargo e departamento, armazenados nos sistemas de RH — no Databricks, ABAC refere-se ao controle de acesso baseado em atributos usando tags governadas em objetos de dados (não atributos de usuário de sistemas de RH.",
         "es_correcta": false,
         "explicacion": "No Databricks, ABAC refere-se ao controle de acesso baseado em atributos usando tags governadas em objetos de dados (não atributos de usuário de sistemas de RH externos). Os 'atributos' são tags em tabelas e colunas."
-      },
-      {
-        "texto_opcion": "ABAC substitui GRANT/REVOKE usando um modelo deny por padrão para todas as colunas da tabela",
-        "es_correcta": false,
-        "explicacion": "ABAC complementa o modelo de privilégio GRANT/REVOKE - não o substitui. Os usuários ainda precisam de SELECT nas tabelas; ABAC controla o que eles veem nessas tabelas (mascaramento/filtragem)."
       }
     ],
     "tags": [
@@ -33,17 +33,7 @@
     "pregunta": "Uma equipe de governança de dados deseja proteger todas as colunas PII em 200 tabelas em `prod_catalog`. Eles marcaram cada coluna PII com `sensibilidade = 'PII'`. Qual é a abordagem mais escalonável para aplicar uma máscara de coluna?",
     "opciones": [
       {
-        "texto_opcion": "Execute `ALTER TABLE t SET MASK ssn_mask` para cada uma das 200 tabelas em um script de loop, esta é a abordagem em nível de tabela — funciona",
-        "es_correcta": false,
-        "explicacion": "Esta é a abordagem em nível de tabela — funciona, mas não é escalonável e requer a nova execução do script para novas tabelas. Políticas ABAC com tags governadas são a abordagem escalonável recomendada."
-      },
-      {
-        "texto_opcion": "Grant apenas privilégio `BROWSE` nas colunas PII para evitar que usuários regulares as vejam",
-        "es_correcta": false,
-        "explicacion": "`BROWSE` fornece acesso a metadados sem acesso a dados - não mascara valores de coluna. O mascaramento de coluna requer uma UDF e uma política de máscara."
-      },
-      {
-        "texto_opcion": "Crie uma visualização dinâmica que envolva todas as 200 tabelas com uma expressão CASE para colunas PII, as visualizações dinâmicas são a abordagem legada pré-ABAC.",
+        "texto_opcion": "Crie uma visualização dinâmica que envolva todas as 200 tabelas com uma expressão CASE para colunas PII, as visualizações dinâmicas são a abordagem legada pré-ABAC — as visualizações dinâmicas são a abordagem legada pré-ABAC — as visualizações dinâmicas são a abordagem legada pré-ABAC. Eles exigem uma visualização por tabela, são difíceis de manter em escala e não lidam com novas tabelas automaticamente.",
         "es_correcta": false,
         "explicacion": "As visualizações dinâmicas são a abordagem legada pré-ABAC. Eles exigem uma visualização por tabela, são difíceis de manter em escala e não lidam com novas tabelas automaticamente."
       },
@@ -51,6 +41,16 @@
         "texto_opcion": "Crie uma política de máscara de coluna ABAC no nível do catálogo acionada por `COLUMN TAG('sensibilidade') = 'PII'` — a máscara se aplica automaticamente a todas as colunas marcadas em todas as 200 tabelas.",
         "es_correcta": true,
         "explicacion": "Este é o valor central de ABAC. Uma única política em nível de catálogo com uma condição de tag elimina a necessidade de 200 comandos `ALTER TABLE SET MASK` individuais. Qualquer coluna marcada como `sensibilidade = PII` é mascarada automaticamente."
+      },
+      {
+        "texto_opcion": "Grant apenas privilégio `BROWSE` nas colunas PII para evitar que usuários regulares as vejam — `BROWSE` fornece acesso a metadados sem acesso a dados - não mascara valores de coluna. O mascaramento de coluna requer uma UDF e uma política de máscara selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "`BROWSE` fornece acesso a metadados sem acesso a dados - não mascara valores de coluna. O mascaramento de coluna requer uma UDF e uma política de máscara."
+      },
+      {
+        "texto_opcion": "Execute `ALTER TABLE t SET MASK ssn_mask` para cada uma das 200 tabelas em um script de loop, esta é a abordagem em nível de tabela — funciona — esta é a abordagem em nível de tabela — funciona, mas não é escalonável e requer a nova execução do script para novas tabelas.",
+        "es_correcta": false,
+        "explicacion": "Esta é a abordagem em nível de tabela — funciona, mas não é escalonável e requer a nova execução do script para novas tabelas. Políticas ABAC com tags governadas são a abordagem escalonável recomendada."
       }
     ],
     "tags": [
@@ -68,19 +68,19 @@
         "explicacion": "ABAC requer tags governadas especificamente. Tags governadas têm chaves controladas (somente administradores as criam), restrições de valor opcionais e uma trilha de auditoria completa. Tags não governadas não são avaliadas pelas condições da política ABAC."
       },
       {
-        "texto_opcion": "Qualquer tag – tanto tags governadas quanto não governadas acionam políticas ABAC igualmente, somente tags governadas podem acionar políticas ABAC.",
+        "texto_opcion": "Qualquer tag – tanto tags governadas quanto não governadas acionam políticas ABAC igualmente, somente tags governadas podem acionar políticas ABAC — somente tags governadas podem acionar políticas ABAC. Tags de formato livre (não governadas) não são usadas nas condições da política ABAC.",
         "es_correcta": false,
         "explicacion": "Somente tags governadas podem acionar políticas ABAC. Tags de formato livre (não governadas) não são usadas nas condições da política ABAC."
       },
       {
-        "texto_opcion": "Tags no nível do workspace — tags definidas por workspace que se aplicam a todos os clusters",
-        "es_correcta": false,
-        "explicacion": "ABAC usa tags governadas no nível da conta em objetos de dados (tabelas, colunas), e não tags no nível do workspace usadas para rastreamento de custos do cluster."
-      },
-      {
-        "texto_opcion": "Tags Delta Lake — metadados especiais incorporados no log de transações Delta, tags governadas Unity Catalog são atributos de metadados no.",
+        "texto_opcion": "Tags Delta Lake — metadados especiais incorporados no log de transações Delta, tags governadas Unity Catalog são atributos de metadados no — tags governadas Unity Catalog são atributos de metadados no catálogo UC — elas não estão incorporadas no log de transações Delta selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Tags governadas Unity Catalog são atributos de metadados no catálogo UC — elas não estão incorporadas no log de transações Delta."
+      },
+      {
+        "texto_opcion": "Tags no nível do workspace — tags definidas por workspace que se aplicam a todos os clusters — aBAC usa tags governadas no nível da conta em objetos de dados (tabelas, colunas), e não tags no nível do workspace usadas para rastreamento de custos do cluster priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "ABAC usa tags governadas no nível da conta em objetos de dados (tabelas, colunas), e não tags no nível do workspace usadas para rastreamento de custos do cluster."
       }
     ],
     "tags": [
@@ -92,22 +92,22 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```sql\nALTER SCHEMA prod_catalog.hr SET TAGS ('sensitivity' = 'PII');\n```\n\nUma política de máscara de coluna ABAC é definida no nível do catálogo com `WHEN COLUMN TAG('sensibilidade') = 'PII'`. As colunas em `hr.employees` são mascaradas automaticamente?",
     "opciones": [
       {
+        "texto_opcion": "Sim — a política no nível do catálogo verifica todas as colunas em todos os esquemas e mascara qualquer coluna que contenha padrões de PII — as políticas ABAC são baseadas em tags, não em conteúdo. Eles não verificam os valores da coluna — eles verificam se a coluna possui a tag especificada.",
+        "es_correcta": false,
+        "explicacion": "As políticas ABAC são baseadas em tags, não em conteúdo. Eles não verificam os valores da coluna — eles verificam se a coluna possui a tag especificada."
+      },
+      {
+        "texto_opcion": "Somente para tabelas criadas após a aplicação da tag de esquema — as tabelas existentes devem ser remarcadas — a questão não é o tempo – as políticas em nível de coluna exigem tags de coluna explícitas, independentemente de quando a tabela foi criada adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "es_correcta": false,
+        "explicacion": "A questão não é o tempo – as políticas em nível de coluna exigem tags de coluna explícitas, independentemente de quando a tabela foi criada."
+      },
+      {
         "texto_opcion": "Não — tags em nível de esquema **não** herdam automaticamente colunas individuais. Cada coluna que deve acionar a máscara deve ser explicitamente marcada com `ALTER TABLE ... ALTER COLUMN col SET TAGS ('sensibilidade' = 'PII')`.",
         "es_correcta": true,
         "explicacion": "Esta é uma limitação crítica do ABAC: as tags se propagam do catálogo/esquema para as tabelas para políticas no nível da tabela, mas NÃO se propagam automaticamente para o nível da coluna. As máscaras em nível de coluna baseadas em tags de coluna exigem que cada coluna seja explicitamente marcada."
       },
       {
-        "texto_opcion": "Sim — a política no nível do catálogo verifica todas as colunas em todos os esquemas e mascara qualquer coluna que contenha padrões de PII.",
-        "es_correcta": false,
-        "explicacion": "As políticas ABAC são baseadas em tags, não em conteúdo. Eles não verificam os valores da coluna — eles verificam se a coluna possui a tag especificada."
-      },
-      {
-        "texto_opcion": "Somente para tabelas criadas após a aplicação da tag de esquema — as tabelas existentes devem ser remarcadas",
-        "es_correcta": false,
-        "explicacion": "A questão não é o tempo – as políticas em nível de coluna exigem tags de coluna explícitas, independentemente de quando a tabela foi criada."
-      },
-      {
-        "texto_opcion": "Sim – as tags de esquema se propagam automaticamente para todas as colunas das tabelas desse esquema",
+        "texto_opcion": "Sim – as tags de esquema se propagam automaticamente para todas as colunas das tabelas desse esquema — a herança de tag para ABAC para no nível da tabela — ela NÃO se propaga para colunas individuais. As colunas devem ser marcadas explicitamente aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "A herança de tag para ABAC para no nível da tabela — ela NÃO se propaga para colunas individuais. As colunas devem ser marcadas explicitamente."
       }
@@ -122,24 +122,24 @@
     "pregunta": "Qual é a versão mínima do Databricks Runtime necessária para acessar tabelas protegidas pelas políticas ABAC?",
     "opciones": [
       {
-        "texto_opcion": "Qualquer versão DBR — ABAC é aplicada na camada de metadados Unity Catalog, não na camada de tempo de execução.",
-        "es_correcta": false,
-        "explicacion": "ABAC é imposto no tempo de execução da consulta pelo Databricks Runtime. Tempos de execução mais antigos não podem interpretar ou impor políticas ABAC."
-      },
-      {
-        "texto_opcion": "DBR 15.4 LTS — a mesma versão necessária para máscaras em nível de tabela e filtros de linha",
-        "es_correcta": false,
-        "explicacion": "DBR 15.4 suporta `SET MASK` / `SET ROW FILTER` em nível de tabela. As políticas ABAC exigem o DBR 16.4+ mais recente."
-      },
-      {
-        "texto_opcion": "Os recursos de governança DBR 12.2 LTS — Unity Catalog estão disponíveis desde os primeiros lançamentos",
+        "texto_opcion": "Os recursos de governança DBR 12.2 LTS — Unity Catalog estão disponíveis desde os primeiros lançamentos — aBAC é um recurso mais recente que requer DBR 16.4+. O DBR 12.2 não suporta políticas ABAC.",
         "es_correcta": false,
         "explicacion": "ABAC é um recurso mais recente que requer DBR 16.4+. O DBR 12.2 não suporta políticas ABAC."
+      },
+      {
+        "texto_opcion": "Qualquer versão DBR — ABAC é aplicada na camada de metadados Unity Catalog, não na camada de tempo de execução — aBAC é imposto no tempo de execução da consulta pelo Databricks Runtime. Tempos de execução mais antigos não podem interpretar ou impor políticas ABAC.",
+        "es_correcta": false,
+        "explicacion": "ABAC é imposto no tempo de execução da consulta pelo Databricks Runtime. Tempos de execução mais antigos não podem interpretar ou impor políticas ABAC."
       },
       {
         "texto_opcion": "**DBR 16.4** ou **Serverless compute** — clusters que executam runtimes mais antigos não podem acessar tabelas protegidas por ABAC.",
         "es_correcta": true,
         "explicacion": "As políticas ABAC exigem DBR 16.4+ (ou serverless). Clusters em runtimes mais antigos (mesmo DBR 15.4 que suporta máscaras em nível de tabela) não podem acessar tabelas protegidas por ABAC e falharão ao consultá-las."
+      },
+      {
+        "texto_opcion": "DBR 15.4 LTS — a mesma versão necessária para máscaras em nível de tabela e filtros de linha — dBR 15.4 suporta `SET MASK` / `SET ROW FILTER` em nível de tabela — dBR 15.4 suporta `SET MASK` / `SET ROW FILTER` em nível de tabela. As políticas ABAC exigem o DBR 16.4+ mais recente.",
+        "es_correcta": false,
+        "explicacion": "DBR 15.4 suporta `SET MASK` / `SET ROW FILTER` em nível de tabela. As políticas ABAC exigem o DBR 16.4+ mais recente."
       }
     ],
     "tags": [
@@ -152,24 +152,24 @@
     "pregunta": "Uma equipe de governação cria uma política de máscara de coluna ABAC ao nível do esquema. Uma nova tabela é adicionada a esse esquema na semana seguinte e marcada com a tag governada correspondente. A nova tabela é protegida automaticamente?",
     "opciones": [
       {
-        "texto_opcion": "Não — as políticas ABAC em nível de esquema devem ser explicitamente anexadas a cada tabela usando Catalog Explorer",
-        "es_correcta": false,
-        "explicacion": "O objetivo do ABAC é evitar a configuração por tabela. As políticas em nível de esquema se aplicam automaticamente às tabelas marcadas — nenhuma configuração de UI por tabela é necessária."
-      },
-      {
-        "texto_opcion": "Não — a política deve ser reaplicada ao esquema sempre que uma nova tabela for adicionada, as políticas ABAC são prospectivas — uma vez criadas",
-        "es_correcta": false,
-        "explicacion": "As políticas ABAC são prospectivas — uma vez criadas, elas protegem automaticamente todos os objetos atuais e futuros com a tag correspondente. Nenhuma nova aplicação é necessária."
-      },
-      {
         "texto_opcion": "Sim — as políticas ABAC no nível do esquema se aplicam automaticamente a todas as tabelas atuais e **futuras** nesse esquema que possuem a tag correspondente. Nenhum comando ALTER TABLE adicional é necessário.",
         "es_correcta": true,
         "explicacion": "A cobertura automática de novos objetos é uma das principais vantagens de ABAC em relação às políticas em nível de tabela. Quando uma nova tabela é marcada com a tag governada correspondente, a política em nível de esquema é imediatamente avaliada e aplicada."
       },
       {
-        "texto_opcion": "Somente se o criador da tabela executar explicitamente `ALTER TABLE SET ABAC POLICY schema_policy`, não existe esse comando `SET ABAC POLICY`.",
+        "texto_opcion": "Não — a política deve ser reaplicada ao esquema sempre que uma nova tabela for adicionada, as políticas ABAC são prospectivas — uma vez criadas — as políticas ABAC são prospectivas — as políticas ABAC são prospectivas — uma vez criadas, elas protegem automaticamente todos os objetos atuais e futuros com a tag correspondente. Nenhuma nova aplicação é necessária.",
+        "es_correcta": false,
+        "explicacion": "As políticas ABAC são prospectivas — uma vez criadas, elas protegem automaticamente todos os objetos atuais e futuros com a tag correspondente. Nenhuma nova aplicação é necessária."
+      },
+      {
+        "texto_opcion": "Somente se o criador da tabela executar explicitamente `ALTER TABLE SET ABAC POLICY schema_policy`, não existe esse comando `SET ABAC POLICY` — não existe esse comando `SET ABAC POLICY`. As políticas ABAC são ativadas automaticamente quando uma tag governada correspondente é aplicada ao objeto.",
         "es_correcta": false,
         "explicacion": "Não existe esse comando `SET ABAC POLICY`. As políticas ABAC são ativadas automaticamente quando uma tag governada correspondente é aplicada ao objeto."
+      },
+      {
+        "texto_opcion": "Não — as políticas ABAC em nível de esquema devem ser explicitamente anexadas a cada tabela usando Catalog Explorer — o objetivo do ABAC é evitar a configuração por tabela. As políticas em nível de esquema se aplicam automaticamente às tabelas marcadas — nenhuma configuração de UI por tabela é necessária.",
+        "es_correcta": false,
+        "explicacion": "O objetivo do ABAC é evitar a configuração por tabela. As políticas em nível de esquema se aplicam automaticamente às tabelas marcadas — nenhuma configuração de UI por tabela é necessária."
       }
     ],
     "tags": [
@@ -187,19 +187,19 @@
         "explicacion": "A criação de uma política ABAC requer MANAGE no objeto protegível (o catálogo neste caso) ou propriedade, além de EXECUTE na UDF que implementa a lógica de mascaramento/filtragem."
       },
       {
-        "texto_opcion": "Função de administrador do metastore — apenas administradores do metastore podem criar políticas ABAC",
+        "texto_opcion": "Função de administrador do metastore — apenas administradores do metastore podem criar políticas ABAC.",
         "es_correcta": false,
         "explicacion": "As políticas ABAC podem ser criadas por proprietários de catálogos e usuários com privilégio MANAGE no catálogo — não exclusivamente por administradores de metastore."
+      },
+      {
+        "texto_opcion": "`ALL PRIVILEGES` no catálogo — apenas detentores de privilégios totais podem definir políticas de segurança — `ALL PRIVILEGES` no catálogo não inclui MANAGE.",
+        "es_correcta": false,
+        "explicacion": "`ALL PRIVILEGES` no catálogo não inclui MANAGE. O privilégio específico necessário para o gerenciamento de políticas é MANAGE no objeto."
       },
       {
         "texto_opcion": "Privilégio `CREATE POLICY` no catálogo — este é um privilégio de gerenciamento ABAC dedicado, `CREATE POLICY` é o comando SQL",
         "es_correcta": false,
         "explicacion": "`CREATE POLICY` é o comando SQL, não um tipo de privilégio. Os privilégios necessários são MANAGE no objeto e EXECUTE na UDF."
-      },
-      {
-        "texto_opcion": "`ALL PRIVILEGES` no catálogo — apenas detentores de privilégios totais podem definir políticas de segurança",
-        "es_correcta": false,
-        "explicacion": "`ALL PRIVILEGES` no catálogo não inclui MANAGE. O privilégio específico necessário para o gerenciamento de políticas é MANAGE no objeto."
       }
     ],
     "tags": [
@@ -212,24 +212,24 @@
     "pregunta": "Como a equipe de governança ativa uma política de máscara de coluna ABAC em uma coluna específica em uma tabela recém-adicionada?",
     "opciones": [
       {
+        "texto_opcion": "Execute `REFRESH ABAC POLICIES ON TABLE catalog.schema.new_table` — isso verifica novamente e aplica todas as políticas correspondentes — `REFRESH ABAC POLICIES` não é um comando SQL válido do Databricks. As políticas são ativadas marcando objetos, não por um comando de atualização.",
+        "es_correcta": false,
+        "explicacion": "`REFRESH ABAC POLICIES` não é um comando SQL válido do Databricks. As políticas são ativadas marcando objetos, não por um comando de atualização."
+      },
+      {
         "texto_opcion": "Aplique a tag governada correspondente à coluna: `ALTER TABLE catalog.schema.new_table ALTER COLUMN ssn SET TAGS ('sensibilidade' = 'PII');` — a política é ativada automaticamente para essa coluna.",
         "es_correcta": true,
         "explicacion": "As políticas ABAC são ativadas por marcação, não pela execução de ALTER TABLE SET MASK por tabela. Depois que a tag é aplicada, o mecanismo de política detecta a tag no momento da consulta e impõe a máscara."
       },
       {
-        "texto_opcion": "Execute `ALTER TABLE catalog.schema.new_table ALTER COLUMN ssn SET MASK existente_policy;` — faça referência à política pelo nome.",
+        "texto_opcion": "Execute `ALTER TABLE catalog.schema.new_table ALTER COLUMN ssn SET MASK existente_policy;` — faça referência à política pelo nome — `SET MASK` faz referência a uma função UDF (abordagem em nível de tabela), não a uma política ABAC. A ativação ABAC usa marcação, não `SET MASK` como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "`SET MASK` faz referência a uma função UDF (abordagem em nível de tabela), não a uma política ABAC. A ativação ABAC usa marcação, não `SET MASK`."
       },
       {
-        "texto_opcion": "Nenhuma ação é necessária — todas as colunas em uma nova tabela herdam todas as políticas ABAC do esquema automaticamente",
+        "texto_opcion": "Nenhuma ação é necessária — todas as colunas em uma nova tabela herdam todas as políticas ABAC do esquema automaticamente — as tags de coluna não são herdadas automaticamente. A equipe de governação deve etiquetar explicitamente a coluna específica para ativar políticas ABAC ao nível da coluna.",
         "es_correcta": false,
         "explicacion": "As tags de coluna não são herdadas automaticamente. A equipe de governação deve etiquetar explicitamente a coluna específica para ativar políticas ABAC ao nível da coluna."
-      },
-      {
-        "texto_opcion": "Execute `REFRESH ABAC POLICIES ON TABLE catalog.schema.new_table` — isso verifica novamente e aplica todas as políticas correspondentes.",
-        "es_correcta": false,
-        "explicacion": "`REFRESH ABAC POLICIES` não é um comando SQL válido do Databricks. As políticas são ativadas marcando objetos, não por um comando de atualização."
       }
     ],
     "tags": [
@@ -247,17 +247,17 @@
         "explicacion": "As políticas ABAC usam condições de tag (`WHEN TABLE TAG(...) = '...'`) para aplicar seletivamente aos objetos. Uma tabela sem a tag especificada não corresponde à condição e não está protegida pela política."
       },
       {
-        "texto_opcion": "Sim — as políticas em nível de esquema se aplicam a TODAS as tabelas do esquema, independentemente das tags",
+        "texto_opcion": "Sim — as políticas em nível de esquema se aplicam a TODAS as tabelas do esquema, independentemente das tags — as políticas ABAC em nível de esquema se aplicam apenas a tabelas que correspondem à condição da tag.",
         "es_correcta": false,
         "explicacion": "As políticas ABAC em nível de esquema se aplicam apenas a tabelas que correspondem à condição da tag. Sem a tag correspondente, a tabela não está protegida."
       },
       {
-        "texto_opcion": "Sim — o próprio esquema herda a tag, portanto, todas as tabelas no esquema são consideradas marcadas",
+        "texto_opcion": "Sim — o próprio esquema herda a tag, portanto, todas as tabelas no esquema são consideradas marcadas — a herança de tag para avaliação ABAC flui do esquema para tabelas somente se a tabela não substituir a tag.",
         "es_correcta": false,
         "explicacion": "A herança de tag para avaliação ABAC flui do esquema para tabelas somente se a tabela não substituir a tag. Mas para esta política, a tabela deve ter a própria tag `access=restricted` ou herdá-la."
       },
       {
-        "texto_opcion": "A política se aplica, mas mostra todas as linhas — tabelas não marcadas recebem um filtro de passagem",
+        "texto_opcion": "A política se aplica, mas mostra todas as linhas — tabelas não marcadas recebem um filtro de passagem — as tabelas não marcadas simplesmente não são afetadas pela política — não há comportamento de passagem.",
         "es_correcta": false,
         "explicacion": "As tabelas não marcadas simplesmente não são afetadas pela política — não há comportamento de passagem. A condição de política `WHEN TABLE TAG('access') = 'restricted'` é avaliada como falsa para tabelas não marcadas."
       }
@@ -272,7 +272,17 @@
     "pregunta": "A qual dos seguintes tipos de objeto uma política ABAC pode ser **aplicada diretamente**?",
     "opciones": [
       {
-        "texto_opcion": "Qualquer objeto, incluindo visualizações, funções e locais externos, as políticas ABAC têm como escopo catálogos, esquemas, tabelas",
+        "texto_opcion": "Somente tabelas individuais — as políticas ABAC não podem ser aplicadas no nível do catálogo ou do esquema — as políticas ABAC em nível de catálogo e em nível de esquema são o principal benefício de.",
+        "es_correcta": false,
+        "explicacion": "As políticas ABAC em nível de catálogo e em nível de esquema são o principal benefício de escalabilidade. A restrição apenas ao nível da tabela exigiria configuração por tabela."
+      },
+      {
+        "texto_opcion": "Somente esquemas — as políticas ABAC devem ter um escopo em nível de esquema para herança adequada — as políticas ABAC podem ser anexadas em nível de catálogo, esquema ou tabela. O nível de catálogo é o escopo mais amplo.",
+        "es_correcta": false,
+        "explicacion": "As políticas ABAC podem ser anexadas em nível de catálogo, esquema ou tabela. O nível de catálogo é o escopo mais amplo."
+      },
+      {
+        "texto_opcion": "Qualquer objeto, incluindo visualizações, funções e locais externos, as políticas ABAC têm como escopo catálogos, esquemas, tabelas — as políticas ABAC têm como escopo catálogos, esquemas, tabelas, materialized views e streaming tables. As visualizações padrão não podem ser direcionadas diretamente pelas políticas ABAC.",
         "es_correcta": false,
         "explicacion": "As políticas ABAC têm como escopo catálogos, esquemas, tabelas, materialized views e streaming tables. As visualizações padrão não podem ser direcionadas diretamente pelas políticas ABAC."
       },
@@ -280,16 +290,6 @@
         "texto_opcion": "Catálogos, esquemas e tabelas — mas **não** visualizações diretas (as visualizações são protegidas indiretamente por meio de políticas de tabela base).",
         "es_correcta": true,
         "explicacion": "As políticas ABAC podem ser anexadas a catálogos, esquemas e tabelas. Eles não podem ser aplicados diretamente às visualizações padrão. No entanto, quando um usuário consulta uma visualização que faz referência a uma tabela base com uma política ABAC, essa política ainda é aplicada."
-      },
-      {
-        "texto_opcion": "Somente esquemas — as políticas ABAC devem ter um escopo em nível de esquema para herança adequada",
-        "es_correcta": false,
-        "explicacion": "As políticas ABAC podem ser anexadas em nível de catálogo, esquema ou tabela. O nível de catálogo é o escopo mais amplo."
-      },
-      {
-        "texto_opcion": "Somente tabelas individuais — as políticas ABAC não podem ser aplicadas no nível do catálogo ou do esquema",
-        "es_correcta": false,
-        "explicacion": "As políticas ABAC em nível de catálogo e em nível de esquema são o principal benefício de escalabilidade. A restrição apenas ao nível da tabela exigiria configuração por tabela."
       }
     ],
     "tags": [
@@ -307,14 +307,14 @@
         "explicacion": "As políticas ABAC (e máscaras no nível da tabela) são aplicadas no nível da tabela base. Mesmo quando uma visualização é consultada, as políticas da tabela base são avaliadas e aplicadas, garantindo que a máscara não seja ignorada pelas visualizações."
       },
       {
-        "texto_opcion": "A política ABAC é ignorada quando consultada por meio de uma visualização — as visualizações criam um contexto de acesso a dados separado.",
-        "es_correcta": false,
-        "explicacion": "As visualizações não podem ser usadas para ignorar as políticas ABAC. As políticas da tabela base são aplicadas independentemente de a tabela ser acessada diretamente ou por meio de uma visualização."
-      },
-      {
-        "texto_opcion": "A consulta da visualização falha — tabelas base protegidas por ABAC não podem ser referenciadas pelas visualizações",
+        "texto_opcion": "A consulta da visualização falha — tabelas base protegidas por ABAC não podem ser referenciadas pelas visualizações — as visualizações PODEM fazer referência a tabelas base protegidas por ABAC.",
         "es_correcta": false,
         "explicacion": "As visualizações PODEM fazer referência a tabelas base protegidas por ABAC. A consulta foi bem-sucedida; os resultados mascarados/filtrados são retornados por meio da visualização."
+      },
+      {
+        "texto_opcion": "A política ABAC é ignorada quando consultada por meio de uma visualização — as visualizações criam um contexto de acesso a dados separado — as visualizações não podem ser usadas para ignorar as políticas ABAC.",
+        "es_correcta": false,
+        "explicacion": "As visualizações não podem ser usadas para ignorar as políticas ABAC. As políticas da tabela base são aplicadas independentemente de a tabela ser acessada diretamente ou por meio de uma visualização."
       },
       {
         "texto_opcion": "O comportamento depende se o proprietário da visualização possui SELECT na tabela base, a propriedade da visualização determina se a visualização pode ler a.",
@@ -333,6 +333,11 @@
     "pregunta": "Qual é o número máximo de políticas ABAC que podem ser definidas por catálogo ou esquema?",
     "opciones": [
       {
+        "texto_opcion": "**100 políticas** por catálogo ou esquema.",
+        "es_correcta": true,
+        "explicacion": "Unity Catalog impõe uma cota de 100 políticas ABAC por catálogo ou esquema, 50 por tabela e 10.000 por metastore. Estes limites orientam as decisões de conceção da governação."
+      },
+      {
         "texto_opcion": "Ilimitado — as políticas são objetos de metadados sem restrições de cota.",
         "es_correcta": false,
         "explicacion": "O Databricks impõe cotas políticas: 100 por catálogo/esquema, 50 por tabela, 10.000 por metastore."
@@ -341,11 +346,6 @@
         "texto_opcion": "50 políticas por catálogo ou esquema, 50 é o limite por **tabela** (não por.",
         "es_correcta": false,
         "explicacion": "50 é o limite por **tabela** (não por catálogo/esquema). O limite do catálogo/esquema é 100."
-      },
-      {
-        "texto_opcion": "**100 políticas** por catálogo ou esquema.",
-        "es_correcta": true,
-        "explicacion": "Unity Catalog impõe uma cota de 100 políticas ABAC por catálogo ou esquema, 50 por tabela e 10.000 por metastore. Estes limites orientam as decisões de conceção da governação."
       },
       {
         "texto_opcion": "10 políticas por catálogo ou esquema, 10 não é a cota correta.",
@@ -392,17 +392,7 @@
     "pregunta": "Por que o Databricks recomenda ABAC em vez de mascaramento em nível de tabela para proteção de PII em larga escala em ambientes de produção?",
     "opciones": [
       {
-        "texto_opcion": "ABAC gera automaticamente as funções UDF de mascaramento com base nos valores da tag, eliminando a criação de UDF",
-        "es_correcta": false,
-        "explicacion": "ABAC ainda requer a criação manual de funções UDF para a lógica de mascaramento/filtragem. A automação está na aplicação da política (via tags), não na geração de UDF."
-      },
-      {
-        "texto_opcion": "ABAC oferece suporte ao mascaramento de colunas, enquanto as políticas em nível de tabela oferecem suporte apenas à filtragem de linhas.",
-        "es_correcta": false,
-        "explicacion": "Ambas as políticas em nível de tabela e ABAC suportam mascaramento de colunas e filtragem de linhas. A distinção é escopo e escalabilidade."
-      },
-      {
-        "texto_opcion": "As políticas ABAC são executadas mais rapidamente do que as máscaras em nível de tabela porque usam C++ compilado em vez de UDFs SQL.",
+        "texto_opcion": "As políticas ABAC são executadas mais rapidamente do que as máscaras em nível de tabela porque usam C++ compilado em vez de UDFs SQL — as políticas ABAC ainda usam UDFs SQL para lógica de mascaramento/filtragem. A vantagem é a escalabilidade operacional e a automação, e não uma diferença no desempenho do tempo de execução.",
         "es_correcta": false,
         "explicacion": "As políticas ABAC ainda usam UDFs SQL para lógica de mascaramento/filtragem. A vantagem é a escalabilidade operacional e a automação, e não uma diferença no desempenho do tempo de execução."
       },
@@ -410,6 +400,16 @@
         "texto_opcion": "ABAC elimina lacunas de governança — depois que uma política é criada, **qualquer tabela ou coluna com a tag correspondente é automaticamente protegida**, incluindo novas tabelas adicionadas no futuro, sem exigir comandos ALTER TABLE manuais por tabela.",
         "es_correcta": true,
         "explicacion": "A principal vantagem do ABAC é a automação da cobertura. As políticas em nível de tabela exigem configuração explícita por tabela e criam lacunas de governança quando novas tabelas são adicionadas e a equipe se esquece de aplicar máscaras."
+      },
+      {
+        "texto_opcion": "ABAC gera automaticamente as funções UDF de mascaramento com base nos valores da tag, eliminando a criação de UDF — aBAC ainda requer a criação manual de funções UDF para a lógica de mascaramento/filtragem. A automação está na aplicação da política (via tags), não na geração de UDF usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "ABAC ainda requer a criação manual de funções UDF para a lógica de mascaramento/filtragem. A automação está na aplicação da política (via tags), não na geração de UDF."
+      },
+      {
+        "texto_opcion": "ABAC oferece suporte ao mascaramento de colunas, enquanto as políticas em nível de tabela oferecem suporte apenas à filtragem de linhas — ambas as políticas em nível de tabela e ABAC suportam mascaramento de colunas e filtragem de linhas. A distinção é escopo e escalabilidade configurado de ponta a ponta para o workload descrito.",
+        "es_correcta": false,
+        "explicacion": "Ambas as políticas em nível de tabela e ABAC suportam mascaramento de colunas e filtragem de linhas. A distinção é escopo e escalabilidade."
       }
     ],
     "tags": [
@@ -422,7 +422,17 @@
     "pregunta": "Um cluster de job legado é executado no DBR 14.3. Ele precisa ler `prod_catalog.hr.employees`, que possui uma política de máscara de coluna ABAC aplicada. Qual é o resultado esperado?",
     "opciones": [
       {
-        "texto_opcion": "A consulta é bem-sucedida e a política ABAC é aplicada — ABAC é imposta pela camada de metadados Unity Catalog, não pelo tempo de execução.",
+        "texto_opcion": "A consulta foi bem-sucedida, mas a máscara não foi aplicada — o DBR 14.3 ignora silenciosamente as políticas ABAC e retorna dados não mascarados — a falha não é silenciosa – a consulta falha com um erro, não com dados desmascarados — a falha não é silenciosa – a consulta falha com um erro, não com dados desmascarados.",
+        "es_correcta": false,
+        "explicacion": "A falha não é silenciosa – a consulta falha com um erro, não com dados desmascarados. Este é um projeto que prioriza a segurança: falhar é mais seguro do que ignorar silenciosamente a política."
+      },
+      {
+        "texto_opcion": "A consulta será bem-sucedida, mas somente se o cluster tiver controle de acesso refinado habilitado nas configurações do cluster, as políticas ABAC exigem DBR 16.4+ — as políticas ABAC exigem DBR 16.4+ — as políticas ABAC exigem DBR 16.4+. Mesmo com o controle de acesso refinado habilitado, o DBR 14.3 não pode suportar políticas ABAC.",
+        "es_correcta": false,
+        "explicacion": "As políticas ABAC exigem DBR 16.4+. Mesmo com o controle de acesso refinado habilitado, o DBR 14.3 não pode suportar políticas ABAC."
+      },
+      {
+        "texto_opcion": "A consulta é bem-sucedida e a política ABAC é aplicada — ABAC é imposta pela camada de metadados Unity Catalog, não pelo tempo de execução — aBAC é aplicado no tempo de execução da consulta pelo tempo de execução. O DBR 14.3 não pode impor políticas ABAC e a consulta falha.",
         "es_correcta": false,
         "explicacion": "ABAC é aplicado no tempo de execução da consulta pelo tempo de execução. O DBR 14.3 não pode impor políticas ABAC e a consulta falha."
       },
@@ -430,16 +440,6 @@
         "texto_opcion": "A consulta **falha** — clusters que executam DBR < 16.4 não podem acessar tabelas protegidas por políticas ABAC. O cluster deve ser atualizado para DBR 16.4+ ou usar serverless compute.",
         "es_correcta": true,
         "explicacion": "A aplicação da política ABAC requer DBR 16.4+. Um cluster no DBR 14.3 não pode interpretar ou impor políticas ABAC e falhará ao consultar tabelas protegidas por ABAC."
-      },
-      {
-        "texto_opcion": "A consulta será bem-sucedida, mas somente se o cluster tiver controle de acesso refinado habilitado nas configurações do cluster, as políticas ABAC exigem DBR 16.4+.",
-        "es_correcta": false,
-        "explicacion": "As políticas ABAC exigem DBR 16.4+. Mesmo com o controle de acesso refinado habilitado, o DBR 14.3 não pode suportar políticas ABAC."
-      },
-      {
-        "texto_opcion": "A consulta foi bem-sucedida, mas a máscara não foi aplicada — o DBR 14.3 ignora silenciosamente as políticas ABAC e retorna dados não mascarados.",
-        "es_correcta": false,
-        "explicacion": "A falha não é silenciosa – a consulta falha com um erro, não com dados desmascarados. Este é um projeto que prioriza a segurança: falhar é mais seguro do que ignorar silenciosamente a política."
       }
     ],
     "tags": [

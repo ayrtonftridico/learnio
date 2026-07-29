@@ -3,11 +3,6 @@
     "pregunta": "A payments fintech needs to ingest ~35,000 events/s with sub-second latency for anomaly detection. Which streaming ingestion architecture best meets the trade-off between scale and control?",
     "opciones": [
       {
-        "texto_opcion": "AWS Database Migration Service in continuous mode for the data lake considering cost, scale and latency",
-        "es_correcta": false,
-        "explicacion": "DMS replicates changes from relational banks, not application telemetry at a high rate."
-      },
-      {
         "texto_opcion": "AWS Transfer Family SFTP with files aggregated every minute in the described scenario, transfer Family is per-file ingestion",
         "es_correcta": false,
         "explicacion": "Transfer Family is per-file ingestion, unsuitable for tens of thousands of events/sec."
@@ -21,6 +16,11 @@
         "texto_opcion": "Amazon Data Firehose delivering directly to S3 with a minimum buffer of 60 s as per the requirements of the statement.",
         "es_correcta": false,
         "explicacion": "Firehose prioritizes managed delivery with buffering; Typical latency is greater than sub-second."
+      },
+      {
+        "texto_opcion": "AWS Database Migration Service in continuous mode for the data lake considering cost, scale and latency.",
+        "es_correcta": false,
+        "explicacion": "DMS replicates changes from relational banks, not application telemetry at a high rate."
       }
     ],
     "tags": [
@@ -32,19 +32,19 @@
     "pregunta": "The industrial IoT platform operates producers and consumers Apache Kafka on-premises and wants to migrate to AWS without rewriting clients. Which managed service preserves compatibility?",
     "opciones": [
       {
-        "texto_opcion": "Amazon MSK with managed brokers and the same Kafka API/protocol.",
-        "es_correcta": true,
-        "explicacion": "MSK is managed Kafka on AWS; preserves existing producers, consumers, topics, and partitioning."
-      },
-      {
         "texto_opcion": "Amazon EventBridge receiving custom events without a broker.",
         "es_correcta": false,
         "explicacion": "EventBridge is event bus, not Kafka cluster replacement."
       },
       {
-        "texto_opcion": "Amazon SQS FIFO as a direct replacement for Kafka topics",
+        "texto_opcion": "Amazon SQS FIFO as a direct replacement for Kafka topics.",
         "es_correcta": false,
         "explicacion": "SQS does not implement partitioned logging or full Kafka consumer group semantics."
+      },
+      {
+        "texto_opcion": "Amazon MSK with managed brokers and the same Kafka API/protocol.",
+        "es_correcta": true,
+        "explicacion": "MSK is managed Kafka on AWS; preserves existing producers, consumers, topics, and partitioning."
       },
       {
         "texto_opcion": "Amazon Kinesis Data Streams converting messages to Kinesis records in.",
@@ -61,14 +61,14 @@
     "pregunta": "Incident #3 — industrial IoT platform eu-west-1 operation: Streaming media startup needs to load 10 TB/day of logs into Amazon S3 with compression and without managing consumers. Which service simplifies the operation?",
     "opciones": [
       {
-        "texto_opcion": "Kinesis Data Streams with three Lambda consumers per shard evaluating operational trade-offs",
-        "es_correcta": false,
-        "explicacion": "Streams require scaling shards and implementing delivery to each consumer."
-      },
-      {
         "texto_opcion": "Amazon Data Firehose with S3 destination, buffering and optional conversion via Lambda.",
         "es_correcta": true,
         "explicacion": "Firehose does buffering, compression, and managed delivery without a dedicated consumer cluster."
+      },
+      {
+        "texto_opcion": "AWS Glue streaming job runs every hour in this production context, glue streaming requires a dedicated job and does not.",
+        "es_correcta": false,
+        "explicacion": "Glue streaming requires a dedicated job and does not replace managed near-real-time pipelines."
       },
       {
         "texto_opcion": "Amazon EMR reading from Kafka and writing Parquet manually according to the requirements of the statement.",
@@ -76,9 +76,9 @@
         "explicacion": "EMR requires cluster operation and does not eliminate consumer management for S3 delivery."
       },
       {
-        "texto_opcion": "AWS Glue streaming job runs every hour in this production context, glue streaming requires a dedicated job and does not.",
+        "texto_opcion": "Kinesis Data Streams with three Lambda consumers per shard evaluating operational trade-offs — streams require scaling shards and implementing delivery to each consumer.",
         "es_correcta": false,
-        "explicacion": "Glue streaming requires a dedicated job and does not replace managed near-real-time pipelines."
+        "explicacion": "Streams require scaling shards and implementing delivery to each consumer."
       }
     ],
     "tags": [
@@ -90,9 +90,9 @@
     "pregunta": "Audit #4 — data team (ap-southeast-1): A Kinesis stream reaches 80% of ingestion capacity with ~8,000 records/s. The team needs to increase throughput without losing order by partition key. What to do?",
     "opciones": [
       {
-        "texto_opcion": "Replace Kinesis with S3 PUT directly from producers evaluating operational trade-offs.",
-        "es_correcta": false,
-        "explicacion": "S3 does not guarantee key-ordered ingestion at streaming rates with ms of latency."
+        "texto_opcion": "Increase the number of shards via UpdateShardCount or resharding.",
+        "es_correcta": true,
+        "explicacion": "Each shard supports 1 MB/s or 1,000 records/s of ingestion; more shards increase total capacidade."
       },
       {
         "texto_opcion": "Migrate all records to a single larger shard as per the requirements of the statement.",
@@ -100,9 +100,9 @@
         "explicacion": "Kinesis does not offer scalable single shard; capacidade is horizontal per shard."
       },
       {
-        "texto_opcion": "Increase the number of shards via UpdateShardCount or resharding.",
-        "es_correcta": true,
-        "explicacion": "Each shard supports 1 MB/s or 1,000 records/s of ingestion; more shards increase total capacidade."
+        "texto_opcion": "Replace Kinesis with S3 PUT directly from producers evaluating operational trade-offs.",
+        "es_correcta": false,
+        "explicacion": "S3 does not guarantee key-ordered ingestion at streaming rates with ms of latency."
       },
       {
         "texto_opcion": "Enable Enhanced Fan-Out only, without changing shards in this production context.",
@@ -129,12 +129,12 @@
         "explicacion": "Longer intervals increase latency, not reduce it."
       },
       {
-        "texto_opcion": "Consolidate all consumers into a single monolithic process in the described scenario.",
+        "texto_opcion": "Consolidate all consumers into a single monolithic process in the described scenario — eliminates team parallelism and does not scale operationally.",
         "es_correcta": false,
         "explicacion": "Eliminates team parallelism and does not scale operationally."
       },
       {
-        "texto_opcion": "Reduce stream retention to 1 hour by evaluating operational trade-offs",
+        "texto_opcion": "Reduce stream retention to 1 hour by evaluating operational trade-offs — retention affects historical retention, not read latency between consumers.",
         "es_correcta": false,
         "explicacion": "Retention affects historical retention, not read latency between consumers."
       }
@@ -148,24 +148,24 @@
     "pregunta": "Firehose delivers files that are too small on S3, increasing Athena's cost. The pipeline allows latency down to less than 200 ms. Which tweak balances file size and freshness?",
     "opciones": [
       {
-        "texto_opcion": "Reduce buffer to 1 MB and interval to 60 s by evaluating operational trade-offs",
-        "es_correcta": false,
-        "explicacion": "Smaller buffers make the small file problem worse."
-      },
-      {
         "texto_opcion": "Increase BufferSizeInMB and/or BufferIntervalInSeconds within the acceptable latency limit.",
         "es_correcta": true,
         "explicacion": "Larger buffers generate less fragmented S3 objects, reducing analytical query costs."
       },
       {
-        "texto_opcion": "Disable GZIP compression to speed up delivery according to the requirements of the statement.",
-        "es_correcta": false,
-        "explicacion": "Compression reduces storage and transfer; disabling increases S3 cost."
-      },
-      {
-        "texto_opcion": "Immediately migrate to Kinesis Analytics without buffering in the scenario described.",
+        "texto_opcion": "Immediately migrate to Kinesis Analytics without buffering in the scenario described — analytics does not replace Firehose delivery configuration for S3.",
         "es_correcta": false,
         "explicacion": "Analytics does not replace Firehose delivery configuration for S3."
+      },
+      {
+        "texto_opcion": "Reduce buffer to 1 MB and interval to 60 s by evaluating operational trade-offs — smaller buffers make the small file problem worse.",
+        "es_correcta": false,
+        "explicacion": "Smaller buffers make the small file problem worse."
+      },
+      {
+        "texto_opcion": "Disable GZIP compression to speed up delivery according to the requirements of the statement — compression reduces storage and transfer; disabling increases S3 cost.",
+        "es_correcta": false,
+        "explicacion": "Compression reduces storage and transfer; disabling increases S3 cost."
       }
     ],
     "tags": [
@@ -177,9 +177,9 @@
     "pregunta": "The insurer has intermittent Kafka loads and wants to avoid provisioning brokers 24/7. Which MSK option reduces operating capacity?",
     "opciones": [
       {
-        "texto_opcion": "Amazon MSK Serverless with auto throughput scaling.",
-        "es_correcta": true,
-        "explicacion": "MSK Serverless abstracts broker sizing for variable loads."
+        "texto_opcion": "Self-managed Kafka on EC2 with Auto Scaling Group, it still requires the operation of brokers",
+        "es_correcta": false,
+        "explicacion": "It still requires the operation of brokers, patches and manual rebalancing."
       },
       {
         "texto_opcion": "Amazon MQ for ActiveMQ as a Kafka drop-in as per the requirements of the statement.",
@@ -187,14 +187,14 @@
         "explicacion": "ActiveMQ is not compatible with Kafka protocol."
       },
       {
-        "texto_opcion": "MSK provisioned with maximum brokers at all times in this production context.",
+        "texto_opcion": "MSK provisioned with maximum brokers at all times in this production context — fixed provisioning increases costs in intermittent loads.",
         "es_correcta": false,
         "explicacion": "Fixed provisioning increases costs in intermittent loads."
       },
       {
-        "texto_opcion": "Self-managed Kafka on EC2 with Auto Scaling Group, it still requires the operation of brokers",
-        "es_correcta": false,
-        "explicacion": "It still requires the operation of brokers, patches and manual rebalancing."
+        "texto_opcion": "Amazon MSK Serverless with auto throughput scaling.",
+        "es_correcta": true,
+        "explicacion": "MSK Serverless abstracts broker sizing for variable loads."
       }
     ],
     "tags": [
@@ -206,12 +206,12 @@
     "pregunta": "Incident #8 — telecom operator's ap-southeast-1 operation: Edge plants generate telemetry bursts and the center needs buffering before the lake in the cloud. What combination balances offline resilience and delivery on AWS?",
     "opciones": [
       {
-        "texto_opcion": "Daily email of CSV files to operators according to the requirements of the statement.",
+        "texto_opcion": "Producers writing directly to S3 via credentials embedded in the described scenario.",
         "es_correcta": false,
-        "explicacion": "Does not scale or serve near real-time."
+        "explicacion": "Resilient offline bufferless and exposes credentials at the edge."
       },
       {
-        "texto_opcion": "Local RDS as the only permanent destination evaluating operational trade-offs",
+        "texto_opcion": "Local RDS as the only permanent destination evaluating operational trade-offs.",
         "es_correcta": false,
         "explicacion": "RDS edge does not replace streaming pipeline for data lake."
       },
@@ -221,9 +221,9 @@
         "explicacion": "Agent/Greengrass buffer offline; Kinesis centralizes durable ingestion in the cloud."
       },
       {
-        "texto_opcion": "Producers writing directly to S3 via credentials embedded in the described scenario.",
+        "texto_opcion": "Daily email of CSV files to operators according to the requirements of the statement.",
         "es_correcta": false,
-        "explicacion": "Resilient offline bufferless and exposes credentials at the edge."
+        "explicacion": "Does not scale or serve near real-time."
       }
     ],
     "tags": [
@@ -240,9 +240,9 @@
         "explicacion": "Extended retention keeps records available for replay after consumer failure."
       },
       {
-        "texto_opcion": "Create snapshot of the shard on EBS evaluating operational trade-offs.",
+        "texto_opcion": "Temporarily enable Enhanced Fan-Out considering cost, scale and latency.",
         "es_correcta": false,
-        "explicacion": "Kinesis does not use EBS snapshots; retention is a stream parameter."
+        "explicacion": "EFO does not extend record retention in the stream."
       },
       {
         "texto_opcion": "Automatically export to Glacier via lifecycle in the described scenario.",
@@ -250,9 +250,9 @@
         "explicacion": "Glacier does not allow low latency streaming replay."
       },
       {
-        "texto_opcion": "Temporarily enable Enhanced Fan-Out considering cost, scale and latency.",
+        "texto_opcion": "Create snapshot of the shard on EBS evaluating operational trade-offs.",
         "es_correcta": false,
-        "explicacion": "EFO does not extend record retention in the stream."
+        "explicacion": "Kinesis does not use EBS snapshots; retention is a stream parameter."
       }
     ],
     "tags": [
@@ -264,6 +264,16 @@
     "pregunta": "Planning #10 — agricultural cooperative in us-east-1: Amazon Data Firehose fails to deliver malformed records and the team needs to audit failures without losing valid data. Which practice is recommended?",
     "opciones": [
       {
+        "texto_opcion": "Configure S3 backup bucket for records with failed conversion/delivery.",
+        "es_correcta": true,
+        "explicacion": "S3 Backup isolates problematic records for analysis without blocking the main stream."
+      },
+      {
+        "texto_opcion": "Stop the source Kinesis stream until manual correction considering cost, scale and latency.",
+        "es_correcta": false,
+        "explicacion": "Stops ingestion of all events, not just invalid ones."
+      },
+      {
         "texto_opcion": "Disable Lambda transformation to ignore errors by evaluating operational trade-offs.",
         "es_correcta": false,
         "explicacion": "Ignores invalid data without traceability."
@@ -272,16 +282,6 @@
         "texto_opcion": "Increase Firehose timeout to 900 s only according to the requirements of the statement.",
         "es_correcta": false,
         "explicacion": "Timeout does not resolve structurally malformed records."
-      },
-      {
-        "texto_opcion": "Stop the source Kinesis stream until manual correction considering cost, scale and latency.",
-        "es_correcta": false,
-        "explicacion": "Stops ingestion of all events, not just invalid ones."
-      },
-      {
-        "texto_opcion": "Configure S3 backup bucket for records with failed conversion/delivery.",
-        "es_correcta": true,
-        "explicacion": "S3 Backup isolates problematic records for analysis without blocking the main stream."
       }
     ],
     "tags": [
@@ -293,14 +293,14 @@
     "pregunta": "MSK topic with 35,000 msg/s shows increasing lag in consumer groups. After optimizing consumers, what adjustment to the broker/topic scales ingestion?",
     "opciones": [
       {
-        "texto_opcion": "Migrate consumers to single sequential polling according to the requirements of the statement.",
-        "es_correcta": false,
-        "explicacion": "Serializes processing and increases lag."
-      },
-      {
         "texto_opcion": "Increase topic partitions and scale brokers as per AWS recommendations.",
         "es_correcta": true,
         "explicacion": "More partitions parallelize consumption; additional brokers support network/disk throughput."
+      },
+      {
+        "texto_opcion": "Disable snappy compression on producers evaluating operational trade-offs, compression reduces I/O — compression reduces I/O; disabling it may worsen network throughput.",
+        "es_correcta": false,
+        "explicacion": "Compression reduces I/O; disabling it may worsen network throughput."
       },
       {
         "texto_opcion": "Reduce replication factor to 1 in the scenario described, reduces durability and does not resolve throughput bottlenecks safely.",
@@ -308,9 +308,9 @@
         "explicacion": "Reduces durability and does not resolve throughput bottlenecks safely."
       },
       {
-        "texto_opcion": "Disable snappy compression on producers evaluating operational trade-offs, compression reduces I/O",
+        "texto_opcion": "Migrate consumers to single sequential polling according to the requirements of the statement — serializes processing and increases lag.",
         "es_correcta": false,
-        "explicacion": "Compression reduces I/O; disabling it may worsen network throughput."
+        "explicacion": "Serializes processing and increases lag."
       }
     ],
     "tags": [
@@ -322,14 +322,14 @@
     "pregunta": "The pharmaceutical laboratory needs multiple customized consumers with fine checkpoint control and ms latency, but does not want to manage S3 delivery. Which service to choose?",
     "opciones": [
       {
-        "texto_opcion": "Amazon Data Firehose as sole consumer, firehose is managed delivery",
-        "es_correcta": false,
-        "explicacion": "Firehose is managed delivery, not a platform for multiple custom consumers."
-      },
-      {
         "texto_opcion": "Amazon S3 Event Notifications in this production context",
         "es_correcta": false,
         "explicacion": "S3 events do not replace high-rate streaming ingestion."
+      },
+      {
+        "texto_opcion": "Amazon Data Firehose as sole consumer, firehose is managed delivery",
+        "es_correcta": false,
+        "explicacion": "Firehose is managed delivery, not a platform for multiple custom consumers."
       },
       {
         "texto_opcion": "Amazon Kinesis Data Streams.",
@@ -361,7 +361,7 @@
         "explicacion": "Python Shell does not scale for continuous stateful aggregation."
       },
       {
-        "texto_opcion": "Redshift COPY every minute considering cost, scale and latency",
+        "texto_opcion": "Redshift COPY every minute considering cost, scale and latency — cOPY batch is not continuous streaming processing.",
         "es_correcta": false,
         "explicacion": "COPY batch is not continuous streaming processing."
       },
@@ -380,12 +380,12 @@
     "pregunta": "Audit #14 — analytics squad (us-east-1): Kinesis producers receive ProvisionedThroughputExceededException at peak times. Which combination solves the problem sustainably?",
     "opciones": [
       {
-        "texto_opcion": "Ignore exceptions and continue sending without retry in the described scenario.",
+        "texto_opcion": "Reduce retention to free up throughput in this production context — retention does not release ingestion capacity per shard.",
         "es_correcta": false,
-        "explicacion": "Loss of records and pipeline instability."
+        "explicacion": "Retention does not release ingestion capacity per shard."
       },
       {
-        "texto_opcion": "Use the same partition key for all events as per the requirements of the statement.",
+        "texto_opcion": "Use the same partition key for all events as per the requirements of the statement — creates hot shard and concentrates load on a single shard.",
         "es_correcta": false,
         "explicacion": "Creates hot shard and concentrates load on a single shard."
       },
@@ -395,9 +395,9 @@
         "explicacion": "More shards increase capacity; backoff and balanced keys prevent hot shards."
       },
       {
-        "texto_opcion": "Reduce retention to free up throughput in this production context",
+        "texto_opcion": "Ignore exceptions and continue sending without retry in the described scenario — loss of records and pipeline instability.",
         "es_correcta": false,
-        "explicacion": "Retention does not release ingestion capacity per shard."
+        "explicacion": "Loss of records and pipeline instability."
       }
     ],
     "tags": [
@@ -408,6 +408,11 @@
   {
     "pregunta": "Planning #15 — proptech in eu-west-1: Stream with 16 shards and KCL consumer with only 8 workers shows lag. Which setting maximizes read parallelism?",
     "opciones": [
+      {
+        "texto_opcion": "Duplicate records in the producer for each worker considering cost, scale and latency.",
+        "es_correcta": false,
+        "explicacion": "Duplicates ingestion and storage without resolving shard leasing."
+      },
       {
         "texto_opcion": "A single multithreaded worker reading all shards serially in the described scenario.",
         "es_correcta": false,
@@ -422,11 +427,6 @@
         "texto_opcion": "Run one KCL worker per shard (16 workers) respecting the 1:1 shard-lease model.",
         "es_correcta": true,
         "explicacion": "KCL distributes shards between workers; undersizing workers limits read throughput."
-      },
-      {
-        "texto_opcion": "Duplicate records in the producer for each worker considering cost, scale and latency.",
-        "es_correcta": false,
-        "explicacion": "Duplicates ingestion and storage without resolving shard leasing."
       }
     ],
     "tags": [
@@ -438,9 +438,9 @@
     "pregunta": "Logistics company wants near-real-time logs in ⟦Q0⟧ without frequent manual COPY. Which native integration does Firehose support?",
     "opciones": [
       {
-        "texto_opcion": "Redshift Spectrum querying S3 in this production context only",
-        "es_correcta": false,
-        "explicacion": "Spectrum is external reading; does not replace near-real-time automated loading on the native table."
+        "texto_opcion": "Destination Amazon Redshift with automatic COPY via Firehose.",
+        "es_correcta": true,
+        "explicacion": "Firehose can load Redshift periodically with configurable buffering."
       },
       {
         "texto_opcion": "Complete daily unload/reload of the table evaluating operational trade-offs.",
@@ -448,9 +448,9 @@
         "explicacion": "Full reload is not near-real-time and is expensive."
       },
       {
-        "texto_opcion": "Destination Amazon Redshift with automatic COPY via Firehose.",
-        "es_correcta": true,
-        "explicacion": "Firehose can load Redshift periodically with configurable buffering."
+        "texto_opcion": "Redshift Spectrum querying S3 in this production context only — spectrum is external reading.",
+        "es_correcta": false,
+        "explicacion": "Spectrum is external reading; does not replace near-real-time automated loading on the native table."
       },
       {
         "texto_opcion": "Continuous DMS from Kinesis stream to Redshift in the described scenario.",
@@ -472,19 +472,19 @@
         "explicacion": "Kinesis Data Streams deliver predictable throughput per shard and EFO reduces latency between parallel consumers."
       },
       {
-        "texto_opcion": "AWS Database Migration Service in continuous mode for the data lake in this production context",
+        "texto_opcion": "Amazon Data Firehose delivering directly to S3 with a minimum buffer of 60 s evaluating operational trade-offs.",
         "es_correcta": false,
-        "explicacion": "DMS replicates changes from relational banks, not application telemetry at a high rate."
+        "explicacion": "Firehose prioritizes managed delivery with buffering; Typical latency is greater than sub-second."
       },
       {
-        "texto_opcion": "AWS Transfer Family SFTP with files aggregated every minute considering cost, scale and latency",
+        "texto_opcion": "AWS Transfer Family SFTP with files aggregated every minute considering cost, scale and latency.",
         "es_correcta": false,
         "explicacion": "Transfer Family is per-file ingestion, unsuitable for tens of thousands of events/sec."
       },
       {
-        "texto_opcion": "Amazon Data Firehose delivering directly to S3 with a minimum buffer of 60 s evaluating operational trade-offs.",
+        "texto_opcion": "AWS Database Migration Service in continuous mode for the data lake in this production context.",
         "es_correcta": false,
-        "explicacion": "Firehose prioritizes managed delivery with buffering; Typical latency is greater than sub-second."
+        "explicacion": "DMS replicates changes from relational banks, not application telemetry at a high rate."
       }
     ],
     "tags": [
@@ -501,11 +501,6 @@
         "explicacion": "EventBridge is event bus, not Kafka cluster replacement."
       },
       {
-        "texto_opcion": "Amazon SQS FIFO as a direct replacement for Kafka topics as per the.",
-        "es_correcta": false,
-        "explicacion": "SQS does not implement partitioned logging or full Kafka consumer group semantics."
-      },
-      {
         "texto_opcion": "Amazon Kinesis Data Streams converting messages to Kinesis records.",
         "es_correcta": false,
         "explicacion": "Would require adapters; does not maintain native compatibility with the Kafka protocol."
@@ -514,6 +509,11 @@
         "texto_opcion": "Amazon MSK with managed brokers and the same Kafka API/protocol.",
         "es_correcta": true,
         "explicacion": "MSK is managed Kafka on AWS; preserves existing producers, consumers, topics, and partitioning."
+      },
+      {
+        "texto_opcion": "Amazon SQS FIFO as a direct replacement for Kafka topics as per the.",
+        "es_correcta": false,
+        "explicacion": "SQS does not implement partitioned logging or full Kafka consumer group semantics."
       }
     ],
     "tags": [
@@ -525,16 +525,6 @@
     "pregunta": "Audit #19 — ML engineering (eu-west-1): Payments fintech needs to load 500 GB/day of logs into Amazon S3 with compression and without managing consumers. Which service simplifies the operation?",
     "opciones": [
       {
-        "texto_opcion": "Amazon Data Firehose with S3 destination, buffering and optional conversion via Lambda.",
-        "es_correcta": true,
-        "explicacion": "Firehose does buffering, compression, and managed delivery without a dedicated consumer cluster."
-      },
-      {
-        "texto_opcion": "AWS Glue streaming job executed every hour according to the requirements of the statement.",
-        "es_correcta": false,
-        "explicacion": "Glue streaming requires a dedicated job and does not replace managed near-real-time pipelines."
-      },
-      {
         "texto_opcion": "Kinesis Data Streams with three Lambda consumers per shard evaluating operational trade-offs.",
         "es_correcta": false,
         "explicacion": "Streams require scaling shards and implementing delivery to each consumer."
@@ -543,6 +533,16 @@
         "texto_opcion": "Amazon EMR reading from Kafka and writing Parquet manually in the described scenario.",
         "es_correcta": false,
         "explicacion": "EMR requires cluster operation and does not eliminate consumer management for S3 delivery."
+      },
+      {
+        "texto_opcion": "Amazon Data Firehose with S3 destination, buffering and optional conversion via Lambda.",
+        "es_correcta": true,
+        "explicacion": "Firehose does buffering, compression, and managed delivery without a dedicated consumer cluster."
+      },
+      {
+        "texto_opcion": "AWS Glue streaming job executed every hour according to the requirements of the statement.",
+        "es_correcta": false,
+        "explicacion": "Glue streaming requires a dedicated job and does not replace managed near-real-time pipelines."
       }
     ],
     "tags": [
@@ -554,6 +554,11 @@
     "pregunta": "Planning #20 — pharmaceutical lab in ap-southeast-1: A Kinesis stream reaches 80% of ingestion capacity with ~35,000 records/s. The team needs to increase throughput without losing order by partition key. What to do?",
     "opciones": [
       {
+        "texto_opcion": "Replace Kinesis with S3 PUT directly from producers considering cost, scale and latency.",
+        "es_correcta": false,
+        "explicacion": "S3 does not guarantee key-ordered ingestion at streaming rates with ms of latency."
+      },
+      {
         "texto_opcion": "Activate Enhanced Fan-Out only, without changing shards as per the requirements of the statement.",
         "es_correcta": false,
         "explicacion": "EFO improves reading, does not increase stream ingestion capacity."
@@ -564,12 +569,7 @@
         "explicacion": "Each shard supports 1 MB/s or 1,000 records/s of ingestion; more shards increase total capacidade."
       },
       {
-        "texto_opcion": "Replace Kinesis with S3 PUT directly from producers considering cost, scale and latency.",
-        "es_correcta": false,
-        "explicacion": "S3 does not guarantee key-ordered ingestion at streaming rates with ms of latency."
-      },
-      {
-        "texto_opcion": "Migrate all records to a single larger shard in the described scenario",
+        "texto_opcion": "Migrate all records to a single larger shard in the described scenario — kinesis does not offer scalable single shard.",
         "es_correcta": false,
         "explicacion": "Kinesis does not offer scalable single shard; capacidade is horizontal per shard."
       }
@@ -583,24 +583,24 @@
     "pregunta": "The streaming media startup has five independent consumers reading the same Kinesis Data Stream and suffers from shared read latency (~2 s). How to reduce latency per consumer?",
     "opciones": [
       {
-        "texto_opcion": "Reduce stream retention to 1 hour by evaluating operational trade-offs",
+        "texto_opcion": "Register consumers with dedicated Enhanced Fan-Out (EFO).",
+        "es_correcta": true,
+        "explicacion": "EFO provisions dedicated read throughput per consumer, reducing contention and latency."
+      },
+      {
+        "texto_opcion": "Reduce stream retention to 1 hour by evaluating operational trade-offs — retention affects historical retention, not read latency between consumers.",
         "es_correcta": false,
         "explicacion": "Retention affects historical retention, not read latency between consumers."
+      },
+      {
+        "texto_opcion": "Use classic polling with a longer interval between GetRecords in this production context — longer intervals increase latency, not reduce it.",
+        "es_correcta": false,
+        "explicacion": "Longer intervals increase latency, not reduce it."
       },
       {
         "texto_opcion": "Consolidate all consumers into a single monolithic process, eliminates team parallelism and does not scale operationally.",
         "es_correcta": false,
         "explicacion": "Eliminates team parallelism and does not scale operationally."
-      },
-      {
-        "texto_opcion": "Use classic polling with a longer interval between GetRecords in this production context.",
-        "es_correcta": false,
-        "explicacion": "Longer intervals increase latency, not reduce it."
-      },
-      {
-        "texto_opcion": "Register consumers with dedicated Enhanced Fan-Out (EFO).",
-        "es_correcta": true,
-        "explicacion": "EFO provisions dedicated read throughput per consumer, reducing contention and latency."
       }
     ],
     "tags": [
@@ -612,14 +612,9 @@
     "pregunta": "Firehose delivers files that are too small on S3, increasing Athena's cost. The pipeline allows latency up to near real-time. Which tweak balances file size and freshness?",
     "opciones": [
       {
-        "texto_opcion": "Immediately migrate to Kinesis Analytics without buffering considering cost, scale and latency.",
+        "texto_opcion": "Disable GZIP compression to speed up delivery in this production context — compression reduces storage and transfer — compression reduces storage and transfer; disabling increases S3 cost.",
         "es_correcta": false,
-        "explicacion": "Analytics does not replace Firehose delivery configuration for S3."
-      },
-      {
-        "texto_opcion": "Reduce buffer to 1 MB and interval to 60 s as per the requirements of the statement.",
-        "es_correcta": false,
-        "explicacion": "Smaller buffers make the small file problem worse."
+        "explicacion": "Compression reduces storage and transfer; disabling increases S3 cost."
       },
       {
         "texto_opcion": "Increase BufferSizeInMB and/or BufferIntervalInSeconds within the acceptable latency limit.",
@@ -627,9 +622,14 @@
         "explicacion": "Larger buffers generate less fragmented S3 objects, reducing analytical query costs."
       },
       {
-        "texto_opcion": "Disable GZIP compression to speed up delivery in this production context",
+        "texto_opcion": "Reduce buffer to 1 MB and interval to 60 s as per the requirements of the statement — smaller buffers make the small file problem worse.",
         "es_correcta": false,
-        "explicacion": "Compression reduces storage and transfer; disabling increases S3 cost."
+        "explicacion": "Smaller buffers make the small file problem worse."
+      },
+      {
+        "texto_opcion": "Immediately migrate to Kinesis Analytics without buffering considering cost, scale and latency — analytics does not replace Firehose delivery configuration for S3.",
+        "es_correcta": false,
+        "explicacion": "Analytics does not replace Firehose delivery configuration for S3."
       }
     ],
     "tags": [
@@ -641,14 +641,14 @@
     "pregunta": "Incident #23 — industrial IoT platform eu-west-1 operation: Game studio has intermittent Kafka loads and wants to avoid provisioning brokers 24/7. Which MSK option reduces operating capacity?",
     "opciones": [
       {
-        "texto_opcion": "MSK provisioned with maximum brokers at all times",
-        "es_correcta": false,
-        "explicacion": "Fixed provisioning increases costs in intermittent loads."
-      },
-      {
         "texto_opcion": "Amazon MSK Serverless with auto throughput scaling.",
         "es_correcta": true,
         "explicacion": "MSK Serverless abstracts broker sizing for variable loads."
+      },
+      {
+        "texto_opcion": "Amazon MQ for ActiveMQ as a Kafka drop-in considering cost, scale and latency.",
+        "es_correcta": false,
+        "explicacion": "ActiveMQ is not compatible with Kafka protocol."
       },
       {
         "texto_opcion": "Self-managed Kafka on EC2 with Auto Scaling Group in the described scenario.",
@@ -656,9 +656,9 @@
         "explicacion": "It still requires the operation of brokers, patches and manual rebalancing."
       },
       {
-        "texto_opcion": "Amazon MQ for ActiveMQ as a Kafka drop-in considering cost, scale and latency.",
+        "texto_opcion": "MSK provisioned with maximum brokers at all times — fixed provisioning increases costs in intermittent loads.",
         "es_correcta": false,
-        "explicacion": "ActiveMQ is not compatible with Kafka protocol."
+        "explicacion": "Fixed provisioning increases costs in intermittent loads."
       }
     ],
     "tags": [
@@ -670,14 +670,14 @@
     "pregunta": "Audit #24 — data team (ap-southeast-1): Edge plants generate telemetry bursts and the center needs buffering before the lake in the cloud. What combination balances offline resilience and delivery on AWS?",
     "opciones": [
       {
-        "texto_opcion": "Daily email of CSV files to operators in the described scenario, does not scale or serve near real-time.",
-        "es_correcta": false,
-        "explicacion": "Does not scale or serve near real-time."
-      },
-      {
-        "texto_opcion": "Producers writing directly to S3 via embedded credentials considering cost, scale and latency.",
+        "texto_opcion": "Producers writing directly to S3 via embedded credentials considering cost, scale and latency — resilient offline bufferless and exposes credentials at the edge.",
         "es_correcta": false,
         "explicacion": "Resilient offline bufferless and exposes credentials at the edge."
+      },
+      {
+        "texto_opcion": "Daily email of CSV files to operators in the described scenario, does not scale or serve near real-time plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Does not scale or serve near real-time."
       },
       {
         "texto_opcion": "Kinesis Agent or local IoT Greengrass + Kinesis Data Streams in region {_pick(REGIONS, i)}.",
@@ -704,14 +704,14 @@
         "explicacion": "Extended retention keeps records available for replay after consumer failure."
       },
       {
-        "texto_opcion": "Create a snapshot of the shard in EBS according to the requirements of the statement.",
-        "es_correcta": false,
-        "explicacion": "Kinesis does not use EBS snapshots; retention is a stream parameter."
-      },
-      {
-        "texto_opcion": "Automatically export to Glacier via lifecycle in this production context.",
+        "texto_opcion": "Automatically export to Glacier via lifecycle in this production context — glacier does not allow low latency streaming replay.",
         "es_correcta": false,
         "explicacion": "Glacier does not allow low latency streaming replay."
+      },
+      {
+        "texto_opcion": "Create a snapshot of the shard in EBS according to the requirements of the statement — kinesis does not use EBS snapshots; retention is a stream parameter.",
+        "es_correcta": false,
+        "explicacion": "Kinesis does not use EBS snapshots; retention is a stream parameter."
       },
       {
         "texto_opcion": "Temporarily enable Enhanced Fan-Out in the described scenario, eFO does not extend record retention in the stream.",
@@ -733,6 +733,11 @@
         "explicacion": "Stops ingestion of all events, not just invalid ones."
       },
       {
+        "texto_opcion": "Disable Lambda transformation to ignore errors as per the requirements of the statement.",
+        "es_correcta": false,
+        "explicacion": "Ignores invalid data without traceability."
+      },
+      {
         "texto_opcion": "Configure S3 backup bucket for records with failed conversion/delivery.",
         "es_correcta": true,
         "explicacion": "S3 Backup isolates problematic records for analysis without blocking the main stream."
@@ -741,11 +746,6 @@
         "texto_opcion": "Increase Firehose timeout to 900 s only considering cost, scale and latency.",
         "es_correcta": false,
         "explicacion": "Timeout does not resolve structurally malformed records."
-      },
-      {
-        "texto_opcion": "Disable Lambda transformation to ignore errors as per the requirements of the statement.",
-        "es_correcta": false,
-        "explicacion": "Ignores invalid data without traceability."
       }
     ],
     "tags": [
@@ -757,24 +757,24 @@
     "pregunta": "MSK topic with 80,000 msg/s shows increasing lag in consumer groups. After optimizing consumers, what adjustment to the broker/topic scales ingestion?",
     "opciones": [
       {
-        "texto_opcion": "Migrate consumers to single sequential polling in this production context.",
-        "es_correcta": false,
-        "explicacion": "Serializes processing and increases lag."
-      },
-      {
-        "texto_opcion": "Reduce replication factor to 1 in the scenario described",
-        "es_correcta": false,
-        "explicacion": "Reduces durability and does not resolve throughput bottlenecks safely."
-      },
-      {
         "texto_opcion": "Disable snappy compression on producers evaluating operational trade-offs.",
         "es_correcta": false,
         "explicacion": "Compression reduces I/O; disabling it may worsen network throughput."
       },
       {
+        "texto_opcion": "Migrate consumers to single sequential polling in this production context.",
+        "es_correcta": false,
+        "explicacion": "Serializes processing and increases lag."
+      },
+      {
         "texto_opcion": "Increase topic partitions and scale brokers as per AWS recommendations.",
         "es_correcta": true,
         "explicacion": "More partitions parallelize consumption; additional brokers support network/disk throughput."
+      },
+      {
+        "texto_opcion": "Reduce replication factor to 1 in the scenario described.",
+        "es_correcta": false,
+        "explicacion": "Reduces durability and does not resolve throughput bottlenecks safely."
       }
     ],
     "tags": [
@@ -791,11 +791,6 @@
         "explicacion": "S3 events do not replace high-rate streaming ingestion."
       },
       {
-        "texto_opcion": "Amazon Data Firehose as sole consumer, firehose is managed delivery",
-        "es_correcta": false,
-        "explicacion": "Firehose is managed delivery, not a platform for multiple custom consumers."
-      },
-      {
         "texto_opcion": "AWS Batch driven by cron, batch is batch processing, not ms streaming.",
         "es_correcta": false,
         "explicacion": "Batch is batch processing, not ms streaming."
@@ -804,6 +799,11 @@
         "texto_opcion": "Amazon Kinesis Data Streams.",
         "es_correcta": true,
         "explicacion": "Streams allows customized consumers with checkpoint control and low latency."
+      },
+      {
+        "texto_opcion": "Amazon Data Firehose as sole consumer, firehose is managed delivery",
+        "es_correcta": false,
+        "explicacion": "Firehose is managed delivery, not a platform for multiple custom consumers."
       }
     ],
     "tags": [
@@ -815,14 +815,9 @@
     "pregunta": "Audit #29 — platform team (sa-east-1): Data team wants continuous SQL over Kinesis for 1-minute window aggregations without managing Flink cluster. Which service fits?",
     "opciones": [
       {
-        "texto_opcion": "Glue Python Shell job per event in this production context",
+        "texto_opcion": "Athena querying S3 every minute via scheduled query according to the.",
         "es_correcta": false,
-        "explicacion": "Python Shell does not scale for continuous stateful aggregation."
-      },
-      {
-        "texto_opcion": "Amazon Managed Service for Apache Flink (formerly Kinesis Data Analytics).",
-        "es_correcta": true,
-        "explicacion": "Managed Flink runs stateful SQL/streaming without manually operating cluster."
+        "explicacion": "Athena is on-demand batch; latency and cost per continuous query are high."
       },
       {
         "texto_opcion": "Redshift COPY every minute considering cost, scale and latency.",
@@ -830,9 +825,14 @@
         "explicacion": "COPY batch is not continuous streaming processing."
       },
       {
-        "texto_opcion": "Athena querying S3 every minute via scheduled query according to the.",
+        "texto_opcion": "Glue Python Shell job per event in this production context.",
         "es_correcta": false,
-        "explicacion": "Athena is on-demand batch; latency and cost per continuous query are high."
+        "explicacion": "Python Shell does not scale for continuous stateful aggregation."
+      },
+      {
+        "texto_opcion": "Amazon Managed Service for Apache Flink (formerly Kinesis Data Analytics).",
+        "es_correcta": true,
+        "explicacion": "Managed Flink runs stateful SQL/streaming without manually operating cluster."
       }
     ],
     "tags": [
@@ -844,14 +844,14 @@
     "pregunta": "Planning #30 — agricultural co-op in us-east-1: Kinesis producers receive ProvisionedThroughputExceededException during peak hours. Which combination solves the problem sustainably?",
     "opciones": [
       {
+        "texto_opcion": "Use the same partition key for all events to evaluate operational trade-offs.",
+        "es_correcta": false,
+        "explicacion": "Creates hot shard and concentrates load on a single shard."
+      },
+      {
         "texto_opcion": "Ignore exceptions and continue sending without retry in the described scenario.",
         "es_correcta": false,
         "explicacion": "Loss of records and pipeline instability."
-      },
-      {
-        "texto_opcion": "Reduce retention to free up throughput according to the requirements of the statement.",
-        "es_correcta": false,
-        "explicacion": "Retention does not release ingestion capacity per shard."
       },
       {
         "texto_opcion": "Increase shards, implement exponential backoff and distribute partition keys evenly.",
@@ -859,9 +859,9 @@
         "explicacion": "More shards increase capacity; backoff and balanced keys prevent hot shards."
       },
       {
-        "texto_opcion": "Use the same partition key for all events to evaluate operational trade-offs.",
+        "texto_opcion": "Reduce retention to free up throughput according to the requirements of the statement.",
         "es_correcta": false,
-        "explicacion": "Creates hot shard and concentrates load on a single shard."
+        "explicacion": "Retention does not release ingestion capacity per shard."
       }
     ],
     "tags": [
@@ -873,16 +873,6 @@
     "pregunta": "Stream with 16 shards and KCL consumer with only 8 workers shows lag. Which setting maximizes read parallelism?",
     "opciones": [
       {
-        "texto_opcion": "A single multithreaded worker reading all shards serially evaluating operational trade-offs, serialization creates a thread-independent bottleneck.",
-        "es_correcta": false,
-        "explicacion": "Serialization creates a thread-independent bottleneck."
-      },
-      {
-        "texto_opcion": "Disable checkpoint to speed up reading in the described scenario, loses reliable exactly-once/at-least-once semantics.",
-        "es_correcta": false,
-        "explicacion": "Loses reliable exactly-once/at-least-once semantics."
-      },
-      {
         "texto_opcion": "Run one KCL worker per shard (16 workers) respecting the 1:1 shard-lease model.",
         "es_correcta": true,
         "explicacion": "KCL distributes shards between workers; undersizing workers limits read throughput."
@@ -891,6 +881,16 @@
         "texto_opcion": "Duplicate records in the producer for each worker according to the requirements of the statement, duplicates ingestion and storage without resolving shard leasing.",
         "es_correcta": false,
         "explicacion": "Duplicates ingestion and storage without resolving shard leasing."
+      },
+      {
+        "texto_opcion": "A single multithreaded worker reading all shards serially evaluating operational trade-offs, serialization creates a thread-independent bottleneck prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Serialization creates a thread-independent bottleneck."
+      },
+      {
+        "texto_opcion": "Disable checkpoint to speed up reading in the described scenario, loses reliable exactly-once/at-least-once semantics used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Loses reliable exactly-once/at-least-once semantics."
       }
     ],
     "tags": [
@@ -902,12 +902,12 @@
     "pregunta": "Omnichannel retailer wants near-real-time logs in ⟦Q0⟧ without frequent manual COPY. Which native integration does Firehose support?",
     "opciones": [
       {
-        "texto_opcion": "Complete daily unload/reload of the table as per the requirements of the statement.",
+        "texto_opcion": "Redshift Spectrum querying S3 only in the described scenario, spectrum is external reading",
         "es_correcta": false,
-        "explicacion": "Full reload is not near-real-time and is expensive."
+        "explicacion": "Spectrum is external reading; does not replace near-real-time automated loading on the native table."
       },
       {
-        "texto_opcion": "Seamless DMS from Kinesis stream to Redshift in this production context.",
+        "texto_opcion": "Seamless DMS from Kinesis stream to Redshift in this production context — dMS is not the default log streaming path for Redshift.",
         "es_correcta": false,
         "explicacion": "DMS is not the default log streaming path for Redshift."
       },
@@ -917,9 +917,9 @@
         "explicacion": "Firehose can load Redshift periodically with configurable buffering."
       },
       {
-        "texto_opcion": "Redshift Spectrum querying S3 only in the described scenario, spectrum is external reading",
+        "texto_opcion": "Complete daily unload/reload of the table as per the requirements of the statement.",
         "es_correcta": false,
-        "explicacion": "Spectrum is external reading; does not replace near-real-time automated loading on the native table."
+        "explicacion": "Full reload is not near-real-time and is expensive."
       }
     ],
     "tags": [
@@ -931,14 +931,14 @@
     "pregunta": "Incident #33 — insurer sa-east-1 operation: An insurer needs to ingest ~2000 events/s with latency less than 200 ms for anomaly detection. Which streaming ingestion architecture best meets the trade-off between scale and control?",
     "opciones": [
       {
+        "texto_opcion": "Amazon Kinesis Data Streams with scaled shards and Enhanced Fan-Out for critical consumers.",
+        "es_correcta": true,
+        "explicacion": "Kinesis Data Streams deliver predictable throughput per shard and EFO reduces latency between parallel consumers."
+      },
+      {
         "texto_opcion": "Amazon Data Firehose delivering directly to S3 with a minimum buffer of 60 s in the described scenario.",
         "es_correcta": false,
         "explicacion": "Firehose prioritizes managed delivery with buffering; Typical latency is greater than sub-second."
-      },
-      {
-        "texto_opcion": "AWS Database Migration Service in continuous mode for the data lake in this production context.",
-        "es_correcta": false,
-        "explicacion": "DMS replicates changes from relational banks, not application telemetry at a high rate."
       },
       {
         "texto_opcion": "AWS Transfer Family SFTP with files aggregated every minute according to the requirements of the statement.",
@@ -946,9 +946,9 @@
         "explicacion": "Transfer Family is per-file ingestion, unsuitable for tens of thousands of events/sec."
       },
       {
-        "texto_opcion": "Amazon Kinesis Data Streams with scaled shards and Enhanced Fan-Out for critical consumers.",
-        "es_correcta": true,
-        "explicacion": "Kinesis Data Streams deliver predictable throughput per shard and EFO reduces latency between parallel consumers."
+        "texto_opcion": "AWS Database Migration Service in continuous mode for the data lake in this production context.",
+        "es_correcta": false,
+        "explicacion": "DMS replicates changes from relational banks, not application telemetry at a high rate."
       }
     ],
     "tags": [
@@ -989,6 +989,16 @@
     "pregunta": "Planning #35 — proptech in eu-west-1: Social networks need to load 200 TB/day of logs into Amazon S3 with compression and without managing consumers. Which service simplifies the operation?",
     "opciones": [
       {
+        "texto_opcion": "AWS Glue streaming job executed every hour considering cost, scale and latency.",
+        "es_correcta": false,
+        "explicacion": "Glue streaming requires a dedicated job and does not replace managed near-real-time pipelines."
+      },
+      {
+        "texto_opcion": "Kinesis Data Streams with three Lambda consumers per shard in the described scenario.",
+        "es_correcta": false,
+        "explicacion": "Streams require scaling shards and implementing delivery to each consumer."
+      },
+      {
         "texto_opcion": "Amazon Data Firehose with S3 destination, buffering and optional conversion via Lambda.",
         "es_correcta": true,
         "explicacion": "Firehose does buffering, compression, and managed delivery without a dedicated consumer cluster."
@@ -997,16 +1007,6 @@
         "texto_opcion": "Amazon EMR reading from Kafka and recording Parquet manually evaluating operational trade-offs.",
         "es_correcta": false,
         "explicacion": "EMR requires cluster operation and does not eliminate consumer management for S3 delivery."
-      },
-      {
-        "texto_opcion": "AWS Glue streaming job executed every hour considering cost, scale and latency",
-        "es_correcta": false,
-        "explicacion": "Glue streaming requires a dedicated job and does not replace managed near-real-time pipelines."
-      },
-      {
-        "texto_opcion": "Kinesis Data Streams with three Lambda consumers per shard in the described scenario.",
-        "es_correcta": false,
-        "explicacion": "Streams require scaling shards and implementing delivery to each consumer."
       }
     ],
     "tags": [
@@ -1018,24 +1018,24 @@
     "pregunta": "A Kinesis stream reaches 80% of the ingestion capacity with ~80,000 records/s. The team needs to increase throughput without losing order by partition key. What to do?",
     "opciones": [
       {
-        "texto_opcion": "Migrate all records to a single larger shard as per the requirements of the statement.",
-        "es_correcta": false,
-        "explicacion": "Kinesis does not offer scalable single shard; capacidade is horizontal per shard."
-      },
-      {
         "texto_opcion": "Increase the number of shards via UpdateShardCount or resharding.",
         "es_correcta": true,
         "explicacion": "Each shard supports 1 MB/s or 1,000 records/s of ingestion; more shards increase total capacidade."
       },
       {
-        "texto_opcion": "Enable Enhanced Fan-Out only, without changing shards considering cost, scale and latency.",
-        "es_correcta": false,
-        "explicacion": "EFO improves reading, does not increase stream ingestion capacity."
-      },
-      {
         "texto_opcion": "Replace Kinesis with S3 PUT direct from producers in this production context",
         "es_correcta": false,
         "explicacion": "S3 does not guarantee key-ordered ingestion at streaming rates with ms of latency."
+      },
+      {
+        "texto_opcion": "Migrate all records to a single larger shard as per the requirements of the statement.",
+        "es_correcta": false,
+        "explicacion": "Kinesis does not offer scalable single shard; capacidade is horizontal per shard."
+      },
+      {
+        "texto_opcion": "Enable Enhanced Fan-Out only, without changing shards considering cost, scale and latency.",
+        "es_correcta": false,
+        "explicacion": "EFO improves reading, does not increase stream ingestion capacity."
       }
     ],
     "tags": [
@@ -1047,16 +1047,6 @@
     "pregunta": "The payments fintech has five independent consumers reading the same Kinesis Data Stream and suffers from shared read latency (~2 s). How to reduce latency per consumer?",
     "opciones": [
       {
-        "texto_opcion": "Use classic polling with a longer interval between GetRecords.",
-        "es_correcta": false,
-        "explicacion": "Longer intervals increase latency, not reduce it."
-      },
-      {
-        "texto_opcion": "Register consumers with dedicated Enhanced Fan-Out (EFO).",
-        "es_correcta": true,
-        "explicacion": "EFO provisions dedicated read throughput per consumer, reducing contention and latency."
-      },
-      {
         "texto_opcion": "Reduce stream retention to 1 hour in the described scenario.",
         "es_correcta": false,
         "explicacion": "Retention affects historical retention, not read latency between consumers."
@@ -1065,6 +1055,16 @@
         "texto_opcion": "Consolidate all consumers into a single monolithic process.",
         "es_correcta": false,
         "explicacion": "Eliminates team parallelism and does not scale operationally."
+      },
+      {
+        "texto_opcion": "Register consumers with dedicated Enhanced Fan-Out (EFO).",
+        "es_correcta": true,
+        "explicacion": "EFO provisions dedicated read throughput per consumer, reducing contention and latency."
+      },
+      {
+        "texto_opcion": "Use classic polling with a longer interval between GetRecords.",
+        "es_correcta": false,
+        "explicacion": "Longer intervals increase latency, not reduce it."
       }
     ],
     "tags": [
@@ -1076,12 +1076,12 @@
     "pregunta": "Incident #38 — digital bank us-east-1 operation: Firehose delivers too small files to S3, increasing Athena's cost. The pipeline allows for latency of up to 1 minute. Which tweak balances file size and freshness?",
     "opciones": [
       {
-        "texto_opcion": "Disable GZIP compression to speed up delivery in this production context",
+        "texto_opcion": "Reduce buffer to 1 MB and interval to 60 s by evaluating operational trade-offs — smaller buffers make the small file problem worse.",
         "es_correcta": false,
-        "explicacion": "Compression reduces storage and transfer; disabling increases S3 cost."
+        "explicacion": "Smaller buffers make the small file problem worse."
       },
       {
-        "texto_opcion": "Immediately migrate to Kinesis Analytics without buffering in the scenario described.",
+        "texto_opcion": "Immediately migrate to Kinesis Analytics without buffering in the scenario described — analytics does not replace Firehose delivery configuration for S3.",
         "es_correcta": false,
         "explicacion": "Analytics does not replace Firehose delivery configuration for S3."
       },
@@ -1091,9 +1091,9 @@
         "explicacion": "Larger buffers generate less fragmented S3 objects, reducing analytical query costs."
       },
       {
-        "texto_opcion": "Reduce buffer to 1 MB and interval to 60 s by evaluating operational trade-offs.",
+        "texto_opcion": "Disable GZIP compression to speed up delivery in this production context — compression reduces storage and transfer — compression reduces storage and transfer; disabling increases S3 cost.",
         "es_correcta": false,
-        "explicacion": "Smaller buffers make the small file problem worse."
+        "explicacion": "Compression reduces storage and transfer; disabling increases S3 cost."
       }
     ],
     "tags": [
@@ -1110,12 +1110,12 @@
         "explicacion": "MSK Serverless abstracts broker sizing for variable loads."
       },
       {
-        "texto_opcion": "Self-managed Kafka on EC2 with Auto Scaling Group in the described scenario.",
+        "texto_opcion": "Self-managed Kafka on EC2 with Auto Scaling Group in the described scenario — it still requires the operation of brokers, patches and manual rebalancing.",
         "es_correcta": false,
         "explicacion": "It still requires the operation of brokers, patches and manual rebalancing."
       },
       {
-        "texto_opcion": "Amazon MQ for ActiveMQ as a Kafka drop-in as per the requirements of the statement.",
+        "texto_opcion": "Amazon MQ for ActiveMQ as a Kafka drop-in as per the requirements of the statement — activeMQ is not compatible with Kafka protocol.",
         "es_correcta": false,
         "explicacion": "ActiveMQ is not compatible with Kafka protocol."
       },
@@ -1134,9 +1134,9 @@
     "pregunta": "Planning #40 — pharmaceutical laboratory in ap-southeast-1: Edge plants generate telemetry bursts and the central one needs buffering before the lake in the cloud. What combination balances offline resilience and delivery on AWS?",
     "opciones": [
       {
-        "texto_opcion": "Daily email of CSV files to operators in this production context, does not scale or serve near real-time.",
-        "es_correcta": false,
-        "explicacion": "Does not scale or serve near real-time."
+        "texto_opcion": "Kinesis Agent or local IoT Greengrass + Kinesis Data Streams in region {_pick(REGIONS, i)}.",
+        "es_correcta": true,
+        "explicacion": "Agent/Greengrass buffer offline; Kinesis centralizes durable ingestion in the cloud."
       },
       {
         "texto_opcion": "Local RDS as the only permanent destination evaluating operational trade-offs, rDS edge does not replace streaming pipeline for data lake.",
@@ -1144,14 +1144,14 @@
         "explicacion": "RDS edge does not replace streaming pipeline for data lake."
       },
       {
-        "texto_opcion": "Producers writing directly to S3 via embedded credentials as per the requirements of the statement.",
+        "texto_opcion": "Producers writing directly to S3 via embedded credentials as per the requirements of the statement — resilient offline bufferless and exposes credentials at the edge.",
         "es_correcta": false,
         "explicacion": "Resilient offline bufferless and exposes credentials at the edge."
       },
       {
-        "texto_opcion": "Kinesis Agent or local IoT Greengrass + Kinesis Data Streams in region {_pick(REGIONS, i)}.",
-        "es_correcta": true,
-        "explicacion": "Agent/Greengrass buffer offline; Kinesis centralizes durable ingestion in the cloud."
+        "texto_opcion": "Daily email of CSV files to operators in this production context, does not scale or serve near real-time as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Does not scale or serve near real-time."
       }
     ],
     "tags": [
@@ -1163,19 +1163,19 @@
     "pregunta": "Downstream consumers were unavailable for 24 h and need to reprocess events. Which Kinesis Data Streams configuration allows recovery?",
     "opciones": [
       {
-        "texto_opcion": "Temporarily enable Enhanced Fan-Out in the described scenario",
-        "es_correcta": false,
-        "explicacion": "EFO does not extend record retention in the stream."
-      },
-      {
         "texto_opcion": "Increase stream retention to at least 24 hours (up to 365 days).",
         "es_correcta": true,
         "explicacion": "Extended retention keeps records available for replay after consumer failure."
       },
       {
-        "texto_opcion": "Create shard snapshot on EBS considering cost, scale and latency",
+        "texto_opcion": "Create shard snapshot on EBS considering cost, scale and latency — kinesis does not use EBS snapshots.",
         "es_correcta": false,
         "explicacion": "Kinesis does not use EBS snapshots; retention is a stream parameter."
+      },
+      {
+        "texto_opcion": "Temporarily enable Enhanced Fan-Out in the described scenario — eFO does not extend record retention in the stream.",
+        "es_correcta": false,
+        "explicacion": "EFO does not extend record retention in the stream."
       },
       {
         "texto_opcion": "Automatically export to Glacier via lifecycle evaluating operational trade-offs.",
@@ -1192,17 +1192,7 @@
     "pregunta": "Incident #43 — industrial IoT platform eu-west-1 operation: MSK topic with 2,000 msg/s shows increasing lag in consumer groups. After optimizing consumers, what adjustment to the broker/topic scales ingestion?",
     "opciones": [
       {
-        "texto_opcion": "Disable snappy compression on producers in the described scenario, compression reduces I/O",
-        "es_correcta": false,
-        "explicacion": "Compression reduces I/O; disabling it may worsen network throughput."
-      },
-      {
-        "texto_opcion": "Increase topic partitions and scale brokers as per AWS recommendations.",
-        "es_correcta": true,
-        "explicacion": "More partitions parallelize consumption; additional brokers support network/disk throughput."
-      },
-      {
-        "texto_opcion": "Reduce replication factor to 1 by evaluating operational trade-offs",
+        "texto_opcion": "Reduce replication factor to 1 by evaluating operational trade-offs — reduces durability and does not resolve throughput bottlenecks safely.",
         "es_correcta": false,
         "explicacion": "Reduces durability and does not resolve throughput bottlenecks safely."
       },
@@ -1210,6 +1200,16 @@
         "texto_opcion": "Migrate consumers to single sequential polling according to the requirements of the statement.",
         "es_correcta": false,
         "explicacion": "Serializes processing and increases lag."
+      },
+      {
+        "texto_opcion": "Increase topic partitions and scale brokers as per AWS recommendations.",
+        "es_correcta": true,
+        "explicacion": "More partitions parallelize consumption; additional brokers support network/disk throughput."
+      },
+      {
+        "texto_opcion": "Disable snappy compression on producers in the described scenario, compression reduces I/O",
+        "es_correcta": false,
+        "explicacion": "Compression reduces I/O; disabling it may worsen network throughput."
       }
     ],
     "tags": [
@@ -1221,14 +1221,9 @@
     "pregunta": "Audit #44 — data team (ap-southeast-1): The B2B marketplace needs multiple customized consumers with fine control of checkpoint and ms latency, but does not want to manage S3 delivery. Which service to choose?",
     "opciones": [
       {
-        "texto_opcion": "Amazon Data Firehose as sole consumer, firehose is managed delivery",
+        "texto_opcion": "Amazon S3 Event Notifications in this production context",
         "es_correcta": false,
-        "explicacion": "Firehose is managed delivery, not a platform for multiple custom consumers."
-      },
-      {
-        "texto_opcion": "AWS Batch driven by cron, batch is batch processing, not ms streaming.",
-        "es_correcta": false,
-        "explicacion": "Batch is batch processing, not ms streaming."
+        "explicacion": "S3 events do not replace high-rate streaming ingestion."
       },
       {
         "texto_opcion": "Amazon Kinesis Data Streams.",
@@ -1236,9 +1231,14 @@
         "explicacion": "Streams allows customized consumers with checkpoint control and low latency."
       },
       {
-        "texto_opcion": "Amazon S3 Event Notifications in this production context",
+        "texto_opcion": "AWS Batch driven by cron, batch is batch processing, not ms streaming.",
         "es_correcta": false,
-        "explicacion": "S3 events do not replace high-rate streaming ingestion."
+        "explicacion": "Batch is batch processing, not ms streaming."
+      },
+      {
+        "texto_opcion": "Amazon Data Firehose as sole consumer, firehose is managed delivery",
+        "es_correcta": false,
+        "explicacion": "Firehose is managed delivery, not a platform for multiple custom consumers."
       }
     ],
     "tags": [
@@ -1250,16 +1250,6 @@
     "pregunta": "Planning #45 — streaming media startup in sa-east-1: Data team wants seamless SQL over Kinesis for 1-minute window aggregations without managing Flink cluster. Which service fits?",
     "opciones": [
       {
-        "texto_opcion": "Glue Python Shell job per event in this production context",
-        "es_correcta": false,
-        "explicacion": "Python Shell does not scale for continuous stateful aggregation."
-      },
-      {
-        "texto_opcion": "Amazon Managed Service for Apache Flink (formerly Kinesis Data Analytics).",
-        "es_correcta": true,
-        "explicacion": "Managed Flink runs stateful SQL/streaming without manually operating cluster."
-      },
-      {
         "texto_opcion": "Redshift COPY every minute according to the requirements of the statement.",
         "es_correcta": false,
         "explicacion": "COPY batch is not continuous streaming processing."
@@ -1268,6 +1258,16 @@
         "texto_opcion": "Athena querying S3 every minute via scheduled query evaluating operational trade-offs.",
         "es_correcta": false,
         "explicacion": "Athena is on-demand batch; latency and cost per continuous query are high."
+      },
+      {
+        "texto_opcion": "Amazon Managed Service for Apache Flink (formerly Kinesis Data Analytics).",
+        "es_correcta": true,
+        "explicacion": "Managed Flink runs stateful SQL/streaming without manually operating cluster."
+      },
+      {
+        "texto_opcion": "Glue Python Shell job per event in this production context — python Shell does not scale for continuous stateful aggregation.",
+        "es_correcta": false,
+        "explicacion": "Python Shell does not scale for continuous stateful aggregation."
       }
     ],
     "tags": [
@@ -1279,14 +1279,9 @@
     "pregunta": "Kinesis producers receive ProvisionedThroughputExceededException at peak times. Which combination solves the problem sustainably?",
     "opciones": [
       {
-        "texto_opcion": "Ignore exceptions and continue sending without retry in the described scenario.",
+        "texto_opcion": "Reduce retention to free up throughput by evaluating operational trade-offs.",
         "es_correcta": false,
-        "explicacion": "Loss of records and pipeline instability."
-      },
-      {
-        "texto_opcion": "Use the same partition key for all events considering cost, scale and latency.",
-        "es_correcta": false,
-        "explicacion": "Creates hot shard and concentrates load on a single shard."
+        "explicacion": "Retention does not release ingestion capacity per shard."
       },
       {
         "texto_opcion": "Increase shards, implement exponential backoff and distribute partition keys evenly.",
@@ -1294,9 +1289,14 @@
         "explicacion": "More shards increase capacity; backoff and balanced keys prevent hot shards."
       },
       {
-        "texto_opcion": "Reduce retention to free up throughput by evaluating operational trade-offs.",
+        "texto_opcion": "Use the same partition key for all events considering cost, scale and latency.",
         "es_correcta": false,
-        "explicacion": "Retention does not release ingestion capacity per shard."
+        "explicacion": "Creates hot shard and concentrates load on a single shard."
+      },
+      {
+        "texto_opcion": "Ignore exceptions and continue sending without retry in the described scenario.",
+        "es_correcta": false,
+        "explicacion": "Loss of records and pipeline instability."
       }
     ],
     "tags": [
@@ -1308,14 +1308,9 @@
     "pregunta": "Incident #48 — telecom operator ap-southeast-1 operation: The digital bank wants near-real-time logs in Amazon Redshift without frequent manual COPY. Which native integration does Firehose support?",
     "opciones": [
       {
-        "texto_opcion": "Redshift Spectrum querying S3 just evaluating operational trade-offs",
-        "es_correcta": false,
-        "explicacion": "Spectrum is external reading; does not replace near-real-time automated loading on the native table."
-      },
-      {
-        "texto_opcion": "Seamless DMS from Kinesis stream to Redshift in this production context.",
-        "es_correcta": false,
-        "explicacion": "DMS is not the default log streaming path for Redshift."
+        "texto_opcion": "Destination Amazon Redshift with automatic COPY via Firehose.",
+        "es_correcta": true,
+        "explicacion": "Firehose can load Redshift periodically with configurable buffering."
       },
       {
         "texto_opcion": "Complete daily unload/reload of the table as per the requirements of the statement.",
@@ -1323,9 +1318,14 @@
         "explicacion": "Full reload is not near-real-time and is expensive."
       },
       {
-        "texto_opcion": "Destination Amazon Redshift with automatic COPY via Firehose.",
-        "es_correcta": true,
-        "explicacion": "Firehose can load Redshift periodically with configurable buffering."
+        "texto_opcion": "Redshift Spectrum querying S3 just evaluating operational trade-offs — spectrum is external reading.",
+        "es_correcta": false,
+        "explicacion": "Spectrum is external reading; does not replace near-real-time automated loading on the native table."
+      },
+      {
+        "texto_opcion": "Seamless DMS from Kinesis stream to Redshift in this production context.",
+        "es_correcta": false,
+        "explicacion": "DMS is not the default log streaming path for Redshift."
       }
     ],
     "tags": [
@@ -1337,14 +1337,14 @@
     "pregunta": "Audit #49 — platform team (sa-east-1): A game studio needs to ingest ~15,000 events/s with near real-time latency for anomaly detection. Which streaming ingestion architecture best meets the trade-off between scale and control?",
     "opciones": [
       {
-        "texto_opcion": "Amazon Kinesis Data Streams with scaled shards and Enhanced Fan-Out for critical consumers.",
-        "es_correcta": true,
-        "explicacion": "Kinesis Data Streams deliver predictable throughput per shard and EFO reduces latency between parallel consumers."
-      },
-      {
         "texto_opcion": "AWS Database Migration Service in continuous mode for the data lake according to the requirements of the statement.",
         "es_correcta": false,
         "explicacion": "DMS replicates changes from relational banks, not application telemetry at a high rate."
+      },
+      {
+        "texto_opcion": "Amazon Kinesis Data Streams with scaled shards and Enhanced Fan-Out for critical consumers.",
+        "es_correcta": true,
+        "explicacion": "Kinesis Data Streams deliver predictable throughput per shard and EFO reduces latency between parallel consumers."
       },
       {
         "texto_opcion": "Amazon Data Firehose delivering directly to S3 with a minimum buffer of 60 s considering cost, scale and latency.",
@@ -1366,9 +1366,9 @@
     "pregunta": "Planning #50 — agricultural cooperative in us-east-1: Digital public agency operates producers and consumers Apache Kafka on-premises and wants to migrate to AWS without rewriting clients. Which managed service preserves compatibility?",
     "opciones": [
       {
-        "texto_opcion": "Amazon MSK with managed brokers and the same Kafka API/protocol.",
-        "es_correcta": true,
-        "explicacion": "MSK is managed Kafka on AWS; preserves existing producers, consumers, topics, and partitioning."
+        "texto_opcion": "Amazon Kinesis Data Streams converting messages to Kinesis records, would require adapters",
+        "es_correcta": false,
+        "explicacion": "Would require adapters; does not maintain native compatibility with the Kafka protocol."
       },
       {
         "texto_opcion": "Amazon EventBridge receiving custom events without a broker in the described scenario.",
@@ -1376,14 +1376,14 @@
         "explicacion": "EventBridge is event bus, not Kafka cluster replacement."
       },
       {
-        "texto_opcion": "Amazon SQS FIFO as a direct replacement for Kafka topics",
-        "es_correcta": false,
-        "explicacion": "SQS does not implement partitioned logging or full Kafka consumer group semantics."
+        "texto_opcion": "Amazon MSK with managed brokers and the same Kafka API/protocol.",
+        "es_correcta": true,
+        "explicacion": "MSK is managed Kafka on AWS; preserves existing producers, consumers, topics, and partitioning."
       },
       {
-        "texto_opcion": "Amazon Kinesis Data Streams converting messages to Kinesis records, would require adapters",
+        "texto_opcion": "Amazon SQS FIFO as a direct replacement for Kafka topics — sQS does not implement partitioned logging or full Kafka.",
         "es_correcta": false,
-        "explicacion": "Would require adapters; does not maintain native compatibility with the Kafka protocol."
+        "explicacion": "SQS does not implement partitioned logging or full Kafka consumer group semantics."
       }
     ],
     "tags": [
@@ -1400,9 +1400,9 @@
         "explicacion": "Firehose does buffering, compression, and managed delivery without a dedicated consumer cluster."
       },
       {
-        "texto_opcion": "Kinesis Data Streams with three Lambda consumers per shard considering cost, scale and latency.",
+        "texto_opcion": "AWS Glue streaming job executed every hour evaluating operational trade-offs.",
         "es_correcta": false,
-        "explicacion": "Streams require scaling shards and implementing delivery to each consumer."
+        "explicacion": "Glue streaming requires a dedicated job and does not replace managed near-real-time pipelines."
       },
       {
         "texto_opcion": "Amazon EMR reading from Kafka and writing Parquet manually in this production context.",
@@ -1410,9 +1410,9 @@
         "explicacion": "EMR requires cluster operation and does not eliminate consumer management for S3 delivery."
       },
       {
-        "texto_opcion": "AWS Glue streaming job executed every hour evaluating operational trade-offs",
+        "texto_opcion": "Kinesis Data Streams with three Lambda consumers per shard considering cost, scale and latency.",
         "es_correcta": false,
-        "explicacion": "Glue streaming requires a dedicated job and does not replace managed near-real-time pipelines."
+        "explicacion": "Streams require scaling shards and implementing delivery to each consumer."
       }
     ],
     "tags": [
@@ -1424,9 +1424,9 @@
     "pregunta": "A Kinesis stream reaches 80% of the ingestion capacity with ~2,000 records/s. The team needs to increase throughput without losing order by partition key. What to do?",
     "opciones": [
       {
-        "texto_opcion": "Replace Kinesis with S3 PUT direct from producers in this production context.",
+        "texto_opcion": "Migrate all records to a single larger shard considering cost, scale and latency.",
         "es_correcta": false,
-        "explicacion": "S3 does not guarantee key-ordered ingestion at streaming rates with ms of latency."
+        "explicacion": "Kinesis does not offer scalable single shard; capacidade is horizontal per shard."
       },
       {
         "texto_opcion": "Enable Enhanced Fan-Out only, without changing shards evaluating operational trade-offs.",
@@ -1434,14 +1434,14 @@
         "explicacion": "EFO improves reading, does not increase stream ingestion capacity."
       },
       {
-        "texto_opcion": "Migrate all records to a single larger shard considering cost, scale and latency.",
-        "es_correcta": false,
-        "explicacion": "Kinesis does not offer scalable single shard; capacidade is horizontal per shard."
-      },
-      {
         "texto_opcion": "Increase the number of shards via UpdateShardCount or resharding.",
         "es_correcta": true,
         "explicacion": "Each shard supports 1 MB/s or 1,000 records/s of ingestion; more shards increase total capacidade."
+      },
+      {
+        "texto_opcion": "Replace Kinesis with S3 PUT direct from producers in this production context.",
+        "es_correcta": false,
+        "explicacion": "S3 does not guarantee key-ordered ingestion at streaming rates with ms of latency."
       }
     ],
     "tags": [
@@ -1453,24 +1453,24 @@
     "pregunta": "Incident #53 — insurance company sa-east-1 operation: The social network has five independent consumers reading the same Kinesis Data Stream and suffers from shared read latency (~2 s). How to reduce latency per consumer?",
     "opciones": [
       {
+        "texto_opcion": "Register consumers with dedicated Enhanced Fan-Out (EFO).",
+        "es_correcta": true,
+        "explicacion": "EFO provisions dedicated read throughput per consumer, reducing contention and latency."
+      },
+      {
         "texto_opcion": "Consolidate all consumers into a single monolithic process in the described scenario.",
         "es_correcta": false,
         "explicacion": "Eliminates team parallelism and does not scale operationally."
       },
       {
-        "texto_opcion": "Use classic polling with a longer interval between GetRecords in this production context.",
-        "es_correcta": false,
-        "explicacion": "Longer intervals increase latency, not reduce it."
-      },
-      {
-        "texto_opcion": "Reduce stream retention to 1 hour by evaluating operational trade-offs",
+        "texto_opcion": "Reduce stream retention to 1 hour by evaluating operational trade-offs.",
         "es_correcta": false,
         "explicacion": "Retention affects historical retention, not read latency between consumers."
       },
       {
-        "texto_opcion": "Register consumers with dedicated Enhanced Fan-Out (EFO).",
-        "es_correcta": true,
-        "explicacion": "EFO provisions dedicated read throughput per consumer, reducing contention and latency."
+        "texto_opcion": "Use classic polling with a longer interval between GetRecords in this production context.",
+        "es_correcta": false,
+        "explicacion": "Longer intervals increase latency, not reduce it."
       }
     ],
     "tags": [
@@ -1482,9 +1482,14 @@
     "pregunta": "Audit #54 — analytics squad (us-east-1): Firehose delivers too small files to S3, increasing Athena's cost. The pipeline allows for up to sub-second latency. Which tweak balances file size and freshness?",
     "opciones": [
       {
-        "texto_opcion": "Disable GZIP compression to speed up delivery in the described scenario",
+        "texto_opcion": "Disable GZIP compression to speed up delivery in the described scenario — compression reduces storage and transfer.",
         "es_correcta": false,
         "explicacion": "Compression reduces storage and transfer; disabling increases S3 cost."
+      },
+      {
+        "texto_opcion": "Immediately migrate to Kinesis Analytics without buffering considering cost, scale and latency — analytics does not replace Firehose delivery configuration for S3.",
+        "es_correcta": false,
+        "explicacion": "Analytics does not replace Firehose delivery configuration for S3."
       },
       {
         "texto_opcion": "Increase BufferSizeInMB and/or BufferIntervalInSeconds within the acceptable latency limit.",
@@ -1495,11 +1500,6 @@
         "texto_opcion": "Reduce buffer to 1 MB and interval to 60 s in this production context, smaller buffers make the small file problem worse.",
         "es_correcta": false,
         "explicacion": "Smaller buffers make the small file problem worse."
-      },
-      {
-        "texto_opcion": "Immediately migrate to Kinesis Analytics without buffering considering cost, scale and latency.",
-        "es_correcta": false,
-        "explicacion": "Analytics does not replace Firehose delivery configuration for S3."
       }
     ],
     "tags": [
@@ -1511,16 +1511,6 @@
     "pregunta": "Planning #55 — proptech at eu-west-1: Payments fintech has intermittent Kafka loads and wants to avoid provisioning brokers 24/7. Which MSK option reduces operating capacity?",
     "opciones": [
       {
-        "texto_opcion": "Amazon MSK Serverless with auto throughput scaling.",
-        "es_correcta": true,
-        "explicacion": "MSK Serverless abstracts broker sizing for variable loads."
-      },
-      {
-        "texto_opcion": "Self-managed Kafka on EC2 with Auto Scaling Group.",
-        "es_correcta": false,
-        "explicacion": "It still requires the operation of brokers, patches and manual rebalancing."
-      },
-      {
         "texto_opcion": "Amazon MQ for ActiveMQ as a Kafka drop-in considering cost",
         "es_correcta": false,
         "explicacion": "ActiveMQ is not compatible with Kafka protocol."
@@ -1529,6 +1519,16 @@
         "texto_opcion": "MSK provisioned with maximum brokers at all times.",
         "es_correcta": false,
         "explicacion": "Fixed provisioning increases costs in intermittent loads."
+      },
+      {
+        "texto_opcion": "Amazon MSK Serverless with auto throughput scaling.",
+        "es_correcta": true,
+        "explicacion": "MSK Serverless abstracts broker sizing for variable loads."
+      },
+      {
+        "texto_opcion": "Self-managed Kafka on EC2 with Auto Scaling Group.",
+        "es_correcta": false,
+        "explicacion": "It still requires the operation of brokers, patches and manual rebalancing."
       }
     ],
     "tags": [
@@ -1545,9 +1545,9 @@
         "explicacion": "Resilient offline bufferless and exposes credentials at the edge."
       },
       {
-        "texto_opcion": "Local RDS as the only permanent destination in this production context, rDS edge does not replace streaming pipeline for data lake.",
+        "texto_opcion": "Daily email of CSV files to operators in the described scenario, does not scale or serve near real-time, does not scale or serve near real-time often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
-        "explicacion": "RDS edge does not replace streaming pipeline for data lake."
+        "explicacion": "Does not scale or serve near real-time."
       },
       {
         "texto_opcion": "Kinesis Agent or local IoT Greengrass + Kinesis Data Streams in region {_pick(REGIONS, i)}.",
@@ -1555,9 +1555,9 @@
         "explicacion": "Agent/Greengrass buffer offline; Kinesis centralizes durable ingestion in the cloud."
       },
       {
-        "texto_opcion": "Daily email of CSV files to operators in the described scenario, does not scale or serve near real-time, does not scale or serve near real-time.",
+        "texto_opcion": "Local RDS as the only permanent destination in this production context, rDS edge does not replace streaming pipeline for data lake selected to meet the constraints described here.",
         "es_correcta": false,
-        "explicacion": "Does not scale or serve near real-time."
+        "explicacion": "RDS edge does not replace streaming pipeline for data lake."
       }
     ],
     "tags": [
@@ -1569,9 +1569,14 @@
     "pregunta": "Incident #58 — digital bank us-east-1 operation: Amazon Data Firehose fails to deliver malformed records and the team needs to audit failures without losing valid data. Which practice is recommended?",
     "opciones": [
       {
-        "texto_opcion": "Increase Firehose timeout to 900 s only in this production context",
+        "texto_opcion": "Increase Firehose timeout to 900 s only in this production context — timeout does not resolve structurally malformed records.",
         "es_correcta": false,
         "explicacion": "Timeout does not resolve structurally malformed records."
+      },
+      {
+        "texto_opcion": "Stop the source Kinesis stream until manual correction in the described scenario.",
+        "es_correcta": false,
+        "explicacion": "Stops ingestion of all events, not just invalid ones."
       },
       {
         "texto_opcion": "Configure S3 backup bucket for records with failed conversion/delivery.",
@@ -1582,11 +1587,6 @@
         "texto_opcion": "Disable Lambda transformation to ignore errors as per the requirements of the statement.",
         "es_correcta": false,
         "explicacion": "Ignores invalid data without traceability."
-      },
-      {
-        "texto_opcion": "Stop the source Kinesis stream until manual correction in the described scenario.",
-        "es_correcta": false,
-        "explicacion": "Stops ingestion of all events, not just invalid ones."
       }
     ],
     "tags": [

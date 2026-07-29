@@ -3,6 +3,11 @@
     "pregunta": "A healthcare provider (~5 TB/day, region brazilsouth) must: grant analysts read-only access to a single BigQuery dataset without project Owner. Which option fits best?",
     "opciones": [
       {
+        "texto_opcion": "Disable IAM and use anonymous dataset links, insecure and non-compliant.",
+        "es_correcta": false,
+        "explicacion": "Insecure and non-compliant."
+      },
+      {
         "texto_opcion": "Share the service account JSON key in Slack, key sprawl and audit risk.",
         "es_correcta": false,
         "explicacion": "Key sprawl and audit risk."
@@ -11,11 +16,6 @@
         "texto_opcion": "Grant roles/owner on the project to all analysts, over-privileged",
         "es_correcta": false,
         "explicacion": "Over-privileged; violates least privilege."
-      },
-      {
-        "texto_opcion": "Disable IAM and use anonymous dataset links, insecure and non-compliant.",
-        "es_correcta": false,
-        "explicacion": "Insecure and non-compliant."
       },
       {
         "texto_opcion": "Assign bigquery.dataViewer on the dataset, not roles/owner.",
@@ -32,9 +32,9 @@
     "pregunta": "Logistics carrier scenario — encrypt BigQuery tables with customer-managed keys for regulatory key control. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture.",
-        "es_correcta": false,
-        "explicacion": "Worse security posture."
+        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config.",
+        "es_correcta": true,
+        "explicacion": "CMEK lets the customer control key lifecycle while Google still encrypts data at rest."
       },
       {
         "texto_opcion": "Rely only on default Google-managed encryption with no CMEK option, does not meet CMEK control requirements.",
@@ -42,12 +42,12 @@
         "explicacion": "Does not meet CMEK control requirements."
       },
       {
-        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config",
-        "es_correcta": true,
-        "explicacion": "CMEK lets the customer control key lifecycle while Google still encrypts data at rest."
+        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Worse security posture."
       },
       {
-        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements.",
+        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Violates baseline encryption requirements."
       }
@@ -61,24 +61,24 @@
     "pregunta": "A gaming studio (strict GDPR residency, region australiaeast) must: prevent data exfiltration from BigQuery and GCS to untrusted projects or the public internet. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Publish all datasets as public Marketplace listings",
+        "texto_opcion": "Publish all datasets as public Marketplace listings adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Opposite of containment."
       },
       {
-        "texto_opcion": "Only open 0.0.0.0/0 firewall rules adopted as the standard.",
-        "es_correcta": false,
-        "explicacion": "Increases exposure."
-      },
-      {
-        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects",
+        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects.",
         "es_correcta": true,
         "explicacion": "VPC-SC constrains Google API access paths and reduces exfiltration risk."
       },
       {
-        "texto_opcion": "Remove Cloud Armor alone as the full solution",
+        "texto_opcion": "Remove Cloud Armor alone as the full solution — cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs.",
         "es_correcta": false,
         "explicacion": "Cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs."
+      },
+      {
+        "texto_opcion": "Only open 0.0.0.0/0 firewall rules adopted as the standard prioritized for simplicity, though it.",
+        "es_correcta": false,
+        "explicacion": "Increases exposure."
       }
     ],
     "tags": [
@@ -90,9 +90,14 @@
     "pregunta": "scan landing GCS files for PII before promoting to curated BigQuery tables. Context: energy utility, strict GDPR residency.",
     "opciones": [
       {
-        "texto_opcion": "Ignore PII and grant allUsers viewer configured end-to-end for.",
+        "texto_opcion": "Ignore PII and grant allUsers viewer configured end-to-end for applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Compliance failure."
+      },
+      {
+        "texto_opcion": "Use Cloud DNS private zones as the PII scanner, dNS is not a data inspection service.",
+        "es_correcta": false,
+        "explicacion": "DNS is not a data inspection service."
       },
       {
         "texto_opcion": "Use Cloud DLP inspection/de-identification jobs.",
@@ -100,14 +105,9 @@
         "explicacion": "DLP discovers and can redact/tokenize sensitive fields before wider access."
       },
       {
-        "texto_opcion": "Rename the bucket only, does not detect or protect PII content.",
+        "texto_opcion": "Rename the bucket only, does not detect or protect PII content applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Does not detect or protect PII content."
-      },
-      {
-        "texto_opcion": "Use Cloud DNS private zones as the PII scanner, dNS is not a data inspection service.",
-        "es_correcta": false,
-        "explicacion": "DNS is not a data inspection service."
       }
     ],
     "tags": [
@@ -119,24 +119,24 @@
     "pregunta": "Incident review (westeurope): keep EU customer data stored and processed only in EU regions for sovereignty. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations",
-        "es_correcta": true,
-        "explicacion": "Location controls and job location policies enforce residency requirements."
-      },
-      {
         "texto_opcion": "Store everything in us-central1 regardless of policy, violates EU residency, violates EU residency.",
         "es_correcta": false,
         "explicacion": "Violates EU residency."
       },
       {
-        "texto_opcion": "Use only Memorystore in any region without controls, does not solve analytical residency.",
-        "es_correcta": false,
-        "explicacion": "Does not solve analytical residency."
-      },
-      {
         "texto_opcion": "Replicate to public HTTP endpoints worldwide used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Breaks sovereignty."
+      },
+      {
+        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations.",
+        "es_correcta": true,
+        "explicacion": "Location controls and job location policies enforce residency requirements."
+      },
+      {
+        "texto_opcion": "Use only Memorystore in any region without controls, does not solve analytical residency.",
+        "es_correcta": false,
+        "explicacion": "Does not solve analytical residency."
       }
     ],
     "tags": [
@@ -148,24 +148,24 @@
     "pregunta": "block creation of public GCS buckets org-wide. Context: media streaming company, near-real-time dashboards.",
     "opciones": [
       {
-        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM",
-        "es_correcta": true,
-        "explicacion": "Org policies provide centralized guardrails across projects."
-      },
-      {
-        "texto_opcion": "Disable Cloud Audit Logs prioritized for operational.",
+        "texto_opcion": "Disable Cloud Audit Logs prioritized for operational configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Reduces visibility."
       },
       {
-        "texto_opcion": "Ask each developer to remember not to go public used as the.",
+        "texto_opcion": "Make all buckets world-readable by default configured adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Opposite control."
+      },
+      {
+        "texto_opcion": "Ask each developer to remember not to go public used as the prioritized for simplicity.",
         "es_correcta": false,
         "explicacion": "Not enforceable."
       },
       {
-        "texto_opcion": "Make all buckets world-readable by default configured.",
-        "es_correcta": false,
-        "explicacion": "Opposite control."
+        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM.",
+        "es_correcta": true,
+        "explicacion": "Org policies provide centralized guardrails across projects."
       }
     ],
     "tags": [
@@ -177,24 +177,24 @@
     "pregunta": "A online marketplace (petabyte-scale historical data, region southeastasia) must: Dataflow workers need least-privilege access to Pub/Sub, GCS, and BigQuery. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Use a dedicated custom service account with minimal roles on each resource",
+        "texto_opcion": "Use a dedicated custom service account with minimal roles on each resource.",
         "es_correcta": true,
         "explicacion": "Workload identity via scoped service accounts is the secure Dataflow pattern."
       },
       {
-        "texto_opcion": "Run all jobs as project Owner default compute SA forever used as the.",
+        "texto_opcion": "Disable authentication on sinks as the default production choice here adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Run all jobs as project Owner default compute SA forever used as the plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Excessive privileges."
       },
       {
-        "texto_opcion": "Embed user passwords in pipeline options, credential anti-pattern.",
+        "texto_opcion": "Embed user passwords in pipeline options, credential anti-pattern used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Credential anti-pattern."
-      },
-      {
-        "texto_opcion": "Disable authentication on sinks as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Insecure."
       }
     ],
     "tags": [
@@ -206,9 +206,9 @@
     "pregunta": "Travel platform scenario — separate development and production data estates for governance. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Give developers Owner on production applied across environments for consistency.",
+        "texto_opcion": "Store prod credentials in the notebook UI permanently configured applied across used as the main path in this architecture.",
         "es_correcta": false,
-        "explicacion": "Risky."
+        "explicacion": "Secret sprawl."
       },
       {
         "texto_opcion": "Use separate GCP projects for dev vs prod with distinct IAM.",
@@ -221,9 +221,9 @@
         "explicacion": "Weak isolation."
       },
       {
-        "texto_opcion": "Store prod credentials in the notebook UI permanently configured applied across.",
+        "texto_opcion": "Give developers Owner on production applied across environments for consistency configured end-to-end for the stated workload.",
         "es_correcta": false,
-        "explicacion": "Secret sprawl."
+        "explicacion": "Risky."
       }
     ],
     "tags": [
@@ -235,12 +235,17 @@
     "pregunta": "Media streaming company scenario — hide salary columns from most BigQuery analysts while allowing HR analysts. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Use column-level security / policy tags with Data Catalog/Dataplex taxonomy",
+        "texto_opcion": "Use column-level security / policy tags with Data Catalog/Dataplex taxonomy.",
         "es_correcta": true,
         "explicacion": "Policy tags enforce fine-grained column access in BigQuery."
       },
       {
-        "texto_opcion": "Only hide the column in a Looker Studio chart, uI hiding is not server-side control.",
+        "texto_opcion": "Grant dataset Owner to everyone then ask politely applied across used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Not enforceable."
+      },
+      {
+        "texto_opcion": "Only hide the column in a Looker Studio chart, uI hiding is not server-side control applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "UI hiding is not server-side control."
       },
@@ -248,11 +253,6 @@
         "texto_opcion": "Delete the salary column from all backups, breaks legitimate HR use, breaks legitimate HR use.",
         "es_correcta": false,
         "explicacion": "Breaks legitimate HR use."
-      },
-      {
-        "texto_opcion": "Grant dataset Owner to everyone then ask politely applied across used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Not enforceable."
       }
     ],
     "tags": [
@@ -264,22 +264,22 @@
     "pregunta": "Incident review (brazilsouth): each regional team must only query their region's rows in a shared fact table. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Use only client-side WHERE in dashboards, not enforceable server-side.",
-        "es_correcta": false,
-        "explicacion": "Not enforceable server-side."
-      },
-      {
-        "texto_opcion": "Ship full table extracts to every laptop as the primary design.",
-        "es_correcta": false,
-        "explicacion": "Overshares data."
-      },
-      {
-        "texto_opcion": "Implement BigQuery row-level security policies filtered by user attributes/groups",
+        "texto_opcion": "Implement BigQuery row-level security policies filtered by user attributes/groups.",
         "es_correcta": true,
         "explicacion": "RLS enforces row filters at query time in BigQuery."
       },
       {
-        "texto_opcion": "Disable authorization checks selected to meet the stated constraints.",
+        "texto_opcion": "Ship full table extracts to every laptop as the primary design adopted as the standard pattern for the team as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Overshares data."
+      },
+      {
+        "texto_opcion": "Use only client-side WHERE in dashboards, not enforceable server-side selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Not enforceable server-side."
+      },
+      {
+        "texto_opcion": "Disable authorization checks selected to meet the stated constraints plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Breach risk."
       }
@@ -298,6 +298,11 @@
         "explicacion": "Private Google Access allows private VMs to reach Google APIs without public IPs."
       },
       {
+        "texto_opcion": "Mirror buckets to anonymous FTP, insecure exfiltration path, insecure exfiltration path.",
+        "es_correcta": false,
+        "explicacion": "Insecure exfiltration path."
+      },
+      {
         "texto_opcion": "Assign public IPs to every VM as the only option, increases attack surface.",
         "es_correcta": false,
         "explicacion": "Increases attack surface."
@@ -306,11 +311,6 @@
         "texto_opcion": "Disable VPC firewalls entirely used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Unsafe."
-      },
-      {
-        "texto_opcion": "Mirror buckets to anonymous FTP, insecure exfiltration path, insecure exfiltration path.",
-        "es_correcta": false,
-        "explicacion": "Insecure exfiltration path."
       }
     ],
     "tags": [
@@ -322,14 +322,14 @@
     "pregunta": "prove who queried a sensitive BigQuery table last month. Context: global retailer, ~50,000 events/s.",
     "opciones": [
       {
+        "texto_opcion": "Rely on memory of the on-call engineer as the default selected to.",
+        "es_correcta": false,
+        "explicacion": "Not auditable."
+      },
+      {
         "texto_opcion": "Disable data access logs to save cost always selected to meet.",
         "es_correcta": false,
         "explicacion": "Loses forensic trail."
-      },
-      {
-        "texto_opcion": "Use Cloud Audit Logs for BigQuery and retain them centrally.",
-        "es_correcta": true,
-        "explicacion": "Audit logs provide who/when/what evidence for compliance investigations."
       },
       {
         "texto_opcion": "Check only the local browser history configured end-to-end for.",
@@ -337,9 +337,9 @@
         "explicacion": "Not authoritative."
       },
       {
-        "texto_opcion": "Rely on memory of the on-call engineer as the default selected to.",
-        "es_correcta": false,
-        "explicacion": "Not auditable."
+        "texto_opcion": "Use Cloud Audit Logs for BigQuery and retain them centrally.",
+        "es_correcta": true,
+        "explicacion": "Audit logs provide who/when/what evidence for compliance investigations."
       }
     ],
     "tags": [
@@ -351,14 +351,14 @@
     "pregunta": "pipelines must not hardcode database passwords in Composer variables committed to git. Context: logistics carrier, ~50,000 events/s.",
     "opciones": [
       {
-        "texto_opcion": "Store secrets in Secret Manager and reference them at runtime.",
-        "es_correcta": true,
-        "explicacion": "Secret Manager centralizes rotation and access control for credentials."
-      },
-      {
         "texto_opcion": "Email passwords weekly in clear text selected to meet the.",
         "es_correcta": false,
         "explicacion": "Insecure process."
+      },
+      {
+        "texto_opcion": "Store secrets in Secret Manager and reference them at runtime.",
+        "es_correcta": true,
+        "explicacion": "Secret Manager centralizes rotation and access control for credentials."
       },
       {
         "texto_opcion": "Put passwords in DAG docstrings applied across configured.",
@@ -385,9 +385,9 @@
         "explicacion": "Authorized views let consumers query derived logic without direct table IAM."
       },
       {
-        "texto_opcion": "Grant dataEditor on all base tables configured end-to-end for this workload.",
+        "texto_opcion": "Export CSVs to a public Drive folder, uncontrolled distribution.",
         "es_correcta": false,
-        "explicacion": "Too broad."
+        "explicacion": "Uncontrolled distribution."
       },
       {
         "texto_opcion": "Clone full tables into every consumer project without filters configured.",
@@ -395,9 +395,9 @@
         "explicacion": "Oversharing."
       },
       {
-        "texto_opcion": "Export CSVs to a public Drive folder, uncontrolled distribution.",
+        "texto_opcion": "Grant dataEditor on all base tables configured end-to-end for this workload.",
         "es_correcta": false,
-        "explicacion": "Uncontrolled distribution."
+        "explicacion": "Too broad."
       }
     ],
     "tags": [
@@ -409,22 +409,22 @@
     "pregunta": "A global retailer (strict GDPR residency, region westeurope) must: ensure client tools and connectors encrypt data in transit to BigQuery and Cloud SQL. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Require TLS/SSL for connections and avoid plaintext JDBC/ODBC paths",
-        "es_correcta": true,
-        "explicacion": "Encryption in transit is a baseline compliance control for managed data services."
-      },
-      {
-        "texto_opcion": "Mirror tables to unencrypted FTP nightly, breaks transit protection.",
+        "texto_opcion": "Mirror tables to unencrypted FTP nightly, breaks transit protection often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Breaks transit protection."
       },
       {
-        "texto_opcion": "Use HTTP without TLS to the API adopted as the standard.",
+        "texto_opcion": "Require TLS/SSL for connections and avoid plaintext JDBC/ODBC paths.",
+        "es_correcta": true,
+        "explicacion": "Encryption in transit is a baseline compliance control for managed data services."
+      },
+      {
+        "texto_opcion": "Use HTTP without TLS to the API adopted as the standard plausible at first glance, yet.",
         "es_correcta": false,
         "explicacion": "Insecure."
       },
       {
-        "texto_opcion": "Force sslmode=disable everywhere, exposes data on the wire.",
+        "texto_opcion": "Force sslmode=disable everywhere, exposes data on the wire as the default production.",
         "es_correcta": false,
         "explicacion": "Exposes data on the wire."
       }
@@ -437,6 +437,11 @@
   {
     "pregunta": "A payments fintech (~5 TB/day, region eastus) must: grant analysts read-only access to a single BigQuery dataset without project Owner. Which option fits best? Constraint set #2.",
     "opciones": [
+      {
+        "texto_opcion": "Assign bigquery.dataViewer on the dataset, not roles/owner.",
+        "es_correcta": true,
+        "explicacion": "Dataset-scoped IAM least privilege is the standard BigQuery access pattern."
+      },
       {
         "texto_opcion": "Grant roles/owner on the project to all analysts, over-privileged",
         "es_correcta": false,
@@ -451,11 +456,6 @@
         "texto_opcion": "Share the service account JSON key in Slack, key sprawl and audit risk.",
         "es_correcta": false,
         "explicacion": "Key sprawl and audit risk."
-      },
-      {
-        "texto_opcion": "Assign bigquery.dataViewer on the dataset, not roles/owner.",
-        "es_correcta": true,
-        "explicacion": "Dataset-scoped IAM least privilege is the standard BigQuery access pattern."
       }
     ],
     "tags": [
@@ -467,24 +467,24 @@
     "pregunta": "Incident review (brazilsouth): encrypt BigQuery tables with customer-managed keys for regulatory key control. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config",
-        "es_correcta": true,
-        "explicacion": "CMEK lets the customer control key lifecycle while Google still encrypts data at rest."
-      },
-      {
-        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements.",
-        "es_correcta": false,
-        "explicacion": "Violates baseline encryption requirements."
-      },
-      {
         "texto_opcion": "Rely only on default Google-managed encryption with no CMEK option, does not meet CMEK control requirements.",
         "es_correcta": false,
         "explicacion": "Does not meet CMEK control requirements."
       },
       {
-        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture.",
+        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Worse security posture."
+      },
+      {
+        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config.",
+        "es_correcta": true,
+        "explicacion": "CMEK lets the customer control key lifecycle while Google still encrypts data at rest."
+      },
+      {
+        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Violates baseline encryption requirements."
       }
     ],
     "tags": [
@@ -496,14 +496,14 @@
     "pregunta": "Energy utility scenario — prevent data exfiltration from BigQuery and GCS to untrusted projects or the public internet. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects",
-        "es_correcta": true,
-        "explicacion": "VPC-SC constrains Google API access paths and reduces exfiltration risk."
+        "texto_opcion": "Remove Cloud Armor alone as the full solution, cloud Armor is edge WAF",
+        "es_correcta": false,
+        "explicacion": "Cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs."
       },
       {
-        "texto_opcion": "Only open 0.0.0.0/0 firewall rules selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Increases exposure."
+        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects.",
+        "es_correcta": true,
+        "explicacion": "VPC-SC constrains Google API access paths and reduces exfiltration risk."
       },
       {
         "texto_opcion": "Publish all datasets as public Marketplace listings, opposite of containment.",
@@ -511,9 +511,9 @@
         "explicacion": "Opposite of containment."
       },
       {
-        "texto_opcion": "Remove Cloud Armor alone as the full solution, cloud Armor is edge WAF",
+        "texto_opcion": "Only open 0.0.0.0/0 firewall rules selected to meet the stated constraints.",
         "es_correcta": false,
-        "explicacion": "Cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs."
+        "explicacion": "Increases exposure."
       }
     ],
     "tags": [
@@ -525,9 +525,9 @@
     "pregunta": "For a travel platform workload with sub-second interactive queries: scan landing GCS files for PII before promoting to curated BigQuery tables. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Ignore PII and grant allUsers viewer as the primary design for.",
-        "es_correcta": false,
-        "explicacion": "Compliance failure."
+        "texto_opcion": "Use Cloud DLP inspection/de-identification jobs.",
+        "es_correcta": true,
+        "explicacion": "DLP discovers and can redact/tokenize sensitive fields before wider access."
       },
       {
         "texto_opcion": "Use Cloud DNS private zones as the PII scanner, dNS is not a data inspection service.",
@@ -535,14 +535,14 @@
         "explicacion": "DNS is not a data inspection service."
       },
       {
-        "texto_opcion": "Rename the bucket only, does not detect or protect PII content.",
+        "texto_opcion": "Rename the bucket only, does not detect or protect PII content often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Does not detect or protect PII content."
       },
       {
-        "texto_opcion": "Use Cloud DLP inspection/de-identification jobs.",
-        "es_correcta": true,
-        "explicacion": "DLP discovers and can redact/tokenize sensitive fields before wider access."
+        "texto_opcion": "Ignore PII and grant allUsers viewer as the primary design for selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Compliance failure."
       }
     ],
     "tags": [
@@ -554,14 +554,14 @@
     "pregunta": "keep EU customer data stored and processed only in EU regions for sovereignty. Context: payments fintech, petabyte-scale historical data. Constraint set #2.",
     "opciones": [
       {
+        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations.",
+        "es_correcta": true,
+        "explicacion": "Location controls and job location policies enforce residency requirements."
+      },
+      {
         "texto_opcion": "Use only Memorystore in any region without controls, does not solve analytical residency.",
         "es_correcta": false,
         "explicacion": "Does not solve analytical residency."
-      },
-      {
-        "texto_opcion": "Store everything in us-central1 regardless of policy, violates EU residency, violates EU residency.",
-        "es_correcta": false,
-        "explicacion": "Violates EU residency."
       },
       {
         "texto_opcion": "Replicate to public HTTP endpoints worldwide configured end-to-end for this workload.",
@@ -569,9 +569,9 @@
         "explicacion": "Breaks sovereignty."
       },
       {
-        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations",
-        "es_correcta": true,
-        "explicacion": "Location controls and job location policies enforce residency requirements."
+        "texto_opcion": "Store everything in us-central1 regardless of policy, violates EU residency, violates EU residency.",
+        "es_correcta": false,
+        "explicacion": "Violates EU residency."
       }
     ],
     "tags": [
@@ -583,24 +583,24 @@
     "pregunta": "Industrial iot platform scenario — block creation of public GCS buckets org-wide. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Ask each developer to remember not to go public applied.",
-        "es_correcta": false,
-        "explicacion": "Not enforceable."
-      },
-      {
-        "texto_opcion": "Disable Cloud Audit Logs used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Reduces visibility."
-      },
-      {
-        "texto_opcion": "Make all buckets world-readable by default applied across.",
+        "texto_opcion": "Make all buckets world-readable by default applied across used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Opposite control."
       },
       {
-        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM",
+        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM.",
         "es_correcta": true,
         "explicacion": "Org policies provide centralized guardrails across projects."
+      },
+      {
+        "texto_opcion": "Disable Cloud Audit Logs used as the main path in this architecture applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Reduces visibility."
+      },
+      {
+        "texto_opcion": "Ask each developer to remember not to go public applied applied across environments for.",
+        "es_correcta": false,
+        "explicacion": "Not enforceable."
       }
     ],
     "tags": [
@@ -612,24 +612,24 @@
     "pregunta": "For a travel platform workload with ~200 million rows/day: Dataflow workers need least-privilege access to Pub/Sub, GCS, and BigQuery. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Use a dedicated custom service account with minimal roles on each resource",
+        "texto_opcion": "Embed user passwords in pipeline options, credential anti-pattern used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Credential anti-pattern."
+      },
+      {
+        "texto_opcion": "Use a dedicated custom service account with minimal roles on each resource.",
         "es_correcta": true,
         "explicacion": "Workload identity via scoped service accounts is the secure Dataflow pattern."
       },
       {
-        "texto_opcion": "Run all jobs as project Owner default compute SA forever used as the.",
+        "texto_opcion": "Run all jobs as project Owner default compute SA forever used as the often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Excessive privileges."
       },
       {
-        "texto_opcion": "Disable authentication on sinks used as the main path in this architecture.",
+        "texto_opcion": "Disable authentication on sinks used as the main path in this architecture selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Insecure."
-      },
-      {
-        "texto_opcion": "Embed user passwords in pipeline options, credential anti-pattern.",
-        "es_correcta": false,
-        "explicacion": "Credential anti-pattern."
       }
     ],
     "tags": [
@@ -670,19 +670,19 @@
     "pregunta": "For a industrial IoT platform workload with strict GDPR residency: hide salary columns from most BigQuery analysts while allowing HR analysts. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Use column-level security / policy tags with Data Catalog/Dataplex taxonomy",
+        "texto_opcion": "Use column-level security / policy tags with Data Catalog/Dataplex taxonomy.",
         "es_correcta": true,
         "explicacion": "Policy tags enforce fine-grained column access in BigQuery."
-      },
-      {
-        "texto_opcion": "Delete the salary column from all backups, breaks legitimate HR use, breaks legitimate HR use.",
-        "es_correcta": false,
-        "explicacion": "Breaks legitimate HR use."
       },
       {
         "texto_opcion": "Grant dataset Owner to everyone then ask politely applied across adopted as the standard.",
         "es_correcta": false,
         "explicacion": "Not enforceable."
+      },
+      {
+        "texto_opcion": "Delete the salary column from all backups, breaks legitimate HR use, breaks legitimate HR use.",
+        "es_correcta": false,
+        "explicacion": "Breaks legitimate HR use."
       },
       {
         "texto_opcion": "Only hide the column in a Looker Studio chart, uI hiding is not server-side control.",
@@ -699,24 +699,24 @@
     "pregunta": "Logistics carrier scenario — each regional team must only query their region's rows in a shared fact table. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Implement BigQuery row-level security policies filtered by user attributes/groups",
-        "es_correcta": true,
-        "explicacion": "RLS enforces row filters at query time in BigQuery."
-      },
-      {
-        "texto_opcion": "Ship full table extracts to every laptop as the default adopted as the.",
-        "es_correcta": false,
-        "explicacion": "Overshares data."
-      },
-      {
-        "texto_opcion": "Use only client-side WHERE in dashboards, not enforceable server-side.",
+        "texto_opcion": "Use only client-side WHERE in dashboards, not enforceable server-side applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Not enforceable server-side."
       },
       {
-        "texto_opcion": "Disable authorization checks adopted as the standard pattern for the team.",
+        "texto_opcion": "Implement BigQuery row-level security policies filtered by user attributes/groups.",
+        "es_correcta": true,
+        "explicacion": "RLS enforces row filters at query time in BigQuery."
+      },
+      {
+        "texto_opcion": "Disable authorization checks adopted as the standard pattern for the team selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Breach risk."
+      },
+      {
+        "texto_opcion": "Ship full table extracts to every laptop as the default adopted as the adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Overshares data."
       }
     ],
     "tags": [
@@ -728,6 +728,11 @@
     "pregunta": "Payments fintech scenario — VMs without public IPs must read GCS and call BigQuery APIs securely. What should they implement? Constraint set #2.",
     "opciones": [
       {
+        "texto_opcion": "Assign public IPs to every VM as the only option, increases attack surface.",
+        "es_correcta": false,
+        "explicacion": "Increases attack surface."
+      },
+      {
         "texto_opcion": "Disable VPC firewalls entirely applied across environments for consistency.",
         "es_correcta": false,
         "explicacion": "Unsafe."
@@ -736,11 +741,6 @@
         "texto_opcion": "Enable Private Google Access for the subnet.",
         "es_correcta": true,
         "explicacion": "Private Google Access allows private VMs to reach Google APIs without public IPs."
-      },
-      {
-        "texto_opcion": "Assign public IPs to every VM as the only option, increases attack surface.",
-        "es_correcta": false,
-        "explicacion": "Increases attack surface."
       },
       {
         "texto_opcion": "Mirror buckets to anonymous FTP, insecure exfiltration path, insecure exfiltration path.",
@@ -757,16 +757,6 @@
     "pregunta": "Industrial iot platform scenario — prove who queried a sensitive BigQuery table last month. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Disable data access logs to save cost always applied across.",
-        "es_correcta": false,
-        "explicacion": "Loses forensic trail."
-      },
-      {
-        "texto_opcion": "Rely on memory of the on-call engineer as the primary design.",
-        "es_correcta": false,
-        "explicacion": "Not auditable."
-      },
-      {
         "texto_opcion": "Check only the local browser history as the default production.",
         "es_correcta": false,
         "explicacion": "Not authoritative."
@@ -775,6 +765,16 @@
         "texto_opcion": "Use Cloud Audit Logs for BigQuery and retain them centrally.",
         "es_correcta": true,
         "explicacion": "Audit logs provide who/when/what evidence for compliance investigations."
+      },
+      {
+        "texto_opcion": "Rely on memory of the on-call engineer as the primary design.",
+        "es_correcta": false,
+        "explicacion": "Not auditable."
+      },
+      {
+        "texto_opcion": "Disable data access logs to save cost always applied across.",
+        "es_correcta": false,
+        "explicacion": "Loses forensic trail."
       }
     ],
     "tags": [
@@ -786,24 +786,24 @@
     "pregunta": "Incident review (australiaeast): pipelines must not hardcode database passwords in Composer variables committed to git. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Put passwords in DAG docstrings configured end-to-end for.",
-        "es_correcta": false,
-        "explicacion": "Visible in code."
-      },
-      {
         "texto_opcion": "Email passwords weekly in clear text configured end-to-end.",
         "es_correcta": false,
         "explicacion": "Insecure process."
       },
       {
-        "texto_opcion": "Store secrets in Secret Manager and reference them at runtime.",
-        "es_correcta": true,
-        "explicacion": "Secret Manager centralizes rotation and access control for credentials."
+        "texto_opcion": "Put passwords in DAG docstrings configured end-to-end for.",
+        "es_correcta": false,
+        "explicacion": "Visible in code."
       },
       {
         "texto_opcion": "Commit .env with passwords to the DAG repo used as the.",
         "es_correcta": false,
         "explicacion": "Secret leak."
+      },
+      {
+        "texto_opcion": "Store secrets in Secret Manager and reference them at runtime.",
+        "es_correcta": true,
+        "explicacion": "Secret Manager centralizes rotation and access control for credentials."
       }
     ],
     "tags": [
@@ -825,14 +825,14 @@
         "explicacion": "Too broad."
       },
       {
-        "texto_opcion": "Create an authorized view exposing only the allowed projection.",
-        "es_correcta": true,
-        "explicacion": "Authorized views let consumers query derived logic without direct table IAM."
-      },
-      {
         "texto_opcion": "Clone full tables into every consumer project without filters adopted as the standard.",
         "es_correcta": false,
         "explicacion": "Oversharing."
+      },
+      {
+        "texto_opcion": "Create an authorized view exposing only the allowed projection.",
+        "es_correcta": true,
+        "explicacion": "Authorized views let consumers query derived logic without direct table IAM."
       }
     ],
     "tags": [
@@ -844,24 +844,24 @@
     "pregunta": "A travel platform (~200 million rows/day, region northeurope) must: ensure client tools and connectors encrypt data in transit to BigQuery and Cloud SQL. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Require TLS/SSL for connections and avoid plaintext JDBC/ODBC paths",
+        "texto_opcion": "Mirror tables to unencrypted FTP nightly, breaks transit protection plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Breaks transit protection."
+      },
+      {
+        "texto_opcion": "Require TLS/SSL for connections and avoid plaintext JDBC/ODBC paths.",
         "es_correcta": true,
         "explicacion": "Encryption in transit is a baseline compliance control for managed data services."
       },
       {
-        "texto_opcion": "Force sslmode=disable everywhere, exposes data on the wire.",
-        "es_correcta": false,
-        "explicacion": "Exposes data on the wire."
-      },
-      {
-        "texto_opcion": "Use HTTP without TLS to the API selected to meet the stated.",
+        "texto_opcion": "Use HTTP without TLS to the API selected to meet the stated often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Insecure."
       },
       {
-        "texto_opcion": "Mirror tables to unencrypted FTP nightly, breaks transit protection.",
+        "texto_opcion": "Force sslmode=disable everywhere, exposes data on the wire plausible at first glance.",
         "es_correcta": false,
-        "explicacion": "Breaks transit protection."
+        "explicacion": "Exposes data on the wire."
       }
     ],
     "tags": [
@@ -873,24 +873,24 @@
     "pregunta": "Incident review (westeurope): grant analysts read-only access to a single BigQuery dataset without project Owner. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Share the service account JSON key in Slack, key sprawl and audit risk.",
-        "es_correcta": false,
-        "explicacion": "Key sprawl and audit risk."
-      },
-      {
-        "texto_opcion": "Disable IAM and use anonymous dataset links, insecure and non-compliant.",
-        "es_correcta": false,
-        "explicacion": "Insecure and non-compliant."
-      },
-      {
         "texto_opcion": "Assign bigquery.dataViewer on the dataset, not roles/owner.",
         "es_correcta": true,
         "explicacion": "Dataset-scoped IAM least privilege is the standard BigQuery access pattern."
       },
       {
+        "texto_opcion": "Share the service account JSON key in Slack, key sprawl and audit risk.",
+        "es_correcta": false,
+        "explicacion": "Key sprawl and audit risk."
+      },
+      {
         "texto_opcion": "Grant roles/owner on the project to all analysts, over-privileged",
         "es_correcta": false,
         "explicacion": "Over-privileged; violates least privilege."
+      },
+      {
+        "texto_opcion": "Disable IAM and use anonymous dataset links, insecure and non-compliant.",
+        "es_correcta": false,
+        "explicacion": "Insecure and non-compliant."
       }
     ],
     "tags": [
@@ -902,24 +902,24 @@
     "pregunta": "A healthcare provider (petabyte-scale historical data, region westeurope) must: encrypt BigQuery tables with customer-managed keys for regulatory key control. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config",
-        "es_correcta": true,
-        "explicacion": "CMEK lets the customer control key lifecycle while Google still encrypts data at rest."
-      },
-      {
-        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements.",
-        "es_correcta": false,
-        "explicacion": "Violates baseline encryption requirements."
-      },
-      {
         "texto_opcion": "Rely only on default Google-managed encryption with no CMEK option, does not meet CMEK control requirements.",
         "es_correcta": false,
         "explicacion": "Does not meet CMEK control requirements."
       },
       {
-        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture.",
+        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Violates baseline encryption requirements."
+      },
+      {
+        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Worse security posture."
+      },
+      {
+        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config.",
+        "es_correcta": true,
+        "explicacion": "CMEK lets the customer control key lifecycle while Google still encrypts data at rest."
       }
     ],
     "tags": [
@@ -931,12 +931,7 @@
     "pregunta": "A industrial IoT platform (hourly batch windows, region australiaeast) must: prevent data exfiltration from BigQuery and GCS to untrusted projects or the public internet. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Remove Cloud Armor alone as the full solution, cloud Armor is edge WAF",
-        "es_correcta": false,
-        "explicacion": "Cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs."
-      },
-      {
-        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects",
+        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects.",
         "es_correcta": true,
         "explicacion": "VPC-SC constrains Google API access paths and reduces exfiltration risk."
       },
@@ -949,6 +944,11 @@
         "texto_opcion": "Publish all datasets as public Marketplace listings, opposite of containment.",
         "es_correcta": false,
         "explicacion": "Opposite of containment."
+      },
+      {
+        "texto_opcion": "Remove Cloud Armor alone as the full solution, cloud Armor is edge WAF",
+        "es_correcta": false,
+        "explicacion": "Cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs."
       }
     ],
     "tags": [
@@ -960,24 +960,24 @@
     "pregunta": "Payments fintech scenario — scan landing GCS files for PII before promoting to curated BigQuery tables. What should they implement? Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "Use Cloud DNS private zones as the PII scanner, dNS is not a data inspection service.",
+        "es_correcta": false,
+        "explicacion": "DNS is not a data inspection service."
+      },
+      {
         "texto_opcion": "Use Cloud DLP inspection/de-identification jobs.",
         "es_correcta": true,
         "explicacion": "DLP discovers and can redact/tokenize sensitive fields before wider access."
       },
       {
-        "texto_opcion": "Rename the bucket only, does not detect or protect PII content.",
+        "texto_opcion": "Rename the bucket only, does not detect or protect PII content as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Does not detect or protect PII content."
       },
       {
-        "texto_opcion": "Ignore PII and grant allUsers viewer as the primary design for.",
+        "texto_opcion": "Ignore PII and grant allUsers viewer as the primary design for prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Compliance failure."
-      },
-      {
-        "texto_opcion": "Use Cloud DNS private zones as the PII scanner, dNS is not a data inspection service.",
-        "es_correcta": false,
-        "explicacion": "DNS is not a data inspection service."
       }
     ],
     "tags": [
@@ -989,14 +989,14 @@
     "pregunta": "Industrial iot platform scenario — keep EU customer data stored and processed only in EU regions for sovereignty. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Store everything in us-central1 regardless of policy, violates EU residency, violates EU residency.",
-        "es_correcta": false,
-        "explicacion": "Violates EU residency."
-      },
-      {
         "texto_opcion": "Replicate to public HTTP endpoints worldwide as the primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Breaks sovereignty."
+      },
+      {
+        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations.",
+        "es_correcta": true,
+        "explicacion": "Location controls and job location policies enforce residency requirements."
       },
       {
         "texto_opcion": "Use only Memorystore in any region without controls, does not solve analytical residency.",
@@ -1004,9 +1004,9 @@
         "explicacion": "Does not solve analytical residency."
       },
       {
-        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations",
-        "es_correcta": true,
-        "explicacion": "Location controls and job location policies enforce residency requirements."
+        "texto_opcion": "Store everything in us-central1 regardless of policy, violates EU residency, violates EU residency.",
+        "es_correcta": false,
+        "explicacion": "Violates EU residency."
       }
     ],
     "tags": [
@@ -1018,24 +1018,24 @@
     "pregunta": "block creation of public GCS buckets org-wide. Context: travel platform, sub-second interactive queries. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM",
+        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM.",
         "es_correcta": true,
         "explicacion": "Org policies provide centralized guardrails across projects."
       },
       {
-        "texto_opcion": "Ask each developer to remember not to go public prioritized.",
-        "es_correcta": false,
-        "explicacion": "Not enforceable."
-      },
-      {
-        "texto_opcion": "Make all buckets world-readable by default as the default.",
+        "texto_opcion": "Make all buckets world-readable by default as the default adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Opposite control."
       },
       {
-        "texto_opcion": "Disable Cloud Audit Logs adopted as the standard pattern for the team.",
+        "texto_opcion": "Disable Cloud Audit Logs adopted as the standard pattern for the team configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Reduces visibility."
+      },
+      {
+        "texto_opcion": "Ask each developer to remember not to go public prioritized plausible at first glance, yet.",
+        "es_correcta": false,
+        "explicacion": "Not enforceable."
       }
     ],
     "tags": [
@@ -1047,24 +1047,24 @@
     "pregunta": "For a industrial IoT platform workload with sub-second interactive queries: Dataflow workers need least-privilege access to Pub/Sub, GCS, and BigQuery. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Disable authentication on sinks as the primary design for this requirement.",
-        "es_correcta": false,
-        "explicacion": "Insecure."
-      },
-      {
-        "texto_opcion": "Run all jobs as project Owner default compute SA forever configured.",
+        "texto_opcion": "Run all jobs as project Owner default compute SA forever configured plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Excessive privileges."
       },
       {
-        "texto_opcion": "Use a dedicated custom service account with minimal roles on each resource",
+        "texto_opcion": "Use a dedicated custom service account with minimal roles on each resource.",
         "es_correcta": true,
         "explicacion": "Workload identity via scoped service accounts is the secure Dataflow pattern."
       },
       {
-        "texto_opcion": "Embed user passwords in pipeline options, credential anti-pattern.",
+        "texto_opcion": "Embed user passwords in pipeline options, credential anti-pattern plausible at first glance, yet.",
         "es_correcta": false,
         "explicacion": "Credential anti-pattern."
+      },
+      {
+        "texto_opcion": "Disable authentication on sinks as the primary design for this requirement configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Insecure."
       }
     ],
     "tags": [
@@ -1076,16 +1076,6 @@
     "pregunta": "separate development and production data estates for governance. Context: global retailer, ~50,000 events/s. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Store prod credentials in the notebook UI permanently prioritized for.",
-        "es_correcta": false,
-        "explicacion": "Secret sprawl."
-      },
-      {
-        "texto_opcion": "Share one project with mixed prod and scratch datasets only prioritized.",
-        "es_correcta": false,
-        "explicacion": "Weak isolation."
-      },
-      {
         "texto_opcion": "Give developers Owner on production as the primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Risky."
@@ -1094,6 +1084,16 @@
         "texto_opcion": "Use separate GCP projects for dev vs prod with distinct IAM.",
         "es_correcta": true,
         "explicacion": "Project boundaries simplify blast-radius, billing, and IAM separation."
+      },
+      {
+        "texto_opcion": "Share one project with mixed prod and scratch datasets only prioritized.",
+        "es_correcta": false,
+        "explicacion": "Weak isolation."
+      },
+      {
+        "texto_opcion": "Store prod credentials in the notebook UI permanently prioritized for.",
+        "es_correcta": false,
+        "explicacion": "Secret sprawl."
       }
     ],
     "tags": [
@@ -1105,7 +1105,7 @@
     "pregunta": "hide salary columns from most BigQuery analysts while allowing HR analysts. Context: travel platform, near-real-time dashboards. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Grant dataset Owner to everyone then ask politely used as the.",
+        "texto_opcion": "Grant dataset Owner to everyone then ask politely used as the prioritized for simplicity, though.",
         "es_correcta": false,
         "explicacion": "Not enforceable."
       },
@@ -1115,14 +1115,14 @@
         "explicacion": "UI hiding is not server-side control."
       },
       {
-        "texto_opcion": "Use column-level security / policy tags with Data Catalog/Dataplex taxonomy",
-        "es_correcta": true,
-        "explicacion": "Policy tags enforce fine-grained column access in BigQuery."
-      },
-      {
-        "texto_opcion": "Delete the salary column from all backups, breaks legitimate HR use.",
+        "texto_opcion": "Delete the salary column from all backups, breaks legitimate HR use prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Breaks legitimate HR use."
+      },
+      {
+        "texto_opcion": "Use column-level security / policy tags with Data Catalog/Dataplex taxonomy.",
+        "es_correcta": true,
+        "explicacion": "Policy tags enforce fine-grained column access in BigQuery."
       }
     ],
     "tags": [
@@ -1134,24 +1134,24 @@
     "pregunta": "each regional team must only query their region's rows in a shared fact table. Context: healthcare provider, ~5 TB/day. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Ship full table extracts to every laptop as the default selected to meet the.",
+        "texto_opcion": "Ship full table extracts to every laptop as the default selected to meet the used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Overshares data."
       },
       {
-        "texto_opcion": "Implement BigQuery row-level security policies filtered by user attributes/groups",
+        "texto_opcion": "Disable authorization checks selected to meet the stated constraints as the default production choice in this scenario.",
+        "es_correcta": false,
+        "explicacion": "Breach risk."
+      },
+      {
+        "texto_opcion": "Implement BigQuery row-level security policies filtered by user attributes/groups.",
         "es_correcta": true,
         "explicacion": "RLS enforces row filters at query time in BigQuery."
       },
       {
-        "texto_opcion": "Use only client-side WHERE in dashboards, not enforceable server-side.",
+        "texto_opcion": "Use only client-side WHERE in dashboards, not enforceable server-side often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Not enforceable server-side."
-      },
-      {
-        "texto_opcion": "Disable authorization checks selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Breach risk."
       }
     ],
     "tags": [
@@ -1168,6 +1168,11 @@
         "explicacion": "Increases attack surface."
       },
       {
+        "texto_opcion": "Disable VPC firewalls entirely configured end-to-end for this workload configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Unsafe."
+      },
+      {
         "texto_opcion": "Enable Private Google Access for the subnet.",
         "es_correcta": true,
         "explicacion": "Private Google Access allows private VMs to reach Google APIs without public IPs."
@@ -1176,11 +1181,6 @@
         "texto_opcion": "Mirror buckets to anonymous FTP, insecure exfiltration path, insecure exfiltration path.",
         "es_correcta": false,
         "explicacion": "Insecure exfiltration path."
-      },
-      {
-        "texto_opcion": "Disable VPC firewalls entirely configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Unsafe."
       }
     ],
     "tags": [
@@ -1192,14 +1192,9 @@
     "pregunta": "For a energy utility workload with strict GDPR residency: prove who queried a sensitive BigQuery table last month. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Disable data access logs to save cost always as the default.",
+        "texto_opcion": "Rely on memory of the on-call engineer adopted as the standard.",
         "es_correcta": false,
-        "explicacion": "Loses forensic trail."
-      },
-      {
-        "texto_opcion": "Check only the local browser history applied across as the default.",
-        "es_correcta": false,
-        "explicacion": "Not authoritative."
+        "explicacion": "Not auditable."
       },
       {
         "texto_opcion": "Use Cloud Audit Logs for BigQuery and retain them centrally.",
@@ -1207,9 +1202,14 @@
         "explicacion": "Audit logs provide who/when/what evidence for compliance investigations."
       },
       {
-        "texto_opcion": "Rely on memory of the on-call engineer adopted as the standard.",
+        "texto_opcion": "Check only the local browser history applied across as the default.",
         "es_correcta": false,
-        "explicacion": "Not auditable."
+        "explicacion": "Not authoritative."
+      },
+      {
+        "texto_opcion": "Disable data access logs to save cost always as the default.",
+        "es_correcta": false,
+        "explicacion": "Loses forensic trail."
       }
     ],
     "tags": [
@@ -1220,6 +1220,11 @@
   {
     "pregunta": "pipelines must not hardcode database passwords in Composer variables committed to git. Context: media streaming company, near-real-time dashboards. Constraint set #3.",
     "opciones": [
+      {
+        "texto_opcion": "Email passwords weekly in clear text used as the main path.",
+        "es_correcta": false,
+        "explicacion": "Insecure process."
+      },
       {
         "texto_opcion": "Store secrets in Secret Manager and reference them at runtime.",
         "es_correcta": true,
@@ -1234,11 +1239,6 @@
         "texto_opcion": "Put passwords in DAG docstrings prioritized for used as the main.",
         "es_correcta": false,
         "explicacion": "Visible in code."
-      },
-      {
-        "texto_opcion": "Email passwords weekly in clear text used as the main path.",
-        "es_correcta": false,
-        "explicacion": "Insecure process."
       }
     ],
     "tags": [
@@ -1250,14 +1250,14 @@
     "pregunta": "Industrial iot platform scenario — share a curated subset of columns/rows without granting base table access. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Create an authorized view exposing only the allowed projection.",
-        "es_correcta": true,
-        "explicacion": "Authorized views let consumers query derived logic without direct table IAM."
-      },
-      {
-        "texto_opcion": "Export CSVs to a public Drive folder, uncontrolled distribution.",
+        "texto_opcion": "Export CSVs to a public Drive folder, uncontrolled distribution selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Uncontrolled distribution."
+      },
+      {
+        "texto_opcion": "Clone full tables into every consumer project without filters selected to meet.",
+        "es_correcta": false,
+        "explicacion": "Oversharing."
       },
       {
         "texto_opcion": "Grant dataEditor on all base tables selected to meet the stated constraints.",
@@ -1265,9 +1265,9 @@
         "explicacion": "Too broad."
       },
       {
-        "texto_opcion": "Clone full tables into every consumer project without filters selected to meet.",
-        "es_correcta": false,
-        "explicacion": "Oversharing."
+        "texto_opcion": "Create an authorized view exposing only the allowed projection.",
+        "es_correcta": true,
+        "explicacion": "Authorized views let consumers query derived logic without direct table IAM."
       }
     ],
     "tags": [
@@ -1279,24 +1279,24 @@
     "pregunta": "Incident review (westeurope): ensure client tools and connectors encrypt data in transit to BigQuery and Cloud SQL. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Use HTTP without TLS to the API as the primary design for.",
+        "texto_opcion": "Use HTTP without TLS to the API as the primary design for plausible at first glance, yet.",
         "es_correcta": false,
         "explicacion": "Insecure."
       },
       {
-        "texto_opcion": "Mirror tables to unencrypted FTP nightly, breaks transit protection.",
+        "texto_opcion": "Force sslmode=disable everywhere, exposes data on the wire selected to meet the.",
+        "es_correcta": false,
+        "explicacion": "Exposes data on the wire."
+      },
+      {
+        "texto_opcion": "Mirror tables to unencrypted FTP nightly, breaks transit protection as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Breaks transit protection."
       },
       {
-        "texto_opcion": "Require TLS/SSL for connections and avoid plaintext JDBC/ODBC paths",
+        "texto_opcion": "Require TLS/SSL for connections and avoid plaintext JDBC/ODBC paths.",
         "es_correcta": true,
         "explicacion": "Encryption in transit is a baseline compliance control for managed data services."
-      },
-      {
-        "texto_opcion": "Force sslmode=disable everywhere, exposes data on the wire.",
-        "es_correcta": false,
-        "explicacion": "Exposes data on the wire."
       }
     ],
     "tags": [
@@ -1337,24 +1337,24 @@
     "pregunta": "A global retailer (petabyte-scale historical data, region northeurope) must: encrypt BigQuery tables with customer-managed keys for regulatory key control. Which option fits best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements.",
+        "texto_opcion": "Rely only on default Google-managed encryption with no CMEK option, does not meet CMEK control requirements.",
+        "es_correcta": false,
+        "explicacion": "Does not meet CMEK control requirements."
+      },
+      {
+        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Violates baseline encryption requirements."
       },
       {
-        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture.",
+        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Worse security posture."
       },
       {
-        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config",
+        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config.",
         "es_correcta": true,
         "explicacion": "CMEK lets the customer control key lifecycle while Google still encrypts data at rest."
-      },
-      {
-        "texto_opcion": "Rely only on default Google-managed encryption with no CMEK option, does not meet CMEK control requirements.",
-        "es_correcta": false,
-        "explicacion": "Does not meet CMEK control requirements."
       }
     ],
     "tags": [
@@ -1366,24 +1366,24 @@
     "pregunta": "Incident review (brazilsouth): prevent data exfiltration from BigQuery and GCS to untrusted projects or the public internet. Select the most appropriate design. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Remove Cloud Armor alone as the full solution",
+        "texto_opcion": "Remove Cloud Armor alone as the full solution — cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs.",
         "es_correcta": false,
         "explicacion": "Cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs."
       },
       {
-        "texto_opcion": "Only open 0.0.0.0/0 firewall rules prioritized for operational.",
+        "texto_opcion": "Only open 0.0.0.0/0 firewall rules prioritized for operational plausible at first glance, yet applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Increases exposure."
       },
       {
-        "texto_opcion": "Publish all datasets as public Marketplace listings",
-        "es_correcta": false,
-        "explicacion": "Opposite of containment."
-      },
-      {
-        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects",
+        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects.",
         "es_correcta": true,
         "explicacion": "VPC-SC constrains Google API access paths and reduces exfiltration risk."
+      },
+      {
+        "texto_opcion": "Publish all datasets as public Marketplace listings plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Opposite of containment."
       }
     ],
     "tags": [
@@ -1395,17 +1395,12 @@
     "pregunta": "scan landing GCS files for PII before promoting to curated BigQuery tables. Context: insurance carrier, sub-second interactive queries. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use Cloud DLP inspection/de-identification jobs.",
-        "es_correcta": true,
-        "explicacion": "DLP discovers and can redact/tokenize sensitive fields before wider access."
-      },
-      {
-        "texto_opcion": "Rename the bucket only, does not detect or protect PII content.",
+        "texto_opcion": "Rename the bucket only, does not detect or protect PII content often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Does not detect or protect PII content."
       },
       {
-        "texto_opcion": "Ignore PII and grant allUsers viewer configured end-to-end for.",
+        "texto_opcion": "Ignore PII and grant allUsers viewer configured end-to-end for often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Compliance failure."
       },
@@ -1413,6 +1408,11 @@
         "texto_opcion": "Use Cloud DNS private zones as the PII scanner, dNS is not a data inspection service.",
         "es_correcta": false,
         "explicacion": "DNS is not a data inspection service."
+      },
+      {
+        "texto_opcion": "Use Cloud DLP inspection/de-identification jobs.",
+        "es_correcta": true,
+        "explicacion": "DLP discovers and can redact/tokenize sensitive fields before wider access."
       }
     ],
     "tags": [
@@ -1429,19 +1429,19 @@
         "explicacion": "Violates EU residency."
       },
       {
-        "texto_opcion": "Use only Memorystore in any region without controls, does not solve analytical residency.",
+        "texto_opcion": "Replicate to public HTTP endpoints worldwide prioritized for operational configured end-to-end for this workload.",
         "es_correcta": false,
-        "explicacion": "Does not solve analytical residency."
+        "explicacion": "Breaks sovereignty."
       },
       {
-        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations",
+        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations.",
         "es_correcta": true,
         "explicacion": "Location controls and job location policies enforce residency requirements."
       },
       {
-        "texto_opcion": "Replicate to public HTTP endpoints worldwide prioritized for operational configured end-to-end for this workload.",
+        "texto_opcion": "Use only Memorystore in any region without controls, does not solve analytical residency prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
-        "explicacion": "Breaks sovereignty."
+        "explicacion": "Does not solve analytical residency."
       }
     ],
     "tags": [
@@ -1453,22 +1453,22 @@
     "pregunta": "For a telecom operator workload with ~5 TB/day: block creation of public GCS buckets org-wide. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Make all buckets world-readable by default applied across.",
-        "es_correcta": false,
-        "explicacion": "Opposite control."
-      },
-      {
-        "texto_opcion": "Disable Cloud Audit Logs as the default production choice here.",
+        "texto_opcion": "Disable Cloud Audit Logs as the default production choice here applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Reduces visibility."
       },
       {
-        "texto_opcion": "Ask each developer to remember not to go public prioritized.",
+        "texto_opcion": "Make all buckets world-readable by default applied across as the default production choice in this scenario.",
+        "es_correcta": false,
+        "explicacion": "Opposite control."
+      },
+      {
+        "texto_opcion": "Ask each developer to remember not to go public prioritized prioritized for simplicity used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Not enforceable."
       },
       {
-        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM",
+        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM.",
         "es_correcta": true,
         "explicacion": "Org policies provide centralized guardrails across projects."
       }
@@ -1482,24 +1482,24 @@
     "pregunta": "Telecom operator scenario — Dataflow workers need least-privilege access to Pub/Sub, GCS, and BigQuery. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use a dedicated custom service account with minimal roles on each resource",
+        "texto_opcion": "Disable authentication on sinks selected to meet the stated constraints applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Insecure."
+      },
+      {
+        "texto_opcion": "Use a dedicated custom service account with minimal roles on each resource.",
         "es_correcta": true,
         "explicacion": "Workload identity via scoped service accounts is the secure Dataflow pattern."
       },
       {
-        "texto_opcion": "Run all jobs as project Owner default compute SA forever selected to.",
-        "es_correcta": false,
-        "explicacion": "Excessive privileges."
-      },
-      {
-        "texto_opcion": "Embed user passwords in pipeline options, credential anti-pattern.",
+        "texto_opcion": "Embed user passwords in pipeline options, credential anti-pattern often seen in legacy designs.",
         "es_correcta": false,
         "explicacion": "Credential anti-pattern."
       },
       {
-        "texto_opcion": "Disable authentication on sinks selected to meet the stated constraints.",
+        "texto_opcion": "Run all jobs as project Owner default compute SA forever selected to plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
-        "explicacion": "Insecure."
+        "explicacion": "Excessive privileges."
       }
     ],
     "tags": [
@@ -1511,14 +1511,14 @@
     "pregunta": "A travel platform (~5 TB/day, region northeurope) must: separate development and production data estates for governance. Which option fits best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use separate GCP projects for dev vs prod with distinct IAM.",
-        "es_correcta": true,
-        "explicacion": "Project boundaries simplify blast-radius, billing, and IAM separation."
-      },
-      {
         "texto_opcion": "Give developers Owner on production as the primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Risky."
+      },
+      {
+        "texto_opcion": "Store prod credentials in the notebook UI permanently selected to meet.",
+        "es_correcta": false,
+        "explicacion": "Secret sprawl."
       },
       {
         "texto_opcion": "Share one project with mixed prod and scratch datasets only selected to.",
@@ -1526,9 +1526,9 @@
         "explicacion": "Weak isolation."
       },
       {
-        "texto_opcion": "Store prod credentials in the notebook UI permanently selected to meet.",
-        "es_correcta": false,
-        "explicacion": "Secret sprawl."
+        "texto_opcion": "Use separate GCP projects for dev vs prod with distinct IAM.",
+        "es_correcta": true,
+        "explicacion": "Project boundaries simplify blast-radius, billing, and IAM separation."
       }
     ],
     "tags": [
@@ -1540,24 +1540,24 @@
     "pregunta": "A media streaming company (petabyte-scale historical data, region eastus) must: hide salary columns from most BigQuery analysts while allowing HR analysts. Which option fits best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Delete the salary column from all backups, breaks legitimate HR use.",
-        "es_correcta": false,
-        "explicacion": "Breaks legitimate HR use."
-      },
-      {
-        "texto_opcion": "Grant dataset Owner to everyone then ask politely selected to.",
-        "es_correcta": false,
-        "explicacion": "Not enforceable."
-      },
-      {
-        "texto_opcion": "Use column-level security / policy tags with Data Catalog/Dataplex taxonomy",
+        "texto_opcion": "Use column-level security / policy tags with Data Catalog/Dataplex taxonomy.",
         "es_correcta": true,
         "explicacion": "Policy tags enforce fine-grained column access in BigQuery."
+      },
+      {
+        "texto_opcion": "Grant dataset Owner to everyone then ask politely selected to prioritized for simplicity, though.",
+        "es_correcta": false,
+        "explicacion": "Not enforceable."
       },
       {
         "texto_opcion": "Only hide the column in a Looker Studio chart, uI hiding is not server-side control.",
         "es_correcta": false,
         "explicacion": "UI hiding is not server-side control."
+      },
+      {
+        "texto_opcion": "Delete the salary column from all backups, breaks legitimate HR use adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Breaks legitimate HR use."
       }
     ],
     "tags": [
@@ -1569,24 +1569,24 @@
     "pregunta": "Incident review (australiaeast): each regional team must only query their region's rows in a shared fact table. Select the most appropriate design. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Disable authorization checks prioritized for operational configured.",
-        "es_correcta": false,
-        "explicacion": "Breach risk."
-      },
-      {
-        "texto_opcion": "Use only client-side WHERE in dashboards, not enforceable server-side.",
-        "es_correcta": false,
-        "explicacion": "Not enforceable server-side."
-      },
-      {
-        "texto_opcion": "Implement BigQuery row-level security policies filtered by user attributes/groups",
+        "texto_opcion": "Implement BigQuery row-level security policies filtered by user attributes/groups.",
         "es_correcta": true,
         "explicacion": "RLS enforces row filters at query time in BigQuery."
       },
       {
-        "texto_opcion": "Ship full table extracts to every laptop configured end-to-end.",
+        "texto_opcion": "Ship full table extracts to every laptop configured end-to-end as a primary design for this requirement prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Overshares data."
+      },
+      {
+        "texto_opcion": "Use only client-side WHERE in dashboards, not enforceable server-side prioritized for simplicity, though it used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Not enforceable server-side."
+      },
+      {
+        "texto_opcion": "Disable authorization checks prioritized for operational configured plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Breach risk."
       }
     ],
     "tags": [
@@ -1598,14 +1598,9 @@
     "pregunta": "Payments fintech scenario — VMs without public IPs must read GCS and call BigQuery APIs securely. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Assign public IPs to every VM as the only option, increases attack surface.",
-        "es_correcta": false,
-        "explicacion": "Increases attack surface."
-      },
-      {
-        "texto_opcion": "Disable VPC firewalls entirely as the primary design for this requirement.",
-        "es_correcta": false,
-        "explicacion": "Unsafe."
+        "texto_opcion": "Enable Private Google Access for the subnet.",
+        "es_correcta": true,
+        "explicacion": "Private Google Access allows private VMs to reach Google APIs without public IPs."
       },
       {
         "texto_opcion": "Mirror buckets to anonymous FTP, insecure exfiltration path, insecure exfiltration path.",
@@ -1613,9 +1608,14 @@
         "explicacion": "Insecure exfiltration path."
       },
       {
-        "texto_opcion": "Enable Private Google Access for the subnet.",
-        "es_correcta": true,
-        "explicacion": "Private Google Access allows private VMs to reach Google APIs without public IPs."
+        "texto_opcion": "Disable VPC firewalls entirely as the primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Unsafe."
+      },
+      {
+        "texto_opcion": "Assign public IPs to every VM as the only option, increases attack surface.",
+        "es_correcta": false,
+        "explicacion": "Increases attack surface."
       }
     ],
     "tags": [
@@ -1627,14 +1627,14 @@
     "pregunta": "Logistics carrier scenario — prove who queried a sensitive BigQuery table last month. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Disable data access logs to save cost always as the default.",
-        "es_correcta": false,
-        "explicacion": "Loses forensic trail."
-      },
-      {
         "texto_opcion": "Rely on memory of the on-call engineer as the primary design.",
         "es_correcta": false,
         "explicacion": "Not auditable."
+      },
+      {
+        "texto_opcion": "Check only the local browser history as the primary design for.",
+        "es_correcta": false,
+        "explicacion": "Not authoritative."
       },
       {
         "texto_opcion": "Use Cloud Audit Logs for BigQuery and retain them centrally.",
@@ -1642,9 +1642,9 @@
         "explicacion": "Audit logs provide who/when/what evidence for compliance investigations."
       },
       {
-        "texto_opcion": "Check only the local browser history as the primary design for.",
+        "texto_opcion": "Disable data access logs to save cost always as the default.",
         "es_correcta": false,
-        "explicacion": "Not authoritative."
+        "explicacion": "Loses forensic trail."
       }
     ],
     "tags": [
@@ -1656,16 +1656,6 @@
     "pregunta": "Online marketplace scenario — pipelines must not hardcode database passwords in Composer variables committed to git. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Store secrets in Secret Manager and reference them at runtime.",
-        "es_correcta": true,
-        "explicacion": "Secret Manager centralizes rotation and access control for credentials."
-      },
-      {
-        "texto_opcion": "Put passwords in DAG docstrings prioritized for adopted as the.",
-        "es_correcta": false,
-        "explicacion": "Visible in code."
-      },
-      {
         "texto_opcion": "Commit .env with passwords to the DAG repo adopted as the.",
         "es_correcta": false,
         "explicacion": "Secret leak."
@@ -1674,6 +1664,16 @@
         "texto_opcion": "Email passwords weekly in clear text selected to meet the.",
         "es_correcta": false,
         "explicacion": "Insecure process."
+      },
+      {
+        "texto_opcion": "Put passwords in DAG docstrings prioritized for adopted as the.",
+        "es_correcta": false,
+        "explicacion": "Visible in code."
+      },
+      {
+        "texto_opcion": "Store secrets in Secret Manager and reference them at runtime.",
+        "es_correcta": true,
+        "explicacion": "Secret Manager centralizes rotation and access control for credentials."
       }
     ],
     "tags": [
@@ -1695,14 +1695,14 @@
         "explicacion": "Uncontrolled distribution."
       },
       {
-        "texto_opcion": "Grant dataEditor on all base tables adopted as the standard pattern for the team.",
-        "es_correcta": false,
-        "explicacion": "Too broad."
-      },
-      {
         "texto_opcion": "Clone full tables into every consumer project without filters as the default production choice here.",
         "es_correcta": false,
         "explicacion": "Oversharing."
+      },
+      {
+        "texto_opcion": "Grant dataEditor on all base tables adopted as the standard pattern for the team often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Too broad."
       }
     ],
     "tags": [
@@ -1714,24 +1714,24 @@
     "pregunta": "ensure client tools and connectors encrypt data in transit to BigQuery and Cloud SQL. Context: energy utility, sub-second interactive queries. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Require TLS/SSL for connections and avoid plaintext JDBC/ODBC paths",
+        "texto_opcion": "Mirror tables to unencrypted FTP nightly, breaks transit protection.",
+        "es_correcta": false,
+        "explicacion": "Breaks transit protection."
+      },
+      {
+        "texto_opcion": "Require TLS/SSL for connections and avoid plaintext JDBC/ODBC paths.",
         "es_correcta": true,
         "explicacion": "Encryption in transit is a baseline compliance control for managed data services."
       },
       {
-        "texto_opcion": "Force sslmode=disable everywhere, exposes data on the wire.",
+        "texto_opcion": "Force sslmode=disable everywhere, exposes data on the wire selected to meet the.",
         "es_correcta": false,
         "explicacion": "Exposes data on the wire."
       },
       {
-        "texto_opcion": "Use HTTP without TLS to the API selected to meet the stated.",
+        "texto_opcion": "Use HTTP without TLS to the API selected to meet the stated configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Insecure."
-      },
-      {
-        "texto_opcion": "Mirror tables to unencrypted FTP nightly, breaks transit protection.",
-        "es_correcta": false,
-        "explicacion": "Breaks transit protection."
       }
     ],
     "tags": [
@@ -1743,9 +1743,9 @@
     "pregunta": "For a telecom operator workload with ~200 million rows/day: grant analysts read-only access to a single BigQuery dataset without project Owner. Best choice (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Assign bigquery.dataViewer on the dataset, not roles/owner.",
-        "es_correcta": true,
-        "explicacion": "Dataset-scoped IAM least privilege is the standard BigQuery access pattern."
+        "texto_opcion": "Disable IAM and use anonymous dataset links, insecure and non-compliant.",
+        "es_correcta": false,
+        "explicacion": "Insecure and non-compliant."
       },
       {
         "texto_opcion": "Share the service account JSON key in Slack, key sprawl and audit risk.",
@@ -1753,14 +1753,14 @@
         "explicacion": "Key sprawl and audit risk."
       },
       {
-        "texto_opcion": "Disable IAM and use anonymous dataset links, insecure and non-compliant.",
-        "es_correcta": false,
-        "explicacion": "Insecure and non-compliant."
-      },
-      {
         "texto_opcion": "Grant roles/owner on the project to all analysts, over-privileged",
         "es_correcta": false,
         "explicacion": "Over-privileged; violates least privilege."
+      },
+      {
+        "texto_opcion": "Assign bigquery.dataViewer on the dataset, not roles/owner.",
+        "es_correcta": true,
+        "explicacion": "Dataset-scoped IAM least privilege is the standard BigQuery access pattern."
       }
     ],
     "tags": [
@@ -1772,24 +1772,24 @@
     "pregunta": "For a payments fintech workload with near-real-time dashboards: encrypt BigQuery tables with customer-managed keys for regulatory key control. Best choice (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements.",
+        "texto_opcion": "Rely only on default Google-managed encryption with no CMEK option, does not meet CMEK control requirements.",
         "es_correcta": false,
-        "explicacion": "Violates baseline encryption requirements."
+        "explicacion": "Does not meet CMEK control requirements."
       },
       {
-        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture.",
-        "es_correcta": false,
-        "explicacion": "Worse security posture."
-      },
-      {
-        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config",
+        "texto_opcion": "Configure Cloud KMS CMEK on the BigQuery dataset/table encryption config.",
         "es_correcta": true,
         "explicacion": "CMEK lets the customer control key lifecycle while Google still encrypts data at rest."
       },
       {
-        "texto_opcion": "Rely only on default Google-managed encryption with no CMEK option, does not meet CMEK control requirements.",
+        "texto_opcion": "Store plaintext copies in a public GCS bucket, worse security posture configured end-to-end for the stated workload.",
         "es_correcta": false,
-        "explicacion": "Does not meet CMEK control requirements."
+        "explicacion": "Worse security posture."
+      },
+      {
+        "texto_opcion": "Disable encryption to simplify audits, violates baseline encryption requirements prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Violates baseline encryption requirements."
       }
     ],
     "tags": [
@@ -1801,24 +1801,24 @@
     "pregunta": "For a industrial IoT platform workload with ~5 TB/day: prevent data exfiltration from BigQuery and GCS to untrusted projects or the public internet. Best choice (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects",
-        "es_correcta": true,
-        "explicacion": "VPC-SC constrains Google API access paths and reduces exfiltration risk."
-      },
-      {
-        "texto_opcion": "Remove Cloud Armor alone as the full solution",
-        "es_correcta": false,
-        "explicacion": "Cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs."
-      },
-      {
-        "texto_opcion": "Only open 0.0.0.0/0 firewall rules applied across environments.",
+        "texto_opcion": "Only open 0.0.0.0/0 firewall rules applied across environments adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Increases exposure."
       },
       {
-        "texto_opcion": "Publish all datasets as public Marketplace listings",
+        "texto_opcion": "Publish all datasets as public Marketplace listings adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Opposite of containment."
+      },
+      {
+        "texto_opcion": "Use VPC Service Controls with a service perimeter around sensitive projects.",
+        "es_correcta": true,
+        "explicacion": "VPC-SC constrains Google API access paths and reduces exfiltration risk."
+      },
+      {
+        "texto_opcion": "Remove Cloud Armor alone as the full solution — cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs.",
+        "es_correcta": false,
+        "explicacion": "Cloud Armor is edge WAF, not data perimeter for BQ/GCS APIs."
       }
     ],
     "tags": [
@@ -1830,19 +1830,19 @@
     "pregunta": "A healthcare provider (hourly batch windows, region brazilsouth) must: scan landing GCS files for PII before promoting to curated BigQuery tables. Which option fits best? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Rename the bucket only, does not detect or protect PII content.",
+        "texto_opcion": "Rename the bucket only, does not detect or protect PII content adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Does not detect or protect PII content."
-      },
-      {
-        "texto_opcion": "Ignore PII and grant allUsers viewer adopted as the standard.",
-        "es_correcta": false,
-        "explicacion": "Compliance failure."
       },
       {
         "texto_opcion": "Use Cloud DNS private zones as the PII scanner, dNS is not a data inspection service.",
         "es_correcta": false,
         "explicacion": "DNS is not a data inspection service."
+      },
+      {
+        "texto_opcion": "Ignore PII and grant allUsers viewer adopted as the standard used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Compliance failure."
       },
       {
         "texto_opcion": "Use Cloud DLP inspection/de-identification jobs.",
@@ -1859,14 +1859,14 @@
     "pregunta": "Payments fintech scenario — keep EU customer data stored and processed only in EU regions for sovereignty. What should they implement? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Store everything in us-central1 regardless of policy, violates EU residency, violates EU residency.",
-        "es_correcta": false,
-        "explicacion": "Violates EU residency."
-      },
-      {
         "texto_opcion": "Use only Memorystore in any region without controls, does not solve analytical residency.",
         "es_correcta": false,
         "explicacion": "Does not solve analytical residency."
+      },
+      {
+        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations.",
+        "es_correcta": true,
+        "explicacion": "Location controls and job location policies enforce residency requirements."
       },
       {
         "texto_opcion": "Replicate to public HTTP endpoints worldwide as the primary design for this requirement.",
@@ -1874,9 +1874,9 @@
         "explicacion": "Breaks sovereignty."
       },
       {
-        "texto_opcion": "Choose EU multi-region or specific EU regions for GCS/BigQuery and restrict job locations",
-        "es_correcta": true,
-        "explicacion": "Location controls and job location policies enforce residency requirements."
+        "texto_opcion": "Store everything in us-central1 regardless of policy, violates EU residency, violates EU residency.",
+        "es_correcta": false,
+        "explicacion": "Violates EU residency."
       }
     ],
     "tags": [
@@ -1888,24 +1888,24 @@
     "pregunta": "A payments fintech (hourly batch windows, region westeurope) must: block creation of public GCS buckets org-wide. Which option fits best? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Ask each developer to remember not to go public selected to.",
+        "texto_opcion": "Ask each developer to remember not to go public selected to prioritized for simplicity often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Not enforceable."
       },
       {
-        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM",
+        "texto_opcion": "Disable Cloud Audit Logs prioritized for operational as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Reduces visibility."
+      },
+      {
+        "texto_opcion": "Enforce organization policy constraints denying public bucket ACLs/IAM.",
         "es_correcta": true,
         "explicacion": "Org policies provide centralized guardrails across projects."
       },
       {
-        "texto_opcion": "Make all buckets world-readable by default prioritized for.",
+        "texto_opcion": "Make all buckets world-readable by default prioritized for selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Opposite control."
-      },
-      {
-        "texto_opcion": "Disable Cloud Audit Logs prioritized for operational.",
-        "es_correcta": false,
-        "explicacion": "Reduces visibility."
       }
     ],
     "tags": [

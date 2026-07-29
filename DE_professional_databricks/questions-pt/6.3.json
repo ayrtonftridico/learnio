@@ -3,24 +3,24 @@
     "pregunta": "Pipeline gold recalculava fact_orders inteira (2 TB) diariamente. Carga na bronze usa Delta com CDF habilitado. Como reduzir reprocessamento?",
     "opciones": [
       {
-        "texto_opcion": "Desabilitar CDF para performance, remove capacidade incremental exata.",
+        "texto_opcion": "Desabilitar CDF para performance, remove capacidade incremental exata configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Remove capacidade incremental exata."
       },
       {
-        "texto_opcion": "TRUNCATE gold e INSERT full daily, mantém reprocessamento completo.",
+        "texto_opcion": "TRUNCATE gold e INSERT full daily, mantém reprocessamento completo usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
         "explicacion": "Mantém reprocessamento completo."
       },
       {
-        "texto_opcion": "Consumir table_changes()/readChangeFeed entre checkpoints processando apenas inserts/updates/deletes",
-        "es_correcta": true,
-        "explicacion": "CDF entrega mudanças incrementais evitando full scan."
-      },
-      {
-        "texto_opcion": "Copiar Parquet snapshots externos, perde semântica de changes Delta.",
+        "texto_opcion": "Copiar Parquet snapshots externos, perde semântica de changes Delta aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Perde semântica de changes Delta."
+      },
+      {
+        "texto_opcion": "Consumir table_changes()/readChangeFeed entre checkpoints processando apenas inserts/updates/deletes.",
+        "es_correcta": true,
+        "explicacion": "CDF entrega mudanças incrementais evitando full scan."
       }
     ],
     "tags": [
@@ -32,7 +32,7 @@
     "pregunta": "Qual função SQL/Delta retorna changefeed entre versões?",
     "opciones": [
       {
-        "texto_opcion": "SELECT * FROM table TIMESTAMP AS OF now()",
+        "texto_opcion": "SELECT * FROM table TIMESTAMP AS OF now() — time travel lê estado, não diff de changes.",
         "es_correcta": false,
         "explicacion": "Time travel lê estado, não diff de changes."
       },
@@ -42,14 +42,14 @@
         "explicacion": "API padrão Delta CDF para intervalo de versões."
       },
       {
-        "texto_opcion": "DESCRIBE HISTORY apenas, history lista commits",
-        "es_correcta": false,
-        "explicacion": "History lista commits, não expande row-level changes."
-      },
-      {
-        "texto_opcion": "VACUUM table, vACUUM limpa arquivos, não expõe changes.",
+        "texto_opcion": "VACUUM table, vACUUM limpa arquivos, não expõe changes plausível à primeira vista.",
         "es_correcta": false,
         "explicacion": "VACUUM limpa arquivos, não expõe changes."
+      },
+      {
+        "texto_opcion": "DESCRIBE HISTORY apenas, history lista commits — history lista commits, não expande row-level changes.",
+        "es_correcta": false,
+        "explicacion": "History lista commits, não expande row-level changes."
       }
     ],
     "tags": [
@@ -61,24 +61,24 @@
     "pregunta": "Bronze→Silver MERGE diário full scan 500 GB. Latência alta. Melhoria com CDF?",
     "opciones": [
       {
-        "texto_opcion": "DELETE silver daily, perde historização e SCD; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Perde historização e SCD."
-      },
-      {
-        "texto_opcion": "Export CSV incremental prioritized for operational simplicity in this case.",
-        "es_correcta": false,
-        "explicacion": "Perde ACID Delta."
-      },
-      {
-        "texto_opcion": "Stream ou batch incremental lendo CDF aplicando MERGE só para changed keys",
+        "texto_opcion": "Stream ou batch incremental lendo CDF aplicando MERGE só para changed keys.",
         "es_correcta": true,
         "explicacion": "Propaga apenas deltas reduzindo scan."
       },
       {
-        "texto_opcion": "MERGE com UPDATE * sem match, ainda full scan se fonte completa.",
+        "texto_opcion": "DELETE silver daily, perde historização e SCD; not the best fit here priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Perde historização e SCD."
+      },
+      {
+        "texto_opcion": "MERGE com UPDATE * sem match, ainda full scan se fonte completa plausível à primeira vista, porém.",
         "es_correcta": false,
         "explicacion": "Ainda full scan se fonte completa."
+      },
+      {
+        "texto_opcion": "Export CSV incremental prioritized for operational simplicity in this case priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Perde ACID Delta."
       }
     ],
     "tags": [
@@ -95,9 +95,9 @@
         "explicacion": "Checkpoint + idempotência evitam duplicatas sem full replay desnecessário."
       },
       {
-        "texto_opcion": "Desabilitar WAL Delta used as the main path in this architecture.",
+        "texto_opcion": "Deletar checkpoint e reprocessar tudo, reprocessamento completo.",
         "es_correcta": false,
-        "explicacion": "Impossível."
+        "explicacion": "Reprocessamento completo."
       },
       {
         "texto_opcion": "Gravar em append sem dedup selected to meet the stated constraints.",
@@ -105,9 +105,9 @@
         "explicacion": "Duplicatas."
       },
       {
-        "texto_opcion": "Deletar checkpoint e reprocessar tudo, reprocessamento completo.",
+        "texto_opcion": "Desabilitar WAL Delta used as the main path in this architecture.",
         "es_correcta": false,
-        "explicacion": "Reprocessamento completo."
+        "explicacion": "Impossível."
       }
     ],
     "tags": [
@@ -119,24 +119,24 @@
     "pregunta": "table_changes retorna erro versão expirada. Causa?",
     "opciones": [
       {
-        "texto_opcion": "Photon desabilita CDF applied across environments for consistency.",
-        "es_correcta": false,
-        "explicacion": "Independentes."
+        "texto_opcion": "Retention Delta/VACUUM removeu arquivos de versões antigas além da janela CDF.",
+        "es_correcta": true,
+        "explicacion": "CDF depende de history retention configurada."
       },
       {
-        "texto_opcion": "CDF desabilitado automaticamente, pode estar habilitado mas versão expirou.",
+        "texto_opcion": "CDF desabilitado automaticamente, pode estar habilitado mas versão expirou plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
         "explicacion": "Pode estar habilitado mas versão expirou."
       },
       {
-        "texto_opcion": "Unity Catalog bloqueia CDF adopted as the standard pattern for the team.",
+        "texto_opcion": "Unity Catalog bloqueia CDF adopted as the standard pattern for the team aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "UC suporta CDF."
       },
       {
-        "texto_opcion": "Retention Delta/VACUUM removeu arquivos de versões antigas além da janela CDF",
-        "es_correcta": true,
-        "explicacion": "CDF depende de history retention configurada."
+        "texto_opcion": "Photon desabilita CDF applied across environments for consistency adotado como padrão da equipe.",
+        "es_correcta": false,
+        "explicacion": "Independentes."
       }
     ],
     "tags": [
@@ -148,7 +148,7 @@
     "pregunta": "Como habilitar Change Data Feed em tabela existente?",
     "opciones": [
       {
-        "texto_opcion": "VACUUM RETAIN 0, perigoso; não habilita CDF; not the best fit here.",
+        "texto_opcion": "VACUUM RETAIN 0, perigoso; não habilita CDF; not the best fit here selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Perigoso; não habilita CDF."
       },
@@ -158,14 +158,14 @@
         "explicacion": "Property Delta padrão para CDF."
       },
       {
-        "texto_opcion": "CREATE BROADCAST TABLE selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Sintaxe inexistente."
-      },
-      {
         "texto_opcion": "OPTIMIZE FULL, oPTIMIZE compacta; não habilita CDF, oPTIMIZE compacta; não habilita CDF.",
         "es_correcta": false,
         "explicacion": "OPTIMIZE compacta; não habilita CDF."
+      },
+      {
+        "texto_opcion": "CREATE BROADCAST TABLE selected to meet the stated constraints adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "es_correcta": false,
+        "explicacion": "Sintaxe inexistente."
       }
     ],
     "tags": [
@@ -177,9 +177,9 @@
     "pregunta": "Dashboard hourly metrics recalculava dia inteiro. Bronze tem CDF. Estratégia?",
     "opciones": [
       {
-        "texto_opcion": "Reagregar apenas horas afetadas identificadas via changefeed.",
-        "es_correcta": true,
-        "explicacion": "Incremental aggregation por janela temporal."
+        "texto_opcion": "Desabilitar métricas used as the main path in this architecture prioritized for operational.",
+        "es_correcta": false,
+        "explicacion": "Não resolve."
       },
       {
         "texto_opcion": "Materialized view sem refresh incremental, pode ainda full refresh dependendo config.",
@@ -187,14 +187,14 @@
         "explicacion": "Pode ainda full refresh dependendo config."
       },
       {
-        "texto_opcion": "Desabilitar métricas used as the main path in this architecture prioritized for operational.",
-        "es_correcta": false,
-        "explicacion": "Não resolve."
-      },
-      {
         "texto_opcion": "Full recompute sempre por simplicidade, ignora otimização pedida, ignora otimização pedida.",
         "es_correcta": false,
         "explicacion": "Ignora otimização pedida."
+      },
+      {
+        "texto_opcion": "Reagregar apenas horas afetadas identificadas via changefeed.",
+        "es_correcta": true,
+        "explicacion": "Incremental aggregation por janela temporal."
       }
     ],
     "tags": [
@@ -206,24 +206,24 @@
     "pregunta": "foreachBatch micro-batch lê Kafka e MERGE silver. Como tornar idempotente?",
     "opciones": [
       {
-        "texto_opcion": "Gravar CSV por batch sem controle adopted as the standard.",
-        "es_correcta": false,
-        "explicacion": "Sem idempotência."
-      },
-      {
-        "texto_opcion": "DELETE table each batch, perde atomicidade incremental.",
+        "texto_opcion": "DELETE table each batch, perde atomicidade incremental comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Perde atomicidade incremental."
       },
       {
-        "texto_opcion": "Append only sem keys configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Duplicatas em retry."
-      },
-      {
-        "texto_opcion": "MERGE ON key com version/offset ou batchId garantindo exactly-once semantics",
+        "texto_opcion": "MERGE ON key com version/offset ou batchId garantindo exactly-once semantics.",
         "es_correcta": true,
         "explicacion": "Chave de idempotência evita duplicatas em retries."
+      },
+      {
+        "texto_opcion": "Gravar CSV por batch sem controle adopted as the standard configurado de ponta a ponta para o workload descrito.",
+        "es_correcta": false,
+        "explicacion": "Sem idempotência."
+      },
+      {
+        "texto_opcion": "Append only sem keys configured end-to-end for this workload adotado como padrão da equipe, embora.",
+        "es_correcta": false,
+        "explicacion": "Duplicatas em retry."
       }
     ],
     "tags": [
@@ -235,24 +235,24 @@
     "pregunta": "Processamento noturno usa start_version estático incorreto, perde changes. Correção?",
     "opciones": [
       {
-        "texto_opcion": "Usar only latest snapshot, ignora changes intermediários, ignora changes intermediários.",
+        "texto_opcion": "Random start version, perde ou duplica dados; not the best fit here aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
-        "explicacion": "Ignora changes intermediários."
+        "explicacion": "Perde ou duplica dados."
       },
       {
-        "texto_opcion": "Sempre start_version=0, reprocessa tudo sempre; not the best fit here.",
+        "texto_opcion": "Sempre start_version=0, reprocessa tudo sempre; not the best fit here adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Reprocessa tudo sempre."
       },
       {
-        "texto_opcion": "Persistir última end_version processada e usar start = last+1 a cada run",
+        "texto_opcion": "Persistir última end_version processada e usar start = last+1 a cada run.",
         "es_correcta": true,
         "explicacion": "Watermark de versão garante continuidade."
       },
       {
-        "texto_opcion": "Random start version, perde ou duplica dados; not the best fit here.",
+        "texto_opcion": "Usar only latest snapshot, ignora changes intermediários, ignora changes intermediários.",
         "es_correcta": false,
-        "explicacion": "Perde ou duplica dados."
+        "explicacion": "Ignora changes intermediários."
       }
     ],
     "tags": [
@@ -264,22 +264,22 @@
     "pregunta": "Fonte já entrega CDC via Debezium no bronze. Gold ainda full refresh. Próximo passo?",
     "opciones": [
       {
-        "texto_opcion": "Export gold to Excel as the primary design for this requirement.",
-        "es_correcta": false,
-        "explicacion": "Inadequado."
-      },
-      {
-        "texto_opcion": "Desabilitar Debezium, remove fonte incremental; not the best fit here.",
+        "texto_opcion": "Desabilitar Debezium, remove fonte incremental; not the best fit here como desenho principal para este requisito aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Remove fonte incremental."
       },
       {
-        "texto_opcion": "Ignorar CDC e bulk load hourly adopted as the standard pattern for the team.",
+        "texto_opcion": "Ignorar CDC e bulk load hourly adopted as the standard pattern for the team comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Desperdiça infra CDC."
       },
       {
-        "texto_opcion": "Propagar incremental usando merge keys e timestamps CDC existentes ou CDF interno bronze",
+        "texto_opcion": "Export gold to Excel as the primary design for this requirement adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "es_correcta": false,
+        "explicacion": "Inadequado."
+      },
+      {
+        "texto_opcion": "Propagar incremental usando merge keys e timestamps CDC existentes ou CDF interno bronze.",
         "es_correcta": true,
         "explicacion": "Aproveita CDC upstream sem reler histórico completo."
       }
@@ -293,16 +293,6 @@
     "pregunta": "Structured Streaming readStream com readChangeFeed=true. Requisito?",
     "opciones": [
       {
-        "texto_opcion": "Kafka obrigatório, delta CDF pode ser source nativa.",
-        "es_correcta": false,
-        "explicacion": "Delta CDF pode ser source nativa."
-      },
-      {
-        "texto_opcion": "Desabilitar checkpoint, checkpoint obrigatório streaming.",
-        "es_correcta": false,
-        "explicacion": "Checkpoint obrigatório streaming."
-      },
-      {
         "texto_opcion": "Tabela source Delta com CDF enabled e opção readChangeFeed.",
         "es_correcta": true,
         "explicacion": "Streaming consome stream de changes Delta."
@@ -311,6 +301,16 @@
         "texto_opcion": "Fonte CSV as the primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "CDF é Delta feature."
+      },
+      {
+        "texto_opcion": "Desabilitar checkpoint, checkpoint obrigatório streaming.",
+        "es_correcta": false,
+        "explicacion": "Checkpoint obrigatório streaming."
+      },
+      {
+        "texto_opcion": "Kafka obrigatório, delta CDF pode ser source nativa.",
+        "es_correcta": false,
+        "explicacion": "Delta CDF pode ser source nativa."
       }
     ],
     "tags": [
@@ -322,16 +322,6 @@
     "pregunta": "SCD2 dim_customer gold recalculada completa. Bronze CDF disponível. Melhoria?",
     "opciones": [
       {
-        "texto_opcion": "Truncar dim daily as the primary design for this requirement.",
-        "es_correcta": false,
-        "explicacion": "Perde historização."
-      },
-      {
-        "texto_opcion": "SCD1 only sempre, pode violar requisito historização",
-        "es_correcta": false,
-        "explicacion": "Pode violar requisito historização."
-      },
-      {
         "texto_opcion": "Aplicar changes incrementais fechando versões alteradas via.",
         "es_correcta": true,
         "explicacion": "SCD2 incremental via CDF reduz scan."
@@ -340,6 +330,16 @@
         "texto_opcion": "Ignorar deletes CDF, deletes podem ser relevantes compliance.",
         "es_correcta": false,
         "explicacion": "Deletes podem ser relevantes compliance."
+      },
+      {
+        "texto_opcion": "SCD1 only sempre, pode violar requisito historização.",
+        "es_correcta": false,
+        "explicacion": "Pode violar requisito historização."
+      },
+      {
+        "texto_opcion": "Truncar dim daily as the primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Perde historização."
       }
     ],
     "tags": [
@@ -351,24 +351,24 @@
     "pregunta": "Custo DBU triplicou após adicionar coluna derivada recomputando 5 anos. Alternativa?",
     "opciones": [
       {
-        "texto_opcion": "Backfill incremental por partição/version ou recomputar só coluna via MERGE incremental",
+        "texto_opcion": "Desabilitar coluna adopted as the standard pattern for the team plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Perde requisito."
+      },
+      {
+        "texto_opcion": "Backfill incremental por partição/version ou recomputar só coluna via MERGE incremental.",
         "es_correcta": true,
         "explicacion": "Limita escopo de recompute."
       },
       {
-        "texto_opcion": "Aumentar cluster size e full recompute forever as the primary design.",
+        "texto_opcion": "Aumentar cluster size e full recompute forever as the primary design como desenho principal para este requisito comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Custo permanece alto."
       },
       {
-        "texto_opcion": "Migrar para Excel used as the main path in this architecture.",
+        "texto_opcion": "Migrar para Excel used as the main path in this architecture plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
         "explicacion": "Inviável."
-      },
-      {
-        "texto_opcion": "Desabilitar coluna adopted as the standard pattern for the team.",
-        "es_correcta": false,
-        "explicacion": "Perde requisito."
       }
     ],
     "tags": [
@@ -380,24 +380,24 @@
     "pregunta": "CDF inclui change_type insert/update_preimage/update_postimage/delete. Uso em MERGE?",
     "opciones": [
       {
-        "texto_opcion": "Apenas inserts, perde updates/deletes; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Perde updates/deletes."
-      },
-      {
-        "texto_opcion": "Ignorar change_type; tratar tudo insert as the primary design.",
-        "es_correcta": false,
-        "explicacion": "Corrompe dados."
-      },
-      {
-        "texto_opcion": "Merge só deletes selected to meet the stated constraints.",
+        "texto_opcion": "Merge só deletes selected to meet the stated constraints comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Perde upserts."
       },
       {
-        "texto_opcion": "Tratar tipos distintos: apply upsert para inserts/updates, delete para removes",
+        "texto_opcion": "Ignorar change_type; tratar tudo insert as the primary design selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Corrompe dados."
+      },
+      {
+        "texto_opcion": "Tratar tipos distintos: apply upsert para inserts/updates, delete para removes.",
         "es_correcta": true,
         "explicacion": "Semântica correta por operação."
+      },
+      {
+        "texto_opcion": "Apenas inserts, perde updates/deletes; not the best fit here plausível à primeira vista, porém mais.",
+        "es_correcta": false,
+        "explicacion": "Perde updates/deletes."
       }
     ],
     "tags": [
@@ -409,24 +409,24 @@
     "pregunta": "Lakeflow job armazena last_processed_version em task value. Benefício?",
     "opciones": [
       {
-        "texto_opcion": "Retomada precisa entre runs sem reler CDF desde versão zero.",
-        "es_correcta": true,
-        "explicacion": "State leve entre execuções."
-      },
-      {
-        "texto_opcion": "Armazenar em print() selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Não persiste."
-      },
-      {
         "texto_opcion": "Usar random UUID applied across environments for consistency.",
         "es_correcta": false,
         "explicacion": "Não ordena versões."
       },
       {
+        "texto_opcion": "Retomada precisa entre runs sem reler CDF desde versão zero.",
+        "es_correcta": true,
+        "explicacion": "State leve entre execuções."
+      },
+      {
         "texto_opcion": "Hardcode version no código configured end-to-end for this workload.",
         "es_correcta": false,
         "explicacion": "Quebra a cada deploy."
+      },
+      {
+        "texto_opcion": "Armazenar em print() selected to meet the stated constraints.",
+        "es_correcta": false,
+        "explicacion": "Não persiste."
       }
     ],
     "tags": [
@@ -437,6 +437,11 @@
   {
     "pregunta": "Gold = fact join dim, fact muda incrementalmente dim quasi-static. Estratégia?",
     "opciones": [
+      {
+        "texto_opcion": "Cross join adopted as the standard pattern for the team como escolha padrão de.",
+        "es_correcta": false,
+        "explicacion": "Explode."
+      },
       {
         "texto_opcion": "Join sem dim as the default production choice here adopted as the.",
         "es_correcta": false,
@@ -451,11 +456,6 @@
         "texto_opcion": "Full join daily, reprocessamento completo; not the best fit here.",
         "es_correcta": false,
         "explicacion": "Reprocessamento completo."
-      },
-      {
-        "texto_opcion": "Cross join adopted as the standard pattern for the team.",
-        "es_correcta": false,
-        "explicacion": "Explode."
       }
     ],
     "tags": [
@@ -467,16 +467,6 @@
     "pregunta": "Retried batch processou mesma versão CDF duas vezes. Prevenção?",
     "opciones": [
       {
-        "texto_opcion": "Idempotent MERGE + transactional commit da versão processada.",
-        "es_correcta": true,
-        "explicacion": "At-least-once com idempotência = effectively once."
-      },
-      {
-        "texto_opcion": "Disable retries as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Perde resiliência."
-      },
-      {
         "texto_opcion": "Manual delete files used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Arriscado."
@@ -485,6 +475,16 @@
         "texto_opcion": "Append duplicates depois dedup full selected to meet the.",
         "es_correcta": false,
         "explicacion": "Custo alto."
+      },
+      {
+        "texto_opcion": "Disable retries as the default production choice here.",
+        "es_correcta": false,
+        "explicacion": "Perde resiliência."
+      },
+      {
+        "texto_opcion": "Idempotent MERGE + transactional commit da versão processada.",
+        "es_correcta": true,
+        "explicacion": "At-least-once com idempotência = effectively once."
       }
     ],
     "tags": [
@@ -496,24 +496,24 @@
     "pregunta": "table_changes em intervalo grande lento. Tuning?",
     "opciones": [
       {
-        "texto_opcion": "Intervalo máximo sempre as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Lento e memória alta."
-      },
-      {
-        "texto_opcion": "Single thread driver collect used as the main path in this architecture.",
+        "texto_opcion": "Single thread driver collect used as the main path in this architecture adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Não escala."
       },
       {
-        "texto_opcion": "Desabilitar stats adopted as the standard pattern for the team.",
+        "texto_opcion": "Desabilitar stats adopted as the standard pattern for the team comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Piora otimizador."
       },
       {
-        "texto_opcion": "Reduzir intervalo por batch, particionar processamento por partição de data",
+        "texto_opcion": "Reduzir intervalo por batch, particionar processamento por partição de data.",
         "es_correcta": true,
         "explicacion": "Menores janelas de versão reduzem scan."
+      },
+      {
+        "texto_opcion": "Intervalo máximo sempre as the default production choice here usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "Lento e memória alta."
       }
     ],
     "tags": [
@@ -525,24 +525,24 @@
     "pregunta": "Nova coluna exige populate histórico sem recomputar joins downstream pesados. Abordagem?",
     "opciones": [
       {
-        "texto_opcion": "Manual CSV paste applied across environments for consistency.",
+        "texto_opcion": "Ignorar histórico adopted as the standard pattern for the team comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
-        "explicacion": "Erro humano."
+        "explicacion": "Viola analytics."
       },
       {
-        "texto_opcion": "Rebuild all gold tables, reprocessamento total; not the best fit here.",
+        "texto_opcion": "Rebuild all gold tables, reprocessamento total; not the best fit here adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Reprocessamento total."
       },
       {
-        "texto_opcion": "Backfill coluna via UPDATE/MERGE particionado por date usando CDF ou snapshots incrementais",
+        "texto_opcion": "Backfill coluna via UPDATE/MERGE particionado por date usando CDF ou snapshots incrementais.",
         "es_correcta": true,
         "explicacion": "Escopo limitado ao necessário."
       },
       {
-        "texto_opcion": "Ignorar histórico adopted as the standard pattern for the team.",
+        "texto_opcion": "Manual CSV paste applied across environments for consistency comum em desenhos legados, porém inadequado neste caso como escolha padrão de produção neste cenário.",
         "es_correcta": false,
-        "explicacion": "Viola analytics."
+        "explicacion": "Erro humano."
       }
     ],
     "tags": [
@@ -554,19 +554,19 @@
     "pregunta": "DLT pipeline com APPLY CHANGES INTO. Benefício vs manual CDF?",
     "opciones": [
       {
-        "texto_opcion": "DLT só batch full applied across environments for consistency.",
+        "texto_opcion": "DLT só batch full applied across environments for consistency aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Suporta incremental."
-      },
-      {
-        "texto_opcion": "APPLY CHANGES proíbe MERGE, é MERGE-based abstraction, é MERGE-based abstraction.",
-        "es_correcta": false,
-        "explicacion": "É MERGE-based abstraction."
       },
       {
         "texto_opcion": "Abstração declarativa SCD/CDC com expectations integradas.",
         "es_correcta": true,
         "explicacion": "DLT gerencia incremental CDC patterns."
+      },
+      {
+        "texto_opcion": "APPLY CHANGES proíbe MERGE, é MERGE-based abstraction, é MERGE-based abstraction.",
+        "es_correcta": false,
+        "explicacion": "É MERGE-based abstraction."
       },
       {
         "texto_opcion": "Remove necessidade de Unity Catalog, uC recomendado mas orthogonal.",
@@ -583,24 +583,24 @@
     "pregunta": "Diferença entre TIMESTAMP AS OF e CDF?",
     "opciones": [
       {
-        "texto_opcion": "São idênticos, diferentes semânticas; not the best fit here.",
+        "texto_opcion": "São idênticos, diferentes semânticas; not the best fit here como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "Diferentes semânticas."
       },
       {
-        "texto_opcion": "Time travel só streaming as the primary design for this requirement.",
+        "texto_opcion": "Time travel lê snapshot completo; CDF retorna row-level changes entre versões.",
+        "es_correcta": true,
+        "explicacion": "Use cases diferentes."
+      },
+      {
+        "texto_opcion": "Time travel só streaming as the primary design for this requirement como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "Batch também."
       },
       {
-        "texto_opcion": "CDF só SQL Server as the primary design for this requirement.",
+        "texto_opcion": "CDF só SQL Server as the primary design for this requirement selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Delta Lake feature."
-      },
-      {
-        "texto_opcion": "Time travel lê snapshot completo; CDF retorna row-level changes entre versões",
-        "es_correcta": true,
-        "explicacion": "Use cases diferentes."
       }
     ],
     "tags": [
@@ -612,22 +612,22 @@
     "pregunta": "Bronze append-only com duplicatas raras. Silver dedup incremental?",
     "opciones": [
       {
-        "texto_opcion": "MERGE ON natural key mantendo latest por timestamp via CDF/batch window",
-        "es_correcta": true,
-        "explicacion": "Dedup incremental sem full scan histórico completo."
-      },
-      {
-        "texto_opcion": "DISTINCT full table daily applied across environments for consistency.",
-        "es_correcta": false,
-        "explicacion": "Full scan."
-      },
-      {
-        "texto_opcion": "Ignore duplicates applied across environments for consistency.",
+        "texto_opcion": "Ignore duplicates applied across environments for consistency aplicado entre ambientes por.",
         "es_correcta": false,
         "explicacion": "Qualidade ruim."
       },
       {
-        "texto_opcion": "Drop bronze applied across environments for consistency as the default.",
+        "texto_opcion": "DISTINCT full table daily applied across environments for consistency comum em desenhos legados, porém inadequado neste caso.",
+        "es_correcta": false,
+        "explicacion": "Full scan."
+      },
+      {
+        "texto_opcion": "MERGE ON natural key mantendo latest por timestamp via CDF/batch window.",
+        "es_correcta": true,
+        "explicacion": "Dedup incremental sem full scan histórico completo."
+      },
+      {
+        "texto_opcion": "Drop bronze applied across environments for consistency as the default aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Perde auditoria."
       }
@@ -641,24 +641,24 @@
     "pregunta": "Changes chegam após fechamento contábil. Pipeline incremental deve?",
     "opciones": [
       {
-        "texto_opcion": "Desabilitar MERGE prioritized for operational simplicity in this case.",
-        "es_correcta": false,
-        "explicacion": "Perde upsert."
-      },
-      {
-        "texto_opcion": "Full reload anual applied across environments for consistency.",
+        "texto_opcion": "Full reload anual applied across environments for consistency priorizado por simplicidade, mas.",
         "es_correcta": false,
         "explicacion": "Caro."
       },
       {
-        "texto_opcion": "Ignorar late data prioritized for operational simplicity in this case.",
+        "texto_opcion": "Ignorar late data prioritized for operational simplicity in this case aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Erro contábil."
       },
       {
-        "texto_opcion": "Suportar reprocessamento de janela fechada idempotente ou versioning gold",
+        "texto_opcion": "Suportar reprocessamento de janela fechada idempotente ou versioning gold.",
         "es_correcta": true,
         "explicacion": "Late data exige correção incremental controlada."
+      },
+      {
+        "texto_opcion": "Desabilitar MERGE prioritized for operational simplicity in this case priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Perde upsert."
       }
     ],
     "tags": [
@@ -670,24 +670,24 @@
     "pregunta": "Fact e dim mudam; gold star schema precisa sync incremental. Pattern?",
     "opciones": [
       {
-        "texto_opcion": "Full star rebuild adopted as the standard pattern for the team.",
-        "es_correcta": false,
-        "explicacion": "Reprocessamento."
-      },
-      {
-        "texto_opcion": "Separate galaxies sem join as the default production choice here.",
+        "texto_opcion": "Separate galaxies sem join as the default production choice here adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Perde modelo."
       },
       {
-        "texto_opcion": "Orquestrar MERGE dim primeiro ou usar FK integrity checks; process facts referencing latest dim version",
-        "es_correcta": true,
-        "explicacion": "Ordem e versionamento evitam inconsistência."
-      },
-      {
-        "texto_opcion": "Processar aleatoriamente adopted as the standard pattern for the team.",
+        "texto_opcion": "Processar aleatoriamente adopted as the standard pattern for the team como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "Risco orphan facts."
+      },
+      {
+        "texto_opcion": "Full star rebuild adopted as the standard pattern for the team plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Reprocessamento."
+      },
+      {
+        "texto_opcion": "Orquestrar MERGE dim primeiro ou usar FK integrity checks; process facts referencing latest dim version.",
+        "es_correcta": true,
+        "explicacion": "Ordem e versionamento evitam inconsistência."
       }
     ],
     "tags": [
@@ -699,6 +699,11 @@
     "pregunta": "Colunas _change_type e _commit_version em output CDF. Uso?",
     "opciones": [
       {
+        "texto_opcion": "Usar _change_type como PK, não é unique business key, não é unique business key.",
+        "es_correcta": false,
+        "explicacion": "Não é unique business key."
+      },
+      {
         "texto_opcion": "Filtrar tipos de mudança e rastrear progresso de consumo.",
         "es_correcta": true,
         "explicacion": "Metadados nativos CDF."
@@ -707,11 +712,6 @@
         "texto_opcion": "Ignorar _commit_version applied across environments for consistency.",
         "es_correcta": false,
         "explicacion": "Dificulta watermark."
-      },
-      {
-        "texto_opcion": "Usar _change_type como PK, não é unique business key, não é unique business key.",
-        "es_correcta": false,
-        "explicacion": "Não é unique business key."
       },
       {
         "texto_opcion": "Drop columns imediatamente sem lógica prioritized for applied across.",
@@ -728,9 +728,9 @@
     "pregunta": "Tabela particionada por date; CDF batch inclui só yesterday. OPTIMIZE scope?",
     "opciones": [
       {
-        "texto_opcion": "OPTIMIZE FULL weekly obrigatório pós incremental",
-        "es_correcta": false,
-        "explicacion": "Opcional; incremental merge não exige full optimize."
+        "texto_opcion": "OPTIMIZE WHERE date=yesterday após merge incremental.",
+        "es_correcta": true,
+        "explicacion": "Manutenção alinhada ao incremental scope."
       },
       {
         "texto_opcion": "VACUUM before merge, ordem incorreta para ingest.",
@@ -738,9 +738,9 @@
         "explicacion": "Ordem incorreta para ingest."
       },
       {
-        "texto_opcion": "OPTIMIZE WHERE date=yesterday após merge incremental.",
-        "es_correcta": true,
-        "explicacion": "Manutenção alinhada ao incremental scope."
+        "texto_opcion": "OPTIMIZE FULL weekly obrigatório pós incremental",
+        "es_correcta": false,
+        "explicacion": "Opcional; incremental merge não exige full optimize."
       },
       {
         "texto_opcion": "Truncate partition futura prioritized for operational.",
@@ -757,24 +757,24 @@
     "pregunta": "Bug corrompeu silver; recomputar from bronze CDF desde versão X. Passos?",
     "opciones": [
       {
-        "texto_opcion": "Identificar versão boa, reset watermark, replay CDF interval ou restore table + replay",
-        "es_correcta": true,
-        "explicacion": "Controlled replay usando history Delta."
-      },
-      {
-        "texto_opcion": "Disable ACID as the primary design for this requirement.",
-        "es_correcta": false,
-        "explicacion": "Impossível."
-      },
-      {
-        "texto_opcion": "Ignore corruption, dados errados persistem; not the best fit here.",
+        "texto_opcion": "Ignore corruption, dados errados persistem; not the best fit here comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Dados errados persistem."
       },
       {
-        "texto_opcion": "Delete storage account adopted as the standard pattern for the team.",
+        "texto_opcion": "Delete storage account adopted as the standard pattern for the team plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
         "explicacion": "Destrutivo demais."
+      },
+      {
+        "texto_opcion": "Disable ACID as the primary design for this requirement adotado como padrão da equipe, embora não seja o melhor aqui plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Impossível."
+      },
+      {
+        "texto_opcion": "Identificar versão boa, reset watermark, replay CDF interval ou restore table + replay.",
+        "es_correcta": true,
+        "explicacion": "Controlled replay usando history Delta."
       }
     ],
     "tags": [
@@ -786,16 +786,6 @@
     "pregunta": "Comparando full daily 1TB vs incremental CDF 50 GB/dia, economia principal?",
     "opciones": [
       {
-        "texto_opcion": "Elimina necessidade de cluster, ainda precisa compute proporcional.",
-        "es_correcta": false,
-        "explicacion": "Ainda precisa compute proporcional."
-      },
-      {
-        "texto_opcion": "Remove DBU entirely as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Exagero."
-      },
-      {
         "texto_opcion": "Só economiza storage selected to meet the stated constraints.",
         "es_correcta": false,
         "explicacion": "Compute também."
@@ -804,6 +794,16 @@
         "texto_opcion": "Menos bytes lidos/escritos e shuffle reduzido em downstream.",
         "es_correcta": true,
         "explicacion": "Incremental reduz IO e compute proporcionalmente."
+      },
+      {
+        "texto_opcion": "Elimina necessidade de cluster, ainda precisa compute proporcional.",
+        "es_correcta": false,
+        "explicacion": "Ainda precisa compute proporcional."
+      },
+      {
+        "texto_opcion": "Remove DBU entirely as the default production choice here.",
+        "es_correcta": false,
+        "explicacion": "Exagero."
       }
     ],
     "tags": [
@@ -815,24 +815,24 @@
     "pregunta": "Dynamic partition overwrite mode com incremental keys. Cuidado?",
     "opciones": [
       {
-        "texto_opcion": "Proibido no Delta, suportado com cuidado; not the best fit here.",
+        "texto_opcion": "Melhor que MERGE sempre prioritized for operational simplicity in this case aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
-        "explicacion": "Suportado com cuidado."
+        "explicacion": "Depende do caso."
       },
       {
-        "texto_opcion": "Overwrite pode substituir partições inteiras; combinar com MERGE para row-level incremental",
+        "texto_opcion": "Overwrite pode substituir partições inteiras; combinar com MERGE para row-level incremental.",
         "es_correcta": true,
         "explicacion": "Partition overwrite não é row-level incremental."
       },
       {
-        "texto_opcion": "Sempre safe para CDC, pode apagar rows não presentes no batch, pode apagar rows não presentes no batch.",
+        "texto_opcion": "Sempre safe para CDC, pode apagar rows não presentes no batch, pode apagar rows não presentes no batch plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
         "explicacion": "Pode apagar rows não presentes no batch."
       },
       {
-        "texto_opcion": "Melhor que MERGE sempre prioritized for operational simplicity in this case.",
+        "texto_opcion": "Proibido no Delta, suportado com cuidado; not the best fit here priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
         "es_correcta": false,
-        "explicacion": "Depende do caso."
+        "explicacion": "Suportado com cuidado."
       }
     ],
     "tags": [
@@ -844,6 +844,16 @@
     "pregunta": "Consumidor CDF atrasado 1000 versões. Risco?",
     "opciones": [
       {
+        "texto_opcion": "CDF auto catch-up instant, precisa processamento; not the best fit here.",
+        "es_correcta": false,
+        "explicacion": "Precisa processamento."
+      },
+      {
+        "texto_opcion": "Retention pode expirar versões antigas; acelerar catch-up ou aumentar retention.",
+        "es_correcta": true,
+        "explicacion": "Lag excessivo perde ability to read old versions."
+      },
+      {
         "texto_opcion": "Lag ignora VACUUM configured end-to-end for this workload as the primary.",
         "es_correcta": false,
         "explicacion": "VACUUM afeta versões."
@@ -852,16 +862,6 @@
         "texto_opcion": "Sem risco as the primary design for this requirement configured end-to-end.",
         "es_correcta": false,
         "explicacion": "Retention limit real."
-      },
-      {
-        "texto_opcion": "CDF auto catch-up instant, precisa processamento; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Precisa processamento."
-      },
-      {
-        "texto_opcion": "Retention pode expirar versões antigas; acelerar catch-up ou aumentar retention",
-        "es_correcta": true,
-        "explicacion": "Lag excessivo perde ability to read old versions."
       }
     ],
     "tags": [
@@ -873,24 +873,24 @@
     "pregunta": "Como testar pipeline incremental localmente?",
     "opciones": [
       {
-        "texto_opcion": "Produção only as the default production choice here used as the main path in.",
-        "es_correcta": false,
-        "explicacion": "Arriscado."
-      },
-      {
-        "texto_opcion": "Inserir sequência controlada de versions, validar output esperado por table_changes",
+        "texto_opcion": "Inserir sequência controlada de versions, validar output esperado por table_changes.",
         "es_correcta": true,
         "explicacion": "Testes simulam commits Delta incrementais."
       },
       {
-        "texto_opcion": "Skip tests used as the main path in this architecture selected to meet the.",
+        "texto_opcion": "Testar só full load, não cobre incremental path; not the best fit here usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "Não cobre incremental path."
+      },
+      {
+        "texto_opcion": "Skip tests used as the main path in this architecture selected to meet the como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "Anti-pattern."
       },
       {
-        "texto_opcion": "Testar só full load, não cobre incremental path; not the best fit here.",
+        "texto_opcion": "Produção only as the default production choice here used as the main path in usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
-        "explicacion": "Não cobre incremental path."
+        "explicacion": "Arriscado."
       }
     ],
     "tags": [
@@ -902,24 +902,24 @@
     "pregunta": "Schema evolution no bronze com CDF. Silver incremental deve?",
     "opciones": [
       {
-        "texto_opcion": "Full rebuild a cada coluna configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Caro."
-      },
-      {
-        "texto_opcion": "Fail pipeline forever selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Pode ser excessivo."
-      },
-      {
-        "texto_opcion": "Ignorar novas colunas always selected to meet the stated constraints.",
+        "texto_opcion": "Ignorar novas colunas always selected to meet the stated constraints selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Perde dados."
       },
       {
-        "texto_opcion": "Propagar novas colunas via MERGE schema evolution ou auto merge schema settings",
+        "texto_opcion": "Full rebuild a cada coluna configured end-to-end for this workload configurado de ponta a ponta para o workload descrito.",
+        "es_correcta": false,
+        "explicacion": "Caro."
+      },
+      {
+        "texto_opcion": "Propagar novas colunas via MERGE schema evolution ou auto merge schema settings.",
         "es_correcta": true,
         "explicacion": "Incremental inclui schema changes."
+      },
+      {
+        "texto_opcion": "Fail pipeline forever selected to meet the stated constraints selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Pode ser excessivo."
       }
     ],
     "tags": [

@@ -3,6 +3,11 @@
     "pregunta": "Which distribution should you use for a large Dedicated SQL pool fact joined often on customer_id?",
     "opciones": [
       {
+        "texto_opcion": "HASH distribute the fact on customer_id.",
+        "es_correcta": true,
+        "explicacion": "Hash on the join key reduces data movement for large equi-joins."
+      },
+      {
         "texto_opcion": "ROUND_ROBIN for the large fact, round-robin causes more.",
         "es_correcta": false,
         "explicacion": "Round-robin causes more reshuffles on joins."
@@ -16,11 +21,6 @@
         "texto_opcion": "Heap with no distribution choice, dedicated SQL pool tables.",
         "es_correcta": false,
         "explicacion": "Dedicated SQL pool tables require a distribution strategy."
-      },
-      {
-        "texto_opcion": "HASH distribute the fact on customer_id.",
-        "es_correcta": true,
-        "explicacion": "Hash on the join key reduces data movement for large equi-joins."
       }
     ],
     "tags": [
@@ -32,24 +32,24 @@
     "pregunta": "Incident review (westeurope): a small slowly changing dimension (~50 MB) is joined to many large facts. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "HASH on a high-cardinality key unnecessarily",
-        "es_correcta": false,
-        "explicacion": "Hash is better for large tables; small dims prefer replicate."
-      },
-      {
-        "texto_opcion": "ROUND_ROBIN the tiny dimension only",
-        "es_correcta": false,
-        "explicacion": "Works but replicate performs better for frequent joins."
-      },
-      {
         "texto_opcion": "REPLICATE distribute the dimension.",
         "es_correcta": true,
         "explicacion": "Replicated small dims avoid shuffle by copying to each distribution."
       },
       {
-        "texto_opcion": "External table only with no caching",
+        "texto_opcion": "ROUND_ROBIN the tiny dimension only.",
+        "es_correcta": false,
+        "explicacion": "Works but replicate performs better for frequent joins."
+      },
+      {
+        "texto_opcion": "External table only with no caching.",
         "es_correcta": false,
         "explicacion": "External tables do not give replicated in-pool performance."
+      },
+      {
+        "texto_opcion": "HASH on a high-cardinality key unnecessarily",
+        "es_correcta": false,
+        "explicacion": "Hash is better for large tables; small dims prefer replicate."
       }
     ],
     "tags": [
@@ -61,24 +61,24 @@
     "pregunta": "For a industrial IoT platform workload with ~50,000 events/s: staging table receives loads before redistribution; joins are rare on staging. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Always HASH on a random GUID with no join use, unnecessary skew risk without benefit.",
-        "es_correcta": false,
-        "explicacion": "Unnecessary skew risk without benefit."
-      },
-      {
-        "texto_opcion": "REPLICATE multi-TB staging facts, replication cost explodes for large data.",
-        "es_correcta": false,
-        "explicacion": "Replication cost explodes for large data."
-      },
-      {
         "texto_opcion": "Skip creating a table and paste into Excel used as the selected to meet the stated constraints.",
         "es_correcta": false,
         "explicacion": "Not MPP warehousing."
       },
       {
+        "texto_opcion": "Always HASH on a random GUID with no join use, unnecessary skew risk without benefit.",
+        "es_correcta": false,
+        "explicacion": "Unnecessary skew risk without benefit."
+      },
+      {
         "texto_opcion": "ROUND_ROBIN distribution for staging/transient tables.",
         "es_correcta": true,
         "explicacion": "Round-robin loads quickly and is fine when join co-location is not required yet."
+      },
+      {
+        "texto_opcion": "REPLICATE multi-TB staging facts, replication cost explodes for large data used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Replication cost explodes for large data."
       }
     ],
     "tags": [
@@ -90,9 +90,14 @@
     "pregunta": "Logistics carrier scenario — large fact mostly scanned by analytics with few updates. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "XML indexes on every column, wrong engine feature focus.",
+        "texto_opcion": "XML indexes on every column, wrong engine feature focus selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Wrong engine feature focus."
+      },
+      {
+        "texto_opcion": "Cursor-based row processing, anti-pattern for MPP analytics often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Anti-pattern for MPP analytics."
       },
       {
         "texto_opcion": "Clustered columnstore index (CCI) on the fact.",
@@ -103,11 +108,6 @@
         "texto_opcion": "Only heaps with no columnstore for huge facts, misses compression and scan speed.",
         "es_correcta": false,
         "explicacion": "Misses compression and scan speed."
-      },
-      {
-        "texto_opcion": "Cursor-based row processing, anti-pattern for MPP analytics.",
-        "es_correcta": false,
-        "explicacion": "Anti-pattern for MPP analytics."
       }
     ],
     "tags": [
@@ -119,9 +119,9 @@
     "pregunta": "For a insurance carrier workload with hourly batch windows: optimizer chooses bad plans after large loads into Dedicated SQL pool. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Delete all indexes permanently, usually worsens plans, usually worsens plans.",
+        "texto_opcion": "Restart Windows clients, irrelevant to pool stats; not the best fit here.",
         "es_correcta": false,
-        "explicacion": "Usually worsens plans."
+        "explicacion": "Irrelevant to pool stats."
       },
       {
         "texto_opcion": "Update statistics after significant data changes.",
@@ -129,9 +129,9 @@
         "explicacion": "Fresh statistics improve distribution-aware plan quality."
       },
       {
-        "texto_opcion": "Restart Windows clients, irrelevant to pool stats; not the best fit here.",
+        "texto_opcion": "Delete all indexes permanently, usually worsens plans, usually worsens plans.",
         "es_correcta": false,
-        "explicacion": "Irrelevant to pool stats."
+        "explicacion": "Usually worsens plans."
       },
       {
         "texto_opcion": "Turn off result set caching as the only fix, does not fix cardinality estimates.",
@@ -148,6 +148,11 @@
     "pregunta": "DMVs show excessive shuffle during fact-dim joins on mismatched keys. Context: industrial IoT platform, near-real-time dashboards.",
     "opciones": [
       {
+        "texto_opcion": "Disable all distributions and use heaps only, not valid Dedicated SQL design.",
+        "es_correcta": false,
+        "explicacion": "Not valid Dedicated SQL design."
+      },
+      {
         "texto_opcion": "Align HASH distributions on the join key or replicate the.",
         "es_correcta": true,
         "explicacion": "Reducing data movement is the primary MPP join tuning lever."
@@ -158,12 +163,7 @@
         "explicacion": "Does not fix distribution mismatch."
       },
       {
-        "texto_opcion": "Disable all distributions and use heaps only, not valid Dedicated SQL design.",
-        "es_correcta": false,
-        "explicacion": "Not valid Dedicated SQL design."
-      },
-      {
-        "texto_opcion": "Increase Power BI visual count, unrelated to SQL pool shuffle.",
+        "texto_opcion": "Increase Power BI visual count, unrelated to SQL pool shuffle applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Unrelated to SQL pool shuffle."
       }
@@ -177,24 +177,24 @@
     "pregunta": "Gaming studio scenario — columnstore quality is poor due to many open small rowgroups after trickle inserts. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Insert one row per transaction forever, creates poor rowgroup quality.",
-        "es_correcta": false,
-        "explicacion": "Creates poor rowgroup quality."
-      },
-      {
-        "texto_opcion": "Drop CCI and store facts as XML, destroys analytical performance.",
-        "es_correcta": false,
-        "explicacion": "Destroys analytical performance."
-      },
-      {
-        "texto_opcion": "Batch loads into CCI and rebuild/reorganize when rowgroups are unhealthy",
+        "texto_opcion": "Batch loads into CCI and rebuild/reorganize when rowgroups are unhealthy.",
         "es_correcta": true,
         "explicacion": "Columnstore prefers bulk loads; maintenance fixes fragmented rowgroups."
       },
       {
-        "texto_opcion": "Turn off compression permanently, inflates storage and I/O.",
+        "texto_opcion": "Turn off compression permanently, inflates storage and I/O often seen in legacy designs but.",
         "es_correcta": false,
         "explicacion": "Inflates storage and I/O."
+      },
+      {
+        "texto_opcion": "Insert one row per transaction forever, creates poor rowgroup quality configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Creates poor rowgroup quality."
+      },
+      {
+        "texto_opcion": "Drop CCI and store facts as XML, destroys analytical performance often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Destroys analytical performance."
       }
     ],
     "tags": [
@@ -206,24 +206,24 @@
     "pregunta": "Incident review (northeurope): identical dashboard queries hit Dedicated SQL pool repeatedly within minutes. Select the most appropriate design.",
     "opciones": [
       {
+        "texto_opcion": "Rewrite every query to SELECT * FROM everywhere as the default production choice in this scenario.",
+        "es_correcta": false,
+        "explicacion": "Worsens load."
+      },
+      {
         "texto_opcion": "Cache only in end-user browsers with no server policy",
         "es_correcta": false,
         "explicacion": "Inconsistent and insecure."
       },
       {
-        "texto_opcion": "Rewrite every query to SELECT * FROM everywhere",
-        "es_correcta": false,
-        "explicacion": "Worsens load."
-      },
-      {
-        "texto_opcion": "Disable caching and raise DWU only",
-        "es_correcta": false,
-        "explicacion": "Spends money without helping repeated identical queries."
-      },
-      {
         "texto_opcion": "Enable and use result set caching where appropriate.",
         "es_correcta": true,
         "explicacion": "Result set caching returns recent identical query results without recompute."
+      },
+      {
+        "texto_opcion": "Disable caching and raise DWU only — spends money without helping.",
+        "es_correcta": false,
+        "explicacion": "Spends money without helping repeated identical queries."
       }
     ],
     "tags": [
@@ -235,24 +235,24 @@
     "pregunta": "A energy utility (sub-second interactive queries, region westeurope) must: Dedicated SQL pool fact needs sliding-window deletes of old months. Which option fits best?",
     "opciones": [
       {
+        "texto_opcion": "DELETE row-by-row without partitions, expensive on huge facts, expensive on huge facts.",
+        "es_correcta": false,
+        "explicacion": "Expensive on huge facts."
+      },
+      {
         "texto_opcion": "Only rely on Power BI filters for deletion, does not remove warehouse data.",
         "es_correcta": false,
         "explicacion": "Does not remove warehouse data."
       },
       {
-        "texto_opcion": "Drop the database monthly adopted as the standard pattern for the team.",
+        "texto_opcion": "Drop the database monthly adopted as the standard pattern for the team often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Destroys everything."
       },
       {
-        "texto_opcion": "Table partitioning by date with partition switching/truncation patterns",
+        "texto_opcion": "Table partitioning by date with partition switching/truncation patterns.",
         "es_correcta": true,
         "explicacion": "Partitions enable efficient data lifecycle operations on large facts."
-      },
-      {
-        "texto_opcion": "DELETE row-by-row without partitions, expensive on huge facts, expensive on huge facts.",
-        "es_correcta": false,
-        "explicacion": "Expensive on huge facts."
       }
     ],
     "tags": [
@@ -264,14 +264,14 @@
     "pregunta": "For a telecom operator workload with strict GDPR residency: bulk load from ADLS Parquet into Dedicated SQL pool efficiently. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Row-by-row INSERT statements, too slow for bulk lake loads.",
+        "texto_opcion": "Row-by-row INSERT statements, too slow for bulk lake loads as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Too slow for bulk lake loads."
       },
       {
-        "texto_opcion": "Power BI Import mode as the load tool, bI import is not the warehouse load path.",
+        "texto_opcion": "Logic Apps foreach file copy, not an analytical bulk loader plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
-        "explicacion": "BI import is not the warehouse load path."
+        "explicacion": "Not an analytical bulk loader."
       },
       {
         "texto_opcion": "PolyBase or COPY INTO from external ADLS sources.",
@@ -279,9 +279,9 @@
         "explicacion": "PolyBase/COPY are designed for high-throughput loads into Dedicated SQL pool."
       },
       {
-        "texto_opcion": "Logic Apps foreach file copy, not an analytical bulk loader.",
+        "texto_opcion": "Power BI Import mode as the load tool, bI import is not the warehouse load path.",
         "es_correcta": false,
-        "explicacion": "Not an analytical bulk loader."
+        "explicacion": "BI import is not the warehouse load path."
       }
     ],
     "tags": [
@@ -292,6 +292,11 @@
   {
     "pregunta": "A payments fintech (strict GDPR residency, region southeastasia) must: one distribution holds most rows after HASH on a low-cardinality status flag. Which option fits best?",
     "opciones": [
+      {
+        "texto_opcion": "Keep the skewed key and hope DWU fixes it, scale does not remove skew.",
+        "es_correcta": false,
+        "explicacion": "Scale does not remove skew."
+      },
       {
         "texto_opcion": "Convert all columns to NVARCHAR(MAX), hurts storage and CPU, hurts storage and CPU.",
         "es_correcta": false,
@@ -306,11 +311,6 @@
         "texto_opcion": "Choose a higher-cardinality HASH key aligned to joins/filters.",
         "es_correcta": true,
         "explicacion": "Low-cardinality hash keys create distribution skew and stragglers."
-      },
-      {
-        "texto_opcion": "Keep the skewed key and hope DWU fixes it, scale does not remove skew.",
-        "es_correcta": false,
-        "explicacion": "Scale does not remove skew."
       }
     ],
     "tags": [
@@ -322,12 +322,17 @@
     "pregunta": "point lookups on a large Dedicated SQL pool table by order_id. Context: media streaming company, ~200 million rows/day.",
     "opciones": [
       {
+        "texto_opcion": "Create a nonclustered index aligned to lookup predicates where beneficial.",
+        "es_correcta": true,
+        "explicacion": "Secondary indexes can accelerate selective lookups when designed carefully."
+      },
+      {
         "texto_opcion": "Disable result set caching forever without reason, may hurt repeated queries.",
         "es_correcta": false,
         "explicacion": "May hurt repeated queries."
       },
       {
-        "texto_opcion": "Store orders only as images adopted as the standard pattern for the team.",
+        "texto_opcion": "Store orders only as images adopted as the standard pattern for the team often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Not queryable."
       },
@@ -335,11 +340,6 @@
         "texto_opcion": "Always full table scan hints, slower for selective lookups, slower for selective lookups.",
         "es_correcta": false,
         "explicacion": "Slower for selective lookups."
-      },
-      {
-        "texto_opcion": "Create a nonclustered index aligned to lookup predicates where beneficial",
-        "es_correcta": true,
-        "explicacion": "Secondary indexes can accelerate selective lookups when designed carefully."
       }
     ],
     "tags": [
@@ -351,7 +351,7 @@
     "pregunta": "Incident review (brazilsouth): nightly ETL needs high compute; daytime is mostly light dashboards. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Replace SQL pool with Excel for night loads selected to meet.",
+        "texto_opcion": "Replace SQL pool with Excel for night loads selected to meet prioritized for simplicity, though.",
         "es_correcta": false,
         "explicacion": "Not enterprise scale."
       },
@@ -361,12 +361,12 @@
         "explicacion": "Elastic DWU scaling matches cost to workload windows."
       },
       {
-        "texto_opcion": "Leave maximum DWU 24/7 forever without review prioritized for.",
+        "texto_opcion": "Leave maximum DWU 24/7 forever without review prioritized for plausible at first glance, yet.",
         "es_correcta": false,
         "explicacion": "Unnecessary cost."
       },
       {
-        "texto_opcion": "Pause during ETL and run ETL on a laptop applied across.",
+        "texto_opcion": "Pause during ETL and run ETL on a laptop applied across selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Breaks warehouse ETL."
       }
@@ -380,24 +380,24 @@
     "pregunta": "Incident review (northeurope): Dedicated SQL pool needs faster aggregations on stable summary patterns. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Disable statistics permanently, worsens optimizer choices, worsens optimizer choices.",
+        "texto_opcion": "Store aggregates only in client browsers, not a durable warehouse strategy plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
-        "explicacion": "Worsens optimizer choices."
+        "explicacion": "Not a durable warehouse strategy."
       },
       {
-        "texto_opcion": "Create materialized / indexed aggregate structures where supported with a clear refresh strategy",
-        "es_correcta": true,
-        "explicacion": "Pre-aggregated structures reduce repeated heavy scans."
-      },
-      {
-        "texto_opcion": "Force CROSS JOIN everywhere adopted as the standard pattern for the team.",
+        "texto_opcion": "Force CROSS JOIN everywhere adopted as the standard pattern for the team selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Explodes cardinality."
       },
       {
-        "texto_opcion": "Store aggregates only in client browsers, not a durable warehouse strategy.",
+        "texto_opcion": "Disable statistics permanently, worsens optimizer choices, worsens optimizer choices adopted as the standard pattern for the team.",
         "es_correcta": false,
-        "explicacion": "Not a durable warehouse strategy."
+        "explicacion": "Worsens optimizer choices."
+      },
+      {
+        "texto_opcion": "Create materialized / indexed aggregate structures where supported with a clear refresh strategy.",
+        "es_correcta": true,
+        "explicacion": "Pre-aggregated structures reduce repeated heavy scans."
       }
     ],
     "tags": [
@@ -409,9 +409,9 @@
     "pregunta": "For a industrial IoT platform workload with hourly batch windows: design a large fact table in Dedicated SQL pool joined frequently on customer_id. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "HASH distribute the fact on customer_id.",
-        "es_correcta": true,
-        "explicacion": "Hash on the join key reduces data movement for large equi-joins."
+        "texto_opcion": "ROUND_ROBIN for the large fact, round-robin causes more.",
+        "es_correcta": false,
+        "explicacion": "Round-robin causes more reshuffles on joins."
       },
       {
         "texto_opcion": "REPLICATE the multi-TB fact, replicate is for small.",
@@ -419,14 +419,14 @@
         "explicacion": "Replicate is for small dimensions, not huge facts."
       },
       {
-        "texto_opcion": "ROUND_ROBIN for the large fact, round-robin causes more.",
-        "es_correcta": false,
-        "explicacion": "Round-robin causes more reshuffles on joins."
-      },
-      {
         "texto_opcion": "Heap with no distribution choice, dedicated SQL pool tables.",
         "es_correcta": false,
         "explicacion": "Dedicated SQL pool tables require a distribution strategy."
+      },
+      {
+        "texto_opcion": "HASH distribute the fact on customer_id.",
+        "es_correcta": true,
+        "explicacion": "Hash on the join key reduces data movement for large equi-joins."
       }
     ],
     "tags": [
@@ -438,12 +438,7 @@
     "pregunta": "a small slowly changing dimension (~50 MB) is joined to many large facts. Context: industrial IoT platform, petabyte-scale historical data. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "ROUND_ROBIN the tiny dimension only",
-        "es_correcta": false,
-        "explicacion": "Works but replicate performs better for frequent joins."
-      },
-      {
-        "texto_opcion": "External table only with no caching",
+        "texto_opcion": "External table only with no caching.",
         "es_correcta": false,
         "explicacion": "External tables do not give replicated in-pool performance."
       },
@@ -451,6 +446,11 @@
         "texto_opcion": "REPLICATE distribute the dimension.",
         "es_correcta": true,
         "explicacion": "Replicated small dims avoid shuffle by copying to each distribution."
+      },
+      {
+        "texto_opcion": "ROUND_ROBIN the tiny dimension only.",
+        "es_correcta": false,
+        "explicacion": "Works but replicate performs better for frequent joins."
       },
       {
         "texto_opcion": "HASH on a high-cardinality key unnecessarily",
@@ -467,14 +467,9 @@
     "pregunta": "Industrial iot platform scenario — staging table receives loads before redistribution; joins are rare on staging. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "REPLICATE multi-TB staging facts, replication cost explodes for large data.",
+        "texto_opcion": "Always HASH on a random GUID with no join use, unnecessary skew risk without benefit.",
         "es_correcta": false,
-        "explicacion": "Replication cost explodes for large data."
-      },
-      {
-        "texto_opcion": "ROUND_ROBIN distribution for staging/transient tables.",
-        "es_correcta": true,
-        "explicacion": "Round-robin loads quickly and is fine when join co-location is not required yet."
+        "explicacion": "Unnecessary skew risk without benefit."
       },
       {
         "texto_opcion": "Skip creating a table and paste into Excel used as the selected to meet the stated constraints.",
@@ -482,9 +477,14 @@
         "explicacion": "Not MPP warehousing."
       },
       {
-        "texto_opcion": "Always HASH on a random GUID with no join use, unnecessary skew risk without benefit.",
+        "texto_opcion": "REPLICATE multi-TB staging facts, replication cost explodes for large data used as the main path in this architecture.",
         "es_correcta": false,
-        "explicacion": "Unnecessary skew risk without benefit."
+        "explicacion": "Replication cost explodes for large data."
+      },
+      {
+        "texto_opcion": "ROUND_ROBIN distribution for staging/transient tables.",
+        "es_correcta": true,
+        "explicacion": "Round-robin loads quickly and is fine when join co-location is not required yet."
       }
     ],
     "tags": [
@@ -496,24 +496,24 @@
     "pregunta": "Media streaming company scenario — large fact mostly scanned by analytics with few updates. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Only heaps with no columnstore for huge facts, misses compression and scan speed.",
-        "es_correcta": false,
-        "explicacion": "Misses compression and scan speed."
-      },
-      {
         "texto_opcion": "Clustered columnstore index (CCI) on the fact.",
         "es_correcta": true,
         "explicacion": "Columnstore is the default high-compression analytical storage in Dedicated SQL pool."
       },
       {
-        "texto_opcion": "Cursor-based row processing, anti-pattern for MPP analytics.",
+        "texto_opcion": "Cursor-based row processing, anti-pattern for MPP analytics prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Anti-pattern for MPP analytics."
       },
       {
-        "texto_opcion": "XML indexes on every column, wrong engine feature focus.",
+        "texto_opcion": "XML indexes on every column, wrong engine feature focus configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Wrong engine feature focus."
+      },
+      {
+        "texto_opcion": "Only heaps with no columnstore for huge facts, misses compression and scan speed.",
+        "es_correcta": false,
+        "explicacion": "Misses compression and scan speed."
       }
     ],
     "tags": [
@@ -525,24 +525,24 @@
     "pregunta": "A gaming studio (sub-second interactive queries, region northeurope) must: optimizer chooses bad plans after large loads into Dedicated SQL pool. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Turn off result set caching as the only fix, does not fix cardinality estimates.",
-        "es_correcta": false,
-        "explicacion": "Does not fix cardinality estimates."
-      },
-      {
         "texto_opcion": "Update statistics after significant data changes.",
         "es_correcta": true,
         "explicacion": "Fresh statistics improve distribution-aware plan quality."
       },
       {
-        "texto_opcion": "Restart Windows clients, irrelevant to pool stats; not the best fit here.",
+        "texto_opcion": "Turn off result set caching as the only fix, does not fix cardinality estimates.",
         "es_correcta": false,
-        "explicacion": "Irrelevant to pool stats."
+        "explicacion": "Does not fix cardinality estimates."
       },
       {
         "texto_opcion": "Delete all indexes permanently, usually worsens plans, usually worsens plans.",
         "es_correcta": false,
         "explicacion": "Usually worsens plans."
+      },
+      {
+        "texto_opcion": "Restart Windows clients, irrelevant to pool stats; not the best fit here.",
+        "es_correcta": false,
+        "explicacion": "Irrelevant to pool stats."
       }
     ],
     "tags": [
@@ -554,24 +554,24 @@
     "pregunta": "A online marketplace (petabyte-scale historical data, region southeastasia) must: DMVs show excessive shuffle during fact-dim joins on mismatched keys. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Force nested loops hints everywhere blindly, does not fix distribution mismatch.",
-        "es_correcta": false,
-        "explicacion": "Does not fix distribution mismatch."
-      },
-      {
         "texto_opcion": "Disable all distributions and use heaps only, not valid Dedicated SQL design.",
         "es_correcta": false,
         "explicacion": "Not valid Dedicated SQL design."
       },
       {
+        "texto_opcion": "Increase Power BI visual count, unrelated to SQL pool shuffle adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Unrelated to SQL pool shuffle."
+      },
+      {
+        "texto_opcion": "Force nested loops hints everywhere blindly, does not fix distribution mismatch.",
+        "es_correcta": false,
+        "explicacion": "Does not fix distribution mismatch."
+      },
+      {
         "texto_opcion": "Align HASH distributions on the join key or replicate the.",
         "es_correcta": true,
         "explicacion": "Reducing data movement is the primary MPP join tuning lever."
-      },
-      {
-        "texto_opcion": "Increase Power BI visual count, unrelated to SQL pool shuffle.",
-        "es_correcta": false,
-        "explicacion": "Unrelated to SQL pool shuffle."
       }
     ],
     "tags": [
@@ -583,24 +583,24 @@
     "pregunta": "Healthcare provider scenario — columnstore quality is poor due to many open small rowgroups after trickle inserts. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Insert one row per transaction forever, creates poor rowgroup quality.",
+        "texto_opcion": "Turn off compression permanently, inflates storage and I/O as the default production choice in this scenario.",
         "es_correcta": false,
-        "explicacion": "Creates poor rowgroup quality."
+        "explicacion": "Inflates storage and I/O."
       },
       {
-        "texto_opcion": "Drop CCI and store facts as XML, destroys analytical performance.",
-        "es_correcta": false,
-        "explicacion": "Destroys analytical performance."
-      },
-      {
-        "texto_opcion": "Batch loads into CCI and rebuild/reorganize when rowgroups are unhealthy",
+        "texto_opcion": "Batch loads into CCI and rebuild/reorganize when rowgroups are unhealthy.",
         "es_correcta": true,
         "explicacion": "Columnstore prefers bulk loads; maintenance fixes fragmented rowgroups."
       },
       {
-        "texto_opcion": "Turn off compression permanently, inflates storage and I/O.",
+        "texto_opcion": "Insert one row per transaction forever, creates poor rowgroup quality often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
-        "explicacion": "Inflates storage and I/O."
+        "explicacion": "Creates poor rowgroup quality."
+      },
+      {
+        "texto_opcion": "Drop CCI and store facts as XML, destroys analytical performance applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Destroys analytical performance."
       }
     ],
     "tags": [
@@ -612,24 +612,24 @@
     "pregunta": "Incident review (brazilsouth): identical dashboard queries hit Dedicated SQL pool repeatedly within minutes. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Enable and use result set caching where appropriate.",
-        "es_correcta": true,
-        "explicacion": "Result set caching returns recent identical query results without recompute."
-      },
-      {
-        "texto_opcion": "Disable caching and raise DWU only",
-        "es_correcta": false,
-        "explicacion": "Spends money without helping repeated identical queries."
-      },
-      {
         "texto_opcion": "Cache only in end-user browsers with no server policy",
         "es_correcta": false,
         "explicacion": "Inconsistent and insecure."
       },
       {
-        "texto_opcion": "Rewrite every query to SELECT * FROM everywhere",
+        "texto_opcion": "Rewrite every query to SELECT * FROM everywhere applied across environments for.",
         "es_correcta": false,
         "explicacion": "Worsens load."
+      },
+      {
+        "texto_opcion": "Disable caching and raise DWU only — spends money without helping.",
+        "es_correcta": false,
+        "explicacion": "Spends money without helping repeated identical queries."
+      },
+      {
+        "texto_opcion": "Enable and use result set caching where appropriate.",
+        "es_correcta": true,
+        "explicacion": "Result set caching returns recent identical query results without recompute."
       }
     ],
     "tags": [
@@ -641,19 +641,19 @@
     "pregunta": "Incident review (eastus): Dedicated SQL pool fact needs sliding-window deletes of old months. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Drop the database monthly used as the main path in this architecture.",
+        "texto_opcion": "Drop the database monthly used as the main path in this architecture as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Destroys everything."
+      },
+      {
+        "texto_opcion": "Table partitioning by date with partition switching/truncation patterns.",
+        "es_correcta": true,
+        "explicacion": "Partitions enable efficient data lifecycle operations on large facts."
       },
       {
         "texto_opcion": "DELETE row-by-row without partitions, expensive on huge facts, expensive on huge facts.",
         "es_correcta": false,
         "explicacion": "Expensive on huge facts."
-      },
-      {
-        "texto_opcion": "Table partitioning by date with partition switching/truncation patterns",
-        "es_correcta": true,
-        "explicacion": "Partitions enable efficient data lifecycle operations on large facts."
       },
       {
         "texto_opcion": "Only rely on Power BI filters for deletion, does not remove warehouse data.",
@@ -670,24 +670,24 @@
     "pregunta": "bulk load from ADLS Parquet into Dedicated SQL pool efficiently. Context: telecom operator, near-real-time dashboards. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Logic Apps foreach file copy, not an analytical bulk loader.",
-        "es_correcta": false,
-        "explicacion": "Not an analytical bulk loader."
-      },
-      {
-        "texto_opcion": "Row-by-row INSERT statements, too slow for bulk lake loads.",
-        "es_correcta": false,
-        "explicacion": "Too slow for bulk lake loads."
-      },
-      {
         "texto_opcion": "Power BI Import mode as the load tool, bI import is not the warehouse load path.",
         "es_correcta": false,
         "explicacion": "BI import is not the warehouse load path."
       },
       {
+        "texto_opcion": "Logic Apps foreach file copy, not an analytical bulk loader adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Not an analytical bulk loader."
+      },
+      {
         "texto_opcion": "PolyBase or COPY INTO from external ADLS sources.",
         "es_correcta": true,
         "explicacion": "PolyBase/COPY are designed for high-throughput loads into Dedicated SQL pool."
+      },
+      {
+        "texto_opcion": "Row-by-row INSERT statements, too slow for bulk lake loads selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Too slow for bulk lake loads."
       }
     ],
     "tags": [
@@ -704,11 +704,6 @@
         "explicacion": "Scale does not remove skew."
       },
       {
-        "texto_opcion": "Choose a higher-cardinality HASH key aligned to joins/filters.",
-        "es_correcta": true,
-        "explicacion": "Low-cardinality hash keys create distribution skew and stragglers."
-      },
-      {
         "texto_opcion": "Convert all columns to NVARCHAR(MAX), hurts storage and CPU, hurts storage and CPU.",
         "es_correcta": false,
         "explicacion": "Hurts storage and CPU."
@@ -717,6 +712,11 @@
         "texto_opcion": "REPLICATE the multi-TB fact to hide skew, replication cost is prohibitive.",
         "es_correcta": false,
         "explicacion": "Replication cost is prohibitive."
+      },
+      {
+        "texto_opcion": "Choose a higher-cardinality HASH key aligned to joins/filters.",
+        "es_correcta": true,
+        "explicacion": "Low-cardinality hash keys create distribution skew and stragglers."
       }
     ],
     "tags": [
@@ -728,14 +728,14 @@
     "pregunta": "For a healthcare provider workload with ~200 million rows/day: point lookups on a large Dedicated SQL pool table by order_id. Best choice (variant 2)?",
     "opciones": [
       {
+        "texto_opcion": "Store orders only as images configured end-to-end for this workload applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
+      },
+      {
         "texto_opcion": "Always full table scan hints, slower for selective lookups, slower for selective lookups.",
         "es_correcta": false,
         "explicacion": "Slower for selective lookups."
-      },
-      {
-        "texto_opcion": "Store orders only as images configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Not queryable."
       },
       {
         "texto_opcion": "Disable result set caching forever without reason, may hurt repeated queries.",
@@ -743,7 +743,7 @@
         "explicacion": "May hurt repeated queries."
       },
       {
-        "texto_opcion": "Create a nonclustered index aligned to lookup predicates where beneficial",
+        "texto_opcion": "Create a nonclustered index aligned to lookup predicates where beneficial.",
         "es_correcta": true,
         "explicacion": "Secondary indexes can accelerate selective lookups when designed carefully."
       }
@@ -757,9 +757,14 @@
     "pregunta": "Global retailer scenario — nightly ETL needs high compute; daytime is mostly light dashboards. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Leave maximum DWU 24/7 forever without review adopted as the.",
+        "texto_opcion": "Leave maximum DWU 24/7 forever without review adopted as the adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Unnecessary cost."
+      },
+      {
+        "texto_opcion": "Pause during ETL and run ETL on a laptop as the primary design adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Breaks warehouse ETL."
       },
       {
         "texto_opcion": "Scale Dedicated SQL pool DWUs on a schedule (scale up for ETL, down after)",
@@ -767,14 +772,9 @@
         "explicacion": "Elastic DWU scaling matches cost to workload windows."
       },
       {
-        "texto_opcion": "Replace SQL pool with Excel for night loads prioritized for.",
+        "texto_opcion": "Replace SQL pool with Excel for night loads prioritized for configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Not enterprise scale."
-      },
-      {
-        "texto_opcion": "Pause during ETL and run ETL on a laptop as the primary design.",
-        "es_correcta": false,
-        "explicacion": "Breaks warehouse ETL."
       }
     ],
     "tags": [
@@ -786,24 +786,24 @@
     "pregunta": "For a gaming studio workload with ~5 TB/day: Dedicated SQL pool needs faster aggregations on stable summary patterns. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Disable statistics permanently, worsens optimizer choices, worsens optimizer choices.",
-        "es_correcta": false,
-        "explicacion": "Worsens optimizer choices."
-      },
-      {
-        "texto_opcion": "Store aggregates only in client browsers, not a durable warehouse strategy.",
+        "texto_opcion": "Store aggregates only in client browsers, not a durable warehouse strategy as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Not a durable warehouse strategy."
       },
       {
-        "texto_opcion": "Force CROSS JOIN everywhere configured end-to-end for this workload as the default production choice here.",
+        "texto_opcion": "Disable statistics permanently, worsens optimizer choices, worsens optimizer choices configured end-to-end for the stated workload.",
         "es_correcta": false,
-        "explicacion": "Explodes cardinality."
+        "explicacion": "Worsens optimizer choices."
       },
       {
-        "texto_opcion": "Create materialized / indexed aggregate structures where supported with a clear refresh strategy",
+        "texto_opcion": "Create materialized / indexed aggregate structures where supported with a clear refresh strategy.",
         "es_correcta": true,
         "explicacion": "Pre-aggregated structures reduce repeated heavy scans."
+      },
+      {
+        "texto_opcion": "Force CROSS JOIN everywhere configured end-to-end for this workload as the default production choice here plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Explodes cardinality."
       }
     ],
     "tags": [
@@ -815,14 +815,9 @@
     "pregunta": "Incident review (northeurope): design a large fact table in Dedicated SQL pool joined frequently on customer_id. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Heap with no distribution choice, dedicated SQL pool tables.",
+        "texto_opcion": "REPLICATE the multi-TB fact, replicate is for small.",
         "es_correcta": false,
-        "explicacion": "Dedicated SQL pool tables require a distribution strategy."
-      },
-      {
-        "texto_opcion": "ROUND_ROBIN for the large fact, round-robin causes more.",
-        "es_correcta": false,
-        "explicacion": "Round-robin causes more reshuffles on joins."
+        "explicacion": "Replicate is for small dimensions, not huge facts."
       },
       {
         "texto_opcion": "HASH distribute the fact on customer_id.",
@@ -830,9 +825,14 @@
         "explicacion": "Hash on the join key reduces data movement for large equi-joins."
       },
       {
-        "texto_opcion": "REPLICATE the multi-TB fact, replicate is for small.",
+        "texto_opcion": "ROUND_ROBIN for the large fact, round-robin causes more.",
         "es_correcta": false,
-        "explicacion": "Replicate is for small dimensions, not huge facts."
+        "explicacion": "Round-robin causes more reshuffles on joins."
+      },
+      {
+        "texto_opcion": "Heap with no distribution choice, dedicated SQL pool tables.",
+        "es_correcta": false,
+        "explicacion": "Dedicated SQL pool tables require a distribution strategy."
       }
     ],
     "tags": [
@@ -844,14 +844,14 @@
     "pregunta": "a small slowly changing dimension (~50 MB) is joined to many large facts. Context: telecom operator, sub-second interactive queries. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "ROUND_ROBIN the tiny dimension only",
-        "es_correcta": false,
-        "explicacion": "Works but replicate performs better for frequent joins."
-      },
-      {
         "texto_opcion": "HASH on a high-cardinality key unnecessarily",
         "es_correcta": false,
         "explicacion": "Hash is better for large tables; small dims prefer replicate."
+      },
+      {
+        "texto_opcion": "ROUND_ROBIN the tiny dimension only.",
+        "es_correcta": false,
+        "explicacion": "Works but replicate performs better for frequent joins."
       },
       {
         "texto_opcion": "REPLICATE distribute the dimension.",
@@ -859,7 +859,7 @@
         "explicacion": "Replicated small dims avoid shuffle by copying to each distribution."
       },
       {
-        "texto_opcion": "External table only with no caching",
+        "texto_opcion": "External table only with no caching.",
         "es_correcta": false,
         "explicacion": "External tables do not give replicated in-pool performance."
       }
@@ -873,14 +873,9 @@
     "pregunta": "staging table receives loads before redistribution; joins are rare on staging. Context: global retailer, ~5 TB/day. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Always HASH on a random GUID with no join use, unnecessary skew risk without benefit.",
+        "texto_opcion": "REPLICATE multi-TB staging facts, replication cost explodes for large data.",
         "es_correcta": false,
-        "explicacion": "Unnecessary skew risk without benefit."
-      },
-      {
-        "texto_opcion": "ROUND_ROBIN distribution for staging/transient tables.",
-        "es_correcta": true,
-        "explicacion": "Round-robin loads quickly and is fine when join co-location is not required yet."
+        "explicacion": "Replication cost explodes for large data."
       },
       {
         "texto_opcion": "Skip creating a table and paste into Excel prioritized for selected to meet the.",
@@ -888,9 +883,14 @@
         "explicacion": "Not MPP warehousing."
       },
       {
-        "texto_opcion": "REPLICATE multi-TB staging facts, replication cost explodes for large data.",
+        "texto_opcion": "ROUND_ROBIN distribution for staging/transient tables.",
+        "es_correcta": true,
+        "explicacion": "Round-robin loads quickly and is fine when join co-location is not required yet."
+      },
+      {
+        "texto_opcion": "Always HASH on a random GUID with no join use, unnecessary skew risk without benefit.",
         "es_correcta": false,
-        "explicacion": "Replication cost explodes for large data."
+        "explicacion": "Unnecessary skew risk without benefit."
       }
     ],
     "tags": [
@@ -902,22 +902,22 @@
     "pregunta": "For a industrial IoT platform workload with near-real-time dashboards: large fact mostly scanned by analytics with few updates. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Only heaps with no columnstore for huge facts, misses compression and scan speed.",
-        "es_correcta": false,
-        "explicacion": "Misses compression and scan speed."
-      },
-      {
-        "texto_opcion": "Cursor-based row processing, anti-pattern for MPP analytics.",
-        "es_correcta": false,
-        "explicacion": "Anti-pattern for MPP analytics."
-      },
-      {
         "texto_opcion": "Clustered columnstore index (CCI) on the fact.",
         "es_correcta": true,
         "explicacion": "Columnstore is the default high-compression analytical storage in Dedicated SQL pool."
       },
       {
-        "texto_opcion": "XML indexes on every column, wrong engine feature focus.",
+        "texto_opcion": "Cursor-based row processing, anti-pattern for MPP analytics often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Anti-pattern for MPP analytics."
+      },
+      {
+        "texto_opcion": "Only heaps with no columnstore for huge facts, misses compression and scan speed.",
+        "es_correcta": false,
+        "explicacion": "Misses compression and scan speed."
+      },
+      {
+        "texto_opcion": "XML indexes on every column, wrong engine feature focus adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Wrong engine feature focus."
       }
@@ -931,14 +931,14 @@
     "pregunta": "Industrial iot platform scenario — optimizer chooses bad plans after large loads into Dedicated SQL pool. What should they implement? Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "Delete all indexes permanently, usually worsens plans, usually worsens plans.",
+        "es_correcta": false,
+        "explicacion": "Usually worsens plans."
+      },
+      {
         "texto_opcion": "Update statistics after significant data changes.",
         "es_correcta": true,
         "explicacion": "Fresh statistics improve distribution-aware plan quality."
-      },
-      {
-        "texto_opcion": "Turn off result set caching as the only fix, does not fix cardinality estimates.",
-        "es_correcta": false,
-        "explicacion": "Does not fix cardinality estimates."
       },
       {
         "texto_opcion": "Restart Windows clients, irrelevant to pool stats; not the best fit here.",
@@ -946,9 +946,9 @@
         "explicacion": "Irrelevant to pool stats."
       },
       {
-        "texto_opcion": "Delete all indexes permanently, usually worsens plans, usually worsens plans.",
+        "texto_opcion": "Turn off result set caching as the only fix, does not fix cardinality estimates.",
         "es_correcta": false,
-        "explicacion": "Usually worsens plans."
+        "explicacion": "Does not fix cardinality estimates."
       }
     ],
     "tags": [
@@ -960,6 +960,16 @@
     "pregunta": "A gaming studio (hourly batch windows, region australiaeast) must: DMVs show excessive shuffle during fact-dim joins on mismatched keys. Which option fits best? Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "Force nested loops hints everywhere blindly, does not fix distribution mismatch.",
+        "es_correcta": false,
+        "explicacion": "Does not fix distribution mismatch."
+      },
+      {
+        "texto_opcion": "Increase Power BI visual count, unrelated to SQL pool shuffle prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Unrelated to SQL pool shuffle."
+      },
+      {
         "texto_opcion": "Align HASH distributions on the join key or replicate the.",
         "es_correcta": true,
         "explicacion": "Reducing data movement is the primary MPP join tuning lever."
@@ -968,16 +978,6 @@
         "texto_opcion": "Disable all distributions and use heaps only, not valid Dedicated SQL design.",
         "es_correcta": false,
         "explicacion": "Not valid Dedicated SQL design."
-      },
-      {
-        "texto_opcion": "Force nested loops hints everywhere blindly, does not fix distribution mismatch.",
-        "es_correcta": false,
-        "explicacion": "Does not fix distribution mismatch."
-      },
-      {
-        "texto_opcion": "Increase Power BI visual count, unrelated to SQL pool shuffle.",
-        "es_correcta": false,
-        "explicacion": "Unrelated to SQL pool shuffle."
       }
     ],
     "tags": [
@@ -989,24 +989,24 @@
     "pregunta": "A gaming studio (hourly batch windows, region southeastasia) must: columnstore quality is poor due to many open small rowgroups after trickle inserts. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Batch loads into CCI and rebuild/reorganize when rowgroups are unhealthy",
-        "es_correcta": true,
-        "explicacion": "Columnstore prefers bulk loads; maintenance fixes fragmented rowgroups."
+        "texto_opcion": "Turn off compression permanently, inflates storage and I/O often seen in legacy designs but.",
+        "es_correcta": false,
+        "explicacion": "Inflates storage and I/O."
       },
       {
-        "texto_opcion": "Insert one row per transaction forever, creates poor rowgroup quality.",
+        "texto_opcion": "Insert one row per transaction forever, creates poor rowgroup quality prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Creates poor rowgroup quality."
       },
       {
-        "texto_opcion": "Drop CCI and store facts as XML, destroys analytical performance.",
+        "texto_opcion": "Drop CCI and store facts as XML, destroys analytical performance plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Destroys analytical performance."
       },
       {
-        "texto_opcion": "Turn off compression permanently, inflates storage and I/O.",
-        "es_correcta": false,
-        "explicacion": "Inflates storage and I/O."
+        "texto_opcion": "Batch loads into CCI and rebuild/reorganize when rowgroups are unhealthy.",
+        "es_correcta": true,
+        "explicacion": "Columnstore prefers bulk loads; maintenance fixes fragmented rowgroups."
       }
     ],
     "tags": [
@@ -1018,24 +1018,24 @@
     "pregunta": "For a healthcare provider workload with ~5 TB/day: identical dashboard queries hit Dedicated SQL pool repeatedly within minutes. Best choice (variant 3)?",
     "opciones": [
       {
+        "texto_opcion": "Disable caching and raise DWU only — spends money without helping.",
+        "es_correcta": false,
+        "explicacion": "Spends money without helping repeated identical queries."
+      },
+      {
         "texto_opcion": "Enable and use result set caching where appropriate.",
         "es_correcta": true,
         "explicacion": "Result set caching returns recent identical query results without recompute."
       },
       {
-        "texto_opcion": "Rewrite every query to SELECT * FROM everywhere",
-        "es_correcta": false,
-        "explicacion": "Worsens load."
-      },
-      {
-        "texto_opcion": "Disable caching and raise DWU only",
-        "es_correcta": false,
-        "explicacion": "Spends money without helping repeated identical queries."
-      },
-      {
         "texto_opcion": "Cache only in end-user browsers with no server policy",
         "es_correcta": false,
         "explicacion": "Inconsistent and insecure."
+      },
+      {
+        "texto_opcion": "Rewrite every query to SELECT * FROM everywhere as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Worsens load."
       }
     ],
     "tags": [
@@ -1047,24 +1047,24 @@
     "pregunta": "Dedicated SQL pool fact needs sliding-window deletes of old months. Context: logistics carrier, ~5 TB/day. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Table partitioning by date with partition switching/truncation patterns",
-        "es_correcta": true,
-        "explicacion": "Partitions enable efficient data lifecycle operations on large facts."
-      },
-      {
         "texto_opcion": "DELETE row-by-row without partitions, expensive on huge facts, expensive on huge facts.",
         "es_correcta": false,
         "explicacion": "Expensive on huge facts."
       },
       {
+        "texto_opcion": "Table partitioning by date with partition switching/truncation patterns.",
+        "es_correcta": true,
+        "explicacion": "Partitions enable efficient data lifecycle operations on large facts."
+      },
+      {
+        "texto_opcion": "Drop the database monthly used as the main path in this architecture often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Destroys everything."
+      },
+      {
         "texto_opcion": "Only rely on Power BI filters for deletion, does not remove warehouse data.",
         "es_correcta": false,
         "explicacion": "Does not remove warehouse data."
-      },
-      {
-        "texto_opcion": "Drop the database monthly used as the main path in this architecture.",
-        "es_correcta": false,
-        "explicacion": "Destroys everything."
       }
     ],
     "tags": [
@@ -1076,24 +1076,24 @@
     "pregunta": "Logistics carrier scenario — bulk load from ADLS Parquet into Dedicated SQL pool efficiently. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Power BI Import mode as the load tool, bI import is not the warehouse load path.",
-        "es_correcta": false,
-        "explicacion": "BI import is not the warehouse load path."
-      },
-      {
         "texto_opcion": "PolyBase or COPY INTO from external ADLS sources.",
         "es_correcta": true,
         "explicacion": "PolyBase/COPY are designed for high-throughput loads into Dedicated SQL pool."
       },
       {
-        "texto_opcion": "Row-by-row INSERT statements, too slow for bulk lake loads.",
-        "es_correcta": false,
-        "explicacion": "Too slow for bulk lake loads."
-      },
-      {
-        "texto_opcion": "Logic Apps foreach file copy, not an analytical bulk loader.",
+        "texto_opcion": "Logic Apps foreach file copy, not an analytical bulk loader selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Not an analytical bulk loader."
+      },
+      {
+        "texto_opcion": "Power BI Import mode as the load tool, bI import is not the warehouse load path.",
+        "es_correcta": false,
+        "explicacion": "BI import is not the warehouse load path."
+      },
+      {
+        "texto_opcion": "Row-by-row INSERT statements, too slow for bulk lake loads configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Too slow for bulk lake loads."
       }
     ],
     "tags": [
@@ -1105,16 +1105,6 @@
     "pregunta": "A healthcare provider (~50,000 events/s, region southeastasia) must: one distribution holds most rows after HASH on a low-cardinality status flag. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Keep the skewed key and hope DWU fixes it, scale does not remove skew.",
-        "es_correcta": false,
-        "explicacion": "Scale does not remove skew."
-      },
-      {
-        "texto_opcion": "Convert all columns to NVARCHAR(MAX), hurts storage and CPU, hurts storage and CPU.",
-        "es_correcta": false,
-        "explicacion": "Hurts storage and CPU."
-      },
-      {
         "texto_opcion": "REPLICATE the multi-TB fact to hide skew, replication cost is prohibitive.",
         "es_correcta": false,
         "explicacion": "Replication cost is prohibitive."
@@ -1123,6 +1113,16 @@
         "texto_opcion": "Choose a higher-cardinality HASH key aligned to joins/filters.",
         "es_correcta": true,
         "explicacion": "Low-cardinality hash keys create distribution skew and stragglers."
+      },
+      {
+        "texto_opcion": "Keep the skewed key and hope DWU fixes it, scale does not remove skew.",
+        "es_correcta": false,
+        "explicacion": "Scale does not remove skew."
+      },
+      {
+        "texto_opcion": "Convert all columns to NVARCHAR(MAX), hurts storage and CPU, hurts storage and CPU.",
+        "es_correcta": false,
+        "explicacion": "Hurts storage and CPU."
       }
     ],
     "tags": [
@@ -1134,24 +1134,24 @@
     "pregunta": "For a logistics carrier workload with sub-second interactive queries: point lookups on a large Dedicated SQL pool table by order_id. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Disable result set caching forever without reason, may hurt repeated queries.",
-        "es_correcta": false,
-        "explicacion": "May hurt repeated queries."
-      },
-      {
         "texto_opcion": "Always full table scan hints, slower for selective lookups, slower for selective lookups.",
         "es_correcta": false,
         "explicacion": "Slower for selective lookups."
       },
       {
-        "texto_opcion": "Store orders only as images used as the main path in this architecture.",
+        "texto_opcion": "Disable result set caching forever without reason, may hurt repeated queries.",
         "es_correcta": false,
-        "explicacion": "Not queryable."
+        "explicacion": "May hurt repeated queries."
       },
       {
-        "texto_opcion": "Create a nonclustered index aligned to lookup predicates where beneficial",
+        "texto_opcion": "Create a nonclustered index aligned to lookup predicates where beneficial.",
         "es_correcta": true,
         "explicacion": "Secondary indexes can accelerate selective lookups when designed carefully."
+      },
+      {
+        "texto_opcion": "Store orders only as images used as the main path in this architecture often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Not queryable."
       }
     ],
     "tags": [
@@ -1163,24 +1163,24 @@
     "pregunta": "For a telecom operator workload with ~50,000 events/s: nightly ETL needs high compute; daytime is mostly light dashboards. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Leave maximum DWU 24/7 forever without review as the primary.",
-        "es_correcta": false,
-        "explicacion": "Unnecessary cost."
-      },
-      {
-        "texto_opcion": "Replace SQL pool with Excel for night loads as the primary.",
-        "es_correcta": false,
-        "explicacion": "Not enterprise scale."
-      },
-      {
         "texto_opcion": "Scale Dedicated SQL pool DWUs on a schedule (scale up for ETL, down after)",
         "es_correcta": true,
         "explicacion": "Elastic DWU scaling matches cost to workload windows."
       },
       {
-        "texto_opcion": "Pause during ETL and run ETL on a laptop as the primary design.",
+        "texto_opcion": "Replace SQL pool with Excel for night loads as the primary plausible at first glance, yet weaker.",
+        "es_correcta": false,
+        "explicacion": "Not enterprise scale."
+      },
+      {
+        "texto_opcion": "Pause during ETL and run ETL on a laptop as the primary design often seen in legacy designs but.",
         "es_correcta": false,
         "explicacion": "Breaks warehouse ETL."
+      },
+      {
+        "texto_opcion": "Leave maximum DWU 24/7 forever without review as the primary as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Unnecessary cost."
       }
     ],
     "tags": [

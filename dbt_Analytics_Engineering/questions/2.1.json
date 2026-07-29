@@ -3,9 +3,9 @@
     "pregunta": "In a platform team publishing shared packages: after building marts grant SELECT to `ANALYTICS_READER` role. Which dbt approach is best?",
     "opciones": [
       {
-        "texto_opcion": "Email DBAs to grant manually each deploy, not reproducible in CI/CD.",
-        "es_correcta": false,
-        "explicacion": "Not reproducible in CI/CD."
+        "texto_opcion": "Use `grants: { select: }` in model config.",
+        "es_correcta": true,
+        "explicacion": "grants config applies permissions as part of model deployment."
       },
       {
         "texto_opcion": "Store grants in personal worksheet, not version controlled.",
@@ -13,14 +13,14 @@
         "explicacion": "Not version controlled."
       },
       {
-        "texto_opcion": "Use `grants: { select: }` in model config.",
-        "es_correcta": true,
-        "explicacion": "grants config applies permissions as part of model deployment."
-      },
-      {
         "texto_opcion": "Grant in pre-hook before relation exists, relation must exist first.",
         "es_correcta": false,
         "explicacion": "Relation must exist first."
+      },
+      {
+        "texto_opcion": "Email DBAs to grant manually each deploy, not reproducible in CI/CD.",
+        "es_correcta": false,
+        "explicacion": "Not reproducible in CI/CD."
       }
     ],
     "tags": [
@@ -32,7 +32,7 @@
     "pregunta": "For a Databricks SQL warehouse deployment with nightly jobs: shared utility model should be consumable by downstream packages. Best practice?",
     "opciones": [
       {
-        "texto_opcion": "Delete utility model selected to meet the stated constraints.",
+        "texto_opcion": "Delete utility model selected to meet the stated constraints often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Breaks dependents."
       },
@@ -66,14 +66,14 @@
         "explicacion": "Overexposure."
       },
       {
-        "texto_opcion": "Mark staging public for convenience, exposes unstable interfaces.",
-        "es_correcta": false,
-        "explicacion": "Exposes unstable interfaces."
-      },
-      {
         "texto_opcion": "Set `access: private` on staging models.",
         "es_correcta": true,
         "explicacion": "Private access restricts direct exposure outside project boundaries."
+      },
+      {
+        "texto_opcion": "Mark staging public for convenience, exposes unstable interfaces.",
+        "es_correcta": false,
+        "explicacion": "Exposes unstable interfaces."
       },
       {
         "texto_opcion": "Document staging as official mart used as the main path in.",
@@ -90,14 +90,9 @@
     "pregunta": "For a Snowflake warehouse project with nightly jobs: downstream tools require stable column names and types. Best practice?",
     "opciones": [
       {
-        "texto_opcion": "Rely on BI tool auto-detect only, not governance at build time, not governance at build time.",
+        "texto_opcion": "Change column types without contract review, breaks downstream silently if not enforced as a primary design for this requirement.",
         "es_correcta": false,
-        "explicacion": "Not governance at build time."
-      },
-      {
-        "texto_opcion": "Use contract enforced without column specs, incomplete contract definition, incomplete contract definition.",
-        "es_correcta": false,
-        "explicacion": "Incomplete contract definition."
+        "explicacion": "Breaks downstream silently if not enforced."
       },
       {
         "texto_opcion": "Define `contract: { enforced: true }` with model columns in YAML.",
@@ -105,9 +100,14 @@
         "explicacion": "Enforced contracts fail builds if model output schema drifts."
       },
       {
-        "texto_opcion": "Change column types without contract review, breaks downstream silently if not enforced.",
+        "texto_opcion": "Use contract enforced without column specs, incomplete contract definition, incomplete contract definition.",
         "es_correcta": false,
-        "explicacion": "Breaks downstream silently if not enforced."
+        "explicacion": "Incomplete contract definition."
+      },
+      {
+        "texto_opcion": "Rely on BI tool auto-detect only, not governance at build time, not governance at build time.",
+        "es_correcta": false,
+        "explicacion": "Not governance at build time."
       }
     ],
     "tags": [
@@ -119,24 +119,24 @@
     "pregunta": "For a monorepo with three dbt projects with nightly jobs: contracted model materialized as view must match YAML columns. Best practice?",
     "opciones": [
       {
+        "texto_opcion": "Select * without column list on contracted model.",
+        "es_correcta": false,
+        "explicacion": "Drift undetected."
+      },
+      {
         "texto_opcion": "Disable enforced contract, allows breaking changes.",
         "es_correcta": false,
         "explicacion": "Allows breaking changes."
       },
       {
-        "texto_opcion": "Select * without column list on contracted model",
+        "texto_opcion": "Define contract only in README adopted as the standard.",
         "es_correcta": false,
-        "explicacion": "Drift undetected."
+        "explicacion": "Not validated by dbt."
       },
       {
         "texto_opcion": "Specify columns and data types under version/contract in.",
         "es_correcta": true,
         "explicacion": "Contract columns define expected schema for views and tables."
-      },
-      {
-        "texto_opcion": "Define contract only in README adopted as the standard.",
-        "es_correcta": false,
-        "explicacion": "Not validated by dbt."
       }
     ],
     "tags": [
@@ -147,6 +147,11 @@
   {
     "pregunta": "dbt project review — a monorepo with three dbt projects. publish v1 and v2 of `fct_orders` during migration window. What should the team do?",
     "opciones": [
+      {
+        "texto_opcion": "Overwrite v1 in place without version suffix, breaks consumers immediately.",
+        "es_correcta": false,
+        "explicacion": "Breaks consumers immediately."
+      },
       {
         "texto_opcion": "Duplicate project entirely for v2, heavy; versions feature is built for this.",
         "es_correcta": false,
@@ -161,11 +166,6 @@
         "texto_opcion": "Use `versions` config with v1/v2 model definitions and `latest_version`",
         "es_correcta": true,
         "explicacion": "Model versions support parallel interfaces during migrations."
-      },
-      {
-        "texto_opcion": "Overwrite v1 in place without version suffix, breaks consumers immediately.",
-        "es_correcta": false,
-        "explicacion": "Breaks consumers immediately."
       }
     ],
     "tags": [
@@ -177,22 +177,22 @@
     "pregunta": "In a product analytics team using dbt: warehouse supports PK constraints on mart. Which dbt approach is best?",
     "opciones": [
       {
-        "texto_opcion": "Rely on DISTINCT in SELECT only, does not enforce at relation level.",
-        "es_correcta": false,
-        "explicacion": "Does not enforce at relation level."
-      },
-      {
-        "texto_opcion": "Use constraints block in profiles.yml, belongs in model YAML.",
-        "es_correcta": false,
-        "explicacion": "Belongs in model YAML."
-      },
-      {
-        "texto_opcion": "Define `constraints: [{ type: primary_key, columns: [order_id] }]` in YAML",
+        "texto_opcion": "Define `constraints: [{ type: primary_key, columns: [order_id] }]` in YAML.",
         "es_correcta": true,
         "explicacion": "constraints document and optionally enforce keys at build time."
       },
       {
-        "texto_opcion": "Skip PK on fact table with declared grain, weak integrity signaling.",
+        "texto_opcion": "Rely on DISTINCT in SELECT only, does not enforce at relation level selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Does not enforce at relation level."
+      },
+      {
+        "texto_opcion": "Use constraints block in profiles.yml, belongs in model YAML often seen in legacy designs but not.",
+        "es_correcta": false,
+        "explicacion": "Belongs in model YAML."
+      },
+      {
+        "texto_opcion": "Skip PK on fact table with declared grain, weak integrity signaling often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Weak integrity signaling."
       }
@@ -206,24 +206,24 @@
     "pregunta": "dbt project review — a monorepo with three dbt projects. document FK relationship to dim_customer in YAML. What should the team do?",
     "opciones": [
       {
-        "texto_opcion": "Enforce FK on warehouse that lacks support without adapter check",
-        "es_correcta": false,
-        "explicacion": "May fail; verify adapter."
-      },
-      {
-        "texto_opcion": "Implicit join without documented FK, harder lineage/governance.",
-        "es_correcta": false,
-        "explicacion": "Harder lineage/governance."
-      },
-      {
-        "texto_opcion": "Use exposures for FK, exposures are downstream usage docs.",
+        "texto_opcion": "Use exposures for FK, exposures are downstream usage docs configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "exposures are downstream usage docs."
       },
       {
-        "texto_opcion": "Add foreign_key constraint metadata referencing parent model/columns",
+        "texto_opcion": "Add foreign_key constraint metadata referencing parent model/columns.",
         "es_correcta": true,
         "explicacion": "FK constraints document relationships for governance and tools."
+      },
+      {
+        "texto_opcion": "Enforce FK on warehouse that lacks support without adapter check adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "May fail; verify adapter."
+      },
+      {
+        "texto_opcion": "Implicit join without documented FK, harder lineage/governance adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Harder lineage/governance."
       }
     ],
     "tags": [
@@ -235,14 +235,9 @@
     "pregunta": "assign model owner metadata for governance catalog. Context: a platform team publishing shared packages.",
     "opciones": [
       {
-        "texto_opcion": "Use tags as owner email only, tags are for selection, meta for attributes.",
+        "texto_opcion": "Owner only in ticket system, not visible in dbt docs, not visible in dbt docs.",
         "es_correcta": false,
-        "explicacion": "Tags are for selection, meta for attributes."
-      },
-      {
-        "texto_opcion": "Set `meta: { owner: 'data-platform@company.com' }` on models.",
-        "es_correcta": true,
-        "explicacion": "meta fields carry ownership and governance attributes into docs."
+        "explicacion": "Not visible in dbt docs."
       },
       {
         "texto_opcion": "Remove meta to reduce YAML size, loses ownership tracking, loses ownership tracking.",
@@ -250,9 +245,14 @@
         "explicacion": "Loses ownership tracking."
       },
       {
-        "texto_opcion": "Owner only in ticket system, not visible in dbt docs, not visible in dbt docs.",
+        "texto_opcion": "Set `meta: { owner: 'data-platform@company.com' }` on models.",
+        "es_correcta": true,
+        "explicacion": "meta fields carry ownership and governance attributes into docs."
+      },
+      {
+        "texto_opcion": "Use tags as owner email only, tags are for selection, meta for attributes.",
         "es_correcta": false,
-        "explicacion": "Not visible in dbt docs."
+        "explicacion": "Tags are for selection, meta for attributes."
       }
     ],
     "tags": [
@@ -264,24 +264,24 @@
     "pregunta": "During `dbt build` troubleshooting in a BigQuery analytics repo: consumer project refs public models from platform project. Select the correct answer.",
     "opciones": [
       {
-        "texto_opcion": "Disable docs on public models, hides interface from consumers.",
-        "es_correcta": false,
-        "explicacion": "Hides interface from consumers."
-      },
-      {
-        "texto_opcion": "Install platform project as package or use mesh public models with contracts",
+        "texto_opcion": "Install platform project as package or use mesh public models with contracts.",
         "es_correcta": true,
         "explicacion": "Cross-project consumption requires public access and stable contracts."
       },
       {
-        "texto_opcion": "Copy SQL without package as the primary design for this requirement.",
-        "es_correcta": false,
-        "explicacion": "Forks upstream logic."
-      },
-      {
-        "texto_opcion": "Ref private staging cross-project, violates access boundaries.",
+        "texto_opcion": "Ref private staging cross-project, violates access boundaries plausible at first glance, yet weaker.",
         "es_correcta": false,
         "explicacion": "Violates access boundaries."
+      },
+      {
+        "texto_opcion": "Disable docs on public models, hides interface from consumers as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Hides interface from consumers."
+      },
+      {
+        "texto_opcion": "Copy SQL without package as the primary design for this requirement configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Forks upstream logic."
       }
     ],
     "tags": [
@@ -298,14 +298,14 @@
         "explicacion": "Auditability loss."
       },
       {
-        "texto_opcion": "Grant ALL to all users via post-hook adopted as the prioritized for.",
-        "es_correcta": false,
-        "explicacion": "Security risk."
-      },
-      {
         "texto_opcion": "Grant least privilege (e.g., SELECT) to reader roles only.",
         "es_correcta": true,
         "explicacion": "Over-privileged grants violate security best practices."
+      },
+      {
+        "texto_opcion": "Grant ALL to all users via post-hook adopted as the prioritized for.",
+        "es_correcta": false,
+        "explicacion": "Security risk."
       },
       {
         "texto_opcion": "Disable grants entirely in prod, may leave relations inaccessible.",
@@ -361,14 +361,14 @@
         "explicacion": "latest_version directs default ref behavior to current interface."
       },
       {
-        "texto_opcion": "Skip documenting version deprecation, consumers stay on old versions unknowingly.",
-        "es_correcta": false,
-        "explicacion": "Consumers stay on old versions unknowingly."
-      },
-      {
         "texto_opcion": "Delete v1 while consumers still ref it, breaking change without migration.",
         "es_correcta": false,
         "explicacion": "Breaking change without migration."
+      },
+      {
+        "texto_opcion": "Skip documenting version deprecation, consumers stay on old versions unknowingly.",
+        "es_correcta": false,
+        "explicacion": "Consumers stay on old versions unknowingly."
       }
     ],
     "tags": [
@@ -380,24 +380,24 @@
     "pregunta": "During `dbt build` troubleshooting in a product analytics team using dbt: after building marts grant SELECT to `ANALYTICS_READER` role. Select the correct answer. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Grant in pre-hook before relation exists, relation must exist first.",
-        "es_correcta": false,
-        "explicacion": "Relation must exist first."
-      },
-      {
         "texto_opcion": "Store grants in personal worksheet, not version controlled.",
         "es_correcta": false,
         "explicacion": "Not version controlled."
       },
       {
-        "texto_opcion": "Use `grants: { select: }` in model config.",
-        "es_correcta": true,
-        "explicacion": "grants config applies permissions as part of model deployment."
-      },
-      {
         "texto_opcion": "Email DBAs to grant manually each deploy, not reproducible in CI/CD.",
         "es_correcta": false,
         "explicacion": "Not reproducible in CI/CD."
+      },
+      {
+        "texto_opcion": "Grant in pre-hook before relation exists, relation must exist first.",
+        "es_correcta": false,
+        "explicacion": "Relation must exist first."
+      },
+      {
+        "texto_opcion": "Use `grants: { select: }` in model config.",
+        "es_correcta": true,
+        "explicacion": "grants config applies permissions as part of model deployment."
       }
     ],
     "tags": [
@@ -409,24 +409,24 @@
     "pregunta": "In a Databricks SQL warehouse deployment: shared utility model should be consumable by downstream packages. Which dbt approach is best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "access: private on shared utility, blocks intended downstream refs.",
-        "es_correcta": false,
-        "explicacion": "Blocks intended downstream refs."
-      },
-      {
-        "texto_opcion": "Delete utility model applied across environments for consistency.",
-        "es_correcta": false,
-        "explicacion": "Breaks dependents."
-      },
-      {
         "texto_opcion": "Set `access: public` on the model config.",
         "es_correcta": true,
         "explicacion": "access: public marks models intended for cross-project consumption."
       },
       {
+        "texto_opcion": "access: private on shared utility, blocks intended downstream refs.",
+        "es_correcta": false,
+        "explicacion": "Blocks intended downstream refs."
+      },
+      {
         "texto_opcion": "Hardcode schema in consumer without contract, weak governance for shared models.",
         "es_correcta": false,
         "explicacion": "Weak governance for shared models."
+      },
+      {
+        "texto_opcion": "Delete utility model applied across environments for consistency prioritized for simplicity, though it.",
+        "es_correcta": false,
+        "explicacion": "Breaks dependents."
       }
     ],
     "tags": [
@@ -443,6 +443,11 @@
         "explicacion": "Misleading consumers."
       },
       {
+        "texto_opcion": "Set `access: private` on staging models.",
+        "es_correcta": true,
+        "explicacion": "Private access restricts direct exposure outside project boundaries."
+      },
+      {
         "texto_opcion": "Mark staging public for convenience, exposes unstable interfaces.",
         "es_correcta": false,
         "explicacion": "Exposes unstable interfaces."
@@ -451,11 +456,6 @@
         "texto_opcion": "Grant SELECT to all warehouse users on staging used as the.",
         "es_correcta": false,
         "explicacion": "Overexposure."
-      },
-      {
-        "texto_opcion": "Set `access: private` on staging models.",
-        "es_correcta": true,
-        "explicacion": "Private access restricts direct exposure outside project boundaries."
       }
     ],
     "tags": [
@@ -467,9 +467,14 @@
     "pregunta": "dbt project review — a Snowflake warehouse project. downstream tools require stable column names and types. What should the team do? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Rely on BI tool auto-detect only, not governance at build time, not governance at build time.",
+        "texto_opcion": "Define `contract: { enforced: true }` with model columns in YAML.",
+        "es_correcta": true,
+        "explicacion": "Enforced contracts fail builds if model output schema drifts."
+      },
+      {
+        "texto_opcion": "Change column types without contract review, breaks downstream silently if not enforced configured end-to-end for the stated workload.",
         "es_correcta": false,
-        "explicacion": "Not governance at build time."
+        "explicacion": "Breaks downstream silently if not enforced."
       },
       {
         "texto_opcion": "Use contract enforced without column specs, incomplete contract definition, incomplete contract definition.",
@@ -477,14 +482,9 @@
         "explicacion": "Incomplete contract definition."
       },
       {
-        "texto_opcion": "Change column types without contract review, breaks downstream silently if not enforced.",
+        "texto_opcion": "Rely on BI tool auto-detect only, not governance at build time, not governance at build time.",
         "es_correcta": false,
-        "explicacion": "Breaks downstream silently if not enforced."
-      },
-      {
-        "texto_opcion": "Define `contract: { enforced: true }` with model columns in YAML.",
-        "es_correcta": true,
-        "explicacion": "Enforced contracts fail builds if model output schema drifts."
+        "explicacion": "Not governance at build time."
       }
     ],
     "tags": [
@@ -496,6 +496,11 @@
     "pregunta": "In a platform team publishing shared packages: contracted model materialized as view must match YAML columns. Which dbt approach is best? Constraint set #2.",
     "opciones": [
       {
+        "texto_opcion": "Specify columns and data types under version/contract in.",
+        "es_correcta": true,
+        "explicacion": "Contract columns define expected schema for views and tables."
+      },
+      {
         "texto_opcion": "Select * without column list on contracted model as the default production choice here.",
         "es_correcta": false,
         "explicacion": "Drift undetected."
@@ -506,12 +511,7 @@
         "explicacion": "Allows breaking changes."
       },
       {
-        "texto_opcion": "Specify columns and data types under version/contract in.",
-        "es_correcta": true,
-        "explicacion": "Contract columns define expected schema for views and tables."
-      },
-      {
-        "texto_opcion": "Define contract only in README as the default production choice here.",
+        "texto_opcion": "Define contract only in README as the default production choice here used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Not validated by dbt."
       }
@@ -530,14 +530,14 @@
         "explicacion": "Breaks consumers immediately."
       },
       {
-        "texto_opcion": "Duplicate project entirely for v2, heavy; versions feature is built for this.",
-        "es_correcta": false,
-        "explicacion": "Heavy; versions feature is built for this."
-      },
-      {
         "texto_opcion": "Use tags instead of versions only, tags do not define schema interfaces.",
         "es_correcta": false,
         "explicacion": "Tags do not define schema interfaces."
+      },
+      {
+        "texto_opcion": "Duplicate project entirely for v2, heavy; versions feature is built for this.",
+        "es_correcta": false,
+        "explicacion": "Heavy; versions feature is built for this."
       },
       {
         "texto_opcion": "Use `versions` config with v1/v2 model definitions and `latest_version`",
@@ -554,22 +554,22 @@
     "pregunta": "dbt project review — a CI pipeline using dbt Core. warehouse supports PK constraints on mart. What should the team do? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Rely on DISTINCT in SELECT only, does not enforce at relation level.",
+        "texto_opcion": "Rely on DISTINCT in SELECT only, does not enforce at relation level as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Does not enforce at relation level."
       },
       {
-        "texto_opcion": "Use constraints block in profiles.yml, belongs in model YAML.",
+        "texto_opcion": "Use constraints block in profiles.yml, belongs in model YAML used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Belongs in model YAML."
       },
       {
-        "texto_opcion": "Skip PK on fact table with declared grain, weak integrity signaling.",
+        "texto_opcion": "Skip PK on fact table with declared grain, weak integrity signaling selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Weak integrity signaling."
       },
       {
-        "texto_opcion": "Define `constraints: [{ type: primary_key, columns: [order_id] }]` in YAML",
+        "texto_opcion": "Define `constraints: [{ type: primary_key, columns: [order_id] }]` in YAML.",
         "es_correcta": true,
         "explicacion": "constraints document and optionally enforce keys at build time."
       }
@@ -583,24 +583,24 @@
     "pregunta": "dbt project review — a CI pipeline using dbt Core. document FK relationship to dim_customer in YAML. What should the team do? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Add foreign_key constraint metadata referencing parent model/columns",
-        "es_correcta": true,
-        "explicacion": "FK constraints document relationships for governance and tools."
-      },
-      {
-        "texto_opcion": "Use exposures for FK, exposures are downstream usage docs.",
+        "texto_opcion": "Enforce FK on warehouse that lacks support without adapter check configured end-to-end for the stated workload.",
         "es_correcta": false,
-        "explicacion": "exposures are downstream usage docs."
+        "explicacion": "May fail; verify adapter."
       },
       {
-        "texto_opcion": "Implicit join without documented FK, harder lineage/governance.",
+        "texto_opcion": "Implicit join without documented FK, harder lineage/governance adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Harder lineage/governance."
       },
       {
-        "texto_opcion": "Enforce FK on warehouse that lacks support without adapter check",
+        "texto_opcion": "Use exposures for FK, exposures are downstream usage docs as the default production.",
         "es_correcta": false,
-        "explicacion": "May fail; verify adapter."
+        "explicacion": "exposures are downstream usage docs."
+      },
+      {
+        "texto_opcion": "Add foreign_key constraint metadata referencing parent model/columns.",
+        "es_correcta": true,
+        "explicacion": "FK constraints document relationships for governance and tools."
       }
     ],
     "tags": [
@@ -617,14 +617,14 @@
         "explicacion": "Not visible in dbt docs."
       },
       {
-        "texto_opcion": "Set `meta: { owner: 'data-platform@company.com' }` on models.",
-        "es_correcta": true,
-        "explicacion": "meta fields carry ownership and governance attributes into docs."
-      },
-      {
         "texto_opcion": "Remove meta to reduce YAML size, loses ownership tracking, loses ownership tracking.",
         "es_correcta": false,
         "explicacion": "Loses ownership tracking."
+      },
+      {
+        "texto_opcion": "Set `meta: { owner: 'data-platform@company.com' }` on models.",
+        "es_correcta": true,
+        "explicacion": "meta fields carry ownership and governance attributes into docs."
       },
       {
         "texto_opcion": "Use tags as owner email only, tags are for selection, meta for attributes.",
@@ -641,24 +641,24 @@
     "pregunta": "consumer project refs public models from platform project. Context: a product analytics team using dbt. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Copy SQL without package as the primary design for this requirement.",
+        "texto_opcion": "Copy SQL without package as the primary design for this requirement as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Forks upstream logic."
       },
       {
-        "texto_opcion": "Ref private staging cross-project, violates access boundaries.",
+        "texto_opcion": "Install platform project as package or use mesh public models with contracts.",
+        "es_correcta": true,
+        "explicacion": "Cross-project consumption requires public access and stable contracts."
+      },
+      {
+        "texto_opcion": "Ref private staging cross-project, violates access boundaries as a primary design for this requirement applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Violates access boundaries."
       },
       {
-        "texto_opcion": "Disable docs on public models, hides interface from consumers.",
+        "texto_opcion": "Disable docs on public models, hides interface from consumers as a primary design for this requirement often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Hides interface from consumers."
-      },
-      {
-        "texto_opcion": "Install platform project as package or use mesh public models with contracts",
-        "es_correcta": true,
-        "explicacion": "Cross-project consumption requires public access and stable contracts."
       }
     ],
     "tags": [
@@ -670,9 +670,9 @@
     "pregunta": "For a CI pipeline using dbt Core with nightly jobs: avoid granting OWNERSHIP broadly via dbt. Best practice? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Grant ALL to all users via post-hook selected to meet the.",
-        "es_correcta": false,
-        "explicacion": "Security risk."
+        "texto_opcion": "Grant least privilege (e.g., SELECT) to reader roles only.",
+        "es_correcta": true,
+        "explicacion": "Over-privileged grants violate security best practices."
       },
       {
         "texto_opcion": "Use shared personal user accounts as the primary design.",
@@ -680,14 +680,14 @@
         "explicacion": "Auditability loss."
       },
       {
-        "texto_opcion": "Grant least privilege (e.g., SELECT) to reader roles only.",
-        "es_correcta": true,
-        "explicacion": "Over-privileged grants violate security best practices."
-      },
-      {
         "texto_opcion": "Disable grants entirely in prod, may leave relations inaccessible.",
         "es_correcta": false,
         "explicacion": "May leave relations inaccessible."
+      },
+      {
+        "texto_opcion": "Grant ALL to all users via post-hook selected to meet the.",
+        "es_correcta": false,
+        "explicacion": "Security risk."
       }
     ],
     "tags": [
@@ -704,14 +704,14 @@
         "explicacion": "Contract build fails (expected)."
       },
       {
-        "texto_opcion": "Omit data_type on enforced contract, validation incomplete, validation incomplete.",
-        "es_correcta": false,
-        "explicacion": "Validation incomplete."
-      },
-      {
         "texto_opcion": "Specify accurate `data_type` for each contracted column.",
         "es_correcta": true,
         "explicacion": "Contract validation compares actual vs declared types."
+      },
+      {
+        "texto_opcion": "Omit data_type on enforced contract, validation incomplete, validation incomplete.",
+        "es_correcta": false,
+        "explicacion": "Validation incomplete."
       },
       {
         "texto_opcion": "Use generic STRING for every column, weak typing defeats contract purpose.",
@@ -733,6 +733,11 @@
         "explicacion": "Consumers stay on old versions unknowingly."
       },
       {
+        "texto_opcion": "Set `latest_version: 2` in model version config.",
+        "es_correcta": true,
+        "explicacion": "latest_version directs default ref behavior to current interface."
+      },
+      {
         "texto_opcion": "Delete v1 while consumers still ref it, breaking change without migration.",
         "es_correcta": false,
         "explicacion": "Breaking change without migration."
@@ -741,11 +746,6 @@
         "texto_opcion": "Use random version numbers adopted as the standard pattern prioritized for.",
         "es_correcta": false,
         "explicacion": "Confusing governance."
-      },
-      {
-        "texto_opcion": "Set `latest_version: 2` in model version config.",
-        "es_correcta": true,
-        "explicacion": "latest_version directs default ref behavior to current interface."
       }
     ],
     "tags": [
@@ -757,24 +757,24 @@
     "pregunta": "In a Databricks SQL warehouse deployment: after building marts grant SELECT to `ANALYTICS_READER` role. Which dbt approach is best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Email DBAs to grant manually each deploy, not reproducible in CI/CD.",
-        "es_correcta": false,
-        "explicacion": "Not reproducible in CI/CD."
-      },
-      {
-        "texto_opcion": "Store grants in personal worksheet, not version controlled.",
-        "es_correcta": false,
-        "explicacion": "Not version controlled."
-      },
-      {
         "texto_opcion": "Use `grants: { select: }` in model config.",
         "es_correcta": true,
         "explicacion": "grants config applies permissions as part of model deployment."
       },
       {
+        "texto_opcion": "Email DBAs to grant manually each deploy, not reproducible in CI/CD.",
+        "es_correcta": false,
+        "explicacion": "Not reproducible in CI/CD."
+      },
+      {
         "texto_opcion": "Grant in pre-hook before relation exists, relation must exist first.",
         "es_correcta": false,
         "explicacion": "Relation must exist first."
+      },
+      {
+        "texto_opcion": "Store grants in personal worksheet, not version controlled.",
+        "es_correcta": false,
+        "explicacion": "Not version controlled."
       }
     ],
     "tags": [
@@ -786,14 +786,14 @@
     "pregunta": "In a BigQuery analytics repo: shared utility model should be consumable by downstream packages. Which dbt approach is best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Hardcode schema in consumer without contract, weak governance for shared models.",
-        "es_correcta": false,
-        "explicacion": "Weak governance for shared models."
-      },
-      {
         "texto_opcion": "access: private on shared utility, blocks intended downstream refs.",
         "es_correcta": false,
         "explicacion": "Blocks intended downstream refs."
+      },
+      {
+        "texto_opcion": "Delete utility model as the primary design for this requirement often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Breaks dependents."
       },
       {
         "texto_opcion": "Set `access: public` on the model config.",
@@ -801,9 +801,9 @@
         "explicacion": "access: public marks models intended for cross-project consumption."
       },
       {
-        "texto_opcion": "Delete utility model as the primary design for this requirement.",
+        "texto_opcion": "Hardcode schema in consumer without contract, weak governance for shared models.",
         "es_correcta": false,
-        "explicacion": "Breaks dependents."
+        "explicacion": "Weak governance for shared models."
       }
     ],
     "tags": [
@@ -820,9 +820,9 @@
         "explicacion": "Exposes unstable interfaces."
       },
       {
-        "texto_opcion": "Set `access: private` on staging models.",
-        "es_correcta": true,
-        "explicacion": "Private access restricts direct exposure outside project boundaries."
+        "texto_opcion": "Grant SELECT to all warehouse users on staging selected to.",
+        "es_correcta": false,
+        "explicacion": "Overexposure."
       },
       {
         "texto_opcion": "Document staging as official mart adopted as the standard.",
@@ -830,9 +830,9 @@
         "explicacion": "Misleading consumers."
       },
       {
-        "texto_opcion": "Grant SELECT to all warehouse users on staging selected to.",
-        "es_correcta": false,
-        "explicacion": "Overexposure."
+        "texto_opcion": "Set `access: private` on staging models.",
+        "es_correcta": true,
+        "explicacion": "Private access restricts direct exposure outside project boundaries."
       }
     ],
     "tags": [
@@ -849,14 +849,14 @@
         "explicacion": "Incomplete contract definition."
       },
       {
+        "texto_opcion": "Change column types without contract review, breaks downstream silently if not enforced configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Breaks downstream silently if not enforced."
+      },
+      {
         "texto_opcion": "Define `contract: { enforced: true }` with model columns in YAML.",
         "es_correcta": true,
         "explicacion": "Enforced contracts fail builds if model output schema drifts."
-      },
-      {
-        "texto_opcion": "Change column types without contract review, breaks downstream silently if not enforced.",
-        "es_correcta": false,
-        "explicacion": "Breaks downstream silently if not enforced."
       },
       {
         "texto_opcion": "Rely on BI tool auto-detect only, not governance at build time, not governance at build time.",
@@ -873,9 +873,9 @@
     "pregunta": "contracted model materialized as view must match YAML columns. Context: a finance mart with strict SLAs. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Select * without column list on contracted model as the default production choice here.",
+        "texto_opcion": "Define contract only in README as the default production choice here as the default production choice in this scenario.",
         "es_correcta": false,
-        "explicacion": "Drift undetected."
+        "explicacion": "Not validated by dbt."
       },
       {
         "texto_opcion": "Specify columns and data types under version/contract in.",
@@ -883,14 +883,14 @@
         "explicacion": "Contract columns define expected schema for views and tables."
       },
       {
-        "texto_opcion": "Define contract only in README as the default production choice here.",
-        "es_correcta": false,
-        "explicacion": "Not validated by dbt."
-      },
-      {
         "texto_opcion": "Disable enforced contract, allows breaking changes, allows breaking changes.",
         "es_correcta": false,
         "explicacion": "Allows breaking changes."
+      },
+      {
+        "texto_opcion": "Select * without column list on contracted model as the default production choice here.",
+        "es_correcta": false,
+        "explicacion": "Drift undetected."
       }
     ],
     "tags": [
@@ -902,9 +902,9 @@
     "pregunta": "For a product analytics team using dbt with nightly jobs: publish v1 and v2 of `fct_orders` during migration window. Best practice? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Use `versions` config with v1/v2 model definitions and `latest_version`",
-        "es_correcta": true,
-        "explicacion": "Model versions support parallel interfaces during migrations."
+        "texto_opcion": "Overwrite v1 in place without version suffix, breaks consumers immediately.",
+        "es_correcta": false,
+        "explicacion": "Breaks consumers immediately."
       },
       {
         "texto_opcion": "Use tags instead of versions only, tags do not define schema interfaces.",
@@ -912,14 +912,14 @@
         "explicacion": "Tags do not define schema interfaces."
       },
       {
+        "texto_opcion": "Use `versions` config with v1/v2 model definitions and `latest_version`",
+        "es_correcta": true,
+        "explicacion": "Model versions support parallel interfaces during migrations."
+      },
+      {
         "texto_opcion": "Duplicate project entirely for v2, heavy; versions feature is built for this.",
         "es_correcta": false,
         "explicacion": "Heavy; versions feature is built for this."
-      },
-      {
-        "texto_opcion": "Overwrite v1 in place without version suffix, breaks consumers immediately.",
-        "es_correcta": false,
-        "explicacion": "Breaks consumers immediately."
       }
     ],
     "tags": [
@@ -931,24 +931,24 @@
     "pregunta": "dbt project review — a CI pipeline using dbt Core. warehouse supports PK constraints on mart. What should the team do? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Use constraints block in profiles.yml, belongs in model YAML.",
+        "texto_opcion": "Use constraints block in profiles.yml, belongs in model YAML often seen in legacy designs but not.",
         "es_correcta": false,
         "explicacion": "Belongs in model YAML."
       },
       {
-        "texto_opcion": "Rely on DISTINCT in SELECT only, does not enforce at relation level.",
-        "es_correcta": false,
-        "explicacion": "Does not enforce at relation level."
-      },
-      {
-        "texto_opcion": "Define `constraints: [{ type: primary_key, columns: [order_id] }]` in YAML",
+        "texto_opcion": "Define `constraints: [{ type: primary_key, columns: [order_id] }]` in YAML.",
         "es_correcta": true,
         "explicacion": "constraints document and optionally enforce keys at build time."
       },
       {
-        "texto_opcion": "Skip PK on fact table with declared grain, weak integrity signaling.",
+        "texto_opcion": "Skip PK on fact table with declared grain, weak integrity signaling applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Weak integrity signaling."
+      },
+      {
+        "texto_opcion": "Rely on DISTINCT in SELECT only, does not enforce at relation level selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Does not enforce at relation level."
       }
     ],
     "tags": [
@@ -960,22 +960,22 @@
     "pregunta": "In a product analytics team using dbt: document FK relationship to dim_customer in YAML. Which dbt approach is best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Enforce FK on warehouse that lacks support without adapter check",
-        "es_correcta": false,
-        "explicacion": "May fail; verify adapter."
-      },
-      {
-        "texto_opcion": "Use exposures for FK, exposures are downstream usage docs.",
-        "es_correcta": false,
-        "explicacion": "exposures are downstream usage docs."
-      },
-      {
-        "texto_opcion": "Implicit join without documented FK, harder lineage/governance.",
+        "texto_opcion": "Implicit join without documented FK, harder lineage/governance as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Harder lineage/governance."
       },
       {
-        "texto_opcion": "Add foreign_key constraint metadata referencing parent model/columns",
+        "texto_opcion": "Enforce FK on warehouse that lacks support without adapter check used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "May fail; verify adapter."
+      },
+      {
+        "texto_opcion": "Use exposures for FK, exposures are downstream usage docs used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "exposures are downstream usage docs."
+      },
+      {
+        "texto_opcion": "Add foreign_key constraint metadata referencing parent model/columns.",
         "es_correcta": true,
         "explicacion": "FK constraints document relationships for governance and tools."
       }
@@ -989,14 +989,14 @@
     "pregunta": "assign model owner metadata for governance catalog. Context: a multi-environment dbt Cloud job. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Use tags as owner email only, tags are for selection, meta for attributes.",
-        "es_correcta": false,
-        "explicacion": "Tags are for selection, meta for attributes."
-      },
-      {
         "texto_opcion": "Owner only in ticket system, not visible in dbt docs, not visible in dbt docs.",
         "es_correcta": false,
         "explicacion": "Not visible in dbt docs."
+      },
+      {
+        "texto_opcion": "Use tags as owner email only, tags are for selection, meta for attributes.",
+        "es_correcta": false,
+        "explicacion": "Tags are for selection, meta for attributes."
       },
       {
         "texto_opcion": "Set `meta: { owner: 'data-platform@company.com' }` on models.",
@@ -1018,24 +1018,24 @@
     "pregunta": "consumer project refs public models from platform project. Context: a platform team publishing shared packages. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Ref private staging cross-project, violates access boundaries.",
-        "es_correcta": false,
-        "explicacion": "Violates access boundaries."
-      },
-      {
-        "texto_opcion": "Install platform project as package or use mesh public models with contracts",
-        "es_correcta": true,
-        "explicacion": "Cross-project consumption requires public access and stable contracts."
-      },
-      {
-        "texto_opcion": "Copy SQL without package applied across environments for consistency.",
+        "texto_opcion": "Copy SQL without package applied across environments for consistency as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Forks upstream logic."
       },
       {
-        "texto_opcion": "Disable docs on public models, hides interface from consumers.",
+        "texto_opcion": "Ref private staging cross-project, violates access boundaries applied across environments for operational consistency.",
+        "es_correcta": false,
+        "explicacion": "Violates access boundaries."
+      },
+      {
+        "texto_opcion": "Disable docs on public models, hides interface from consumers selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Hides interface from consumers."
+      },
+      {
+        "texto_opcion": "Install platform project as package or use mesh public models with contracts.",
+        "es_correcta": true,
+        "explicacion": "Cross-project consumption requires public access and stable contracts."
       }
     ],
     "tags": [
@@ -1047,9 +1047,9 @@
     "pregunta": "In a platform team publishing shared packages: avoid granting OWNERSHIP broadly via dbt. Which dbt approach is best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Grant ALL to all users via post-hook prioritized for selected to meet.",
-        "es_correcta": false,
-        "explicacion": "Security risk."
+        "texto_opcion": "Grant least privilege (e.g., SELECT) to reader roles only.",
+        "es_correcta": true,
+        "explicacion": "Over-privileged grants violate security best practices."
       },
       {
         "texto_opcion": "Disable grants entirely in prod, may leave relations inaccessible.",
@@ -1057,12 +1057,12 @@
         "explicacion": "May leave relations inaccessible."
       },
       {
-        "texto_opcion": "Grant least privilege (e.g., SELECT) to reader roles only.",
-        "es_correcta": true,
-        "explicacion": "Over-privileged grants violate security best practices."
+        "texto_opcion": "Grant ALL to all users via post-hook prioritized for selected to meet.",
+        "es_correcta": false,
+        "explicacion": "Security risk."
       },
       {
-        "texto_opcion": "Use shared personal user accounts selected to meet the.",
+        "texto_opcion": "Use shared personal user accounts selected to meet the often seen in legacy designs but.",
         "es_correcta": false,
         "explicacion": "Auditability loss."
       }
@@ -1076,14 +1076,14 @@
     "pregunta": "YAML column type must match warehouse type for contract. Context: a monorepo with three dbt projects. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Omit data_type on enforced contract, validation incomplete, validation incomplete.",
-        "es_correcta": false,
-        "explicacion": "Validation incomplete."
-      },
-      {
         "texto_opcion": "Use generic STRING for every column, weak typing defeats contract purpose.",
         "es_correcta": false,
         "explicacion": "Weak typing defeats contract purpose."
+      },
+      {
+        "texto_opcion": "Omit data_type on enforced contract, validation incomplete, validation incomplete.",
+        "es_correcta": false,
+        "explicacion": "Validation incomplete."
       },
       {
         "texto_opcion": "Specify accurate `data_type` for each contracted column.",
@@ -1105,16 +1105,6 @@
     "pregunta": "dbt project review — a Snowflake warehouse project. consumers should default to newest model version. What should the team do? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Skip documenting version deprecation, consumers stay on old versions unknowingly.",
-        "es_correcta": false,
-        "explicacion": "Consumers stay on old versions unknowingly."
-      },
-      {
-        "texto_opcion": "Set `latest_version: 2` in model version config.",
-        "es_correcta": true,
-        "explicacion": "latest_version directs default ref behavior to current interface."
-      },
-      {
         "texto_opcion": "Use random version numbers as the default production choice here adopted as the.",
         "es_correcta": false,
         "explicacion": "Confusing governance."
@@ -1123,6 +1113,16 @@
         "texto_opcion": "Delete v1 while consumers still ref it, breaking change without migration.",
         "es_correcta": false,
         "explicacion": "Breaking change without migration."
+      },
+      {
+        "texto_opcion": "Set `latest_version: 2` in model version config.",
+        "es_correcta": true,
+        "explicacion": "latest_version directs default ref behavior to current interface."
+      },
+      {
+        "texto_opcion": "Skip documenting version deprecation, consumers stay on old versions unknowingly.",
+        "es_correcta": false,
+        "explicacion": "Consumers stay on old versions unknowingly."
       }
     ],
     "tags": [
@@ -1134,9 +1134,9 @@
     "pregunta": "During `dbt build` troubleshooting in a monorepo with three dbt projects: after building marts grant SELECT to `ANALYTICS_READER` role. Select the correct answer. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Grant in pre-hook before relation exists, relation must exist first.",
+        "texto_opcion": "Store grants in personal worksheet, not version controlled.",
         "es_correcta": false,
-        "explicacion": "Relation must exist first."
+        "explicacion": "Not version controlled."
       },
       {
         "texto_opcion": "Email DBAs to grant manually each deploy, not reproducible in CI/CD.",
@@ -1149,9 +1149,9 @@
         "explicacion": "grants config applies permissions as part of model deployment."
       },
       {
-        "texto_opcion": "Store grants in personal worksheet, not version controlled.",
+        "texto_opcion": "Grant in pre-hook before relation exists, relation must exist first.",
         "es_correcta": false,
-        "explicacion": "Not version controlled."
+        "explicacion": "Relation must exist first."
       }
     ],
     "tags": [
@@ -1163,14 +1163,14 @@
     "pregunta": "shared utility model should be consumable by downstream packages. Context: a Databricks SQL warehouse deployment. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Delete utility model as the primary design for this requirement.",
+        "texto_opcion": "access: private on shared utility, blocks intended downstream refs.",
         "es_correcta": false,
-        "explicacion": "Breaks dependents."
+        "explicacion": "Blocks intended downstream refs."
       },
       {
-        "texto_opcion": "Hardcode schema in consumer without contract, weak governance for shared models.",
+        "texto_opcion": "Delete utility model as the primary design for this requirement plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
-        "explicacion": "Weak governance for shared models."
+        "explicacion": "Breaks dependents."
       },
       {
         "texto_opcion": "Set `access: public` on the model config.",
@@ -1178,9 +1178,9 @@
         "explicacion": "access: public marks models intended for cross-project consumption."
       },
       {
-        "texto_opcion": "access: private on shared utility, blocks intended downstream refs.",
+        "texto_opcion": "Hardcode schema in consumer without contract, weak governance for shared models.",
         "es_correcta": false,
-        "explicacion": "Blocks intended downstream refs."
+        "explicacion": "Weak governance for shared models."
       }
     ],
     "tags": [
@@ -1192,14 +1192,9 @@
     "pregunta": "In a medallion lakehouse built with dbt: internal staging model not meant for BI tools. Which dbt approach is best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Set `access: private` on staging models.",
-        "es_correcta": true,
-        "explicacion": "Private access restricts direct exposure outside project boundaries."
-      },
-      {
-        "texto_opcion": "Document staging as official mart used as the main path in.",
+        "texto_opcion": "Mark staging public for convenience, exposes unstable interfaces.",
         "es_correcta": false,
-        "explicacion": "Misleading consumers."
+        "explicacion": "Exposes unstable interfaces."
       },
       {
         "texto_opcion": "Grant SELECT to all warehouse users on staging as the.",
@@ -1207,9 +1202,14 @@
         "explicacion": "Overexposure."
       },
       {
-        "texto_opcion": "Mark staging public for convenience, exposes unstable interfaces.",
+        "texto_opcion": "Document staging as official mart used as the main path in.",
         "es_correcta": false,
-        "explicacion": "Exposes unstable interfaces."
+        "explicacion": "Misleading consumers."
+      },
+      {
+        "texto_opcion": "Set `access: private` on staging models.",
+        "es_correcta": true,
+        "explicacion": "Private access restricts direct exposure outside project boundaries."
       }
     ],
     "tags": [
@@ -1221,24 +1221,24 @@
     "pregunta": "During `dbt build` troubleshooting in a product analytics team using dbt: downstream tools require stable column names and types. Select the correct answer. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use contract enforced without column specs, incomplete contract definition, incomplete contract definition.",
-        "es_correcta": false,
-        "explicacion": "Incomplete contract definition."
-      },
-      {
-        "texto_opcion": "Change column types without contract review, breaks downstream silently if not enforced.",
-        "es_correcta": false,
-        "explicacion": "Breaks downstream silently if not enforced."
-      },
-      {
         "texto_opcion": "Rely on BI tool auto-detect only, not governance at build time, not governance at build time.",
         "es_correcta": false,
         "explicacion": "Not governance at build time."
       },
       {
+        "texto_opcion": "Use contract enforced without column specs, incomplete contract definition, incomplete contract definition.",
+        "es_correcta": false,
+        "explicacion": "Incomplete contract definition."
+      },
+      {
         "texto_opcion": "Define `contract: { enforced: true }` with model columns in YAML.",
         "es_correcta": true,
         "explicacion": "Enforced contracts fail builds if model output schema drifts."
+      },
+      {
+        "texto_opcion": "Change column types without contract review, breaks downstream silently if not enforced often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Breaks downstream silently if not enforced."
       }
     ],
     "tags": [
@@ -1250,9 +1250,14 @@
     "pregunta": "During `dbt build` troubleshooting in a Databricks SQL warehouse deployment: contracted model materialized as view must match YAML columns. Select the correct answer. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Select * without column list on contracted model",
+        "texto_opcion": "Select * without column list on contracted model.",
         "es_correcta": false,
         "explicacion": "Drift undetected."
+      },
+      {
+        "texto_opcion": "Specify columns and data types under version/contract in.",
+        "es_correcta": true,
+        "explicacion": "Contract columns define expected schema for views and tables."
       },
       {
         "texto_opcion": "Disable enforced contract, allows breaking changes.",
@@ -1263,11 +1268,6 @@
         "texto_opcion": "Define contract only in README adopted as the standard.",
         "es_correcta": false,
         "explicacion": "Not validated by dbt."
-      },
-      {
-        "texto_opcion": "Specify columns and data types under version/contract in.",
-        "es_correcta": true,
-        "explicacion": "Contract columns define expected schema for views and tables."
       }
     ],
     "tags": [
@@ -1279,24 +1279,24 @@
     "pregunta": "During `dbt build` troubleshooting in a medallion lakehouse built with dbt: publish v1 and v2 of `fct_orders` during migration window. Select the correct answer. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Duplicate project entirely for v2, heavy; versions feature is built for this.",
-        "es_correcta": false,
-        "explicacion": "Heavy; versions feature is built for this."
-      },
-      {
         "texto_opcion": "Use tags instead of versions only, tags do not define schema interfaces.",
         "es_correcta": false,
         "explicacion": "Tags do not define schema interfaces."
       },
       {
-        "texto_opcion": "Use `versions` config with v1/v2 model definitions and `latest_version`",
-        "es_correcta": true,
-        "explicacion": "Model versions support parallel interfaces during migrations."
+        "texto_opcion": "Duplicate project entirely for v2, heavy; versions feature is built for this.",
+        "es_correcta": false,
+        "explicacion": "Heavy; versions feature is built for this."
       },
       {
         "texto_opcion": "Overwrite v1 in place without version suffix, breaks consumers immediately.",
         "es_correcta": false,
         "explicacion": "Breaks consumers immediately."
+      },
+      {
+        "texto_opcion": "Use `versions` config with v1/v2 model definitions and `latest_version`",
+        "es_correcta": true,
+        "explicacion": "Model versions support parallel interfaces during migrations."
       }
     ],
     "tags": [
@@ -1308,24 +1308,24 @@
     "pregunta": "For a medallion lakehouse built with dbt with nightly jobs: warehouse supports PK constraints on mart. Best practice? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Rely on DISTINCT in SELECT only, does not enforce at relation level.",
+        "texto_opcion": "Use constraints block in profiles.yml, belongs in model YAML applied across environments for.",
         "es_correcta": false,
-        "explicacion": "Does not enforce at relation level."
+        "explicacion": "Belongs in model YAML."
       },
       {
-        "texto_opcion": "Define `constraints: [{ type: primary_key, columns: [order_id] }]` in YAML",
+        "texto_opcion": "Define `constraints: [{ type: primary_key, columns: [order_id] }]` in YAML.",
         "es_correcta": true,
         "explicacion": "constraints document and optionally enforce keys at build time."
       },
       {
-        "texto_opcion": "Skip PK on fact table with declared grain, weak integrity signaling.",
+        "texto_opcion": "Rely on DISTINCT in SELECT only, does not enforce at relation level applied across environments for operational consistency.",
         "es_correcta": false,
-        "explicacion": "Weak integrity signaling."
+        "explicacion": "Does not enforce at relation level."
       },
       {
-        "texto_opcion": "Use constraints block in profiles.yml, belongs in model YAML.",
+        "texto_opcion": "Skip PK on fact table with declared grain, weak integrity signaling prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
-        "explicacion": "Belongs in model YAML."
+        "explicacion": "Weak integrity signaling."
       }
     ],
     "tags": [
@@ -1337,24 +1337,24 @@
     "pregunta": "In a product analytics team using dbt: document FK relationship to dim_customer in YAML. Which dbt approach is best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Enforce FK on warehouse that lacks support without adapter check",
+        "texto_opcion": "Enforce FK on warehouse that lacks support without adapter check often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "May fail; verify adapter."
       },
       {
-        "texto_opcion": "Implicit join without documented FK, harder lineage/governance.",
-        "es_correcta": false,
-        "explicacion": "Harder lineage/governance."
+        "texto_opcion": "Add foreign_key constraint metadata referencing parent model/columns.",
+        "es_correcta": true,
+        "explicacion": "FK constraints document relationships for governance and tools."
       },
       {
-        "texto_opcion": "Use exposures for FK, exposures are downstream usage docs.",
+        "texto_opcion": "Use exposures for FK, exposures are downstream usage docs selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "exposures are downstream usage docs."
       },
       {
-        "texto_opcion": "Add foreign_key constraint metadata referencing parent model/columns",
-        "es_correcta": true,
-        "explicacion": "FK constraints document relationships for governance and tools."
+        "texto_opcion": "Implicit join without documented FK, harder lineage/governance often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Harder lineage/governance."
       }
     ],
     "tags": [
@@ -1366,9 +1366,9 @@
     "pregunta": "assign model owner metadata for governance catalog. Context: a CI pipeline using dbt Core. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Remove meta to reduce YAML size, loses ownership tracking, loses ownership tracking.",
-        "es_correcta": false,
-        "explicacion": "Loses ownership tracking."
+        "texto_opcion": "Set `meta: { owner: 'data-platform@company.com' }` on models.",
+        "es_correcta": true,
+        "explicacion": "meta fields carry ownership and governance attributes into docs."
       },
       {
         "texto_opcion": "Use tags as owner email only, tags are for selection, meta for attributes.",
@@ -1376,14 +1376,14 @@
         "explicacion": "Tags are for selection, meta for attributes."
       },
       {
-        "texto_opcion": "Set `meta: { owner: 'data-platform@company.com' }` on models.",
-        "es_correcta": true,
-        "explicacion": "meta fields carry ownership and governance attributes into docs."
-      },
-      {
         "texto_opcion": "Owner only in ticket system, not visible in dbt docs, not visible in dbt docs.",
         "es_correcta": false,
         "explicacion": "Not visible in dbt docs."
+      },
+      {
+        "texto_opcion": "Remove meta to reduce YAML size, loses ownership tracking, loses ownership tracking.",
+        "es_correcta": false,
+        "explicacion": "Loses ownership tracking."
       }
     ],
     "tags": [
@@ -1395,24 +1395,24 @@
     "pregunta": "During `dbt build` troubleshooting in a Databricks SQL warehouse deployment: consumer project refs public models from platform project. Select the correct answer. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Install platform project as package or use mesh public models with contracts",
-        "es_correcta": true,
-        "explicacion": "Cross-project consumption requires public access and stable contracts."
-      },
-      {
-        "texto_opcion": "Ref private staging cross-project, violates access boundaries.",
+        "texto_opcion": "Copy SQL without package prioritized for operational simplicity used as the main path in this architecture.",
         "es_correcta": false,
-        "explicacion": "Violates access boundaries."
+        "explicacion": "Forks upstream logic."
       },
       {
-        "texto_opcion": "Disable docs on public models, hides interface from consumers.",
+        "texto_opcion": "Disable docs on public models, hides interface from consumers plausible at first glance, yet weaker.",
         "es_correcta": false,
         "explicacion": "Hides interface from consumers."
       },
       {
-        "texto_opcion": "Copy SQL without package prioritized for operational simplicity.",
+        "texto_opcion": "Ref private staging cross-project, violates access boundaries prioritized for simplicity, though it.",
         "es_correcta": false,
-        "explicacion": "Forks upstream logic."
+        "explicacion": "Violates access boundaries."
+      },
+      {
+        "texto_opcion": "Install platform project as package or use mesh public models with contracts.",
+        "es_correcta": true,
+        "explicacion": "Cross-project consumption requires public access and stable contracts."
       }
     ],
     "tags": [
@@ -1424,16 +1424,6 @@
     "pregunta": "In a multi-environment dbt Cloud job: avoid granting OWNERSHIP broadly via dbt. Which dbt approach is best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Grant ALL to all users via post-hook as the default adopted as the.",
-        "es_correcta": false,
-        "explicacion": "Security risk."
-      },
-      {
-        "texto_opcion": "Use shared personal user accounts adopted as the standard.",
-        "es_correcta": false,
-        "explicacion": "Auditability loss."
-      },
-      {
         "texto_opcion": "Grant least privilege (e.g., SELECT) to reader roles only.",
         "es_correcta": true,
         "explicacion": "Over-privileged grants violate security best practices."
@@ -1442,6 +1432,16 @@
         "texto_opcion": "Disable grants entirely in prod, may leave relations inaccessible.",
         "es_correcta": false,
         "explicacion": "May leave relations inaccessible."
+      },
+      {
+        "texto_opcion": "Use shared personal user accounts adopted as the standard.",
+        "es_correcta": false,
+        "explicacion": "Auditability loss."
+      },
+      {
+        "texto_opcion": "Grant ALL to all users via post-hook as the default adopted as the.",
+        "es_correcta": false,
+        "explicacion": "Security risk."
       }
     ],
     "tags": [
@@ -1453,24 +1453,24 @@
     "pregunta": "YAML column type must match warehouse type for contract. Context: a platform team publishing shared packages. Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Specify accurate `data_type` for each contracted column.",
-        "es_correcta": true,
-        "explicacion": "Contract validation compares actual vs declared types."
-      },
-      {
         "texto_opcion": "Omit data_type on enforced contract, validation incomplete, validation incomplete.",
         "es_correcta": false,
         "explicacion": "Validation incomplete."
       },
       {
-        "texto_opcion": "Change warehouse type without updating YAML, contract build fails (expected).",
-        "es_correcta": false,
-        "explicacion": "Contract build fails (expected)."
+        "texto_opcion": "Specify accurate `data_type` for each contracted column.",
+        "es_correcta": true,
+        "explicacion": "Contract validation compares actual vs declared types."
       },
       {
         "texto_opcion": "Use generic STRING for every column, weak typing defeats contract purpose.",
         "es_correcta": false,
         "explicacion": "Weak typing defeats contract purpose."
+      },
+      {
+        "texto_opcion": "Change warehouse type without updating YAML, contract build fails (expected).",
+        "es_correcta": false,
+        "explicacion": "Contract build fails (expected)."
       }
     ],
     "tags": [

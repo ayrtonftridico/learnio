@@ -3,9 +3,14 @@
     "pregunta": "Em uma fintech de pagamentos, o pipeline Python precisa enriquecer milhões de linhas de transações e chargebacks com scoring customizado. Qual UDF minimiza overhead?",
     "opciones": [
       {
-        "texto_opcion": "pandas UDF (vectorized) com tipos Arrow compatíveis.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
+        "texto_opcion": "Executar scoring no driver com collect().",
+        "es_correcta": false,
+        "explicacion": "collect() traz dados ao driver e não escala."
+      },
+      {
+        "texto_opcion": "UDF Python linha a linha sem vectorização.",
+        "es_correcta": false,
+        "explicacion": "Serializa linha a linha; custo alto em volume."
       },
       {
         "texto_opcion": "mapInPandas sem schema definido, schema ausente gera.",
@@ -13,14 +18,9 @@
         "explicacion": "Schema ausente gera inferência cara e instável."
       },
       {
-        "texto_opcion": "UDF Python linha a linha sem vectorização",
-        "es_correcta": false,
-        "explicacion": "Serializa linha a linha; custo alto em volume."
-      },
-      {
-        "texto_opcion": "Executar scoring no driver com collect()",
-        "es_correcta": false,
-        "explicacion": "collect() traz dados ao driver e não escala."
+        "texto_opcion": "pandas UDF (vectorized) com tipos Arrow compatíveis.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
       }
     ],
     "tags": [
@@ -32,7 +32,7 @@
     "pregunta": "O time de uma rede de varejo omnichannel quer modularizar código Spark em wheel reutilizável. Onde colocar funções de transformação?",
     "opciones": [
       {
-        "texto_opcion": "Definir tudo como UDF SQL permanente, lógica complexa fica difícil de",
+        "texto_opcion": "Definir tudo como UDF SQL permanente, lógica complexa fica difícil de — lógica complexa fica difícil de testar unitariamente.",
         "es_correcta": false,
         "explicacion": "Lógica complexa fica difícil de testar unitariamente."
       },
@@ -61,24 +61,24 @@
     "pregunta": "Durante ingestão de telemetria de sensores em uma operadora de IoT industrial, registros inválidos não podem derrubar o job. Qual padrão Python?",
     "opciones": [
       {
-        "texto_opcion": "Deixar exceção propagar e falhar o streaming query, um registro inválido interrompe todo o micro-batch.",
+        "texto_opcion": "Deixar exceção propagar e falhar o streaming query, um registro inválido interrompe todo o micro-batch como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "Um registro inválido interrompe todo o micro-batch."
+      },
+      {
+        "texto_opcion": "Ignorar silenciosamente sem log, perde rastreabilidade para auditoria plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Perde rastreabilidade para auditoria."
+      },
+      {
+        "texto_opcion": "Usar sys.exit() no executor, encerra executor e corrompe estabilidade do cluster como escolha padrão de produção neste cenário.",
+        "es_correcta": false,
+        "explicacion": "Encerra executor e corrompe estabilidade do cluster."
       },
       {
         "texto_opcion": "try/except por registro ou lote em foreachBatch, registrando falhas em tabela de quarentena.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "Usar sys.exit() no executor, encerra executor e corrompe estabilidade do cluster.",
-        "es_correcta": false,
-        "explicacion": "Encerra executor e corrompe estabilidade do cluster."
-      },
-      {
-        "texto_opcion": "Ignorar silenciosamente sem log, perde rastreabilidade para auditoria.",
-        "es_correcta": false,
-        "explicacion": "Perde rastreabilidade para auditoria."
       }
     ],
     "tags": [
@@ -124,6 +124,11 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
+        "texto_opcion": "Retornar string JSON sem schema, perde tipagem e validação em downstream.",
+        "es_correcta": false,
+        "explicacion": "Perde tipagem e validação em downstream."
+      },
+      {
         "texto_opcion": "Confiar na inferência automática do Spark, inferência pode mudar entre batches.",
         "es_correcta": false,
         "explicacion": "Inferência pode mudar entre batches."
@@ -132,11 +137,6 @@
         "texto_opcion": "Usar MapType genérico sempre, mapType não documenta campos esperados.",
         "es_correcta": false,
         "explicacion": "MapType não documenta campos esperados."
-      },
-      {
-        "texto_opcion": "Retornar string JSON sem schema, perde tipagem e validação em downstream.",
-        "es_correcta": false,
-        "explicacion": "Perde tipagem e validação em downstream."
       }
     ],
     "tags": [
@@ -148,7 +148,12 @@
     "pregunta": "O pipeline de sinistros e apólices em uma seguradora usa logging para troubleshooting. Qual prática evita poluir stdout?",
     "opciones": [
       {
-        "texto_opcion": "print() em UDF para cada linha, gera volume enorme e degrada performance.",
+        "texto_opcion": "Desabilitar todos os logs em produção, impossibilita diagnóstico de falhas usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "Impossibilita diagnóstico de falhas."
+      },
+      {
+        "texto_opcion": "print() em UDF para cada linha, gera volume enorme e degrada performance aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Gera volume enorme e degrada performance."
       },
@@ -161,11 +166,6 @@
         "texto_opcion": "Usar módulo logging com níveis e evitar print() em executors.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "Desabilitar todos os logs em produção, impossibilita diagnóstico de falhas.",
-        "es_correcta": false,
-        "explicacion": "Impossibilita diagnóstico de falhas."
       }
     ],
     "tags": [
@@ -177,22 +177,22 @@
     "pregunta": "Para deduplicar rotas e entregas em uma operadora logística, o código Python precisa estado entre micro-batches. Onde manter?",
     "opciones": [
       {
-        "texto_opcion": "Variável global no módulo importado, executores não compartilham.",
-        "es_correcta": false,
-        "explicacion": "Executores não compartilham memória de forma confiável."
-      },
-      {
         "texto_opcion": "Delta Lake ou state store do Structured Streaming, não variáveis globais Python.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Cache no driver com dict Python, não escala além da memória do driver.",
+        "texto_opcion": "Cache no driver com dict Python, não escala além da memória do driver como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "Não escala além da memória do driver."
       },
       {
-        "texto_opcion": "Arquivo local /tmp no executor, perde-se em restart e skew entre nós.",
+        "texto_opcion": "Variável global no módulo importado, executores não compartilham — executores não compartilham memória de forma confiável.",
+        "es_correcta": false,
+        "explicacion": "Executores não compartilham memória de forma confiável."
+      },
+      {
+        "texto_opcion": "Arquivo local /tmp no executor, perde-se em restart e skew entre nós como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "Perde-se em restart e skew entre nós."
       }
@@ -206,14 +206,14 @@
     "pregunta": "Em uma cooperativa agrícola, o job recebe parâmetro de data via widget/argumento. Como acessar em módulo Python?",
     "opciones": [
       {
+        "texto_opcion": "Hardcodar data no código fonte, exige redeploy para cada execução, exige redeploy para cada execução.",
+        "es_correcta": false,
+        "explicacion": "Exige redeploy para cada execução."
+      },
+      {
         "texto_opcion": "Ler sys.argv ou dbutils.widgets.get() no entrypoint e passar.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "Ler variável de ambiente sem documentar, ambientes divergentes quebram reprodutibilidade.",
-        "es_correcta": false,
-        "explicacion": "Ambientes divergentes quebram reprodutibilidade."
       },
       {
         "texto_opcion": "Usar input() interativo, jobs agendados não têm terminal interativo, jobs agendados não têm terminal interativo.",
@@ -221,9 +221,9 @@
         "explicacion": "Jobs agendados não têm terminal interativo."
       },
       {
-        "texto_opcion": "Hardcodar data no código fonte, exige redeploy para cada execução, exige redeploy para cada execução.",
+        "texto_opcion": "Ler variável de ambiente sem documentar, ambientes divergentes quebram reprodutibilidade aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
-        "explicacion": "Exige redeploy para cada execução."
+        "explicacion": "Ambientes divergentes quebram reprodutibilidade."
       }
     ],
     "tags": [
@@ -240,17 +240,17 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Usar apenas RDD map, perde otimizações do Catalyst e tipagem.",
-        "es_correcta": false,
-        "explicacion": "Perde otimizações do Catalyst e tipagem."
-      },
-      {
         "texto_opcion": "Exportar CSV e reimportar, quebra atomicidade e lineage, quebra atomicidade e lineage.",
         "es_correcta": false,
         "explicacion": "Quebra atomicidade e lineage."
       },
       {
-        "texto_opcion": "Converter tudo para pandas no driver, não escala para datasets grandes.",
+        "texto_opcion": "Usar apenas RDD map, perde otimizações do Catalyst e tipagem como desenho principal para este requisito.",
+        "es_correcta": false,
+        "explicacion": "Perde otimizações do Catalyst e tipagem."
+      },
+      {
+        "texto_opcion": "Converter tudo para pandas no driver, não escala para datasets grandes comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Não escala para datasets grandes."
       }
@@ -269,14 +269,14 @@
         "explicacion": "Spark pode enviar cópia por task."
       },
       {
-        "texto_opcion": "Repetir leitura do lookup a cada partition, i/O redundante em todos os executors.",
-        "es_correcta": false,
-        "explicacion": "I/O redundante em todos os executors."
-      },
-      {
         "texto_opcion": "Transmissão do DataFrame de pesquisa antes do join/UDF que o consome.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Repetir leitura do lookup a cada partition, i/O redundante em todos os executors.",
+        "es_correcta": false,
+        "explicacion": "I/O redundante em todos os executors."
       },
       {
         "texto_opcion": "Materializar lookup em UDF sem cache, leitura duplicada a cada invocação.",
@@ -293,11 +293,6 @@
     "pregunta": "Para gravar telemetria de sensores incrementalmente em Delta a partir de Python streaming, qual sink?",
     "opciones": [
       {
-        "texto_opcion": "complete mode em tabela grande, reescreve tabela inteira a cada trigger.",
-        "es_correcta": false,
-        "explicacion": "Reescreve tabela inteira a cada trigger."
-      },
-      {
         "texto_opcion": "Gravar Parquet direto ignorando Delta, perde ACID e MERGE downstream.",
         "es_correcta": false,
         "explicacion": "Perde ACID e MERGE downstream."
@@ -311,6 +306,11 @@
         "texto_opcion": "append mode sem deduplicação, duplica registros em reprocessamento.",
         "es_correcta": false,
         "explicacion": "Duplica registros em reprocessamento."
+      },
+      {
+        "texto_opcion": "complete mode em tabela grande, reescreve tabela inteira a cada trigger.",
+        "es_correcta": false,
+        "explicacion": "Reescreve tabela inteira a cada trigger."
       }
     ],
     "tags": [
@@ -322,7 +322,7 @@
     "pregunta": "Em um hospital universitário, o código Python deve ser compatível com Unity Catalog. Como obter SparkSession?",
     "opciones": [
       {
-        "texto_opcion": "Instanciar SparkContext manual sem session, aPI legada sem integração completa.",
+        "texto_opcion": "Instanciar SparkContext manual sem session, aPI legada sem integração completa como desenho principal para este requisito.",
         "es_correcta": false,
         "explicacion": "API legada sem integração completa."
       },
@@ -337,7 +337,7 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Criar Hive metastore local separado, ignora governança central do UC.",
+        "texto_opcion": "Criar Hive metastore local separado, ignora governança central do UC adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Ignora governança central do UC."
       }
@@ -361,14 +361,14 @@
         "explicacion": "StructType é serializável normalmente."
       },
       {
-        "texto_opcion": "Usar pandas UDF, pandas UDFs suportadas; não causam PicklingError por si.",
-        "es_correcta": false,
-        "explicacion": "pandas UDFs suportadas; não causam PicklingError por si."
-      },
-      {
         "texto_opcion": "Executar em cluster Photon, photon não altera requisitos de",
         "es_correcta": false,
         "explicacion": "Photon não altera requisitos de serialização Python."
+      },
+      {
+        "texto_opcion": "Usar pandas UDF, pandas UDFs suportadas; não causam PicklingError por si.",
+        "es_correcta": false,
+        "explicacion": "pandas UDFs suportadas; não causam PicklingError por si."
       }
     ],
     "tags": [
@@ -409,24 +409,24 @@
     "pregunta": "Em uma operadora logística, o pipeline Python precisa enriquecer milhões de linhas de rotas e entregas com scoring customizado. Qual UDF minimiza overhead?",
     "opciones": [
       {
+        "texto_opcion": "pandas UDF (vectorized) com tipos Arrow compatíveis.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Executar scoring no driver com collect().",
+        "es_correcta": false,
+        "explicacion": "collect() traz dados ao driver e não escala."
+      },
+      {
         "texto_opcion": "mapInPandas sem schema definido, schema ausente gera.",
         "es_correcta": false,
         "explicacion": "Schema ausente gera inferência cara e instável."
       },
       {
-        "texto_opcion": "UDF Python linha a linha sem vectorização",
+        "texto_opcion": "UDF Python linha a linha sem vectorização.",
         "es_correcta": false,
         "explicacion": "Serializa linha a linha; custo alto em volume."
-      },
-      {
-        "texto_opcion": "Executar scoring no driver com collect()",
-        "es_correcta": false,
-        "explicacion": "collect() traz dados ao driver e não escala."
-      },
-      {
-        "texto_opcion": "pandas UDF (vectorized) com tipos Arrow compatíveis.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
       }
     ],
     "tags": [
@@ -438,9 +438,9 @@
     "pregunta": "O time de uma cooperativa agrícola quer modularizar código Spark em wheel reutilizável. Onde colocar funções de transformação?",
     "opciones": [
       {
-        "texto_opcion": "Definir tudo como UDF SQL permanente, lógica complexa fica difícil de",
-        "es_correcta": false,
-        "explicacion": "Lógica complexa fica difícil de testar unitariamente."
+        "texto_opcion": "Pacote Python instalado no cluster/job via wheel ou PyPI, importado nos notebooks.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
         "texto_opcion": "Copiar funções manualmente em cada notebook, duplicação dificulta testes e versionamento.",
@@ -448,14 +448,14 @@
         "explicacion": "Duplicação dificulta testes e versionamento."
       },
       {
+        "texto_opcion": "Definir tudo como UDF SQL permanente, lógica complexa fica difícil de — lógica complexa fica difícil de testar unitariamente.",
+        "es_correcta": false,
+        "explicacion": "Lógica complexa fica difícil de testar unitariamente."
+      },
+      {
         "texto_opcion": "Salvar apenas em dbutils.fs sem pacote, não forma módulo importável versionado.",
         "es_correcta": false,
         "explicacion": "Não forma módulo importável versionado."
-      },
-      {
-        "texto_opcion": "Pacote Python instalado no cluster/job via wheel ou PyPI, importado nos notebooks.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
       }
     ],
     "tags": [
@@ -467,12 +467,17 @@
     "pregunta": "Durante ingestão de transações e chargebacks em uma fintech de pagamentos, registros inválidos não podem derrubar o job. Qual padrão Python?",
     "opciones": [
       {
-        "texto_opcion": "Ignorar silenciosamente sem log, perde rastreabilidade para auditoria.",
+        "texto_opcion": "Ignorar silenciosamente sem log, perde rastreabilidade para auditoria configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Perde rastreabilidade para auditoria."
       },
       {
-        "texto_opcion": "Usar sys.exit() no executor, encerra executor e corrompe estabilidade do cluster.",
+        "texto_opcion": "Deixar exceção propagar e falhar o streaming query, um registro inválido interrompe todo o micro-batch plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Um registro inválido interrompe todo o micro-batch."
+      },
+      {
+        "texto_opcion": "Usar sys.exit() no executor, encerra executor e corrompe estabilidade do cluster selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Encerra executor e corrompe estabilidade do cluster."
       },
@@ -480,11 +485,6 @@
         "texto_opcion": "try/except por registro ou lote em foreachBatch, registrando falhas em tabela de quarentena.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "Deixar exceção propagar e falhar o streaming query, um registro inválido interrompe todo o micro-batch.",
-        "es_correcta": false,
-        "explicacion": "Um registro inválido interrompe todo o micro-batch."
       }
     ],
     "tags": [
@@ -496,6 +496,16 @@
     "pregunta": "Antes de promover transformação de pedidos e estoque em uma rede de varejo omnichannel, o time quer testes locais. Qual ferramenta combina com Databricks Connect?",
     "opciones": [
       {
+        "texto_opcion": "Apenas testes manuais no notebook produtivo, sem regressão automatizada entre deploys.",
+        "es_correcta": false,
+        "explicacion": "Sem regressão automatizada entre deploys."
+      },
+      {
+        "texto_opcion": "unittest sem isolar dados de entrada, testes frágeis e acoplados ao ambiente.",
+        "es_correcta": false,
+        "explicacion": "Testes frágeis e acoplados ao ambiente."
+      },
+      {
         "texto_opcion": "Validar só no cluster de produção, risco operacional e custo desnecessário.",
         "es_correcta": false,
         "explicacion": "Risco operacional e custo desnecessário."
@@ -504,16 +514,6 @@
         "texto_opcion": "pytest com SparkSession local ou remota via Databricks Connect.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "unittest sem isolar dados de entrada, testes frágeis e acoplados ao ambiente.",
-        "es_correcta": false,
-        "explicacion": "Testes frágeis e acoplados ao ambiente."
-      },
-      {
-        "texto_opcion": "Apenas testes manuais no notebook produtivo, sem regressão automatizada entre deploys.",
-        "es_correcta": false,
-        "explicacion": "Sem regressão automatizada entre deploys."
       }
     ],
     "tags": [
@@ -525,9 +525,9 @@
     "pregunta": "Em uma operadora de IoT industrial, uma função Python retorna struct aninhado sobre telemetria de sensores. Como garantir schema estável?",
     "opciones": [
       {
-        "texto_opcion": "Usar MapType genérico sempre, mapType não documenta campos esperados.",
+        "texto_opcion": "Confiar na inferência automática do Spark, inferência pode mudar entre batches.",
         "es_correcta": false,
-        "explicacion": "MapType não documenta campos esperados."
+        "explicacion": "Inferência pode mudar entre batches."
       },
       {
         "texto_opcion": "Retornar string JSON sem schema, perde tipagem e validação em downstream.",
@@ -540,9 +540,9 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Confiar na inferência automática do Spark, inferência pode mudar entre batches.",
+        "texto_opcion": "Usar MapType genérico sempre, mapType não documenta campos esperados.",
         "es_correcta": false,
-        "explicacion": "Inferência pode mudar entre batches."
+        "explicacion": "MapType não documenta campos esperados."
       }
     ],
     "tags": [
@@ -554,9 +554,9 @@
     "pregunta": "O pipeline de prontuários e exames em um hospital universitário usa logging para troubleshooting. Qual prática evita poluir stdout?",
     "opciones": [
       {
-        "texto_opcion": "Desabilitar todos os logs em produção, impossibilita diagnóstico de falhas.",
+        "texto_opcion": "Logar PII completo em DEBUG, viola compliance e aumenta risco, viola compliance e aumenta risco.",
         "es_correcta": false,
-        "explicacion": "Impossibilita diagnóstico de falhas."
+        "explicacion": "Viola compliance e aumenta risco."
       },
       {
         "texto_opcion": "Usar módulo logging com níveis e evitar print() em executors.",
@@ -564,14 +564,14 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "print() em UDF para cada linha, gera volume enorme e degrada performance.",
+        "texto_opcion": "print() em UDF para cada linha, gera volume enorme e degrada performance configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Gera volume enorme e degrada performance."
       },
       {
-        "texto_opcion": "Logar PII completo em DEBUG, viola compliance e aumenta risco, viola compliance e aumenta risco.",
+        "texto_opcion": "Desabilitar todos os logs em produção, impossibilita diagnóstico de falhas selecionado para atender as restrições citadas.",
         "es_correcta": false,
-        "explicacion": "Viola compliance e aumenta risco."
+        "explicacion": "Impossibilita diagnóstico de falhas."
       }
     ],
     "tags": [
@@ -583,14 +583,9 @@
     "pregunta": "Para deduplicar eventos de reprodução em uma plataforma de streaming, o código Python precisa estado entre micro-batches. Onde manter?",
     "opciones": [
       {
-        "texto_opcion": "Cache no driver com dict Python, não escala além da memória do driver.",
+        "texto_opcion": "Variável global no módulo importado, executores não compartilham — executores não compartilham memória de forma confiável.",
         "es_correcta": false,
-        "explicacion": "Não escala além da memória do driver."
-      },
-      {
-        "texto_opcion": "Arquivo local /tmp no executor, perde-se em restart e skew entre nós.",
-        "es_correcta": false,
-        "explicacion": "Perde-se em restart e skew entre nós."
+        "explicacion": "Executores não compartilham memória de forma confiável."
       },
       {
         "texto_opcion": "Delta Lake ou state store do Structured Streaming, não variáveis globais Python.",
@@ -598,9 +593,14 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Variável global no módulo importado, executores não compartilham.",
+        "texto_opcion": "Cache no driver com dict Python, não escala além da memória do driver selecionado para atender as restrições citadas.",
         "es_correcta": false,
-        "explicacion": "Executores não compartilham memória de forma confiável."
+        "explicacion": "Não escala além da memória do driver."
+      },
+      {
+        "texto_opcion": "Arquivo local /tmp no executor, perde-se em restart e skew entre nós plausível à primeira vista, porém.",
+        "es_correcta": false,
+        "explicacion": "Perde-se em restart e skew entre nós."
       }
     ],
     "tags": [
@@ -612,11 +612,6 @@
     "pregunta": "Em uma seguradora, o job recebe parâmetro de data via widget/argumento. Como acessar em módulo Python?",
     "opciones": [
       {
-        "texto_opcion": "Usar input() interativo, jobs agendados não têm terminal interativo, jobs agendados não têm terminal interativo.",
-        "es_correcta": false,
-        "explicacion": "Jobs agendados não têm terminal interativo."
-      },
-      {
         "texto_opcion": "Ler sys.argv ou dbutils.widgets.get() no entrypoint e passar.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
@@ -627,9 +622,14 @@
         "explicacion": "Exige redeploy para cada execução."
       },
       {
-        "texto_opcion": "Ler variável de ambiente sem documentar, ambientes divergentes quebram reprodutibilidade.",
+        "texto_opcion": "Ler variável de ambiente sem documentar, ambientes divergentes quebram reprodutibilidade selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Ambientes divergentes quebram reprodutibilidade."
+      },
+      {
+        "texto_opcion": "Usar input() interativo, jobs agendados não têm terminal interativo, jobs agendados não têm terminal interativo.",
+        "es_correcta": false,
+        "explicacion": "Jobs agendados não têm terminal interativo."
       }
     ],
     "tags": [
@@ -641,14 +641,14 @@
     "pregunta": "O time de uma operadora logística precisa aplicar transformação pandas-like em rotas e entregas mantendo API Spark. Qual API?",
     "opciones": [
       {
-        "texto_opcion": "Usar apenas RDD map, perde otimizações do Catalyst e tipagem.",
+        "texto_opcion": "Exportar CSV e reimportar, quebra atomicidade e lineage, quebra atomicidade e lineage.",
         "es_correcta": false,
-        "explicacion": "Perde otimizações do Catalyst e tipagem."
+        "explicacion": "Quebra atomicidade e lineage."
       },
       {
-        "texto_opcion": "Converter tudo para pandas no driver, não escala para datasets grandes.",
+        "texto_opcion": "Usar apenas RDD map, perde otimizações do Catalyst e tipagem plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
-        "explicacion": "Não escala para datasets grandes."
+        "explicacion": "Perde otimizações do Catalyst e tipagem."
       },
       {
         "texto_opcion": "pandas API on Spark (pyspark.pandas).",
@@ -656,9 +656,9 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Exportar CSV e reimportar, quebra atomicidade e lineage, quebra atomicidade e lineage.",
+        "texto_opcion": "Converter tudo para pandas no driver, não escala para datasets grandes priorizado por simplicidade, mas deixa de.",
         "es_correcta": false,
-        "explicacion": "Quebra atomicidade e lineage."
+        "explicacion": "Não escala para datasets grandes."
       }
     ],
     "tags": [
@@ -670,6 +670,11 @@
     "pregunta": "Em uma cooperativa agrícola, uma UDF referencia arquivo de lookup pequeno (<50 MB) repetidamente. Como otimizar?",
     "opciones": [
       {
+        "texto_opcion": "Transmissão do DataFrame de pesquisa antes do join/UDF que o consome.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
         "texto_opcion": "Materializar lookup em UDF sem cache, leitura duplicada a cada invocação.",
         "es_correcta": false,
         "explicacion": "Leitura duplicada a cada invocação."
@@ -678,11 +683,6 @@
         "texto_opcion": "Repetir leitura do lookup a cada partition, i/O redundante em todos os executors.",
         "es_correcta": false,
         "explicacion": "I/O redundante em todos os executors."
-      },
-      {
-        "texto_opcion": "Transmissão do DataFrame de pesquisa antes do join/UDF que o consome.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
         "texto_opcion": "Enviar lookup como closure sem broadcast, spark pode enviar cópia por task.",
@@ -699,14 +699,9 @@
     "pregunta": "Para gravar transações e chargebacks incrementalmente em Delta a partir de Python streaming, qual sink?",
     "opciones": [
       {
-        "texto_opcion": "append mode sem deduplicação, duplica registros em reprocessamento.",
+        "texto_opcion": "Gravar Parquet direto ignorando Delta, perde ACID e MERGE downstream.",
         "es_correcta": false,
-        "explicacion": "Duplica registros em reprocessamento."
-      },
-      {
-        "texto_opcion": "complete mode em tabela grande, reescreve tabela inteira a cada trigger.",
-        "es_correcta": false,
-        "explicacion": "Reescreve tabela inteira a cada trigger."
+        "explicacion": "Perde ACID e MERGE downstream."
       },
       {
         "texto_opcion": "foreachBatch com merge idempotente usando batchId ou chave.",
@@ -714,9 +709,14 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Gravar Parquet direto ignorando Delta, perde ACID e MERGE downstream.",
+        "texto_opcion": "complete mode em tabela grande, reescreve tabela inteira a cada trigger.",
         "es_correcta": false,
-        "explicacion": "Perde ACID e MERGE downstream."
+        "explicacion": "Reescreve tabela inteira a cada trigger."
+      },
+      {
+        "texto_opcion": "append mode sem deduplicação, duplica registros em reprocessamento.",
+        "es_correcta": false,
+        "explicacion": "Duplica registros em reprocessamento."
       }
     ],
     "tags": [
@@ -728,24 +728,24 @@
     "pregunta": "Em uma rede de varejo omnichannel, o código Python deve ser compatível com Unity Catalog. Como obter SparkSession?",
     "opciones": [
       {
+        "texto_opcion": "Instanciar SparkContext manual sem session, aPI legada sem integração completa como escolha padrão de produção neste cenário.",
+        "es_correcta": false,
+        "explicacion": "API legada sem integração completa."
+      },
+      {
+        "texto_opcion": "Criar Hive metastore local separado, ignora governança central do UC priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "es_correcta": false,
+        "explicacion": "Ignora governança central do UC."
+      },
+      {
         "texto_opcion": "SparkSession.builder.getOrCreate() no runtime Databricks com UC habilitado.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Criar Hive metastore local separado, ignora governança central do UC.",
-        "es_correcta": false,
-        "explicacion": "Ignora governança central do UC."
-      },
-      {
         "texto_opcion": "Usar spark._jsc apenas via JVM, bypassa APIs Python suportadas, bypassa APIs Python suportadas.",
         "es_correcta": false,
         "explicacion": "Bypassa APIs Python suportadas."
-      },
-      {
-        "texto_opcion": "Instanciar SparkContext manual sem session, aPI legada sem integração completa.",
-        "es_correcta": false,
-        "explicacion": "API legada sem integração completa."
       }
     ],
     "tags": [
@@ -757,9 +757,9 @@
     "pregunta": "O pipeline Python de telemetria de sensores em uma operadora de IoT industrial falha com PicklingError em UDF. Causa provável?",
     "opciones": [
       {
-        "texto_opcion": "Executar em cluster Photon, photon não altera requisitos de",
+        "texto_opcion": "Usar pandas UDF, pandas UDFs suportadas; não causam PicklingError por si.",
         "es_correcta": false,
-        "explicacion": "Photon não altera requisitos de serialização Python."
+        "explicacion": "pandas UDFs suportadas; não causam PicklingError por si."
       },
       {
         "texto_opcion": "Schema StructType muito grande, structType é serializável normalmente.",
@@ -767,14 +767,14 @@
         "explicacion": "StructType é serializável normalmente."
       },
       {
-        "texto_opcion": "Usar pandas UDF, pandas UDFs suportadas; não causam PicklingError por si.",
-        "es_correcta": false,
-        "explicacion": "pandas UDFs suportadas; não causam PicklingError por si."
-      },
-      {
         "texto_opcion": "Capturar objeto não serializável no closure da UDF.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Executar em cluster Photon, photon não altera requisitos de",
+        "es_correcta": false,
+        "explicacion": "Photon não altera requisitos de serialização Python."
       }
     ],
     "tags": [
@@ -786,14 +786,14 @@
     "pregunta": "Em um hospital universitário, funções utilitárias de prontuários e exames devem ser testadas sem cluster. O que mockar?",
     "opciones": [
       {
-        "texto_opcion": "Copiar código de produção nos testes, duplicação gera drift.",
-        "es_correcta": false,
-        "explicacion": "Duplicação gera drift."
-      },
-      {
         "texto_opcion": "Dependências externas mantendo lógica pura isolada.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Nunca mockar; só testes de integração, feedback lento e caro.",
+        "es_correcta": false,
+        "explicacion": "Feedback lento e caro."
       },
       {
         "texto_opcion": "Mockar todo o SparkSession sempre, testes de transformação.",
@@ -801,9 +801,9 @@
         "explicacion": "Testes de transformação real precisam de Spark."
       },
       {
-        "texto_opcion": "Nunca mockar; só testes de integração, feedback lento e caro.",
+        "texto_opcion": "Copiar código de produção nos testes, duplicação gera drift.",
         "es_correcta": false,
-        "explicacion": "Feedback lento e caro."
+        "explicacion": "Duplicação gera drift."
       }
     ],
     "tags": [
@@ -815,11 +815,6 @@
     "pregunta": "Em uma plataforma de streaming, o pipeline Python precisa enriquecer milhões de linhas de eventos de reprodução com scoring customizado. Qual UDF minimiza overhead?",
     "opciones": [
       {
-        "texto_opcion": "Executar scoring no driver com collect()",
-        "es_correcta": false,
-        "explicacion": "collect() traz dados ao driver e não escala."
-      },
-      {
         "texto_opcion": "pandas UDF (vectorized) com tipos Arrow compatíveis.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
@@ -830,7 +825,12 @@
         "explicacion": "Schema ausente gera inferência cara e instável."
       },
       {
-        "texto_opcion": "UDF Python linha a linha sem vectorização",
+        "texto_opcion": "Executar scoring no driver com collect().",
+        "es_correcta": false,
+        "explicacion": "collect() traz dados ao driver e não escala."
+      },
+      {
+        "texto_opcion": "UDF Python linha a linha sem vectorização.",
         "es_correcta": false,
         "explicacion": "Serializa linha a linha; custo alto em volume."
       }
@@ -844,14 +844,9 @@
     "pregunta": "O time de uma seguradora quer modularizar código Spark em wheel reutilizável. Onde colocar funções de transformação?",
     "opciones": [
       {
-        "texto_opcion": "Definir tudo como UDF SQL permanente, lógica complexa fica difícil de",
+        "texto_opcion": "Definir tudo como UDF SQL permanente, lógica complexa fica difícil de — lógica complexa fica difícil de testar unitariamente.",
         "es_correcta": false,
         "explicacion": "Lógica complexa fica difícil de testar unitariamente."
-      },
-      {
-        "texto_opcion": "Salvar apenas em dbutils.fs sem pacote, não forma módulo importável versionado.",
-        "es_correcta": false,
-        "explicacion": "Não forma módulo importável versionado."
       },
       {
         "texto_opcion": "Copiar funções manualmente em cada notebook, duplicação dificulta testes e versionamento.",
@@ -862,6 +857,11 @@
         "texto_opcion": "Pacote Python instalado no cluster/job via wheel ou PyPI, importado nos notebooks.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Salvar apenas em dbutils.fs sem pacote, não forma módulo importável versionado.",
+        "es_correcta": false,
+        "explicacion": "Não forma módulo importável versionado."
       }
     ],
     "tags": [
@@ -873,22 +873,22 @@
     "pregunta": "Durante ingestão de rotas e entregas em uma operadora logística, registros inválidos não podem derrubar o job. Qual padrão Python?",
     "opciones": [
       {
+        "texto_opcion": "Usar sys.exit() no executor, encerra executor e corrompe estabilidade do cluster selecionado para atender as restrições citadas.",
+        "es_correcta": false,
+        "explicacion": "Encerra executor e corrompe estabilidade do cluster."
+      },
+      {
         "texto_opcion": "try/except por registro ou lote em foreachBatch, registrando falhas em tabela de quarentena.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Ignorar silenciosamente sem log, perde rastreabilidade para auditoria.",
+        "texto_opcion": "Ignorar silenciosamente sem log, perde rastreabilidade para auditoria aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Perde rastreabilidade para auditoria."
       },
       {
-        "texto_opcion": "Usar sys.exit() no executor, encerra executor e corrompe estabilidade do cluster.",
-        "es_correcta": false,
-        "explicacion": "Encerra executor e corrompe estabilidade do cluster."
-      },
-      {
-        "texto_opcion": "Deixar exceção propagar e falhar o streaming query, um registro inválido interrompe todo o micro-batch.",
+        "texto_opcion": "Deixar exceção propagar e falhar o streaming query, um registro inválido interrompe todo o micro-batch usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
         "explicacion": "Um registro inválido interrompe todo o micro-batch."
       }
@@ -907,14 +907,14 @@
         "explicacion": "Sem regressão automatizada entre deploys."
       },
       {
-        "texto_opcion": "Validar só no cluster de produção, risco operacional e custo desnecessário.",
-        "es_correcta": false,
-        "explicacion": "Risco operacional e custo desnecessário."
-      },
-      {
         "texto_opcion": "pytest com SparkSession local ou remota via Databricks Connect.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Validar só no cluster de produção, risco operacional e custo desnecessário.",
+        "es_correcta": false,
+        "explicacion": "Risco operacional e custo desnecessário."
       },
       {
         "texto_opcion": "unittest sem isolar dados de entrada, testes frágeis e acoplados ao ambiente.",
@@ -960,11 +960,6 @@
     "pregunta": "O pipeline de pedidos e estoque em uma rede de varejo omnichannel usa logging para troubleshooting. Qual prática evita poluir stdout?",
     "opciones": [
       {
-        "texto_opcion": "Desabilitar todos os logs em produção, impossibilita diagnóstico de falhas.",
-        "es_correcta": false,
-        "explicacion": "Impossibilita diagnóstico de falhas."
-      },
-      {
         "texto_opcion": "Logar PII completo em DEBUG, viola compliance e aumenta risco, viola compliance e aumenta risco.",
         "es_correcta": false,
         "explicacion": "Viola compliance e aumenta risco."
@@ -975,7 +970,12 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "print() em UDF para cada linha, gera volume enorme e degrada performance.",
+        "texto_opcion": "Desabilitar todos os logs em produção, impossibilita diagnóstico de falhas como desenho principal para este requisito.",
+        "es_correcta": false,
+        "explicacion": "Impossibilita diagnóstico de falhas."
+      },
+      {
+        "texto_opcion": "print() em UDF para cada linha, gera volume enorme e degrada performance adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Gera volume enorme e degrada performance."
       }
@@ -989,24 +989,24 @@
     "pregunta": "Para deduplicar telemetria de sensores em uma operadora de IoT industrial, o código Python precisa estado entre micro-batches. Onde manter?",
     "opciones": [
       {
-        "texto_opcion": "Cache no driver com dict Python, não escala além da memória do driver.",
-        "es_correcta": false,
-        "explicacion": "Não escala além da memória do driver."
-      },
-      {
         "texto_opcion": "Delta Lake ou state store do Structured Streaming, não variáveis globais Python.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Arquivo local /tmp no executor, perde-se em restart e skew entre nós.",
+        "texto_opcion": "Variável global no módulo importado, executores não compartilham — executores não compartilham memória de forma confiável.",
+        "es_correcta": false,
+        "explicacion": "Executores não compartilham memória de forma confiável."
+      },
+      {
+        "texto_opcion": "Arquivo local /tmp no executor, perde-se em restart e skew entre nós usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
         "explicacion": "Perde-se em restart e skew entre nós."
       },
       {
-        "texto_opcion": "Variável global no módulo importado, executores não compartilham.",
+        "texto_opcion": "Cache no driver com dict Python, não escala além da memória do driver como desenho principal para este requisito.",
         "es_correcta": false,
-        "explicacion": "Executores não compartilham memória de forma confiável."
+        "explicacion": "Não escala além da memória do driver."
       }
     ],
     "tags": [
@@ -1018,14 +1018,9 @@
     "pregunta": "Em um hospital universitário, o job recebe parâmetro de data via widget/argumento. Como acessar em módulo Python?",
     "opciones": [
       {
-        "texto_opcion": "Usar input() interativo, jobs agendados não têm terminal interativo, jobs agendados não têm terminal interativo.",
-        "es_correcta": false,
-        "explicacion": "Jobs agendados não têm terminal interativo."
-      },
-      {
-        "texto_opcion": "Ler variável de ambiente sem documentar, ambientes divergentes quebram reprodutibilidade.",
-        "es_correcta": false,
-        "explicacion": "Ambientes divergentes quebram reprodutibilidade."
+        "texto_opcion": "Ler sys.argv ou dbutils.widgets.get() no entrypoint e passar.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
         "texto_opcion": "Hardcodar data no código fonte, exige redeploy para cada execução, exige redeploy para cada execução.",
@@ -1033,9 +1028,14 @@
         "explicacion": "Exige redeploy para cada execução."
       },
       {
-        "texto_opcion": "Ler sys.argv ou dbutils.widgets.get() no entrypoint e passar.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
+        "texto_opcion": "Ler variável de ambiente sem documentar, ambientes divergentes quebram reprodutibilidade como escolha padrão de produção neste cenário.",
+        "es_correcta": false,
+        "explicacion": "Ambientes divergentes quebram reprodutibilidade."
+      },
+      {
+        "texto_opcion": "Usar input() interativo, jobs agendados não têm terminal interativo, jobs agendados não têm terminal interativo.",
+        "es_correcta": false,
+        "explicacion": "Jobs agendados não têm terminal interativo."
       }
     ],
     "tags": [
@@ -1047,24 +1047,24 @@
     "pregunta": "O time de uma plataforma de streaming precisa aplicar transformação pandas-like em eventos de reprodução mantendo API Spark. Qual API?",
     "opciones": [
       {
-        "texto_opcion": "pandas API on Spark (pyspark.pandas).",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "Usar apenas RDD map, perde otimizações do Catalyst e tipagem.",
+        "texto_opcion": "Usar apenas RDD map, perde otimizações do Catalyst e tipagem aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
         "explicacion": "Perde otimizações do Catalyst e tipagem."
-      },
-      {
-        "texto_opcion": "Converter tudo para pandas no driver, não escala para datasets grandes.",
-        "es_correcta": false,
-        "explicacion": "Não escala para datasets grandes."
       },
       {
         "texto_opcion": "Exportar CSV e reimportar, quebra atomicidade e lineage, quebra atomicidade e lineage.",
         "es_correcta": false,
         "explicacion": "Quebra atomicidade e lineage."
+      },
+      {
+        "texto_opcion": "pandas API on Spark (pyspark.pandas).",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Converter tudo para pandas no driver, não escala para datasets grandes como desenho principal para este requisito.",
+        "es_correcta": false,
+        "explicacion": "Não escala para datasets grandes."
       }
     ],
     "tags": [
@@ -1076,16 +1076,6 @@
     "pregunta": "Em uma seguradora, uma UDF referencia arquivo de lookup pequeno (<50 MB) repetidamente. Como otimizar?",
     "opciones": [
       {
-        "texto_opcion": "Enviar lookup como closure sem broadcast, spark pode enviar cópia por task.",
-        "es_correcta": false,
-        "explicacion": "Spark pode enviar cópia por task."
-      },
-      {
-        "texto_opcion": "Repetir leitura do lookup a cada partition, i/O redundante em todos os executors.",
-        "es_correcta": false,
-        "explicacion": "I/O redundante em todos os executors."
-      },
-      {
         "texto_opcion": "Transmissão do DataFrame de pesquisa antes do join/UDF que o consome.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
@@ -1094,6 +1084,16 @@
         "texto_opcion": "Materializar lookup em UDF sem cache, leitura duplicada a cada invocação.",
         "es_correcta": false,
         "explicacion": "Leitura duplicada a cada invocação."
+      },
+      {
+        "texto_opcion": "Enviar lookup como closure sem broadcast, spark pode enviar cópia por task.",
+        "es_correcta": false,
+        "explicacion": "Spark pode enviar cópia por task."
+      },
+      {
+        "texto_opcion": "Repetir leitura do lookup a cada partition, i/O redundante em todos os executors.",
+        "es_correcta": false,
+        "explicacion": "I/O redundante em todos os executors."
       }
     ],
     "tags": [
@@ -1134,14 +1134,9 @@
     "pregunta": "Em uma cooperativa agrícola, o código Python deve ser compatível com Unity Catalog. Como obter SparkSession?",
     "opciones": [
       {
-        "texto_opcion": "Usar spark._jsc apenas via JVM, bypassa APIs Python suportadas, bypassa APIs Python suportadas.",
+        "texto_opcion": "Instanciar SparkContext manual sem session, aPI legada sem integração completa plausível à primeira vista, porém mais fraco que a melhor opção.",
         "es_correcta": false,
-        "explicacion": "Bypassa APIs Python suportadas."
-      },
-      {
-        "texto_opcion": "Criar Hive metastore local separado, ignora governança central do UC.",
-        "es_correcta": false,
-        "explicacion": "Ignora governança central do UC."
+        "explicacion": "API legada sem integração completa."
       },
       {
         "texto_opcion": "SparkSession.builder.getOrCreate() no runtime Databricks com UC habilitado.",
@@ -1149,9 +1144,14 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Instanciar SparkContext manual sem session, aPI legada sem integração completa.",
+        "texto_opcion": "Usar spark._jsc apenas via JVM, bypassa APIs Python suportadas, bypassa APIs Python suportadas.",
         "es_correcta": false,
-        "explicacion": "API legada sem integração completa."
+        "explicacion": "Bypassa APIs Python suportadas."
+      },
+      {
+        "texto_opcion": "Criar Hive metastore local separado, ignora governança central do UC configurado de ponta a ponta para o workload descrito.",
+        "es_correcta": false,
+        "explicacion": "Ignora governança central do UC."
       }
     ],
     "tags": [
@@ -1163,6 +1163,16 @@
     "pregunta": "O pipeline Python de transações e chargebacks em uma fintech de pagamentos falha com PicklingError em UDF. Causa provável?",
     "opciones": [
       {
+        "texto_opcion": "Executar em cluster Photon, photon não altera requisitos de",
+        "es_correcta": false,
+        "explicacion": "Photon não altera requisitos de serialização Python."
+      },
+      {
+        "texto_opcion": "Usar pandas UDF, pandas UDFs suportadas; não causam PicklingError por si.",
+        "es_correcta": false,
+        "explicacion": "pandas UDFs suportadas; não causam PicklingError por si."
+      },
+      {
         "texto_opcion": "Schema StructType muito grande, structType é serializável normalmente.",
         "es_correcta": false,
         "explicacion": "StructType é serializável normalmente."
@@ -1171,16 +1181,6 @@
         "texto_opcion": "Capturar objeto não serializável no closure da UDF.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "Usar pandas UDF, pandas UDFs suportadas; não causam PicklingError por si.",
-        "es_correcta": false,
-        "explicacion": "pandas UDFs suportadas; não causam PicklingError por si."
-      },
-      {
-        "texto_opcion": "Executar em cluster Photon, photon não altera requisitos de",
-        "es_correcta": false,
-        "explicacion": "Photon não altera requisitos de serialização Python."
       }
     ],
     "tags": [
@@ -1192,9 +1192,9 @@
     "pregunta": "Em uma rede de varejo omnichannel, funções utilitárias de pedidos e estoque devem ser testadas sem cluster. O que mockar?",
     "opciones": [
       {
-        "texto_opcion": "Copiar código de produção nos testes, duplicação gera drift.",
+        "texto_opcion": "Nunca mockar; só testes de integração, feedback lento e caro.",
         "es_correcta": false,
-        "explicacion": "Duplicação gera drift."
+        "explicacion": "Feedback lento e caro."
       },
       {
         "texto_opcion": "Mockar todo o SparkSession sempre, testes de transformação.",
@@ -1202,14 +1202,14 @@
         "explicacion": "Testes de transformação real precisam de Spark."
       },
       {
-        "texto_opcion": "Nunca mockar; só testes de integração, feedback lento e caro.",
-        "es_correcta": false,
-        "explicacion": "Feedback lento e caro."
-      },
-      {
         "texto_opcion": "Dependências externas mantendo lógica pura isolada.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
+      },
+      {
+        "texto_opcion": "Copiar código de produção nos testes, duplicação gera drift.",
+        "es_correcta": false,
+        "explicacion": "Duplicação gera drift."
       }
     ],
     "tags": [
@@ -1221,6 +1221,11 @@
     "pregunta": "Em uma operadora de IoT industrial, o pipeline Python precisa enriquecer milhões de linhas de telemetria de sensores com scoring customizado. Qual UDF minimiza overhead?",
     "opciones": [
       {
+        "texto_opcion": "UDF Python linha a linha sem vectorização.",
+        "es_correcta": false,
+        "explicacion": "Serializa linha a linha; custo alto em volume."
+      },
+      {
         "texto_opcion": "mapInPandas sem schema definido, schema ausente gera.",
         "es_correcta": false,
         "explicacion": "Schema ausente gera inferência cara e instável."
@@ -1231,12 +1236,7 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "UDF Python linha a linha sem vectorização",
-        "es_correcta": false,
-        "explicacion": "Serializa linha a linha; custo alto em volume."
-      },
-      {
-        "texto_opcion": "Executar scoring no driver com collect()",
+        "texto_opcion": "Executar scoring no driver com collect().",
         "es_correcta": false,
         "explicacion": "collect() traz dados ao driver e não escala."
       }
@@ -1255,19 +1255,19 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Salvar apenas em dbutils.fs sem pacote, não forma módulo importável versionado.",
+        "texto_opcion": "Copiar funções manualmente em cada notebook, duplicação dificulta testes e versionamento.",
         "es_correcta": false,
-        "explicacion": "Não forma módulo importável versionado."
+        "explicacion": "Duplicação dificulta testes e versionamento."
       },
       {
-        "texto_opcion": "Definir tudo como UDF SQL permanente, lógica complexa fica difícil de",
+        "texto_opcion": "Definir tudo como UDF SQL permanente, lógica complexa fica difícil de — lógica complexa fica difícil de testar unitariamente.",
         "es_correcta": false,
         "explicacion": "Lógica complexa fica difícil de testar unitariamente."
       },
       {
-        "texto_opcion": "Copiar funções manualmente em cada notebook, duplicação dificulta testes e versionamento.",
+        "texto_opcion": "Salvar apenas em dbutils.fs sem pacote, não forma módulo importável versionado.",
         "es_correcta": false,
-        "explicacion": "Duplicação dificulta testes e versionamento."
+        "explicacion": "Não forma módulo importável versionado."
       }
     ],
     "tags": [
@@ -1279,24 +1279,24 @@
     "pregunta": "Durante ingestão de eventos de reprodução em uma plataforma de streaming, registros inválidos não podem derrubar o job. Qual padrão Python?",
     "opciones": [
       {
-        "texto_opcion": "Usar sys.exit() no executor, encerra executor e corrompe estabilidade do cluster.",
+        "texto_opcion": "Usar sys.exit() no executor, encerra executor e corrompe estabilidade do cluster configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Encerra executor e corrompe estabilidade do cluster."
       },
       {
-        "texto_opcion": "Ignorar silenciosamente sem log, perde rastreabilidade para auditoria.",
+        "texto_opcion": "Ignorar silenciosamente sem log, perde rastreabilidade para auditoria comum em desenhos legados, porém inadequado neste caso.",
         "es_correcta": false,
         "explicacion": "Perde rastreabilidade para auditoria."
+      },
+      {
+        "texto_opcion": "Deixar exceção propagar e falhar o streaming query, um registro inválido interrompe todo o micro-batch aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "Um registro inválido interrompe todo o micro-batch."
       },
       {
         "texto_opcion": "try/except por registro ou lote em foreachBatch, registrando falhas em tabela de quarentena.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "Deixar exceção propagar e falhar o streaming query, um registro inválido interrompe todo o micro-batch.",
-        "es_correcta": false,
-        "explicacion": "Um registro inválido interrompe todo o micro-batch."
       }
     ],
     "tags": [
@@ -1313,14 +1313,14 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Apenas testes manuais no notebook produtivo, sem regressão automatizada entre deploys.",
-        "es_correcta": false,
-        "explicacion": "Sem regressão automatizada entre deploys."
-      },
-      {
         "texto_opcion": "Validar só no cluster de produção, risco operacional e custo desnecessário.",
         "es_correcta": false,
         "explicacion": "Risco operacional e custo desnecessário."
+      },
+      {
+        "texto_opcion": "Apenas testes manuais no notebook produtivo, sem regressão automatizada entre deploys.",
+        "es_correcta": false,
+        "explicacion": "Sem regressão automatizada entre deploys."
       },
       {
         "texto_opcion": "unittest sem isolar dados de entrada, testes frágeis e acoplados ao ambiente.",
@@ -1342,6 +1342,11 @@
         "explicacion": "Perde tipagem e validação em downstream."
       },
       {
+        "texto_opcion": "Usar MapType genérico sempre, mapType não documenta campos esperados.",
+        "es_correcta": false,
+        "explicacion": "MapType não documenta campos esperados."
+      },
+      {
         "texto_opcion": "Declarar returnType como StructType explícito na UDF.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
@@ -1350,11 +1355,6 @@
         "texto_opcion": "Confiar na inferência automática do Spark, inferência pode mudar entre batches.",
         "es_correcta": false,
         "explicacion": "Inferência pode mudar entre batches."
-      },
-      {
-        "texto_opcion": "Usar MapType genérico sempre, mapType não documenta campos esperados.",
-        "es_correcta": false,
-        "explicacion": "MapType não documenta campos esperados."
       }
     ],
     "tags": [
@@ -1371,19 +1371,19 @@
         "explicacion": "Viola compliance e aumenta risco."
       },
       {
-        "texto_opcion": "print() em UDF para cada linha, gera volume enorme e degrada performance.",
-        "es_correcta": false,
-        "explicacion": "Gera volume enorme e degrada performance."
+        "texto_opcion": "Usar módulo logging com níveis e evitar print() em executors.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Desabilitar todos os logs em produção, impossibilita diagnóstico de falhas.",
+        "texto_opcion": "Desabilitar todos os logs em produção, impossibilita diagnóstico de falhas usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
         "explicacion": "Impossibilita diagnóstico de falhas."
       },
       {
-        "texto_opcion": "Usar módulo logging com níveis e evitar print() em executors.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
+        "texto_opcion": "print() em UDF para cada linha, gera volume enorme e degrada performance plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "es_correcta": false,
+        "explicacion": "Gera volume enorme e degrada performance."
       }
     ],
     "tags": [
@@ -1395,7 +1395,17 @@
     "pregunta": "Para deduplicar transações e chargebacks em uma fintech de pagamentos, o código Python precisa estado entre micro-batches. Onde manter?",
     "opciones": [
       {
-        "texto_opcion": "Cache no driver com dict Python, não escala além da memória do driver.",
+        "texto_opcion": "Variável global no módulo importado, executores não compartilham — executores não compartilham memória de forma confiável.",
+        "es_correcta": false,
+        "explicacion": "Executores não compartilham memória de forma confiável."
+      },
+      {
+        "texto_opcion": "Arquivo local /tmp no executor, perde-se em restart e skew entre nós adotado como padrão da equipe usado como caminho principal nesta arquitetura.",
+        "es_correcta": false,
+        "explicacion": "Perde-se em restart e skew entre nós."
+      },
+      {
+        "texto_opcion": "Cache no driver com dict Python, não escala além da memória do driver usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
         "explicacion": "Não escala além da memória do driver."
       },
@@ -1403,16 +1413,6 @@
         "texto_opcion": "Delta Lake ou state store do Structured Streaming, não variáveis globais Python.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
-        "texto_opcion": "Variável global no módulo importado, executores não compartilham.",
-        "es_correcta": false,
-        "explicacion": "Executores não compartilham memória de forma confiável."
-      },
-      {
-        "texto_opcion": "Arquivo local /tmp no executor, perde-se em restart e skew entre nós.",
-        "es_correcta": false,
-        "explicacion": "Perde-se em restart e skew entre nós."
       }
     ],
     "tags": [
@@ -1424,14 +1424,14 @@
     "pregunta": "Em uma rede de varejo omnichannel, o job recebe parâmetro de data via widget/argumento. Como acessar em módulo Python?",
     "opciones": [
       {
-        "texto_opcion": "Ler variável de ambiente sem documentar, ambientes divergentes quebram reprodutibilidade.",
-        "es_correcta": false,
-        "explicacion": "Ambientes divergentes quebram reprodutibilidade."
+        "texto_opcion": "Ler sys.argv ou dbutils.widgets.get() no entrypoint e passar.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Usar input() interativo, jobs agendados não têm terminal interativo, jobs agendados não têm terminal interativo.",
+        "texto_opcion": "Ler variável de ambiente sem documentar, ambientes divergentes quebram reprodutibilidade adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
-        "explicacion": "Jobs agendados não têm terminal interativo."
+        "explicacion": "Ambientes divergentes quebram reprodutibilidade."
       },
       {
         "texto_opcion": "Hardcodar data no código fonte, exige redeploy para cada execução, exige redeploy para cada execução.",
@@ -1439,9 +1439,9 @@
         "explicacion": "Exige redeploy para cada execução."
       },
       {
-        "texto_opcion": "Ler sys.argv ou dbutils.widgets.get() no entrypoint e passar.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
+        "texto_opcion": "Usar input() interativo, jobs agendados não têm terminal interativo, jobs agendados não têm terminal interativo.",
+        "es_correcta": false,
+        "explicacion": "Jobs agendados não têm terminal interativo."
       }
     ],
     "tags": [
@@ -1453,14 +1453,9 @@
     "pregunta": "O time de uma operadora de IoT industrial precisa aplicar transformação pandas-like em telemetria de sensores mantendo API Spark. Qual API?",
     "opciones": [
       {
-        "texto_opcion": "Usar apenas RDD map, perde otimizações do Catalyst e tipagem.",
+        "texto_opcion": "Usar apenas RDD map, perde otimizações do Catalyst e tipagem selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "Perde otimizações do Catalyst e tipagem."
-      },
-      {
-        "texto_opcion": "Converter tudo para pandas no driver, não escala para datasets grandes.",
-        "es_correcta": false,
-        "explicacion": "Não escala para datasets grandes."
       },
       {
         "texto_opcion": "pandas API on Spark (pyspark.pandas).",
@@ -1471,6 +1466,11 @@
         "texto_opcion": "Exportar CSV e reimportar, quebra atomicidade e lineage, quebra atomicidade e lineage.",
         "es_correcta": false,
         "explicacion": "Quebra atomicidade e lineage."
+      },
+      {
+        "texto_opcion": "Converter tudo para pandas no driver, não escala para datasets grandes comum em desenhos legados, porém inadequado neste caso.",
+        "es_correcta": false,
+        "explicacion": "Não escala para datasets grandes."
       }
     ],
     "tags": [
@@ -1482,14 +1482,14 @@
     "pregunta": "Em um hospital universitário, uma UDF referencia arquivo de lookup pequeno (<50 MB) repetidamente. Como otimizar?",
     "opciones": [
       {
-        "texto_opcion": "Transmissão do DataFrame de pesquisa antes do join/UDF que o consome.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
-      },
-      {
         "texto_opcion": "Enviar lookup como closure sem broadcast, spark pode enviar cópia por task.",
         "es_correcta": false,
         "explicacion": "Spark pode enviar cópia por task."
+      },
+      {
+        "texto_opcion": "Transmissão do DataFrame de pesquisa antes do join/UDF que o consome.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
         "texto_opcion": "Materializar lookup em UDF sem cache, leitura duplicada a cada invocação.",
@@ -1511,16 +1511,6 @@
     "pregunta": "Para gravar eventos de reprodução incrementalmente em Delta a partir de Python streaming, qual sink?",
     "opciones": [
       {
-        "texto_opcion": "append mode sem deduplicação, duplica registros em reprocessamento.",
-        "es_correcta": false,
-        "explicacion": "Duplica registros em reprocessamento."
-      },
-      {
-        "texto_opcion": "complete mode em tabela grande, reescreve tabela inteira a cada trigger.",
-        "es_correcta": false,
-        "explicacion": "Reescreve tabela inteira a cada trigger."
-      },
-      {
         "texto_opcion": "foreachBatch com merge idempotente usando batchId ou chave.",
         "es_correcta": true,
         "explicacion": "Abordagem alinhada ao requisito do cenário."
@@ -1529,6 +1519,16 @@
         "texto_opcion": "Gravar Parquet direto ignorando Delta, perde ACID e MERGE downstream.",
         "es_correcta": false,
         "explicacion": "Perde ACID e MERGE downstream."
+      },
+      {
+        "texto_opcion": "append mode sem deduplicação, duplica registros em reprocessamento.",
+        "es_correcta": false,
+        "explicacion": "Duplica registros em reprocessamento."
+      },
+      {
+        "texto_opcion": "complete mode em tabela grande, reescreve tabela inteira a cada trigger.",
+        "es_correcta": false,
+        "explicacion": "Reescreve tabela inteira a cada trigger."
       }
     ],
     "tags": [
@@ -1545,7 +1545,12 @@
         "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
-        "texto_opcion": "Criar Hive metastore local separado, ignora governança central do UC.",
+        "texto_opcion": "Instanciar SparkContext manual sem session, aPI legada sem integração completa comum em desenhos legados, porém inadequado neste caso.",
+        "es_correcta": false,
+        "explicacion": "API legada sem integração completa."
+      },
+      {
+        "texto_opcion": "Criar Hive metastore local separado, ignora governança central do UC configurado de ponta a ponta para o workload descrito.",
         "es_correcta": false,
         "explicacion": "Ignora governança central do UC."
       },
@@ -1553,11 +1558,6 @@
         "texto_opcion": "Usar spark._jsc apenas via JVM, bypassa APIs Python suportadas, bypassa APIs Python suportadas.",
         "es_correcta": false,
         "explicacion": "Bypassa APIs Python suportadas."
-      },
-      {
-        "texto_opcion": "Instanciar SparkContext manual sem session, aPI legada sem integração completa.",
-        "es_correcta": false,
-        "explicacion": "API legada sem integração completa."
       }
     ],
     "tags": [
@@ -1598,9 +1598,9 @@
     "pregunta": "Em uma cooperativa agrícola, funções utilitárias de colheita e umidade do solo devem ser testadas sem cluster. O que mockar?",
     "opciones": [
       {
-        "texto_opcion": "Dependências externas mantendo lógica pura isolada.",
-        "es_correcta": true,
-        "explicacion": "Abordagem alinhada ao requisito do cenário."
+        "texto_opcion": "Mockar todo o SparkSession sempre, testes de transformação.",
+        "es_correcta": false,
+        "explicacion": "Testes de transformação real precisam de Spark."
       },
       {
         "texto_opcion": "Copiar código de produção nos testes, duplicação gera drift.",
@@ -1608,9 +1608,9 @@
         "explicacion": "Duplicação gera drift."
       },
       {
-        "texto_opcion": "Mockar todo o SparkSession sempre, testes de transformação.",
-        "es_correcta": false,
-        "explicacion": "Testes de transformação real precisam de Spark."
+        "texto_opcion": "Dependências externas mantendo lógica pura isolada.",
+        "es_correcta": true,
+        "explicacion": "Abordagem alinhada ao requisito do cenário."
       },
       {
         "texto_opcion": "Nunca mockar; só testes de integração, feedback lento e caro.",

@@ -3,24 +3,24 @@
     "pregunta": "Um engenheiro de dados executa `DROP TABLE catalog.schema.orders`. A tabela foi criada sem uma cláusula `LOCATION`. O que acontece com os arquivos de dados subjacentes?",
     "opciones": [
       {
-        "texto_opcion": "Tanto os metadados ** quanto ** os arquivos de dados são excluídos — esta é uma tabela gerenciada, portanto, Unity Catalog controla o ciclo de vida dos dados e remove arquivos do armazenamento em nuvem.",
-        "es_correcta": true,
-        "explicacion": "Tabelas gerenciadas (criadas sem uma cláusula `LOCATION`) dão ao Unity Catalog controle total sobre o ciclo de vida dos dados. `DROP TABLE` remove os metadados do catálogo e os arquivos Parquet/Delta subjacentes do armazenamento gerenciado."
+        "texto_opcion": "A operação falha — as tabelas gerenciadas não podem ser eliminadas sem a palavra-chave `FORCE` — não há exigência de palavra-chave `FORCE` para eliminar tabelas gerenciadas. `DROP TABLE` funciona diretamente em tabelas gerenciadas e exclui metadados e dados.",
+        "es_correcta": false,
+        "explicacion": "Não há exigência de palavra-chave `FORCE` para eliminar tabelas gerenciadas. `DROP TABLE` funciona diretamente em tabelas gerenciadas e exclui metadados e dados."
       },
       {
-        "texto_opcion": "Apenas os metadados são removidos – os arquivos de dados permanecem no armazenamento em nuvem no caminho original.",
+        "texto_opcion": "Apenas os metadados são removidos – os arquivos de dados permanecem no armazenamento em nuvem no caminho original — esse é o comportamento das tabelas externas. As tabelas gerenciadas excluem metadados e arquivos de dados quando descartadas adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Esse é o comportamento das tabelas externas. As tabelas gerenciadas excluem metadados e arquivos de dados quando descartadas."
       },
       {
-        "texto_opcion": "A tabela é movida para um catálogo da Lixeira e preservada por 30 dias antes da exclusão permanente",
+        "texto_opcion": "A tabela é movida para um catálogo da Lixeira e preservada por 30 dias antes da exclusão permanente — o Databricks não possui um catálogo de Lixeira para tabelas gerenciadas — o Databricks não possui um catálogo de Lixeira para tabelas gerenciadas.",
         "es_correcta": false,
         "explicacion": "O Databricks não possui um catálogo de Lixeira para tabelas gerenciadas. A tabela entra em uma janela de recuperação (UNDROP disponível por 7 dias) antes que os arquivos sejam excluídos permanentemente após a janela de retenção de 8 dias."
       },
       {
-        "texto_opcion": "A operação falha — as tabelas gerenciadas não podem ser eliminadas sem a palavra-chave `FORCE`",
-        "es_correcta": false,
-        "explicacion": "Não há exigência de palavra-chave `FORCE` para eliminar tabelas gerenciadas. `DROP TABLE` funciona diretamente em tabelas gerenciadas e exclui metadados e dados."
+        "texto_opcion": "Tanto os metadados ** quanto ** os arquivos de dados são excluídos — esta é uma tabela gerenciada, portanto, Unity Catalog controla o ciclo de vida dos dados e remove arquivos do armazenamento em nuvem.",
+        "es_correcta": true,
+        "explicacion": "Tabelas gerenciadas (criadas sem uma cláusula `LOCATION`) dão ao Unity Catalog controle total sobre o ciclo de vida dos dados. `DROP TABLE` remove os metadados do catálogo e os arquivos Parquet/Delta subjacentes do armazenamento gerenciado."
       }
     ],
     "tags": [
@@ -33,22 +33,22 @@
     "pregunta": "Um engenheiro de dados cria uma tabela externa:\n\n```sql\nCREATE TABLE catalog.schema.raw_events\nUSING DELTA\nLOCATION 'abfss://raw@myaccount.dfs.core.windows.net/events/';\n```\n\nMais tarde, eles executam `DROP TABLE catalog.schema.raw_events`. Qual é o estado dos dados?",
     "opciones": [
       {
+        "texto_opcion": "Os arquivos de dados são movidos para o local da lixeira do UC, mas preservados por 7 dias, o UC não move arquivos de tabelas externas no DROP — o UC não move arquivos de tabelas externas no DROP. Os arquivos permanecem exatamente onde estavam – no caminho `LOCATION` original.",
+        "es_correcta": false,
+        "explicacion": "O UC não move arquivos de tabelas externas no DROP. Os arquivos permanecem exatamente onde estavam – no caminho `LOCATION` original."
+      },
+      {
+        "texto_opcion": "Tanto os metadados quanto os arquivos de dados são excluídos — a tabela é externa, portanto o UC exclui todos os arquivos associados — esse é o comportamento das tabelas gerenciadas. As tabelas externas preservam os arquivos de dados no DROP — apenas os metadados são removidos.",
+        "es_correcta": false,
+        "explicacion": "Esse é o comportamento das tabelas gerenciadas. As tabelas externas preservam os arquivos de dados no DROP — apenas os metadados são removidos."
+      },
+      {
         "texto_opcion": "Os metadados do catálogo são removidos, mas os arquivos de dados em `abfss://raw@myaccount.dfs.core.windows.net/events/` **permanecem intactos** — tabelas externas não excluem dados no DROP.",
         "es_correcta": true,
         "explicacion": "As tabelas externas registram apenas um ponteiro para os dados gerenciados pelo usuário. `DROP TABLE` remove o registro Unity Catalog, mas deixa os arquivos reais no armazenamento em nuvem intactos."
       },
       {
-        "texto_opcion": "Tanto os metadados quanto os arquivos de dados são excluídos — a tabela é externa, portanto o UC exclui todos os arquivos associados.",
-        "es_correcta": false,
-        "explicacion": "Esse é o comportamento das tabelas gerenciadas. As tabelas externas preservam os arquivos de dados no DROP — apenas os metadados são removidos."
-      },
-      {
-        "texto_opcion": "Os arquivos de dados são movidos para o local da lixeira do UC, mas preservados por 7 dias, o UC não move arquivos de tabelas externas no DROP.",
-        "es_correcta": false,
-        "explicacion": "O UC não move arquivos de tabelas externas no DROP. Os arquivos permanecem exatamente onde estavam – no caminho `LOCATION` original."
-      },
-      {
-        "texto_opcion": "O comando DROP falhará, a menos que o registro do local externo seja primeiro cancelado, a eliminação de uma tabela externa não requer o cancelamento do registro do.",
+        "texto_opcion": "O comando DROP falhará, a menos que o registro do local externo seja primeiro cancelado, a eliminação de uma tabela externa não requer o cancelamento do registro do — a eliminação de uma tabela externa não requer o cancelamento do registro do local externo. O DROP remove apenas os metadados da tabela do catálogo.",
         "es_correcta": false,
         "explicacion": "A eliminação de uma tabela externa não requer o cancelamento do registro do local externo. O DROP remove apenas os metadados da tabela do catálogo."
       }
@@ -68,19 +68,19 @@
         "explicacion": "A presença ou ausência da cláusula `LOCATION` é o que determina o tipo de tabela na criação. Sem `LOCATION`, Unity Catalog atribui armazenamento automaticamente (gerenciado). Com `LOCATION`, a tabela aponta para o armazenamento especificado pelo usuário (externo)."
       },
       {
-        "texto_opcion": "As tabelas gerenciadas usam `USING MANAGED` e as tabelas externas usam `USING EXTERNAL` na instrução CREATE",
+        "texto_opcion": "As tabelas gerenciadas requerem permissões de administrador para serem criadas; tabelas externas podem ser criadas por qualquer usuário — ambos os tipos de tabela requerem o privilégio `CREATE TABLE` no esquema. As tabelas gerenciadas não requerem permissões de administrador usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
-        "explicacion": "Estas não são palavras-chave válidas do Spark SQL. A distinção é feita pela cláusula `LOCATION`, não por uma palavra-chave `USING MANAGED/EXTERNAL`."
+        "explicacion": "Ambos os tipos de tabela requerem o privilégio `CREATE TABLE` no esquema. As tabelas gerenciadas não requerem permissões de administrador."
       },
       {
-        "texto_opcion": "As tabelas gerenciadas devem estar no formato Delta; tabelas externas só podem ser Parquet ou CSV",
+        "texto_opcion": "As tabelas gerenciadas devem estar no formato Delta; tabelas externas só podem ser Parquet ou CSV — tanto as tabelas gerenciadas quanto as externas podem usar o formato Delta. Tabelas externas também podem fazer referência a formatos não-Delta (Parquet, CSV), mas Delta é o formato recomendado para ambos.",
         "es_correcta": false,
         "explicacion": "Tanto as tabelas gerenciadas quanto as externas podem usar o formato Delta. Tabelas externas também podem fazer referência a formatos não-Delta (Parquet, CSV), mas Delta é o formato recomendado para ambos."
       },
       {
-        "texto_opcion": "As tabelas gerenciadas requerem permissões de administrador para serem criadas; tabelas externas podem ser criadas por qualquer usuário.",
+        "texto_opcion": "As tabelas gerenciadas usam `USING MANAGED` e as tabelas externas usam `USING EXTERNAL` na instrução CREATE — estas não são palavras-chave válidas do Spark SQL. A distinção é feita pela cláusula `LOCATION`, não por uma palavra-chave `USING MANAGED/EXTERNAL` usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
-        "explicacion": "Ambos os tipos de tabela requerem o privilégio `CREATE TABLE` no esquema. As tabelas gerenciadas não requerem permissões de administrador."
+        "explicacion": "Estas não são palavras-chave válidas do Spark SQL. A distinção é feita pela cláusula `LOCATION`, não por uma palavra-chave `USING MANAGED/EXTERNAL`."
       }
     ],
     "tags": [
@@ -97,19 +97,19 @@
         "explicacion": "O recurso UNDROP do UC permite recuperar tabelas gerenciadas eliminadas em 7 dias. Após 7 dias (ou após a execução do VACUUM), os arquivos são excluídos permanentemente e não podem ser recuperados."
       },
       {
-        "texto_opcion": "`RESTORE TABLE catalog.finance.revenue TO VERSION AS OF 0;` — restaurar para a versão 0 recupera a tabela",
+        "texto_opcion": "`UNDROP TABLE` não é suportado para tabelas gerenciadas — apenas tabelas externas podem ser recuperadas — uNDROP é especificamente para tabelas gerenciadas — não para tabelas externas. Tabelas externas não podem ser UNDROP porque seus arquivos de dados nunca foram excluídos.",
         "es_correcta": false,
-        "explicacion": "`RESTORE` requer que a tabela exista no catálogo. Como a tabela foi eliminada, `RESTORE` não pode ser usado — `UNDROP` deve ser usado primeiro para restaurar a tabela no catálogo."
+        "explicacion": "UNDROP é especificamente para tabelas gerenciadas — não para tabelas externas. Tabelas externas não podem ser UNDROP porque seus arquivos de dados nunca foram excluídos."
       },
       {
-        "texto_opcion": "Entre em contato com o suporte do Databricks – tabelas gerenciadas eliminadas só podem ser recuperadas por engenheiros do Databricks.",
+        "texto_opcion": "Entre em contato com o suporte do Databricks – tabelas gerenciadas eliminadas só podem ser recuperadas por engenheiros do Databricks — uNDROP é um comando SQL de autoatendimento disponível para usuários com privilégios apropriados — uNDROP é um comando SQL de autoatendimento disponível para usuários com privilégios apropriados. Nenhum ticket de suporte é necessário dentro do período de 7 dias.",
         "es_correcta": false,
         "explicacion": "UNDROP é um comando SQL de autoatendimento disponível para usuários com privilégios apropriados. Nenhum ticket de suporte é necessário dentro do período de 7 dias."
       },
       {
-        "texto_opcion": "`UNDROP TABLE` não é suportado para tabelas gerenciadas — apenas tabelas externas podem ser recuperadas",
+        "texto_opcion": "`RESTORE TABLE catalog.finance.revenue TO VERSION AS OF 0;` — restaurar para a versão 0 recupera a tabela — `RESTORE` requer que a tabela exista no catálogo. Como a tabela foi eliminada, `RESTORE` não pode ser usado — `UNDROP` deve ser usado primeiro para restaurar a tabela no catálogo.",
         "es_correcta": false,
-        "explicacion": "UNDROP é especificamente para tabelas gerenciadas — não para tabelas externas. Tabelas externas não podem ser UNDROP porque seus arquivos de dados nunca foram excluídos."
+        "explicacion": "`RESTORE` requer que a tabela exista no catálogo. Como a tabela foi eliminada, `RESTORE` não pode ser usado — `UNDROP` deve ser usado primeiro para restaurar a tabela no catálogo."
       }
     ],
     "tags": [
@@ -122,24 +122,24 @@
     "pregunta": "Um engenheiro de dados precisa criar uma tabela externa em Unity Catalog apontando para `abfss://landing@corp.dfs.core.windows.net/raw/`. Qual é o pré-requisito para que isso tenha sucesso?",
     "opciones": [
       {
+        "texto_opcion": "Os arquivos de dados devem estar no formato Delta Lake antes de criar a tabela externa — tabelas externas podem fazer referência a formatos não Delta (Parquet, CSV, ORC). O requisito de formato é baseado na cláusula `USING`, não no registro do Local Externo.",
+        "es_correcta": false,
+        "explicacion": "Tabelas externas podem fazer referência a formatos não Delta (Parquet, CSV, ORC). O requisito de formato é baseado na cláusula `USING`, não no registro do Local Externo."
+      },
+      {
         "texto_opcion": "Um **Local Externo** deve ser registrado em Unity Catalog para o caminho `abfss://landing@corp.dfs.core.windows.net/raw/` (ou um caminho pai), com uma credencial de armazenamento válida.",
         "es_correcta": true,
         "explicacion": "Unity Catalog exige que todos os caminhos de tabelas externas sejam cobertos por um local externo registrado com uma credencial de armazenamento associada. Sem isso, o CREATE TABLE falha com um erro de acesso."
       },
       {
-        "texto_opcion": "Os arquivos de dados devem estar no formato Delta Lake antes de criar a tabela externa",
-        "es_correcta": false,
-        "explicacion": "Tabelas externas podem fazer referência a formatos não Delta (Parquet, CSV, ORC). O requisito de formato é baseado na cláusula `USING`, não no registro do Local Externo."
-      },
-      {
-        "texto_opcion": "O usuário deve ter o privilégio `MODIFY` na conta de armazenamento no Azure Active Directory",
-        "es_correcta": false,
-        "explicacion": "Unity Catalog abstrai permissões de nuvem por meio de credenciais de armazenamento e locais externos. Os usuários do Databricks não precisam de permissões diretas do Azure AD — eles usam credenciais registradas em UC."
-      },
-      {
-        "texto_opcion": "O esquema deve ser criado com um `MANAGED LOCATION` correspondente antes que tabelas externas possam referenciá-lo",
+        "texto_opcion": "O esquema deve ser criado com um `MANAGED LOCATION` correspondente antes que tabelas externas possam referenciá-lo — `MANAGED LOCATION` em um esquema é para armazenamento de tabela gerenciado — `MANAGED LOCATION` em um esquema é para armazenamento de tabela gerenciado. As tabelas externas usam Locais Externos, que são objetos UC separados registrados pelos administradores.",
         "es_correcta": false,
         "explicacion": "`MANAGED LOCATION` em um esquema é para armazenamento de tabela gerenciado. As tabelas externas usam Locais Externos, que são objetos UC separados registrados pelos administradores."
+      },
+      {
+        "texto_opcion": "O usuário deve ter o privilégio `MODIFY` na conta de armazenamento no Azure Active Directory — unity Catalog abstrai permissões de nuvem por meio de credenciais de armazenamento e locais externos — unity Catalog abstrai permissões de nuvem por meio de credenciais de armazenamento e locais externos.",
+        "es_correcta": false,
+        "explicacion": "Unity Catalog abstrai permissões de nuvem por meio de credenciais de armazenamento e locais externos. Os usuários do Databricks não precisam de permissões diretas do Azure AD — eles usam credenciais registradas em UC."
       }
     ],
     "tags": [
@@ -152,24 +152,24 @@
     "pregunta": "Um engenheiro de dados altera o local de armazenamento gerenciado de um catálogo existente:\n\n```sql\nALTER CATALOG prod_catalog\nSET MANAGED LOCATION 'abfss://new@account.dfs.core.windows.net/';\n```\n\nComo isso afeta as tabelas gerenciadas existentes em `prod_catalog`?",
     "opciones": [
       {
-        "texto_opcion": "Todas as tabelas do catálogo ficarão inacessíveis até que a migração seja concluída, `ALTER CATALOG SET MANAGED LOCATION` é uma alteração apenas de.",
-        "es_correcta": false,
-        "explicacion": "`ALTER CATALOG SET MANAGED LOCATION` é uma alteração apenas de metadados que afeta o armazenamento futuro. Isso não afeta o acesso às tabelas existentes."
-      },
-      {
         "texto_opcion": "As tabelas existentes **não são afetadas** — elas permanecem no local de armazenamento atual. Somente **novas** tabelas e volumes gerenciados criados após essa alteração usam o novo local.",
         "es_correcta": true,
         "explicacion": "`ALTER CATALOG SET MANAGED LOCATION` é prospectivo - define onde novos objetos serão armazenados. As tabelas existentes permanecem no caminho de armazenamento atual e não são migradas automaticamente."
       },
       {
-        "texto_opcion": "O comando falha — o local gerenciado em nível de catálogo só pode ser definido durante a criação do catálogo",
+        "texto_opcion": "Todas as tabelas gerenciadas existentes são movidas imediatamente para o novo local — o comando aciona uma migração em segundo plano — o comando define apenas o caminho de armazenamento padrão para objetos futuros. Ele não migra tabelas existentes.",
+        "es_correcta": false,
+        "explicacion": "O comando define apenas o caminho de armazenamento padrão para objetos futuros. Ele não migra tabelas existentes. A migração manual (via `SET MANAGED` ou `DEEP CLONE`) é necessária para mover tabelas existentes."
+      },
+      {
+        "texto_opcion": "O comando falha — o local gerenciado em nível de catálogo só pode ser definido durante a criação do catálogo — `ALTER CATALOG SET MANAGED LOCATION` é um comando válido e pode ser executado a qualquer momento. Não se restringe à criação de catálogos.",
         "es_correcta": false,
         "explicacion": "`ALTER CATALOG SET MANAGED LOCATION` é um comando válido e pode ser executado a qualquer momento. Não se restringe à criação de catálogos."
       },
       {
-        "texto_opcion": "Todas as tabelas gerenciadas existentes são movidas imediatamente para o novo local — o comando aciona uma migração em segundo plano.",
+        "texto_opcion": "Todas as tabelas do catálogo ficarão inacessíveis até que a migração seja concluída, `ALTER CATALOG SET MANAGED LOCATION` é uma alteração apenas de — `ALTER CATALOG SET MANAGED LOCATION` é uma alteração apenas de metadados que afeta o armazenamento futuro. Isso não afeta o acesso às tabelas existentes.",
         "es_correcta": false,
-        "explicacion": "O comando define apenas o caminho de armazenamento padrão para objetos futuros. Ele não migra tabelas existentes. A migração manual (via `SET MANAGED` ou `DEEP CLONE`) é necessária para mover tabelas existentes."
+        "explicacion": "`ALTER CATALOG SET MANAGED LOCATION` é uma alteração apenas de metadados que afeta o armazenamento futuro. Isso não afeta o acesso às tabelas existentes."
       }
     ],
     "tags": [
@@ -182,9 +182,9 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```sql\nALTER TABLE catalog.schema.raw_events SET MANAGED;\n```\n\nDepois que o comando for bem-sucedido, o que eles devem fazer para evitar custos duplos de armazenamento?",
     "opciones": [
       {
-        "texto_opcion": "Execute `VACUUM catalog.schema.raw_events RETAIN 0 HOURS` — VACUUM remove os arquivos externos originais",
+        "texto_opcion": "Nada — os arquivos originais são excluídos automaticamente após 7 dias pela política de retenção de Unity Catalog — as políticas de retenção de UC aplicam-se a arquivos de dados de tabelas gerenciadas, não a locais de armazenamento externos.",
         "es_correcta": false,
-        "explicacion": "VACUUM remove versões antigas de arquivos Delta do armazenamento da tabela gerenciada — ele não exclui arquivos do local externo original."
+        "explicacion": "As políticas de retenção de UC aplicam-se a arquivos de dados de tabelas gerenciadas, não a locais de armazenamento externos. Os arquivos no caminho externo original são de responsabilidade do usuário para limpeza."
       },
       {
         "texto_opcion": "**Exclua manualmente** os arquivos originais do local de armazenamento externo — `SET MANAGED` copia dados para o armazenamento gerenciado UC, mas não remove arquivos do caminho externo original.",
@@ -192,14 +192,14 @@
         "explicacion": "`ALTER TABLE SET MANAGED` move os dados para o armazenamento gerenciado por UC, mas deixa os arquivos originais no local externo. Ambas as cópias existem até que o usuário exclua manualmente os arquivos do caminho original."
       },
       {
-        "texto_opcion": "Nada — os arquivos originais são excluídos automaticamente após 7 dias pela política de retenção de Unity Catalog.",
-        "es_correcta": false,
-        "explicacion": "As políticas de retenção de UC aplicam-se a arquivos de dados de tabelas gerenciadas, não a locais de armazenamento externos. Os arquivos no caminho externo original são de responsabilidade do usuário para limpeza."
-      },
-      {
-        "texto_opcion": "Execute `DROP EXTERNAL LOCATION raw_data_location` – eliminar o local externo exclui todos os arquivos",
+        "texto_opcion": "Execute `DROP EXTERNAL LOCATION raw_data_location` – eliminar o local externo exclui todos os arquivos — a eliminação de um local externo remove o registro UC, mas não exclui os arquivos reais no armazenamento em nuvem selecionado para atender as restrições citadas.",
         "es_correcta": false,
         "explicacion": "A eliminação de um local externo remove o registro UC, mas não exclui os arquivos reais no armazenamento em nuvem."
+      },
+      {
+        "texto_opcion": "Execute `VACUUM catalog.schema.raw_events RETAIN 0 HOURS` — VACUUM remove os arquivos externos originais — vACUUM remove versões antigas de arquivos Delta do armazenamento da tabela gerenciada — ele não exclui arquivos do local externo original.",
+        "es_correcta": false,
+        "explicacion": "VACUUM remove versões antigas de arquivos Delta do armazenamento da tabela gerenciada — ele não exclui arquivos do local externo original."
       }
     ],
     "tags": [
@@ -212,24 +212,24 @@
     "pregunta": "Um engenheiro de dados deseja converter uma tabela Delta externa em uma tabela gerenciada, preservando o histórico Delta completo e minimizando o tempo de inatividade. Qual comando é recomendado?",
     "opciones": [
       {
-        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events UNSET LOCATION;` — remover o LOCATION o converte em gerenciado, não há comando `UNSET LOCATION`.",
-        "es_correcta": false,
-        "explicacion": "Não há comando `UNSET LOCATION`. O comando de conversão local correto é `ALTER TABLE SET MANAGED`."
-      },
-      {
-        "texto_opcion": "`CREATE TABLE catalog.schema.raw_events_owned DEEP CLONE catalog.schema.raw_events;` — DEEP CLONE preserva o histórico",
-        "es_correcta": false,
-        "explicacion": "O DEEP CLONE preserva o histórico da Delta, mas cria uma cópia separada com um nome diferente, exigindo etapas adicionais de renomeação. `SET MANAGED` faz a conversão no local com menos complexidade."
-      },
-      {
-        "texto_opcion": "`CREATE TABLE catalog.schema.raw_events_owned AS SELECT * FROM catalog.schema.raw_events;` — CTAS cria uma nova tabela gerenciada.",
+        "texto_opcion": "`CREATE TABLE catalog.schema.raw_events_owned AS SELECT * FROM catalog.schema.raw_events;` — CTAS cria uma nova tabela gerenciada — o CTAS não preserva o histórico, as permissões ou os comentários da Delta — o CTAS não preserva o histórico, as permissões ou os comentários da Delta.",
         "es_correcta": false,
         "explicacion": "O CTAS não preserva o histórico, as permissões ou os comentários da Delta. Ele cria uma nova tabela que requer renomeação, o que aumenta a complexidade. `SET MANAGED` é o preferido."
+      },
+      {
+        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events UNSET LOCATION;` — remover o LOCATION o converte em gerenciado, não há comando `UNSET LOCATION` — não há comando `UNSET LOCATION`. O comando de conversão local correto é `ALTER TABLE SET MANAGED`.",
+        "es_correcta": false,
+        "explicacion": "Não há comando `UNSET LOCATION`. O comando de conversão local correto é `ALTER TABLE SET MANAGED`."
       },
       {
         "texto_opcion": "`ALTER TABLE catalog.schema.raw_events SET MANAGED;` — esta é a conversão local recomendada que preserva o histórico Delta, as permissões e minimiza o tempo de inatividade de gravação.",
         "es_correcta": true,
         "explicacion": "`ALTER TABLE SET MANAGED` é o método de conversão preferido a partir de 2026. Ele preserva o histórico completo do Delta, permissões existentes, tags e comentários. Requer apenas uma breve janela de inatividade para gravações."
+      },
+      {
+        "texto_opcion": "`CREATE TABLE catalog.schema.raw_events_owned DEEP CLONE catalog.schema.raw_events;` — DEEP CLONE preserva o histórico — o DEEP CLONE preserva o histórico da Delta, mas cria uma cópia separada com um nome diferente, exigindo etapas adicionais.",
+        "es_correcta": false,
+        "explicacion": "O DEEP CLONE preserva o histórico da Delta, mas cria uma cópia separada com um nome diferente, exigindo etapas adicionais de renomeação. `SET MANAGED` faz a conversão no local com menos complexidade."
       }
     ],
     "tags": [
@@ -242,24 +242,24 @@
     "pregunta": "Um engenheiro de dados precisa verificar se uma tabela específica é gerenciada ou externa. Qual comando SQL mostra essas informações?",
     "opciones": [
       {
-        "texto_opcion": "`SHOW TABLE EXTENDED IN catalog.schema LIKE 'orders';` — mostra o tipo de tabela",
+        "texto_opcion": "`DESCRIBE TABLE EXTENDED catalog.schema.orders;` — a saída inclui uma linha `Type` mostrando `MANAGED` ou `EXTERNAL`.",
+        "es_correcta": true,
+        "explicacion": "`DESCRIBE TABLE EXTENDED` fornece metadados detalhados, incluindo o tipo de tabela (`MANAGED` ou `EXTERNAL`), o local de armazenamento e outras propriedades."
+      },
+      {
+        "texto_opcion": "`SHOW TABLE EXTENDED IN catalog.schema LIKE 'orders';` — mostra o tipo de tabela — `SHOW TABLE EXTENDED` mostra informações básicas da tabela, mas.",
         "es_correcta": false,
         "explicacion": "`SHOW TABLE EXTENDED` mostra informações básicas da tabela, mas `DESCRIBE TABLE EXTENDED` é o comando que exibe os metadados completos, incluindo o tipo de tabela."
       },
       {
-        "texto_opcion": "`SHOW CREATE TABLE catalog.schema.orders;` — a presença de LOCATION na saída indica uma tabela externa.",
-        "es_correcta": false,
-        "explicacion": "Embora `SHOW CREATE TABLE` mostre a cláusula `LOCATION` para tabelas externas (e nenhum `LOCATION` para tabelas gerenciadas), `DESCRIBE TABLE EXTENDED` mostra explicitamente `Type = MANAGED` ou `Type = EXTERNAL` e é a maneira mais clara de verificar."
-      },
-      {
-        "texto_opcion": "`SELECT tipo de tabela FROM information_schema.tables WHERE nome_tabela = 'pedidos';`",
+        "texto_opcion": "`SELECT tipo de tabela FROM information_schema.tables WHERE nome_tabela = 'pedidos';` — embora `information_schema.tables` tenha uma coluna `table_type`, normalmente mostra `BASE TABLE`.",
         "es_correcta": false,
         "explicacion": "Embora `information_schema.tables` tenha uma coluna `table_type`, normalmente mostra `BASE TABLE` — não `MANAGED` vs `EXTERNAL`. `DESCRIBE TABLE EXTENDED` é a fonte definitiva."
       },
       {
-        "texto_opcion": "`DESCRIBE TABLE EXTENDED catalog.schema.orders;` — a saída inclui uma linha `Type` mostrando `MANAGED` ou `EXTERNAL`.",
-        "es_correcta": true,
-        "explicacion": "`DESCRIBE TABLE EXTENDED` fornece metadados detalhados, incluindo o tipo de tabela (`MANAGED` ou `EXTERNAL`), o local de armazenamento e outras propriedades."
+        "texto_opcion": "`SHOW CREATE TABLE catalog.schema.orders;` — a presença de LOCATION na saída indica uma tabela externa — embora `SHOW CREATE TABLE` mostre a cláusula `LOCATION` para tabelas externas (e nenhum.",
+        "es_correcta": false,
+        "explicacion": "Embora `SHOW CREATE TABLE` mostre a cláusula `LOCATION` para tabelas externas (e nenhum `LOCATION` para tabelas gerenciadas), `DESCRIBE TABLE EXTENDED` mostra explicitamente `Type = MANAGED` ou `Type = EXTERNAL` e é a maneira mais clara de verificar."
       }
     ],
     "tags": [
@@ -276,19 +276,19 @@
         "explicacion": "`ALTER TABLE SET LOCATION` altera de onde a tabela externa lê os dados. Ele apenas atualiza o ponteiro de metadados – não move os arquivos de dados reais."
       },
       {
-        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events SET MANAGED LOCATION 'abfss://new@account.dfs.core.windows.net/events/';`",
-        "es_correcta": false,
-        "explicacion": "`SET MANAGED LOCATION` é usado em catálogos e esquemas para definir onde novos objetos gerenciados são armazenados - não em tabelas. Use `SET LOCATION` para alterações de ponteiro de tabela externa."
-      },
-      {
-        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events MOVE TO 'abfss://new@account.dfs.core.windows.net/events/';` — move metadados e arquivos.",
+        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events MOVE TO 'abfss://new@account.dfs.core.windows.net/events/';` — move metadados e arquivos — `MOVE TO` não é um comando SQL do Databricks válido para tabelas — `MOVE TO` não é um comando SQL do Databricks válido para tabelas.",
         "es_correcta": false,
         "explicacion": "`MOVE TO` não é um comando SQL do Databricks válido para tabelas. Use `ALTER TABLE SET LOCATION` para alterar o ponteiro ou `DEEP CLONE` para copiar arquivos para um novo local."
       },
       {
-        "texto_opcion": "`SET LOCATION` não é suportado para tabelas externas — use `DROP TABLE` e `CREATE TABLE` no novo caminho",
+        "texto_opcion": "`SET LOCATION` não é suportado para tabelas externas — use `DROP TABLE` e `CREATE TABLE` no novo caminho — `ALTER TABLE SET LOCATION` é totalmente compatível com tabelas externas — `ALTER TABLE SET LOCATION` é totalmente compatível com tabelas externas.",
         "es_correcta": false,
         "explicacion": "`ALTER TABLE SET LOCATION` é totalmente compatível com tabelas externas. É a maneira padrão de alterar o ponteiro de armazenamento de uma tabela externa."
+      },
+      {
+        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events SET MANAGED LOCATION 'abfss://new@account.dfs.core.windows.net/events/';` — `SET MANAGED LOCATION` é usado em catálogos e esquemas para definir onde novos objetos gerenciados.",
+        "es_correcta": false,
+        "explicacion": "`SET MANAGED LOCATION` é usado em catálogos e esquemas para definir onde novos objetos gerenciados são armazenados - não em tabelas. Use `SET LOCATION` para alterações de ponteiro de tabela externa."
       }
     ],
     "tags": [
@@ -301,24 +301,24 @@
     "pregunta": "Depois de executar `ALTER TABLE catalog.schema.raw_events SET LOCATION 'abfss://new@account.dfs.core.windows.net/events/'`, o que acontece com os dados no local ANTIGO?",
     "opciones": [
       {
-        "texto_opcion": "Os dados de localização antigos tornam-se imediatamente inacessíveis para todos os usuários",
-        "es_correcta": false,
-        "explicacion": "Os dados no local antigo ainda podem ser acessados por meio de acesso direto ao armazenamento em nuvem. A tabela Databricks, no entanto, agora lê a partir do novo local."
-      },
-      {
-        "texto_opcion": "Os dados são movidos do local antigo para o novo automaticamente, `SET LOCATION` não move arquivos, `SET LOCATION` não move arquivos.",
-        "es_correcta": false,
-        "explicacion": "`SET LOCATION` não move arquivos. Somente o ponteiro de metadados é atualizado. Os arquivos devem ser movidos separadamente (por exemplo, via `dbutils.fs.cp` ou ferramentas de armazenamento em nuvem)."
-      },
-      {
         "texto_opcion": "Os dados no local antigo **permanecem intocados** — `SET LOCATION` apenas altera o ponteiro de metadados. Nenhum arquivo é movido ou excluído.",
         "es_correcta": true,
         "explicacion": "`ALTER TABLE SET LOCATION` é uma operação somente de metadados. Ele atualiza o ponteiro do catálogo para o caminho de armazenamento, mas não tem efeito nos arquivos físicos no local antigo ou no novo."
       },
       {
-        "texto_opcion": "O local antigo é excluído – o Databricks limpa o caminho externo anterior, databricks não gerencia armazenamento externo.",
+        "texto_opcion": "Os dados são movidos do local antigo para o novo automaticamente, `SET LOCATION` não move arquivos, `SET LOCATION` não move arquivos — `SET LOCATION` não move arquivos — `SET LOCATION` não move arquivos. Somente o ponteiro de metadados é atualizado.",
+        "es_correcta": false,
+        "explicacion": "`SET LOCATION` não move arquivos. Somente o ponteiro de metadados é atualizado. Os arquivos devem ser movidos separadamente (por exemplo, via `dbutils.fs.cp` ou ferramentas de armazenamento em nuvem)."
+      },
+      {
+        "texto_opcion": "O local antigo é excluído – o Databricks limpa o caminho externo anterior, databricks não gerencia armazenamento externo — databricks não gerencia armazenamento externo — databricks não gerencia armazenamento externo.",
         "es_correcta": false,
         "explicacion": "Databricks não gerencia armazenamento externo. Os arquivos no local antigo permanecem até serem excluídos manualmente pelo usuário."
+      },
+      {
+        "texto_opcion": "Os dados de localização antigos tornam-se imediatamente inacessíveis para todos os usuários — os dados no local antigo ainda podem ser acessados por meio de acesso direto ao armazenamento.",
+        "es_correcta": false,
+        "explicacion": "Os dados no local antigo ainda podem ser acessados por meio de acesso direto ao armazenamento em nuvem. A tabela Databricks, no entanto, agora lê a partir do novo local."
       }
     ],
     "tags": [
@@ -331,9 +331,9 @@
     "pregunta": "Um engenheiro de dados precisa usar `CTAS` para criar uma tabela gerenciada a partir de uma tabela externa. De que limitação importante eles deveriam estar cientes?",
     "opciones": [
       {
-        "texto_opcion": "O CTAS **não** preserva o histórico da tabela Delta, as permissões existentes ou os comentários da tabela de origem.",
-        "es_correcta": true,
-        "explicacion": "O CTAS cria uma tabela totalmente nova – ele copia os dados (a partir do instantâneo atual), mas não o histórico Delta (viagem no tempo), permissões GRANT/REVOKE existentes ou metadados como comentários e tags."
+        "texto_opcion": "CTAS não é suportado em Unity Catalog — use `DEEP CLONE` em vez disso, cTAS é totalmente compatível com Unity Catalog.",
+        "es_correcta": false,
+        "explicacion": "CTAS é totalmente compatível com Unity Catalog. Sua limitação é a perda de histórico/permissões em comparação com `SET MANAGED`, não incompatibilidade com UC."
       },
       {
         "texto_opcion": "O CTAS falhará se a tabela de origem for uma tabela externa — ele só funciona com cópias gerenciadas para gerenciadas.",
@@ -341,14 +341,14 @@
         "explicacion": "O CTAS funciona com qualquer consulta SELECT, incluindo consultas em tabelas externas. A limitação é que ele não preserva histórico/permissões, e não que seja incompatível com tabelas externas."
       },
       {
-        "texto_opcion": "O CTAS copia automaticamente as configurações `CLUSTER BY` e `PARTITIONED BY` da tabela de origem",
+        "texto_opcion": "O CTAS copia automaticamente as configurações `CLUSTER BY` e `PARTITIONED BY` da tabela de origem.",
         "es_correcta": false,
         "explicacion": "O CTAS cria uma tabela simples sem clustering ou particionamento, a menos que seja explicitamente especificado na instrução CTAS. O layout de armazenamento deve ser declarado novamente."
       },
       {
-        "texto_opcion": "CTAS não é suportado em Unity Catalog — use `DEEP CLONE` em vez disso, cTAS é totalmente compatível com Unity Catalog.",
-        "es_correcta": false,
-        "explicacion": "CTAS é totalmente compatível com Unity Catalog. Sua limitação é a perda de histórico/permissões em comparação com `SET MANAGED`, não incompatibilidade com UC."
+        "texto_opcion": "O CTAS **não** preserva o histórico da tabela Delta, as permissões existentes ou os comentários da tabela de origem.",
+        "es_correcta": true,
+        "explicacion": "O CTAS cria uma tabela totalmente nova – ele copia os dados (a partir do instantâneo atual), mas não o histórico Delta (viagem no tempo), permissões GRANT/REVOKE existentes ou metadados como comentários e tags."
       }
     ],
     "tags": [
@@ -366,19 +366,19 @@
         "explicacion": "Quando ferramentas externas modificam os arquivos de uma tabela externa sem passar pelo SQL do Databricks, os metadados Unity Catalog podem ficar obsoletos. `MSCK REPAIR TABLE SYNC METADATA` atualiza os metadados para refletir o estado atual do caminho de armazenamento."
       },
       {
-        "texto_opcion": "`ANALYZE TABLE catalog.schema.external_table COMPUTE STATISTICS;` — verifica novos arquivos e atualiza estatísticas",
+        "texto_opcion": "`REFRESH TABLE catalog.schema.external_table;` — REFRESH atualiza o cache da tabela — `REFRESH TABLE` limpa o cache do Spark SQL para essa tabela (forçando uma releitura dos metadados).",
+        "es_correcta": false,
+        "explicacion": "`REFRESH TABLE` limpa o cache do Spark SQL para essa tabela (forçando uma releitura dos metadados). Embora possa ajudar em alguns casos, `MSCK REPAIR TABLE SYNC METADATA` é o comando específico para sincronizar metadados UC com alterações de arquivos externos."
+      },
+      {
+        "texto_opcion": "`ANALYZE TABLE catalog.schema.external_table COMPUTE STATISTICS;` — verifica novos arquivos e atualiza estatísticas — `ANALYZE TABLE` atualiza as estatísticas em nível de coluna para a consulta optimizer.",
         "es_correcta": false,
         "explicacion": "`ANALYZE TABLE` atualiza as estatísticas em nível de coluna para a consulta optimizer. Ele não repara inconsistências de metadados causadas por adições de arquivos externos."
       },
       {
-        "texto_opcion": "`ALTER TABLE catalog.schema.external_table SET LOCATION 'same/path/';` — redefinir o local aciona uma nova verificação do arquivo.",
+        "texto_opcion": "`ALTER TABLE catalog.schema.external_table SET LOCATION 'same/path/';` — redefinir o local aciona uma nova verificação do arquivo — a redefinição do mesmo LOCATION não aciona uma nova verificação do arquivo.",
         "es_correcta": false,
         "explicacion": "A redefinição do mesmo LOCATION não aciona uma nova verificação do arquivo. `MSCK REPAIR TABLE SYNC METADATA` é o comando correto para este cenário."
-      },
-      {
-        "texto_opcion": "`REFRESH TABLE catalog.schema.external_table;` — REFRESH atualiza o cache da tabela",
-        "es_correcta": false,
-        "explicacion": "`REFRESH TABLE` limpa o cache do Spark SQL para essa tabela (forçando uma releitura dos metadados). Embora possa ajudar em alguns casos, `MSCK REPAIR TABLE SYNC METADATA` é o comando específico para sincronizar metadados UC com alterações de arquivos externos."
       }
     ],
     "tags": [
@@ -391,14 +391,14 @@
     "pregunta": "Qual dos seguintes cenários é a **melhor justificativa** para usar uma tabela externa em vez de uma tabela gerenciada?",
     "opciones": [
       {
+        "texto_opcion": "A equipe deseja que Predictive Optimization OPTIMIZE e VACUUM automaticamente a mesa — predictive Optimization se aplica apenas a tabelas gerenciadas Unity Catalog.",
+        "es_correcta": false,
+        "explicacion": "Predictive Optimization se aplica apenas a tabelas gerenciadas Unity Catalog. Se desejar manutenção automatizada, use uma tabela gerenciada."
+      },
+      {
         "texto_opcion": "Os dados também são acessados pelo Apache Hive no EMR e devem permanecer em um caminho S3 específico que ambos os sistemas possam ler diretamente.",
         "es_correcta": true,
         "explicacion": "As tabelas externas são ideais quando os dados devem ser coproprietários ou co-acessados por sistemas que não sejam Databricks. O `LOCATION` fixo garante que os Databricks e as ferramentas externas sejam lidas no mesmo caminho."
-      },
-      {
-        "texto_opcion": "A equipe deseja que Predictive Optimization OPTIMIZE e VACUUM automaticamente a mesa",
-        "es_correcta": false,
-        "explicacion": "Predictive Optimization se aplica apenas a tabelas gerenciadas Unity Catalog. Se desejar manutenção automatizada, use uma tabela gerenciada."
       },
       {
         "texto_opcion": "A equipe deseja que o DROP TABLE limpe automaticamente os arquivos de dados, a limpeza automática de arquivos de dados no DROP é um.",
@@ -406,7 +406,7 @@
         "explicacion": "A limpeza automática de arquivos de dados no DROP é um comportamento de tabela gerenciada, não um comportamento de tabela externa. Use uma tabela gerenciada se quiser que o DROP limpe os arquivos."
       },
       {
-        "texto_opcion": "A tabela precisa usar o formato Delta para transações ACID, tanto as tabelas gerenciadas quanto as externas podem usar o.",
+        "texto_opcion": "A tabela precisa usar o formato Delta para transações ACID, tanto as tabelas gerenciadas quanto as externas podem usar o — tanto as tabelas gerenciadas quanto as externas podem usar o formato Delta.",
         "es_correcta": false,
         "explicacion": "Tanto as tabelas gerenciadas quanto as externas podem usar o formato Delta. A escolha do formato não é motivo para preferir tabelas externas em vez de tabelas gerenciadas."
       }
@@ -426,17 +426,17 @@
         "explicacion": "CTAS sem uma cláusula `LOCATION` cria uma tabela gerenciada. O UC atribui o caminho de armazenamento com base na hierarquia de locais gerenciados por catálogo/esquema. O caminho é totalmente gerenciado por UC."
       },
       {
-        "texto_opcion": "Em `dbfs:/user/hive/warehouse/catalog.analytics/monthly_sales/` — UC usa o armazém Hive como armazenamento padrão",
+        "texto_opcion": "Em `dbfs:/user/hive/warehouse/catalog.analytics/monthly_sales/` — UC usa o armazém Hive como armazenamento padrão — as tabelas gerenciadas Unity Catalog usam o armazenamento em nuvem do metastore UC (Azure Data Lake Storage, S3 ou GCS), e não o caminho do armazém do Hive `dbfs:/user/hive/warehouse`.",
         "es_correcta": false,
         "explicacion": "As tabelas gerenciadas Unity Catalog usam o armazenamento em nuvem do metastore UC (Azure Data Lake Storage, S3 ou GCS), e não o caminho do armazém do Hive `dbfs:/user/hive/warehouse`."
       },
       {
-        "texto_opcion": "No mesmo local que `catalog.raw.orders` — CTAS herda o caminho de armazenamento da tabela de origem, o CTAS cria uma tabela nova e independente.",
+        "texto_opcion": "No mesmo local que `catalog.raw.orders` — CTAS herda o caminho de armazenamento da tabela de origem, o CTAS cria uma tabela nova e independente — o CTAS cria uma tabela nova e independente. Ele não compartilha nem herda o caminho de armazenamento da tabela de origem como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "O CTAS cria uma tabela nova e independente. Ele não compartilha nem herda o caminho de armazenamento da tabela de origem."
       },
       {
-        "texto_opcion": "Em `/tmp/` no nó do driver — a tabela é criada na memória e deve ser salva explicitamente, sQL `CREATE TABLE AS SELECT` cria uma tabela Delta persistente no.",
+        "texto_opcion": "Em `/tmp/` no nó do driver — a tabela é criada na memória e deve ser salva explicitamente, sQL `CREATE TABLE AS SELECT` cria uma tabela Delta persistente no — sQL `CREATE TABLE AS SELECT` cria uma tabela Delta persistente no armazenamento em nuvem, não na memória temporária do driver adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "SQL `CREATE TABLE AS SELECT` cria uma tabela Delta persistente no armazenamento em nuvem, não na memória temporária do driver."
       }
@@ -451,22 +451,22 @@
     "pregunta": "Um engenheiro de dados executa `UNDROP TABLE catalog.schema.orders`, mas recebe um erro. Qual das alternativas a seguir explica por que o UNDROP pode falhar?",
     "opciones": [
       {
-        "texto_opcion": "A tabela era uma tabela externa — UNDROP só funciona para tabelas gerenciadas, mas o usuário esqueceu de que tipo era.",
-        "es_correcta": false,
-        "explicacion": "Embora as tabelas externas não possam ser UNDROP, o erro nesta questão pergunta especificamente por que o UNDROP pode falhar para uma tabela que FOI gerenciada. A janela de 7 dias e VACUUM são os principais motivos de falha."
-      },
-      {
-        "texto_opcion": "UNDROP requer a função `SYSADMIN` — usuários regulares não podem recuperar tabelas eliminadas",
-        "es_correcta": false,
-        "explicacion": "UNDROP requer propriedade da tabela ou privilégio `CREATE TABLE` no esquema - não uma função especial `SYSADMIN`."
-      },
-      {
         "texto_opcion": "A tabela foi eliminada há mais de **7 dias** e VACUUM já excluiu os arquivos de dados subjacentes.",
         "es_correcta": true,
         "explicacion": "UNDROP tem uma janela de recuperação de 7 dias. Se mais de 7 dias se passaram ou se VACUUM foi executado após o DROP, os arquivos de dados subjacentes serão excluídos permanentemente e o UNDROP falhará."
       },
       {
-        "texto_opcion": "UNDROP não é compatível com tabelas Delta — somente tabelas Parquet podem ser recuperadas",
+        "texto_opcion": "A tabela era uma tabela externa — UNDROP só funciona para tabelas gerenciadas, mas o usuário esqueceu de que tipo era.",
+        "es_correcta": false,
+        "explicacion": "Embora as tabelas externas não possam ser UNDROP, o erro nesta questão pergunta especificamente por que o UNDROP pode falhar para uma tabela que FOI gerenciada. A janela de 7 dias e VACUUM são os principais motivos de falha."
+      },
+      {
+        "texto_opcion": "UNDROP requer a função `SYSADMIN` — usuários regulares não podem recuperar tabelas eliminadas.",
+        "es_correcta": false,
+        "explicacion": "UNDROP requer propriedade da tabela ou privilégio `CREATE TABLE` no esquema - não uma função especial `SYSADMIN`."
+      },
+      {
+        "texto_opcion": "UNDROP não é compatível com tabelas Delta — somente tabelas Parquet podem ser recuperadas.",
         "es_correcta": false,
         "explicacion": "UNDROP foi projetado especificamente para tabelas gerenciadas Delta em Unity Catalog. Não há restrição de formato."
       }
@@ -481,24 +481,24 @@
     "pregunta": "Um engenheiro de dados usa `DEEP CLONE` para criar uma cópia de uma tabela Delta. Qual a diferença entre `DEEP CLONE` e `ALTER TABLE SET MANAGED` para converter uma tabela externa em gerenciada?",
     "opciones": [
       {
-        "texto_opcion": "Ambos os comandos produzem resultados idênticos, sem diferenças de comportamento ou resultado",
-        "es_correcta": false,
-        "explicacion": "Existem diferenças significativas: `DEEP CLONE` cria uma nova tabela separada; `SET MANAGED` converte a tabela existente no local preservando sua identidade e permissões."
-      },
-      {
-        "texto_opcion": "`DEEP CLONE` exclui a tabela externa de origem após a clonagem; `SET MANAGED` mantém ambas as cópias",
+        "texto_opcion": "`DEEP CLONE` exclui a tabela externa de origem após a clonagem; `SET MANAGED` mantém ambas as cópias — `DEEP CLONE` não modifica ou exclui a tabela de origem. Ambos os métodos resultam na existência de dados em dois locais até que o usuário limpe manualmente o original.",
         "es_correcta": false,
         "explicacion": "`DEEP CLONE` não modifica ou exclui a tabela de origem. Ambos os métodos resultam na existência de dados em dois locais até que o usuário limpe manualmente o original."
-      },
-      {
-        "texto_opcion": "`DEEP CLONE` é mais rápido que `SET MANAGED` porque usa operações somente de metadados",
-        "es_correcta": false,
-        "explicacion": "O DEEP CLONE envolve a cópia de todos os arquivos de dados, o que consome muito tempo para tabelas grandes. `SET MANAGED` geralmente é mais rápido para conversão no local."
       },
       {
         "texto_opcion": "`DEEP CLONE` cria uma **cópia com um novo nome de tabela** (histórico preservado, mas requer renomeação); `SET MANAGED` converte **no local** preservando nome, permissões e histórico sem etapas extras.",
         "es_correcta": true,
         "explicacion": "`DEEP CLONE` é melhor para cópias de catálogos cruzados ou criação de sandbox - produz uma tabela separada. `SET MANAGED` é a conversão in-loco que preserva a identidade original da tabela, evitando a complexidade de renomeação."
+      },
+      {
+        "texto_opcion": "Ambos os comandos produzem resultados idênticos, sem diferenças de comportamento ou resultado — existem diferenças significativas: `DEEP CLONE` cria uma nova tabela separada; `SET MANAGED` converte a tabela existente no local preservando sua identidade e permissões.",
+        "es_correcta": false,
+        "explicacion": "Existem diferenças significativas: `DEEP CLONE` cria uma nova tabela separada; `SET MANAGED` converte a tabela existente no local preservando sua identidade e permissões."
+      },
+      {
+        "texto_opcion": "`DEEP CLONE` é mais rápido que `SET MANAGED` porque usa operações somente de metadados — o DEEP CLONE envolve a cópia de todos os arquivos de dados, o que consome muito tempo para tabelas grandes. `SET MANAGED` geralmente é mais rápido para conversão no local.",
+        "es_correcta": false,
+        "explicacion": "O DEEP CLONE envolve a cópia de todos os arquivos de dados, o que consome muito tempo para tabelas grandes. `SET MANAGED` geralmente é mais rápido para conversão no local."
       }
     ],
     "tags": [
@@ -511,22 +511,22 @@
     "pregunta": "Uma equipe de engenharia de dados cria todas as tabelas de produção como **tabelas gerenciadas** em Unity Catalog. Um engenheiro júnior pergunta: \"O que evita a perda acidental de dados do DROP TABLE?\" Qual recurso aborda essa preocupação?",
     "opciones": [
       {
+        "texto_opcion": "Tabelas gerenciadas não podem ser eliminadas — `DROP TABLE` só funciona em tabelas externas — `DROP TABLE` funciona em tabelas gerenciadas e externas. A proteção vem da capacidade de recuperação do UNDROP, e não da prevenção do DROP configurado de ponta a ponta para o workload descrito.",
+        "es_correcta": false,
+        "explicacion": "`DROP TABLE` funciona em tabelas gerenciadas e externas. A proteção vem da capacidade de recuperação do UNDROP, e não da prevenção do DROP."
+      },
+      {
         "texto_opcion": "**UNDROP TABLE** — tabelas gerenciadas eliminadas podem ser recuperadas em 7 dias, desde que VACUUM não tenha sido executado e excluído permanentemente os arquivos.",
         "es_correcta": true,
         "explicacion": "UNDROP fornece uma rede de segurança para DROP acidental em tabelas gerenciadas. A janela de retenção de 7 dias permite a recuperação. Esta é uma vantagem importante de governança das tabelas gerenciadas."
       },
       {
-        "texto_opcion": "Unity Catalog requer um `STAGE DROP` de duas etapas seguido de `CONFIRM DROP` para tabelas gerenciadas",
+        "texto_opcion": "Unity Catalog requer um `STAGE DROP` de duas etapas seguido de `CONFIRM DROP` para tabelas gerenciadas — não há mecanismo de confirmação DROP em duas etapas em Unity Catalog. Um único `DROP TABLE` remove a tabela. UNDROP é o mecanismo de recuperação.",
         "es_correcta": false,
         "explicacion": "Não há mecanismo de confirmação DROP em duas etapas em Unity Catalog. Um único `DROP TABLE` remove a tabela. UNDROP é o mecanismo de recuperação."
       },
       {
-        "texto_opcion": "Tabelas gerenciadas não podem ser eliminadas — `DROP TABLE` só funciona em tabelas externas",
-        "es_correcta": false,
-        "explicacion": "`DROP TABLE` funciona em tabelas gerenciadas e externas. A proteção vem da capacidade de recuperação do UNDROP, e não da prevenção do DROP."
-      },
-      {
-        "texto_opcion": "As tabelas gerenciadas fazem backup automaticamente dos dados em um local secundário antes de qualquer operação DROP.",
+        "texto_opcion": "As tabelas gerenciadas fazem backup automaticamente dos dados em um local secundário antes de qualquer operação DROP — não há backup automático no DROP. A proteção vem do comando UNDROP e da janela de retenção de arquivos de 7 dias adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "Não há backup automático no DROP. A proteção vem do comando UNDROP e da janela de retenção de arquivos de 7 dias."
       }
@@ -541,24 +541,24 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```sql\nALTER SCHEMA catalog.prod_schema\nSET MANAGED LOCATION 'abfss://new@account.dfs.core.windows.net/prod/';\n```\n\nQual das afirmações a seguir é verdadeira após este comando?",
     "opciones": [
       {
-        "texto_opcion": "Todas as tabelas gerenciadas existentes em `prod_schema` são migradas imediatamente para o novo local",
+        "texto_opcion": "Novas tabelas gerenciadas criadas em `prod_schema` armazenarão dados em `abfss://new@account.dfs.core.windows.net/prod/`; tabelas existentes **não são movidas**.",
+        "es_correcta": true,
+        "explicacion": "`ALTER SCHEMA SET MANAGED LOCATION` define o armazenamento padrão para futuros objetos gerenciados. Não é retroativo — as tabelas existentes permanecem em seus caminhos de armazenamento atuais."
+      },
+      {
+        "texto_opcion": "Todas as tabelas gerenciadas existentes em `prod_schema` são migradas imediatamente para o novo local — a alteração do local gerenciado pelo esquema é apenas prospectiva — a alteração do local gerenciado pelo esquema é apenas prospectiva.",
         "es_correcta": false,
         "explicacion": "A alteração do local gerenciado pelo esquema é apenas prospectiva. As tabelas existentes requerem migração explícita (por exemplo, `SET MANAGED` ou `DEEP CLONE`)."
       },
       {
-        "texto_opcion": "O comando falhará, a menos que o novo local esteja vazio — um caminho de armazenamento existente não pode ser usado como local gerenciado.",
-        "es_correcta": false,
-        "explicacion": "O caminho do local gerenciado não precisa estar vazio. Unity Catalog cria subdiretórios no caminho do local gerenciado para cada tabela."
-      },
-      {
-        "texto_opcion": "Todas as tabelas externas em `prod_schema` agora apontam para o novo local, `SET MANAGED LOCATION` afeta apenas os padrões de armazenamento de.",
+        "texto_opcion": "Todas as tabelas externas em `prod_schema` agora apontam para o novo local, `SET MANAGED LOCATION` afeta apenas os padrões de armazenamento de — `SET MANAGED LOCATION` afeta apenas os padrões de armazenamento de tabelas **gerenciadas**.",
         "es_correcta": false,
         "explicacion": "`SET MANAGED LOCATION` afeta apenas os padrões de armazenamento de tabelas **gerenciadas** — e não tabelas externas, que sempre usam seu caminho `LOCATION` explícito."
       },
       {
-        "texto_opcion": "Novas tabelas gerenciadas criadas em `prod_schema` armazenarão dados em `abfss://new@account.dfs.core.windows.net/prod/`; tabelas existentes **não são movidas**.",
-        "es_correcta": true,
-        "explicacion": "`ALTER SCHEMA SET MANAGED LOCATION` define o armazenamento padrão para futuros objetos gerenciados. Não é retroativo — as tabelas existentes permanecem em seus caminhos de armazenamento atuais."
+        "texto_opcion": "O comando falhará, a menos que o novo local esteja vazio — um caminho de armazenamento existente não pode ser usado como local gerenciado — o caminho do local gerenciado não precisa estar vazio.",
+        "es_correcta": false,
+        "explicacion": "O caminho do local gerenciado não precisa estar vazio. Unity Catalog cria subdiretórios no caminho do local gerenciado para cada tabela."
       }
     ],
     "tags": [
@@ -571,24 +571,24 @@
     "pregunta": "Um engenheiro de dados possui uma tabela gerenciada `catalog.staging.events`. Eles desejam criar uma cópia com o histórico Delta completo para uso em um catálogo diferente e desejam que a cópia seja uma tabela gerenciada. Qual abordagem é melhor?",
     "opciones": [
       {
-        "texto_opcion": "`ALTER TABLE catalog.staging.events SET MANAGED;` — isso move a tabela para o outro catálogo",
-        "es_correcta": false,
-        "explicacion": "`SET MANAGED` converte entre tipos externos e gerenciados dentro da mesma tabela. Não é possível mover uma tabela para um catálogo diferente."
-      },
-      {
         "texto_opcion": "`CREATE TABLE other_catalog.schema.events_copy DEEP CLONE catalog.staging.events;` — DEEP CLONE cria uma cópia completa com o histórico Delta como uma nova tabela gerenciada no catálogo de destino.",
         "es_correcta": true,
         "explicacion": "`DEEP CLONE` copia todos os arquivos de dados e histórico de log Delta. Sem uma cláusula `LOCATION`, o resultado é uma tabela gerenciada no catálogo de destino. Esta é a abordagem recomendada para cópias entre catálogos que exigem preservação do histórico."
       },
       {
-        "texto_opcion": "`ALTER TABLE catalog.staging.events RENAME TO other_catalog.schema.events_copy;` — RENAME move a tabela entre catálogos.",
+        "texto_opcion": "`ALTER TABLE catalog.staging.events RENAME TO other_catalog.schema.events_copy;` — RENAME move a tabela entre catálogos — `RENAME TO` não suporta renomeação entre catálogos em Unity Catalog. As tabelas só podem ser renomeadas dentro do mesmo catálogo adotado como padrão da equipe, embora não seja o melhor aqui.",
         "es_correcta": false,
         "explicacion": "`RENAME TO` não suporta renomeação entre catálogos em Unity Catalog. As tabelas só podem ser renomeadas dentro do mesmo catálogo."
       },
       {
-        "texto_opcion": "`CREATE TABLE other_catalog.schema.events_copy AS SELECT * FROM catalog.staging.events;` — CTAS copia os dados e o histórico.",
+        "texto_opcion": "`CREATE TABLE other_catalog.schema.events_copy AS SELECT * FROM catalog.staging.events;` — CTAS copia os dados e o histórico — o CTAS não copia o histórico Delta – ele apenas captura o instantâneo dos dados atuais. `DEEP CLONE` é necessário para preservar o histórico.",
         "es_correcta": false,
         "explicacion": "O CTAS não copia o histórico Delta – ele apenas captura o instantâneo dos dados atuais. `DEEP CLONE` é necessário para preservar o histórico."
+      },
+      {
+        "texto_opcion": "`ALTER TABLE catalog.staging.events SET MANAGED;` — isso move a tabela para o outro catálogo — `SET MANAGED` converte entre tipos externos e gerenciados dentro da mesma tabela. Não é possível mover uma tabela para um catálogo diferente como desenho principal para este requisito.",
+        "es_correcta": false,
+        "explicacion": "`SET MANAGED` converte entre tipos externos e gerenciados dentro da mesma tabela. Não é possível mover uma tabela para um catálogo diferente."
       }
     ],
     "tags": [

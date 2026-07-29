@@ -13,14 +13,14 @@
         "explicacion": "`count()` conta linhas, não valores distintos entre colunas; isso exigiria `countDistinct` em colunas específicas."
       },
       {
-        "texto_opcion": "A soma de todas as colunas numéricas em cada grupo de regiões",
-        "es_correcta": false,
-        "explicacion": "`count()` não soma nada; `sum()` seria necessário para essa agregação."
-      },
-      {
         "texto_opcion": "O número de partições usadas para calcular cada grupo de regiões.",
         "es_correcta": false,
         "explicacion": "A contagem de partições não está relacionada a `count()`, que é uma função agregada de contagem de linhas."
+      },
+      {
+        "texto_opcion": "A soma de todas as colunas numéricas em cada grupo de regiões",
+        "es_correcta": false,
+        "explicacion": "`count()` não soma nada; `sum()` seria necessário para essa agregação."
       }
     ],
     "tags": [
@@ -37,11 +37,6 @@
         "explicacion": "`approx_count_distinct` usa o algoritmo HyperLogLog para estimar a cardinalidade muito mais rápido do que uma contagem exata em conjuntos de dados muito grandes."
       },
       {
-        "texto_opcion": "`mean(\"id_cliente\")`, `mean` calcula uma média e não é.",
-        "es_correcta": false,
-        "explicacion": "`mean` calcula uma média e não é aplicável à contagem de identificadores exclusivos."
-      },
-      {
         "texto_opcion": "`count_distinct(\"customer_id\")`, `count_distinct` calcula um.",
         "es_correcta": false,
         "explicacion": "`count_distinct` calcula um resultado exato, que requer um shuffle completo e é mais lento em conjuntos de dados massivos."
@@ -50,6 +45,11 @@
         "texto_opcion": "`contagem(\"id_cliente\")`, `count` conta todas as linhas não.",
         "es_correcta": false,
         "explicacion": "`count` conta todas as linhas não nulas, não valores únicos, portanto, contaria demais as duplicatas."
+      },
+      {
+        "texto_opcion": "`mean(\"id_cliente\")`, `mean` calcula uma média e não é.",
+        "es_correcta": false,
+        "explicacion": "`mean` calcula uma média e não é aplicável à contagem de identificadores exclusivos."
       }
     ],
     "tags": [
@@ -61,9 +61,9 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```python\ndf.select(mean(\"sales_amount\")).show()\n```\n\nO que isso retorna?",
     "opciones": [
       {
-        "texto_opcion": "A soma total de `sales_amount` dividida pelo número de valores distintos.",
-        "es_correcta": false,
-        "explicacion": "A média divide a soma pela contagem total de linhas, não pela contagem de valores distintos."
+        "texto_opcion": "O valor médio da coluna `sales_amount` em todas as linhas.",
+        "es_correcta": true,
+        "explicacion": "`mean()` é um alias para `avg()` e calcula a média aritmética da coluna especificada."
       },
       {
         "texto_opcion": "O valor mediano da coluna `sales_amount`, a mediana requer `percentile_approx` ou.",
@@ -71,14 +71,14 @@
         "explicacion": "A mediana requer `percentile_approx` ou `median()`; `mean` sempre calcula a média aritmética."
       },
       {
-        "texto_opcion": "O valor médio da coluna `sales_amount` em todas as linhas.",
-        "es_correcta": true,
-        "explicacion": "`mean()` é um alias para `avg()` e calcula a média aritmética da coluna especificada."
-      },
-      {
-        "texto_opcion": "O valor que ocorre com mais frequência em `sales_amount`",
+        "texto_opcion": "O valor que ocorre com mais frequência em `sales_amount` — moda não é o que a “média” calcula.",
         "es_correcta": false,
         "explicacion": "Moda não é o que a “média” calcula; média é estritamente a média aritmética."
+      },
+      {
+        "texto_opcion": "A soma total de `sales_amount` dividida pelo número de valores distintos.",
+        "es_correcta": false,
+        "explicacion": "A média divide a soma pela contagem total de linhas, não pela contagem de valores distintos."
       }
     ],
     "tags": [
@@ -95,7 +95,12 @@
         "explicacion": "`summary()` calcula contagem, média, stddev, mínimo, máximo e percentis para colunas numéricas e de string em uma única chamada."
       },
       {
-        "texto_opcion": "`inventory_df.groupBy().agg(mean(\"*\")).show()`",
+        "texto_opcion": "`inventory_df.describe().show()`, `describe()` retorna apenas.",
+        "es_correcta": false,
+        "explicacion": "`describe()` retorna apenas contagem, média, stddev, min e max - omite os percentis que `summary()` inclui por padrão."
+      },
+      {
+        "texto_opcion": "`inventory_df.groupBy().agg(mean(\"*\")).show()`.",
         "es_correcta": false,
         "explicacion": "`mean(\"*\")` é uma sintaxe inválida; funções agregadas requerem nomes de colunas explícitos."
       },
@@ -103,11 +108,6 @@
         "texto_opcion": "`inventário_df.stat().show()`, não existe um método `stat()`.",
         "es_correcta": false,
         "explicacion": "Não existe um método `stat()` que retorne um resumo DataFrame; `stat` é um namespace para funções como `corr` e `cov`."
-      },
-      {
-        "texto_opcion": "`inventory_df.describe().show()`, `describe()` retorna apenas.",
-        "es_correcta": false,
-        "explicacion": "`describe()` retorna apenas contagem, média, stddev, min e max - omite os percentis que `summary()` inclui por padrão."
       }
     ],
     "tags": [
@@ -119,14 +119,9 @@
     "pregunta": "Uma tabela `events` contém linhas duplicadas devido a um mecanismo de nova tentativa upstream que reenvia registros idênticos. Um engenheiro de dados precisa remover linhas duplicadas exatas em todas as colunas.\n\nQual código faz isso?",
     "opciones": [
       {
-        "texto_opcion": "`eventos_df.dropDuplicates()`.",
-        "es_correcta": true,
-        "explicacion": "Chamar `dropDuplicates()` sem argumentos compara todas as colunas e remove linhas totalmente idênticas."
-      },
-      {
-        "texto_opcion": "`events_df.distinct(subset=[\"event_id\"])`",
+        "texto_opcion": "`events_df.filter(col(\"event_id\").isNotNull())`",
         "es_correcta": false,
-        "explicacion": "`distinct()` não aceita um parâmetro `subset`; essa sintaxe é inválida no PySpark."
+        "explicacion": "Isso filtra os nulos em uma coluna, mas não detecta nem remove linhas duplicadas."
       },
       {
         "texto_opcion": "`events_df.dropna()`, `dropna()` remove linhas com valores.",
@@ -134,9 +129,14 @@
         "explicacion": "`dropna()` remove linhas com valores nulos; não tem efeito em linhas duplicadas."
       },
       {
-        "texto_opcion": "`events_df.filter(col(\"event_id\").isNotNull())`",
+        "texto_opcion": "`events_df.distinct(subset=[\"event_id\"])`.",
         "es_correcta": false,
-        "explicacion": "Isso filtra os nulos em uma coluna, mas não detecta nem remove linhas duplicadas."
+        "explicacion": "`distinct()` não aceita um parâmetro `subset`; essa sintaxe é inválida no PySpark."
+      },
+      {
+        "texto_opcion": "`eventos_df.dropDuplicates()`.",
+        "es_correcta": true,
+        "explicacion": "Chamar `dropDuplicates()` sem argumentos compara todas as colunas e remove linhas totalmente idênticas."
       }
     ],
     "tags": [
@@ -153,19 +153,19 @@
         "explicacion": "`row_number()` atribui 1 à última linha por partição devido à ordem decrescente, e a filtragem em `rn == 1` mantém apenas essa linha."
       },
       {
-        "texto_opcion": "Todas as linhas, com uma nova coluna classificando-as por tempo recente.",
+        "texto_opcion": "A contagem total de linhas por cliente, este código não agrega contagens",
         "es_correcta": false,
-        "explicacion": "A etapa `.filter(col(\"rn\") == 1)` remove todas as linhas, exceto a mais bem classificada por cliente."
+        "explicacion": "Este código não agrega contagens; ele classifica e filtra linhas individuais usando uma função de janela."
       },
       {
-        "texto_opcion": "Uma linha por cliente contendo o valor `updated_at` mais antigo",
+        "texto_opcion": "Uma linha por cliente contendo o valor `updated_at` mais antigo.",
         "es_correcta": false,
         "explicacion": "`.desc()` ordena por `updated_at` decrescente, então a classificação 1 corresponde ao registro mais novo, não ao mais antigo."
       },
       {
-        "texto_opcion": "A contagem total de linhas por cliente, este código não agrega contagens",
+        "texto_opcion": "Todas as linhas, com uma nova coluna classificando-as por tempo recente.",
         "es_correcta": false,
-        "explicacion": "Este código não agrega contagens; ele classifica e filtra linhas individuais usando uma função de janela."
+        "explicacion": "A etapa `.filter(col(\"rn\") == 1)` remove todas as linhas, exceto a mais bem classificada por cliente."
       }
     ],
     "tags": [
@@ -192,7 +192,7 @@
         "explicacion": "`count()` simples conta todas as linhas por grupo, incluindo valores `device_id` duplicados, não dispositivos únicos."
       },
       {
-        "texto_opcion": "`df.select(\"device_id\").distinct().count()`",
+        "texto_opcion": "`df.select(\"device_id\").distinct().count()` — isso retorna uma única contagem global.",
         "es_correcta": false,
         "explicacion": "Isso retorna uma única contagem global distinta e perde o detalhamento por `app_version` necessário."
       }
@@ -206,14 +206,9 @@
     "pregunta": "Um engenheiro de dados escreve o seguinte código para desduplicar uma tabela `customers` baseada apenas em `email`, mantendo qualquer linha por email:\n\n```python\nresult_df = customers.dropDuplicates([\"email\"])\n```\n\nQual afirmação sobre este código está correta?",
     "opciones": [
       {
-        "texto_opcion": "Ele mantém uma linha arbitrária por valor `email` distinto, eliminando o resto.",
-        "es_correcta": true,
-        "explicacion": "Passar um subconjunto de colunas para `dropDuplicates` desduplica com base apenas nessas colunas, e o Spark não garante qual linha duplicada será retida."
-      },
-      {
-        "texto_opcion": "Ele mantém a linha com o carimbo de data/hora mais recente para cada `email`.",
+        "texto_opcion": "Remove todas as linhas que contêm emails duplicados, incluindo a primeira ocorrência.",
         "es_correcta": false,
-        "explicacion": "`dropDuplicates` não tem conceito de recência; ele não ordena por nenhuma coluna de carimbo de data/hora, a menos que seja explicitamente combinado com uma função de janela."
+        "explicacion": "`dropDuplicates` retém uma linha representativa por grupo em vez de remover todas as ocorrências duplicadas."
       },
       {
         "texto_opcion": "Isso gera um erro porque uma lista de subconjuntos não é um argumento válido.",
@@ -221,9 +216,14 @@
         "explicacion": "Passar uma lista de nomes de colunas para `dropDuplicates` é uma sintaxe válida e é a maneira padrão de desduplicar por subconjunto."
       },
       {
-        "texto_opcion": "Remove todas as linhas que contêm emails duplicados, incluindo a primeira ocorrência.",
+        "texto_opcion": "Ele mantém a linha com o carimbo de data/hora mais recente para cada `email`.",
         "es_correcta": false,
-        "explicacion": "`dropDuplicates` retém uma linha representativa por grupo em vez de remover todas as ocorrências duplicadas."
+        "explicacion": "`dropDuplicates` não tem conceito de recência; ele não ordena por nenhuma coluna de carimbo de data/hora, a menos que seja explicitamente combinado com uma função de janela."
+      },
+      {
+        "texto_opcion": "Ele mantém uma linha arbitrária por valor `email` distinto, eliminando o resto.",
+        "es_correcta": true,
+        "explicacion": "Passar um subconjunto de colunas para `dropDuplicates` desduplica com base apenas nessas colunas, e o Spark não garante qual linha duplicada será retida."
       }
     ],
     "tags": [
@@ -235,9 +235,9 @@
     "pregunta": "Um engenheiro de dados precisa calcular, para cada `store_id`, o total acumulado de `daily_sales` ordenado por `sale_date`.\n\nQual código implementa isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf.groupBy.agg.alias)\n```, `groupBy` collapses each store into a single total row and cannot produce a row-by-row running total",
+        "texto_opcion": "```python\ndf.withColumn(\"running_total\", cumsum(\"daily_sales\"))\n```, `cumsum` is not a PySpark function; cumulative sums must be implemented with a window function.",
         "es_correcta": false,
-        "explicacion": "`cumsum` não é uma função PySpark; somas cumulativas devem ser implementadas com uma função de janela."
+        "explicacion": "`groupBy` recolhe cada armazenamento em uma única linha de total e não pode produzir um total acumulado linha por linha."
       },
       {
         "texto_opcion": "```python\nw = Window.partitionBy.orderBy.rowsBetween\ndf.withColumn.over(w))\n```.",
@@ -245,14 +245,14 @@
         "explicacion": "Particionar por `store_id`, ordenar por data e somar um quadro ilimitado anterior à linha atual produz um total de execução correto por loja."
       },
       {
-        "texto_opcion": "```python\ndf.withColumn(\"running_total\", cumsum(\"daily_sales\"))\n```, `cumsum` is not a PySpark function; cumulative sums must be implemented with a window function.",
-        "es_correcta": false,
-        "explicacion": "`groupBy` recolhe cada armazenamento em uma única linha de total e não pode produzir um total acumulado linha por linha."
-      },
-      {
-        "texto_opcion": "```python\nw = Window.partitionBy(\"sale_date\").orderBy(\"store_id\")\ndf.withColumn(\"running_total\", sum(\"daily_sales\").over(w))\n```",
+        "texto_opcion": "```python\nw = Window.partitionBy(\"sale_date\").orderBy(\"store_id\")\ndf.withColumn(\"running_total\", sum(\"daily_sales\").over(w))\n```.",
         "es_correcta": false,
         "explicacion": "O particionamento por `sale_date` em vez de `store_id` agrupa a dimensão errada e não produz um total em execução por loja."
+      },
+      {
+        "texto_opcion": "```python\ndf.groupBy.agg.alias)\n```, `groupBy` collapses each store into a single total row and cannot produce a row-by-row running total — `cumsum` não é uma função PySpark; somas cumulativas devem ser implementadas com uma função de janela.",
+        "es_correcta": false,
+        "explicacion": "`cumsum` não é uma função PySpark; somas cumulativas devem ser implementadas com uma função de janela."
       }
     ],
     "tags": [
@@ -264,24 +264,24 @@
     "pregunta": "Qual é o principal motivo arquitetônico pelo qual `approx_count_distinct` é mais rápido que `count_distinct` em conjuntos de dados muito grandes?",
     "opciones": [
       {
-        "texto_opcion": "Ele armazena em cache todo o conjunto de dados na memória antes da contagem",
-        "es_correcta": false,
-        "explicacion": "O cache não está relacionado ao motivo pelo qual a função é mais rápida; o ganho de velocidade vem do próprio algoritmo probabilístico."
-      },
-      {
-        "texto_opcion": "Ele é executado inteiramente no nó do driver, em vez de distribuir o job aos executores.",
+        "texto_opcion": "Ele é executado inteiramente no nó do driver, em vez de distribuir o job aos executores — a computação ainda está distribuída entre os executores.",
         "es_correcta": false,
         "explicacion": "A computação ainda está distribuída entre os executores; apenas a mesclagem final do esboço acontece centralmente."
-      },
-      {
-        "texto_opcion": "Ele verifica apenas uma amostra aleatória de 10% da tabela",
-        "es_correcta": false,
-        "explicacion": "`approx_count_distinct` processa o conjunto de dados completo; ele não subamostra linhas."
       },
       {
         "texto_opcion": "Ele usa um esboço probabilístico que evita embaralhar e comparar cada valor individual.",
         "es_correcta": true,
         "explicacion": "O HyperLogLog estima a cardinalidade usando esboços compactos, reduzindo drasticamente o job de shuffle e comparação necessário para uma contagem exata e distinta."
+      },
+      {
+        "texto_opcion": "Ele armazena em cache todo o conjunto de dados na memória antes da contagem — o cache não está relacionado ao motivo pelo qual a função é mais rápida.",
+        "es_correcta": false,
+        "explicacion": "O cache não está relacionado ao motivo pelo qual a função é mais rápida; o ganho de velocidade vem do próprio algoritmo probabilístico."
+      },
+      {
+        "texto_opcion": "Ele verifica apenas uma amostra aleatória de 10% da tabela — `approx_count_distinct` processa o conjunto de dados.",
+        "es_correcta": false,
+        "explicacion": "`approx_count_distinct` processa o conjunto de dados completo; ele não subamostra linhas."
       }
     ],
     "tags": [
@@ -293,24 +293,24 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```python\ndf.groupBy(\"category\").agg(\n    sum(\"revenue\").alias(\"total_revenue\"),\n    avg(\"revenue\").alias(\"avg_revenue\")\n).show()\n```\n\nQual afirmação sobre esta consulta está correta?",
     "opciones": [
       {
-        "texto_opcion": "Ele calcula `avg_revenue` como uma média móvel ordenada pela posição da linha",
-        "es_correcta": false,
-        "explicacion": "Não há janela ou ordem envolvida; `avg` aqui é uma agregação simples por grupo, não um cálculo contínuo."
-      },
-      {
-        "texto_opcion": "Isso gera um erro porque `.agg()` aceita apenas uma única função agregada",
-        "es_correcta": false,
-        "explicacion": "`.agg()` aceita múltiplas expressões agregadas em uma única chamada; este é o uso padrão."
-      },
-      {
-        "texto_opcion": "Ele retorna o total de uma linha, com soma global e média em todo o DataFrame",
+        "texto_opcion": "Ele retorna o total de uma linha, com soma global e média em todo o DataFrame — como `groupBy(\"category\")` é especificado, a agregação é calculada por categoria, não globalmente.",
         "es_correcta": false,
         "explicacion": "Como `groupBy(\"category\")` é especificado, a agregação é calculada por categoria, não globalmente."
+      },
+      {
+        "texto_opcion": "Ele calcula `avg_revenue` como uma média móvel ordenada pela posição da linha — não há janela ou ordem envolvida — não há janela ou ordem envolvida.",
+        "es_correcta": false,
+        "explicacion": "Não há janela ou ordem envolvida; `avg` aqui é uma agregação simples por grupo, não um cálculo contínuo."
       },
       {
         "texto_opcion": "Ele retorna uma linha por “categoria” distinta com a receita total e média calculada dentro desse grupo.",
         "es_correcta": true,
         "explicacion": "`groupBy` seguido por `.agg` com múltiplas funções agregadas calcula cada agregado independentemente por grupo, retornando uma linha por grupo."
+      },
+      {
+        "texto_opcion": "Isso gera um erro porque `.agg()` aceita apenas uma única função agregada — `.agg()` aceita múltiplas expressões agregadas em uma única.",
+        "es_correcta": false,
+        "explicacion": "`.agg()` aceita múltiplas expressões agregadas em uma única chamada; este é o uso padrão."
       }
     ],
     "tags": [
@@ -322,24 +322,24 @@
     "pregunta": "Um engenheiro de dados precisa identificar e manter apenas as linhas que representam valores duplicados de `order_id` que ocorreram mais de uma vez, para investigação adicional - e não a tabela desduplicada em si.\n\nQual abordagem é mais apropriada?",
     "opciones": [
       {
-        "texto_opcion": "Chame `dropDuplicates([\"order_id\"])` e inspecione o resultado",
+        "texto_opcion": "Agrupe por `order_id`, conte as ocorrências, filtre onde contagem > 1 e, em seguida, junte-se novamente à tabela original.",
+        "es_correcta": true,
+        "explicacion": "Contar ocorrências por `order_id` e filtrar contagens maiores que uma identifica quais IDs estão duplicados, que podem então ser unidos novamente para recuperar as linhas duplicadas completas."
+      },
+      {
+        "texto_opcion": "Chame `dropDuplicates([\"order_id\"])` e inspecione o resultado — `dropDuplicates` remove duplicatas e retorna linhas exclusivas; ele não revela quais linhas foram duplicadas.",
         "es_correcta": false,
         "explicacion": "`dropDuplicates` remove duplicatas e retorna linhas exclusivas; ele não revela quais linhas foram duplicadas."
       },
       {
-        "texto_opcion": "Use `approx_count_distinct(\"order_id\")` para estimar linhas duplicadas",
-        "es_correcta": false,
-        "explicacion": "`approx_count_distinct` estima a cardinalidade e não identifica ou retorna as próprias linhas duplicadas."
-      },
-      {
-        "texto_opcion": "Chame `df.distinct()` e compare as contagens de linhas antes e depois",
+        "texto_opcion": "Chame `df.distinct()` e compare as contagens de linhas antes e depois — isso revela apenas quantas linhas duplicadas existiam no total, e não quais valores ou.",
         "es_correcta": false,
         "explicacion": "Isso revela apenas quantas linhas duplicadas existiam no total, e não quais valores ou linhas `order_id` específicos foram duplicados."
       },
       {
-        "texto_opcion": "Agrupe por `order_id`, conte as ocorrências, filtre onde contagem > 1 e, em seguida, junte-se novamente à tabela original.",
-        "es_correcta": true,
-        "explicacion": "Contar ocorrências por `order_id` e filtrar contagens maiores que uma identifica quais IDs estão duplicados, que podem então ser unidos novamente para recuperar as linhas duplicadas completas."
+        "texto_opcion": "Use `approx_count_distinct(\"order_id\")` para estimar linhas duplicadas — `approx_count_distinct` estima a cardinalidade e não identifica ou retorna as próprias linhas duplicadas.",
+        "es_correcta": false,
+        "explicacion": "`approx_count_distinct` estima a cardinalidade e não identifica ou retorna as próprias linhas duplicadas."
       }
     ],
     "tags": [
@@ -351,24 +351,24 @@
     "pregunta": "Qual função de janela um engenheiro de dados deve usar para atribuir uma classificação sequencial exclusiva às linhas dentro de cada partição, mesmo quando existem valores de empate, de modo que duas linhas nunca compartilhem a mesma classificação?",
     "opciones": [
       {
-        "texto_opcion": "`ntil()`, `ntile()` divide as linhas em um número fixo de.",
-        "es_correcta": false,
-        "explicacion": "`ntile()` divide as linhas em um número fixo de intervalos e não garante valores sequenciais exclusivos por linha."
-      },
-      {
-        "texto_opcion": "`classificação_densa()`, `dense_rank()` também atribui.",
-        "es_correcta": false,
-        "explicacion": "`dense_rank()` também atribui classificações iguais aos empates, mas sem deixar lacunas na sequência de classificação."
-      },
-      {
         "texto_opcion": "`classificação()`, `rank()` atribui a mesma classificação às.",
         "es_correcta": false,
         "explicacion": "`rank()` atribui a mesma classificação às linhas empatadas e pula os valores de classificação subsequentes, para que os empates não obtenham números únicos."
       },
       {
+        "texto_opcion": "`ntil()`, `ntile()` divide as linhas em um número fixo de.",
+        "es_correcta": false,
+        "explicacion": "`ntile()` divide as linhas em um número fixo de intervalos e não garante valores sequenciais exclusivos por linha."
+      },
+      {
         "texto_opcion": "`número_linha()`.",
         "es_correcta": true,
         "explicacion": "`row_number()` sempre atribui um valor estritamente sequencial e exclusivo dentro de cada partição, independentemente dos vínculos na coluna de ordenação."
+      },
+      {
+        "texto_opcion": "`classificação_densa()`, `dense_rank()` também atribui.",
+        "es_correcta": false,
+        "explicacion": "`dense_rank()` também atribui classificações iguais aos empates, mas sem deixar lacunas na sequência de classificação."
       }
     ],
     "tags": [
@@ -380,24 +380,24 @@
     "pregunta": "Um engenheiro de dados executa `df.describe(\"price\").show()` em uma coluna contendo alguns valores nulos.\n\nComo `describe()` lida com os nulos ao calcular `count`, `mean` e `stddev`?",
     "opciones": [
       {
-        "texto_opcion": "Valores nulos são contados, mas excluídos apenas da `média`.",
-        "es_correcta": false,
-        "explicacion": "Os nulos são excluídos consistentemente dos cálculos de contagem, média e stddev, e não seletivamente de apenas um."
-      },
-      {
-        "texto_opcion": "A função gera um erro se houver valores nulos",
-        "es_correcta": false,
-        "explicacion": "`describe()` é executado com sucesso em colunas contendo nulos; isso não gera um erro."
-      },
-      {
-        "texto_opcion": "Valores nulos são tratados como zero em todos os cálculos.",
+        "texto_opcion": "Valores nulos são tratados como zero em todos os cálculos — os nulos são excluídos e não convertidos para zero, o.",
         "es_correcta": false,
         "explicacion": "Os nulos são excluídos e não convertidos para zero, o que, de outra forma, distorceria incorretamente a média e o desvio padrão."
+      },
+      {
+        "texto_opcion": "Valores nulos são contados, mas excluídos apenas da `média` — os nulos são excluídos consistentemente dos cálculos.",
+        "es_correcta": false,
+        "explicacion": "Os nulos são excluídos consistentemente dos cálculos de contagem, média e stddev, e não seletivamente de apenas um."
       },
       {
         "texto_opcion": "Valores nulos são excluídos dos cálculos `count`, `mean` e `stddev`.",
         "es_correcta": true,
         "explicacion": "`describe()` segue a semântica agregada SQL padrão, ignorando nulos ao calcular contagem, média e desvio padrão."
+      },
+      {
+        "texto_opcion": "A função gera um erro se houver valores nulos — `describe()` é executado com sucesso em.",
+        "es_correcta": false,
+        "explicacion": "`describe()` é executado com sucesso em colunas contendo nulos; isso não gera um erro."
       }
     ],
     "tags": [
@@ -414,19 +414,19 @@
         "explicacion": "O estado de desduplicação de streaming cresce continuamente, a menos que seja delimitado por uma marca d'água em uma coluna de tempo de evento, já que o Spark precisa se lembrar de chaves anteriores para detectar novas duplicatas."
       },
       {
-        "texto_opcion": "A desduplicação em streaming só funciona na coluna `event_id` se for a coluna de partição da origem",
-        "es_correcta": false,
-        "explicacion": "`dropDuplicates` funciona em qualquer coluna especificada, independentemente de como os dados de origem são fisicamente particionados."
-      },
-      {
-        "texto_opcion": "Streaming DataFrames não suporta `dropDuplicates` e este código lança uma exceção, `dropDuplicates` é suportado em streaming DataFrames",
+        "texto_opcion": "Streaming DataFrames não suporta `dropDuplicates` e este código lança uma exceção, `dropDuplicates` é suportado em streaming DataFrames — `dropDuplicates` é suportado em streaming DataFrames; a preocupação é o crescimento ilimitado do Estado e não a falta de apoio.",
         "es_correcta": false,
         "explicacion": "`dropDuplicates` é suportado em streaming DataFrames; a preocupação é o crescimento ilimitado do Estado e não a falta de apoio."
       },
       {
-        "texto_opcion": "O Spark elimina automaticamente o estado de desduplicação de cada microlote, independentemente das configurações da marca d'água.",
+        "texto_opcion": "O Spark elimina automaticamente o estado de desduplicação de cada microlote, independentemente das configurações da marca d'água — o estado não é eliminado automaticamente de cada microlote; ele persiste entre lotes, a menos que uma marca d'água defina uma política de despejo.",
         "es_correcta": false,
         "explicacion": "O estado não é eliminado automaticamente de cada microlote; ele persiste entre lotes, a menos que uma marca d'água defina uma política de despejo."
+      },
+      {
+        "texto_opcion": "A desduplicação em streaming só funciona na coluna `event_id` se for a coluna de partição da origem — `dropDuplicates` funciona em qualquer coluna especificada, independentemente de como os dados de origem são fisicamente particionados comum em desenhos legados, porém inadequado neste caso.",
+        "es_correcta": false,
+        "explicacion": "`dropDuplicates` funciona em qualquer coluna especificada, independentemente de como os dados de origem são fisicamente particionados."
       }
     ],
     "tags": [
@@ -438,22 +438,22 @@
     "pregunta": "Um engenheiro de dados precisa encontrar, para cada `customer_id`, a diferença em dias entre valores consecutivos de `order_date`.\n\nQual combinação de funções de janela é apropriada?",
     "opciones": [
       {
+        "texto_opcion": "Use `groupBy(\"customer_id\").agg(max(\"order_date\") - min(\"order_date\"))`, isso calcula apenas o intervalo geral entre o primeiro e o — isso calcula apenas o intervalo geral entre o primeiro e o último pedido, não a diferença entre cada par de pedidos consecutivos.",
+        "es_correcta": false,
+        "explicacion": "Isso calcula apenas o intervalo geral entre o primeiro e o último pedido, não a diferença entre cada par de pedidos consecutivos."
+      },
+      {
+        "texto_opcion": "Use `row_number()` em uma janela particionada por `customer_id`, `row_number()` atribui apenas números sequenciais — `row_number()` atribui apenas números sequenciais — `row_number()` atribui apenas números sequenciais; ele não fornece acesso ao valor de data de uma linha anterior para comparação.",
+        "es_correcta": false,
+        "explicacion": "`row_number()` atribui apenas números sequenciais; ele não fornece acesso ao valor de data de uma linha anterior para comparação."
+      },
+      {
         "texto_opcion": "Use `lag(\"order_date\")` em uma janela particionada por `customer_id` e ordenada por `order_date`, então calcule `datediff` em relação à linha atual.",
         "es_correcta": true,
         "explicacion": "`lag` recupera o valor da linha anterior dentro da partição, permitindo um cálculo direto da diferença de data entre pedidos consecutivos por cliente."
       },
       {
-        "texto_opcion": "Use `row_number()` em uma janela particionada por `customer_id`, `row_number()` atribui apenas números sequenciais",
-        "es_correcta": false,
-        "explicacion": "`row_number()` atribui apenas números sequenciais; ele não fornece acesso ao valor de data de uma linha anterior para comparação."
-      },
-      {
-        "texto_opcion": "Use `groupBy(\"customer_id\").agg(max(\"order_date\") - min(\"order_date\"))`, isso calcula apenas o intervalo geral entre o primeiro e o.",
-        "es_correcta": false,
-        "explicacion": "Isso calcula apenas o intervalo geral entre o primeiro e o último pedido, não a diferença entre cada par de pedidos consecutivos."
-      },
-      {
-        "texto_opcion": "Use `count(\"order_date\")` particionado por `customer_id`, `count` apenas contabiliza o número de pedidos e não.",
+        "texto_opcion": "Use `count(\"order_date\")` particionado por `customer_id`, `count` apenas contabiliza o número de pedidos e não — `count` apenas contabiliza o número de pedidos e não fornece informações sobre o intervalo de tempo entre eles.",
         "es_correcta": false,
         "explicacion": "`count` apenas contabiliza o número de pedidos e não fornece informações sobre o intervalo de tempo entre eles."
       }
@@ -467,24 +467,24 @@
     "pregunta": "Qual código calcula corretamente a porcentagem que as “vendas” de cada “categoria” contribuem para o total geral de vendas, exibido ao lado da linha de cada categoria?",
     "opciones": [
       {
-        "texto_opcion": "```python\nw = Window.partitionBy()\ndf.withColumn(\"pct_total\", col(\"sales\") / sum(\"sales\").over(w) * 100)\n```",
-        "es_correcta": true,
-        "explicacion": "Uma janela `partitionBy()` vazia trata DataFrame inteiro como uma partição, então `sum(\"sales\").over(w)` fornece o total geral contra o qual a porcentagem de cada linha pode ser calculada."
+        "texto_opcion": "```python\ndf.select(\"category\", \"sales\").distinct()\n```, this only removes duplicate rows and performs no — isso remove apenas linhas duplicadas e não realiza nenhum cálculo de porcentagem.",
+        "es_correcta": false,
+        "explicacion": "Isso remove apenas linhas duplicadas e não realiza nenhum cálculo de porcentagem."
       },
       {
-        "texto_opcion": "```python\ndf.groupBy(\"category\").agg((col(\"sales\") / sum(\"sales\") * 100).alias(\"pct_total\"))\n```",
+        "texto_opcion": "```python\ndf.groupBy(\"category\").agg((col(\"sales\") / sum(\"sales\") * 100).alias(\"pct_total\"))\n``` — `col(\"sales\")` não pode ser referenciado diretamente dentro de `.agg()` fora de.",
         "es_correcta": false,
         "explicacion": "`col(\"sales\")` não pode ser referenciado diretamente dentro de `.agg()` fora de uma função agregada, uma vez que o agrupamento recolhe as linhas."
       },
       {
-        "texto_opcion": "```python\ndf.withColumn(\"pct_total\", col(\"sales\") / count(\"sales\") * 100)\n```",
+        "texto_opcion": "```python\ndf.withColumn(\"pct_total\", col(\"sales\") / count(\"sales\") * 100)\n``` — dividir por `count` em vez de `sum` produz uma proporção.",
         "es_correcta": false,
         "explicacion": "Dividir por `count` em vez de `sum` produz uma proporção incorreta, não uma porcentagem do total de vendas."
       },
       {
-        "texto_opcion": "```python\ndf.select(\"category\", \"sales\").distinct()\n```, this only removes duplicate rows and performs no.",
-        "es_correcta": false,
-        "explicacion": "Isso remove apenas linhas duplicadas e não realiza nenhum cálculo de porcentagem."
+        "texto_opcion": "```python\nw = Window.partitionBy()\ndf.withColumn(\"pct_total\", col(\"sales\") / sum(\"sales\").over(w) * 100)\n```",
+        "es_correcta": true,
+        "explicacion": "Uma janela `partitionBy()` vazia trata DataFrame inteiro como uma partição, então `sum(\"sales\").over(w)` fornece o total geral contra o qual a porcentagem de cada linha pode ser calculada."
       }
     ],
     "tags": [
@@ -496,24 +496,24 @@
     "pregunta": "Um engenheiro de dados tem uma tabela onde algumas linhas são duplicatas verdadeiras (idênticas em todas as colunas) e outras compartilham a mesma chave comercial, mas têm valores `last_modified` diferentes devido a atualizações legítimas. O engenheiro precisa manter apenas a versão mais recente por chave comercial e, ao mesmo tempo, remover primeiro as linhas duplicadas exatas.\n\nQual ordem de processamento está correta?",
     "opciones": [
       {
+        "texto_opcion": "Use apenas `distinct()` no DataFrame completo, pois remove duplicatas exatas e versões antigas — `distinct()` remove apenas linhas totalmente idênticas; ele não tem conhecimento das chaves de negócios ou da atualidade e não resolverá diferentes versões `last_modified` aplicado entre ambientes por consistência operacional.",
+        "es_correcta": false,
+        "explicacion": "`distinct()` remove apenas linhas totalmente idênticas; ele não tem conhecimento das chaves de negócios ou da atualidade e não resolverá diferentes versões `last_modified`."
+      },
+      {
         "texto_opcion": "Primeiro aplique `dropDuplicates()` sem argumentos para remover linhas duplicadas exatas e, em seguida, use uma função de janela classificada por `last_modified` para manter apenas a linha mais recente por chave comercial.",
         "es_correcta": true,
         "explicacion": "A remoção de duplicatas exatas primeiro evita distorções na etapa de classificação, e a função da janela isola corretamente a atualização legítima mais recente por chave."
       },
       {
-        "texto_opcion": "Aplique `dropDuplicates([\"business_key\"])` apenas, pois reterá automaticamente a linha modificada mais recentemente.",
-        "es_correcta": false,
-        "explicacion": "`dropDuplicates` em um subconjunto não considera nenhuma coluna de ordenação como `last_modified`; ele pode manter arbitrariamente qualquer linha para essa chave."
-      },
-      {
-        "texto_opcion": "Use apenas `distinct()` no DataFrame completo, pois remove duplicatas exatas e versões antigas",
-        "es_correcta": false,
-        "explicacion": "`distinct()` remove apenas linhas totalmente idênticas; ele não tem conhecimento das chaves de negócios ou da atualidade e não resolverá diferentes versões `last_modified`."
-      },
-      {
-        "texto_opcion": "Aplique uma função de janela primeiro e depois `dropDuplicates()`, pois a ordem não afeta o resultado",
+        "texto_opcion": "Aplique uma função de janela primeiro e depois `dropDuplicates()`, pois a ordem não afeta o resultado — a ordem é importante: a classificação antes de remover duplicatas exatas pode permitir que as linhas duplicadas distorçam a numeração das linhas, enquanto removê-las primeiro garante uma classificação limpa.",
         "es_correcta": false,
         "explicacion": "A ordem é importante: a classificação antes de remover duplicatas exatas pode permitir que as linhas duplicadas distorçam a numeração das linhas, enquanto removê-las primeiro garante uma classificação limpa."
+      },
+      {
+        "texto_opcion": "Aplique `dropDuplicates([\"business_key\"])` apenas, pois reterá automaticamente a linha modificada mais recentemente — `dropDuplicates` em um subconjunto não considera nenhuma coluna de ordenação como `last_modified`; ele pode manter arbitrariamente qualquer linha para essa chave adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "es_correcta": false,
+        "explicacion": "`dropDuplicates` em um subconjunto não considera nenhuma coluna de ordenação como `last_modified`; ele pode manter arbitrariamente qualquer linha para essa chave."
       }
     ],
     "tags": [
@@ -525,14 +525,14 @@
     "pregunta": "O que o código a seguir retorna?\n\n```python\nfrom pyspark.sql.functions import countDistinct\n\ndf.select(countDistinct(\"region\", \"product\")).show()\n```",
     "opciones": [
       {
-        "texto_opcion": "Um erro, já que `countDistinct` aceita apenas uma única coluna",
-        "es_correcta": false,
-        "explicacion": "`countDistinct` aceita vários argumentos de coluna e os trata como uma chave composta para distinção."
-      },
-      {
         "texto_opcion": "A contagem de combinações distintas de valores de \"região\" e \"produto\" juntos.",
         "es_correcta": true,
         "explicacion": "Passar múltiplas colunas para `countDistinct` conta combinações únicas entre essas colunas em conjunto, não cada coluna separadamente."
+      },
+      {
+        "texto_opcion": "Duas contagens separadas: uma para valores distintos de `região` e outra para.",
+        "es_correcta": false,
+        "explicacion": "`countDistinct` com vários argumentos retorna uma única contagem combinada, não dois resultados independentes."
       },
       {
         "texto_opcion": "O número total de linhas no DataFrame, isso calcula combinações distintas",
@@ -540,9 +540,9 @@
         "explicacion": "Isso calcula combinações distintas, não a contagem bruta de linhas, que seria simplesmente `df.count()`."
       },
       {
-        "texto_opcion": "Duas contagens separadas: uma para valores distintos de `região` e outra para.",
+        "texto_opcion": "Um erro, já que `countDistinct` aceita apenas uma única coluna.",
         "es_correcta": false,
-        "explicacion": "`countDistinct` com vários argumentos retorna uma única contagem combinada, não dois resultados independentes."
+        "explicacion": "`countDistinct` aceita vários argumentos de coluna e os trata como uma chave composta para distinção."
       }
     ],
     "tags": [
@@ -554,6 +554,16 @@
     "pregunta": "Um engenheiro de dados deseja calcular, para cada `departamento`, o salário médio, mas incluir apenas funcionários com `status = 'ativo'`, mantendo todos os funcionários (ativos e inativos) na saída final com a média do departamento anexada como uma nova coluna.\n\nQual abordagem está correta?",
     "opciones": [
       {
+        "texto_opcion": "Use `groupBy(\"department\", \"status\").agg(avg(\"salary\"))` e junte-se novamente apenas ao departamento.",
+        "es_correcta": false,
+        "explicacion": "O agrupamento por `departamento` e por `status` produz médias separadas por status, e não uma única média apenas ativa anexada a cada linha de funcionário."
+      },
+      {
+        "texto_opcion": "Use `dropDuplicates([\"department\"])` para obter uma linha por departamento e calcule a média manualmente.",
+        "es_correcta": false,
+        "explicacion": "`dropDuplicates` escolhe arbitrariamente uma linha por departamento e não calcula nenhum valor agregado."
+      },
+      {
         "texto_opcion": "Use uma função de janela com `avg == \"active\", col))` particionada por `department`, aplicada via `withColumn`.",
         "es_correcta": true,
         "explicacion": "Combinar uma expressão condicional `when` dentro de uma janela `avg` permite filtrar quais linhas contribuem para a média, preservando cada linha na saída por meio de `withColumn`."
@@ -562,16 +572,6 @@
         "texto_opcion": "Filtre o DataFrame para `status = 'ativo'` primeiro, depois use `groupBy(\"department\").agg(avg(\"salary\"))`",
         "es_correcta": false,
         "explicacion": "A filtragem antes do agrupamento remove totalmente os funcionários inativos do resultado, mas o requisito é reter todos os funcionários na saída."
-      },
-      {
-        "texto_opcion": "Use `groupBy(\"department\", \"status\").agg(avg(\"salary\"))` e junte-se novamente apenas ao departamento",
-        "es_correcta": false,
-        "explicacion": "O agrupamento por `departamento` e por `status` produz médias separadas por status, e não uma única média apenas ativa anexada a cada linha de funcionário."
-      },
-      {
-        "texto_opcion": "Use `dropDuplicates([\"department\"])` para obter uma linha por departamento e calcule a média manualmente",
-        "es_correcta": false,
-        "explicacion": "`dropDuplicates` escolhe arbitrariamente uma linha por departamento e não calcula nenhum valor agregado."
       }
     ],
     "tags": [
@@ -588,19 +588,19 @@
         "explicacion": "Sem nenhum subconjunto especificado, `dropDuplicates()` compara todas as colunas, portanto, qualquer diferença - mesmo em um único campo - significa que as linhas são tratadas como distintas."
       },
       {
-        "texto_opcion": "Só pode ser aplicado a DataFrames com menos de 1 milhão de linhas, `dropDuplicates()` não tem essa restrição de contagem.",
+        "texto_opcion": "Ele altera permanentemente o DataFrame original no lugar, pySpark DataFrames são imutáveis — pySpark DataFrames são imutáveis; `dropDuplicates()` retorna um novo DataFrame em vez de modificar o original como escolha padrão de produção neste cenário.",
+        "es_correcta": false,
+        "explicacion": "PySpark DataFrames são imutáveis; `dropDuplicates()` retorna um novo DataFrame em vez de modificar o original."
+      },
+      {
+        "texto_opcion": "Só pode ser aplicado a DataFrames com menos de 1 milhão de linhas, `dropDuplicates()` não tem essa restrição de contagem — `dropDuplicates()` não tem essa restrição de contagem de linhas e é dimensionado em conjuntos de dados distribuídos de qualquer tamanho.",
         "es_correcta": false,
         "explicacion": "`dropDuplicates()` não tem essa restrição de contagem de linhas e é dimensionado em conjuntos de dados distribuídos de qualquer tamanho."
       },
       {
-        "texto_opcion": "Requer que o DataFrame seja classificado previamente, `dropDuplicates()` não requer nenhuma classificação.",
+        "texto_opcion": "Requer que o DataFrame seja classificado previamente, `dropDuplicates()` não requer nenhuma classificação — `dropDuplicates()` não requer nenhuma classificação prévia; ele opera corretamente em dados não classificados.",
         "es_correcta": false,
         "explicacion": "`dropDuplicates()` não requer nenhuma classificação prévia; ele opera corretamente em dados não classificados."
-      },
-      {
-        "texto_opcion": "Ele altera permanentemente o DataFrame original no lugar, pySpark DataFrames são imutáveis",
-        "es_correcta": false,
-        "explicacion": "PySpark DataFrames são imutáveis; `dropDuplicates()` retorna um novo DataFrame em vez de modificar o original."
       }
     ],
     "tags": [
@@ -617,6 +617,11 @@
         "explicacion": "`ntile(n)` divide as linhas ordenadas dentro de cada partição em `n` grupos de tamanhos aproximadamente iguais, que é exatamente o que o agrupamento de quartis exige."
       },
       {
+        "texto_opcion": "`classificação()`, `rank()` atribui uma posição com base na.",
+        "es_correcta": false,
+        "explicacion": "`rank()` atribui uma posição com base na ordem, mas não agrupa as linhas em um número fixo de intervalos."
+      },
+      {
         "texto_opcion": "`classificação_densa()`, `dense_rank()` produz uma.",
         "es_correcta": false,
         "explicacion": "`dense_rank()` produz uma classificação compacta sem lacunas, mas ainda não cria intervalos de tamanhos iguais."
@@ -625,11 +630,6 @@
         "texto_opcion": "`número_linha()`, `row_number()` simplesmente numera as.",
         "es_correcta": false,
         "explicacion": "`row_number()` simplesmente numera as linhas sequencialmente e não tem comportamento de agrupamento."
-      },
-      {
-        "texto_opcion": "`classificação()`, `rank()` atribui uma posição com base na.",
-        "es_correcta": false,
-        "explicacion": "`rank()` atribui uma posição com base na ordem, mas não agrupa as linhas em um número fixo de intervalos."
       }
     ],
     "tags": [
@@ -641,22 +641,22 @@
     "pregunta": "Um engenheiro de dados percebe que `df.agg(sum(\"amount\"))` retorna `null` mesmo que a coluna `amount` contenha alguns valores numéricos não nulos.\n\nQual é a explicação mais provável?",
     "opciones": [
       {
+        "texto_opcion": "`sum()` requer que a coluna seja convertida explicitamente usando `approx_count_distinct` primeiro — `approx_count_distinct` não está relacionado à soma de valores e não é um pré-requisito para usar `sum()` como escolha padrão de produção neste cenário.",
+        "es_correcta": false,
+        "explicacion": "`approx_count_distinct` não está relacionado à soma de valores e não é um pré-requisito para usar `sum()`."
+      },
+      {
         "texto_opcion": "A coluna `amount` é armazenada como um tipo de string contendo valores não numéricos que não podem ser convertidos implicitamente, fazendo com que a soma falhe silenciosamente e retorne nulo.",
         "es_correcta": true,
         "explicacion": "Quando uma coluna destinada a ser numérica contém valores de cadeia de caracteres não convertíveis, a agregação de soma do Spark pode retornar nulo em vez de gerar um erro, dependendo da configuração."
       },
       {
-        "texto_opcion": "`sum()` sempre retorna nulo quando o agrupamento não é aplicado, `sum()` funciona corretamente sem `groupBy`, `sum()` funciona corretamente sem `groupBy`",
+        "texto_opcion": "`sum()` sempre retorna nulo quando o agrupamento não é aplicado, `sum()` funciona corretamente sem `groupBy`, `sum()` funciona corretamente sem `groupBy` — `sum()` funciona corretamente sem `groupBy`, retornando uma única linha agregada sobre todo o DataFrame; esta não é a causa de um resultado nulo.",
         "es_correcta": false,
         "explicacion": "`sum()` funciona corretamente sem `groupBy`, retornando uma única linha agregada sobre todo o DataFrame; esta não é a causa de um resultado nulo."
       },
       {
-        "texto_opcion": "`sum()` requer que a coluna seja convertida explicitamente usando `approx_count_distinct` primeiro",
-        "es_correcta": false,
-        "explicacion": "`approx_count_distinct` não está relacionado à soma de valores e não é um pré-requisito para usar `sum()`."
-      },
-      {
-        "texto_opcion": "A função `sum()` do PySpark não suporta colunas de ponto flutuante, `sum()` suporta totalmente ponto flutuante e outros tipos numéricos",
+        "texto_opcion": "A função `sum()` do PySpark não suporta colunas de ponto flutuante, `sum()` suporta totalmente ponto flutuante e outros tipos numéricos — `sum()` suporta totalmente ponto flutuante e outros tipos numéricos; esta não é uma limitação conhecida.",
         "es_correcta": false,
         "explicacion": "`sum()` suporta totalmente ponto flutuante e outros tipos numéricos; esta não é uma limitação conhecida."
       }
@@ -675,9 +675,9 @@
         "explicacion": "Ordenar primeiro por `prioridade` decrescente classifica a prioridade mais alta primeiro, e a classificação ascendente secundária em `created_at` quebra corretamente os empates pelo horário de criação mais antigo."
       },
       {
-        "texto_opcion": "`Window.partitionBy(\"prioridade\").orderBy(col(\"ticket_id\").desc())`",
+        "texto_opcion": "`Window.partitionBy(\"ticket_id\", \"created_at\").orderBy(col(\"priority\").desc())`",
         "es_correcta": false,
-        "explicacion": "O particionamento por `priority` em vez de `ticket_id` agrupa a dimensão errada e não desduplica por ticket."
+        "explicacion": "Incluir `created_at` em `partitionBy` cria uma partição separada para cada carimbo de data/hora, impedindo a classificação adequada em todas as linhas do mesmo ticket."
       },
       {
         "texto_opcion": "`Window.partitionBy(\"ticket_id\").orderBy(col(\"created_at\").desc())`",
@@ -685,9 +685,9 @@
         "explicacion": "Isso ordena apenas pelo horário de criação e ignora totalmente a `prioridade`, que é o principal critério de classificação especificado."
       },
       {
-        "texto_opcion": "`Window.partitionBy(\"ticket_id\", \"created_at\").orderBy(col(\"priority\").desc())`",
+        "texto_opcion": "`Window.partitionBy(\"prioridade\").orderBy(col(\"ticket_id\").desc())`",
         "es_correcta": false,
-        "explicacion": "Incluir `created_at` em `partitionBy` cria uma partição separada para cada carimbo de data/hora, impedindo a classificação adequada em todas as linhas do mesmo ticket."
+        "explicacion": "O particionamento por `priority` em vez de `ticket_id` agrupa a dimensão errada e não desduplica por ticket."
       }
     ],
     "tags": [
@@ -699,24 +699,24 @@
     "pregunta": "Qual é a principal diferença entre `rank()` e `dense_rank()` quando há valores vinculados na coluna de ordenação?",
     "opciones": [
       {
-        "texto_opcion": "`dense_rank()` atribui o mesmo valor a todas as linhas em uma partição, enquanto `rank()` atribui valores únicos",
+        "texto_opcion": "`dense_rank()` atribui o mesmo valor a todas as linhas em uma partição, enquanto `rank()` atribui valores únicos — ambas as funções atribuem valores iguais apenas às linhas vinculadas, e não à partição inteira de maneira uniforme.",
         "es_correcta": false,
         "explicacion": "Ambas as funções atribuem valores iguais apenas às linhas vinculadas, e não à partição inteira de maneira uniforme."
-      },
-      {
-        "texto_opcion": "`dense_rank()` só pode ser usado em colunas numéricas, enquanto `rank()` funciona em qualquer tipo de dados",
-        "es_correcta": false,
-        "explicacion": "Tanto `rank()` quanto `dense_rank()` funcionam em qualquer tipo de dados solicitáveis, incluindo strings e datas."
-      },
-      {
-        "texto_opcion": "`rank()` requer uma cláusula `partitionBy` enquanto `dense_rank()` não, ambas as funções podem ser usadas com ou sem `partitionBy`",
-        "es_correcta": false,
-        "explicacion": "Ambas as funções podem ser usadas com ou sem `partitionBy`; este não é um requisito distintivo."
       },
       {
         "texto_opcion": "`rank()` deixa lacunas na sequência de classificação após empates, enquanto `dense_rank()` atribui classificações consecutivas sem lacunas.",
         "es_correcta": true,
         "explicacion": "Após um empate, `rank()` avança pelo número de linhas empatadas, enquanto `dense_rank()` continua com o próximo número inteiro consecutivo."
+      },
+      {
+        "texto_opcion": "`dense_rank()` só pode ser usado em colunas numéricas, enquanto `rank()` funciona em qualquer tipo de dados — tanto `rank()` quanto `dense_rank()` funcionam em qualquer tipo de dados solicitáveis, incluindo strings e datas.",
+        "es_correcta": false,
+        "explicacion": "Tanto `rank()` quanto `dense_rank()` funcionam em qualquer tipo de dados solicitáveis, incluindo strings e datas."
+      },
+      {
+        "texto_opcion": "`rank()` requer uma cláusula `partitionBy` enquanto `dense_rank()` não, ambas as funções podem ser usadas com ou sem `partitionBy` — ambas as funções podem ser usadas com ou sem `partitionBy`; este não é um requisito distintivo.",
+        "es_correcta": false,
+        "explicacion": "Ambas as funções podem ser usadas com ou sem `partitionBy`; este não é um requisito distintivo."
       }
     ],
     "tags": [
@@ -738,14 +738,14 @@
         "explicacion": "A filtragem em uma coluna de saída `dense_rank()` é válida e comumente usada; nenhum erro ocorre."
       },
       {
-        "texto_opcion": "A janela retornará resultados classificados por `departamento` em ordem alfabética em vez de por `salário`",
-        "es_correcta": false,
-        "explicacion": "A cláusula `orderBy(col(\"salary\").desc())` controla a ordem de classificação; a classificação do resultado final não é afetada pelo nome do departamento."
-      },
-      {
         "texto_opcion": "`dense_rank()` não pode ser particionado por uma coluna de string como `department`, `partitionBy` suporta colunas de string sem restrição",
         "es_correcta": false,
         "explicacion": "`partitionBy` suporta colunas de string sem restrição; esta não é uma limitação válida."
+      },
+      {
+        "texto_opcion": "A janela retornará resultados classificados por `departamento` em ordem alfabética em vez de por `salário`.",
+        "es_correcta": false,
+        "explicacion": "A cláusula `orderBy(col(\"salary\").desc())` controla a ordem de classificação; a classificação do resultado final não é afetada pelo nome do departamento."
       }
     ],
     "tags": [
@@ -757,22 +757,22 @@
     "pregunta": "Um engenheiro de dados executa `df.groupBy(\"product_id\").agg(sum(\"quantity\"), avg(\"price\")).explain()` e percebe um estágio de shuffle no plano físico.\n\nPor que esse shuffle ocorre?",
     "opciones": [
       {
+        "texto_opcion": "O shuffle é causado pela chamada de `.explain()`, que força a redistribuição dos dados, `.explain()` exibe apenas o plano de execução — `.explain()` exibe apenas o plano de execução — `.explain()` exibe apenas o plano de execução; ele não aciona nenhuma movimentação de dados nem afeta o comportamento da consulta.",
+        "es_correcta": false,
+        "explicacion": "`.explain()` exibe apenas o plano de execução; ele não aciona nenhuma movimentação de dados nem afeta o comportamento da consulta."
+      },
+      {
+        "texto_opcion": "Embaralhamentos ocorrem apenas ao usar `avg()`, nunca com `sum()`, tanto `sum()` quanto `avg()` são funções agregadas que podem acionar um — tanto `sum()` quanto `avg()` são funções agregadas que podem acionar um shuffle.",
+        "es_correcta": false,
+        "explicacion": "Tanto `sum()` quanto `avg()` são funções agregadas que podem acionar um shuffle; o shuffle é causado pela operação de agrupamento em si, não pela função específica."
+      },
+      {
         "texto_opcion": "Linhas com o mesmo `product_id` podem residir em partições diferentes, portanto, o Spark deve embaralhar os dados para reunir as chaves correspondentes antes da agregação.",
         "es_correcta": true,
         "explicacion": "O agrupamento requer a localização conjunta de todas as linhas da mesma chave, o que normalmente exige uma ordem aleatória, a menos que os dados já estejam particionados por essa chave."
       },
       {
-        "texto_opcion": "Embaralhamentos ocorrem apenas ao usar `avg()`, nunca com `sum()`, tanto `sum()` quanto `avg()` são funções agregadas que podem acionar um.",
-        "es_correcta": false,
-        "explicacion": "Tanto `sum()` quanto `avg()` são funções agregadas que podem acionar um shuffle; o shuffle é causado pela operação de agrupamento em si, não pela função específica."
-      },
-      {
-        "texto_opcion": "O shuffle é causado pela chamada de `.explain()`, que força a redistribuição dos dados, `.explain()` exibe apenas o plano de execução",
-        "es_correcta": false,
-        "explicacion": "`.explain()` exibe apenas o plano de execução; ele não aciona nenhuma movimentação de dados nem afeta o comportamento da consulta."
-      },
-      {
-        "texto_opcion": "Embaralhamentos acontecem porque duas funções agregadas foram usadas na mesma chamada `.agg()`",
+        "texto_opcion": "Embaralhamentos acontecem porque duas funções agregadas foram usadas na mesma chamada `.agg()` — usar múltiplas funções agregadas em uma chamada `.agg()` não causa shuffles adicionais — usar múltiplas funções agregadas em uma chamada `.agg()` não causa shuffles adicionais.",
         "es_correcta": false,
         "explicacion": "Usar múltiplas funções agregadas em uma chamada `.agg()` não causa shuffles adicionais; o shuffle está vinculado à redistribuição da chave de agrupamento, computada uma vez, independentemente da contagem de funções."
       }
@@ -786,9 +786,14 @@
     "pregunta": "Qual cenário é o caso de uso mais apropriado para `approx_count_distinct` em vez de `countDistinct`?",
     "opciones": [
       {
-        "texto_opcion": "Cálculo do número exato de IDs exclusivas de pacientes para uma auditoria de conformidade regulatória",
+        "texto_opcion": "Reconciliar contagens de transações financeiras entre dois sistemas durante o fechamento do mês — a reconciliação financeira exige números exactos, pelo que uma contagem aproximada seria inadequada e poderia mascarar discrepâncias.",
         "es_correcta": false,
-        "explicacion": "Os casos de uso regulatórios e de conformidade exigem números exatos, tornando `countDistinct` a escolha apropriada em vez de uma estimativa."
+        "explicacion": "A reconciliação financeira exige números exactos, pelo que uma contagem aproximada seria inadequada e poderia mascarar discrepâncias."
+      },
+      {
+        "texto_opcion": "Validar se uma coluna de chave primária contém zero valores duplicados antes de uma operação de mesclagem — a validação da exclusividade de uma restrição de chave primária requer uma contagem exata para garantir a correção, não uma aproximação.",
+        "es_correcta": false,
+        "explicacion": "A validação da exclusividade de uma restrição de chave primária requer uma contagem exata para garantir a correção, não uma aproximação."
       },
       {
         "texto_opcion": "Gerar uma métrica diária no painel mostrando aproximadamente quantos visitantes únicos do site houve, onde a velocidade é mais importante do que a precisão exata.",
@@ -796,14 +801,9 @@
         "explicacion": "As métricas do painel que toleram pequenos erros de estimativa se beneficiam da velocidade de `approx_count_distinct`, especialmente em dados de grande escala."
       },
       {
-        "texto_opcion": "Reconciliar contagens de transações financeiras entre dois sistemas durante o fechamento do mês",
+        "texto_opcion": "Cálculo do número exato de IDs exclusivas de pacientes para uma auditoria de conformidade regulatória — os casos de uso regulatórios e de conformidade exigem números exatos, tornando `countDistinct` a escolha apropriada em vez de uma estimativa.",
         "es_correcta": false,
-        "explicacion": "A reconciliação financeira exige números exactos, pelo que uma contagem aproximada seria inadequada e poderia mascarar discrepâncias."
-      },
-      {
-        "texto_opcion": "Validar se uma coluna de chave primária contém zero valores duplicados antes de uma operação de mesclagem",
-        "es_correcta": false,
-        "explicacion": "A validação da exclusividade de uma restrição de chave primária requer uma contagem exata para garantir a correção, não uma aproximação."
+        "explicacion": "Os casos de uso regulatórios e de conformidade exigem números exatos, tornando `countDistinct` a escolha apropriada em vez de uma estimativa."
       }
     ],
     "tags": [
@@ -815,24 +815,24 @@
     "pregunta": "Um engenheiro de dados precisa desduplicar as leituras do sensor IoT, onde a mesma combinação de `sensor_id` e `reading_timestamp` pode ser relatada duas vezes devido a novas tentativas de rede, mas um `reading_value` ligeiramente diferente devido a diferenças de arredondamento de ponto flutuante entre novas tentativas ainda deve ser tratado como o mesmo evento.\n\nQual estratégia de desduplicação está correta?",
     "opciones": [
       {
-        "texto_opcion": "Use `groupBy(\"sensor_id\").count()` para identificar e remover sensores duplicados, o agrupamento apenas por `sensor_id` ignora totalmente a dimensão do.",
-        "es_correcta": false,
-        "explicacion": "O agrupamento apenas por `sensor_id` ignora totalmente a dimensão do carimbo de data/hora e trataria incorretamente todas as leituras de um sensor como duplicatas."
-      },
-      {
-        "texto_opcion": "Use `dropDuplicates()` sem argumentos para remover linhas que são totalmente idênticas, sem um subconjunto, sem um subconjunto",
-        "es_correcta": false,
-        "explicacion": "Sem um subconjunto, as linhas com `reading_value` ligeiramente diferentes devido ao arredondamento não serão consideradas duplicadas e serão retidas."
-      },
-      {
         "texto_opcion": "Use `dropDuplicates([\"sensor_id\", \"reading_timestamp\"])` para desduplicar com base apenas nas colunas-chave de identificação, ignorando pequenas diferenças em `reading_value`.",
         "es_correcta": true,
         "explicacion": "Especificar apenas as colunas-chave como subconjunto garante que as duplicatas sejam identificadas pela identidade lógica do evento, ignorando diferenças de valor inconsequentes."
       },
       {
-        "texto_opcion": "Arredonde `reading_value` para zero casas decimais e então chame `distinct()`, o arredondamento agressivo para zero casas decimais pode.",
+        "texto_opcion": "Use `dropDuplicates()` sem argumentos para remover linhas que são totalmente idênticas, sem um subconjunto, sem um subconjunto — sem um subconjunto, as linhas com `reading_value` ligeiramente diferentes devido ao arredondamento não.",
+        "es_correcta": false,
+        "explicacion": "Sem um subconjunto, as linhas com `reading_value` ligeiramente diferentes devido ao arredondamento não serão consideradas duplicadas e serão retidas."
+      },
+      {
+        "texto_opcion": "Arredonde `reading_value` para zero casas decimais e então chame `distinct()`, o arredondamento agressivo para zero casas decimais pode — o arredondamento agressivo para zero casas decimais pode destruir a precisão significativa do sensor e não é a chave de desduplicação pretendida.",
         "es_correcta": false,
         "explicacion": "O arredondamento agressivo para zero casas decimais pode destruir a precisão significativa do sensor e não é a chave de desduplicação pretendida."
+      },
+      {
+        "texto_opcion": "Use `groupBy(\"sensor_id\").count()` para identificar e remover sensores duplicados, o agrupamento apenas por `sensor_id` ignora totalmente a dimensão do — o agrupamento apenas por `sensor_id` ignora totalmente a dimensão do carimbo de data/hora e trataria incorretamente todas as leituras de um sensor como duplicatas.",
+        "es_correcta": false,
+        "explicacion": "O agrupamento apenas por `sensor_id` ignora totalmente a dimensão do carimbo de data/hora e trataria incorretamente todas as leituras de um sensor como duplicatas."
       }
     ],
     "tags": [
@@ -844,22 +844,22 @@
     "pregunta": "O que o código a seguir calcula para cada linha em `vendas` DataFrame?\n\n```python\nw = Window.partitionBy(\"region\").orderBy(\"sale_date\") \\\n    .rowsBetween(-2, 0)\ndf.withColumn(\"moving_avg\", avg(\"amount\").over(w))\n```",
     "opciones": [
       {
-        "texto_opcion": "A média das próximas duas linhas após a linha atual, os limites do quadro negativo referem-se às linhas.",
-        "es_correcta": false,
-        "explicacion": "Os limites do quadro negativo referem-se às linhas anteriores, não às seguintes; `(-2, 0)` olha para trás, não para frente."
-      },
-      {
         "texto_opcion": "Uma média móvel de três linhas de `amount` (a linha atual e as duas linhas anteriores) dentro de cada região, ordenada por `sale_date`.",
         "es_correcta": true,
         "explicacion": "`rowsBetween(-2, 0)` define um quadro que abrange a linha atual e as duas linhas anteriores, então `avg` calcula uma média móvel de 3 linhas por região."
       },
       {
-        "texto_opcion": "A `quantidade` média em toda a partição `region`, idêntica para cada linha",
+        "texto_opcion": "A `quantidade` média em toda a partição `region`, idêntica para cada linha — uma média de partição inteira exigiria `rowsBetween(Window.unboundedPreceding.",
         "es_correcta": false,
         "explicacion": "Uma média de partição inteira exigiria `rowsBetween(Window.unboundedPreceding, Window.unboundedFollowing)`, não um quadro limitado de `(-2, 0)`."
       },
       {
-        "texto_opcion": "Uma média cumulativa da primeira linha da partição até a linha atual",
+        "texto_opcion": "A média das próximas duas linhas após a linha atual, os limites do quadro negativo referem-se às linhas — os limites do quadro negativo referem-se às linhas anteriores, não às seguintes; `(-2, 0)` olha para trás, não para frente.",
+        "es_correcta": false,
+        "explicacion": "Os limites do quadro negativo referem-se às linhas anteriores, não às seguintes; `(-2, 0)` olha para trás, não para frente."
+      },
+      {
+        "texto_opcion": "Uma média cumulativa da primeira linha da partição até a linha atual — uma média cumulativa desde o início exigiria `Window.unboundedPreceding` como limite inferior, não um valor fixo de `-2`.",
         "es_correcta": false,
         "explicacion": "Uma média cumulativa desde o início exigiria `Window.unboundedPreceding` como limite inferior, não um valor fixo de `-2`."
       }

@@ -3,16 +3,6 @@
     "pregunta": "How should analytical lake folders be organized for prune-friendly Spark and Synapse SQL reads?",
     "opciones": [
       {
-        "texto_opcion": "Store only in Cosmos DB documents, cosmos is not the primary.",
-        "es_correcta": false,
-        "explicacion": "Cosmos is not the primary lake file store for analytical scans."
-      },
-      {
-        "texto_opcion": "Hive-style folders such as /year=/month=/day=/region= with Parquet",
-        "es_correcta": true,
-        "explicacion": "Directory partitioning enables partition elimination in Spark and serverless SQL."
-      },
-      {
         "texto_opcion": "One giant CSV with no folders, unpartitioned CSV forces full.",
         "es_correcta": false,
         "explicacion": "Unpartitioned CSV forces full scans and weak compression."
@@ -21,6 +11,16 @@
         "texto_opcion": "Random GUID file names in one folder, no partition columns means.",
         "es_correcta": false,
         "explicacion": "No partition columns means engines cannot prune."
+      },
+      {
+        "texto_opcion": "Hive-style folders such as /year=/month=/day=/region= with Parquet.",
+        "es_correcta": true,
+        "explicacion": "Directory partitioning enables partition elimination in Spark and serverless SQL."
+      },
+      {
+        "texto_opcion": "Store only in Cosmos DB documents, cosmos is not the primary.",
+        "es_correcta": false,
+        "explicacion": "Cosmos is not the primary lake file store for analytical scans."
       }
     ],
     "tags": [
@@ -32,9 +32,9 @@
     "pregunta": "A travel platform (near-real-time dashboards, region eastus) must: Event Hubs / Stream Analytics output must land in date-hour folders. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Configure output path pattern with date and hour partitions.",
-        "es_correcta": true,
-        "explicacion": "Time-based partitions keep streaming landings pruneable."
+        "texto_opcion": "Write all events to one forever-growing file, unmanageable and unprunable.",
+        "es_correcta": false,
+        "explicacion": "Unmanageable and unprunable."
       },
       {
         "texto_opcion": "Ignore path design entirely, breaks downstream partition elimination.",
@@ -42,9 +42,9 @@
         "explicacion": "Breaks downstream partition elimination."
       },
       {
-        "texto_opcion": "Write all events to one forever-growing file, unmanageable and unprunable.",
-        "es_correcta": false,
-        "explicacion": "Unmanageable and unprunable."
+        "texto_opcion": "Configure output path pattern with date and hour partitions.",
+        "es_correcta": true,
+        "explicacion": "Time-based partitions keep streaming landings pruneable."
       },
       {
         "texto_opcion": "Random UUID folders per event, too granular; listing overhead.",
@@ -61,24 +61,24 @@
     "pregunta": "Online marketplace scenario — choose partition columns that are selective enough without creating millions of tiny folders. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Partition only by a boolean flag, too coarse; weak pruning.",
+        "texto_opcion": "Never partition any large fact landing as the primary configured end-to-end for the stated workload.",
         "es_correcta": false,
-        "explicacion": "Too coarse; weak pruning."
+        "explicacion": "Forces full scans."
       },
       {
-        "texto_opcion": "Partition by unique transaction_id only",
-        "es_correcta": false,
-        "explicacion": "Extreme cardinality creates tiny partitions."
-      },
-      {
-        "texto_opcion": "Partition on moderate-cardinality columns like date + major region",
+        "texto_opcion": "Partition on moderate-cardinality columns like date + major region.",
         "es_correcta": true,
         "explicacion": "Balance prune power against small-file and listing overhead."
       },
       {
-        "texto_opcion": "Never partition any large fact landing as the primary.",
+        "texto_opcion": "Partition only by a boolean flag, too coarse; weak pruning selected to meet the constraints described here.",
         "es_correcta": false,
-        "explicacion": "Forces full scans."
+        "explicacion": "Too coarse; weak pruning."
+      },
+      {
+        "texto_opcion": "Partition by unique transaction_id only — extreme cardinality creates tiny partitions.",
+        "es_correcta": false,
+        "explicacion": "Extreme cardinality creates tiny partitions."
       }
     ],
     "tags": [
@@ -90,9 +90,9 @@
     "pregunta": "A insurance carrier (~200 million rows/day, region northeurope) must: Spark jobs write skewed output with thousands of tiny Parquet files. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Disable compression used as the main path in this architecture.",
+        "texto_opcion": "Increase tiny files further, worsens listing and planning overhead.",
         "es_correcta": false,
-        "explicacion": "Larger I/O."
+        "explicacion": "Worsens listing and planning overhead."
       },
       {
         "texto_opcion": "Write one empty schema file only selected to meet the used as the main.",
@@ -100,14 +100,14 @@
         "explicacion": "No data."
       },
       {
-        "texto_opcion": "Repartition/coalesce appropriately and target larger Parquet files",
-        "es_correcta": true,
-        "explicacion": "Controlling partition count reduces small-file problems."
+        "texto_opcion": "Disable compression used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Larger I/O."
       },
       {
-        "texto_opcion": "Increase tiny files further, worsens listing and planning overhead.",
-        "es_correcta": false,
-        "explicacion": "Worsens listing and planning overhead."
+        "texto_opcion": "Repartition/coalesce appropriately and target larger Parquet files.",
+        "es_correcta": true,
+        "explicacion": "Controlling partition count reduces small-file problems."
       }
     ],
     "tags": [
@@ -119,14 +119,14 @@
     "pregunta": "Travel platform scenario — need to roll back incorrect overwrite on Delta tables after a bad job. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Use Delta time travel / restore to prior version.",
-        "es_correcta": true,
-        "explicacion": "Delta history enables controlled rollback of lake tables."
-      },
-      {
         "texto_opcion": "Only purge Key Vault secrets, does not restore table versions.",
         "es_correcta": false,
         "explicacion": "Does not restore table versions."
+      },
+      {
+        "texto_opcion": "Use Delta time travel / restore to prior version.",
+        "es_correcta": true,
+        "explicacion": "Delta history enables controlled rollback of lake tables."
       },
       {
         "texto_opcion": "Ignore the bad overwrite, leaves corrupt curated data.",
@@ -148,11 +148,6 @@
     "pregunta": "For a gaming studio workload with ~200 million rows/day: serverless SQL queries must filter on partition columns present in the path. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Rename partitions after every query, breaks stable path contracts.",
-        "es_correcta": false,
-        "explicacion": "Breaks stable path contracts."
-      },
-      {
         "texto_opcion": "Push predicates on partition columns in OPENROWSET/external queries.",
         "es_correcta": true,
         "explicacion": "Partition elimination only works when filters align with path layout."
@@ -161,6 +156,11 @@
         "texto_opcion": "Always SELECT * without date filters on multi-year lakes applied across.",
         "es_correcta": false,
         "explicacion": "Full scan cost."
+      },
+      {
+        "texto_opcion": "Rename partitions after every query, breaks stable path contracts.",
+        "es_correcta": false,
+        "explicacion": "Breaks stable path contracts."
       },
       {
         "texto_opcion": "Filter only after downloading all files locally, defeats cloud pruning.",
@@ -177,24 +177,24 @@
     "pregunta": "streaming partitions by event time but late events arrive hours later. Context: insurance carrier, sub-second interactive queries.",
     "opciones": [
       {
-        "texto_opcion": "Use watermarking / late-arrival windows and write to correct event-time partitions",
-        "es_correcta": true,
-        "explicacion": "Event-time partitioning with late-arrival handling keeps analytics correct."
-      },
-      {
         "texto_opcion": "Store late events in email inboxes used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Not a lake design."
       },
       {
-        "texto_opcion": "Always partition only by processing time and never correct, misplaces late events.",
-        "es_correcta": false,
-        "explicacion": "Misplaces late events."
+        "texto_opcion": "Use watermarking / late-arrival windows and write to correct event-time partitions.",
+        "es_correcta": true,
+        "explicacion": "Event-time partitioning with late-arrival handling keeps analytics correct."
       },
       {
         "texto_opcion": "Drop all late events silently without policy, may violate completeness SLAs.",
         "es_correcta": false,
         "explicacion": "May violate completeness SLAs."
+      },
+      {
+        "texto_opcion": "Always partition only by processing time and never correct, misplaces late events.",
+        "es_correcta": false,
+        "explicacion": "Misplaces late events."
       }
     ],
     "tags": [
@@ -206,24 +206,24 @@
     "pregunta": "For a insurance carrier workload with sub-second interactive queries: hourly micro-batches left too many small files in gold tables. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Schedule compaction / OPTIMIZE-style jobs to rewrite larger files",
-        "es_correcta": true,
-        "explicacion": "Periodic compaction restores scan efficiency after micro-batch landings."
-      },
-      {
-        "texto_opcion": "Delete partition metadata only, does not fix file sizes.",
-        "es_correcta": false,
-        "explicacion": "Does not fix file sizes."
-      },
-      {
-        "texto_opcion": "Disable all reads until files multiply more used as the.",
+        "texto_opcion": "Disable all reads until files multiply more used as the as the default production.",
         "es_correcta": false,
         "explicacion": "Worsens the problem."
       },
       {
-        "texto_opcion": "Convert Parquet to uncompressed CSV mid-flight used as the.",
+        "texto_opcion": "Delete partition metadata only, does not fix file sizes plausible at first glance.",
+        "es_correcta": false,
+        "explicacion": "Does not fix file sizes."
+      },
+      {
+        "texto_opcion": "Convert Parquet to uncompressed CSV mid-flight used as the plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Hurts performance."
+      },
+      {
+        "texto_opcion": "Schedule compaction / OPTIMIZE-style jobs to rewrite larger files.",
+        "es_correcta": true,
+        "explicacion": "Periodic compaction restores scan efficiency after micro-batch landings."
       }
     ],
     "tags": [
@@ -240,14 +240,14 @@
         "explicacion": "Hot partitions need key redesign or salting for balance."
       },
       {
-        "texto_opcion": "Keep the hot key and increase tiny file count only applied across.",
-        "es_correcta": false,
-        "explicacion": "Does not fix skew."
-      },
-      {
         "texto_opcion": "Use a constant partition value for all rows, creates one giant partition.",
         "es_correcta": false,
         "explicacion": "Creates one giant partition."
+      },
+      {
+        "texto_opcion": "Keep the hot key and increase tiny file count only applied across.",
+        "es_correcta": false,
+        "explicacion": "Does not fix skew."
       },
       {
         "texto_opcion": "Replicate the entire lake to one folder applied across prioritized for.",
@@ -264,24 +264,24 @@
     "pregunta": "Incident review (northeurope): materialize a curated Parquet slice into Dedicated SQL with preserved grain. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Browser LocalStorage staging configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Not a warehouse path."
-      },
-      {
-        "texto_opcion": "Email Parquet as attachments applied across environments.",
-        "es_correcta": false,
-        "explicacion": "Not engineering."
-      },
-      {
-        "texto_opcion": "CTAS/CETAS from partitioned external sources into distributed tables",
+        "texto_opcion": "CTAS/CETAS from partitioned external sources into distributed tables.",
         "es_correcta": true,
         "explicacion": "CTAS/CETAS efficiently materializes lake partitions into SQL pool tables."
       },
       {
-        "texto_opcion": "GUI copy-paste millions of rows adopted as the standard configured.",
+        "texto_opcion": "Browser LocalStorage staging configured end-to-end for this workload plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Not a warehouse path."
+      },
+      {
+        "texto_opcion": "GUI copy-paste millions of rows adopted as the standard configured plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Not scalable."
+      },
+      {
+        "texto_opcion": "Email Parquet as attachments applied across environments adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Not engineering."
       }
     ],
     "tags": [
@@ -298,11 +298,6 @@
         "explicacion": "Shallow predictable layouts reduce listing overhead and cognitive load."
       },
       {
-        "texto_opcion": "Encode partitions only inside filenames with no folders, weaker engine pruning support.",
-        "es_correcta": false,
-        "explicacion": "Weaker engine pruning support."
-      },
-      {
         "texto_opcion": "Nest 20 GUID levels per file, listing and discovery suffer, listing and discovery suffer.",
         "es_correcta": false,
         "explicacion": "Listing and discovery suffer."
@@ -311,6 +306,11 @@
         "texto_opcion": "Put all years in one flat mega-folder of millions of files configured end-to-end for this workload.",
         "es_correcta": false,
         "explicacion": "Also listing-heavy."
+      },
+      {
+        "texto_opcion": "Encode partitions only inside filenames with no folders, weaker engine pruning support.",
+        "es_correcta": false,
+        "explicacion": "Weaker engine pruning support."
       }
     ],
     "tags": [
@@ -322,14 +322,9 @@
     "pregunta": "For a industrial IoT platform workload with hourly batch windows: daily job must replace only yesterday's partition, not the whole table. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Drop the storage account nightly as the primary design for adopted as the.",
+        "texto_opcion": "Append duplicates without replace semantics, breaks uniqueness assumptions.",
         "es_correcta": false,
-        "explicacion": "Catastrophic."
-      },
-      {
-        "texto_opcion": "Full table truncate before every daily load, destroys unrelated partitions.",
-        "es_correcta": false,
-        "explicacion": "Destroys unrelated partitions."
+        "explicacion": "Breaks uniqueness assumptions."
       },
       {
         "texto_opcion": "Dynamic partition overwrite for the affected date partition.",
@@ -337,9 +332,14 @@
         "explicacion": "Partition-scoped overwrite preserves history for other dates."
       },
       {
-        "texto_opcion": "Append duplicates without replace semantics, breaks uniqueness assumptions.",
+        "texto_opcion": "Full table truncate before every daily load, destroys unrelated partitions.",
         "es_correcta": false,
-        "explicacion": "Breaks uniqueness assumptions."
+        "explicacion": "Destroys unrelated partitions."
+      },
+      {
+        "texto_opcion": "Drop the storage account nightly as the primary design for adopted as the.",
+        "es_correcta": false,
+        "explicacion": "Catastrophic."
       }
     ],
     "tags": [
@@ -351,9 +351,9 @@
     "pregunta": "Industrial iot platform scenario — landing zone currently CSV; analytics team complains about scan bills. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Move everything to Redis hashes, not analytical lake storage, not analytical lake storage.",
-        "es_correcta": false,
-        "explicacion": "Not analytical lake storage."
+        "texto_opcion": "Convert curated layers to compressed Parquet with partitions.",
+        "es_correcta": true,
+        "explicacion": "Parquet + partitions cuts scanned bytes versus wide CSV scans."
       },
       {
         "texto_opcion": "Keep CSV and increase Dedicated DWU only, treats symptom, treats symptom; lake format still weak.",
@@ -361,14 +361,14 @@
         "explicacion": "Treats symptom; lake format still weak."
       },
       {
-        "texto_opcion": "Store CSV inside ZIP inside another ZIP, adds complexity without columnar pruning.",
+        "texto_opcion": "Move everything to Redis hashes, not analytical lake storage, not analytical lake storage.",
         "es_correcta": false,
-        "explicacion": "Adds complexity without columnar pruning."
+        "explicacion": "Not analytical lake storage."
       },
       {
-        "texto_opcion": "Convert curated layers to compressed Parquet with partitions.",
-        "es_correcta": true,
-        "explicacion": "Parquet + partitions cuts scanned bytes versus wide CSV scans."
+        "texto_opcion": "Store CSV inside ZIP inside another ZIP, adds complexity without columnar pruning often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Adds complexity without columnar pruning."
       }
     ],
     "tags": [
@@ -380,11 +380,6 @@
     "pregunta": "A payments fintech (near-real-time dashboards, region eastus) must: several Event Hub namespaces write independently; need unified date partitions. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Let each team invent incompatible folder schemas, breaks shared pipelines.",
-        "es_correcta": false,
-        "explicacion": "Breaks shared pipelines."
-      },
-      {
         "texto_opcion": "Ignore time zones and mix UTC/local randomly, corrupt partition boundaries.",
         "es_correcta": false,
         "explicacion": "Corrupt partition boundaries."
@@ -395,7 +390,12 @@
         "explicacion": "No prune path."
       },
       {
-        "texto_opcion": "Standardize path templates and clock/time conventions across producers",
+        "texto_opcion": "Let each team invent incompatible folder schemas, breaks shared pipelines.",
+        "es_correcta": false,
+        "explicacion": "Breaks shared pipelines."
+      },
+      {
+        "texto_opcion": "Standardize path templates and clock/time conventions across producers.",
         "es_correcta": true,
         "explicacion": "Consistent path contracts enable unified downstream pruning."
       }
@@ -419,14 +419,14 @@
         "explicacion": "No partition columns means engines cannot prune."
       },
       {
+        "texto_opcion": "Hive-style folders such as /year=/month=/day=/region= with Parquet.",
+        "es_correcta": true,
+        "explicacion": "Directory partitioning enables partition elimination in Spark and serverless SQL."
+      },
+      {
         "texto_opcion": "Store only in Cosmos DB documents, cosmos is not the primary.",
         "es_correcta": false,
         "explicacion": "Cosmos is not the primary lake file store for analytical scans."
-      },
-      {
-        "texto_opcion": "Hive-style folders such as /year=/month=/day=/region= with Parquet",
-        "es_correcta": true,
-        "explicacion": "Directory partitioning enables partition elimination in Spark and serverless SQL."
       }
     ],
     "tags": [
@@ -438,16 +438,6 @@
     "pregunta": "Healthcare provider scenario — Event Hubs / Stream Analytics output must land in date-hour folders. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Configure output path pattern with date and hour partitions.",
-        "es_correcta": true,
-        "explicacion": "Time-based partitions keep streaming landings pruneable."
-      },
-      {
-        "texto_opcion": "Write all events to one forever-growing file, unmanageable and unprunable.",
-        "es_correcta": false,
-        "explicacion": "Unmanageable and unprunable."
-      },
-      {
         "texto_opcion": "Random UUID folders per event, too granular; listing overhead.",
         "es_correcta": false,
         "explicacion": "Too granular; listing overhead."
@@ -456,6 +446,16 @@
         "texto_opcion": "Ignore path design entirely, breaks downstream partition elimination.",
         "es_correcta": false,
         "explicacion": "Breaks downstream partition elimination."
+      },
+      {
+        "texto_opcion": "Write all events to one forever-growing file, unmanageable and unprunable.",
+        "es_correcta": false,
+        "explicacion": "Unmanageable and unprunable."
+      },
+      {
+        "texto_opcion": "Configure output path pattern with date and hour partitions.",
+        "es_correcta": true,
+        "explicacion": "Time-based partitions keep streaming landings pruneable."
       }
     ],
     "tags": [
@@ -467,24 +467,24 @@
     "pregunta": "Telecom operator scenario — choose partition columns that are selective enough without creating millions of tiny folders. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Partition by unique transaction_id only",
+        "texto_opcion": "Partition by unique transaction_id only — extreme cardinality creates tiny partitions.",
         "es_correcta": false,
         "explicacion": "Extreme cardinality creates tiny partitions."
       },
       {
-        "texto_opcion": "Partition only by a boolean flag, too coarse; weak pruning.",
-        "es_correcta": false,
-        "explicacion": "Too coarse; weak pruning."
+        "texto_opcion": "Partition on moderate-cardinality columns like date + major region.",
+        "es_correcta": true,
+        "explicacion": "Balance prune power against small-file and listing overhead."
       },
       {
-        "texto_opcion": "Never partition any large fact landing configured.",
+        "texto_opcion": "Never partition any large fact landing configured adopted as the standard pattern for the team.",
         "es_correcta": false,
         "explicacion": "Forces full scans."
       },
       {
-        "texto_opcion": "Partition on moderate-cardinality columns like date + major region",
-        "es_correcta": true,
-        "explicacion": "Balance prune power against small-file and listing overhead."
+        "texto_opcion": "Partition only by a boolean flag, too coarse; weak pruning plausible at first glance, yet weaker than the best option.",
+        "es_correcta": false,
+        "explicacion": "Too coarse; weak pruning."
       }
     ],
     "tags": [
@@ -496,24 +496,24 @@
     "pregunta": "For a logistics carrier workload with sub-second interactive queries: Spark jobs write skewed output with thousands of tiny Parquet files. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Write one empty schema file only adopted as the standard.",
-        "es_correcta": false,
-        "explicacion": "No data."
-      },
-      {
-        "texto_opcion": "Repartition/coalesce appropriately and target larger Parquet files",
+        "texto_opcion": "Repartition/coalesce appropriately and target larger Parquet files.",
         "es_correcta": true,
         "explicacion": "Controlling partition count reduces small-file problems."
       },
       {
-        "texto_opcion": "Disable compression as the default production choice here.",
+        "texto_opcion": "Increase tiny files further, worsens listing and planning overhead often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Worsens listing and planning overhead."
+      },
+      {
+        "texto_opcion": "Disable compression as the default production choice here as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Larger I/O."
       },
       {
-        "texto_opcion": "Increase tiny files further, worsens listing and planning overhead.",
+        "texto_opcion": "Write one empty schema file only adopted as the standard adopted as the standard pattern for the team.",
         "es_correcta": false,
-        "explicacion": "Worsens listing and planning overhead."
+        "explicacion": "No data."
       }
     ],
     "tags": [
@@ -525,9 +525,9 @@
     "pregunta": "For a telecom operator workload with hourly batch windows: need to roll back incorrect overwrite on Delta tables after a bad job. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Only purge Key Vault secrets, does not restore table versions.",
+        "texto_opcion": "Ignore the bad overwrite, leaves corrupt curated data.",
         "es_correcta": false,
-        "explicacion": "Does not restore table versions."
+        "explicacion": "Leaves corrupt curated data."
       },
       {
         "texto_opcion": "Use Delta time travel / restore to prior version.",
@@ -535,14 +535,14 @@
         "explicacion": "Delta history enables controlled rollback of lake tables."
       },
       {
-        "texto_opcion": "Ignore the bad overwrite, leaves corrupt curated data.",
-        "es_correcta": false,
-        "explicacion": "Leaves corrupt curated data."
-      },
-      {
         "texto_opcion": "Recreate the entire Azure subscription, extreme and unrelated.",
         "es_correcta": false,
         "explicacion": "Extreme and unrelated."
+      },
+      {
+        "texto_opcion": "Only purge Key Vault secrets, does not restore table versions.",
+        "es_correcta": false,
+        "explicacion": "Does not restore table versions."
       }
     ],
     "tags": [
@@ -553,6 +553,11 @@
   {
     "pregunta": "For a travel platform workload with strict GDPR residency: serverless SQL queries must filter on partition columns present in the path. Best choice (variant 2)?",
     "opciones": [
+      {
+        "texto_opcion": "Always SELECT * without date filters on multi-year lakes adopted as the.",
+        "es_correcta": false,
+        "explicacion": "Full scan cost."
+      },
       {
         "texto_opcion": "Push predicates on partition columns in OPENROWSET/external queries.",
         "es_correcta": true,
@@ -567,11 +572,6 @@
         "texto_opcion": "Rename partitions after every query, breaks stable path contracts.",
         "es_correcta": false,
         "explicacion": "Breaks stable path contracts."
-      },
-      {
-        "texto_opcion": "Always SELECT * without date filters on multi-year lakes adopted as the.",
-        "es_correcta": false,
-        "explicacion": "Full scan cost."
       }
     ],
     "tags": [
@@ -583,6 +583,11 @@
     "pregunta": "A industrial IoT platform (sub-second interactive queries, region brazilsouth) must: streaming partitions by event time but late events arrive hours later. Which option fits best? Constraint set #2.",
     "opciones": [
       {
+        "texto_opcion": "Drop all late events silently without policy, may violate completeness SLAs.",
+        "es_correcta": false,
+        "explicacion": "May violate completeness SLAs."
+      },
+      {
         "texto_opcion": "Always partition only by processing time and never correct, misplaces late events.",
         "es_correcta": false,
         "explicacion": "Misplaces late events."
@@ -593,12 +598,7 @@
         "explicacion": "Not a lake design."
       },
       {
-        "texto_opcion": "Drop all late events silently without policy, may violate completeness SLAs.",
-        "es_correcta": false,
-        "explicacion": "May violate completeness SLAs."
-      },
-      {
-        "texto_opcion": "Use watermarking / late-arrival windows and write to correct event-time partitions",
+        "texto_opcion": "Use watermarking / late-arrival windows and write to correct event-time partitions.",
         "es_correcta": true,
         "explicacion": "Event-time partitioning with late-arrival handling keeps analytics correct."
       }
@@ -612,24 +612,24 @@
     "pregunta": "A online marketplace (~50,000 events/s, region southeastasia) must: hourly micro-batches left too many small files in gold tables. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Schedule compaction / OPTIMIZE-style jobs to rewrite larger files",
+        "texto_opcion": "Delete partition metadata only, does not fix file sizes as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Does not fix file sizes."
+      },
+      {
+        "texto_opcion": "Schedule compaction / OPTIMIZE-style jobs to rewrite larger files.",
         "es_correcta": true,
         "explicacion": "Periodic compaction restores scan efficiency after micro-batch landings."
       },
       {
-        "texto_opcion": "Convert Parquet to uncompressed CSV mid-flight as the primary.",
-        "es_correcta": false,
-        "explicacion": "Hurts performance."
-      },
-      {
-        "texto_opcion": "Disable all reads until files multiply more as the primary.",
+        "texto_opcion": "Disable all reads until files multiply more as the primary plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Worsens the problem."
       },
       {
-        "texto_opcion": "Delete partition metadata only, does not fix file sizes.",
+        "texto_opcion": "Convert Parquet to uncompressed CSV mid-flight as the primary configured end-to-end for the stated workload.",
         "es_correcta": false,
-        "explicacion": "Does not fix file sizes."
+        "explicacion": "Hurts performance."
       }
     ],
     "tags": [
@@ -670,24 +670,24 @@
     "pregunta": "A travel platform (~5 TB/day, region southeastasia) must: materialize a curated Parquet slice into Dedicated SQL with preserved grain. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "CTAS/CETAS from partitioned external sources into distributed tables",
+        "texto_opcion": "CTAS/CETAS from partitioned external sources into distributed tables.",
         "es_correcta": true,
         "explicacion": "CTAS/CETAS efficiently materializes lake partitions into SQL pool tables."
       },
       {
-        "texto_opcion": "GUI copy-paste millions of rows used as the main path in.",
+        "texto_opcion": "GUI copy-paste millions of rows used as the main path in selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Not scalable."
       },
       {
-        "texto_opcion": "Email Parquet as attachments selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Not engineering."
-      },
-      {
-        "texto_opcion": "Browser LocalStorage staging configured end-to-end for this workload.",
+        "texto_opcion": "Browser LocalStorage staging configured end-to-end for this workload used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Not a warehouse path."
+      },
+      {
+        "texto_opcion": "Email Parquet as attachments selected to meet the stated constraints configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Not engineering."
       }
     ],
     "tags": [
@@ -698,11 +698,6 @@
   {
     "pregunta": "For a payments fintech workload with sub-second interactive queries: excessive nested folders slow listing for Spark job planning. Best choice (variant 2)?",
     "opciones": [
-      {
-        "texto_opcion": "Keep a shallow, consistent partition scheme (e.g., date then region).",
-        "es_correcta": true,
-        "explicacion": "Shallow predictable layouts reduce listing overhead and cognitive load."
-      },
       {
         "texto_opcion": "Nest 20 GUID levels per file, listing and discovery suffer, listing and discovery suffer.",
         "es_correcta": false,
@@ -717,6 +712,11 @@
         "texto_opcion": "Put all years in one flat mega-folder of millions of files as the default production choice here.",
         "es_correcta": false,
         "explicacion": "Also listing-heavy."
+      },
+      {
+        "texto_opcion": "Keep a shallow, consistent partition scheme (e.g., date then region).",
+        "es_correcta": true,
+        "explicacion": "Shallow predictable layouts reduce listing overhead and cognitive load."
       }
     ],
     "tags": [
@@ -757,24 +757,24 @@
     "pregunta": "landing zone currently CSV; analytics team complains about scan bills. Context: logistics carrier, sub-second interactive queries. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Store CSV inside ZIP inside another ZIP, adds complexity without columnar pruning.",
-        "es_correcta": false,
-        "explicacion": "Adds complexity without columnar pruning."
-      },
-      {
-        "texto_opcion": "Move everything to Redis hashes, not analytical lake storage, not analytical lake storage.",
-        "es_correcta": false,
-        "explicacion": "Not analytical lake storage."
-      },
-      {
         "texto_opcion": "Keep CSV and increase Dedicated DWU only, treats symptom, treats symptom; lake format still weak.",
         "es_correcta": false,
         "explicacion": "Treats symptom; lake format still weak."
       },
       {
+        "texto_opcion": "Store CSV inside ZIP inside another ZIP, adds complexity without columnar pruning as the default production choice in this scenario.",
+        "es_correcta": false,
+        "explicacion": "Adds complexity without columnar pruning."
+      },
+      {
         "texto_opcion": "Convert curated layers to compressed Parquet with partitions.",
         "es_correcta": true,
         "explicacion": "Parquet + partitions cuts scanned bytes versus wide CSV scans."
+      },
+      {
+        "texto_opcion": "Move everything to Redis hashes, not analytical lake storage, not analytical lake storage.",
+        "es_correcta": false,
+        "explicacion": "Not analytical lake storage."
       }
     ],
     "tags": [
@@ -791,12 +791,7 @@
         "explicacion": "No prune path."
       },
       {
-        "texto_opcion": "Ignore time zones and mix UTC/local randomly, corrupt partition boundaries.",
-        "es_correcta": false,
-        "explicacion": "Corrupt partition boundaries."
-      },
-      {
-        "texto_opcion": "Standardize path templates and clock/time conventions across producers",
+        "texto_opcion": "Standardize path templates and clock/time conventions across producers.",
         "es_correcta": true,
         "explicacion": "Consistent path contracts enable unified downstream pruning."
       },
@@ -804,6 +799,11 @@
         "texto_opcion": "Let each team invent incompatible folder schemas, breaks shared pipelines.",
         "es_correcta": false,
         "explicacion": "Breaks shared pipelines."
+      },
+      {
+        "texto_opcion": "Ignore time zones and mix UTC/local randomly, corrupt partition boundaries.",
+        "es_correcta": false,
+        "explicacion": "Corrupt partition boundaries."
       }
     ],
     "tags": [
@@ -815,9 +815,9 @@
     "pregunta": "A travel platform (~50,000 events/s, region southeastasia) must: partition Parquet landing zones by date and region for prune-friendly Spark/Synapse reads. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Hive-style folders such as /year=/month=/day=/region= with Parquet",
-        "es_correcta": true,
-        "explicacion": "Directory partitioning enables partition elimination in Spark and serverless SQL."
+        "texto_opcion": "Random GUID file names in one folder, no partition columns means.",
+        "es_correcta": false,
+        "explicacion": "No partition columns means engines cannot prune."
       },
       {
         "texto_opcion": "Store only in Cosmos DB documents, cosmos is not the primary.",
@@ -830,9 +830,9 @@
         "explicacion": "Unpartitioned CSV forces full scans and weak compression."
       },
       {
-        "texto_opcion": "Random GUID file names in one folder, no partition columns means.",
-        "es_correcta": false,
-        "explicacion": "No partition columns means engines cannot prune."
+        "texto_opcion": "Hive-style folders such as /year=/month=/day=/region= with Parquet.",
+        "es_correcta": true,
+        "explicacion": "Directory partitioning enables partition elimination in Spark and serverless SQL."
       }
     ],
     "tags": [
@@ -844,14 +844,14 @@
     "pregunta": "Incident review (australiaeast): Event Hubs / Stream Analytics output must land in date-hour folders. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Write all events to one forever-growing file, unmanageable and unprunable.",
-        "es_correcta": false,
-        "explicacion": "Unmanageable and unprunable."
-      },
-      {
         "texto_opcion": "Ignore path design entirely, breaks downstream partition elimination.",
         "es_correcta": false,
         "explicacion": "Breaks downstream partition elimination."
+      },
+      {
+        "texto_opcion": "Write all events to one forever-growing file, unmanageable and unprunable.",
+        "es_correcta": false,
+        "explicacion": "Unmanageable and unprunable."
       },
       {
         "texto_opcion": "Configure output path pattern with date and hour partitions.",
@@ -873,24 +873,24 @@
     "pregunta": "Incident review (eastus): choose partition columns that are selective enough without creating millions of tiny folders. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Partition on moderate-cardinality columns like date + major region",
-        "es_correcta": true,
-        "explicacion": "Balance prune power against small-file and listing overhead."
-      },
-      {
-        "texto_opcion": "Never partition any large fact landing selected to meet.",
-        "es_correcta": false,
-        "explicacion": "Forces full scans."
-      },
-      {
-        "texto_opcion": "Partition by unique transaction_id only",
+        "texto_opcion": "Partition by unique transaction_id only — extreme cardinality creates tiny partitions.",
         "es_correcta": false,
         "explicacion": "Extreme cardinality creates tiny partitions."
       },
       {
-        "texto_opcion": "Partition only by a boolean flag, too coarse; weak pruning.",
+        "texto_opcion": "Partition only by a boolean flag, too coarse; weak pruning plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Too coarse; weak pruning."
+      },
+      {
+        "texto_opcion": "Never partition any large fact landing selected to meet prioritized for simplicity.",
+        "es_correcta": false,
+        "explicacion": "Forces full scans."
+      },
+      {
+        "texto_opcion": "Partition on moderate-cardinality columns like date + major region.",
+        "es_correcta": true,
+        "explicacion": "Balance prune power against small-file and listing overhead."
       }
     ],
     "tags": [
@@ -902,22 +902,22 @@
     "pregunta": "A media streaming company (petabyte-scale historical data, region westeurope) must: Spark jobs write skewed output with thousands of tiny Parquet files. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Disable compression as the primary design for this requirement.",
+        "texto_opcion": "Disable compression as the primary design for this requirement prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Larger I/O."
       },
       {
-        "texto_opcion": "Repartition/coalesce appropriately and target larger Parquet files",
+        "texto_opcion": "Repartition/coalesce appropriately and target larger Parquet files.",
         "es_correcta": true,
         "explicacion": "Controlling partition count reduces small-file problems."
       },
       {
-        "texto_opcion": "Increase tiny files further, worsens listing and planning overhead.",
+        "texto_opcion": "Increase tiny files further, worsens listing and planning overhead applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Worsens listing and planning overhead."
       },
       {
-        "texto_opcion": "Write one empty schema file only used as the main path in.",
+        "texto_opcion": "Write one empty schema file only used as the main path in as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "No data."
       }
@@ -931,24 +931,24 @@
     "pregunta": "need to roll back incorrect overwrite on Delta tables after a bad job. Context: healthcare provider, petabyte-scale historical data. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Ignore the bad overwrite, leaves corrupt curated data.",
-        "es_correcta": false,
-        "explicacion": "Leaves corrupt curated data."
-      },
-      {
-        "texto_opcion": "Recreate the entire Azure subscription, extreme and unrelated.",
-        "es_correcta": false,
-        "explicacion": "Extreme and unrelated."
-      },
-      {
         "texto_opcion": "Use Delta time travel / restore to prior version.",
         "es_correcta": true,
         "explicacion": "Delta history enables controlled rollback of lake tables."
       },
       {
+        "texto_opcion": "Ignore the bad overwrite, leaves corrupt curated data.",
+        "es_correcta": false,
+        "explicacion": "Leaves corrupt curated data."
+      },
+      {
         "texto_opcion": "Only purge Key Vault secrets, does not restore table versions.",
         "es_correcta": false,
         "explicacion": "Does not restore table versions."
+      },
+      {
+        "texto_opcion": "Recreate the entire Azure subscription, extreme and unrelated.",
+        "es_correcta": false,
+        "explicacion": "Extreme and unrelated."
       }
     ],
     "tags": [
@@ -960,14 +960,14 @@
     "pregunta": "A healthcare provider (petabyte-scale historical data, region brazilsouth) must: serverless SQL queries must filter on partition columns present in the path. Which option fits best? Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "Push predicates on partition columns in OPENROWSET/external queries.",
+        "es_correcta": true,
+        "explicacion": "Partition elimination only works when filters align with path layout."
+      },
+      {
         "texto_opcion": "Always SELECT * without date filters on multi-year lakes selected to meet.",
         "es_correcta": false,
         "explicacion": "Full scan cost."
-      },
-      {
-        "texto_opcion": "Filter only after downloading all files locally, defeats cloud pruning.",
-        "es_correcta": false,
-        "explicacion": "Defeats cloud pruning."
       },
       {
         "texto_opcion": "Rename partitions after every query, breaks stable path contracts.",
@@ -975,9 +975,9 @@
         "explicacion": "Breaks stable path contracts."
       },
       {
-        "texto_opcion": "Push predicates on partition columns in OPENROWSET/external queries.",
-        "es_correcta": true,
-        "explicacion": "Partition elimination only works when filters align with path layout."
+        "texto_opcion": "Filter only after downloading all files locally, defeats cloud pruning.",
+        "es_correcta": false,
+        "explicacion": "Defeats cloud pruning."
       }
     ],
     "tags": [
@@ -989,24 +989,24 @@
     "pregunta": "Incident review (brazilsouth): streaming partitions by event time but late events arrive hours later. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Always partition only by processing time and never correct, misplaces late events.",
-        "es_correcta": false,
-        "explicacion": "Misplaces late events."
-      },
-      {
-        "texto_opcion": "Use watermarking / late-arrival windows and write to correct event-time partitions",
-        "es_correcta": true,
-        "explicacion": "Event-time partitioning with late-arrival handling keeps analytics correct."
-      },
-      {
-        "texto_opcion": "Store late events in email inboxes adopted as the standard pattern.",
+        "texto_opcion": "Store late events in email inboxes adopted as the standard pattern selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Not a lake design."
       },
       {
-        "texto_opcion": "Drop all late events silently without policy, may violate completeness SLAs.",
+        "texto_opcion": "Drop all late events silently without policy, may violate completeness SLAs selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "May violate completeness SLAs."
+      },
+      {
+        "texto_opcion": "Always partition only by processing time and never correct, misplaces late events often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Misplaces late events."
+      },
+      {
+        "texto_opcion": "Use watermarking / late-arrival windows and write to correct event-time partitions.",
+        "es_correcta": true,
+        "explicacion": "Event-time partitioning with late-arrival handling keeps analytics correct."
       }
     ],
     "tags": [
@@ -1018,24 +1018,24 @@
     "pregunta": "hourly micro-batches left too many small files in gold tables. Context: energy utility, near-real-time dashboards. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Convert Parquet to uncompressed CSV mid-flight prioritized.",
+        "texto_opcion": "Convert Parquet to uncompressed CSV mid-flight prioritized as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Hurts performance."
       },
       {
-        "texto_opcion": "Delete partition metadata only, does not fix file sizes.",
-        "es_correcta": false,
-        "explicacion": "Does not fix file sizes."
-      },
-      {
-        "texto_opcion": "Disable all reads until files multiply more prioritized.",
+        "texto_opcion": "Disable all reads until files multiply more prioritized plausible at first glance.",
         "es_correcta": false,
         "explicacion": "Worsens the problem."
       },
       {
-        "texto_opcion": "Schedule compaction / OPTIMIZE-style jobs to rewrite larger files",
+        "texto_opcion": "Schedule compaction / OPTIMIZE-style jobs to rewrite larger files.",
         "es_correcta": true,
         "explicacion": "Periodic compaction restores scan efficiency after micro-batch landings."
+      },
+      {
+        "texto_opcion": "Delete partition metadata only, does not fix file sizes prioritized for simplicity.",
+        "es_correcta": false,
+        "explicacion": "Does not fix file sizes."
       }
     ],
     "tags": [
@@ -1047,11 +1047,6 @@
     "pregunta": "Gaming studio scenario — partitioning by country creates a hot US partition and tiny others. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Replicate the entire lake to one folder configured prioritized for operational.",
-        "es_correcta": false,
-        "explicacion": "Removes pruning."
-      },
-      {
         "texto_opcion": "Add a secondary salt/bucket or choose a more even partition key.",
         "es_correcta": true,
         "explicacion": "Hot partitions need key redesign or salting for balance."
@@ -1062,7 +1057,12 @@
         "explicacion": "Does not fix skew."
       },
       {
-        "texto_opcion": "Use a constant partition value for all rows, creates one giant partition.",
+        "texto_opcion": "Replicate the entire lake to one folder configured prioritized for operational.",
+        "es_correcta": false,
+        "explicacion": "Removes pruning."
+      },
+      {
+        "texto_opcion": "Use a constant partition value for all rows, creates one giant partition configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Creates one giant partition."
       }
@@ -1076,24 +1076,24 @@
     "pregunta": "materialize a curated Parquet slice into Dedicated SQL with preserved grain. Context: industrial IoT platform, ~50,000 events/s. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "GUI copy-paste millions of rows prioritized for operational.",
+        "texto_opcion": "GUI copy-paste millions of rows prioritized for operational used as the main path in this architecture.",
         "es_correcta": false,
         "explicacion": "Not scalable."
       },
       {
-        "texto_opcion": "Email Parquet as attachments used as the main path in this.",
+        "texto_opcion": "Browser LocalStorage staging configured end-to-end for this workload used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Not a warehouse path."
+      },
+      {
+        "texto_opcion": "Email Parquet as attachments used as the main path in this prioritized for simplicity configured end-to-end for the stated workload.",
         "es_correcta": false,
         "explicacion": "Not engineering."
       },
       {
-        "texto_opcion": "CTAS/CETAS from partitioned external sources into distributed tables",
+        "texto_opcion": "CTAS/CETAS from partitioned external sources into distributed tables.",
         "es_correcta": true,
         "explicacion": "CTAS/CETAS efficiently materializes lake partitions into SQL pool tables."
-      },
-      {
-        "texto_opcion": "Browser LocalStorage staging configured end-to-end for this workload.",
-        "es_correcta": false,
-        "explicacion": "Not a warehouse path."
       }
     ],
     "tags": [
@@ -1105,14 +1105,14 @@
     "pregunta": "A media streaming company (~200 million rows/day, region westeurope) must: excessive nested folders slow listing for Spark job planning. Which option fits best? Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "Keep a shallow, consistent partition scheme (e.g., date then region).",
+        "es_correcta": true,
+        "explicacion": "Shallow predictable layouts reduce listing overhead and cognitive load."
+      },
+      {
         "texto_opcion": "Encode partitions only inside filenames with no folders, weaker engine pruning support.",
         "es_correcta": false,
         "explicacion": "Weaker engine pruning support."
-      },
-      {
-        "texto_opcion": "Put all years in one flat mega-folder of millions of files selected to meet the stated constraints.",
-        "es_correcta": false,
-        "explicacion": "Also listing-heavy."
       },
       {
         "texto_opcion": "Nest 20 GUID levels per file, listing and discovery suffer, listing and discovery suffer.",
@@ -1120,9 +1120,9 @@
         "explicacion": "Listing and discovery suffer."
       },
       {
-        "texto_opcion": "Keep a shallow, consistent partition scheme (e.g., date then region).",
-        "es_correcta": true,
-        "explicacion": "Shallow predictable layouts reduce listing overhead and cognitive load."
+        "texto_opcion": "Put all years in one flat mega-folder of millions of files selected to meet the stated constraints.",
+        "es_correcta": false,
+        "explicacion": "Also listing-heavy."
       }
     ],
     "tags": [
@@ -1139,14 +1139,14 @@
         "explicacion": "Partition-scoped overwrite preserves history for other dates."
       },
       {
-        "texto_opcion": "Drop the storage account nightly prioritized for applied across environments for consistency.",
-        "es_correcta": false,
-        "explicacion": "Catastrophic."
-      },
-      {
         "texto_opcion": "Full table truncate before every daily load, destroys unrelated partitions, destroys unrelated partitions.",
         "es_correcta": false,
         "explicacion": "Destroys unrelated partitions."
+      },
+      {
+        "texto_opcion": "Drop the storage account nightly prioritized for applied across environments for consistency.",
+        "es_correcta": false,
+        "explicacion": "Catastrophic."
       },
       {
         "texto_opcion": "Append duplicates without replace semantics, breaks uniqueness assumptions, breaks uniqueness assumptions.",

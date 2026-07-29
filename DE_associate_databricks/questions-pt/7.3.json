@@ -3,24 +3,24 @@
     "pregunta": "Um engenheiro de dados deseja ocultar o valor da coluna `ssn` de usuários que não estão no grupo `pii-authorized`. Usuários que NÃO estão no grupo devem ver `'***-**-****'`. Qual abordagem está correta?",
     "opciones": [
       {
-        "texto_opcion": "Use `ALTER TABLE users ALTER COLUMN ssn SET DEFAULT '***-**-****'` para usuários não administradores",
-        "es_correcta": false,
-        "explicacion": "`SET DEFAULT` define um valor padrão para novas linhas em INSERT — ele não controla quais dados existentes os usuários veem no momento da consulta. O mascaramento de coluna é o mecanismo correto."
-      },
-      {
-        "texto_opcion": "Crie uma visualização que use uma instrução `CASE` para mascarar a coluna `ssn` e grant `SELECT` apenas na visualização",
-        "es_correcta": false,
-        "explicacion": "As visualizações dinâmicas eram a abordagem legada. Máscaras de coluna nativas (via `SET MASK`) são a abordagem de UC recomendada — elas são transparentes, baseadas em políticas e aplicadas no nível do mecanismo."
-      },
-      {
-        "texto_opcion": "Revoke `SELECT` na coluna `ssn` para usuários que não estão em `pii-authorized`, unity Catalog não suporta revogações SELECT em nível de coluna.",
+        "texto_opcion": "Revoke `SELECT` na coluna `ssn` para usuários que não estão em `pii-authorized`, unity Catalog não suporta revogações SELECT em nível de coluna — unity Catalog não suporta revogações SELECT em nível de coluna.",
         "es_correcta": false,
         "explicacion": "Unity Catalog não suporta revogações SELECT em nível de coluna. A visibilidade da coluna é gerenciada por meio de máscaras de coluna, e não por revogações de privilégios em nível de coluna."
+      },
+      {
+        "texto_opcion": "Use `ALTER TABLE users ALTER COLUMN ssn SET DEFAULT '***-**-****'` para usuários não administradores — `SET DEFAULT` define um valor padrão para novas linhas em INSERT — `SET DEFAULT` define um valor padrão para novas linhas em INSERT.",
+        "es_correcta": false,
+        "explicacion": "`SET DEFAULT` define um valor padrão para novas linhas em INSERT — ele não controla quais dados existentes os usuários veem no momento da consulta. O mascaramento de coluna é o mecanismo correto."
       },
       {
         "texto_opcion": "Crie uma UDF SQL que retorne o valor real para membros `pii-authorized` e `'***-**-****'` para outros, então aplique-o com `ALTER TABLE ... ALTER COLUMN ssn SET MASK`.",
         "es_correcta": true,
         "explicacion": "O mascaramento de coluna requer: (1) uma UDF SQL escalar retornando o mesmo tipo da coluna, usando `is_account_group_member()` para ramificar; e (2) aplicando-o via `ALTER TABLE ... ALTER COLUMN ... SET MASK`."
+      },
+      {
+        "texto_opcion": "Crie uma visualização que use uma instrução `CASE` para mascarar a coluna `ssn` e grant `SELECT` apenas na visualização — as visualizações dinâmicas eram a abordagem legada — as visualizações dinâmicas eram a abordagem legada.",
+        "es_correcta": false,
+        "explicacion": "As visualizações dinâmicas eram a abordagem legada. Máscaras de coluna nativas (via `SET MASK`) são a abordagem de UC recomendada — elas são transparentes, baseadas em políticas e aplicadas no nível do mecanismo."
       }
     ],
     "tags": [
@@ -33,14 +33,9 @@
     "pregunta": "Um engenheiro de dados cria a seguinte máscara de coluna UDF:\n\n```sql\nCREATE OR REPLACE FUNCTION catalog.schema.ssn_mask(ssn STRING)\nRETURNS STRING\nRETURN CASE\n  WHEN is_account_group_member('pii-authorized') THEN ssn\n  ELSE '***-**-****'\nEND;\n```\n\nComo eles deveriam anexar esta máscara à coluna `users.ssn`?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nSET MASK catalog.schema.ssn_mask;\n```.",
-        "es_correcta": true,
-        "explicacion": "`ALTER TABLE ... ALTER COLUMN ... SET MASK <nome_da_função>` é a sintaxe correta para anexar uma máscara de coluna a uma coluna específica. A função já deve existir antes de ALTER ser executado."
-      },
-      {
-        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nSET MASK ssn = catalog.schema.ssn_mask;\n```",
+        "texto_opcion": "```sql\nGRANT MASK ON COLUMN catalog.schema.users.ssn\nUSING FUNCTION catalog.schema.ssn_mask;\n```.",
         "es_correcta": false,
-        "explicacion": "A sintaxe correta requer `ALTER COLUMN <col_name> SET MASK`, não um `SET MASK col = function` direto na tabela. A cláusula `ALTER COLUMN` é obrigatória."
+        "explicacion": "`CREATE MASK POLICY` não é o SQL padrão do Databricks para mascaramento em nível de tabela. O comando correto é `ALTER TABLE ... ALTER COLUMN ... SET MASK`."
       },
       {
         "texto_opcion": "```sql\nCREATE MASK POLICY ssn_policy\nUSING catalog.schema.ssn_mask ON TABLE catalog.schema.users COLUMN ssn;\n```",
@@ -48,9 +43,14 @@
         "explicacion": "`GRANT MASK` não é um comando SQL válido do Databricks. As máscaras de coluna são aplicadas com `ALTER TABLE ... ALTER COLUMN ... SET MASK`."
       },
       {
-        "texto_opcion": "```sql\nGRANT MASK ON COLUMN catalog.schema.users.ssn\nUSING FUNCTION catalog.schema.ssn_mask;\n```",
+        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nSET MASK catalog.schema.ssn_mask;\n```.",
+        "es_correcta": true,
+        "explicacion": "`ALTER TABLE ... ALTER COLUMN ... SET MASK <nome_da_função>` é a sintaxe correta para anexar uma máscara de coluna a uma coluna específica. A função já deve existir antes de ALTER ser executado."
+      },
+      {
+        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nSET MASK ssn = catalog.schema.ssn_mask;\n```.",
         "es_correcta": false,
-        "explicacion": "`CREATE MASK POLICY` não é o SQL padrão do Databricks para mascaramento em nível de tabela. O comando correto é `ALTER TABLE ... ALTER COLUMN ... SET MASK`."
+        "explicacion": "A sintaxe correta requer `ALTER COLUMN <col_name> SET MASK`, não um `SET MASK col = function` direto na tabela. A cláusula `ALTER COLUMN` é obrigatória."
       }
     ],
     "tags": [
@@ -63,24 +63,24 @@
     "pregunta": "Um engenheiro de dados aplica uma máscara de coluna a `orders.credit_card`. Um usuário com `SELECT` na tabela executa `SELECT credit_card FROM Orders`. O que o usuário vê?",
     "opciones": [
       {
-        "texto_opcion": "A coluna fica oculta do esquema — o usuário não vê a coluna, as máscaras de coluna NÃO ocultam a coluna do esquema.",
-        "es_correcta": false,
-        "explicacion": "As máscaras de coluna NÃO ocultam a coluna do esquema. A coluna ainda está visível; seu valor é apenas substituído pela saída da máscara para usuários não autorizados."
+        "texto_opcion": "O **valor mascarado** — a função de máscara avalia esse usuário e retorna o resultado mascarado. O usuário não tem indicação de que uma máscara foi aplicada.",
+        "es_correcta": true,
+        "explicacion": "As máscaras de coluna são transparentes — a consulta parece normal, mas a UDF da máscara é executada por linha no momento da consulta, retornando o valor real ou o valor mascarado, dependendo da associação do usuário ao grupo."
       },
       {
-        "texto_opcion": "Um erro — `COLUMN_ACCESS_DENIED` — porque a coluna tem uma máscara aplicada",
+        "texto_opcion": "Um erro — `COLUMN_ACCESS_DENIED` — porque a coluna tem uma máscara aplicada — as máscaras de coluna não geram erros — elas retornam o valor mascarado. Os usuários ainda podem consultar a coluna; eles apenas veem o resultado transformado.",
         "es_correcta": false,
         "explicacion": "As máscaras de coluna não geram erros — elas retornam o valor mascarado. Os usuários ainda podem consultar a coluna; eles apenas veem o resultado transformado."
       },
       {
-        "texto_opcion": "NULL — colunas mascaradas sempre retornam NULL para usuários não autorizados",
+        "texto_opcion": "A coluna fica oculta do esquema — o usuário não vê a coluna, as máscaras de coluna NÃO ocultam a coluna do esquema — as máscaras de coluna NÃO ocultam a coluna do esquema — as máscaras de coluna NÃO ocultam a coluna do esquema. A coluna ainda está visível; seu valor é apenas substituído pela saída da máscara para usuários não autorizados.",
         "es_correcta": false,
-        "explicacion": "O valor mascarado depende inteiramente do que a UDF retorna. Pode ser `NULL`, `'***'`, um valor parcial ou qualquer outra transformação - não automaticamente NULL."
+        "explicacion": "As máscaras de coluna NÃO ocultam a coluna do esquema. A coluna ainda está visível; seu valor é apenas substituído pela saída da máscara para usuários não autorizados."
       },
       {
-        "texto_opcion": "O **valor mascarado** — a função de máscara avalia esse usuário e retorna o resultado mascarado. O usuário não tem indicação de que uma máscara foi aplicada.",
-        "es_correcta": true,
-        "explicacion": "As máscaras de coluna são transparentes — a consulta parece normal, mas a UDF da máscara é executada por linha no momento da consulta, retornando o valor real ou o valor mascarado, dependendo da associação do usuário ao grupo."
+        "texto_opcion": "NULL — colunas mascaradas sempre retornam NULL para usuários não autorizados — o valor mascarado depende inteiramente do que a UDF retorna — o valor mascarado depende inteiramente do que a UDF retorna. Pode ser `NULL`, `'***'`, um valor parcial ou qualquer outra transformação - não automaticamente NULL.",
+        "es_correcta": false,
+        "explicacion": "O valor mascarado depende inteiramente do que a UDF retorna. Pode ser `NULL`, `'***'`, um valor parcial ou qualquer outra transformação - não automaticamente NULL."
       }
     ],
     "tags": [
@@ -92,24 +92,24 @@
     "pregunta": "Um engenheiro de dados cria o seguinte filtro de linha:\n\n```sql\nCREATE OR REPLACE FUNCTION catalog.sales.region_filter(region STRING)\nRETURNS BOOLEAN\nRETURN is_account_group_member('admin')\n    OR is_account_group_member(CONCAT(region, '-team'));\n```\n\nEste filtro é aplicado à tabela `orders` na coluna `region`. Um analista da UE (na `equipe da UE`, mas NÃO no `admin`) consulta `SELECT COUNT(*) FROM ordens`. O que a contagem reflete?",
     "opciones": [
       {
-        "texto_opcion": "Somente a contagem de linhas onde `region = 'EU'` — o filtro de linha restringe a visibilidade às linhas onde `is_account_group_member(CONCAT('EU', '-team'))` retorna `TRUE`.",
-        "es_correcta": true,
-        "explicacion": "O filtro avalia por linha. Para cada linha com `region = 'EU'`, `is_account_group_member('EU-team')` retorna TRUE (o analista está na equipe da UE), portanto a linha é incluída. As linhas onde a função retorna FALSE (outras regiões) são excluídas."
+        "texto_opcion": "Um erro porque a função de filtro usa `is_account_group_member()` dentro de uma consulta `COUNT(*)` — `is_account_group_member()` é válido dentro de UDFs de filtro de linha — `is_account_group_member()` é válido dentro de UDFs de filtro de linha. Não há restrição para consultas agregadas — o filtro simplesmente limita quais linhas são contadas.",
+        "es_correcta": false,
+        "explicacion": "`is_account_group_member()` é válido dentro de UDFs de filtro de linha. Não há restrição para consultas agregadas — o filtro simplesmente limita quais linhas são contadas."
       },
       {
-        "texto_opcion": "A contagem total de todas as linhas — os filtros de linha se aplicam apenas a `SELECT *`, não a funções agregadas.",
+        "texto_opcion": "A contagem total de todas as linhas — os filtros de linha se aplicam apenas a `SELECT *`, não a funções agregadas — os filtros de linha se aplicam a todas as consultas na tabela, incluindo funções agregadas. `COUNT(*)` reflete apenas linhas visíveis.",
         "es_correcta": false,
         "explicacion": "Os filtros de linha se aplicam a todas as consultas na tabela, incluindo funções agregadas. `COUNT(*)` reflete apenas linhas visíveis."
       },
       {
-        "texto_opcion": "0 — o analista não pode ver nenhuma linha porque ela não possui EXECUTE na função de filtro",
+        "texto_opcion": "0 — o analista não pode ver nenhuma linha porque ela não possui EXECUTE na função de filtro — os usuários que consultam uma tabela com um filtro de linha NÃO precisam de EXECUTE na função de filtro — os usuários que consultam uma tabela com um filtro de linha NÃO precisam de EXECUTE na função de filtro — eles só precisam de SELECT na tabela. O filtro funciona de forma transparente.",
         "es_correcta": false,
         "explicacion": "Os usuários que consultam uma tabela com um filtro de linha NÃO precisam de EXECUTE na função de filtro — eles só precisam de SELECT na tabela. O filtro funciona de forma transparente."
       },
       {
-        "texto_opcion": "Um erro porque a função de filtro usa `is_account_group_member()` dentro de uma consulta `COUNT(*)`",
-        "es_correcta": false,
-        "explicacion": "`is_account_group_member()` é válido dentro de UDFs de filtro de linha. Não há restrição para consultas agregadas — o filtro simplesmente limita quais linhas são contadas."
+        "texto_opcion": "Somente a contagem de linhas onde `region = 'EU'` — o filtro de linha restringe a visibilidade às linhas onde `is_account_group_member(CONCAT('EU', '-team'))` retorna `TRUE`.",
+        "es_correcta": true,
+        "explicacion": "O filtro avalia por linha. Para cada linha com `region = 'EU'`, `is_account_group_member('EU-team')` retorna TRUE (o analista está na equipe da UE), portanto a linha é incluída. As linhas onde a função retorna FALSE (outras regiões) são excluídas."
       }
     ],
     "tags": [
@@ -121,22 +121,22 @@
     "pregunta": "Qual é o requisito de tipo de retorno para uma UDF de **filtro de linha**?",
     "opciones": [
       {
-        "texto_opcion": "A função deve retornar **STRING** — a string retornada é usada como condição de filtro, os filtros de linha retornam BOOLEAN.",
-        "es_correcta": false,
-        "explicacion": "Os filtros de linha retornam BOOLEAN. STRING é o tipo de retorno para funções de máscara de coluna (quando a coluna mascarada é do tipo STRING)."
-      },
-      {
         "texto_opcion": "A função deve retornar **BOOLEAN** — as linhas onde a função retorna `TRUE` são visíveis; linhas onde retorna `FALSE` ou `NULL` são excluídas.",
         "es_correcta": true,
         "explicacion": "UDFs de filtro de linha devem retornar BOOLEAN. TRUE = inclui linha, FALSE ou NULL = exclui linha. Este é o requisito principal que distingue filtros de linha de máscaras de coluna."
       },
       {
-        "texto_opcion": "A função deve retornar **INTEGER** — 1 significa incluir, 0 significa excluir, os filtros de linha retornam BOOLEAN, não INTEGER.",
+        "texto_opcion": "A função deve retornar **INTEGER** — 1 significa incluir, 0 significa excluir, os filtros de linha retornam BOOLEAN, não INTEGER — os filtros de linha retornam BOOLEAN, não INTEGER.",
         "es_correcta": false,
         "explicacion": "Os filtros de linha retornam BOOLEAN, não INTEGER. 1 e 0 são valores INTEIROs; a função deve retornar explicitamente TRUE/FALSE."
       },
       {
-        "texto_opcion": "O tipo de retorno deve corresponder ao tipo de coluna passado para a função por meio da cláusula `ON`, os filtros de linha sempre retornam BOOLEAN",
+        "texto_opcion": "A função deve retornar **STRING** — a string retornada é usada como condição de filtro, os filtros de linha retornam BOOLEAN — os filtros de linha retornam BOOLEAN — os filtros de linha retornam BOOLEAN.",
+        "es_correcta": false,
+        "explicacion": "Os filtros de linha retornam BOOLEAN. STRING é o tipo de retorno para funções de máscara de coluna (quando a coluna mascarada é do tipo STRING)."
+      },
+      {
+        "texto_opcion": "O tipo de retorno deve corresponder ao tipo de coluna passado para a função por meio da cláusula `ON`, os filtros de linha sempre retornam BOOLEAN.",
         "es_correcta": false,
         "explicacion": "Os filtros de linha sempre retornam BOOLEAN, independentemente dos tipos de colunas passados na cláusula `ON`. Os valores da coluna em `ON` são entradas; a saída é sempre BOOLEAN."
       }
@@ -151,14 +151,14 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```sql\nALTER TABLE catalog.sales.orders\nSET ROW FILTER catalog.sales.region_filter\nON (region);\n```\n\nO que acontece com as linhas onde `region_filter(region)` retorna `NULL`?",
     "opciones": [
       {
-        "texto_opcion": "O comportamento depende da configuração de manipulação de NULL nas configurações do cluster",
-        "es_correcta": false,
-        "explicacion": "O tratamento de NULL para filtros de linha é corrigido por Unity Catalog: NULL = exclude. Não há configuração em nível de cluster para isso."
-      },
-      {
         "texto_opcion": "As linhas onde o filtro retorna `NULL` são **excluídas** — somente as linhas onde o filtro retorna `TRUE` ficam visíveis.",
         "es_correcta": true,
         "explicacion": "Os filtros de linha Unity Catalog excluem linhas onde a função retorna FALSE **ou NULL**. Os retornos nulos são tratados como falsos (deny), que é o padrão seguro."
+      },
+      {
+        "texto_opcion": "As linhas onde o filtro retorna `NULL` são **incluídas** — NULL é tratado como um resultado desconhecido/não filtrado.",
+        "es_correcta": false,
+        "explicacion": "O padrão seguro é NULL = exclude. Isso evita a exposição acidental de dados quando a função de filtro retorna NULL (por exemplo, para valores de grupo inesperados)."
       },
       {
         "texto_opcion": "Um erro é gerado para qualquer linha em que a função de filtro retorna NULL, nenhum erro é gerado, nenhum erro é gerado.",
@@ -166,9 +166,9 @@
         "explicacion": "Nenhum erro é gerado. Os retornos NULL são tratados silenciosamente como FALSE, excluindo essas linhas."
       },
       {
-        "texto_opcion": "As linhas onde o filtro retorna `NULL` são **incluídas** — NULL é tratado como um resultado desconhecido/não filtrado.",
+        "texto_opcion": "O comportamento depende da configuração de manipulação de NULL nas configurações do cluster.",
         "es_correcta": false,
-        "explicacion": "O padrão seguro é NULL = exclude. Isso evita a exposição acidental de dados quando a função de filtro retorna NULL (por exemplo, para valores de grupo inesperados)."
+        "explicacion": "O tratamento de NULL para filtros de linha é corrigido por Unity Catalog: NULL = exclude. Não há configuração em nível de cluster para isso."
       }
     ],
     "tags": [
@@ -180,19 +180,19 @@
     "pregunta": "Qual função de identidade deve ser usada em UDFs de máscara/filtro Unity Catalog para verificar a associação ao grupo - `is_member()` ou `is_account_group_member()`?",
     "opciones": [
       {
-        "texto_opcion": "`is_member()` — this is the standard group membership function for Databricks SQL UDFs, `is_member()` uses workspace-local groups",
+        "texto_opcion": "Both functions are equivalent in Unity Catalog — use either one, they are not equivalent, they are not equivalent — `GROUP_MEMBER()` não é uma função SQL do Databricks.",
+        "es_correcta": false,
+        "explicacion": "`GROUP_MEMBER()` não é uma função SQL do Databricks. Use `is_account_group_member('group-name')` para UDFs de filtro de linha/máscara de coluna Unity Catalog."
+      },
+      {
+        "texto_opcion": "`is_member()` — this is the standard group membership function for Databricks SQL UDFs, `is_member()` uses workspace-local groups.",
         "es_correcta": false,
         "explicacion": "`is_member()` usa grupos locais de workspace, o que pode causar inconsistências em Unity Catalog (que usa grupos em nível de conta). `is_account_group_member()` é preferido."
       },
       {
-        "texto_opcion": "`GROUP_MEMBER(group, user)` — this is the standard Unity Catalog group membership function, `GROUP_MEMBER()` is not a Databricks SQL function.",
+        "texto_opcion": "`GROUP_MEMBER(group, user)` — this is the standard Unity Catalog group membership function, `GROUP_MEMBER()` is not a Databricks SQL function — eles não são equivalentes.",
         "es_correcta": false,
         "explicacion": "Eles não são equivalentes. `is_account_group_member()` usa grupos em nível de conta (correto para UC); `is_member()` usa grupos locais do workspace (pode causar inconsistências)."
-      },
-      {
-        "texto_opcion": "Both functions are equivalent in Unity Catalog — use either one, they are not equivalent, they are not equivalent.",
-        "es_correcta": false,
-        "explicacion": "`GROUP_MEMBER()` não é uma função SQL do Databricks. Use `is_account_group_member('group-name')` para UDFs de filtro de linha/máscara de coluna Unity Catalog."
       },
       {
         "texto_opcion": "`is_account_group_member()` — this checks **account-level** groups and is preferred for Unity Catalog, avoiding scope issues with workspace-local groups.",
@@ -209,24 +209,24 @@
     "pregunta": "Um engenheiro de dados precisa remover a máscara da coluna `ssn` na tabela `users`. Qual comando consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nDROP MASK;\n```.",
-        "es_correcta": true,
-        "explicacion": "`ALTER TABLE ... ALTER COLUMN ... DROP MASK` remove a máscara da coluna especificada. Depois disso, todos os usuários com SELECT veem o valor real da coluna."
-      },
-      {
-        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nUNSET MASK;\n```",
-        "es_correcta": false,
-        "explicacion": "`UNSET MASK` não é a sintaxe correta. O comando correto é `DROP MASK`."
-      },
-      {
-        "texto_opcion": "```sql\nDROP FUNCTION catalog.schema.ssn_mask;\n```",
+        "texto_opcion": "```sql\nDROP FUNCTION catalog.schema.ssn_mask;\n``` — `REVOKE MASK` não é um comando SQL válido.",
         "es_correcta": false,
         "explicacion": "`REVOKE MASK` não é um comando SQL válido do Databricks. Use `ALTER TABLE ... ALTER COLUMN ... DROP MASK`."
       },
       {
-        "texto_opcion": "```sql\nREVOKE MASK catalog.schema.ssn_mask FROM TABLE catalog.schema.users;\n```",
+        "texto_opcion": "```sql\nREVOKE MASK catalog.schema.ssn_mask FROM TABLE catalog.schema.users;\n```.",
         "es_correcta": false,
         "explicacion": "Eliminar a função NÃO remove a máscara da coluna da tabela — isso quebraria as consultas na coluna mascarada. Primeiro remova a máscara com `DROP MASK` e, opcionalmente, elimine a função."
+      },
+      {
+        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nUNSET MASK;\n``` — `UNSET MASK` não é a sintaxe correta.",
+        "es_correcta": false,
+        "explicacion": "`UNSET MASK` não é a sintaxe correta. O comando correto é `DROP MASK`."
+      },
+      {
+        "texto_opcion": "```sql\nALTER TABLE catalog.schema.users\nALTER COLUMN ssn\nDROP MASK;\n```.",
+        "es_correcta": true,
+        "explicacion": "`ALTER TABLE ... ALTER COLUMN ... DROP MASK` remove a máscara da coluna especificada. Depois disso, todos os usuários com SELECT veem o valor real da coluna."
       }
     ],
     "tags": [
@@ -239,7 +239,17 @@
     "pregunta": "Uma função de máscara de coluna precisa usar o valor de outra coluna para decidir como mascarar a coluna de destino. Por exemplo, mascare `salário` de maneira diferente com base na coluna `departamento` da linha. Como isso está configurado?",
     "opciones": [
       {
-        "texto_opcion": "Use uma subconsulta dentro da UDF para procurar o departamento de cada linha:\n```sql\nRETURN CASE WHEN (SELECT dept FROM Employees WHERE ...) = 'RH' THEN salário ...\n```",
+        "texto_opcion": "Aplique duas máscaras distintas: uma para salário e outra para departamento, a máscara salarial precisa do valor do departamento da mesma linha — a máscara salarial precisa do valor do departamento da mesma linha do contexto. Duas máscaras separadas não resolvem isso — `USING COLUMNS` é o mecanismo correto comum em desenhos legados, porém inadequado neste caso.",
+        "es_correcta": false,
+        "explicacion": "A máscara salarial precisa do valor do departamento da mesma linha do contexto. Duas máscaras separadas não resolvem isso — `USING COLUMNS` é o mecanismo correto."
+      },
+      {
+        "texto_opcion": "Crie uma coluna composta `salary_dept` e aplique uma máscara a ela, criar colunas compostas apenas para contornar as limitações de mascaramento — criar colunas compostas apenas para contornar as limitações de mascaramento não é um padrão recomendado. `USING COLUMNS` passa os valores das colunas existentes como contexto para a função de máscara.",
+        "es_correcta": false,
+        "explicacion": "Criar colunas compostas apenas para contornar as limitações de mascaramento não é um padrão recomendado. `USING COLUMNS` passa os valores das colunas existentes como contexto para a função de máscara."
+      },
+      {
+        "texto_opcion": "Use uma subconsulta dentro da UDF para procurar o departamento de cada linha:\n```sql\nRETURN CASE WHEN (SELECT dept FROM Employees WHERE ...) = 'RH' THEN salário ...\n``` — subconsultas dentro de UDFs de máscara de coluna são suportadas, mas fortemente desencorajadas para desempenho – elas são executadas por linha. `USING COLUMNS` é o padrão correto para passar o contexto da linha para a função de máscara.",
         "es_correcta": false,
         "explicacion": "Subconsultas dentro de UDFs de máscara de coluna são suportadas, mas fortemente desencorajadas para desempenho – elas são executadas por linha. `USING COLUMNS` é o padrão correto para passar o contexto da linha para a função de máscara."
       },
@@ -247,16 +257,6 @@
         "texto_opcion": "A assinatura da função inclui a coluna adicional como parâmetro e a máscara é aplicada com `USING COLUMNS (departamento)`:\n```sql\nALTER TABLE employees\nALTER COLUMN salary\nSET MASK dept_salary_mask\nUSING COLUMNS (department);\n```",
         "es_correcta": true,
         "explicacion": "`USING COLUMNS` passa valores de coluna adicionais para a função de máscara como argumentos extras. A função usa `(salário, departamento)` - `salário` é a coluna mascarada primária, `departamento` é a coluna de contexto passada por meio de `USING COLUMNS`."
-      },
-      {
-        "texto_opcion": "Crie uma coluna composta `salary_dept` e aplique uma máscara a ela, criar colunas compostas apenas para contornar as limitações de mascaramento",
-        "es_correcta": false,
-        "explicacion": "Criar colunas compostas apenas para contornar as limitações de mascaramento não é um padrão recomendado. `USING COLUMNS` passa os valores das colunas existentes como contexto para a função de máscara."
-      },
-      {
-        "texto_opcion": "Aplique duas máscaras distintas: uma para salário e outra para departamento, a máscara salarial precisa do valor do departamento da mesma linha",
-        "es_correcta": false,
-        "explicacion": "A máscara salarial precisa do valor do departamento da mesma linha do contexto. Duas máscaras separadas não resolvem isso — `USING COLUMNS` é o mecanismo correto."
       }
     ],
     "tags": [
@@ -274,19 +274,19 @@
         "explicacion": "A aplicação de uma máscara/filtro requer: (1) EXECUTE na função UDF da máscara/filtro (para referenciá-la) e (2) ser o proprietário da tabela ou ter MANAGE na tabela (para alterar sua configuração de política)."
       },
       {
+        "texto_opcion": "`SELECT` na tabela e `MODIFY` na tabela, `SELECT` e `MODIFY` são privilégios de.",
+        "es_correcta": false,
+        "explicacion": "`SELECT` e `MODIFY` são privilégios de acesso a dados. Aplicar uma máscara é uma operação de gerenciamento de política que requer propriedade de tabela ou MANAGE, além de EXECUTE na função."
+      },
+      {
         "texto_opcion": "Somente privilégio de administrador do metastore — somente administradores podem.",
         "es_correcta": false,
         "explicacion": "Os administradores do metastore podem aplicar máscaras, mas também os proprietários de tabelas e usuários com privilégio MANAGE na tabela. Não está restrito aos administradores do metastore."
       },
       {
-        "texto_opcion": "`ALL PRIVILEGES` na tabela e `CREATE FUNCTION` no esquema",
+        "texto_opcion": "`ALL PRIVILEGES` na tabela e `CREATE FUNCTION` no esquema — `ALL PRIVILEGES` não inclui MANAGE.",
         "es_correcta": false,
         "explicacion": "`ALL PRIVILEGES` não inclui MANAGE. O requisito específico é propriedade da tabela ou MANAGE, além de EXECUTE na função."
-      },
-      {
-        "texto_opcion": "`SELECT` na tabela e `MODIFY` na tabela, `SELECT` e `MODIFY` são privilégios de.",
-        "es_correcta": false,
-        "explicacion": "`SELECT` e `MODIFY` são privilégios de acesso a dados. Aplicar uma máscara é uma operação de gerenciamento de política que requer propriedade de tabela ou MANAGE, além de EXECUTE na função."
       }
     ],
     "tags": [
@@ -299,22 +299,22 @@
     "pregunta": "Um usuário com `SELECT` em uma tabela com um filtro de linha a consulta. Eles precisam de `EXECUTE` na função UDF do filtro de linha?",
     "opciones": [
       {
+        "texto_opcion": "Sim, mas somente se não estiverem no grupo autorizado — usuários não autorizados precisam de EXECUTE para ver se o filtro existe — nenhum usuário consultando a tabela precisa de EXECUTE na função de filtro — nenhum usuário consultando a tabela precisa de EXECUTE na função de filtro. O filtro é completamente transparente, independentemente de o usuário ver resultados filtrados ou não filtrados.",
+        "es_correcta": false,
+        "explicacion": "Nenhum usuário consultando a tabela precisa de EXECUTE na função de filtro. O filtro é completamente transparente, independentemente de o usuário ver resultados filtrados ou não filtrados."
+      },
+      {
+        "texto_opcion": "Sim — os usuários devem ter EXECUTE na função de filtro de linha para executar a lógica de filtro em seu nome — eXECUTE é necessário apenas para a pessoa que APLICA o filtro à tabela (o administrador). Os usuários finais que consultam a tabela só precisam de SELECT comum em desenhos legados, porém inadequado neste caso.",
+        "es_correcta": false,
+        "explicacion": "EXECUTE é necessário apenas para a pessoa que APLICA o filtro à tabela (o administrador). Os usuários finais que consultam a tabela só precisam de SELECT."
+      },
+      {
         "texto_opcion": "Não — os usuários que consultam uma tabela protegida só precisam de `SELECT` na tabela. O filtro de linha é executado de forma transparente; os usuários não precisam conhecer ou ter acesso à UDF.",
         "es_correcta": true,
         "explicacion": "Os filtros de linha (e máscaras de coluna) são transparentes para os usuários finais. A UDF é executada com privilégios elevados em nome do mecanismo. Os usuários finais só precisam de SELECT na tabela."
       },
       {
-        "texto_opcion": "Sim — os usuários devem ter EXECUTE na função de filtro de linha para executar a lógica de filtro em seu nome",
-        "es_correcta": false,
-        "explicacion": "EXECUTE é necessário apenas para a pessoa que APLICA o filtro à tabela (o administrador). Os usuários finais que consultam a tabela só precisam de SELECT."
-      },
-      {
-        "texto_opcion": "Sim, mas somente se não estiverem no grupo autorizado — usuários não autorizados precisam de EXECUTE para ver se o filtro existe.",
-        "es_correcta": false,
-        "explicacion": "Nenhum usuário consultando a tabela precisa de EXECUTE na função de filtro. O filtro é completamente transparente, independentemente de o usuário ver resultados filtrados ou não filtrados."
-      },
-      {
-        "texto_opcion": "Somente se o usuário também precisar DROP o filtro posteriormente — DROP MASK requer EXECUTE na função",
+        "texto_opcion": "Somente se o usuário também precisar DROP o filtro posteriormente — DROP MASK requer EXECUTE na função — a eliminação de uma máscara/filtro requer propriedade da tabela ou MANAGE — não EXECUTE na função. E os usuários finais regulares não precisam de EXECUTE para consultar a tabela.",
         "es_correcta": false,
         "explicacion": "A eliminação de uma máscara/filtro requer propriedade da tabela ou MANAGE — não EXECUTE na função. E os usuários finais regulares não precisam de EXECUTE para consultar a tabela."
       }
@@ -329,24 +329,24 @@
     "pregunta": "Qual comando SQL aplica um filtro de linha no momento da criação da tabela?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (\n  order_id BIGINT,\n  region STRING,\n  amount DECIMAL(10,2)\n)\nWITH ROW FILTER catalog.schema.region_filter ON (region);\n```",
-        "es_correcta": true,
-        "explicacion": "Filtros de linha podem ser aplicados na criação da tabela usando a cláusula `WITH ROW FILTER ... ON (...)` na instrução `CREATE TABLE`. Isso garante que a política esteja ativa desde a primeira inserção de dados."
-      },
-      {
-        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (...)\nROW FILTER = catalog.schema.region_filter ON region;\n```",
+        "texto_opcion": "Row filters cannot be set at table creation — they must be added with `ALTER TABLE` after creation — os filtros de linha PODEM ser especificados na criação da tabela usando `WITH ROW FILTER ... ON (...)` na instrução `CREATE TABLE`.",
         "es_correcta": false,
-        "explicacion": "A sintaxe correta usa `WITH ROW FILTER ... ON (...)` — e não `ROW FILTER =`."
+        "explicacion": "Os filtros de linha PODEM ser especificados na criação da tabela usando `WITH ROW FILTER ... ON (...)` na instrução `CREATE TABLE`."
       },
       {
-        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (...)\nSET ROW FILTER catalog.schema.region_filter (region);\n```",
+        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (...)\nSET ROW FILTER catalog.schema.region_filter (region);\n``` — `SET ROW FILTER` é usado em `ALTER TABLE`, não em `CREATE TABLE`. A sintaxe CREATE TABLE usa `WITH ROW FILTER ... ON (...)`.",
         "es_correcta": false,
         "explicacion": "`SET ROW FILTER` é usado em `ALTER TABLE`, não em `CREATE TABLE`. A sintaxe CREATE TABLE usa `WITH ROW FILTER ... ON (...)`."
       },
       {
-        "texto_opcion": "Row filters cannot be set at table creation — they must be added with `ALTER TABLE` after creation",
+        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (...)\nROW FILTER = catalog.schema.region_filter ON region;\n``` — a sintaxe correta usa `WITH ROW FILTER ... ON (...)` — e não `ROW FILTER =` aplicado entre ambientes por consistência operacional.",
         "es_correcta": false,
-        "explicacion": "Os filtros de linha PODEM ser especificados na criação da tabela usando `WITH ROW FILTER ... ON (...)` na instrução `CREATE TABLE`."
+        "explicacion": "A sintaxe correta usa `WITH ROW FILTER ... ON (...)` — e não `ROW FILTER =`."
+      },
+      {
+        "texto_opcion": "```sql\nCREATE TABLE catalog.schema.orders (\n  order_id BIGINT,\n  region STRING,\n  amount DECIMAL(10,2)\n)\nWITH ROW FILTER catalog.schema.region_filter ON (region);\n```",
+        "es_correcta": true,
+        "explicacion": "Filtros de linha podem ser aplicados na criação da tabela usando a cláusula `WITH ROW FILTER ... ON (...)` na instrução `CREATE TABLE`. Isso garante que a política esteja ativa desde a primeira inserção de dados."
       }
     ],
     "tags": [
@@ -359,22 +359,22 @@
     "pregunta": "Um engenheiro de dados remove o filtro de linha de uma tabela:\n\n```sql\nALTER TABLE catalog.sales.orders DROP ROW FILTER;\n```\n\nQual é o efeito?",
     "opciones": [
       {
+        "texto_opcion": "A tabela é descartada junto com o filtro — `DROP ROW FILTER` é equivalente a `DROP TABLE` — `DROP ROW FILTER` remove apenas a política de filtro de linha da tabela. A tabela e todos os seus dados permanecem intactos.",
+        "es_correcta": false,
+        "explicacion": "`DROP ROW FILTER` remove apenas a política de filtro de linha da tabela. A tabela e todos os seus dados permanecem intactos."
+      },
+      {
+        "texto_opcion": "Todas as linhas anteriormente ocultadas são excluídas permanentemente da tabela — os filtros de linha nunca excluem dados — eles apenas restringem a visibilidade no momento da consulta — os filtros de linha nunca excluem dados.",
+        "es_correcta": false,
+        "explicacion": "Os filtros de linha nunca excluem dados — eles apenas restringem a visibilidade no momento da consulta. A eliminação do filtro restaura a visibilidade de todas as linhas; nenhum dado é excluído."
+      },
+      {
         "texto_opcion": "Todas as linhas ficam visíveis para todos os usuários com SELECT na tabela — o filtro é removido e nenhuma restrição no nível da linha permanece.",
         "es_correcta": true,
         "explicacion": "`DROP ROW FILTER` remove a política de filtro da tabela. Depois disso, todos os usuários com SELECT verão todas as linhas. A função UDF subjacente NÃO é excluída — ela permanece no esquema."
       },
       {
-        "texto_opcion": "Todas as linhas anteriormente ocultadas são excluídas permanentemente da tabela",
-        "es_correcta": false,
-        "explicacion": "Os filtros de linha nunca excluem dados — eles apenas restringem a visibilidade no momento da consulta. A eliminação do filtro restaura a visibilidade de todas as linhas; nenhum dado é excluído."
-      },
-      {
-        "texto_opcion": "A tabela é descartada junto com o filtro — `DROP ROW FILTER` é equivalente a `DROP TABLE`",
-        "es_correcta": false,
-        "explicacion": "`DROP ROW FILTER` remove apenas a política de filtro de linha da tabela. A tabela e todos os seus dados permanecem intactos."
-      },
-      {
-        "texto_opcion": "A função UDF é excluída do catálogo quando o filtro de linha é eliminado",
+        "texto_opcion": "A função UDF é excluída do catálogo quando o filtro de linha é eliminado — `DROP ROW FILTER` remove o anexo do filtro da tabela - NÃO exclui a função UDF — `DROP ROW FILTER` remove o anexo do filtro da tabela - NÃO exclui a função UDF. A função deve ser eliminada separadamente com `DROP FUNCTION` se não for mais necessária.",
         "es_correcta": false,
         "explicacion": "`DROP ROW FILTER` remove o anexo do filtro da tabela - NÃO exclui a função UDF. A função deve ser eliminada separadamente com `DROP FUNCTION` se não for mais necessária."
       }
@@ -389,24 +389,24 @@
     "pregunta": "Um engenheiro de dados deseja usar `current_user()` em um filtro de linha para permitir que cada usuário veja apenas seus próprios registros. A coluna `created_by` armazena o email do usuário. Qual UDF implementa isso corretamente?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS BOOLEAN\nRETURN is_account_group_member('admin')\n    OR current_user() = created_by;\n```",
-        "es_correcta": true,
-        "explicacion": "Isso usa `current_user()` corretamente para comparar a identidade do usuário que está consultando com a coluna `created_by`. Os administradores ignoram o filtro. A função retorna BOOLEAN conforme necessário para filtros de linha."
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS STRING\nRETURN CASE WHEN current_user() = created_by THEN created_by ELSE NULL END;\n``` — marcar um UDF `DETERMINISTIC` que usa `current_user()` está incorreto.",
+        "es_correcta": false,
+        "explicacion": "Marcar um UDF `DETERMINISTIC` que usa `current_user()` está incorreto — `current_user()` retorna valores diferentes para sessões diferentes. UDFs que usam funções de identidade NÃO devem ser marcados como `DETERMINISTIC`."
       },
       {
-        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter()\nRETURNS BOOLEAN\nRETURN SELECT * FROM catalog.schema.user_tasks WHERE created_by = current_user();\n```",
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter()\nRETURNS BOOLEAN\nRETURN SELECT * FROM catalog.schema.user_tasks WHERE created_by = current_user();\n``` — as UDFs de filtro de linha devem retornar BOOLEAN, não STRING.",
         "es_correcta": false,
         "explicacion": "As UDFs de filtro de linha devem retornar BOOLEAN, não STRING. Um tipo de retorno STRING é para máscaras de coluna, não para filtros de linha."
       },
       {
-        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS BOOLEAN\nDETERMINISTIC\nRETURN current_user() = created_by;\n```",
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS BOOLEAN\nDETERMINISTIC\nRETURN current_user() = created_by;\n``` — uDFs de filtro de linha não podem conter subconsultas SELECT que leem tabelas — isso causaria dependências circulares e problemas de desempenho.",
         "es_correcta": false,
         "explicacion": "UDFs de filtro de linha não podem conter subconsultas SELECT que leem tabelas — isso causaria dependências circulares e problemas de desempenho. Use expressões CASE simples com funções de identidade."
       },
       {
-        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS STRING\nRETURN CASE WHEN current_user() = created_by THEN created_by ELSE NULL END;\n```",
-        "es_correcta": false,
-        "explicacion": "Marcar um UDF `DETERMINISTIC` que usa `current_user()` está incorreto — `current_user()` retorna valores diferentes para sessões diferentes. UDFs que usam funções de identidade NÃO devem ser marcados como `DETERMINISTIC`."
+        "texto_opcion": "```sql\nCREATE FUNCTION catalog.schema.owner_filter(created_by STRING)\nRETURNS BOOLEAN\nRETURN is_account_group_member('admin')\n    OR current_user() = created_by;\n```",
+        "es_correcta": true,
+        "explicacion": "Isso usa `current_user()` corretamente para comparar a identidade do usuário que está consultando com a coluna `created_by`. Os administradores ignoram o filtro. A função retorna BOOLEAN conforme necessário para filtros de linha."
       }
     ],
     "tags": [
@@ -424,19 +424,19 @@
         "explicacion": "As funções determinísticas retornam a mesma saída para a mesma entrada, independentemente de quem as chama ou quando. `is_account_group_member()` depende da associação do usuário atual ao grupo, tornando-o não determinístico. Marcar como DETERMINISTIC pode causar comportamento incorreto de cache."
       },
       {
-        "texto_opcion": "Somente se a função de máscara for aplicada a uma tabela com menos de 1 milhão de linhas, o tamanho da tabela não influencia se uma UDF deve ser marcada como.",
+        "texto_opcion": "Sim — `is_account_group_member()` avalia uma vez por sessão e é efetivamente determinístico dentro de uma sessão — embora o resultado possa ser estável dentro de uma sessão, `DETERMINISTIC` em SQL significa \"mesma entrada → mesma saída para qualquer usuário a qualquer momento\", o.",
+        "es_correcta": false,
+        "explicacion": "Embora o resultado possa ser estável dentro de uma sessão, `DETERMINISTIC` em SQL significa \"mesma entrada → mesma saída para qualquer usuário a qualquer momento\", o que é violado por funções dependentes do usuário."
+      },
+      {
+        "texto_opcion": "Somente se a função de máscara for aplicada a uma tabela com menos de 1 milhão de linhas, o tamanho da tabela não influencia se uma UDF deve ser marcada como — o tamanho da tabela não influencia se uma UDF deve ser marcada como DETERMINISTIC. O problema é a natureza dependente do usuário de `is_account_group_member()`.",
         "es_correcta": false,
         "explicacion": "O tamanho da tabela não influencia se uma UDF deve ser marcada como DETERMINISTIC. O problema é a natureza dependente do usuário de `is_account_group_member()`."
       },
       {
-        "texto_opcion": "Sim, `DETERMINISTIC` melhora o desempenho e é seguro porque o Databricks reavalia a associação ao grupo em cada consulta de qualquer maneira.",
+        "texto_opcion": "Sim, `DETERMINISTIC` melhora o desempenho e é seguro porque o Databricks reavalia a associação ao grupo em cada consulta de qualquer maneira — mesmo se reavaliada, marcar uma função como `DETERMINISTIC` que retorna valores dependentes do usuário viola o contrato semântico e pode — mesmo se reavaliada, marcar uma função como `DETERMINISTIC` que retorna valores dependentes do usuário viola o contrato semântico e pode causar comportamentos de otimização incorretos.",
         "es_correcta": false,
         "explicacion": "Mesmo se reavaliada, marcar uma função como `DETERMINISTIC` que retorna valores dependentes do usuário viola o contrato semântico e pode causar comportamentos de otimização incorretos."
-      },
-      {
-        "texto_opcion": "Sim — `is_account_group_member()` avalia uma vez por sessão e é efetivamente determinístico dentro de uma sessão",
-        "es_correcta": false,
-        "explicacion": "Embora o resultado possa ser estável dentro de uma sessão, `DETERMINISTIC` em SQL significa \"mesma entrada → mesma saída para qualquer usuário a qualquer momento\", o que é violado por funções dependentes do usuário."
       }
     ],
     "tags": [
@@ -449,12 +449,7 @@
     "pregunta": "Um engenheiro de dados consulta uma tabela Delta com um filtro de linha ativo usando **Time Travel**:\n\n```sql\nSELECT * FROM catalog.schema.orders VERSION AS OF 5;\n```\n\nA viagem no tempo é compatível com filtros de linha?",
     "opciones": [
       {
-        "texto_opcion": "Suportado apenas se a função de filtro de linha existisse no momento da versão 5, a existência da função numa versão histórica não é o problema.",
-        "es_correcta": false,
-        "explicacion": "A existência da função numa versão histórica não é o problema. A viagem no tempo em si é a limitação — geralmente não é compatível com políticas de filtro de linha ativas."
-      },
-      {
-        "texto_opcion": "Suportado para operações SELECT somente leitura, mas não para operações RESTORE, a limitação se aplica a leituras de viagem no tempo (`VERSION AS OF`",
+        "texto_opcion": "Suportado para operações SELECT somente leitura, mas não para operações RESTORE, a limitação se aplica a leituras de viagem no tempo (`VERSION AS OF` — a limitação se aplica a leituras de viagem no tempo (`VERSION AS OF`, `TIMESTAMP AS OF`) - não apenas RESTORE.",
         "es_correcta": false,
         "explicacion": "A limitação se aplica a leituras de viagem no tempo (`VERSION AS OF`, `TIMESTAMP AS OF`) - não apenas RESTORE. Geralmente, ambos não são compatíveis com filtros de linha ativos."
       },
@@ -464,9 +459,14 @@
         "explicacion": "A viagem no tempo (`VERSION AS OF`, `TIMESTAMP AS OF`) geralmente não é suportada em tabelas com filtros de linha ou máscaras de coluna ativos. Esta é uma limitação documentada do controle de acesso refinado Unity Catalog."
       },
       {
-        "texto_opcion": "Totalmente compatível – a viagem no tempo lê dados históricos e o filtro de linha se aplica às linhas históricas",
+        "texto_opcion": "Totalmente compatível – a viagem no tempo lê dados históricos e o filtro de linha se aplica às linhas históricas — a viagem no tempo com filtros de linha é uma limitação documentada. Geralmente não é suportado.",
         "es_correcta": false,
         "explicacion": "A viagem no tempo com filtros de linha é uma limitação documentada. Geralmente não é suportado."
+      },
+      {
+        "texto_opcion": "Suportado apenas se a função de filtro de linha existisse no momento da versão 5, a existência da função numa versão histórica não é o problema — a existência da função numa versão histórica não é o problema.",
+        "es_correcta": false,
+        "explicacion": "A existência da função numa versão histórica não é o problema. A viagem no tempo em si é a limitação — geralmente não é compatível com políticas de filtro de linha ativas."
       }
     ],
     "tags": [
@@ -479,19 +479,19 @@
     "pregunta": "Uma máscara de coluna e um filtro de linha podem ser aplicados à **mesma tabela simultaneamente**?",
     "opciones": [
       {
-        "texto_opcion": "Sim, mas somente se a tabela usar o formato Delta — as tabelas externas Parquet não podem ter ambos",
+        "texto_opcion": "Não — apenas um tipo de política pode estar ativo por tabela por vez, ambos os tipos de política podem coexistir — ambos os tipos de política podem coexistir. Unity Catalog aplica-os de forma independente: primeiro o filtro de linha determina quais linhas estão visíveis, depois a máscara de coluna transforma os valores nessas linhas visíveis.",
+        "es_correcta": false,
+        "explicacion": "Ambos os tipos de política podem coexistir. Unity Catalog aplica-os de forma independente: primeiro o filtro de linha determina quais linhas estão visíveis, depois a máscara de coluna transforma os valores nessas linhas visíveis."
+      },
+      {
+        "texto_opcion": "Sim, mas somente se a tabela usar o formato Delta — as tabelas externas Parquet não podem ter ambos — embora o formato Delta seja recomendado para Unity Catalog, a coexistência de máscaras e filtros não é uma restrição dependente do formato adotado como padrão da equipe, embora não seja o melhor aqui Isso o torna inadequado frente à restrição principal do enunciado..",
         "es_correcta": false,
         "explicacion": "Embora o formato Delta seja recomendado para Unity Catalog, a coexistência de máscaras e filtros não é uma restrição dependente do formato."
       },
       {
-        "texto_opcion": "Somente se o filtro de linha e a máscara de coluna usarem a mesma função UDF, não existe tal exigência.",
+        "texto_opcion": "Somente se o filtro de linha e a máscara de coluna usarem a mesma função UDF, não existe tal exigência — não existe tal exigência. Máscaras de coluna e filtros de linha usam UDFs separados — eles podem coexistir na mesma tabela de forma independente selecionado para atender as restrições citadas Isso o torna inadequado frente à restrição principal do enunciado..",
         "es_correcta": false,
         "explicacion": "Não existe tal exigência. Máscaras de coluna e filtros de linha usam UDFs separados — eles podem coexistir na mesma tabela de forma independente."
-      },
-      {
-        "texto_opcion": "Não — apenas um tipo de política pode estar ativo por tabela por vez, ambos os tipos de política podem coexistir.",
-        "es_correcta": false,
-        "explicacion": "Ambos os tipos de política podem coexistir. Unity Catalog aplica-os de forma independente: primeiro o filtro de linha determina quais linhas estão visíveis, depois a máscara de coluna transforma os valores nessas linhas visíveis."
       },
       {
         "texto_opcion": "Sim — máscaras de coluna (em colunas específicas) e um filtro de linha (na tabela) podem coexistir. Eles funcionam de forma independente: o filtro de linha exclui linhas e a máscara de coluna transforma valores em linhas visíveis.",
@@ -509,24 +509,24 @@
     "pregunta": "Um engenheiro de dados deseja usar **políticas ABAC** para mascaramento de colunas em todas as tabelas em um catálogo marcado com `sensibilidade=PII`. Qual é a versão mínima do DBR necessária?",
     "opciones": [
       {
-        "texto_opcion": "**DBR 14.3 LTS** — As políticas ABAC foram introduzidas juntamente com Unity Catalog v2.0, as políticas ABAC exigem DBR 16.4+, não DBR 14.3.",
-        "es_correcta": false,
-        "explicacion": "As políticas ABAC exigem DBR 16.4+, não DBR 14.3."
-      },
-      {
         "texto_opcion": "**DBR 16.4+** — As políticas ABAC exigem um tempo de execução mais recente do que máscaras/filtros em nível de tabela (que exigem DBR 15.4 LTS).",
         "es_correcta": true,
         "explicacion": "As políticas ABAC (políticas com escopo de catálogo/esquema usando tags governadas) exigem DBR 16.4 ou superior. `SET MASK` / `SET ROW FILTER` em nível de tabela requer DBR 15.4 LTS."
       },
       {
-        "texto_opcion": "**DBR 12.2 LTS** — o mascaramento de coluna está disponível desde as primeiras versões Databricks Runtime",
+        "texto_opcion": "**DBR 12.2 LTS** — o mascaramento de coluna está disponível desde as primeiras versões Databricks Runtime — as políticas ABAC são um recurso mais recente que requer DBR 16.4+. Os runtimes mais antigos não os suportam.",
         "es_correcta": false,
         "explicacion": "As políticas ABAC são um recurso mais recente que requer DBR 16.4+. Os runtimes mais antigos não os suportam."
       },
       {
-        "texto_opcion": "Qualquer versão DBR — ABAC é um recurso de metadados que não depende do tempo de execução",
+        "texto_opcion": "Qualquer versão DBR — ABAC é um recurso de metadados que não depende do tempo de execução — as políticas ABAC são aplicadas no tempo de execução da consulta pelo Databricks runtime — as políticas ABAC são aplicadas no tempo de execução da consulta pelo Databricks runtime.",
         "es_correcta": false,
         "explicacion": "As políticas ABAC são aplicadas no tempo de execução da consulta pelo Databricks runtime. Os runtimes mais antigos não conseguirão acessar tabelas protegidas pelas políticas ABAC."
+      },
+      {
+        "texto_opcion": "**DBR 14.3 LTS** — As políticas ABAC foram introduzidas juntamente com Unity Catalog v2.0, as políticas ABAC exigem DBR 16.4+, não DBR 14.3 aplicado entre ambientes por consistência operacional Isso o torna inadequado frente à restrição principal do enunciado..",
+        "es_correcta": false,
+        "explicacion": "As políticas ABAC exigem DBR 16.4+, não DBR 14.3."
       }
     ],
     "tags": [
@@ -539,24 +539,24 @@
     "pregunta": "Uma tabela `orders` possui a coluna `customer_email` com esta máscara:\n\n```sql\nCREATE FUNCTION catalog.schema.email_mask(email STRING)\nRETURNS STRING\nRETURN CASE\n  WHEN is_account_group_member('admins') THEN email\n  ELSE CONCAT('****@', SPLIT(email, '@')[1])\nEND;\n```\n\nUm usuário não administrador vê `****@gmail.com` para um e-mail de `frank@gmail.com`. Este é o comportamento esperado?",
     "opciones": [
       {
-        "texto_opcion": "Sim — a função preserva o domínio do e-mail (`gmail.com`) enquanto mascara a parte local (`frank`) com `****`. Este é um padrão de mascaramento parcial que oculta PII enquanto mantém algum contexto.",
-        "es_correcta": true,
-        "explicacion": "`SPLIT(email, '@')[1]` extrai a parte do domínio e `CONCAT('****@', domain)` combina uma máscara fixa com o domínio real. O resultado `****@gmail.com` para quem não é administrador é exatamente o que a função produz."
-      },
-      {
-        "texto_opcion": "Não — a função deve retornar o e-mail completo inalterado porque `SPLIT` retorna um array, `SPLIT(email, '@')` retorna um array",
+        "texto_opcion": "Não — a função deve retornar o e-mail completo inalterado porque `SPLIT` retorna um array, `SPLIT(email, '@')` retorna um array — `SPLIT(email, '@')` retorna um array; `[1]` (indexado 1 no Databricks SQL) recupera o segundo elemento - o domínio. Este é um padrão de mascaramento parcial válido.",
         "es_correcta": false,
         "explicacion": "`SPLIT(email, '@')` retorna um array; `[1]` (indexado 1 no Databricks SQL) recupera o segundo elemento - o domínio. Este é um padrão de mascaramento parcial válido."
       },
       {
-        "texto_opcion": "Não — a função falha porque `CONCAT` não pode combinar uma string constante com a saída `SPLIT`",
+        "texto_opcion": "Não — a função falha porque `CONCAT` não pode combinar uma string constante com a saída `SPLIT` — `SPLIT` retorna um elemento de array de string quando indexado. `CONCAT('****@', string)` é SQL válido. A função funciona corretamente priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
         "es_correcta": false,
         "explicacion": "`SPLIT` retorna um elemento de array de string quando indexado. `CONCAT('****@', string)` é SQL válido. A função funciona corretamente."
       },
       {
-        "texto_opcion": "Não — para não administradores, a função retorna NULL porque as cláusulas `else` em CASE retornam NULL por padrão",
+        "texto_opcion": "Não — para não administradores, a função retorna NULL porque as cláusulas `else` em CASE retornam NULL por padrão — a cláusula `ELSE` retorna explicitamente `CONCAT('****@', SPLIT(email, '@')[1])` — não NULL. NULL só seria retornado se a cláusula ELSE estivesse faltando no CASE como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "A cláusula `ELSE` retorna explicitamente `CONCAT('****@', SPLIT(email, '@')[1])` — não NULL. NULL só seria retornado se a cláusula ELSE estivesse faltando no CASE."
+      },
+      {
+        "texto_opcion": "Sim — a função preserva o domínio do e-mail (`gmail.com`) enquanto mascara a parte local (`frank`) com `****`. Este é um padrão de mascaramento parcial que oculta PII enquanto mantém algum contexto.",
+        "es_correcta": true,
+        "explicacion": "`SPLIT(email, '@')[1]` extrai a parte do domínio e `CONCAT('****@', domain)` combina uma máscara fixa com o domínio real. O resultado `****@gmail.com` para quem não é administrador é exatamente o que a função produz."
       }
     ],
     "tags": [
@@ -569,14 +569,9 @@
     "pregunta": "Um engenheiro de dados cria um filtro de linha que é aplicado à tabela `orders`. Um analista tenta executar `CREATE TABLE requests_copy DEEP CLONE catalog.schema.orders`. Qual é o resultado esperado?",
     "opciones": [
       {
-        "texto_opcion": "O clone copia apenas as linhas visíveis para o analista (as linhas filtradas são excluídas do clone).",
+        "texto_opcion": "O clone copia apenas as linhas visíveis para o analista (as linhas filtradas são excluídas do clone) — dEEP CLONE em uma tabela filtrada não é compatível — a operação falha totalmente. Não há comportamento de cópia parcial.",
         "es_correcta": false,
         "explicacion": "DEEP CLONE em uma tabela filtrada não é compatível — a operação falha totalmente. Não há comportamento de cópia parcial."
-      },
-      {
-        "texto_opcion": "A clonagem foi bem-sucedida, mas o filtro de linha não foi copiado para a tabela clonada",
-        "es_correcta": false,
-        "explicacion": "DEEP CLONE não é compatível com tabelas mascaradas/filtradas — a operação falha, mas não é bem-sucedida sem o filtro."
       },
       {
         "texto_opcion": "A operação **falha** — `DEEP CLONE` não é compatível com tabelas com filtros de linha ou máscaras de coluna ativos.",
@@ -584,7 +579,12 @@
         "explicacion": "DEEP CLONE e SHALLOW CLONE são documentados como operações não suportadas em tabelas com segurança ativa em nível de linha ou máscaras de coluna. Esta é uma limitação importante a ser conhecida."
       },
       {
-        "texto_opcion": "A clonagem é bem-sucedida e o filtro de linha é aplicado automaticamente à tabela clonada",
+        "texto_opcion": "A clonagem foi bem-sucedida, mas o filtro de linha não foi copiado para a tabela clonada — dEEP CLONE não é compatível com tabelas mascaradas/filtradas — a operação falha, mas não é bem-sucedida sem o filtro.",
+        "es_correcta": false,
+        "explicacion": "DEEP CLONE não é compatível com tabelas mascaradas/filtradas — a operação falha, mas não é bem-sucedida sem o filtro."
+      },
+      {
+        "texto_opcion": "A clonagem é bem-sucedida e o filtro de linha é aplicado automaticamente à tabela clonada — dEEP CLONE não é compatível com tabelas mascaradas/filtradas.",
         "es_correcta": false,
         "explicacion": "DEEP CLONE não é compatível com tabelas mascaradas/filtradas. O resultado descrito pressupõe que a operação foi bem-sucedida, o que não acontece."
       }
@@ -599,24 +599,24 @@
     "pregunta": "Um engenheiro de dados deseja verificar quais máscaras de coluna e filtros de linha são aplicados a `catalog.schema.users`. Qual comando mostra essas informações?",
     "opciones": [
       {
-        "texto_opcion": "`MOSTRAR GRANTS ON TABLE catalog.schema.users;`, `SHOW GRANTS` mostra privilégios grants.",
-        "es_correcta": false,
-        "explicacion": "`SHOW GRANTS` mostra privilégios grants (SELECT, MODIFY, etc.) - máscaras de coluna ou políticas de filtro de linha não aplicadas."
-      },
-      {
-        "texto_opcion": "`MOSTRAR POLÍTICAS ON TABLE catalog.schema.users;`, `SHOW POLICIES` não é um comando SQL padrão do.",
-        "es_correcta": false,
-        "explicacion": "`SHOW POLICIES` não é um comando SQL padrão do Databricks. `DESCRIBE TABLE EXTENDED` é o comando correto para visualizar máscaras e filtros aplicados."
-      },
-      {
         "texto_opcion": "`DESCRIBE TABLE EXTENDED catalog.schema.users;` — a saída inclui máscaras de coluna e filtros de linha aplicados.",
         "es_correcta": true,
         "explicacion": "`DESCRIBE TABLE EXTENDED` mostra metadados detalhados da tabela, incluindo quaisquer máscaras de coluna ativas (por coluna) e políticas de filtro de linha aplicadas à tabela."
       },
       {
-        "texto_opcion": "`SELECT * FROM system.access.column_masks WHERE nome_tabela = 'usuários';`",
+        "texto_opcion": "`MOSTRAR POLÍTICAS ON TABLE catalog.schema.users;`, `SHOW POLICIES` não é um comando SQL padrão do — `SHOW POLICIES` não é um comando SQL padrão do Databricks.",
+        "es_correcta": false,
+        "explicacion": "`SHOW POLICIES` não é um comando SQL padrão do Databricks. `DESCRIBE TABLE EXTENDED` é o comando correto para visualizar máscaras e filtros aplicados."
+      },
+      {
+        "texto_opcion": "`SELECT * FROM system.access.column_masks WHERE nome_tabela = 'usuários';` — embora as tabelas do sistema possam fornecer dados de auditoria, o.",
         "es_correcta": false,
         "explicacion": "Embora as tabelas do sistema possam fornecer dados de auditoria, o comando SQL principal para verificar máscaras e filtros aplicados em uma tabela específica é `DESCRIBE TABLE EXTENDED`."
+      },
+      {
+        "texto_opcion": "`MOSTRAR GRANTS ON TABLE catalog.schema.users;`, `SHOW GRANTS` mostra privilégios grants — `SHOW GRANTS` mostra privilégios grants (SELECT, MODIFY, etc.).",
+        "es_correcta": false,
+        "explicacion": "`SHOW GRANTS` mostra privilégios grants (SELECT, MODIFY, etc.) - máscaras de coluna ou políticas de filtro de linha não aplicadas."
       }
     ],
     "tags": [
@@ -629,24 +629,24 @@
     "pregunta": "Qual é a principal vantagem das políticas **ABAC** em relação aos filtros de linha e máscaras de coluna no **nível de tabela** ao gerenciar a segurança em centenas de tabelas?",
     "opciones": [
       {
+        "texto_opcion": "As políticas ABAC podem aplicar máscaras de coluna a colunas computadas/virtuais que não existem no esquema da tabela — as políticas ABAC funcionam com colunas de tabela existentes. Eles não podem mascarar colunas virtuais que não existem no esquema como escolha padrão de produção neste cenário.",
+        "es_correcta": false,
+        "explicacion": "As políticas ABAC funcionam com colunas de tabela existentes. Eles não podem mascarar colunas virtuais que não existem no esquema."
+      },
+      {
         "texto_opcion": "As políticas ABAC são aplicadas no **nível de catálogo ou esquema** usando tags governadas — novas tabelas com a tag correspondente herdam automaticamente a política sem qualquer comando `ALTER TABLE`.",
         "es_correcta": true,
         "explicacion": "As políticas ABAC eliminam a carga \"ALTER TABLE por tabela\". Depois que uma política é criada no nível do catálogo/esquema, qualquer tabela marcada com a tag correspondente herda automaticamente o comportamento de mascaramento/filtragem."
       },
       {
-        "texto_opcion": "As políticas ABAC são executadas mais rapidamente do que as máscaras em nível de tabela porque usam otimizações nativas do Spark.",
+        "texto_opcion": "As políticas ABAC são executadas mais rapidamente do que as máscaras em nível de tabela porque usam otimizações nativas do Spark — as características de desempenho entre ABAC e políticas em nível de tabela podem diferir de acordo com o caso de uso, mas a principal.",
         "es_correcta": false,
         "explicacion": "As características de desempenho entre ABAC e políticas em nível de tabela podem diferir de acordo com o caso de uso, mas a principal vantagem de ABAC é a escalabilidade/manutenção, não o desempenho."
       },
       {
-        "texto_opcion": "As políticas ABAC funcionam em tabelas externas, enquanto as máscaras em nível de tabela funcionam apenas em tabelas gerenciadas.",
+        "texto_opcion": "As políticas ABAC funcionam em tabelas externas, enquanto as máscaras em nível de tabela funcionam apenas em tabelas gerenciadas — a vantagem de ABAC é o gerenciamento escalonável por meio de tags, não uma restrição de tipo de tabela. Ambas as abordagens funcionam com tabelas Delta.",
         "es_correcta": false,
         "explicacion": "A vantagem de ABAC é o gerenciamento escalonável por meio de tags, não uma restrição de tipo de tabela. Ambas as abordagens funcionam com tabelas Delta."
-      },
-      {
-        "texto_opcion": "As políticas ABAC podem aplicar máscaras de coluna a colunas computadas/virtuais que não existem no esquema da tabela.",
-        "es_correcta": false,
-        "explicacion": "As políticas ABAC funcionam com colunas de tabela existentes. Eles não podem mascarar colunas virtuais que não existem no esquema."
       }
     ],
     "tags": [
@@ -658,24 +658,24 @@
     "pregunta": "Um engenheiro de dados aplica o seguinte filtro de linha:\n\n```sql\nCREATE FUNCTION catalog.schema.admin_only()\nRETURNS BOOLEAN\nRETURN is_account_group_member('admins');\n\nALTER TABLE catalog.schema.sensitive_table\nSET ROW FILTER catalog.schema.admin_only ON ();\n```\n\nO que um usuário não administrador vê quando consulta `SELECT COUNT(*) FROM catalog.schema.sensitive_table`?",
     "opciones": [
       {
-        "texto_opcion": "NULL — quando nenhuma linha passa no filtro, COUNT(*) retorna NULL",
-        "es_correcta": false,
-        "explicacion": "`COUNT(*)` nunca retorna NULL - retorna 0 quando não há linhas para contar."
-      },
-      {
-        "texto_opcion": "A contagem total de linhas — o filtro se aplica apenas a consultas SELECT *, não a COUNT(*)",
-        "es_correcta": false,
-        "explicacion": "Os filtros de linha se aplicam a TODAS as consultas na tabela, incluindo COUNT(*). A contagem reflete apenas as linhas visíveis para o usuário."
-      },
-      {
-        "texto_opcion": "Um erro – não administradores não podem executar consultas em tabelas com filtros de linha",
+        "texto_opcion": "Um erro – não administradores não podem executar consultas em tabelas com filtros de linha — não administradores podem executar consultas em tabelas filtradas.",
         "es_correcta": false,
         "explicacion": "Não administradores podem executar consultas em tabelas filtradas — eles simplesmente veem o conjunto de resultados filtrados (vazio). Nenhum erro é gerado."
+      },
+      {
+        "texto_opcion": "A contagem total de linhas — o filtro se aplica apenas a consultas SELECT *, não a COUNT(*) — os filtros de linha se aplicam a TODAS as consultas na tabela, incluindo COUNT(*). A contagem reflete apenas as linhas visíveis para o usuário.",
+        "es_correcta": false,
+        "explicacion": "Os filtros de linha se aplicam a TODAS as consultas na tabela, incluindo COUNT(*). A contagem reflete apenas as linhas visíveis para o usuário."
       },
       {
         "texto_opcion": "`0` — para não administradores, `admin_only()` retorna `FALSE`, então todas as linhas são excluídas. A contagem retorna 0.",
         "es_correcta": true,
         "explicacion": "`admin_only()` retorna FALSE para não administradores. Como TODAS as linhas retornam FALSE do filtro, nenhuma linha fica visível para não administradores. COUNT(*) em zero linhas visíveis retorna 0."
+      },
+      {
+        "texto_opcion": "NULL — quando nenhuma linha passa no filtro, COUNT(*) retorna NULL — `COUNT(*)` nunca retorna NULL - retorna 0 quando não há linhas para contar adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "es_correcta": false,
+        "explicacion": "`COUNT(*)` nunca retorna NULL - retorna 0 quando não há linhas para contar."
       }
     ],
     "tags": [
@@ -688,14 +688,14 @@
     "pregunta": "Uma máscara de coluna UDF é aplicada ao `salário` na tabela `funcionários`. Um usuário com apenas `SELECT` na tabela consulta `SELECT salário FROM funcionários`. Qual privilégio é invocado automaticamente para executar a função de máscara?",
     "opciones": [
       {
-        "texto_opcion": "A função é executada com os privilégios do usuário que faz a consulta — se eles não tiverem EXECUTE, a consulta falhará.",
+        "texto_opcion": "A função é executada com os privilégios do usuário que faz a consulta — se eles não tiverem EXECUTE, a consulta falhará — os usuários finais não precisam de EXECUTE na função de máscara. A função é executada de forma transparente com privilégios no nível do mecanismo.",
         "es_correcta": false,
         "explicacion": "Os usuários finais não precisam de EXECUTE na função de máscara. A função é executada de forma transparente com privilégios no nível do mecanismo."
       },
       {
-        "texto_opcion": "A função não é executada — o valor bruto do salário é retornado porque o usuário não possui EXECUTE",
+        "texto_opcion": "A consulta solicita que o usuário se autentique com credenciais adicionais antes de executar a máscara — as máscaras são completamente transparentes para os usuários finais. Nenhuma autenticação ou credenciais adicionais são necessárias usado como caminho principal nesta arquitetura.",
         "es_correcta": false,
-        "explicacion": "A máscara sempre é executada independentemente do privilégio EXECUTE do usuário na função. O usuário obtém o valor mascarado, não o valor bruto."
+        "explicacion": "As máscaras são completamente transparentes para os usuários finais. Nenhuma autenticação ou credenciais adicionais são necessárias."
       },
       {
         "texto_opcion": "A função de máscara é executada com **privilégios do proprietário da tabela** (ou privilégios elevados do mecanismo) — o usuário que faz a consulta não precisa de EXECUTE na máscara UDF.",
@@ -703,9 +703,9 @@
         "explicacion": "UDFs de máscara de coluna e filtro de linha são invocados pelo mecanismo Unity Catalog com privilégios elevados. Os usuários finais só precisam de SELECT na tabela — eles não precisam de EXECUTE na UDF."
       },
       {
-        "texto_opcion": "A consulta solicita que o usuário se autentique com credenciais adicionais antes de executar a máscara",
+        "texto_opcion": "A função não é executada — o valor bruto do salário é retornado porque o usuário não possui EXECUTE — a máscara sempre é executada independentemente do privilégio EXECUTE do usuário na função. O usuário obtém o valor mascarado, não o valor bruto priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
         "es_correcta": false,
-        "explicacion": "As máscaras são completamente transparentes para os usuários finais. Nenhuma autenticação ou credenciais adicionais são necessárias."
+        "explicacion": "A máscara sempre é executada independentemente do privilégio EXECUTE do usuário na função. O usuário obtém o valor mascarado, não o valor bruto."
       }
     ],
     "tags": [
@@ -718,24 +718,24 @@
     "pregunta": "Um engenheiro de dados possui uma tabela com um filtro de linha aplicado. Eles tentam compartilhá-lo via **Delta Sharing** com um destinatário externo. Qual é o comportamento esperado?",
     "opciones": [
       {
-        "texto_opcion": "Delta Sharing remove automaticamente o filtro de linha ao criar o compartilhamento",
-        "es_correcta": false,
-        "explicacion": "Delta Sharing não modifica o filtro de linha da tabela de origem. A operação de compartilhamento falha devido à incompatibilidade."
-      },
-      {
-        "texto_opcion": "Delta Sharing funciona normalmente — o filtro de linha se aplica ao destinatário externo com base em sua identidade.",
-        "es_correcta": false,
-        "explicacion": "O padrão Delta Sharing não pode aplicar filtros baseados em identidade a destinatários externos (que possuem sistemas de identidade diferentes). É por isso que é uma limitação documentada."
-      },
-      {
         "texto_opcion": "O padrão Delta Sharing **não** compartilha tabelas com filtros de linha ou máscaras de coluna no nível da tabela — esta é uma limitação documentada.",
         "es_correcta": true,
         "explicacion": "O padrão Delta Sharing não suporta o compartilhamento de tabelas com segurança ativa em nível de linha ou máscaras de coluna. As tabelas protegidas por ABAC têm considerações especiais, mas as políticas em nível de tabela bloqueiam o padrão Delta Sharing."
       },
       {
-        "texto_opcion": "Delta Sharing compartilha a tabela, mas exclui todas as linhas do destinatário externo",
+        "texto_opcion": "Delta Sharing compartilha a tabela, mas exclui todas as linhas do destinatário externo — o padrão Delta Sharing em uma tabela filtrada falha — ele não compartilha com zero linhas como escolha padrão de produção neste cenário.",
         "es_correcta": false,
         "explicacion": "O padrão Delta Sharing em uma tabela filtrada falha — ele não compartilha com zero linhas."
+      },
+      {
+        "texto_opcion": "Delta Sharing funciona normalmente — o filtro de linha se aplica ao destinatário externo com base em sua identidade — o padrão Delta Sharing não pode aplicar filtros baseados em identidade a destinatários externos (que possuem sistemas de identidade diferentes). É por isso que é uma limitação documentada.",
+        "es_correcta": false,
+        "explicacion": "O padrão Delta Sharing não pode aplicar filtros baseados em identidade a destinatários externos (que possuem sistemas de identidade diferentes). É por isso que é uma limitação documentada."
+      },
+      {
+        "texto_opcion": "Delta Sharing remove automaticamente o filtro de linha ao criar o compartilhamento — delta Sharing não modifica o filtro de linha da tabela de origem. A operação de compartilhamento falha devido à incompatibilidade.",
+        "es_correcta": false,
+        "explicacion": "Delta Sharing não modifica o filtro de linha da tabela de origem. A operação de compartilhamento falha devido à incompatibilidade."
       }
     ],
     "tags": [

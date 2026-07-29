@@ -3,22 +3,22 @@
     "pregunta": "A travel platform (near-real-time dashboards, region southeastasia) must: describe how Snowflake physically stores table rows on disk. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition",
-        "es_correcta": true,
-        "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
-      },
-      {
-        "texto_opcion": "One row per file in random order without compression",
+        "texto_opcion": "One row per file in random order without compression — snowflake uses compressed micro-partitions, not row files applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Snowflake uses compressed micro-partitions, not row files."
       },
       {
-        "texto_opcion": "All tables stored as single monolithic JSON document",
+        "texto_opcion": "All tables stored as single monolithic JSON document — relational tables use micro-partitions, not one JSON blob often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Relational tables use micro-partitions, not one JSON blob."
       },
       {
-        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently",
+        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition.",
+        "es_correcta": true,
+        "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
+      },
+      {
+        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently — durable storage is in object storage; warehouses cache temporarily.",
         "es_correcta": false,
         "explicacion": "Durable storage is in object storage; warehouses cache temporarily."
       }
@@ -32,14 +32,9 @@
     "pregunta": "Incident review (eastus): filter FACT_EVENTS WHERE event_date = '2026-07-01' on a large fact table. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Full table scan is always required regardless of filters, pruning reduces scanned partitions when metadata allows.",
+        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata selected to meet the constraints described here.",
         "es_correcta": false,
-        "explicacion": "Pruning reduces scanned partitions when metadata allows."
-      },
-      {
-        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata",
-        "es_correcta": false,
-        "explicacion": "Pruning uses micro-partition metadata; clustering improves organization."
+        "explicacion": "Optimizer prunes automatically using metadata."
       },
       {
         "texto_opcion": "Snowflake uses min/max metadata per micro-partition to skip irrelevant.",
@@ -47,9 +42,14 @@
         "explicacion": "Partition pruning avoids scanning partitions outside predicate range."
       },
       {
-        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata.",
+        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata — pruning uses micro-partition metadata; clustering improves organization.",
         "es_correcta": false,
-        "explicacion": "Optimizer prunes automatically using metadata."
+        "explicacion": "Pruning uses micro-partition metadata; clustering improves organization."
+      },
+      {
+        "texto_opcion": "Full table scan is always required regardless of filters, pruning reduces scanned partitions when metadata allows.",
+        "es_correcta": false,
+        "explicacion": "Pruning reduces scanned partitions when metadata allows."
       }
     ],
     "tags": [
@@ -61,14 +61,14 @@
     "pregunta": "A gaming studio (~5 TB/day, region westeurope) must: queries filter on customer_id and event_time but pruning is poor after many inserts. Which option fits best?",
     "opciones": [
       {
+        "texto_opcion": "Disable micro-partitions to use heap storage — snowflake always uses.",
+        "es_correcta": false,
+        "explicacion": "Snowflake always uses micro-partitions for native tables."
+      },
+      {
         "texto_opcion": "Convert table to external table to get clustering automatically",
         "es_correcta": false,
         "explicacion": "External tables behave differently; clustering is for native tables."
-      },
-      {
-        "texto_opcion": "Increase warehouse size only and ignore data layout",
-        "es_correcta": false,
-        "explicacion": "Bigger warehouse does not fix poor partition bounds."
       },
       {
         "texto_opcion": "Define CLUSTER BY or allow automatic clustering where supported.",
@@ -76,9 +76,9 @@
         "explicacion": "Clustering co-locates related rows to improve partition elimination over time."
       },
       {
-        "texto_opcion": "Disable micro-partitions to use heap storage",
+        "texto_opcion": "Increase warehouse size only and ignore data layout.",
         "es_correcta": false,
-        "explicacion": "Snowflake always uses micro-partitions for native tables."
+        "explicacion": "Bigger warehouse does not fix poor partition bounds."
       }
     ],
     "tags": [
@@ -90,7 +90,7 @@
     "pregunta": "data loaded sorted by load file date shows good pruning on load_date without explicit key. Context: insurance carrier, hourly batch windows.",
     "opciones": [
       {
-        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters",
+        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters.",
         "es_correcta": true,
         "explicacion": "Insert order can yield beneficial partition bounds before explicit clustering."
       },
@@ -100,14 +100,14 @@
         "explicacion": "Statistics/metadata still matter for optimization."
       },
       {
-        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning.",
-        "es_correcta": false,
-        "explicacion": "Random order often hurts pruning."
-      },
-      {
         "texto_opcion": "Natural clustering requires MULTI_CLUSTER warehouse, clustering relates to data layout, not multi-cluster feature.",
         "es_correcta": false,
         "explicacion": "Clustering relates to data layout, not multi-cluster feature."
+      },
+      {
+        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Random order often hurts pruning."
       }
     ],
     "tags": [
@@ -119,24 +119,24 @@
     "pregunta": "Energy utility scenario — high-cardinality point lookups on UUID columns with poor partition pruning. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries",
-        "es_correcta": true,
-        "explicacion": "Search Optimization adds auxiliary structures for point lookup acceleration."
+        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired prioritized for simplicity, though it misses a key constraint.",
+        "es_correcta": false,
+        "explicacion": "Not supported/desired."
       },
       {
-        "texto_opcion": "Use CSV external stage only, stage type does not replace Search.",
+        "texto_opcion": "Use CSV external stage only, stage type does not replace Search — stage type does not replace Search Optimization for point lookups.",
         "es_correcta": false,
         "explicacion": "Stage type does not replace Search Optimization for point lookups."
       },
       {
-        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis",
+        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis — high-cardinality random keys may not cluster well; SOS may fit better.",
         "es_correcta": false,
         "explicacion": "High-cardinality random keys may not cluster well; SOS may fit better."
       },
       {
-        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired.",
-        "es_correcta": false,
-        "explicacion": "Not supported/desired."
+        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries.",
+        "es_correcta": true,
+        "explicacion": "Search Optimization adds auxiliary structures for point lookup acceleration."
       }
     ],
     "tags": [
@@ -148,19 +148,19 @@
     "pregunta": "A logistics carrier (sub-second interactive queries, region eastus) must: analytical query selects 3 of 200 columns from a wide fact table. Which option fits best?",
     "opciones": [
       {
-        "texto_opcion": "Store each column in a separate account configured.",
-        "es_correcta": false,
-        "explicacion": "Not Snowflake design."
-      },
-      {
-        "texto_opcion": "Convert all columns to VARIANT to prune better",
+        "texto_opcion": "Convert all columns to VARIANT to prune better — vARIANT wide rows can hurt pruning/selectivity.",
         "es_correcta": false,
         "explicacion": "VARIANT wide rows can hurt pruning/selectivity."
       },
       {
-        "texto_opcion": "Snowflake must read all 200 columns for every SELECT",
+        "texto_opcion": "Snowflake must read all 200 columns for every SELECT — columnar storage supports column pruning.",
         "es_correcta": false,
         "explicacion": "Columnar storage supports column pruning."
+      },
+      {
+        "texto_opcion": "Store each column in a separate account configured used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Not Snowflake design."
       },
       {
         "texto_opcion": "Columnar micro-partitions allow reading only required columns.",
@@ -177,14 +177,9 @@
     "pregunta": "Incident review (westeurope): many small inserts create numerous tiny micro-partitions hurting performance. Select the most appropriate design.",
     "opciones": [
       {
-        "texto_opcion": "Insert one row per INSERT statement intentionally for ETL efficiency",
+        "texto_opcion": "Insert one row per INSERT statement intentionally for ETL efficiency — row-by-row inserts create overhead and small partitions.",
         "es_correcta": false,
         "explicacion": "Row-by-row inserts create overhead and small partitions."
-      },
-      {
-        "texto_opcion": "Disable compression to merge partitions, compression setting does not merge partitions.",
-        "es_correcta": false,
-        "explicacion": "Compression setting does not merge partitions."
       },
       {
         "texto_opcion": "Batch loads and appropriate file sizes; consider reclustering or reload.",
@@ -195,6 +190,11 @@
         "texto_opcion": "Drop clustering metadata to consolidate partitions instantly, does not merge physical partitions meaningfully.",
         "es_correcta": false,
         "explicacion": "Does not merge physical partitions meaningfully."
+      },
+      {
+        "texto_opcion": "Disable compression to merge partitions, compression setting does not merge partitions configured end-to-end for the stated workload.",
+        "es_correcta": false,
+        "explicacion": "Compression setting does not merge partitions."
       }
     ],
     "tags": [
@@ -206,11 +206,6 @@
     "pregunta": "Insurance carrier scenario — maintain clustering without manual RECLUSTER operations. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Run VACUUM FULL like PostgreSQL nightly, snowflake uses.",
-        "es_correcta": false,
-        "explicacion": "Snowflake uses reclustering/automatic clustering, not PG VACUUM."
-      },
-      {
         "texto_opcion": "Use automatic clustering on clustered tables where enabled.",
         "es_correcta": true,
         "explicacion": "Snowflake can automatically reorganize micro-partitions for clustering keys."
@@ -219,6 +214,11 @@
         "texto_opcion": "Automatic clustering runs on every external table by default always",
         "es_correcta": false,
         "explicacion": "Automatic clustering applies to native clustered tables per configuration."
+      },
+      {
+        "texto_opcion": "Run VACUUM FULL like PostgreSQL nightly, snowflake uses.",
+        "es_correcta": false,
+        "explicacion": "Snowflake uses reclustering/automatic clustering, not PG VACUUM."
       },
       {
         "texto_opcion": "Recreate account daily to defragment, extreme and incorrect.",
@@ -235,6 +235,11 @@
     "pregunta": "UPDATE modifies many rows across partitions in a large table. Context: healthcare provider, ~200 million rows/day.",
     "opciones": [
       {
+        "texto_opcion": "Snowflake creates new micro-partitions; unchanged partitions may be shared via copy-on-write.",
+        "es_correcta": true,
+        "explicacion": "DML rewrites affected partitions; unchanged partitions can remain shared."
+      },
+      {
         "texto_opcion": "UPDATE always duplicates entire table storage immediately, only affected partitions are rewritten.",
         "es_correcta": false,
         "explicacion": "Only affected partitions are rewritten."
@@ -243,11 +248,6 @@
         "texto_opcion": "UPDATE is not allowed on clustered tables, dML is allowed; clustering maintenance continues.",
         "es_correcta": false,
         "explicacion": "DML is allowed; clustering maintenance continues."
-      },
-      {
-        "texto_opcion": "Snowflake creates new micro-partitions; unchanged partitions may be shared via copy-on-write",
-        "es_correcta": true,
-        "explicacion": "DML rewrites affected partitions; unchanged partitions can remain shared."
       },
       {
         "texto_opcion": "UPDATE edits rows in place within the same immutable partition file, micro-partitions are immutable",
@@ -264,16 +264,6 @@
     "pregunta": "need open format Iceberg tables queried in Snowflake without full import. Context: industrial IoT platform, strict GDPR residency.",
     "opciones": [
       {
-        "texto_opcion": "IMPORT forces all external data into VARIANT only, external tables can map structured columns.",
-        "es_correcta": false,
-        "explicacion": "External tables can map structured columns."
-      },
-      {
-        "texto_opcion": "Use external tables / Iceberg tables pointing at cloud storage with catalog integration",
-        "es_correcta": true,
-        "explicacion": "External/Iceberg tables query files in place with different optimization characteristics."
-      },
-      {
         "texto_opcion": "External tables store data inside Cloud Services, data remains in customer/external storage.",
         "es_correcta": false,
         "explicacion": "Data remains in customer/external storage."
@@ -282,6 +272,16 @@
         "texto_opcion": "Native micro-partition tables and external tables share identical pruning guarantees always",
         "es_correcta": false,
         "explicacion": "External tables depend on file layout and external metadata."
+      },
+      {
+        "texto_opcion": "Use external tables / Iceberg tables pointing at cloud storage with catalog integration.",
+        "es_correcta": true,
+        "explicacion": "External/Iceberg tables query files in place with different optimization characteristics."
+      },
+      {
+        "texto_opcion": "IMPORT forces all external data into VARIANT only, external tables can map structured columns.",
+        "es_correcta": false,
+        "explicacion": "External tables can map structured columns."
       }
     ],
     "tags": [
@@ -293,7 +293,12 @@
     "pregunta": "Media streaming company scenario — optimizer chooses inefficient join order on large tables. What should they implement?",
     "opciones": [
       {
-        "texto_opcion": "Statistics require manual ANALYZE TABLE on every insert in Snowflake like some RDBMS always",
+        "texto_opcion": "Disable Cloud Services so warehouse guesses cardinality, optimizer relies on Cloud Services metadata.",
+        "es_correcta": false,
+        "explicacion": "Optimizer relies on Cloud Services metadata."
+      },
+      {
+        "texto_opcion": "Statistics require manual ANALYZE TABLE on every insert in Snowflake like some RDBMS always — snowflake automates much statistics maintenance.",
         "es_correcta": false,
         "explicacion": "Snowflake automates much statistics maintenance."
       },
@@ -301,11 +306,6 @@
         "texto_opcion": "Ensure automatic statistics collection/maintenance and review Query Profile.",
         "es_correcta": true,
         "explicacion": "Snowflake maintains table statistics to guide optimization."
-      },
-      {
-        "texto_opcion": "Disable Cloud Services so warehouse guesses cardinality, optimizer relies on Cloud Services metadata.",
-        "es_correcta": false,
-        "explicacion": "Optimizer relies on Cloud Services metadata."
       },
       {
         "texto_opcion": "Delete INFORMATION_SCHEMA to refresh stats, destructive and wrong, destructive and wrong; not the best fit here.",
@@ -322,14 +322,9 @@
     "pregunta": "For a energy utility workload with petabyte-scale historical data: precompute expensive aggregations refreshed automatically for dashboards. Best choice?",
     "opciones": [
       {
-        "texto_opcion": "Use stage file listing as materialized aggregation, lIST shows files",
+        "texto_opcion": "Create standard view only and expect automatic physical pre-aggregation always",
         "es_correcta": false,
-        "explicacion": "LIST shows files, not aggregated query results."
-      },
-      {
-        "texto_opcion": "Export aggregates to email nightly, not a database feature, not a database feature.",
-        "es_correcta": false,
-        "explicacion": "Not a database feature."
+        "explicacion": "Standard views are logical unless materialized."
       },
       {
         "texto_opcion": "Create a materialized view to store pre-aggregated results.",
@@ -337,9 +332,14 @@
         "explicacion": "Materialized views persist precomputed results with maintenance costs."
       },
       {
-        "texto_opcion": "Create standard view only and expect automatic physical pre-aggregation always",
+        "texto_opcion": "Use stage file listing as materialized aggregation, lIST shows files — lIST shows files, not aggregated query results.",
         "es_correcta": false,
-        "explicacion": "Standard views are logical unless materialized."
+        "explicacion": "LIST shows files, not aggregated query results."
+      },
+      {
+        "texto_opcion": "Export aggregates to email nightly, not a database feature, not a database feature.",
+        "es_correcta": false,
+        "explicacion": "Not a database feature."
       }
     ],
     "tags": [
@@ -351,24 +351,24 @@
     "pregunta": "Travel platform scenario — describe how Snowflake physically stores table rows on disk. What should they implement? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition",
-        "es_correcta": true,
-        "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
-      },
-      {
-        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently",
-        "es_correcta": false,
-        "explicacion": "Durable storage is in object storage; warehouses cache temporarily."
-      },
-      {
-        "texto_opcion": "All tables stored as single monolithic JSON document",
+        "texto_opcion": "All tables stored as single monolithic JSON document — relational tables use micro-partitions, not one JSON blob often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Relational tables use micro-partitions, not one JSON blob."
       },
       {
-        "texto_opcion": "One row per file in random order without compression",
+        "texto_opcion": "One row per file in random order without compression — snowflake uses compressed micro-partitions, not row files prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Snowflake uses compressed micro-partitions, not row files."
+      },
+      {
+        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently — durable storage is in object storage; warehouses cache temporarily.",
+        "es_correcta": false,
+        "explicacion": "Durable storage is in object storage; warehouses cache temporarily."
+      },
+      {
+        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition.",
+        "es_correcta": true,
+        "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
       }
     ],
     "tags": [
@@ -380,12 +380,7 @@
     "pregunta": "Incident review (brazilsouth): filter FACT_EVENTS WHERE event_date = '2026-07-01' on a large fact table. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Snowflake uses min/max metadata per micro-partition to skip irrelevant.",
-        "es_correcta": true,
-        "explicacion": "Partition pruning avoids scanning partitions outside predicate range."
-      },
-      {
-        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata",
+        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata — pruning uses micro-partition metadata; clustering improves organization.",
         "es_correcta": false,
         "explicacion": "Pruning uses micro-partition metadata; clustering improves organization."
       },
@@ -395,7 +390,12 @@
         "explicacion": "Pruning reduces scanned partitions when metadata allows."
       },
       {
-        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata.",
+        "texto_opcion": "Snowflake uses min/max metadata per micro-partition to skip irrelevant.",
+        "es_correcta": true,
+        "explicacion": "Partition pruning avoids scanning partitions outside predicate range."
+      },
+      {
+        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Optimizer prunes automatically using metadata."
       }
@@ -409,17 +409,7 @@
     "pregunta": "A travel platform (hourly batch windows, region eastus) must: queries filter on customer_id and event_time but pruning is poor after many inserts. Which option fits best? Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Increase warehouse size only and ignore data layout",
-        "es_correcta": false,
-        "explicacion": "Bigger warehouse does not fix poor partition bounds."
-      },
-      {
-        "texto_opcion": "Define CLUSTER BY or allow automatic clustering where supported.",
-        "es_correcta": true,
-        "explicacion": "Clustering co-locates related rows to improve partition elimination over time."
-      },
-      {
-        "texto_opcion": "Disable micro-partitions to use heap storage",
+        "texto_opcion": "Disable micro-partitions to use heap storage — snowflake always uses.",
         "es_correcta": false,
         "explicacion": "Snowflake always uses micro-partitions for native tables."
       },
@@ -427,6 +417,16 @@
         "texto_opcion": "Convert table to external table to get clustering automatically",
         "es_correcta": false,
         "explicacion": "External tables behave differently; clustering is for native tables."
+      },
+      {
+        "texto_opcion": "Increase warehouse size only and ignore data layout.",
+        "es_correcta": false,
+        "explicacion": "Bigger warehouse does not fix poor partition bounds."
+      },
+      {
+        "texto_opcion": "Define CLUSTER BY or allow automatic clustering where supported.",
+        "es_correcta": true,
+        "explicacion": "Clustering co-locates related rows to improve partition elimination over time."
       }
     ],
     "tags": [
@@ -438,14 +438,9 @@
     "pregunta": "Incident review (australiaeast): data loaded sorted by load file date shows good pruning on load_date without explicit key. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters",
+        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters.",
         "es_correcta": true,
         "explicacion": "Insert order can yield beneficial partition bounds before explicit clustering."
-      },
-      {
-        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning.",
-        "es_correcta": false,
-        "explicacion": "Random order often hurts pruning."
       },
       {
         "texto_opcion": "Natural clustering requires MULTI_CLUSTER warehouse, clustering relates to data layout, not multi-cluster feature.",
@@ -456,6 +451,11 @@
         "texto_opcion": "Natural clustering replaces need for any statistics, statistics/metadata still matter for optimization.",
         "es_correcta": false,
         "explicacion": "Statistics/metadata still matter for optimization."
+      },
+      {
+        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning used as the main path in this architecture.",
+        "es_correcta": false,
+        "explicacion": "Random order often hurts pruning."
       }
     ],
     "tags": [
@@ -467,24 +467,24 @@
     "pregunta": "Incident review (northeurope): high-cardinality point lookups on UUID columns with poor partition pruning. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired.",
-        "es_correcta": false,
-        "explicacion": "Not supported/desired."
-      },
-      {
-        "texto_opcion": "Use CSV external stage only, stage type does not replace Search.",
+        "texto_opcion": "Use CSV external stage only, stage type does not replace Search — stage type does not replace Search Optimization for point lookups.",
         "es_correcta": false,
         "explicacion": "Stage type does not replace Search Optimization for point lookups."
       },
       {
-        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries",
+        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis — high-cardinality random keys may not cluster well; SOS may fit better.",
+        "es_correcta": false,
+        "explicacion": "High-cardinality random keys may not cluster well; SOS may fit better."
+      },
+      {
+        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries.",
         "es_correcta": true,
         "explicacion": "Search Optimization adds auxiliary structures for point lookup acceleration."
       },
       {
-        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis",
+        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired used as the main path in this architecture.",
         "es_correcta": false,
-        "explicacion": "High-cardinality random keys may not cluster well; SOS may fit better."
+        "explicacion": "Not supported/desired."
       }
     ],
     "tags": [
@@ -496,24 +496,24 @@
     "pregunta": "Incident review (westeurope): analytical query selects 3 of 200 columns from a wide fact table. Select the most appropriate design. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Convert all columns to VARIANT to prune better",
+        "texto_opcion": "Snowflake must read all 200 columns for every SELECT — columnar storage supports column pruning.",
+        "es_correcta": false,
+        "explicacion": "Columnar storage supports column pruning."
+      },
+      {
+        "texto_opcion": "Convert all columns to VARIANT to prune better — vARIANT wide rows can hurt pruning/selectivity.",
         "es_correcta": false,
         "explicacion": "VARIANT wide rows can hurt pruning/selectivity."
       },
       {
-        "texto_opcion": "Snowflake must read all 200 columns for every SELECT",
+        "texto_opcion": "Store each column in a separate account applied across adopted as the standard pattern for the team.",
         "es_correcta": false,
-        "explicacion": "Columnar storage supports column pruning."
+        "explicacion": "Not Snowflake design."
       },
       {
         "texto_opcion": "Columnar micro-partitions allow reading only required columns.",
         "es_correcta": true,
         "explicacion": "Column pruning reduces IO within partitions."
-      },
-      {
-        "texto_opcion": "Store each column in a separate account applied across.",
-        "es_correcta": false,
-        "explicacion": "Not Snowflake design."
       }
     ],
     "tags": [
@@ -525,22 +525,22 @@
     "pregunta": "For a logistics carrier workload with petabyte-scale historical data: many small inserts create numerous tiny micro-partitions hurting performance. Best choice (variant 2)?",
     "opciones": [
       {
-        "texto_opcion": "Batch loads and appropriate file sizes; consider reclustering or reload.",
-        "es_correcta": true,
-        "explicacion": "Many small inserts can create suboptimal partition layout."
-      },
-      {
-        "texto_opcion": "Insert one row per INSERT statement intentionally for ETL efficiency",
-        "es_correcta": false,
-        "explicacion": "Row-by-row inserts create overhead and small partitions."
-      },
-      {
         "texto_opcion": "Drop clustering metadata to consolidate partitions instantly, does not merge physical partitions meaningfully.",
         "es_correcta": false,
         "explicacion": "Does not merge physical partitions meaningfully."
       },
       {
-        "texto_opcion": "Disable compression to merge partitions, compression setting does not merge partitions.",
+        "texto_opcion": "Insert one row per INSERT statement intentionally for ETL efficiency — row-by-row inserts create overhead and small partitions.",
+        "es_correcta": false,
+        "explicacion": "Row-by-row inserts create overhead and small partitions."
+      },
+      {
+        "texto_opcion": "Batch loads and appropriate file sizes; consider reclustering or reload.",
+        "es_correcta": true,
+        "explicacion": "Many small inserts can create suboptimal partition layout."
+      },
+      {
+        "texto_opcion": "Disable compression to merge partitions, compression setting does not merge partitions applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Compression setting does not merge partitions."
       }
@@ -554,9 +554,9 @@
     "pregunta": "maintain clustering without manual RECLUSTER operations. Context: insurance carrier, strict GDPR residency. Constraint set #2.",
     "opciones": [
       {
-        "texto_opcion": "Use automatic clustering on clustered tables where enabled.",
-        "es_correcta": true,
-        "explicacion": "Snowflake can automatically reorganize micro-partitions for clustering keys."
+        "texto_opcion": "Automatic clustering runs on every external table by default always",
+        "es_correcta": false,
+        "explicacion": "Automatic clustering applies to native clustered tables per configuration."
       },
       {
         "texto_opcion": "Run VACUUM FULL like PostgreSQL nightly, snowflake uses.",
@@ -564,14 +564,14 @@
         "explicacion": "Snowflake uses reclustering/automatic clustering, not PG VACUUM."
       },
       {
+        "texto_opcion": "Use automatic clustering on clustered tables where enabled.",
+        "es_correcta": true,
+        "explicacion": "Snowflake can automatically reorganize micro-partitions for clustering keys."
+      },
+      {
         "texto_opcion": "Recreate account daily to defragment, extreme and incorrect.",
         "es_correcta": false,
         "explicacion": "Extreme and incorrect."
-      },
-      {
-        "texto_opcion": "Automatic clustering runs on every external table by default always",
-        "es_correcta": false,
-        "explicacion": "Automatic clustering applies to native clustered tables per configuration."
       }
     ],
     "tags": [
@@ -588,19 +588,19 @@
         "explicacion": "DML is allowed; clustering maintenance continues."
       },
       {
+        "texto_opcion": "UPDATE edits rows in place within the same immutable partition file, micro-partitions are immutable",
+        "es_correcta": false,
+        "explicacion": "Micro-partitions are immutable; changes write new partitions."
+      },
+      {
         "texto_opcion": "UPDATE always duplicates entire table storage immediately, only affected partitions are rewritten.",
         "es_correcta": false,
         "explicacion": "Only affected partitions are rewritten."
       },
       {
-        "texto_opcion": "Snowflake creates new micro-partitions; unchanged partitions may be shared via copy-on-write",
+        "texto_opcion": "Snowflake creates new micro-partitions; unchanged partitions may be shared via copy-on-write.",
         "es_correcta": true,
         "explicacion": "DML rewrites affected partitions; unchanged partitions can remain shared."
-      },
-      {
-        "texto_opcion": "UPDATE edits rows in place within the same immutable partition file, micro-partitions are immutable",
-        "es_correcta": false,
-        "explicacion": "Micro-partitions are immutable; changes write new partitions."
       }
     ],
     "tags": [
@@ -612,6 +612,11 @@
     "pregunta": "Logistics carrier scenario — need open format Iceberg tables queried in Snowflake without full import. What should they implement? Constraint set #2.",
     "opciones": [
       {
+        "texto_opcion": "Use external tables / Iceberg tables pointing at cloud storage with catalog integration.",
+        "es_correcta": true,
+        "explicacion": "External/Iceberg tables query files in place with different optimization characteristics."
+      },
+      {
         "texto_opcion": "Native micro-partition tables and external tables share identical pruning guarantees always",
         "es_correcta": false,
         "explicacion": "External tables depend on file layout and external metadata."
@@ -620,11 +625,6 @@
         "texto_opcion": "IMPORT forces all external data into VARIANT only, external tables can map structured columns.",
         "es_correcta": false,
         "explicacion": "External tables can map structured columns."
-      },
-      {
-        "texto_opcion": "Use external tables / Iceberg tables pointing at cloud storage with catalog integration",
-        "es_correcta": true,
-        "explicacion": "External/Iceberg tables query files in place with different optimization characteristics."
       },
       {
         "texto_opcion": "External tables store data inside Cloud Services, data remains in customer/external storage.",
@@ -646,7 +646,7 @@
         "explicacion": "Snowflake maintains table statistics to guide optimization."
       },
       {
-        "texto_opcion": "Statistics require manual ANALYZE TABLE on every insert in Snowflake like some RDBMS always",
+        "texto_opcion": "Statistics require manual ANALYZE TABLE on every insert in Snowflake like some RDBMS always — snowflake automates much statistics maintenance.",
         "es_correcta": false,
         "explicacion": "Snowflake automates much statistics maintenance."
       },
@@ -675,12 +675,7 @@
         "explicacion": "Standard views are logical unless materialized."
       },
       {
-        "texto_opcion": "Create a materialized view to store pre-aggregated results.",
-        "es_correcta": true,
-        "explicacion": "Materialized views persist precomputed results with maintenance costs."
-      },
-      {
-        "texto_opcion": "Use stage file listing as materialized aggregation, lIST shows files",
+        "texto_opcion": "Use stage file listing as materialized aggregation, lIST shows files — lIST shows files, not aggregated query results.",
         "es_correcta": false,
         "explicacion": "LIST shows files, not aggregated query results."
       },
@@ -688,6 +683,11 @@
         "texto_opcion": "Export aggregates to email nightly, not a database feature, not a database feature.",
         "es_correcta": false,
         "explicacion": "Not a database feature."
+      },
+      {
+        "texto_opcion": "Create a materialized view to store pre-aggregated results.",
+        "es_correcta": true,
+        "explicacion": "Materialized views persist precomputed results with maintenance costs."
       }
     ],
     "tags": [
@@ -699,24 +699,24 @@
     "pregunta": "Payments fintech scenario — describe how Snowflake physically stores table rows on disk. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently",
-        "es_correcta": false,
-        "explicacion": "Durable storage is in object storage; warehouses cache temporarily."
-      },
-      {
-        "texto_opcion": "One row per file in random order without compression",
+        "texto_opcion": "One row per file in random order without compression — snowflake uses compressed micro-partitions, not row files as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Snowflake uses compressed micro-partitions, not row files."
       },
       {
-        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition",
-        "es_correcta": true,
-        "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
-      },
-      {
-        "texto_opcion": "All tables stored as single monolithic JSON document",
+        "texto_opcion": "All tables stored as single monolithic JSON document — relational tables use micro-partitions, not one JSON blob prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Relational tables use micro-partitions, not one JSON blob."
+      },
+      {
+        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently — durable storage is in object storage; warehouses cache temporarily.",
+        "es_correcta": false,
+        "explicacion": "Durable storage is in object storage; warehouses cache temporarily."
+      },
+      {
+        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition.",
+        "es_correcta": true,
+        "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
       }
     ],
     "tags": [
@@ -728,14 +728,9 @@
     "pregunta": "filter FACT_EVENTS WHERE event_date = '2026-07-01' on a large fact table. Context: logistics carrier, ~50,000 events/s. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata.",
-        "es_correcta": false,
-        "explicacion": "Optimizer prunes automatically using metadata."
-      },
-      {
-        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata",
-        "es_correcta": false,
-        "explicacion": "Pruning uses micro-partition metadata; clustering improves organization."
+        "texto_opcion": "Snowflake uses min/max metadata per micro-partition to skip irrelevant.",
+        "es_correcta": true,
+        "explicacion": "Partition pruning avoids scanning partitions outside predicate range."
       },
       {
         "texto_opcion": "Full table scan is always required regardless of filters, pruning reduces scanned partitions when metadata allows.",
@@ -743,9 +738,14 @@
         "explicacion": "Pruning reduces scanned partitions when metadata allows."
       },
       {
-        "texto_opcion": "Snowflake uses min/max metadata per micro-partition to skip irrelevant.",
-        "es_correcta": true,
-        "explicacion": "Partition pruning avoids scanning partitions outside predicate range."
+        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata — pruning uses micro-partition metadata; clustering improves organization.",
+        "es_correcta": false,
+        "explicacion": "Pruning uses micro-partition metadata; clustering improves organization."
+      },
+      {
+        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata often seen in legacy designs but not ideal for this case.",
+        "es_correcta": false,
+        "explicacion": "Optimizer prunes automatically using metadata."
       }
     ],
     "tags": [
@@ -757,9 +757,14 @@
     "pregunta": "A industrial IoT platform (sub-second interactive queries, region southeastasia) must: queries filter on customer_id and event_time but pruning is poor after many inserts. Which option fits best? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Increase warehouse size only and ignore data layout",
+        "texto_opcion": "Define CLUSTER BY or allow automatic clustering where supported.",
+        "es_correcta": true,
+        "explicacion": "Clustering co-locates related rows to improve partition elimination over time."
+      },
+      {
+        "texto_opcion": "Disable micro-partitions to use heap storage — snowflake always uses.",
         "es_correcta": false,
-        "explicacion": "Bigger warehouse does not fix poor partition bounds."
+        "explicacion": "Snowflake always uses micro-partitions for native tables."
       },
       {
         "texto_opcion": "Convert table to external table to get clustering automatically",
@@ -767,14 +772,9 @@
         "explicacion": "External tables behave differently; clustering is for native tables."
       },
       {
-        "texto_opcion": "Define CLUSTER BY or allow automatic clustering where supported.",
-        "es_correcta": true,
-        "explicacion": "Clustering co-locates related rows to improve partition elimination over time."
-      },
-      {
-        "texto_opcion": "Disable micro-partitions to use heap storage",
+        "texto_opcion": "Increase warehouse size only and ignore data layout.",
         "es_correcta": false,
-        "explicacion": "Snowflake always uses micro-partitions for native tables."
+        "explicacion": "Bigger warehouse does not fix poor partition bounds."
       }
     ],
     "tags": [
@@ -786,9 +786,14 @@
     "pregunta": "For a media streaming company workload with ~5 TB/day: data loaded sorted by load file date shows good pruning on load_date without explicit key. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning.",
+        "texto_opcion": "Natural clustering requires MULTI_CLUSTER warehouse, clustering relates to data layout, not multi-cluster feature.",
         "es_correcta": false,
-        "explicacion": "Random order often hurts pruning."
+        "explicacion": "Clustering relates to data layout, not multi-cluster feature."
+      },
+      {
+        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters.",
+        "es_correcta": true,
+        "explicacion": "Insert order can yield beneficial partition bounds before explicit clustering."
       },
       {
         "texto_opcion": "Natural clustering replaces need for any statistics, statistics/metadata still matter for optimization.",
@@ -796,14 +801,9 @@
         "explicacion": "Statistics/metadata still matter for optimization."
       },
       {
-        "texto_opcion": "Natural clustering requires MULTI_CLUSTER warehouse, clustering relates to data layout, not multi-cluster feature.",
+        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning as a primary design for this requirement.",
         "es_correcta": false,
-        "explicacion": "Clustering relates to data layout, not multi-cluster feature."
-      },
-      {
-        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters",
-        "es_correcta": true,
-        "explicacion": "Insert order can yield beneficial partition bounds before explicit clustering."
+        "explicacion": "Random order often hurts pruning."
       }
     ],
     "tags": [
@@ -815,22 +815,22 @@
     "pregunta": "Incident review (westeurope): high-cardinality point lookups on UUID columns with poor partition pruning. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis",
+        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis — high-cardinality random keys may not cluster well; SOS may fit better.",
         "es_correcta": false,
         "explicacion": "High-cardinality random keys may not cluster well; SOS may fit better."
       },
       {
-        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired.",
+        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired often seen in legacy designs but not ideal for this case.",
         "es_correcta": false,
         "explicacion": "Not supported/desired."
       },
       {
-        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries",
+        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries.",
         "es_correcta": true,
         "explicacion": "Search Optimization adds auxiliary structures for point lookup acceleration."
       },
       {
-        "texto_opcion": "Use CSV external stage only, stage type does not replace Search.",
+        "texto_opcion": "Use CSV external stage only, stage type does not replace Search — stage type does not replace Search Optimization for point lookups.",
         "es_correcta": false,
         "explicacion": "Stage type does not replace Search Optimization for point lookups."
       }
@@ -844,24 +844,24 @@
     "pregunta": "Incident review (northeurope): analytical query selects 3 of 200 columns from a wide fact table. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Convert all columns to VARIANT to prune better",
+        "texto_opcion": "Convert all columns to VARIANT to prune better — vARIANT wide rows can hurt pruning/selectivity.",
         "es_correcta": false,
         "explicacion": "VARIANT wide rows can hurt pruning/selectivity."
+      },
+      {
+        "texto_opcion": "Store each column in a separate account applied across adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Not Snowflake design."
+      },
+      {
+        "texto_opcion": "Snowflake must read all 200 columns for every SELECT — columnar storage supports column pruning.",
+        "es_correcta": false,
+        "explicacion": "Columnar storage supports column pruning."
       },
       {
         "texto_opcion": "Columnar micro-partitions allow reading only required columns.",
         "es_correcta": true,
         "explicacion": "Column pruning reduces IO within partitions."
-      },
-      {
-        "texto_opcion": "Snowflake must read all 200 columns for every SELECT",
-        "es_correcta": false,
-        "explicacion": "Columnar storage supports column pruning."
-      },
-      {
-        "texto_opcion": "Store each column in a separate account applied across.",
-        "es_correcta": false,
-        "explicacion": "Not Snowflake design."
       }
     ],
     "tags": [
@@ -873,17 +873,17 @@
     "pregunta": "Incident review (australiaeast): many small inserts create numerous tiny micro-partitions hurting performance. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
+        "texto_opcion": "Insert one row per INSERT statement intentionally for ETL efficiency — row-by-row inserts create overhead and small partitions.",
+        "es_correcta": false,
+        "explicacion": "Row-by-row inserts create overhead and small partitions."
+      },
+      {
         "texto_opcion": "Batch loads and appropriate file sizes; consider reclustering or reload.",
         "es_correcta": true,
         "explicacion": "Many small inserts can create suboptimal partition layout."
       },
       {
-        "texto_opcion": "Insert one row per INSERT statement intentionally for ETL efficiency",
-        "es_correcta": false,
-        "explicacion": "Row-by-row inserts create overhead and small partitions."
-      },
-      {
-        "texto_opcion": "Disable compression to merge partitions, compression setting does not merge partitions.",
+        "texto_opcion": "Disable compression to merge partitions, compression setting does not merge partitions prioritized for simplicity, though it misses a key constraint.",
         "es_correcta": false,
         "explicacion": "Compression setting does not merge partitions."
       },
@@ -902,9 +902,9 @@
     "pregunta": "Payments fintech scenario — maintain clustering without manual RECLUSTER operations. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Run VACUUM FULL like PostgreSQL nightly, snowflake uses.",
+        "texto_opcion": "Recreate account daily to defragment, extreme and incorrect.",
         "es_correcta": false,
-        "explicacion": "Snowflake uses reclustering/automatic clustering, not PG VACUUM."
+        "explicacion": "Extreme and incorrect."
       },
       {
         "texto_opcion": "Use automatic clustering on clustered tables where enabled.",
@@ -912,14 +912,14 @@
         "explicacion": "Snowflake can automatically reorganize micro-partitions for clustering keys."
       },
       {
+        "texto_opcion": "Run VACUUM FULL like PostgreSQL nightly, snowflake uses.",
+        "es_correcta": false,
+        "explicacion": "Snowflake uses reclustering/automatic clustering, not PG VACUUM."
+      },
+      {
         "texto_opcion": "Automatic clustering runs on every external table by default always",
         "es_correcta": false,
         "explicacion": "Automatic clustering applies to native clustered tables per configuration."
-      },
-      {
-        "texto_opcion": "Recreate account daily to defragment, extreme and incorrect.",
-        "es_correcta": false,
-        "explicacion": "Extreme and incorrect."
       }
     ],
     "tags": [
@@ -931,14 +931,14 @@
     "pregunta": "For a logistics carrier workload with petabyte-scale historical data: UPDATE modifies many rows across partitions in a large table. Best choice (variant 3)?",
     "opciones": [
       {
+        "texto_opcion": "Snowflake creates new micro-partitions; unchanged partitions may be shared via copy-on-write.",
+        "es_correcta": true,
+        "explicacion": "DML rewrites affected partitions; unchanged partitions can remain shared."
+      },
+      {
         "texto_opcion": "UPDATE edits rows in place within the same immutable partition file, micro-partitions are immutable",
         "es_correcta": false,
         "explicacion": "Micro-partitions are immutable; changes write new partitions."
-      },
-      {
-        "texto_opcion": "UPDATE always duplicates entire table storage immediately, only affected partitions are rewritten.",
-        "es_correcta": false,
-        "explicacion": "Only affected partitions are rewritten."
       },
       {
         "texto_opcion": "UPDATE is not allowed on clustered tables, dML is allowed; clustering maintenance continues.",
@@ -946,9 +946,9 @@
         "explicacion": "DML is allowed; clustering maintenance continues."
       },
       {
-        "texto_opcion": "Snowflake creates new micro-partitions; unchanged partitions may be shared via copy-on-write",
-        "es_correcta": true,
-        "explicacion": "DML rewrites affected partitions; unchanged partitions can remain shared."
+        "texto_opcion": "UPDATE always duplicates entire table storage immediately, only affected partitions are rewritten.",
+        "es_correcta": false,
+        "explicacion": "Only affected partitions are rewritten."
       }
     ],
     "tags": [
@@ -960,14 +960,9 @@
     "pregunta": "Telecom operator scenario — need open format Iceberg tables queried in Snowflake without full import. What should they implement? Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Use external tables / Iceberg tables pointing at cloud storage with catalog integration",
-        "es_correcta": true,
-        "explicacion": "External/Iceberg tables query files in place with different optimization characteristics."
-      },
-      {
-        "texto_opcion": "Native micro-partition tables and external tables share identical pruning guarantees always",
+        "texto_opcion": "IMPORT forces all external data into VARIANT only, external tables can map structured columns.",
         "es_correcta": false,
-        "explicacion": "External tables depend on file layout and external metadata."
+        "explicacion": "External tables can map structured columns."
       },
       {
         "texto_opcion": "External tables store data inside Cloud Services, data remains in customer/external storage.",
@@ -975,9 +970,14 @@
         "explicacion": "Data remains in customer/external storage."
       },
       {
-        "texto_opcion": "IMPORT forces all external data into VARIANT only, external tables can map structured columns.",
+        "texto_opcion": "Use external tables / Iceberg tables pointing at cloud storage with catalog integration.",
+        "es_correcta": true,
+        "explicacion": "External/Iceberg tables query files in place with different optimization characteristics."
+      },
+      {
+        "texto_opcion": "Native micro-partition tables and external tables share identical pruning guarantees always",
         "es_correcta": false,
-        "explicacion": "External tables can map structured columns."
+        "explicacion": "External tables depend on file layout and external metadata."
       }
     ],
     "tags": [
@@ -989,24 +989,24 @@
     "pregunta": "Incident review (brazilsouth): optimizer chooses inefficient join order on large tables. Select the most appropriate design. Constraint set #3.",
     "opciones": [
       {
-        "texto_opcion": "Statistics require manual ANALYZE TABLE on every insert in Snowflake like some RDBMS always",
-        "es_correcta": false,
-        "explicacion": "Snowflake automates much statistics maintenance."
-      },
-      {
         "texto_opcion": "Ensure automatic statistics collection/maintenance and review Query Profile.",
         "es_correcta": true,
         "explicacion": "Snowflake maintains table statistics to guide optimization."
       },
       {
-        "texto_opcion": "Delete INFORMATION_SCHEMA to refresh stats, destructive and wrong, destructive and wrong; not the best fit here.",
-        "es_correcta": false,
-        "explicacion": "Destructive and wrong."
-      },
-      {
         "texto_opcion": "Disable Cloud Services so warehouse guesses cardinality, optimizer relies on Cloud Services metadata.",
         "es_correcta": false,
         "explicacion": "Optimizer relies on Cloud Services metadata."
+      },
+      {
+        "texto_opcion": "Statistics require manual ANALYZE TABLE on every insert in Snowflake like some RDBMS always — snowflake automates much statistics maintenance.",
+        "es_correcta": false,
+        "explicacion": "Snowflake automates much statistics maintenance."
+      },
+      {
+        "texto_opcion": "Delete INFORMATION_SCHEMA to refresh stats, destructive and wrong, destructive and wrong; not the best fit here.",
+        "es_correcta": false,
+        "explicacion": "Destructive and wrong."
       }
     ],
     "tags": [
@@ -1018,9 +1018,9 @@
     "pregunta": "For a travel platform workload with ~200 million rows/day: precompute expensive aggregations refreshed automatically for dashboards. Best choice (variant 3)?",
     "opciones": [
       {
-        "texto_opcion": "Export aggregates to email nightly, not a database feature, not a database feature.",
+        "texto_opcion": "Use stage file listing as materialized aggregation, lIST shows files — lIST shows files, not aggregated query results.",
         "es_correcta": false,
-        "explicacion": "Not a database feature."
+        "explicacion": "LIST shows files, not aggregated query results."
       },
       {
         "texto_opcion": "Create standard view only and expect automatic physical pre-aggregation always",
@@ -1033,9 +1033,9 @@
         "explicacion": "Materialized views persist precomputed results with maintenance costs."
       },
       {
-        "texto_opcion": "Use stage file listing as materialized aggregation, lIST shows files",
+        "texto_opcion": "Export aggregates to email nightly, not a database feature, not a database feature.",
         "es_correcta": false,
-        "explicacion": "LIST shows files, not aggregated query results."
+        "explicacion": "Not a database feature."
       }
     ],
     "tags": [
@@ -1047,24 +1047,24 @@
     "pregunta": "Travel platform scenario — describe how Snowflake physically stores table rows on disk. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition",
-        "es_correcta": true,
-        "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
-      },
-      {
-        "texto_opcion": "One row per file in random order without compression",
+        "texto_opcion": "One row per file in random order without compression — snowflake uses compressed micro-partitions, not row files plausible at first glance, yet weaker than the best option.",
         "es_correcta": false,
         "explicacion": "Snowflake uses compressed micro-partitions, not row files."
       },
       {
-        "texto_opcion": "All tables stored as single monolithic JSON document",
-        "es_correcta": false,
-        "explicacion": "Relational tables use micro-partitions, not one JSON blob."
+        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition.",
+        "es_correcta": true,
+        "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
       },
       {
-        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently",
+        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently — durable storage is in object storage; warehouses cache temporarily.",
         "es_correcta": false,
         "explicacion": "Durable storage is in object storage; warehouses cache temporarily."
+      },
+      {
+        "texto_opcion": "All tables stored as single monolithic JSON document — relational tables use micro-partitions, not one JSON blob selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Relational tables use micro-partitions, not one JSON blob."
       }
     ],
     "tags": [
@@ -1076,12 +1076,17 @@
     "pregunta": "For a online marketplace workload with ~5 TB/day: filter FACT_EVENTS WHERE event_date = '2026-07-01' on a large fact table. Best choice (variant 4)?",
     "opciones": [
       {
+        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata — pruning uses micro-partition metadata; clustering improves organization.",
+        "es_correcta": false,
+        "explicacion": "Pruning uses micro-partition metadata; clustering improves organization."
+      },
+      {
         "texto_opcion": "Full table scan is always required regardless of filters, pruning reduces scanned partitions when metadata allows.",
         "es_correcta": false,
         "explicacion": "Pruning reduces scanned partitions when metadata allows."
       },
       {
-        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata.",
+        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata applied across environments for operational consistency.",
         "es_correcta": false,
         "explicacion": "Optimizer prunes automatically using metadata."
       },
@@ -1089,11 +1094,6 @@
         "texto_opcion": "Snowflake uses min/max metadata per micro-partition to skip irrelevant.",
         "es_correcta": true,
         "explicacion": "Partition pruning avoids scanning partitions outside predicate range."
-      },
-      {
-        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata",
-        "es_correcta": false,
-        "explicacion": "Pruning uses micro-partition metadata; clustering improves organization."
       }
     ],
     "tags": [
@@ -1105,11 +1105,6 @@
     "pregunta": "Energy utility scenario — queries filter on customer_id and event_time but pruning is poor after many inserts. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Disable micro-partitions to use heap storage",
-        "es_correcta": false,
-        "explicacion": "Snowflake always uses micro-partitions for native tables."
-      },
-      {
         "texto_opcion": "Define CLUSTER BY or allow automatic clustering where supported.",
         "es_correcta": true,
         "explicacion": "Clustering co-locates related rows to improve partition elimination over time."
@@ -1120,7 +1115,12 @@
         "explicacion": "External tables behave differently; clustering is for native tables."
       },
       {
-        "texto_opcion": "Increase warehouse size only and ignore data layout",
+        "texto_opcion": "Disable micro-partitions to use heap storage — snowflake always uses.",
+        "es_correcta": false,
+        "explicacion": "Snowflake always uses micro-partitions for native tables."
+      },
+      {
+        "texto_opcion": "Increase warehouse size only and ignore data layout.",
         "es_correcta": false,
         "explicacion": "Bigger warehouse does not fix poor partition bounds."
       }
@@ -1134,19 +1134,19 @@
     "pregunta": "Payments fintech scenario — data loaded sorted by load file date shows good pruning on load_date without explicit key. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters",
-        "es_correcta": true,
-        "explicacion": "Insert order can yield beneficial partition bounds before explicit clustering."
+        "texto_opcion": "Natural clustering replaces need for any statistics, statistics/metadata still matter for optimization.",
+        "es_correcta": false,
+        "explicacion": "Statistics/metadata still matter for optimization."
       },
       {
-        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning.",
+        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning as a primary design for this requirement.",
         "es_correcta": false,
         "explicacion": "Random order often hurts pruning."
       },
       {
-        "texto_opcion": "Natural clustering replaces need for any statistics, statistics/metadata still matter for optimization.",
-        "es_correcta": false,
-        "explicacion": "Statistics/metadata still matter for optimization."
+        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters.",
+        "es_correcta": true,
+        "explicacion": "Insert order can yield beneficial partition bounds before explicit clustering."
       },
       {
         "texto_opcion": "Natural clustering requires MULTI_CLUSTER warehouse, clustering relates to data layout, not multi-cluster feature.",
@@ -1163,24 +1163,24 @@
     "pregunta": "Gaming studio scenario — high-cardinality point lookups on UUID columns with poor partition pruning. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Use CSV external stage only, stage type does not replace Search.",
-        "es_correcta": false,
-        "explicacion": "Stage type does not replace Search Optimization for point lookups."
-      },
-      {
-        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired.",
+        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired as the default production choice in this scenario.",
         "es_correcta": false,
         "explicacion": "Not supported/desired."
       },
       {
-        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries",
-        "es_correcta": true,
-        "explicacion": "Search Optimization adds auxiliary structures for point lookup acceleration."
+        "texto_opcion": "Use CSV external stage only, stage type does not replace Search — stage type does not replace Search Optimization for point lookups.",
+        "es_correcta": false,
+        "explicacion": "Stage type does not replace Search Optimization for point lookups."
       },
       {
-        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis",
+        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis — high-cardinality random keys may not cluster well; SOS may fit better.",
         "es_correcta": false,
         "explicacion": "High-cardinality random keys may not cluster well; SOS may fit better."
+      },
+      {
+        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries.",
+        "es_correcta": true,
+        "explicacion": "Search Optimization adds auxiliary structures for point lookup acceleration."
       }
     ],
     "tags": [
@@ -1192,12 +1192,17 @@
     "pregunta": "Travel platform scenario — analytical query selects 3 of 200 columns from a wide fact table. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Convert all columns to VARIANT to prune better",
+        "texto_opcion": "Convert all columns to VARIANT to prune better.",
         "es_correcta": false,
         "explicacion": "VARIANT wide rows can hurt pruning/selectivity."
       },
       {
-        "texto_opcion": "Snowflake must read all 200 columns for every SELECT",
+        "texto_opcion": "Columnar micro-partitions allow reading only required columns.",
+        "es_correcta": true,
+        "explicacion": "Column pruning reduces IO within partitions."
+      },
+      {
+        "texto_opcion": "Snowflake must read all 200 columns for every SELECT.",
         "es_correcta": false,
         "explicacion": "Columnar storage supports column pruning."
       },
@@ -1205,11 +1210,6 @@
         "texto_opcion": "Store each column in a separate account used as the main.",
         "es_correcta": false,
         "explicacion": "Not Snowflake design."
-      },
-      {
-        "texto_opcion": "Columnar micro-partitions allow reading only required columns.",
-        "es_correcta": true,
-        "explicacion": "Column pruning reduces IO within partitions."
       }
     ],
     "tags": [
@@ -1221,24 +1221,24 @@
     "pregunta": "Payments fintech scenario — many small inserts create numerous tiny micro-partitions hurting performance. What should they implement? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Drop clustering metadata to consolidate partitions instantly, does not merge physical partitions meaningfully.",
-        "es_correcta": false,
-        "explicacion": "Does not merge physical partitions meaningfully."
-      },
-      {
-        "texto_opcion": "Disable compression to merge partitions, compression setting does not merge partitions.",
-        "es_correcta": false,
-        "explicacion": "Compression setting does not merge partitions."
-      },
-      {
         "texto_opcion": "Batch loads and appropriate file sizes; consider reclustering or reload.",
         "es_correcta": true,
         "explicacion": "Many small inserts can create suboptimal partition layout."
       },
       {
-        "texto_opcion": "Insert one row per INSERT statement intentionally for ETL efficiency",
+        "texto_opcion": "Insert one row per INSERT statement intentionally for ETL efficiency — row-by-row inserts create overhead and small partitions.",
         "es_correcta": false,
         "explicacion": "Row-by-row inserts create overhead and small partitions."
+      },
+      {
+        "texto_opcion": "Disable compression to merge partitions, compression setting does not merge partitions selected to meet the constraints described here.",
+        "es_correcta": false,
+        "explicacion": "Compression setting does not merge partitions."
+      },
+      {
+        "texto_opcion": "Drop clustering metadata to consolidate partitions instantly, does not merge physical partitions meaningfully.",
+        "es_correcta": false,
+        "explicacion": "Does not merge physical partitions meaningfully."
       }
     ],
     "tags": [
@@ -1250,24 +1250,24 @@
     "pregunta": "A online marketplace (near-real-time dashboards, region eastus) must: maintain clustering without manual RECLUSTER operations. Which option fits best? Constraint set #4.",
     "opciones": [
       {
-        "texto_opcion": "Automatic clustering runs on every external table by default always",
-        "es_correcta": false,
-        "explicacion": "Automatic clustering applies to native clustered tables per configuration."
-      },
-      {
         "texto_opcion": "Use automatic clustering on clustered tables where enabled.",
         "es_correcta": true,
         "explicacion": "Snowflake can automatically reorganize micro-partitions for clustering keys."
       },
       {
-        "texto_opcion": "Run VACUUM FULL like PostgreSQL nightly, snowflake uses.",
-        "es_correcta": false,
-        "explicacion": "Snowflake uses reclustering/automatic clustering, not PG VACUUM."
-      },
-      {
         "texto_opcion": "Recreate account daily to defragment, extreme and incorrect.",
         "es_correcta": false,
         "explicacion": "Extreme and incorrect."
+      },
+      {
+        "texto_opcion": "Automatic clustering runs on every external table by default always",
+        "es_correcta": false,
+        "explicacion": "Automatic clustering applies to native clustered tables per configuration."
+      },
+      {
+        "texto_opcion": "Run VACUUM FULL like PostgreSQL nightly, snowflake uses.",
+        "es_correcta": false,
+        "explicacion": "Snowflake uses reclustering/automatic clustering, not PG VACUUM."
       }
     ],
     "tags": [
@@ -1279,9 +1279,14 @@
     "pregunta": "For a insurance carrier workload with petabyte-scale historical data: UPDATE modifies many rows across partitions in a large table. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "UPDATE always duplicates entire table storage immediately, only affected partitions are rewritten.",
+        "texto_opcion": "UPDATE edits rows in place within the same immutable partition file, micro-partitions are immutable",
         "es_correcta": false,
-        "explicacion": "Only affected partitions are rewritten."
+        "explicacion": "Micro-partitions are immutable; changes write new partitions."
+      },
+      {
+        "texto_opcion": "Snowflake creates new micro-partitions; unchanged partitions may be shared via copy-on-write.",
+        "es_correcta": true,
+        "explicacion": "DML rewrites affected partitions; unchanged partitions can remain shared."
       },
       {
         "texto_opcion": "UPDATE is not allowed on clustered tables, dML is allowed; clustering maintenance continues.",
@@ -1289,14 +1294,9 @@
         "explicacion": "DML is allowed; clustering maintenance continues."
       },
       {
-        "texto_opcion": "Snowflake creates new micro-partitions; unchanged partitions may be shared via copy-on-write",
-        "es_correcta": true,
-        "explicacion": "DML rewrites affected partitions; unchanged partitions can remain shared."
-      },
-      {
-        "texto_opcion": "UPDATE edits rows in place within the same immutable partition file, micro-partitions are immutable",
+        "texto_opcion": "UPDATE always duplicates entire table storage immediately, only affected partitions are rewritten.",
         "es_correcta": false,
-        "explicacion": "Micro-partitions are immutable; changes write new partitions."
+        "explicacion": "Only affected partitions are rewritten."
       }
     ],
     "tags": [
@@ -1318,14 +1318,14 @@
         "explicacion": "Data remains in customer/external storage."
       },
       {
-        "texto_opcion": "Use external tables / Iceberg tables pointing at cloud storage with catalog integration",
-        "es_correcta": true,
-        "explicacion": "External/Iceberg tables query files in place with different optimization characteristics."
-      },
-      {
         "texto_opcion": "Native micro-partition tables and external tables share identical pruning guarantees always",
         "es_correcta": false,
         "explicacion": "External tables depend on file layout and external metadata."
+      },
+      {
+        "texto_opcion": "Use external tables / Iceberg tables pointing at cloud storage with catalog integration.",
+        "es_correcta": true,
+        "explicacion": "External/Iceberg tables query files in place with different optimization characteristics."
       }
     ],
     "tags": [
@@ -1342,9 +1342,9 @@
         "explicacion": "Destructive and wrong."
       },
       {
-        "texto_opcion": "Statistics require manual ANALYZE TABLE on every insert in Snowflake like some RDBMS always",
-        "es_correcta": false,
-        "explicacion": "Snowflake automates much statistics maintenance."
+        "texto_opcion": "Ensure automatic statistics collection/maintenance and review Query Profile.",
+        "es_correcta": true,
+        "explicacion": "Snowflake maintains table statistics to guide optimization."
       },
       {
         "texto_opcion": "Disable Cloud Services so warehouse guesses cardinality, optimizer relies on Cloud Services metadata.",
@@ -1352,9 +1352,9 @@
         "explicacion": "Optimizer relies on Cloud Services metadata."
       },
       {
-        "texto_opcion": "Ensure automatic statistics collection/maintenance and review Query Profile.",
-        "es_correcta": true,
-        "explicacion": "Snowflake maintains table statistics to guide optimization."
+        "texto_opcion": "Statistics require manual ANALYZE TABLE on every insert in Snowflake like some RDBMS always — snowflake automates much statistics maintenance.",
+        "es_correcta": false,
+        "explicacion": "Snowflake automates much statistics maintenance."
       }
     ],
     "tags": [
@@ -1366,14 +1366,9 @@
     "pregunta": "For a industrial IoT platform workload with ~50,000 events/s: precompute expensive aggregations refreshed automatically for dashboards. Best choice (variant 4)?",
     "opciones": [
       {
-        "texto_opcion": "Export aggregates to email nightly, not a database feature, not a database feature.",
+        "texto_opcion": "Create standard view only and expect automatic physical pre-aggregation always",
         "es_correcta": false,
-        "explicacion": "Not a database feature."
-      },
-      {
-        "texto_opcion": "Use stage file listing as materialized aggregation, lIST shows files",
-        "es_correcta": false,
-        "explicacion": "LIST shows files, not aggregated query results."
+        "explicacion": "Standard views are logical unless materialized."
       },
       {
         "texto_opcion": "Create a materialized view to store pre-aggregated results.",
@@ -1381,9 +1376,14 @@
         "explicacion": "Materialized views persist precomputed results with maintenance costs."
       },
       {
-        "texto_opcion": "Create standard view only and expect automatic physical pre-aggregation always",
+        "texto_opcion": "Use stage file listing as materialized aggregation, lIST shows files — lIST shows files, not aggregated query results.",
         "es_correcta": false,
-        "explicacion": "Standard views are logical unless materialized."
+        "explicacion": "LIST shows files, not aggregated query results."
+      },
+      {
+        "texto_opcion": "Export aggregates to email nightly, not a database feature, not a database feature.",
+        "es_correcta": false,
+        "explicacion": "Not a database feature."
       }
     ],
     "tags": [
@@ -1395,24 +1395,24 @@
     "pregunta": "For a industrial IoT platform workload with ~5 TB/day: describe how Snowflake physically stores table rows on disk. Best choice (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently",
-        "es_correcta": false,
-        "explicacion": "Durable storage is in object storage; warehouses cache temporarily."
-      },
-      {
-        "texto_opcion": "One row per file in random order without compression",
-        "es_correcta": false,
-        "explicacion": "Snowflake uses compressed micro-partitions, not row files."
-      },
-      {
-        "texto_opcion": "All tables stored as single monolithic JSON document",
+        "texto_opcion": "All tables stored as single monolithic JSON document — relational tables use micro-partitions, not one JSON blob selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Relational tables use micro-partitions, not one JSON blob."
       },
       {
-        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition",
+        "texto_opcion": "Rows are stored in immutable compressed micro-partitions (~50-500 MB) columnar within each partition.",
         "es_correcta": true,
         "explicacion": "Micro-partitions are Snowflake's unit of storage and pruning."
+      },
+      {
+        "texto_opcion": "One row per file in random order without compression — snowflake uses compressed micro-partitions, not row files as a primary design for this requirement.",
+        "es_correcta": false,
+        "explicacion": "Snowflake uses compressed micro-partitions, not row files."
+      },
+      {
+        "texto_opcion": "Micro-partitions are stored only in warehouse SSD permanently — durable storage is in object storage; warehouses cache temporarily.",
+        "es_correcta": false,
+        "explicacion": "Durable storage is in object storage; warehouses cache temporarily."
       }
     ],
     "tags": [
@@ -1424,19 +1424,19 @@
     "pregunta": "Gaming studio scenario — filter FACT_EVENTS WHERE event_date = '2026-07-01' on a large fact table. What should they implement? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata",
+        "texto_opcion": "Pruning requires a clustering key on every table by default, pruning uses micro-partition metadata — pruning uses micro-partition metadata; clustering improves organization.",
         "es_correcta": false,
         "explicacion": "Pruning uses micro-partition metadata; clustering improves organization."
-      },
-      {
-        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata.",
-        "es_correcta": false,
-        "explicacion": "Optimizer prunes automatically using metadata."
       },
       {
         "texto_opcion": "Snowflake uses min/max metadata per micro-partition to skip irrelevant.",
         "es_correcta": true,
         "explicacion": "Partition pruning avoids scanning partitions outside predicate range."
+      },
+      {
+        "texto_opcion": "Users must manually list files to prune, optimizer prunes automatically using metadata adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Optimizer prunes automatically using metadata."
       },
       {
         "texto_opcion": "Full table scan is always required regardless of filters, pruning reduces scanned partitions when metadata allows.",
@@ -1453,24 +1453,24 @@
     "pregunta": "Insurance carrier scenario — queries filter on customer_id and event_time but pruning is poor after many inserts. What should they implement? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Define CLUSTER BY or allow automatic clustering where supported.",
-        "es_correcta": true,
-        "explicacion": "Clustering co-locates related rows to improve partition elimination over time."
-      },
-      {
-        "texto_opcion": "Increase warehouse size only and ignore data layout",
+        "texto_opcion": "Increase warehouse size only and ignore data layout.",
         "es_correcta": false,
         "explicacion": "Bigger warehouse does not fix poor partition bounds."
-      },
-      {
-        "texto_opcion": "Disable micro-partitions to use heap storage",
-        "es_correcta": false,
-        "explicacion": "Snowflake always uses micro-partitions for native tables."
       },
       {
         "texto_opcion": "Convert table to external table to get clustering automatically",
         "es_correcta": false,
         "explicacion": "External tables behave differently; clustering is for native tables."
+      },
+      {
+        "texto_opcion": "Define CLUSTER BY or allow automatic clustering where supported.",
+        "es_correcta": true,
+        "explicacion": "Clustering co-locates related rows to improve partition elimination over time."
+      },
+      {
+        "texto_opcion": "Disable micro-partitions to use heap storage — snowflake always uses.",
+        "es_correcta": false,
+        "explicacion": "Snowflake always uses micro-partitions for native tables."
       }
     ],
     "tags": [
@@ -1482,24 +1482,24 @@
     "pregunta": "For a energy utility workload with petabyte-scale historical data: data loaded sorted by load file date shows good pruning on load_date without explicit key. Best choice (variant 5)?",
     "opciones": [
       {
-        "texto_opcion": "Natural clustering replaces need for any statistics, statistics/metadata still matter for optimization.",
-        "es_correcta": false,
-        "explicacion": "Statistics/metadata still matter for optimization."
-      },
-      {
-        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning.",
-        "es_correcta": false,
-        "explicacion": "Random order often hurts pruning."
-      },
-      {
         "texto_opcion": "Natural clustering requires MULTI_CLUSTER warehouse, clustering relates to data layout, not multi-cluster feature.",
         "es_correcta": false,
         "explicacion": "Clustering relates to data layout, not multi-cluster feature."
       },
       {
-        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters",
+        "texto_opcion": "Snowflake may achieve natural clustering when load order aligns with query filters.",
         "es_correcta": true,
         "explicacion": "Insert order can yield beneficial partition bounds before explicit clustering."
+      },
+      {
+        "texto_opcion": "Random insert order always optimizes all query patterns, random order often hurts pruning adopted as the standard pattern for the team.",
+        "es_correcta": false,
+        "explicacion": "Random order often hurts pruning."
+      },
+      {
+        "texto_opcion": "Natural clustering replaces need for any statistics, statistics/metadata still matter for optimization.",
+        "es_correcta": false,
+        "explicacion": "Statistics/metadata still matter for optimization."
       }
     ],
     "tags": [
@@ -1511,24 +1511,24 @@
     "pregunta": "Telecom operator scenario — high-cardinality point lookups on UUID columns with poor partition pruning. What should they implement? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis",
+        "texto_opcion": "Use CSV external stage only, stage type does not replace Search — stage type does not replace Search Optimization for point lookups.",
+        "es_correcta": false,
+        "explicacion": "Stage type does not replace Search Optimization for point lookups."
+      },
+      {
+        "texto_opcion": "Force CLUSTER BY on UUID alone always without tradeoff analysis — high-cardinality random keys may not cluster well; SOS may fit better.",
         "es_correcta": false,
         "explicacion": "High-cardinality random keys may not cluster well; SOS may fit better."
       },
       {
-        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries",
+        "texto_opcion": "Enable Search Optimization Service on the table/columns for selective point queries.",
         "es_correcta": true,
         "explicacion": "Search Optimization adds auxiliary structures for point lookup acceleration."
       },
       {
-        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired.",
+        "texto_opcion": "Disable micro-partitions for UUID tables, not supported/desired selected to meet the constraints described here.",
         "es_correcta": false,
         "explicacion": "Not supported/desired."
-      },
-      {
-        "texto_opcion": "Use CSV external stage only, stage type does not replace Search.",
-        "es_correcta": false,
-        "explicacion": "Stage type does not replace Search Optimization for point lookups."
       }
     ],
     "tags": [
@@ -1540,7 +1540,7 @@
     "pregunta": "Healthcare provider scenario — analytical query selects 3 of 200 columns from a wide fact table. What should they implement? Constraint set #5.",
     "opciones": [
       {
-        "texto_opcion": "Convert all columns to VARIANT to prune better",
+        "texto_opcion": "Convert all columns to VARIANT to prune better — vARIANT wide rows can hurt pruning/selectivity.",
         "es_correcta": false,
         "explicacion": "VARIANT wide rows can hurt pruning/selectivity."
       },
@@ -1550,14 +1550,14 @@
         "explicacion": "Column pruning reduces IO within partitions."
       },
       {
-        "texto_opcion": "Store each column in a separate account configured.",
-        "es_correcta": false,
-        "explicacion": "Not Snowflake design."
-      },
-      {
-        "texto_opcion": "Snowflake must read all 200 columns for every SELECT",
+        "texto_opcion": "Snowflake must read all 200 columns for every SELECT — columnar storage supports column pruning.",
         "es_correcta": false,
         "explicacion": "Columnar storage supports column pruning."
+      },
+      {
+        "texto_opcion": "Store each column in a separate account configured often seen in legacy designs.",
+        "es_correcta": false,
+        "explicacion": "Not Snowflake design."
       }
     ],
     "tags": [
