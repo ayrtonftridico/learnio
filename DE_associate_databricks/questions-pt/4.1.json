@@ -8,7 +8,7 @@
         "explicacion": "O Databricks sempre executa tarefas upstream antes das tarefas downstream. `load` não pode ser executado até que `validate` e `transform` sejam concluídos."
       },
       {
-        "texto_opcion": "`ingest` é executado primeiro, depois `validate` e `transform` são executados em paralelo e, em seguida.",
+        "texto_opcion": "`ingest` é executado primeiro, depois `validate` e `transform` são executados em paralelo e, em seguida, `load` é executado por último.",
         "es_correcta": true,
         "explicacion": "O Databricks executa tarefas upstream antes das tarefas downstream e executa tantas tarefas em paralelo quanto possível. `validate` e `transform` dependem apenas de `ingest`, portanto podem ser executados simultaneamente."
       },
@@ -158,7 +158,7 @@
         "explicacion": "A chegada do arquivo é um tipo de gatilho no nível do job, não um mecanismo para ramificação condicional dentro do DAG de um job em execução."
       },
       {
-        "texto_opcion": "Uma **tarefa de condição If/else** que avalia uma expressão booleana para.",
+        "texto_opcion": "Uma **tarefa de condição If/else** que avalia uma expressão booleana para ramificar o DAG.",
         "es_correcta": true,
         "explicacion": "A tarefa de condição If/else avalia uma expressão booleana e roteia a execução para diferentes ramos do DAG, permitindo a execução condicional de tarefas downstream."
       },
@@ -187,7 +187,7 @@
         "explicacion": "`ALL_DONE` é executado independentemente do resultado do upstream. `ALL_FAILED` só é executado quando todas as tarefas upstream falham - essas são condições distintas."
       },
       {
-        "texto_opcion": "Não — `ALL_FAILED` requer que todas as tarefas upstream tenham falhado.",
+        "texto_opcion": "Não — `ALL_FAILED` requer que todas as tarefas upstream tenham falhado, mas `job_b` foi bem-sucedido.",
         "es_correcta": true,
         "explicacion": "`ALL_FAILED` apenas aciona a tarefa quando TODAS as dependências upstream falharam. Como `job_b` foi bem-sucedido, a condição não foi atendida e `job_c` foi ignorado."
       },
@@ -337,7 +337,7 @@
         "explicacion": "`task_key` é um identificador de string para referência de tarefas dentro de DAG, não um conceito de criptografia ou segurança."
       },
       {
-        "texto_opcion": "É um identificador exclusivo para a tarefa dentro do job.",
+        "texto_opcion": "É um identificador exclusivo para a tarefa dentro do job, usado para referenciá-la nas listas `depends_on`.",
         "es_correcta": true,
         "explicacion": "`task_key` identifica exclusivamente cada tarefa na definição de job e é o valor referenciado em matrizes `depends_on` de outras tarefas para estabelecer bordas DAG."
       }
@@ -366,7 +366,7 @@
         "explicacion": "As tarefas ignoradas não são tratadas como bem-sucedidas. Eles estão em um estado SKIPPED que não satisfaz `ALL_SUCCESS` ou `NONE_FAILED`."
       },
       {
-        "texto_opcion": "Não — uma tarefa ignorada conta como não tendo sido executada e `NONE_FAILED` requer que pelo menos uma tarefa.",
+        "texto_opcion": "Não — uma tarefa ignorada conta como não tendo sido executada e `NONE_FAILED` requer que pelo menos uma tarefa upstream tenha sido executada (e nenhuma tenha falhado).",
         "es_correcta": true,
         "explicacion": "`NONE_FAILED` requer que nenhum upstream falhou E pelo menos um foi executado. Um `load` ignorado significa que ele não foi executado, portanto a condição não foi satisfeita."
       }
@@ -390,7 +390,7 @@
         "explicacion": "Executar Job aciona um job diferente, não o atual. A reinicialização automática não é um padrão DAG compatível."
       },
       {
-        "texto_opcion": "Acionar um job separado e definido de forma independente no mesmo workspace como parte de.",
+        "texto_opcion": "Acionar um job separado e definido de forma independente no mesmo workspace como parte de uma orquestração maior DAG.",
         "es_correcta": true,
         "explicacion": "O tipo de tarefa Run Job permite que um job acione outro job dentro do workspace, permitindo a composição modular do pipeline dentro de um DAG."
       },
@@ -477,7 +477,7 @@
         "explicacion": "Tarefas raiz sem `depends_on` são explicitamente suportadas. Os jobs podem ter diversas tarefas raiz, e todas podem começar em paralelo."
       },
       {
-        "texto_opcion": "Como uma tarefa raiz sem dependências upstream — ela pode ser executada imediatamente quando o.",
+        "texto_opcion": "Como uma tarefa raiz sem dependências upstream — ela pode ser executada imediatamente quando o job é iniciado.",
         "es_correcta": true,
         "explicacion": "Tarefas sem `depends_on` são tarefas raiz no DAG. Eles não têm dependências upstream e são elegíveis para execução assim que o job for acionado."
       },
@@ -540,7 +540,7 @@
         "explicacion": "Lakeflow Jobs oferece suporte nativo a muitos tipos de tarefas: notebooks, SQL, scripts Python, dbt, Spark Declarative Pipelines, ML e tarefas Run Job."
       },
       {
-        "texto_opcion": "Um Job é o principal recurso para coordenar, agendar e executar operações.",
+        "texto_opcion": "Um Job é o principal recurso para coordenar, agendar e executar operações; Tarefas são as unidades individuais de job dentro de um Job.",
         "es_correcta": true,
         "explicacion": "Em Lakeflow Jobs, um Job é o recurso de orquestração de nível superior e Tasks são os nós no DAG que executam o job real."
       }
@@ -627,7 +627,7 @@
         "explicacion": "DABs são a principal estrutura como código para definir e implantar Lakeflow Jobs, pipelines e outros recursos do Databricks — não apenas esquemas Unity Catalog."
       },
       {
-        "texto_opcion": "DABs permite que os engenheiros definam Lakeflow Jobs, tarefas e suas dependências DAG em arquivos YAML para implantação como.",
+        "texto_opcion": "DABs permite que os engenheiros definam Lakeflow Jobs, tarefas e suas dependências DAG em arquivos YAML para implantação como código controlada por versão.",
         "es_correcta": true,
         "explicacion": "Declarative Automation Bundles (anteriormente Databricks Asset Bundles) permite que o job completo DAG — incluindo tarefas, dependências e condições `run_if` — seja definido em `databricks.yml` e implantado através da CLI do Databricks."
       }
@@ -670,7 +670,7 @@
     "pregunta": "Na UI Lakeflow Jobs, um engenheiro de dados deseja adicionar uma dependência entre duas tarefas existentes. Qual ação da UI realiza isso?",
     "opciones": [
       {
-        "texto_opcion": "Selecione a tarefa downstream, use o campo **Depende de** para adicionar a tarefa upstream e clique em.",
+        "texto_opcion": "Selecione a tarefa downstream, use o campo **Depende de** para adicionar a tarefa upstream e clique em **Salvar tarefa**.",
         "es_correcta": true,
         "explicacion": "O workflow da UI é: selecione a tarefa downstream → use o campo Depende de → adicione a tarefa upstream → escolha uma condição Executar se → Salvar tarefa."
       },
@@ -699,7 +699,7 @@
     "pregunta": "Qual afirmação descreve corretamente o que acontece com as tarefas B e C neste DAG quando a tarefa A (da qual B e C dependem) é bem-sucedida, mas a tarefa B falha?\n\n`A → B → D`\n`A → C → D`\n\n`D` tem `run_if: ALL_SUCCESS` e depende de B e C.",
     "opciones": [
       {
-        "texto_opcion": "C é executado (a falha de B não afeta C), mas D é ignorado porque B falhou e `ALL_SUCCESS` requer que.",
+        "texto_opcion": "C é executado (a falha de B não afeta C), mas D é ignorado porque B falhou e `ALL_SUCCESS` requer que todos os upstreams sejam bem-sucedidos.",
         "es_correcta": true,
         "explicacion": "C depende apenas de A, portanto é executado independentemente do resultado de B. D depende de B e C — porque B falhou, `ALL_SUCCESS` não foi satisfeito e D foi ignorado."
       },
@@ -786,7 +786,7 @@
     "pregunta": "Qual das alternativas a seguir descreve corretamente a estrutura de um job Lakeflow conforme definido em um pacote de automação declarativa (`databricks.yml`)?",
     "opciones": [
       {
-        "texto_opcion": "Os jobs são definidos em `resources.jobs`, cada um contendo uma lista de `tarefas` onde cada tarefa tem uma `task_key`.",
+        "texto_opcion": "Os jobs são definidos em `resources.jobs`, cada um contendo uma lista de `tarefas` onde cada tarefa tem uma `task_key`, opcional `depends_on` e uma definição de tipo de tarefa.",
         "es_correcta": true,
         "explicacion": "Em DABs, a hierarquia é `bundle → resources → jobs → [job_name] → tasks → [task_key, depends_on, run_if, task_type]`."
       },
@@ -849,7 +849,7 @@
         "explicacion": "As condições `run_if` não substituem a restrição acíclica. Os ciclos nunca são permitidos em um DAG, independentemente das condições."
       },
       {
-        "texto_opcion": "Os ciclos não são permitidos — se a tarefa A depender da tarefa B e a tarefa B também depender da tarefa A.",
+        "texto_opcion": "Os ciclos não são permitidos — se a tarefa A depender da tarefa B e a tarefa B também depender da tarefa A, o Databricks rejeitará a configuração.",
         "es_correcta": true,
         "explicacion": "Um DAG é por definição acíclico. O Databricks impõe esta restrição e não conseguirá salvar ou validar qualquer configuração de job que contenha um ciclo de dependência."
       },

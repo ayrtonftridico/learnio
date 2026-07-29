@@ -158,7 +158,7 @@ Padrão de geração:
 - Distratores curtos / fracos
 - **Viés “alternativa mais longa = correta”** (chegou a 85–99% em vários bancos)
 
-Mitigação já aplicada: `tools/bankgen/rebalance_options.py` em EN e PT (equaliza comprimento e engorda distratores). Isso remove o atalho de tamanho; **não** transforma o banco em qualidade de prova oficial. Próximo passo desejável: reescrever distratores para serem alternativas técnicas plausíveis (começar por DE Professional + 4 novos).
+Mitigação já aplicada: `tools/bankgen/rebalance_options.py` em EN e PT (equaliza comprimento e engorda distratores). Isso remove o atalho de tamanho; **não** transforma o banco em qualidade de prova oficial. **Cuidado:** versões antigas do `compress()` cortavam a alternativa correta no meio (“… e.” / “… and.”). Correção: `tools/bankgen/repair_truncated_correct.py` (restaura do commit pré-rebalance) + `compress()` endurecido.
 
 ### 4.3 Import de provas / simulados “reais”
 

@@ -3,7 +3,7 @@
     "pregunta": "What is the core principle that distinguishes ABAC (Attribute-Based Access Control) from traditional table-level column masks and row filters?",
     "opciones": [
       {
-        "texto_opcion": "ABAC uses **governed tags** to trigger policies automatically — instead of running `ALTER TABLE SET MASK` on.",
+        "texto_opcion": "ABAC uses **governed tags** to trigger policies automatically — instead of running `ALTER TABLE SET MASK` on every table, a single policy applies to all objects that have the matching tag.",
         "es_correcta": true,
         "explicacion": "ABAC shifts from per-table explicit configuration to tag-driven automation. Any object tagged with the matching governed tag automatically inherits the policy — including new tables created in the future."
       },
@@ -33,7 +33,7 @@
     "pregunta": "A data governance team wants to protect all PII columns across 200 tables in `prod_catalog`. They have tagged each PII column with `sensitivity = 'PII'`. What is the most scalable approach to apply a column mask?",
     "opciones": [
       {
-        "texto_opcion": "Create one ABAC column mask policy at the catalog level triggered by `COLUMN TAG = 'PII'` — the mask.",
+        "texto_opcion": "Create one ABAC column mask policy at the catalog level triggered by `COLUMN TAG('sensitivity') = 'PII'` — the mask automatically applies to all tagged columns across all 200 tables.",
         "es_correcta": true,
         "explicacion": "This is the core value of ABAC. A single catalog-level policy with a tag condition eliminates the need for 200 individual `ALTER TABLE SET MASK` commands. Any column tagged `sensitivity=PII` is automatically masked."
       },
@@ -63,7 +63,7 @@
     "pregunta": "Which type of tag is required for ABAC policies to work in Unity Catalog?",
     "opciones": [
       {
-        "texto_opcion": "**Governed tags** — these are account-level tags with admin-controlled keys and optional.",
+        "texto_opcion": "**Governed tags** — these are account-level tags with admin-controlled keys and optional restricted values. Free-form (ungoverned) tags cannot trigger ABAC policies.",
         "es_correcta": true,
         "explicacion": "ABAC requires governed tags specifically. Governed tags have controlled keys (only admins create them), optional value restrictions, and a full audit trail. Ungoverned tags are not evaluated by ABAC policy conditions."
       },
@@ -92,7 +92,7 @@
     "pregunta": "A data engineer runs:\n\n```sql\nALTER SCHEMA prod_catalog.hr SET TAGS ('sensitivity' = 'PII');\n```\n\nAn ABAC column mask policy is defined at the catalog level with `WHEN COLUMN TAG('sensitivity') = 'PII'`. Are columns in `hr.employees` automatically masked?",
     "opciones": [
       {
-        "texto_opcion": "No — schema-level tags do **not** automatically inherit to individual columns.",
+        "texto_opcion": "No — schema-level tags do **not** automatically inherit to individual columns. Each column that should trigger the mask must be explicitly tagged with `ALTER TABLE ... ALTER COLUMN col SET TAGS ('sensitivity' = 'PII')`.",
         "es_correcta": true,
         "explicacion": "This is a critical ABAC limitation: tags propagate from catalog/schema to tables for table-level policies, but do NOT automatically propagate to column level. Column-level masks based on column tags require each column to be explicitly tagged."
       },
@@ -137,7 +137,7 @@
         "explicacion": "ABAC is enforced at query execution time by the Databricks Runtime. Older runtimes cannot interpret or enforce ABAC policies."
       },
       {
-        "texto_opcion": "**DBR 16.4** or **Serverless compute** — clusters running older runtimes cannot access.",
+        "texto_opcion": "**DBR 16.4** or **Serverless compute** — clusters running older runtimes cannot access ABAC-protected tables.",
         "es_correcta": true,
         "explicacion": "ABAC policies require DBR 16.4+ (or serverless). Clusters on older runtimes (even DBR 15.4 which supports table-level masks) cannot access ABAC-protected tables and will fail when querying them."
       }
@@ -167,7 +167,7 @@
         "explicacion": "ABAC policies are prospective — once created, they automatically protect all current and future objects with the matching tag. No re-application is needed."
       },
       {
-        "texto_opcion": "Yes — ABAC policies at the schema level automatically apply to all current and **future** tables in that schema that have the.",
+        "texto_opcion": "Yes — ABAC policies at the schema level automatically apply to all current and **future** tables in that schema that have the matching tag. No additional ALTER TABLE command is needed.",
         "es_correcta": true,
         "explicacion": "Automatic coverage of new objects is one of the primary advantages of ABAC over table-level policies. When a new table is tagged with the matching governed tag, the schema-level policy is immediately evaluated and enforced."
       }
@@ -212,7 +212,7 @@
     "pregunta": "How does the governance team activate an ABAC column mask policy on a specific column in a newly added table?",
     "opciones": [
       {
-        "texto_opcion": "Apply the matching governed tag to the column: `ALTER TABLE catalog.schema.new_table ALTER COLUMN ssn SET TAGS ('sensitivity'.",
+        "texto_opcion": "Apply the matching governed tag to the column: `ALTER TABLE catalog.schema.new_table ALTER COLUMN ssn SET TAGS ('sensitivity' = 'PII');` — the policy is automatically activated for that column.",
         "es_correcta": true,
         "explicacion": "ABAC policies activate by tagging, not by running ALTER TABLE SET MASK per table. Once the tag is applied, the policy engine detects the tag at query time and enforces the mask."
       },
@@ -252,7 +252,7 @@
         "explicacion": "Schema-level ABAC policies only apply to tables that match the tag condition. Without the matching tag, the table is not protected."
       },
       {
-        "texto_opcion": "No — the row filter only applies to tables that **have** the matching tag (`access = 'restricted'`).",
+        "texto_opcion": "No — the row filter only applies to tables that **have** the matching tag (`access = 'restricted'`). Tables without the tag are not affected by the policy.",
         "es_correcta": true,
         "explicacion": "ABAC policies use tag conditions (`WHEN TABLE TAG(...) = '...'`) to selectively apply to objects. A table without the specified tag does not match the condition and is not protected by the policy."
       },
@@ -287,7 +287,7 @@
         "explicacion": "Catalog-level and schema-level ABAC policies are the primary scalability benefit. Restricting to table-level only would require per-table configuration."
       },
       {
-        "texto_opcion": "Catalogs, schemas, and tables — but **not** views directly.",
+        "texto_opcion": "Catalogs, schemas, and tables — but **not** views directly (views are protected indirectly via base table policies).",
         "es_correcta": true,
         "explicacion": "ABAC policies can be attached to catalogs, schemas, and tables. They cannot be applied directly to standard views. However, when a user queries a view that references a base table with an ABAC policy, that policy is still enforced."
       }
@@ -317,7 +317,7 @@
         "explicacion": "View ownership determines whether the view can read the base table, but ABAC policies are enforced based on the querying user's identity — independent of view ownership."
       },
       {
-        "texto_opcion": "The ABAC policy on the **base table** is still enforced — the masked value is returned even when.",
+        "texto_opcion": "The ABAC policy on the **base table** is still enforced — the masked value is returned even when queried through the view.",
         "es_correcta": true,
         "explicacion": "ABAC policies (and table-level masks) are enforced at the base table level. Even when a view is queried, the base table's policies are evaluated and applied, ensuring the mask is not bypassed via views."
       }
@@ -392,7 +392,7 @@
     "pregunta": "Why does Databricks recommend ABAC over table-level masking for large-scale PII protection in production environments?",
     "opciones": [
       {
-        "texto_opcion": "ABAC eliminates governance gaps — once a policy is created, **any table or column with the matching tag is.",
+        "texto_opcion": "ABAC eliminates governance gaps — once a policy is created, **any table or column with the matching tag is automatically protected**, including new tables added in the future, without requiring manual per-table ALTER TABLE commands.",
         "es_correcta": true,
         "explicacion": "The primary advantage of ABAC is coverage automation. Table-level policies require explicit per-table configuration and create governance gaps when new tables are added and the team forgets to apply masks."
       },
@@ -422,7 +422,7 @@
     "pregunta": "A legacy job cluster runs on DBR 14.3. It needs to read from `prod_catalog.hr.employees`, which has an ABAC column mask policy applied. What is the expected outcome?",
     "opciones": [
       {
-        "texto_opcion": "The query **fails** — clusters running DBR < 16.4 cannot access tables protected by ABAC policies.",
+        "texto_opcion": "The query **fails** — clusters running DBR < 16.4 cannot access tables protected by ABAC policies. The cluster must be upgraded to DBR 16.4+ or use serverless compute.",
         "es_correcta": true,
         "explicacion": "ABAC policy enforcement requires DBR 16.4+. A cluster on DBR 14.3 cannot interpret or enforce ABAC policies and will fail when querying ABAC-protected tables."
       },

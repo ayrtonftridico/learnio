@@ -119,7 +119,7 @@
     "pregunta": "A data engineer defines the following Lakeflow Jobs trigger in a Databricks Asset Bundle:\n\n```yaml\ntrigger:\n  pause_status: UNPAUSED\n  table_update:\n    table_names:\n      - main.sales.orders\n    condition: ANY_UPDATED\n    wait_after_last_change_seconds: 300\n```\n\nWhat does `wait_after_last_change_seconds: 300` accomplish?",
     "opciones": [
       {
-        "texto_opcion": "It waits 300 seconds after the most recent table change before starting a run.",
+        "texto_opcion": "It waits 300 seconds after the most recent table change before starting a run, resetting the timer on every new change.",
         "es_correcta": true,
         "explicacion": "This is the debounce behavior of `wait_after_last_change_seconds`, letting a full batch of changes land before triggering one consolidated run."
       },
@@ -163,7 +163,7 @@
         "explicacion": "This reverses the documented order — the cooldown is applied first, not the debounce."
       },
       {
-        "texto_opcion": "The minimum-time cooldown is honored first, then the debounce window applies.",
+        "texto_opcion": "The minimum-time cooldown is honored first, then the debounce window applies on top of that.",
         "es_correcta": true,
         "explicacion": "Per the documented behavior, the cooldown (`min_time_between_triggers_seconds`) is honored first, with the debounce (`wait_after_last_change_seconds`) layered on top."
       }
@@ -192,7 +192,7 @@
         "explicacion": "The described failure is specific to in-place overwrites, not a missing volume configuration."
       },
       {
-        "texto_opcion": "Overwriting an existing file with the same name does not trigger a run.",
+        "texto_opcion": "Overwriting an existing file with the same name does not trigger a run; file arrival only reacts to genuinely new files.",
         "es_correcta": true,
         "explicacion": "This is an explicitly documented anti-pattern — in-place overwrites do not fire a file arrival trigger; a table update trigger or new file names should be used instead."
       }
@@ -250,7 +250,7 @@
         "explicacion": "A continuous trigger is meant for always-on workloads, not for refreshing a dashboard in response to discrete table updates."
       },
       {
-        "texto_opcion": "Replace the fixed-time schedule with a table update trigger so the dashboard refreshes.",
+        "texto_opcion": "Replace the fixed-time schedule with a table update trigger so the dashboard refreshes as soon as the source table actually updates.",
         "es_correcta": true,
         "explicacion": "This is explicitly called out as a canonical use case — using a table update trigger to replace fixed-time refreshes with event-driven ones."
       }
@@ -269,7 +269,7 @@
         "explicacion": "The Jobs API trigger object does not support combining trigger types into one OR condition; this request mixes two mutually exclusive types."
       },
       {
-        "texto_opcion": "The trigger object accepts exactly one of `periodic`, `file_arrival`.",
+        "texto_opcion": "The trigger object accepts exactly one of `periodic`, `file_arrival`, or `table_update` — this request incorrectly specifies both `table_update` and `file_arrival`.",
         "es_correcta": true,
         "explicacion": "The trigger object is documented to accept exactly one trigger type; to get both a primary event-driven path and a safety net, separate jobs should be created instead."
       },
@@ -298,7 +298,7 @@
         "explicacion": "A single job's trigger object only accepts one trigger type; a schedule and table_update cannot be combined in the same job."
       },
       {
-        "texto_opcion": "Create two separate jobs: a primary event-driven job and a secondary.",
+        "texto_opcion": "Create two separate jobs: a primary event-driven job and a secondary, much-less-frequent scheduled reconciliation job, with failure notifications on the trigger.",
         "es_correcta": true,
         "explicacion": "This matches the documented Pattern A — use two separate jobs to implement a scheduled safety net alongside an event-driven primary path, paired with failure notifications."
       },
@@ -351,7 +351,7 @@
     "pregunta": "A data engineer migrates a job from a schedule-based trigger to a table update trigger. According to the documented migration steps, what should be confirmed before configuring the new trigger?",
     "opciones": [
       {
-        "texto_opcion": "That the upstream source is covered by Unity Catalog as a supported Delta/Iceberg table, view.",
+        "texto_opcion": "That the upstream source is covered by Unity Catalog as a supported Delta/Iceberg table, view, materialized view, or streaming table.",
         "es_correcta": true,
         "explicacion": "Confirming Unity Catalog coverage of the supported table types is an explicit step before configuring a table update trigger."
       },
@@ -385,7 +385,7 @@
         "explicacion": "The guidance recommends adding the new trigger alongside the old schedule temporarily, not deleting the schedule immediately."
       },
       {
-        "texto_opcion": "Add the table update trigger alongside the existing schedule temporarily, compare run timestamps.",
+        "texto_opcion": "Add the table update trigger alongside the existing schedule temporarily, compare run timestamps, then remove the schedule block once confident.",
         "es_correcta": true,
         "explicacion": "This matches the documented migration step of running both trigger mechanisms in parallel to validate before cutting over."
       },
@@ -467,7 +467,7 @@
     "pregunta": "Two teams own a fully internal pipeline: Team A's job produces data and Team B's job consumes it immediately afterward. Both jobs are owned by the same organization and team boundaries are not a concern. What does the guide recommend instead of using a schedule or a data-driven trigger?",
     "opciones": [
       {
-        "texto_opcion": "A Run Job task or `depends_on` relationship so the downstream job runs.",
+        "texto_opcion": "A Run Job task or `depends_on` relationship so the downstream job runs immediately after the upstream task DAG completes",
         "es_correcta": true,
         "explicacion": "When you own both upstream and downstream jobs, chaining via a Run Job task or `depends_on` avoids the need for either trigger type entirely."
       },
@@ -530,7 +530,7 @@
         "explicacion": "Data-driven triggers do require configuring a storage location or table list, which is part of why they're rated medium complexity."
       },
       {
-        "texto_opcion": "Scheduled triggers have low setup complexity; data-driven triggers have medium setup complexity due to UC storage/table.",
+        "texto_opcion": "Scheduled triggers have low setup complexity; data-driven triggers have medium setup complexity due to UC storage/table configuration and optional file events.",
         "es_correcta": true,
         "explicacion": "This matches the documented comparison — schedules are simplest to configure, while data-driven triggers require additional UC setup."
       },
@@ -588,7 +588,7 @@
         "explicacion": "There is no automatic fallback to a schedule; a separate scheduled job must be configured deliberately as a safety net."
       },
       {
-        "texto_opcion": "The trigger fails to evaluate silently from the job-run history's perspective.",
+        "texto_opcion": "The trigger fails to evaluate silently from the job-run history's perspective, and the team may not notice the job has stopped firing.",
         "es_correcta": true,
         "explicacion": "This is the documented risk of skipping failure notifications — unlike a missed cron tick, a failed event evaluation has no obvious equivalent in run history."
       },
@@ -612,7 +612,7 @@
     "pregunta": "A reporting job is consumed by stakeholders only once a day at a fixed time, with no need for fresher data throughout the day. According to the latency-sensitivity question in the decision framework, what does this imply about trigger choice?",
     "opciones": [
       {
-        "texto_opcion": "A schedule is simpler and just as effective, since the consumer doesn't need data sooner than.",
+        "texto_opcion": "A schedule is simpler and just as effective, since the consumer doesn't need data sooner than the fixed consumption time.",
         "es_correcta": true,
         "explicacion": "This matches the documented guidance: when downstream consumption is fixed-time and not latency-sensitive, a schedule is simpler and equally effective."
       },
@@ -646,7 +646,7 @@
         "explicacion": "This variable has nothing to do with Spark configuration; it relates to trigger configuration choice."
       },
       {
-        "texto_opcion": "It lets the same bundle be deployed with the trigger approach (scheduled vs.",
+        "texto_opcion": "It lets the same bundle be deployed with the trigger approach (scheduled vs. event-driven) chosen per deployment target, without duplicating the whole job definition.",
         "es_correcta": true,
         "explicacion": "A bundle variable like this allows the trigger strategy to be parameterized across dev/test/prod targets while reusing one job definition."
       },
@@ -670,7 +670,7 @@
     "pregunta": "Which of the following correctly distinguishes the source type each data-driven trigger reacts to?",
     "opciones": [
       {
-        "texto_opcion": "File arrival reacts to files landing in cloud storage; table update reacts to changes on UC tables.",
+        "texto_opcion": "File arrival reacts to files landing in cloud storage; table update reacts to changes (insert/merge/delete) on UC tables, views, materialized views, or streaming tables.",
         "es_correcta": true,
         "explicacion": "This correctly matches each trigger type to its source: file arrival for storage files, table update for UC table/view changes."
       },

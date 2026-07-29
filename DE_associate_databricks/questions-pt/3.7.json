@@ -13,7 +13,7 @@
         "explicacion": "A atualização Materialized view é conduzida pelo gatilho do pipeline Lakeflow SDP, não por uma programação separada."
       },
       {
-        "texto_opcion": "Quando o pipeline Lakeflow SDP é executado e os dados upstream em.",
+        "texto_opcion": "Quando o pipeline Lakeflow SDP é executado e os dados upstream em silver_sales são alterados.",
         "es_correcta": true,
         "explicacion": "Lakeflow SDP recalcula materialized views durante cada execução do pipeline, incorporando alterações de conjuntos de dados upstream."
       },
@@ -48,7 +48,7 @@
         "explicacion": "As visualizações regulares não armazenam dados; apenas materialized views persistem os resultados da consulta no armazenamento."
       },
       {
-        "texto_opcion": "Uma visualização SQL não armazena dados e reexecuta sua consulta a cada leitura.",
+        "texto_opcion": "Uma visualização SQL não armazena dados e reexecuta sua consulta a cada leitura; a materialized view persiste resultados pré-computados.",
         "es_correcta": true,
         "explicacion": "As visualizações SQL são virtuais – custo zero de armazenamento, mas recálculo completo por consulta. Armazenamento comercial Materialized views para leituras mais rápidas."
       }
@@ -62,7 +62,7 @@
     "pregunta": "Uma equipe de BI consulta uma visualização da camada Gold dezenas de vezes por hora. A visualização une três grandes tabelas Silver e calcula agregações pesadas. A latência da consulta é de 45 segundos. Qual mudança reduziria mais diretamente a latência?",
     "opciones": [
       {
-        "texto_opcion": "Converta a visualização em materialized view em um pipeline.",
+        "texto_opcion": "Converta a visualização em materialized view em um pipeline Lakeflow SDP.",
         "es_correcta": true,
         "explicacion": "Um materialized view armazena agregações pré-computadas, de modo que as consultas de BI leem os resultados armazenados em cache em vez de executar novamente a dispendiosa junção+agregação a cada vez."
       },
@@ -157,7 +157,7 @@
         "explicacion": "Ambos os tipos de objeto oferecem suporte a SQL e Python em pipelines Lakeflow SDP."
       },
       {
-        "texto_opcion": "Streaming tables processam apenas novos registros anexados de forma incremental.",
+        "texto_opcion": "Streaming tables processam apenas novos registros anexados de forma incremental; materialized views usam semântica em lote e podem atualizar de forma incremental ou completa dependendo do optimizer.",
         "es_correcta": true,
         "explicacion": "Streaming tables sempre usam checkpoints para processar apenas novos dados. Materialized views usam semântica em lote — em pipelines serverless o optimizer pode escolher uma atualização incremental; em pipelines clássicos, uma recomputação completa é sempre executada."
       },
@@ -216,7 +216,7 @@
         "explicacion": "Ambas as tabelas materialized views e Delta armazenam dados pré-computados; nenhum deles tem uma vantagem de latência inerente sobre o outro para leituras."
       },
       {
-        "texto_opcion": "Quando a tabela Gold requer lógica MERGE complexa que incorpora regras de negócios não.",
+        "texto_opcion": "Quando a tabela Gold requer lógica MERGE complexa que incorpora regras de negócios não expressáveis em um único SELECT.",
         "es_correcta": true,
         "explicacion": "As tabelas Delta regulares suportam DML arbitrário (MERGE, UPDATE, DELETE) e lógica de orquestração personalizada, que Lakeflow SDP materialized views não expõe."
       },
@@ -246,7 +246,7 @@
         "explicacion": "As visualizações SQL podem ser consultadas por qualquer carga de trabalho, incluindo pipelines de treinamento de ML."
       },
       {
-        "texto_opcion": "A agregação é executada integralmente no momento da consulta a cada execução de treinamento.",
+        "texto_opcion": "A agregação é executada integralmente no momento da consulta a cada execução de treinamento, desperdiçando computação.",
         "es_correcta": true,
         "explicacion": "As visualizações recomputam sua consulta a cada leitura. Para 500 milhões de linhas, cada execução de treinamento de ML aciona uma agregação totalmente cara - um materialized view pré-calcularia isso uma vez."
       },
@@ -281,7 +281,7 @@
         "explicacion": "Streaming tables usam checkpointing para processar apenas novos registros, mesmo no modo acionado. Somente materialized views clássicos (não serverless) sempre fazem uma recomputação completa."
       },
       {
-        "texto_opcion": "O materialized view usa semântica em lote e pode fazer uma recomputação completa ou atualização incremental.",
+        "texto_opcion": "O materialized view usa semântica em lote e pode fazer uma recomputação completa ou atualização incremental; o streaming table processa apenas registros adicionados desde a última execução.",
         "es_correcta": true,
         "explicacion": "Streaming tables sempre verificam o progresso e processam apenas novos dados. Materialized views usam semântica em lote — em pipelines serverless o optimizer pode escolher atualização incremental; em pipelines clássicos, uma recomputação completa é executada."
       },
@@ -341,7 +341,7 @@
         "explicacion": "Streaming tables podem ser compartilhados, mas o modo contínuo é desnecessário para uma agregação em lote exposta a partes externas."
       },
       {
-        "texto_opcion": "Uma tabela materialized view ou Delta gerenciada regular.",
+        "texto_opcion": "Uma tabela materialized view ou Delta gerenciada regular, ambas armazenando dados Delta físicos compartilháveis via Delta Sharing.",
         "es_correcta": true,
         "explicacion": "Delta Sharing opera em tabelas Delta físicas. Tanto as tabelas materialized views quanto as tabelas Delta gerenciadas persistem dados no formato Delta e podem ser compartilhadas."
       },
@@ -376,7 +376,7 @@
         "explicacion": "As tabelas Lakeflow SDP podem ler qualquer conjunto de dados SDP upstream ou tabela Delta externa, independentemente da camada medalhão."
       },
       {
-        "texto_opcion": "`dp.read_stream()` combinado com `groupBy()` requer uma marca d'água ou modo de saída completo.",
+        "texto_opcion": "`dp.read_stream()` combinado com `groupBy()` requer uma marca d'água ou modo de saída completo; sem ele, a agregação de streaming pode falhar.",
         "es_correcta": true,
         "explicacion": "O streaming de agregações `groupBy` requer uma marca d'água para manipulação tardia de dados ou modo de saída completo; omitir isso causa erros de pipeline no streaming com estado."
       }
@@ -436,7 +436,7 @@
         "explicacion": "Uma visualização SQL reflete os dados do Silver em tempo real, mas não oferece garantia de atomicidade — se o Silver for parcialmente escrito, a visualização reflete isso."
       },
       {
-        "texto_opcion": "Um Lakeflow SDP materialized view, porque os pipelines SDP aplicam atualizações atomicamente e as.",
+        "texto_opcion": "Um Lakeflow SDP materialized view, porque os pipelines SDP aplicam atualizações atomicamente e as tabelas downstream só são atualizadas após a conclusão bem-sucedida.",
         "es_correcta": true,
         "explicacion": "Os pipelines Lakeflow SDP confirmam os resultados atomicamente – as tabelas Gold são atualizadas apenas quando toda a execução do pipeline é bem-sucedida, evitando que os consumidores vejam resultados parciais."
       }
@@ -466,7 +466,7 @@
         "explicacion": "CACHE TABLE armazena dados na memória apenas para a sessão e não fornece controle de versão histórico ou capacidade de viagem no tempo."
       },
       {
-        "texto_opcion": "Uma tabela Delta gerenciada, que mantém um log de transações Delta que suporta.",
+        "texto_opcion": "Uma tabela Delta gerenciada, que mantém um log de transações Delta que suporta consultas VERSION AS OF e TIMESTAMP AS OF.",
         "es_correcta": true,
         "explicacion": "As tabelas Delta gerenciadas oferecem suporte total à viagem no tempo. Materialized views não suportam viagem no tempo, apesar de serem apoiados por Delta, e as visualizações SQL não armazenam nenhum histórico."
       }
@@ -491,7 +491,7 @@
         "explicacion": "A lógica condicional no notebook para seleção de ambiente é frágil; a configuração em nível de pipeline é o padrão recomendado."
       },
       {
-        "texto_opcion": "Use as configurações do pipeline Lakeflow SDP ou Databricks Asset Bundles para injetar nomes de catálogo/esquema como.",
+        "texto_opcion": "Use as configurações do pipeline Lakeflow SDP ou Databricks Asset Bundles para injetar nomes de catálogo/esquema como parâmetros, mantendo o SQL/Python da camada Gold inalterado.",
         "es_correcta": true,
         "explicacion": "Lakeflow SDP oferece suporte a catálogo e esquema parametrizados por meio de configuração de pipeline ou DABs, permitindo que o mesmo código da camada Gold seja executado em desenvolvimento e produção sem modificação."
       },
@@ -521,7 +521,7 @@
         "explicacion": "O SELECT da visualização lista explicitamente as colunas; ele não projetará automaticamente novas colunas upstream."
       },
       {
-        "texto_opcion": "O materialized view recomputa com o mesmo esquema de saída.",
+        "texto_opcion": "O materialized view recomputa com o mesmo esquema de saída, não afetado pela nova coluna à qual não faz referência.",
         "es_correcta": true,
         "explicacion": "Como o SELECT não inclui `country`, o esquema de saída materialized view permanece inalterado. Lakeflow SDP recalcula usando a lista de colunas explícita."
       },
@@ -730,7 +730,7 @@
         "explicacion": "Os tipos de objetos no Lakeflow SDP são independentes; a presença de um streaming table não altera o comportamento de atualização de materialized views."
       },
       {
-        "texto_opcion": "Eles podem coexistir; o materialized view usa semântica em lote (recomputação completa ou incremental por optimizer) enquanto.",
+        "texto_opcion": "Eles podem coexistir; o materialized view usa semântica em lote (recomputação completa ou incremental por optimizer) enquanto o streaming table sempre processa apenas novos registros.",
         "es_correcta": true,
         "explicacion": "Lakeflow SDP oferece suporte a ambos os tipos de objetos em um único pipeline. Streaming tables sempre processam de forma incremental por meio de checkpoint. Materialized views usam semântica em lote — o optimizer escolhe recomputação completa ou atualização incremental, com incremental disponível apenas em pipelines serverless."
       },

@@ -3,7 +3,7 @@
     "pregunta": "A data engineer wants to understand what serverless compute for Lakeflow Jobs actually manages on their behalf. Which statement is accurate?",
     "opciones": [
       {
-        "texto_opcion": "Databricks automatically manages instance types, memory, processing engine, and Databricks Runtime upgrades.",
+        "texto_opcion": "Databricks automatically manages instance types, memory, processing engine, and Databricks Runtime upgrades, with autoscaling and Photon enabled by default.",
         "es_correcta": true,
         "explicacion": "Serverless compute continuously optimizes infrastructure and auto-upgrades the runtime, with autoscaling and Photon automatically enabled."
       },
@@ -66,7 +66,7 @@
         "explicacion": "Unlike JAR tasks (which are in Public Preview on serverless), Spark Submit has no serverless support at all."
       },
       {
-        "texto_opcion": "Spark Submit tasks are not supported on serverless at all.",
+        "texto_opcion": "Spark Submit tasks are not supported on serverless at all; only classic jobs compute supports them.",
         "es_correcta": true,
         "explicacion": "The compute-by-task-type reference explicitly lists Spark Submit as classic jobs only, with serverless not supported."
       },
@@ -90,7 +90,7 @@
     "pregunta": "A data engineer creates a new job with a notebook task and does not configure any compute settings. What compute will the task use by default?",
     "opciones": [
       {
-        "texto_opcion": "Serverless compute, since notebook tasks select serverless by default when no.",
+        "texto_opcion": "Serverless compute, since notebook tasks select serverless by default when no cluster fields are specified.",
         "es_correcta": true,
         "explicacion": "By default, serverless compute is selected automatically for supported task types like notebooks, requiring no cluster configuration step."
       },
@@ -124,7 +124,7 @@
         "explicacion": "Both modes use the same SKU; they differ in DBU consumption and startup latency, not hardware tier."
       },
       {
-        "texto_opcion": "Standard performance has lower DBU consumption with ~4–6 minute startup latency.",
+        "texto_opcion": "Standard performance has lower DBU consumption with ~4–6 minute startup latency; Performance optimized starts and runs faster but consumes more DBUs.",
         "es_correcta": true,
         "explicacion": "This matches the documented trade-off exactly: Standard saves cost with slower startup, Performance optimized trades higher DBU usage for speed."
       },
@@ -216,7 +216,7 @@
         "explicacion": "Compute policies are explicitly listed as not supported on serverless compute."
       },
       {
-        "texto_opcion": "Compute-scoped configuration isn't supported on serverless; allowed Spark parameters can only be set at the session.",
+        "texto_opcion": "Compute-scoped configuration isn't supported on serverless; allowed Spark parameters can only be set at the session level, e.g., inside the notebook.",
         "es_correcta": true,
         "explicacion": "Serverless compute restricts Spark configuration to a specific allow-list and only permits setting it at the session level, not the compute level."
       },
@@ -264,7 +264,7 @@
     "pregunta": "A notebook task on serverless compute is running out of memory while processing a large dataset. According to the documented Public Preview feature, what option is available?",
     "opciones": [
       {
-        "texto_opcion": "Configure a High Memory setting in the notebook's Environment side panel —.",
+        "texto_opcion": "Configure a High Memory setting in the notebook's Environment side panel — available only for notebook task types.",
         "es_correcta": true,
         "explicacion": "High Memory for notebook tasks is a Public Preview feature configured via the Environment side panel and is only available for notebook task types."
       },
@@ -322,7 +322,7 @@
     "pregunta": "A data engineer wants to share a single compute resource across multiple tasks in a classic job to reduce cluster start-up latency. Which risk is specifically associated with this shared-compute pattern?",
     "opciones": [
       {
-        "texto_opcion": "Tasks sharing the same driver JVM can be affected by persisting Scala singleton/companion object.",
+        "texto_opcion": "Tasks sharing the same driver JVM can be affected by persisting Scala singleton/companion object state across tasks.",
         "es_correcta": true,
         "explicacion": "When tasks share a jobs compute resource, they run on the same driver JVM, so Scala singleton/companion object state can persist and be overwritten by concurrent tasks."
       },
@@ -351,7 +351,7 @@
     "pregunta": "A streaming job currently uses the implicit default trigger (no trigger specified) inside a notebook task on serverless compute. What will happen when this job runs?",
     "opciones": [
       {
-        "texto_opcion": "It raises `INFINITE_STREAMING_TRIGGER_NOT_SUPPORTED`.",
+        "texto_opcion": "It raises `INFINITE_STREAMING_TRIGGER_NOT_SUPPORTED`, since serverless does not support default or time-based interval triggers.",
         "es_correcta": true,
         "explicacion": "Serverless explicitly does not support default/time-based interval triggers, including the implicit `Trigger.ProcessingTime(\"0 seconds\")` default, and raises this error."
       },
@@ -409,7 +409,7 @@
     "pregunta": "A data engineer needs a workload to run essentially continuously on serverless compute, but a job-level Continuous trigger is not supported there. What is the documented alternative?",
     "opciones": [
       {
-        "texto_opcion": "Use a continuous-mode Lakeflow Spark Declarative Pipeline, which is serverless-compatible.",
+        "texto_opcion": "Use a continuous-mode Lakeflow Spark Declarative Pipeline, which is serverless-compatible, instead of a job-level Continuous trigger.",
         "es_correcta": true,
         "explicacion": "For continuous streaming-style workloads on serverless, the documented approach is continuous pipeline mode in a Lakeflow Spark Declarative Pipeline."
       },
@@ -438,7 +438,7 @@
     "pregunta": "A data engineer reviews the following REST API task definition:\n\n```json\n{\n  \"task_key\": \"ingest_notebook\",\n  \"notebook_task\": {\n    \"notebook_path\": \"/Workspace/Users/user@company.com/ingest_notebook\"\n  }\n}\n```\n\nNo `new_cluster` or `existing_cluster_id` field is present. What compute will this task run on?",
     "opciones": [
       {
-        "texto_opcion": "Serverless compute, since omitting cluster-related fields on a supported task type results in.",
+        "texto_opcion": "Serverless compute, since omitting cluster-related fields on a supported task type results in serverless by default.",
         "es_correcta": true,
         "explicacion": "Omitting `new_cluster` and `existing_cluster_id` for a supported task type like a notebook results in the task running on serverless compute by default."
       },
@@ -472,7 +472,7 @@
         "explicacion": "The `legacy_jar_step` task explicitly defines a `new_cluster` block, so it runs on classic compute, not serverless."
       },
       {
-        "texto_opcion": "The `ingest` task runs on serverless by default since it has no cluster fields.",
+        "texto_opcion": "The `ingest` task runs on serverless by default since it has no cluster fields; `legacy_jar_step` runs on classic compute via its explicit `new_cluster` definition.",
         "es_correcta": true,
         "explicacion": "This correctly mixes compute types within one job — `ingest` defaults to serverless, while `legacy_jar_step` explicitly uses a classic `new_cluster`."
       },
@@ -506,7 +506,7 @@
         "explicacion": "The Spark UI Executors tab shows runtime executor metrics, not billing or DBU cost attribution; that comes from the billable usage system table."
       },
       {
-        "texto_opcion": "The billable usage system table (`system.access.billing`).",
+        "texto_opcion": "The billable usage system table (`system.access.billing`), which includes user and workload attributes for serverless costs.",
         "es_correcta": true,
         "explicacion": "Serverless job costs are monitored via the billable usage system table, which includes user and workload attributes for granular cost tracking."
       },
@@ -535,7 +535,7 @@
         "explicacion": "Azure does have a distinct invoice label for serverless compute — 'Automated Serverless Compute' — it is not bundled."
       },
       {
-        "texto_opcion": "It appears as 'Automated Serverless Compute' on Azure.",
+        "texto_opcion": "It appears as 'Automated Serverless Compute' on Azure, while AWS/GCP show 'Jobs Serverless Compute'.",
         "es_correcta": true,
         "explicacion": "The documentation specifies distinct invoice labels: 'Jobs Serverless Compute' for AWS/GCP and 'Automated Serverless Compute' for Azure."
       },
@@ -554,7 +554,7 @@
     "pregunta": "A team is preparing to migrate a classic compute job to serverless. According to documented best practices, which of the following should they audit for first as a likely migration blocker?",
     "opciones": [
       {
-        "texto_opcion": "R or Scala UDF usage, DBFS mounts with instance profiles, Hive SerDe tables.",
+        "texto_opcion": "R or Scala UDF usage, DBFS mounts with instance profiles, Hive SerDe tables, dataframe caching APIs, and compute-scoped libraries.",
         "es_correcta": true,
         "explicacion": "These are explicitly called out as the most common blockers surfaced by the serverless compute limitations list before migrating a classic job to serverless."
       },

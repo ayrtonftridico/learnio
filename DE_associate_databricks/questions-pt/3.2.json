@@ -76,7 +76,7 @@
         "explicacion": "`fillna` substitui valores; ele não descarta linhas. Nulos em `desconto` tornam-se 0, não removidos."
       },
       {
-        "texto_opcion": "Elimina as linhas que faltam `order_id` ou `amount` e, em seguida.",
+        "texto_opcion": "Elimina as linhas que faltam `order_id` ou `amount` e, em seguida, substitui os nulos em `discount` por 0.",
         "es_correcta": true,
         "explicacion": "`dropna(subset=...)` remove linhas onde qualquer uma das colunas listadas é nula. `fillna` então substitui 0 por descontos nulos nas linhas restantes."
       }
@@ -187,7 +187,7 @@
         "explicacion": "Filtrar o resultado de uma função de janela após envolvê-lo em `withColumn` é um padrão válido e comum no PySpark."
       },
       {
-        "texto_opcion": "Mantém o registro ingerido mais recentemente para cada `order_id`.",
+        "texto_opcion": "Mantém o registro ingerido mais recentemente para cada `order_id`, removendo duplicatas mais antigas.",
         "es_correcta": true,
         "explicacion": "Particionar por `order_id` e ordenar por `ingested_at` decrescente atribui a linha número 1 ao registro mais recente; a filtragem em `rn == 1` retém apenas essa linha."
       },
@@ -293,7 +293,7 @@
     "pregunta": "Um engenheiro de dados lê uma tabela Bronze Delta de um caminho de arquivo e grava a saída limpa em Silver:\n\n```python\ndf = spark.read.format(\"delta\").load(\"/mnt/bronze/sales\")\ndf_clean = df.filter(col(\"amount\") > 0)\ndf_clean.write.format(\"delta\").mode(\"append\").saveAsTable(\"silver.sales\")\n```\n\nQual comportamento de gravação `mode(\"append\")` produz?",
     "opciones": [
       {
-        "texto_opcion": "Novos registros são adicionados à tabela Silver existente sem afetar as.",
+        "texto_opcion": "Novos registros são adicionados à tabela Silver existente sem afetar as linhas existentes.",
         "es_correcta": true,
         "explicacion": "O modo `append` adiciona as novas linhas à tabela de destino, deixando os dados existentes intactos."
       },
@@ -380,7 +380,7 @@
     "pregunta": "Uma tabela Bronze possui o seguinte esquema:\n\n```sql\nroot\n |-- order_id: string\n |-- amount: string\n |-- created_at: string\n```\n\nUm engenheiro de dados aplica esta transformação para produzir Prata:\n\n```python\ndf_silver = df_bronze \\\n    .withColumn(\"amount\", col(\"amount\").cast(\"decimal(10,2)\")) \\\n    .withColumn(\"created_at\", to_timestamp(col(\"created_at\")))\n```\n\nQual afirmação descreve melhor o resultado?",
     "opciones": [
       {
-        "texto_opcion": "`amount` se torna `DECIMAL(10,2)` e `created_at` se torna `TIMESTAMP`.",
+        "texto_opcion": "`amount` se torna `DECIMAL(10,2)` e `created_at` se torna `TIMESTAMP`; valores não analisáveis ​​tornam-se nulos.",
         "es_correcta": true,
         "explicacion": "Ambos os elencos estão corretos. O Spark define silenciosamente valores inválidos como nulos em vez de gerar erros."
       },
@@ -477,7 +477,7 @@
         "explicacion": "A viagem no tempo é um recurso inerente ao Delta Lake, não controlado por `overwriteSchema`."
       },
       {
-        "texto_opcion": "O novo DataFrame possui um esquema diferente da tabela Delta existente e a alteração do.",
+        "texto_opcion": "O novo DataFrame possui um esquema diferente da tabela Delta existente e a alteração do esquema deve ser explicitamente permitida.",
         "es_correcta": true,
         "explicacion": "Delta Lake reforça a consistência do esquema; `overwriteSchema` é necessário ao substituir por um DataFrame cujo esquema não corresponde ao esquema da tabela existente."
       },
@@ -496,7 +496,7 @@
     "pregunta": "Uma tabela Bronze possui colunas `first_name` e `last_name`. A camada Silver requer uma coluna `full_name` (concatenada) e as colunas originais removidas. Qual código está correto?",
     "opciones": [
       {
-        "texto_opcion": "`df.withColumn(\"nome_completo\", concat_ws(\" \", col(\"primeiro_nome\"), col(\"sobrenome\"))).drop(\"primeiro_nome\".",
+        "texto_opcion": "`df.withColumn(\"nome_completo\", concat_ws(\" \", col(\"primeiro_nome\"), col(\"sobrenome\"))).drop(\"primeiro_nome\", \"sobrenome\")`",
         "es_correcta": true,
         "explicacion": "`concat_ws` une strings com um separador e lida com nulos normalmente; `.drop()` remove as colunas de origem."
       },
@@ -554,7 +554,7 @@
     "pregunta": "Um engenheiro de dados lê uma tabela Bronze que foi criada por Auto Loader com `cloudFiles.schemaEvolutionMode = 'addNewColumns'`. Novas colunas apareceram em arquivos recentes, mas a transformação Silver faz referência a uma lista fixa de colunas com `select()`. O que acontece quando o job Silver é executado?",
     "opciones": [
       {
-        "texto_opcion": "Somente as colunas selecionadas são gravadas em Silver.",
+        "texto_opcion": "Somente as colunas selecionadas são gravadas em Silver; novas colunas de Bronze são silenciosamente ignoradas.",
         "es_correcta": true,
         "explicacion": "`select()` retorna apenas as colunas especificadas; quaisquer novas colunas presentes em Bronze, mas não na lista de seleção, serão excluídas da saída Silver."
       },
@@ -612,7 +612,7 @@
     "pregunta": "Um engenheiro de dados grava dados limpos em uma tabela Silver usando a opção `mergeSchema`:\n\n```python\ndf_silver.write.format(\"delta\") \\\n    .mode(\"append\") \\\n    .option(\"mergeSchema\", \"true\") \\\n    .saveAsTable(\"silver.events\")\n```\n\nO que `mergeSchema` permite?",
     "opciones": [
       {
-        "texto_opcion": "Novas colunas no DataFrame de entrada são adicionadas automaticamente ao.",
+        "texto_opcion": "Novas colunas no DataFrame de entrada são adicionadas automaticamente ao esquema da tabela existente.",
         "es_correcta": true,
         "explicacion": "`mergeSchema` (evolução do esquema) permite que a tabela Delta de destino seja atualizada com quaisquer novas colunas presentes nos dados recebidos."
       },
@@ -772,7 +772,7 @@
         "explicacion": "Isso envia nulos originais e 'N/A' pela mesma etapa fillna(0.0), então 'N/A' termina como 0,0 em vez de nulo, violando a regra."
       },
       {
-        "texto_opcion": "fillna(0.0) → convertido para float → 'N/A' torna-se nulo automaticamente.",
+        "texto_opcion": "fillna(0.0) → convertido para float → 'N/A' torna-se nulo automaticamente (conversão inválida)",
         "es_correcta": true,
         "explicacion": "Preencher os nulos originais com 0,0 primeiro (enquanto 'N/A' ainda é uma string distinta) garante que apenas nulos verdadeiros obtenham 0,0. A conversão para float posteriormente transforma as strings 'N/A' intocadas em nulas, satisfazendo ambas as partes da regra sem colisões."
       }
@@ -815,7 +815,7 @@
     "pregunta": "Um engenheiro de dados grava dados Silver de forma incremental. A tabela Bronze é anexada a cada hora e contém uma coluna `ingest_time`. O job Silver só deve processar registros mais recentes que a última gravação Silver. Qual é o padrão de leitura incremental correto?",
     "opciones": [
       {
-        "texto_opcion": "Use `spark.readStream.format('delta').table('bronze.events')` com um pipeline de streaming estruturado que.",
+        "texto_opcion": "Use `spark.readStream.format('delta').table('bronze.events')` com um pipeline de streaming estruturado que verifica os deslocamentos processados.",
         "es_correcta": true,
         "explicacion": "O streaming estruturado com fonte Delta rastreia o progresso por meio de checkpoints, processando automaticamente apenas novos dados desde a última execução, sem gerenciar marcas d'água manualmente."
       },

@@ -76,7 +76,7 @@
         "explicacion": "A substituição de um arquivo não coloca o gatilho em estado de erro; simplesmente não gera um novo evento de chegada."
       },
       {
-        "texto_opcion": "Nenhuma execução é acionada, porque apenas novos arquivos acionam uma execução — a substituição.",
+        "texto_opcion": "Nenhuma execução é acionada, porque apenas novos arquivos acionam uma execução — a substituição de um arquivo existente com o mesmo nome não o faz.",
         "es_correcta": true,
         "explicacion": "Esta é uma limitação documentada: os gatilhos de chegada de arquivos são acionados apenas em novos arquivos, não em substituições de arquivos existentes com o mesmo nome."
       }
@@ -90,7 +90,7 @@
     "pregunta": "Um engenheiro de dados deseja que os arquivos que chegam em rajadas (vários arquivos com intervalo de alguns segundos entre si) sejam processados juntos em uma única execução, em vez de acionar uma execução por arquivo.\n\nQual configuração do gatilho de chegada de arquivo deve ser configurada?",
     "opciones": [
       {
-        "texto_opcion": "`wait_after_last_change_seconds`, definido para esperar após a chegada mais recente antes de.",
+        "texto_opcion": "`wait_after_last_change_seconds`, definido para esperar após a chegada mais recente antes de iniciar uma execução, redefinindo a cada novo arquivo.",
         "es_correcta": true,
         "explicacion": "\"Asalvar após a última alteração\" desfaz as chegadas intermitentes - ele espera esse tempo após a chegada do arquivo mais recente antes de iniciar uma execução, e cada nova chegada zera o cronômetro, para que todo o lote seja processado em conjunto."
       },
@@ -177,7 +177,7 @@
     "pregunta": "Sem eventos de arquivo habilitados, quais são as limitações documentadas para o local de armazenamento monitorado de um gatilho de chegada de arquivo?",
     "opciones": [
       {
-        "texto_opcion": "Um máximo de 50 jobs por workspace podem usar um gatilho de chegada de arquivo em um determinado local.",
+        "texto_opcion": "Um máximo de 50 jobs por workspace podem usar um gatilho de chegada de arquivo em um determinado local, e o local é limitado a 10.000 arquivos.",
         "es_correcta": true,
         "explicacion": "Estes são os limites documentados sem eventos de arquivo: 50 jobs por workspace em um determinado local e um limite de 10.000 arquivos no subcaminho configurado."
       },
@@ -264,7 +264,7 @@
     "pregunta": "Um gatilho de atualização de tabela é configurado para monitorar uma visualização Unity Catalog que depende de 11 tabelas diferentes suportadas.\n\nO que acontece?",
     "opciones": [
       {
-        "texto_opcion": "A visualização não pode ser usada em um gatilho de atualização de tabela.",
+        "texto_opcion": "A visualização não pode ser usada em um gatilho de atualização de tabela, pois as tabelas de origem de uma visualização são contadas no limite de 10 tabelas por gatilho.",
         "es_correcta": true,
         "explicacion": "As tabelas de origem de uma visualização contam para o limite de 10 tabelas por acionador, portanto, uma visualização que depende de 11 tabelas excede o limite e não pode ser usada."
       },
@@ -293,7 +293,7 @@
     "pregunta": "Uma visualização usada em um gatilho de atualização de tabela depende de uma tabela federada (não-Unity-Catalog) como uma de suas fontes.\n\nQual é o comportamento documentado?",
     "opciones": [
       {
-        "texto_opcion": "A criação do gatilho é bem-sucedida, mas nenhuma execução é acionada quando a dependência federada sem.",
+        "texto_opcion": "A criação do gatilho é bem-sucedida, mas nenhuma execução é acionada quando a dependência federada sem suporte é atualizada.",
         "es_correcta": true,
         "explicacion": "As visualizações que dependem de tabelas federadas não são suportadas como dependência de acionamento; a criação do gatilho ainda é bem-sucedida, mas nenhuma execução de job é acionada para atualizações dessa dependência não suportada."
       },
@@ -322,7 +322,7 @@
     "pregunta": "Um engenheiro de dados define `min_time_between_triggers_seconds: 120` e `wait_after_last_change_seconds: 60` em um gatilho de atualização de tabela. Uma atualização da tabela ocorre na marca de 5 segundos e outra atualização ocorre na marca de 115 segundos.\n\nQuando o gatilho realmente dispara uma execução, com base na interação documentada dessas duas configurações?",
     "opciones": [
       {
-        "texto_opcion": "Só depois de 175 segundos, porque o cronômetro de espera após a última alteração é redefinido na atualização em 115 segundos.",
+        "texto_opcion": "Só depois de 175 segundos, porque o cronômetro de espera após a última alteração é redefinido na atualização em 115 segundos, além do mínimo de 120 segundos.",
         "es_correcta": true,
         "explicacion": "Quando ambas as opções são usadas, o acionador aguarda primeiro o tempo mínimo entre os acionadores e, em seguida, aguarda o período de espera após a última alteração após a última alteração; uma atualização em 115s redefine o debounce de 60 segundos, aumentando o tempo de disparo para 175s."
       },
@@ -356,7 +356,7 @@
         "explicacion": "Os gatilhos contínuos não são baseados em agendamento, portanto não existe o conceito de \"próxima janela de tempo agendada\"; a retomada entra em vigor assim que a execução ativa é concluída."
       },
       {
-        "texto_opcion": "Se uma execução ainda estiver ativa quando for retomada, o agendador aguardará a conclusão dessa execução.",
+        "texto_opcion": "Se uma execução ainda estiver ativa quando for retomada, o agendador aguardará a conclusão dessa execução antes de iniciar uma nova.",
         "es_correcta": true,
         "explicacion": "Este é o comportamento documentado de retomada do gatilho contínuo: uma execução em andamento pode ser concluída antes que o agendador inicie uma nova execução."
       },
@@ -385,7 +385,7 @@
         "explicacion": "Isto é explicitamente o oposto da recomendação documentada, que alerta contra esta configuração dupla-contínua redundante."
       },
       {
-        "texto_opcion": "Evite esta combinação: mantenha as tarefas do pipeline no modo acionado quando orquestradas por um job.",
+        "texto_opcion": "Evite esta combinação: mantenha as tarefas do pipeline no modo acionado quando orquestradas por um job, em vez de agrupar um pipeline já contínuo em um gatilho contínuo no nível do job.",
         "es_correcta": true,
         "explicacion": "A Databricks recomenda não agrupar um pipeline já contínuo num gatilho contínuo ao nível do job; as tarefas de pipeline orquestradas por jobs devem usar o modo acionado, para evitar a execução contínua dupla."
       },
@@ -424,7 +424,7 @@
         "explicacion": "Não há agendamento padrão aplicado a jobs não acionados; sem um gatilho configurado, nada é executado automaticamente."
       },
       {
-        "texto_opcion": "Clicar em Executar agora na interface do usuário, chamar o endpoint REST Executar agora ou um.",
+        "texto_opcion": "Clicar em Executar agora na interface do usuário, chamar o endpoint REST Executar agora ou um orquestrador externo como Apache Airflow chamando a API Jobs.",
         "es_correcta": true,
         "explicacion": "Sem nenhum gatilho configurado, as execuções são iniciadas apenas manualmente, por meio do botão Executar agora da interface do usuário, do endpoint REST Executar agora ou de um orquestrador externo que chama a API Jobs."
       }
@@ -448,7 +448,7 @@
         "explicacion": "`run-now` inicia uma única execução; ele não configura nem invoca um gatilho contínuo."
       },
       {
-        "texto_opcion": "Uma execução manual/orientada por API — inicia programaticamente uma única execução.",
+        "texto_opcion": "Uma execução manual/orientada por API — inicia programaticamente uma única execução, independente de qualquer gatilho configurado.",
         "es_correcta": true,
         "explicacion": "Chamar o endpoint REST `jobs/run-now` é um mecanismo de gatilho manual/acionado por API, usado para iniciar uma execução individual sob demanda."
       },
@@ -506,7 +506,7 @@
         "explicacion": "`jobs/create` cria um emprego totalmente novo; ele não aceita um `job_id` existente para modificar um job em vigor."
       },
       {
-        "texto_opcion": "`POST /api/2.2/jobs/update` com `job_id` e um bloco.",
+        "texto_opcion": "`POST /api/2.2/jobs/update` com `job_id` e um bloco `new_settings.trigger.table_update`.",
         "es_correcta": true,
         "explicacion": "Adicionar um gatilho a um job existente é feito via `jobs/update`, especificando o `job_id` e a nova configuração do `trigger` dentro de `new_settings`."
       },
@@ -583,7 +583,7 @@
     "pregunta": "Um engenheiro de dados pausa um gatilho ativo enquanto uma execução está em andamento (job não contínuo).\n\nO que acontece com essa execução em andamento?",
     "opciones": [
       {
-        "texto_opcion": "Continua até a conclusão; pausar apenas impede que o gatilho.",
+        "texto_opcion": "Continua até a conclusão; pausar apenas impede que o gatilho inicie novas execuções.",
         "es_correcta": true,
         "explicacion": "Pausar um gatilho significa que qualquer execução atualmente ativa continua até ser concluída, mas o gatilho para de iniciar novas execuções."
       },
@@ -670,7 +670,7 @@
     "pregunta": "Um engenheiro de dados está avaliando se deve usar um gatilho programado ou um gatilho de atualização de tabela para um job. Qual fator favorece mais fortemente a escolha de um gatilho **programado** em vez de um gatilho de atualização de tabela?",
     "opciones": [
       {
-        "texto_opcion": "Os dados upstream chegam de forma previsível e o tempo exato de execução é mais importante do que reagir imediatamente às.",
+        "texto_opcion": "Os dados upstream chegam de forma previsível e o tempo exato de execução é mais importante do que reagir imediatamente às alterações nos dados.",
         "es_correcta": true,
         "explicacion": "Prática recomendada: use Programado para cargas de trabalho periódicas e previsíveis, nas quais o tempo exato é mais importante do que a reação aos dados à medida que chegam."
       },
@@ -762,7 +762,7 @@
         "explicacion": "A chegada de arquivos aciona a verificação de novos arquivos aproximadamente por minuto, com base no melhor esforço, independentemente dessa configuração; `wait_after_last_change_seconds` controla o tempo de rejeição, não o intervalo de pesquisa."
       },
       {
-        "texto_opcion": "O gatilho aguarda 300 segundos após a chegada do arquivo mais recente antes de iniciar uma execução.",
+        "texto_opcion": "O gatilho aguarda 300 segundos após a chegada do arquivo mais recente antes de iniciar uma execução, zerando o cronômetro a cada nova chegada.",
         "es_correcta": true,
         "explicacion": "Isso implementa o comportamento de debounce: depois que o último arquivo chega, o gatilho espera 300 segundos antes de disparar, e qualquer nova chegada durante essa janela zera a contagem regressiva."
       },
@@ -825,7 +825,7 @@
         "explicacion": "O gatilho não comete erros nem se desativa; ele continua avaliando sem erros."
       },
       {
-        "texto_opcion": "O gatilho continua a ser avaliado sem erros.",
+        "texto_opcion": "O gatilho continua a ser avaliado sem erros, não encontrando nenhum arquivo até que o caminho exista.",
         "es_correcta": true,
         "explicacion": "No S3/GCS, um gatilho de chegada de arquivo apontado para um caminho inexistente ou excluído não gera erro — o S3/GCS não distingue diretórios vazios/inexistentes/excluídos, portanto, ele simplesmente não encontra nenhum arquivo até que o caminho exista."
       },
@@ -849,7 +849,7 @@
         "explicacion": "Os gatilhos de atualização de tabela monitoram alterações de tabela, não arquivos brutos no S3 — eles são o mecanismo errado para este cenário de ingestão, independentemente das comparações de limite."
       },
       {
-        "texto_opcion": "Gatilho de chegada de arquivo, porque a origem são arquivos brutos no armazenamento em nuvem.",
+        "texto_opcion": "Gatilho de chegada de arquivo, porque a origem são arquivos brutos no armazenamento em nuvem, não uma tabela Unity Catalog.",
         "es_correcta": true,
         "explicacion": "Os gatilhos de chegada de arquivos são projetados para novos arquivos que chegam em um local ou volume externo Unity Catalog, como S3; os gatilhos de atualização de tabela monitoram tabelas/visualizações de UC, não arquivos brutos de entrada."
       },

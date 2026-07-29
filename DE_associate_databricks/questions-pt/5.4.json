@@ -18,7 +18,7 @@
         "explicacion": "`bundle validate` captura erros de sintaxe YAML, mas não consegue detectar diferenças lógicas ou comportamentais causadas por configurações de ambiente inconsistentes. A causa raiz é a falta de uma abordagem IaC unificada."
       },
       {
-        "texto_opcion": "Configuração manual e inconsistente entre ambientes — o mesmo pipeline não foi implantado com as mesmas.",
+        "texto_opcion": "Configuração manual e inconsistente entre ambientes — o mesmo pipeline não foi implantado com as mesmas configurações.",
         "es_correcta": true,
         "explicacion": "Quando a configuração é gerenciada manualmente (por meio da UI ou de chamadas CLI ad hoc), as diferenças se acumulam entre os ambientes. A solução é Infraestrutura como Código (IaC) via DABs, onde o mesmo YAML e código são implantados de forma consistente em todos os ambientes."
       }
@@ -98,7 +98,7 @@
         "explicacion": "`mode: development` pausa todos os cronogramas e prefixa nomes de recursos - nenhum dos comportamentos é adequado para um ambiente de teste destinado a espelhar a produção."
       },
       {
-        "texto_opcion": "`mode: production` — mantém os cronogramas ativos e usa nomenclatura semelhante à produção.",
+        "texto_opcion": "`mode: production` — mantém os cronogramas ativos e usa nomenclatura semelhante à produção, fornecendo validação de teste genuína.",
         "es_correcta": true,
         "explicacion": "`mode: production` no teste evita a pausa automática de programações, usa nomenclatura limpa de recursos (sem prefixo) e define pipelines DLT como `development: false` — fazendo com que o teste realmente reflita o comportamento da produção."
       },
@@ -152,7 +152,7 @@
     "pregunta": "Um engenheiro de dados precisa de um job para enviar alertas de falha para `dev@company.com` no desenvolvimento, `staging-alerts@company.com` no teste e `oncall@company.com` na produção. Qual é a abordagem correta?",
     "opciones": [
       {
-        "texto_opcion": "Defina uma variável `alert_email` com um padrão, substitua por destino em `targets.variables` e faça referência a.",
+        "texto_opcion": "Defina uma variável `alert_email` com um padrão, substitua por destino em `targets.variables` e faça referência a `${var.alert_email}` em `email_notifications.on_failure`.",
         "es_correcta": true,
         "explicacion": "Este é o padrão de parametrização de variáveis ​​do livro didático. Defina uma vez, substitua por destino — sem duplicação da definição de recurso."
       },
@@ -216,7 +216,7 @@
         "explicacion": "`development: false` afeta o comportamento do modo DLT, não o tamanho do cluster. As substituições de cluster exigem a especificação da configuração do cluster no bloco de substituição de destino."
       },
       {
-        "texto_opcion": "Substitua em `targets.prod.resources.pipelines.<name>.clusters` usando o mesmo `label: default` para corresponder e.",
+        "texto_opcion": "Substitua em `targets.prod.resources.pipelines.<name>.clusters` usando o mesmo `label: default` para corresponder e substituir a configuração do cluster.",
         "es_correcta": true,
         "explicacion": "As substituições de cluster de pipeline DLT usam o campo `label` para identificar qual configuração de cluster substituir. O `label: default` identifica o cluster de computação principal."
       },
@@ -241,7 +241,7 @@
     "pregunta": "Um engenheiro de dados configura Unity Catalog por ambiente usando este padrão:\n\n```yaml\nvariables:\n  catalog:\n    default: dev_catalog\n\ntargets:\n  prod:\n    variables:\n      catalog: prod_catalog\n\nresources:\n  pipelines:\n    silver_pipeline:\n      catalog: ${var.catalog}\n      schema: silver\n```\n\nQual catálogo o pipeline usa quando implantado no `prod`?",
     "opciones": [
       {
-        "texto_opcion": "`prod_catalog` — a substituição da variável do destino de produção é aplicada no momento da.",
+        "texto_opcion": "`prod_catalog` — a substituição da variável do destino de produção é aplicada no momento da implantação.",
         "es_correcta": true,
         "explicacion": "Variáveis no nível de destino substituem o padrão global. Ao implantar em `prod`, `${var.catalog}` resolve para `prod_catalog`."
       },
@@ -276,7 +276,7 @@
         "explicacion": "DABs YAML não suporta expressões condicionais. As substituições de variáveis ​​por destino são o mecanismo correto."
       },
       {
-        "texto_opcion": "Defina uma variável `silver_schema` com uma substituição por destino para cada ambiente e defina `schema:.",
+        "texto_opcion": "Defina uma variável `silver_schema` com uma substituição por destino para cada ambiente e defina `schema: ${var.silver_schema}` no recurso de pipeline.",
         "es_correcta": true,
         "explicacion": "Variáveis com substituições por destino são a abordagem limpa e SECA. Cada ambiente obtém seu próprio valor de esquema sem duplicar a definição do pipeline."
       },
@@ -316,7 +316,7 @@
         "explicacion": "As substituições são resolvidas no momento da implantação para todos os campos YAML, incluindo `name`. A sequência literal não aparece na tarefa implementada."
       },
       {
-        "texto_opcion": "`ETL Pipeline [staging]` — `${bundle.target}` resolves to the target key name.",
+        "texto_opcion": "`ETL Pipeline [staging]` — `${bundle.target}` resolve para o nome da chave de destino; `mode: production` não adiciona prefixo.",
         "es_correcta": true,
         "explicacion": "`${bundle.target}` resolve para a chave YAML do destino atual (`staging`). O modo de produção não adiciona um prefixo — apenas o modo de desenvolvimento adiciona `[dev <username>]`."
       }
@@ -331,7 +331,7 @@
     "pregunta": "Uma equipe define `git.branch: main` em seu destino de produção. Um desenvolvedor no branch `feature/new-transform` acidentalmente executa `databricks bundle deploy -t prod`. O que acontece?",
     "opciones": [
       {
-        "texto_opcion": "A implantação falha com um erro de validação — o branch atual `feature/new-transform` não.",
+        "texto_opcion": "A implantação falha com um erro de validação — o branch atual `feature/new-transform` não corresponde ao `main` necessário.",
         "es_correcta": true,
         "explicacion": "`mode: production` impõe que o branch atual do Git corresponda ao valor configurado `git.branch`. Isso evita implantações acidentais de produção de filiais não principais."
       },
@@ -361,7 +361,7 @@
     "pregunta": "De acordo com as melhores práticas DABs, qual é a estratégia de ramificação Git recomendada para promoção de pipeline?",
     "opciones": [
       {
-        "texto_opcion": "Desenvolvimento baseado em tronco — ramificações de recursos de curta duração mescladas em uma única.",
+        "texto_opcion": "Desenvolvimento baseado em tronco — ramificações de recursos de curta duração mescladas em uma única ramificação `principal` que está sempre pronta para implantação.",
         "es_correcta": true,
         "explicacion": "O desenvolvimento baseado em tronco minimiza conflitos de mesclagem e mantém o `principal` pronto para produção. As ramificações de recursos têm vida curta, são mescladas rapidamente e a promoção é feita por pipelines CI/CD direcionados a diferentes alvos de pacote - e não a ramificações separadas de longa duração."
       },
@@ -400,7 +400,7 @@
         "explicacion": "Ramos obsoletos são um problema de higiene do Git. O desvio de configuração refere-se especificamente ao estado da infraestrutura implantada que diverge do estado desejado definido pelo código."
       },
       {
-        "texto_opcion": "Quando o estado real de um recurso implantado (job, pipeline) diverge do estado desejado definido na configuração do pacote.",
+        "texto_opcion": "Quando o estado real de um recurso implantado (job, pipeline) diverge do estado desejado definido na configuração do pacote YAML, normalmente devido a alterações manuais feitas na UI.",
         "es_correcta": true,
         "explicacion": "O desvio de configuração ocorre quando alterações ad hoc (via UI, chamadas CLI diretas ou hotfixes) são aplicadas a recursos implantados sem atualizar o YAML de origem. A próxima bundle deploy corrige o desvio."
       },
@@ -419,7 +419,7 @@
     "pregunta": "Um engenheiro de dados executa `databricks bundle deploy -t prod` três vezes seguidas sem alterações no YAML. Qual é o resultado da segunda e terceira execuções?",
     "opciones": [
       {
-        "texto_opcion": "O mesmo resultado da primeira execução — `bundle deploy` é idempotente e produz o.",
+        "texto_opcion": "O mesmo resultado da primeira execução — `bundle deploy` é idempotente e produz o mesmo estado, independentemente de quantas vezes for executado.",
         "es_correcta": true,
         "explicacion": "`databricks bundle deploy` é idempotente: reconcilia o estado implantado atual com o estado desejado no YAML. Executá-lo repetidamente sem alterações não produz alterações adicionais."
       },
@@ -507,7 +507,7 @@
     "pregunta": "Um engenheiro de dados configura o campo `run_as` de maneira diferente por ambiente:\n\n```yaml\ntargets:\n  dev:\n    run_as:\n      user_name: \"${workspace.current_user.userName}\"\n  prod:\n    run_as:\n      service_principal_name: \"prod-sp@company.com\"\n```\n\nPor que uma entidade de serviço é recomendada para o destino `prod` em vez da identidade do desenvolvedor?",
     "opciones": [
       {
-        "texto_opcion": "Os principais de serviço são identidades estáveis, não vinculadas a usuários individuais — eles não quebram se um.",
+        "texto_opcion": "Os principais de serviço são identidades estáveis, não vinculadas a usuários individuais — eles não quebram se um desenvolvedor sair e impõem a separação de tarefas entre implantadores e executores.",
         "es_correcta": true,
         "explicacion": "Se a conta de um desenvolvedor for usada para `run_as` na produção e ele sair da empresa ou mudar de função, os jobs de produção serão interrompidos. Os principais de serviço são identidades não humanas de longa duração projetadas para automação."
       },
@@ -542,7 +542,7 @@
         "explicacion": "`bundle validate` verifica apenas a sintaxe YAML - ele não detecta desvios no estado implantado. `bundle plan` detecta desvios e `bundle deploy` corrige-os. No entanto, evitar desvios por meio de permissões é mais robusto."
       },
       {
-        "texto_opcion": "Grant `CAN_MANAGE` em recursos de produção apenas para a entidade de serviço CI/CD — remova.",
+        "texto_opcion": "Grant `CAN_MANAGE` em recursos de produção apenas para a entidade de serviço CI/CD — remova `CAN_MANAGE` para contas de usuários individuais.",
         "es_correcta": true,
         "explicacion": "Se os usuários tiverem `CAN_MANAGE` nos recursos de produção, eles poderão fazer alterações baseadas na UI que causam desvios. Restringir `CAN_MANAGE` ao principal de serviço CI/CD impõe que todas as alterações fluam através do pipeline de implantação do bundle."
       },
@@ -572,7 +572,7 @@
         "explicacion": "Databricks suporta absolutamente arquivos `.whl` pré-construídos - `bundle deploy` compila e carrega-os automaticamente. A questão é confirmá-los no Git, não usá-los."
       },
       {
-        "texto_opcion": "Artefatos construídos são arquivos binários que não se diferenciam bem no Git.",
+        "texto_opcion": "Artefatos construídos são arquivos binários que não se diferenciam bem no Git, podem ser grandes e sempre devem ser compilados a partir do código-fonte durante CI/CD para garantir a reprodutibilidade.",
         "es_correcta": true,
         "explicacion": "Os artefatos binários comprometidos com o Git aumentam o repositório, não mostram diferenças significativas na revisão de código e podem se tornar obsoletos ou inconsistentes. A melhor prática é compilar a partir do código-fonte em CI/CD e fazer upload via `bundle deploy`."
       },
@@ -597,7 +597,7 @@
     "pregunta": "Um engenheiro de dados configura um teste de integração como um job de pacote executado no ambiente de preparo. Qual é o propósito de executar este teste como um comando `bundle run` em CI/CD?",
     "opciones": [
       {
-        "texto_opcion": "Para validar o comportamento do pipeline em relação a dados e infraestrutura reais de preparação após a.",
+        "texto_opcion": "Para validar o comportamento do pipeline em relação a dados e infraestrutura reais de preparação após a implantação, antes de promovê-lo para produção.",
         "es_correcta": true,
         "explicacion": "Os testes de integração são executados após a implantação temporária para verificar o comportamento real de ponta a ponta. Se falharem, o pipeline CI/CD será interrompido e não será promovido para produção."
       },
@@ -627,7 +627,7 @@
     "pregunta": "Um engenheiro de dados define este caminho do workspace em `databricks.yml`:\n\n```yaml\nworkspace:\n  root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}\n```\n\nDois desenvolvedores, Alice e Bob, implantam no destino `dev`. Suas implantações entram em conflito?",
     "opciones": [
       {
-        "texto_opcion": "Não — cada desenvolvedor obtém um caminho exclusivo porque `${workspace.current_user.userName}`.",
+        "texto_opcion": "Não — cada desenvolvedor obtém um caminho exclusivo porque `${workspace.current_user.userName}` resolve para seu próprio e-mail, criando caminhos de workspace isolados.",
         "es_correcta": true,
         "explicacion": "`${workspace.current_user.userName}` resolve o e-mail do usuário de implantação. Alice obtém `.../alice@co.com/...` e Bob obtém `.../bob@co.com/...` - caminhos totalmente isolados."
       },
@@ -662,7 +662,7 @@
         "explicacion": "`bundle deploy` atualiza os recursos existentes. Ele não ignora recursos que já existem — ele os reconcilia com o estado definido pelo YAML."
       },
       {
-        "texto_opcion": "A alteração da UI é substituída - `bundle deploy` reconcilia o job de produção para corresponder ao estado.",
+        "texto_opcion": "A alteração da UI é substituída - `bundle deploy` reconcilia o job de produção para corresponder ao estado desejado definido pelo YAML.",
         "es_correcta": true,
         "explicacion": "`bundle deploy` é idempotente e sempre direciona recursos para o estado definido em YAML. Quaisquer alterações fora de banda (edições de UI, chamadas CLI diretas) serão substituídas na próxima implantação."
       },
@@ -691,7 +691,7 @@
         "explicacion": "Eles não são equivalentes. A abordagem A (YAML único com alvos) é a recomendação oficial do Databricks e evita divergências de configuração."
       },
       {
-        "texto_opcion": "A abordagem A mantém uma única fonte de verdade. A abordagem B cria duplicação e corre o risco de os ambientes se.",
+        "texto_opcion": "A abordagem A mantém uma única fonte de verdade. A abordagem B cria duplicação e corre o risco de os ambientes se desintegrarem à medida que as alterações são aplicadas de forma inconsistente nos arquivos.",
         "es_correcta": true,
         "explicacion": "Vários arquivos YAML por ambiente divergem inevitavelmente, pois alguns arquivos recebem atualizações e outros não. Um único YAML com destinos garante a promoção consistente da mesma configuração em todos os ambientes."
       },
@@ -721,7 +721,7 @@
         "explicacion": "`bundle deploy` é idempotente - ele se reconcilia com o estado YAML atual. Ele não cria instantâneos versionados, a menos que a lógica seja construída separadamente (por exemplo, por meio de tags Git)."
       },
       {
-        "texto_opcion": "A execução de `bundle deploy` substitui periodicamente quaisquer alterações manuais da UI de volta ao estado.",
+        "texto_opcion": "A execução de `bundle deploy` substitui periodicamente quaisquer alterações manuais da UI de volta ao estado definido pelo YAML, mantendo continuamente o alinhamento entre o código e a infraestrutura.",
         "es_correcta": true,
         "explicacion": "Como o `bundle deploy` é idempotente, agendá-lo regularmente (por exemplo, todas as noites) garante que quaisquer alterações fora da banda sejam corrigidas automaticamente. Isso transforma a bundle deploy em um ciclo de reconciliação contínuo."
       },
@@ -775,7 +775,7 @@
     "pregunta": "Um engenheiro de dados é informado: *'Não conecte diferentes Databricks Git folders (Repos) a filiais separadas para gerenciamento de ambiente.'*\n\nQual abordagem substitui esse padrão?",
     "opciones": [
       {
-        "texto_opcion": "Use uma única ramificação Git (`main`) com destinos DABs para promover o mesmo código em ambientes por meio de `databricks.",
+        "texto_opcion": "Use uma única ramificação Git (`main`) com destinos DABs para promover o mesmo código em ambientes por meio de `databricks bundle deploy -t <target>`.",
         "es_correcta": true,
         "explicacion": "A abordagem moderna substitui ramificações Git específicas do ambiente por destinos de bundle. O mesmo código em `main` é implantado em diferentes workspaces alternando o sinalizador `-t`, usando substituições de variáveis ​​por destino para diferenças de ambiente."
       },
@@ -805,7 +805,7 @@
     "pregunta": "Um engenheiro de dados tem a seguinte etapa do GitHub Actions:\n\n```yaml\n- name: Deploy to production\n  env:\n    DATABRICKS_HOST: ${{ vars.PROD_HOST }}\n    DATABRICKS_CLIENT_ID: ${{ vars.PROD_CLIENT_ID }}\n  run: |\n    databricks bundle validate -t prod\n    databricks bundle deploy -t prod\n```\n\nPor que esta etapa executa `validate` antes de `deploy` no mesmo job?",
     "opciones": [
       {
-        "texto_opcion": "As a final safety check — validate catches any configuration issues with the prod target before making changes to.",
+        "texto_opcion": "Como verificação de segurança final – o valide detecta quaisquer problemas de configuração com o destino de produção antes de fazer alterações no workspace de produção.",
         "es_correcta": true,
         "explicacion": "Executar `validate` imediatamente antes de `deploy` é uma medida de segurança para cintos e suspensórios. Mesmo que a validação seja executada no PR aberto, a revalidação no momento da implantação captura quaisquer alterações feitas entre a mesclagem do PR e a implantação do produto."
       },
@@ -834,7 +834,7 @@
     "pregunta": "A equipe de um engenheiro de dados identificou o seguinte como um **antipadrão**: usar `mode: development` para o destino de teste. Por que isso está errado?",
     "opciones": [
       {
-        "texto_opcion": "O modo de desenvolvimento pausa todos os cronogramas de job, prefixa nomes de recursos e define pipelines DLT para o modo de.",
+        "texto_opcion": "O modo de desenvolvimento pausa todos os cronogramas de job, prefixa nomes de recursos e define pipelines DLT para o modo de desenvolvimento – nenhum dos quais reflete o comportamento de produção, tornando a preparação uma porta de teste não confiável.",
         "es_correcta": true,
         "explicacion": "O objetivo da preparação é validar o comportamento em condições semelhantes às de produção. `mode: development` pausa automaticamente os cronogramas, usa prefixos de nomenclatura e usa o modo de desenvolvimento DLT - todos os quais mascaram problemas reais de produção."
       },
@@ -874,7 +874,7 @@
         "explicacion": "Destruir um ambiente de produção para fazer uma correção é extremamente perturbador. A abordagem correta é atualizar o YAML e reimplantar por meio do pipeline CI/CD."
       },
       {
-        "texto_opcion": "Faça a correção no YAML, acelere o pipeline CI/CD com `--force` se necessário e documente a emergência.",
+        "texto_opcion": "Faça a correção no YAML, acelere o pipeline CI/CD com `--force` se necessário e documente a emergência. As correções da UI ainda devem ser refletidas no YAML imediatamente.",
         "es_correcta": true,
         "explicacion": "As soluções de emergência devem passar pelo pipeline, se possível. Se uma alteração na UI for inevitável, ela deverá ser refletida imediatamente no YAML para evitar que seja substituída na próxima implantação e para manter o princípio da fonte da verdade."
       },

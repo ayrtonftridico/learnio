@@ -61,7 +61,7 @@
     "pregunta": "A job runs in **Continuous** mode. A data engineer tries to set `max_retries: 3` on one of its tasks via the REST API.\n\nWhat is true about retry behavior for this job?",
     "opciones": [
       {
-        "texto_opcion": "Continuous jobs cannot use manual retry policies; the job instead automatically retries using.",
+        "texto_opcion": "Continuous jobs cannot use manual retry policies; the job instead automatically retries using exponential backoff.",
         "es_correcta": true,
         "explicacion": "Continuous mode does not support manual retry policies like `max_retries`; failures are retried automatically with an exponential backoff algorithm at the job level."
       },
@@ -211,7 +211,7 @@
         "explicacion": "`ALL_DONE` never marks a task `Upstream failed`; it always runs regardless of upstream outcome, including cancellation."
       },
       {
-        "texto_opcion": "It still runs, because tasks with a `Run if` condition that handles failure are run.",
+        "texto_opcion": "It still runs, because tasks with a `Run if` condition that handles failure are run even when cancellation propagates downstream.",
         "es_correcta": true,
         "explicacion": "Cancellation propagates through downstream tasks, but tasks with a `Run if` condition that handles failure (like `ALL_DONE`) are still run — e.g., cleanup tasks."
       },
@@ -235,7 +235,7 @@
     "pregunta": "A task `B` depends on task `A`, which is skipped (`Excluded`) due to its own `run_if` condition. Task `B` uses the default `run_if` value.\n\nHow is the skipped upstream task `A` treated when evaluating `B`'s condition?",
     "opciones": [
       {
-        "texto_opcion": "As successful — skipped (`Excluded`) upstream tasks are treated as successful for `Run if`.",
+        "texto_opcion": "As successful — skipped (`Excluded`) upstream tasks are treated as successful for `Run if` evaluation purposes.",
         "es_correcta": true,
         "explicacion": "Skipped (`Excluded`) upstream tasks are treated as successful when evaluating `Run if` conditions, so `B`'s default `ALL_SUCCESS` condition can still be satisfied."
       },
@@ -269,7 +269,7 @@
         "explicacion": "`run_if` can be configured on any task type, not just notebook tasks."
       },
       {
-        "texto_opcion": "`Run if` reacts to the pass/fail/done outcome of upstream tasks.",
+        "texto_opcion": "`Run if` reacts to the pass/fail/done outcome of upstream tasks, while `If/else` evaluates a value-based boolean expression at runtime.",
         "es_correcta": true,
         "explicacion": "This is the documented distinction: `Run if` is outcome-based branching, whereas `If/else` is value-based branching using operators like `>`, `==`, etc."
       },
@@ -472,7 +472,7 @@
         "explicacion": "This reverses the actual limits — literal inputs are capped at 5,000 chars, and task value references go up to 48 KB."
       },
       {
-        "texto_opcion": "5,000 characters; use a task value reference instead.",
+        "texto_opcion": "5,000 characters; use a task value reference instead, which supports up to 48 KB.",
         "es_correcta": true,
         "explicacion": "Literal JSON arrays in the Inputs box are limited to 5,000 characters, while task value references support up to 48 KB for the referenced value."
       },
@@ -583,7 +583,7 @@
     "pregunta": "A data engineer disables a task in the middle of a job's DAG while debugging an issue.\n\nWhat happens to the disabled task's configuration and run history?",
     "opciones": [
       {
-        "texto_opcion": "Both are preserved — the task is skipped at run time but keeps its configuration and.",
+        "texto_opcion": "Both are preserved — the task is skipped at run time but keeps its configuration and history so it can be re-enabled later.",
         "es_correcta": true,
         "explicacion": "Disabling a task skips it at run time without removing it from the job; it keeps its configuration and run history for later re-enabling."
       },
@@ -612,7 +612,7 @@
     "pregunta": "An `If/else condition` task's left operand references a task value produced by an upstream task. That upstream task is then **disabled**.\n\nWhat happens to the `If/else condition` task on the next run?",
     "opciones": [
       {
-        "texto_opcion": "It fails, because an `If/else condition` task fails if the upstream task providing its.",
+        "texto_opcion": "It fails, because an `If/else condition` task fails if the upstream task providing its condition value is disabled.",
         "es_correcta": true,
         "explicacion": "This is documented explicitly: disabling the task that supplies an `If/else` condition's value causes the condition task to fail, since it has no value to evaluate."
       },
@@ -762,7 +762,7 @@
         "explicacion": "Whether `row_count` is greater than zero is what the `condition_task` itself evaluates; it's not a precondition for the task to run at all — only `ingest`'s success status (via `run_if`) gates execution."
       },
       {
-        "texto_opcion": "The `ingest` task must have succeeded, satisfying the `ALL_SUCCESS` `run_if` condition on.",
+        "texto_opcion": "The `ingest` task must have succeeded, satisfying the `ALL_SUCCESS` `run_if` condition on `check_row_count`.",
         "es_correcta": true,
         "explicacion": "`run_if=ALL_SUCCESS` is itself a dependency gate; `check_row_count` only runs (and thus its `condition_task` is only evaluated) once `ingest` has succeeded."
       },
@@ -815,7 +815,7 @@
     "pregunta": "A data engineer needs to choose between **Run if** and an **If/else condition** task to decide whether a downstream notebook should run a data-quality fix.\n\nThe decision must be based on whether a computed row count (a runtime value, not a task outcome) exceeds a threshold.\n\nWhich mechanism is correct, and why?",
     "opciones": [
       {
-        "texto_opcion": "`If/else condition` task, because the decision depends on a value produced at runtime.",
+        "texto_opcion": "`If/else condition` task, because the decision depends on a value produced at runtime, not merely on whether an upstream task succeeded or failed.",
         "es_correcta": true,
         "explicacion": "Best practice: use `If/else` when the decision depends on a value (record counts, flags, thresholds); use `Run if` when the decision is purely about upstream success/failure."
       },

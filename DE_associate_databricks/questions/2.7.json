@@ -37,7 +37,7 @@
         "explicacion": "`COPY INTO` is a batch command and does not support continuous streaming or automatic schema evolution."
       },
       {
-        "texto_opcion": "Auto Loader with `cloudFiles.schemaEvolutionMode =.",
+        "texto_opcion": "Auto Loader with `cloudFiles.schemaEvolutionMode = 'addNewColumns'`",
         "es_correcta": true,
         "explicacion": "Auto Loader (file notification or directory listing mode) handles continuous file arrival and evolves the schema automatically when new fields appear."
       },
@@ -298,7 +298,7 @@
         "explicacion": "Parquet files on ADLS are a file-based source — Auto Loader is the right tool, not Lakeflow Connect."
       },
       {
-        "texto_opcion": "When ingesting from a SaaS application like Salesforce, SAP.",
+        "texto_opcion": "When ingesting from a SaaS application like Salesforce, SAP, or ServiceNow",
         "es_correcta": true,
         "explicacion": "Lakeflow Connect provides managed connectors for SaaS and enterprise systems, handling API authentication, pagination, incremental sync, and Unity Catalog governance automatically."
       },
@@ -361,7 +361,7 @@
         "explicacion": "Managed Lakeflow Connect connectors may route data through Databricks-managed infrastructure, which could violate VPC residency requirements."
       },
       {
-        "texto_opcion": "JDBC ingestion via a notebook running on a cluster in the.",
+        "texto_opcion": "JDBC ingestion via a notebook running on a cluster in the customer VPC",
         "es_correcta": true,
         "explicacion": "JDBC reads run on compute inside the customer's data plane (VPC). Data never leaves the customer network, satisfying residency requirements."
       },
@@ -385,7 +385,7 @@
         "explicacion": "Auto Loader reads files from cloud object storage. It cannot call a REST API directly."
       },
       {
-        "texto_opcion": "Custom notebook using Python `requests` library.",
+        "texto_opcion": "Custom notebook using Python `requests` library, writing results to Delta via PySpark",
         "es_correcta": true,
         "explicacion": "When no managed connector exists, a custom notebook using Python HTTP libraries is the standard approach. Results can be written to Delta for downstream processing."
       },
@@ -501,7 +501,7 @@
         "explicacion": "`COPY INTO` lists all unprocessed files on each run. At very high file counts, this listing can become a bottleneck; Auto Loader's file notification mode is more scalable."
       },
       {
-        "texto_opcion": "Auto Loader in file notification mode scales better for high file counts and.",
+        "texto_opcion": "Auto Loader in file notification mode scales better for high file counts and continuous arrival.",
         "es_correcta": true,
         "explicacion": "Auto Loader's file notification mode (using cloud events) processes files as they arrive without full directory listing, scaling efficiently to hundreds of thousands of files."
       },
@@ -540,7 +540,7 @@
         "explicacion": "Lakeflow Connect targets structured SaaS/database sources. Raw XML on GCS requires file-based ingestion."
       },
       {
-        "texto_opcion": "Auto Loader with `cloudFiles.format = 'binaryFile'` to.",
+        "texto_opcion": "Auto Loader with `cloudFiles.format = 'binaryFile'` to preserve raw bytes",
         "es_correcta": true,
         "explicacion": "Loading XML as `binaryFile` preserves the raw content in the Bronze layer. Parsing can be done downstream in Silver, following medallion best practices."
       }
@@ -598,7 +598,7 @@
         "explicacion": "Changing the format option does not reset the list of loaded files stored in the transaction log."
       },
       {
-        "texto_opcion": "The target Delta table was recreated with `CREATE OR.",
+        "texto_opcion": "The target Delta table was recreated with `CREATE OR REPLACE TABLE`",
         "es_correcta": true,
         "explicacion": "`COPY INTO` stores the list of loaded files in the Delta transaction log of the target table. If the table is dropped and recreated, this history is lost and all files are treated as new."
       }
@@ -646,7 +646,7 @@
         "explicacion": "Managed Lakeflow Connect connectors run on Databricks-managed infrastructure and require internet connectivity from the source, which is not available here."
       },
       {
-        "texto_opcion": "JDBC read using a Databricks cluster deployed in the same.",
+        "texto_opcion": "JDBC read using a Databricks cluster deployed in the same VPC/on-premises network via VPN or PrivateLink",
         "es_correcta": true,
         "explicacion": "For on-premises sources behind a firewall, a Databricks cluster in the customer's data plane (connected via VPN or PrivateLink) can use JDBC to reach the database without public internet exposure."
       },
@@ -670,7 +670,7 @@
     "pregunta": "A data engineer must choose between a **standard connector** and a **managed connector** in Lakeflow Connect.\n\nWhich statement correctly describes the difference?",
     "opciones": [
       {
-        "texto_opcion": "Standard connectors require customer-managed compute.",
+        "texto_opcion": "Standard connectors require customer-managed compute; managed connectors run on Databricks-managed compute.",
         "es_correcta": true,
         "explicacion": "Standard connectors use the customer's existing compute (classic clusters), while managed connectors run on Databricks-managed serverless infrastructure, reducing operational overhead."
       },
@@ -704,7 +704,7 @@
         "explicacion": "`mergeSchema` is a schema evolution option, not a deduplication feature. Deduplication requires `MERGE INTO` or `dropDuplicates`."
       },
       {
-        "texto_opcion": "It allows new columns in incoming JSON files to be added to the target Delta.",
+        "texto_opcion": "It allows new columns in incoming JSON files to be added to the target Delta table schema.",
         "es_correcta": true,
         "explicacion": "`mergeSchema = 'true'` in `COPY_OPTIONS` enables schema evolution — new columns discovered in incoming files are automatically added to the target table."
       },
@@ -825,7 +825,7 @@
         "explicacion": "Both modes support schema evolution. The difference is file discovery mechanism, not schema handling."
       },
       {
-        "texto_opcion": "File notification mode — it uses cloud storage events and scales to millions of files without.",
+        "texto_opcion": "File notification mode — it uses cloud storage events and scales to millions of files without full directory listing.",
         "es_correcta": true,
         "explicacion": "File notification mode subscribes to cloud events (S3 EventBridge, ADLS Event Grid) and triggers only on new file events, making it highly scalable for large buckets."
       },
@@ -849,7 +849,7 @@
         "explicacion": "Lakeflow Connect does not support raw S3 file ingestion as a source type. It targets structured SaaS and database connectors."
       },
       {
-        "texto_opcion": "Use Auto Loader for the S3 CSV files and Lakeflow Connect for Salesforce.",
+        "texto_opcion": "Use Auto Loader for the S3 CSV files and Lakeflow Connect for Salesforce; merge outputs into the Bronze table.",
         "es_correcta": true,
         "explicacion": "Each source type has its best-fit tool: Auto Loader for file-based S3 ingestion, Lakeflow Connect for SaaS (Salesforce). Outputs can be written to the same or separate Bronze tables."
       },
@@ -888,7 +888,7 @@
         "explicacion": "`COPY INTO` only supports cloud object storage paths (S3, ADLS, GCS). It cannot connect to SFTP servers."
       },
       {
-        "texto_opcion": "Stage files from SFTP to S3/ADLS first.",
+        "texto_opcion": "Stage files from SFTP to S3/ADLS first, then use `COPY INTO` or Auto Loader to ingest",
         "es_correcta": true,
         "explicacion": "The standard pattern for unsupported protocols is to stage files to cloud object storage first (using a custom transfer script or third-party tool), then apply standard Databricks ingestion."
       }
@@ -917,7 +917,7 @@
         "explicacion": "While append mode does not deduplicate, this is a design choice. The specific concern here is the parallelism configuration, which affects performance but not correctness."
       },
       {
-        "texto_opcion": "The code does not include a `partitionColumn`, `lowerBound`, or `upperBound`.",
+        "texto_opcion": "The code does not include a `partitionColumn`, `lowerBound`, or `upperBound`, so all 8 partitions will read the full table in serial.",
         "es_correcta": true,
         "explicacion": "Without `partitionColumn`, `lowerBound`, and `upperBound`, Spark cannot split the read across partitions. All data is loaded by a single connection, making `numPartitions` ineffective."
       }
@@ -941,7 +941,7 @@
         "explicacion": "JDBC reads from SQL databases. ADLS Parquet files are object storage, not a JDBC source."
       },
       {
-        "texto_opcion": "Auto Loader in file notification mode with `schemaEvolutionMode =.",
+        "texto_opcion": "Auto Loader in file notification mode with `schemaEvolutionMode = 'addNewColumns'`, writing to Unity Catalog Delta table",
         "es_correcta": true,
         "explicacion": "Auto Loader (file notification) meets all criteria: < 5-minute latency, high volume scalability, schema evolution support, and writes directly to Unity Catalog tables."
       },
@@ -965,7 +965,7 @@
         "explicacion": "Lakeflow Connect does not expose a PII filter toggle for column masking. Data masking governance is a Unity Catalog feature applied post-ingestion."
       },
       {
-        "texto_opcion": "After ingestion, by applying Unity Catalog column masking policies on the.",
+        "texto_opcion": "After ingestion, by applying Unity Catalog column masking policies on the target Delta table",
         "es_correcta": true,
         "explicacion": "Unity Catalog's column masking feature applies masking functions to sensitive columns at query time, governing access for all downstream consumers regardless of ingestion method."
       },
@@ -994,7 +994,7 @@
         "explicacion": "A 1-minute schedule approximates file arrival but is not event-driven. True file-arrival triggering requires a different trigger type."
       },
       {
-        "texto_opcion": "File arrival trigger on the S3 path + `COPY INTO` or Auto.",
+        "texto_opcion": "File arrival trigger on the S3 path + `COPY INTO` or Auto Loader notebook task",
         "es_correcta": true,
         "explicacion": "Lakeflow Jobs support a file arrival trigger that detects new files in a cloud storage path and starts the job automatically. Paired with `COPY INTO` or Auto Loader, this enables event-driven ingestion."
       },

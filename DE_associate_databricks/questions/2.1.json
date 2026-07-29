@@ -18,7 +18,7 @@
         "explicacion": "Batch is not necessarily faster — it reprocesses all data each time, which can be inefficient. Streaming is more efficient for continuously arriving data."
       },
       {
-        "texto_opcion": "In batch, the engine processes all available data without tracking what was previously processed.",
+        "texto_opcion": "In batch, the engine processes all available data without tracking what was previously processed; in streaming, it only processes new data since the last execution.",
         "es_correcta": true,
         "explicacion": "Batch reads all available data on each run, while streaming tracks progress via checkpoints and only processes new records incrementally."
       }
@@ -66,7 +66,7 @@
         "explicacion": "Schema is managed separately via `cloudFiles.schemaLocation`. The checkpoint stores stream progress offsets, not schema."
       },
       {
-        "texto_opcion": "It records which data has already been processed so the stream can resume from where it left off after a.",
+        "texto_opcion": "It records which data has already been processed so the stream can resume from where it left off after a restart, guaranteeing exactly-once processing.",
         "es_correcta": true,
         "explicacion": "The checkpoint stores the stream's progress (offsets, state). On restart, Spark reads the checkpoint to know what was already processed and continues from there."
       },
@@ -90,7 +90,7 @@
     "pregunta": "An e-commerce platform calculates **average sales price per hour**. New sales data arrives continuously. During hour 2, late data from hour 1 arrives.\n\nWith **batch processing**, what happens to the hour 1 results?",
     "opciones": [
       {
-        "texto_opcion": "Late data from hour 1 is processed together with hour 2 data.",
+        "texto_opcion": "Late data from hour 1 is processed together with hour 2 data, and the previous hour 1 result is automatically overwritten with the corrected value.",
         "es_correcta": true,
         "explicacion": "Batch reads ALL available data each run. When the job runs during hour 2, it includes late hour 1 records and recomputes everything, producing correct results for all hours."
       },
@@ -129,7 +129,7 @@
         "explicacion": "By default, streaming may include late data within the watermark window. Beyond the watermark, late data is dropped. Either way, stateful logic is required for correct aggregation."
       },
       {
-        "texto_opcion": "The streaming logic must store the previous sum and count for hour 1 as state.",
+        "texto_opcion": "The streaming logic must store the previous sum and count for hour 1 as state, so it can correctly update the average when late data arrives.",
         "es_correcta": true,
         "explicacion": "Unlike batch, streaming does not reprocess past data. To update hour 1's average with late arrivals, the engine must maintain state (sum, count) for that window — this is stateful processing."
       },
@@ -158,7 +158,7 @@
         "explicacion": "A running sum accumulates state across all records for each customer. This is a classic stateful aggregation."
       },
       {
-        "texto_opcion": "Appending new log records from a source topic to a destination Delta table without any.",
+        "texto_opcion": "Appending new log records from a source topic to a destination Delta table without any aggregation.",
         "es_correcta": true,
         "explicacion": "A simple append (filter + write) is stateless — each record is processed independently without needing information about previous records or time windows."
       },
@@ -274,7 +274,7 @@
         "explicacion": "COPY INTO is appropriate for file-based ingestion at smaller scale, but streaming (e.g., Auto Loader) is the recommended general pattern for Bronze in the Medallion architecture."
       },
       {
-        "texto_opcion": "Streaming, because Bronze ingestion is mostly stateless (simple appends).",
+        "texto_opcion": "Streaming, because Bronze ingestion is mostly stateless (simple appends), making it possible to get streaming efficiency benefits without the complexity of stateful operations.",
         "es_correcta": true,
         "explicacion": "Bronze ingestion (raw data append) is stateless — no joins or aggregations. Streaming here is efficient and avoids reprocessing historical data on every batch run, without introducing stateful complexity."
       },
@@ -298,7 +298,7 @@
         "explicacion": "Lower latency has a cost: stateful streaming complexity. Databricks recommends streaming in Silver only when low latency is *much more important* than accuracy, with full awareness of the complexity."
       },
       {
-        "texto_opcion": "Batch processing with incremental refresh on materialized views.",
+        "texto_opcion": "Batch processing with incremental refresh on materialized views, because stateful streaming adds significant complexity for joins and aggregations.",
         "es_correcta": true,
         "explicacion": "Joins and aggregations in streaming require maintaining state, handling late data, and managing watermarks. Batch with materialized views is simpler and produces accurate results automatically."
       },
@@ -351,7 +351,7 @@
     "pregunta": "A data engineer needs to read a Delta table as a stream and write results to another Delta table. Which code correctly implements this?",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf = spark.readStream.format(\"delta\").load\ndf.writeStream.format(\"delta\") \\\n  .option \\\n  .start\n```.",
+        "texto_opcion": "```python\ndf = spark.readStream.format(\"delta\").load(\"/data/source\")\ndf.writeStream.format(\"delta\") \\\n  .option(\"checkpointLocation\", \"/checkpoints/output\") \\\n  .start(\"/data/output\")\n```",
         "es_correcta": true,
         "explicacion": "`spark.readStream` creates a streaming DataFrame. `.writeStream.start()` initiates the continuous write. The checkpoint is required for exactly-once guarantees and fault tolerance."
       },
@@ -380,7 +380,7 @@
     "pregunta": "What is the key advantage of **incremental loading** over full batch reprocessing?",
     "opciones": [
       {
-        "texto_opcion": "Incremental loading only processes new or changed data since the last run.",
+        "texto_opcion": "Incremental loading only processes new or changed data since the last run, reducing compute costs and processing time compared to reprocessing the entire dataset.",
         "es_correcta": true,
         "explicacion": "Incremental loading tracks a watermark or checkpoint to identify new data. This avoids redundant reprocessing of historical data, saving time and cost."
       },
@@ -472,7 +472,7 @@
         "explicacion": "The checkpoint records the last *processed* offset, not the latest offset. Messages that arrived during downtime will be processed when the stream restarts."
       },
       {
-        "texto_opcion": "The stream resumes from where it left off, processing only Kafka messages that arrived after.",
+        "texto_opcion": "The stream resumes from where it left off, processing only Kafka messages that arrived after the last committed offset stored in the checkpoint.",
         "es_correcta": true,
         "explicacion": "The `checkpointLocation` stores the last committed Kafka offset. On restart, Spark reads the checkpoint and resumes from that offset, ensuring exactly-once processing without reprocessing already-consumed messages."
       },
@@ -535,7 +535,7 @@
         "explicacion": "Trigger interval controls how often micro-batches run, not how long windows stay open for late data. Watermarks are the correct mechanism."
       },
       {
-        "texto_opcion": "Watermarks — a threshold that tells the engine how long to wait for late data before closing a.",
+        "texto_opcion": "Watermarks — a threshold that tells the engine how long to wait for late data before closing a time window.",
         "es_correcta": true,
         "explicacion": "Watermarks define the maximum lateness the engine will tolerate. Setting a 15-minute watermark ensures records arriving up to 15 minutes late are included in the correct window before it is finalized."
       },
@@ -554,7 +554,7 @@
     "pregunta": "A data architect must choose between batch and streaming for a pipeline that:\n- Aggregates daily website traffic metrics  \n- Results are consumed once per day by a BI dashboard  \n- Data arrives continuously throughout the day  \n\nWhich recommendation is most appropriate?",
     "opciones": [
       {
-        "texto_opcion": "Batch — since results are only consumed once per day, there is no business value in real-time processing.",
+        "texto_opcion": "Batch — since results are only consumed once per day, there is no business value in real-time processing. Batch is simpler and produces accurate results at lower complexity.",
         "es_correcta": true,
         "explicacion": "When the consumption frequency (daily) matches the business need, streaming adds complexity without benefit. Batch with a daily schedule is simpler, accurate, and sufficient."
       },
@@ -583,7 +583,7 @@
     "pregunta": "What is the **output mode** in Spark Structured Streaming, and which mode is used for simple append-only streaming to a Delta table?",
     "opciones": [
       {
-        "texto_opcion": "`append` mode — only new rows added since the last trigger are written to the output.",
+        "texto_opcion": "`append` mode — only new rows added since the last trigger are written to the output. This is used for stateless transformations and simple ingestion pipelines.",
         "es_correcta": true,
         "explicacion": "`append` mode writes only newly generated rows each trigger. It is the correct and most efficient mode for stateless pipelines like raw ingestion to a Bronze Delta table."
       },
@@ -651,7 +651,7 @@
         "explicacion": "Batch jobs can be fully automated with schedulers (Lakeflow Jobs, cron). Automation is not the constraint — the minimum latency achievable is the fundamental limitation."
       },
       {
-        "texto_opcion": "Because batch processes all available data each time it runs and has minimum latency of minutes.",
+        "texto_opcion": "Because batch processes all available data each time it runs and has minimum latency of minutes, making it architecturally incapable of sub-minute response times.",
         "es_correcta": true,
         "explicacion": "Batch jobs have overhead from job scheduling, cluster startup (for serverless), full data scans, and write operations. Even optimized batch jobs cannot achieve second-level latency."
       },
@@ -675,7 +675,7 @@
         "explicacion": "Most Spark data sources support both batch and streaming (Delta, Kafka, cloud files). Changing data sources is generally not required for the migration."
       },
       {
-        "texto_opcion": "Streaming introduces stateful complexity for aggregations and joins, and may produce different results when late-arriving.",
+        "texto_opcion": "Streaming introduces stateful complexity for aggregations and joins, and may produce different results when late-arriving data falls outside the watermark window.",
         "es_correcta": true,
         "explicacion": "The core trade-off is simplicity vs. latency. Batch is simple and always accurate. Streaming achieves lower latency but requires watermarks, state management, and careful handling of late data that may be dropped."
       },
@@ -709,7 +709,7 @@
         "explicacion": "Materialized views are explicitly recommended for Silver and Gold layers in the Databricks Medallion architecture, particularly for aggregations and joins."
       },
       {
-        "texto_opcion": "Yes — streaming in Bronze is recommended for efficient stateless ingestion.",
+        "texto_opcion": "Yes — streaming in Bronze is recommended for efficient stateless ingestion, and batch (materialized views) in Silver and Gold is recommended for stateful operations like joins and aggregations.",
         "es_correcta": true,
         "explicacion": "This matches Databricks' recommendations: streaming for stateless Bronze ingestion (efficient, no reprocessing), and batch materialized views for Silver/Gold where joins, deduplication, and aggregations require stateful processing that is simpler in batch."
       },

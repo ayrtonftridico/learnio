@@ -37,7 +37,7 @@
         "explicacion": "`COPY INTO` é um comando em lote e não suporta streaming contínuo ou evolução automática de esquema."
       },
       {
-        "texto_opcion": "Auto Loader com `cloudFiles.schemaEvolutionMode =.",
+        "texto_opcion": "Auto Loader com `cloudFiles.schemaEvolutionMode = 'addNewColumns'`",
         "es_correcta": true,
         "explicacion": "Auto Loader (modo de notificação de arquivo ou listagem de diretório) lida com a chegada contínua de arquivos e evolui o esquema automaticamente quando novos campos aparecem."
       },
@@ -153,7 +153,7 @@
         "explicacion": "Auto Loader é optimized para pipelines de streaming incrementais; `COPY INTO` para carregamentos em lote limitados. Eles atendem a diferentes casos de uso."
       },
       {
-        "texto_opcion": "`COPY INTO` fornece carregamento de arquivo idempotente exatamente uma vez e é adequado.",
+        "texto_opcion": "`COPY INTO` fornece carregamento de arquivo idempotente exatamente uma vez e é adequado para lotes grandes e pouco frequentes.",
         "es_correcta": true,
         "explicacion": "`COPY INTO` registra quais arquivos foram carregados e ignora a reingestão deles, garantindo a semântica exatamente uma vez. Grandes lotes mensais são perfeitos."
       },
@@ -356,7 +356,7 @@
         "explicacion": "Os conectores Lakeflow Connect gerenciados podem rotear dados por meio da infraestrutura gerenciada pelo Databricks, o que pode violar os requisitos de residência de VPC."
       },
       {
-        "texto_opcion": "Ingestão JDBC por meio de um notebook em execução em um cluster.",
+        "texto_opcion": "Ingestão JDBC por meio de um notebook em execução em um cluster na VPC do cliente",
         "es_correcta": true,
         "explicacion": "As leituras JDBC são executadas na computação dentro do plano de dados (VPC) do cliente. Os dados nunca saem da rede do cliente, satisfazendo os requisitos de residência."
       },
@@ -390,7 +390,7 @@
         "explicacion": "JDBC foi projetado para bancos de dados SQL. APIs REST requerem bibliotecas de cliente HTTP, não drivers JDBC."
       },
       {
-        "texto_opcion": "Notebook personalizado usando a biblioteca `requests` do Python.",
+        "texto_opcion": "Notebook personalizado usando a biblioteca `requests` do Python, gravando resultados no Delta via PySpark",
         "es_correcta": true,
         "explicacion": "Quando não existe nenhum conector gerenciado, um notebook personalizado usando bibliotecas Python HTTP é a abordagem padrão. Os resultados podem ser gravados no Delta para processamento posterior."
       },
@@ -496,7 +496,7 @@
     "pregunta": "Uma equipe está escolhendo entre `COPY INTO` e Auto Loader. Seu pipeline processará até 100.000 arquivos por dia, chegando continuamente.\n\nQual afirmação é precisa?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader no modo de notificação de arquivo é melhor dimensionado para altas contagens de.",
+        "texto_opcion": "Auto Loader no modo de notificação de arquivo é melhor dimensionado para altas contagens de arquivos e chegada contínua.",
         "es_correcta": true,
         "explicacion": "O modo de notificação de arquivos do Auto Loader (usando eventos na nuvem) processa os arquivos conforme eles chegam, sem listagem completa de diretórios, dimensionando com eficiência para centenas de milhares de arquivos."
       },
@@ -540,7 +540,7 @@
         "explicacion": "JDBC conecta-se a bancos de dados relacionais; ele não pode ler arquivos XML do GCS."
       },
       {
-        "texto_opcion": "Auto Loader com `cloudFiles.format = 'binaryFile'` para.",
+        "texto_opcion": "Auto Loader com `cloudFiles.format = 'binaryFile'` para preservar bytes brutos",
         "es_correcta": true,
         "explicacion": "Carregar XML como `binaryFile` preserva o conteúdo bruto na camada Bronze. A análise pode ser feita posteriormente no Silver, seguindo as práticas recomendadas do medalhão."
       }
@@ -646,7 +646,7 @@
         "explicacion": "Os conectores Lakeflow Connect gerenciados são executados em infraestrutura gerenciada pelo Databricks e exigem conectividade com a Internet da fonte, que não está disponível aqui."
       },
       {
-        "texto_opcion": "JDBC leitura usando um cluster Databricks implantado na mesma rede.",
+        "texto_opcion": "JDBC leitura usando um cluster Databricks implantado na mesma rede VPC/local via VPN ou PrivateLink",
         "es_correcta": true,
         "explicacion": "Para fontes locais atrás de um firewall, um cluster Databricks no plano de dados do cliente (conectado via VPN ou PrivateLink) pode usar JDBC para chegar ao banco de dados sem exposição pública à Internet."
       },
@@ -670,7 +670,7 @@
     "pregunta": "Um engenheiro de dados deve escolher entre um **conector padrão** e um **conector gerenciado** em Lakeflow Connect.\n\nQual afirmação descreve corretamente a diferença?",
     "opciones": [
       {
-        "texto_opcion": "Os conectores padrão exigem computação gerenciada pelo cliente; conectores gerenciados são executados em computação.",
+        "texto_opcion": "Os conectores padrão exigem computação gerenciada pelo cliente; conectores gerenciados são executados em computação gerenciada pelo Databricks.",
         "es_correcta": true,
         "explicacion": "Os conectores padrão usam a computação existente do cliente (clusters clássicos), enquanto os conectores gerenciados são executados na infraestrutura serverless gerenciada por Databricks, reduzindo a sobrecarga operacional."
       },
@@ -709,7 +709,7 @@
         "explicacion": "`mergeSchema` afeta apenas a evolução do esquema. A consolidação de arquivos é uma preocupação separada tratada por `OPTIMIZE` ou `COMPACT`."
       },
       {
-        "texto_opcion": "Ele permite que novas colunas em arquivos JSON recebidos sejam adicionadas ao esquema da.",
+        "texto_opcion": "Ele permite que novas colunas em arquivos JSON recebidos sejam adicionadas ao esquema da tabela Delta de destino.",
         "es_correcta": true,
         "explicacion": "`mergeSchema = 'true'` em `COPY_OPTIONS` permite a evolução do esquema - novas colunas descobertas nos arquivos recebidos são automaticamente adicionadas à tabela de destino."
       },
@@ -830,7 +830,7 @@
         "explicacion": "O modo de listagem de diretório lista todos os arquivos em cada ciclo de disparo. Com mais de 1 milhão de arquivos, isso se torna lento e caro."
       },
       {
-        "texto_opcion": "Modo de notificação de arquivos – usa eventos de armazenamento em nuvem e pode ser dimensionado para milhões de arquivos.",
+        "texto_opcion": "Modo de notificação de arquivos – usa eventos de armazenamento em nuvem e pode ser dimensionado para milhões de arquivos sem listagem completa de diretórios.",
         "es_correcta": true,
         "explicacion": "O modo de notificação de arquivo assina eventos de nuvem (S3 EventBridge, ADLS Event Grid) e é acionado apenas em novos eventos de arquivo, tornando-o altamente escalável para grandes buckets."
       }
@@ -854,7 +854,7 @@
         "explicacion": "`COPY INTO` lê apenas caminhos de armazenamento de objetos em nuvem. Não é possível ingerir do Salesforce."
       },
       {
-        "texto_opcion": "Use Auto Loader para arquivos CSV S3 e Lakeflow Connect para Salesforce.",
+        "texto_opcion": "Use Auto Loader para arquivos CSV S3 e Lakeflow Connect para Salesforce; mesclar as saídas na tabela Bronze.",
         "es_correcta": true,
         "explicacion": "Cada tipo de origem tem sua ferramenta mais adequada: Auto Loader para ingestão S3 baseada em arquivo, Lakeflow Connect para SaaS (Salesforce). As saídas podem ser gravadas nas mesmas tabelas Bronze ou em tabelas separadas."
       },
@@ -888,7 +888,7 @@
         "explicacion": "`COPY INTO` suporta apenas caminhos de armazenamento de objetos em nuvem (S3, ADLS, GCS). Não é possível conectar-se a servidores SFTP."
       },
       {
-        "texto_opcion": "Prepare os arquivos do SFTP para S3/ADLS primeiro e depois.",
+        "texto_opcion": "Prepare os arquivos do SFTP para S3/ADLS primeiro e depois use `COPY INTO` ou Auto Loader para ingerir",
         "es_correcta": true,
         "explicacion": "O padrão padrão para protocolos não suportados é preparar primeiro os arquivos para o armazenamento de objetos em nuvem (usando um script de transferência personalizado ou uma ferramenta de terceiros) e, em seguida, aplicar a ingestão padrão do Databricks."
       }
@@ -912,7 +912,7 @@
         "explicacion": "`dbutils.secrets.get` é a forma recomendada de recuperar credenciais no Databricks. É totalmente suportado nas opções JDBC."
       },
       {
-        "texto_opcion": "O código não inclui `partitionColumn`, `lowerBound` ou `upperBound`, portanto.",
+        "texto_opcion": "O código não inclui `partitionColumn`, `lowerBound` ou `upperBound`, portanto, todas as 8 partições lerão a tabela completa em série.",
         "es_correcta": true,
         "explicacion": "Sem `partitionColumn`, `lowerBound` e `upperBound`, o Spark não pode dividir a leitura entre partições. Todos os dados são carregados por uma única conexão, tornando `numPartitions` ineficaz."
       },
@@ -936,7 +936,7 @@
         "explicacion": "JDBC lê bancos de dados SQL. Os arquivos ADLS Parquet são armazenamento de objetos, não uma fonte JDBC."
       },
       {
-        "texto_opcion": "Auto Loader no modo de notificação de arquivo com `schemaEvolutionMode =.",
+        "texto_opcion": "Auto Loader no modo de notificação de arquivo com `schemaEvolutionMode = 'addNewColumns'`, gravando na tabela Unity Catalog Delta",
         "es_correcta": true,
         "explicacion": "Auto Loader (notificação de arquivo) atende a todos os critérios: < latência de 5 minutos, alta escalabilidade de volume, suporte à evolução de esquema e grava diretamente em tabelas Unity Catalog."
       },
@@ -970,7 +970,7 @@
         "explicacion": "Auto Loader não possui a opção `maskColumns` integrada. Ele ingere dados brutos; o mascaramento deve ser aplicado após a ingestão."
       },
       {
-        "texto_opcion": "Após a ingestão, aplicando políticas de mascaramento de coluna Unity.",
+        "texto_opcion": "Após a ingestão, aplicando políticas de mascaramento de coluna Unity Catalog na tabela Delta de destino",
         "es_correcta": true,
         "explicacion": "O recurso de mascaramento de coluna do Unity Catalog aplica funções de mascaramento a colunas confidenciais no momento da consulta, controlando o acesso para todos os consumidores downstream, independentemente do método de ingestão."
       },
@@ -989,7 +989,7 @@
     "pregunta": "Uma equipe de engenharia de dados deseja automatizar a ingestão para que um job do Lakeflow seja acionado sempre que novos arquivos cheguem a um bucket do S3.\n\nQue tipo de gatilho e método de ingestão eles devem usar?",
     "opciones": [
       {
-        "texto_opcion": "Gatilho de chegada de arquivo no caminho S3 + tarefa de notebook `COPY.",
+        "texto_opcion": "Gatilho de chegada de arquivo no caminho S3 + tarefa de notebook `COPY INTO` ou Auto Loader",
         "es_correcta": true,
         "explicacion": "Lakeflow Jobs suporta um gatilho de chegada de arquivo que detecta novos arquivos em um caminho de armazenamento em nuvem e inicia o job automaticamente. Emparelhado com `COPY INTO` ou Auto Loader, isso permite a ingestão orientada a eventos."
       },

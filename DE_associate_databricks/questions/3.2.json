@@ -61,7 +61,7 @@
     "pregunta": "A data engineer runs the following code to clean a Bronze table:\n\n```python\ndf_silver = (\n    df_bronze\n    .dropna(subset=[\"order_id\", \"amount\"])\n    .fillna(0, subset=[\"discount\"])\n)\n```\n\nWhat does this code do?",
     "opciones": [
       {
-        "texto_opcion": "Drops rows missing `order_id` or `amount`.",
+        "texto_opcion": "Drops rows missing `order_id` or `amount`, then replaces nulls in `discount` with 0.",
         "es_correcta": true,
         "explicacion": "`dropna(subset=...)` removes rows where any of the listed columns is null. `fillna` then substitutes 0 for null discounts in the remaining rows."
       },
@@ -187,7 +187,7 @@
         "explicacion": "Filtering on a window function result after wrapping it in a `withColumn` is a valid and common pattern in PySpark."
       },
       {
-        "texto_opcion": "Keeps the most recently ingested record for each `order_id`.",
+        "texto_opcion": "Keeps the most recently ingested record for each `order_id`, removing older duplicates.",
         "es_correcta": true,
         "explicacion": "Partitioning by `order_id` and ordering by `ingested_at` descending assigns row number 1 to the newest record; filtering on `rn == 1` retains only that row."
       },
@@ -293,7 +293,7 @@
     "pregunta": "A data engineer reads a Bronze Delta table from a file path and writes the cleaned output to Silver:\n\n```python\ndf = spark.read.format(\"delta\").load(\"/mnt/bronze/sales\")\ndf_clean = df.filter(col(\"amount\") > 0)\ndf_clean.write.format(\"delta\").mode(\"append\").saveAsTable(\"silver.sales\")\n```\n\nWhat write behavior does `mode(\"append\")` produce?",
     "opciones": [
       {
-        "texto_opcion": "New records are added to the existing Silver table.",
+        "texto_opcion": "New records are added to the existing Silver table without affecting existing rows.",
         "es_correcta": true,
         "explicacion": "`append` mode adds the new rows to the target table, leaving existing data intact."
       },
@@ -385,7 +385,7 @@
         "explicacion": "Spark only transforms the columns explicitly targeted with `withColumn`; `order_id` remains a string."
       },
       {
-        "texto_opcion": "`amount` becomes `DECIMAL(10,2)` and `created_at` becomes `TIMESTAMP`.",
+        "texto_opcion": "`amount` becomes `DECIMAL(10,2)` and `created_at` becomes `TIMESTAMP`; unparseable values become null.",
         "es_correcta": true,
         "explicacion": "Both casts are correct. Spark silently sets invalid values to null rather than raising errors."
       },
@@ -482,7 +482,7 @@
         "explicacion": "`overwriteSchema` is only needed when the schema **changes**; overwriting with the same schema does not require it."
       },
       {
-        "texto_opcion": "The new DataFrame has a different schema than the existing Delta table.",
+        "texto_opcion": "The new DataFrame has a different schema than the existing Delta table, and the schema change must be explicitly allowed.",
         "es_correcta": true,
         "explicacion": "Delta Lake enforces schema consistency; `overwriteSchema` is required when overwriting with a DataFrame whose schema doesn't match the existing table schema."
       }
@@ -511,7 +511,7 @@
         "explicacion": "String concatenation with `+` in Spark does not add a space and returns null if either column is null."
       },
       {
-        "texto_opcion": "`df.withColumn(\"full_name\", concat_ws(\" \", col(\"first_name\"), col(\"last_name\"))).drop(\"first_name\".",
+        "texto_opcion": "`df.withColumn(\"full_name\", concat_ws(\" \", col(\"first_name\"), col(\"last_name\"))).drop(\"first_name\", \"last_name\")`",
         "es_correcta": true,
         "explicacion": "`concat_ws` joins strings with a separator and handles nulls gracefully; `.drop()` removes the source columns."
       }
@@ -554,7 +554,7 @@
     "pregunta": "A data engineer reads a Bronze table that was created by Auto Loader with `cloudFiles.schemaEvolutionMode = 'addNewColumns'`. New columns appeared in recent files but the Silver transformation references a fixed list of columns with `select()`. What happens when the Silver job runs?",
     "opciones": [
       {
-        "texto_opcion": "Only the selected columns are written to Silver.",
+        "texto_opcion": "Only the selected columns are written to Silver; new Bronze columns are silently ignored.",
         "es_correcta": true,
         "explicacion": "`select()` returns only the specified columns; any new columns present in Bronze but not in the select list are excluded from the Silver output."
       },
@@ -622,7 +622,7 @@
         "explicacion": "Default Delta behavior (without `mergeSchema`) rejects schema mismatches; `mergeSchema` relaxes this to allow additive changes."
       },
       {
-        "texto_opcion": "New columns in the incoming DataFrame are added to the existing table schema.",
+        "texto_opcion": "New columns in the incoming DataFrame are added to the existing table schema automatically.",
         "es_correcta": true,
         "explicacion": "`mergeSchema` (schema evolution) allows the target Delta table to be updated with any new columns present in the incoming data."
       },
@@ -762,7 +762,7 @@
         "explicacion": "This sends both original nulls and 'N/A' through the same fillna(0.0) step, so 'N/A' ends up as 0.0 instead of null, violating the rule."
       },
       {
-        "texto_opcion": "fillna(0.0) → cast to float → 'N/A' becomes null automatically.",
+        "texto_opcion": "fillna(0.0) → cast to float → 'N/A' becomes null automatically (invalid cast)",
         "es_correcta": true,
         "explicacion": "Filling original nulls with 0.0 first (while 'N/A' is still a distinct string) ensures only true nulls get 0.0. Casting to float afterward turns the untouched 'N/A' strings into null, satisfying both parts of the rule without collisions."
       },
@@ -815,7 +815,7 @@
     "pregunta": "A data engineer writes Silver data incrementally. The Bronze table is appended every hour and contains an `ingest_time` column. The Silver job should only process records newer than the last Silver write. What is the correct incremental reading pattern?",
     "opciones": [
       {
-        "texto_opcion": "Use `spark.readStream.format('delta').table` with a Structured Streaming pipeline that.",
+        "texto_opcion": "Use `spark.readStream.format('delta').table('bronze.events')` with a Structured Streaming pipeline that checkpoints processed offsets.",
         "es_correcta": true,
         "explicacion": "Structured Streaming with Delta source tracks progress via checkpoints, automatically processing only new data since the last run without manually managing watermarks."
       },

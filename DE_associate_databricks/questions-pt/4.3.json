@@ -71,7 +71,7 @@
         "explicacion": "A configuração de novas tentativas não altera o modo de disparo de um job; jobs contínuos simplesmente ignoram as políticas de novas tentativas manuais em favor da espera."
       },
       {
-        "texto_opcion": "Os jobs contínuos não podem usar políticas de novas tentativas manuais.",
+        "texto_opcion": "Os jobs contínuos não podem usar políticas de novas tentativas manuais; em vez disso, o job tenta novamente automaticamente usando espera exponencial.",
         "es_correcta": true,
         "explicacion": "O modo contínuo não suporta políticas de repetição manual como `max_retries`; as falhas são repetidas automaticamente com um algoritmo de espera exponencial no nível do job."
       },
@@ -211,7 +211,7 @@
         "explicacion": "`ALL_DONE` foi projetado especificamente para ainda executar lógica de limpeza/notificação mesmo quando uma execução upstream é cancelada."
       },
       {
-        "texto_opcion": "Ele ainda é executado, porque as tarefas com uma condição `Run if` que trata da falha são.",
+        "texto_opcion": "Ele ainda é executado, porque as tarefas com uma condição `Run if` que trata da falha são executadas mesmo quando o cancelamento se propaga downstream.",
         "es_correcta": true,
         "explicacion": "O cancelamento se propaga por meio de tarefas downstream, mas tarefas com uma condição `Run if` que lida com falhas (como `ALL_DONE`) ainda são executadas — por exemplo, tarefas de limpeza."
       },
@@ -250,7 +250,7 @@
         "explicacion": "Isto é o oposto do comportamento documentado; tarefas upstream ignoradas são consideradas bem-sucedidas, não falhadas."
       },
       {
-        "texto_opcion": "As tarefas upstream bem-sucedidas - ignoradas (`Excluídas`) são tratadas como bem-sucedidas para.",
+        "texto_opcion": "As tarefas upstream bem-sucedidas - ignoradas (`Excluídas`) são tratadas como bem-sucedidas para fins de avaliação `Run if`.",
         "es_correcta": true,
         "explicacion": "Tarefas upstream ignoradas (`Excluídas`) são tratadas como bem-sucedidas ao avaliar as condições `Run if`, portanto, a condição `ALL_SUCCESS` padrão de `B` ainda pode ser satisfeita."
       }
@@ -279,7 +279,7 @@
         "explicacion": "`run_if` pode ser configurado em qualquer tipo de tarefa, não apenas em tarefas de notebook."
       },
       {
-        "texto_opcion": "`Run if` reage ao resultado de aprovação/falha/concluído de tarefas upstream.",
+        "texto_opcion": "`Run if` reage ao resultado de aprovação/falha/concluído de tarefas upstream, enquanto `If/else` avalia uma expressão booleana baseada em valor em tempo de execução.",
         "es_correcta": true,
         "explicacion": "Esta é a distinção documentada: `Run if` é uma ramificação baseada em resultados, enquanto `If/else` é uma ramificação baseada em valores usando operadores como `>`, `==`, etc."
       }
@@ -593,7 +593,7 @@
         "explicacion": "O histórico de execução é preservado, e não apagado, quando uma tarefa é desativada."
       },
       {
-        "texto_opcion": "Ambos são preservados — a tarefa é ignorada em tempo de execução.",
+        "texto_opcion": "Ambos são preservados — a tarefa é ignorada em tempo de execução, mas mantém sua configuração e histórico para que possa ser reativada posteriormente.",
         "es_correcta": true,
         "explicacion": "Desabilitar uma tarefa ignora-a em tempo de execução sem removê-la do job; ele mantém sua configuração e histórico de execução para reativação posterior."
       },
@@ -627,7 +627,7 @@
         "explicacion": "Não há nenhum mecanismo de fallback de cache descrito para tarefas upstream desativadas que alimentam condições If/else."
       },
       {
-        "texto_opcion": "Ele falha porque uma tarefa `condição If/else` falha se a tarefa upstream que fornece seu valor de.",
+        "texto_opcion": "Ele falha porque uma tarefa `condição If/else` falha se a tarefa upstream que fornece seu valor de condição estiver desabilitada.",
         "es_correcta": true,
         "explicacion": "Isso está documentado explicitamente: desabilitar a tarefa que fornece um valor de condição `If/else` faz com que a tarefa de condição falhe, uma vez que ela não tem valor para avaliar."
       }
@@ -656,7 +656,7 @@
         "explicacion": "Embora isso possa funcionar tecnicamente, ele modifica a definição de job salva (mesmo temporariamente) em vez de usar a substituição de execução única criada especificamente para esse fim."
       },
       {
-        "texto_opcion": "Use **Executar agora com configurações diferentes** em vez de desabilitar.",
+        "texto_opcion": "Use **Executar agora com configurações diferentes** em vez de desabilitar permanentemente a tarefa.",
         "es_correcta": true,
         "explicacion": "Ignorar uma tarefa apenas para uma única execução, sem modificar o job, é feito por meio de **Executar agora com configurações diferentes**, diferente da alternância persistente Desativar."
       }
@@ -670,7 +670,7 @@
     "pregunta": "Revise este snippet DAB implementando uma proteção contra novas tentativas contra reparos manuais infinitos:\n\n```yaml\n- task_key: check_repair_limit\n  condition_task:\n    op: LESS_THAN\n    left: '{{job.repair_count}}'\n    right: '5'\n```\n\nO que `{{job.repair_count}}` representa?",
     "opciones": [
       {
-        "texto_opcion": "O número de vezes que a execução do job atual foi reparada.",
+        "texto_opcion": "O número de vezes que a execução do job atual foi reparada manualmente.",
         "es_correcta": true,
         "explicacion": "`{{job.repair_count}}` é uma referência de valor dinâmico que expõe quantas vezes a execução foi reparada, útil como proteção contra loops de reparo manual ilimitados."
       },
@@ -757,7 +757,7 @@
     "pregunta": "Examine esta definição de tarefa do Python SDK:\n\n```python\njobs.Task(\n    task_key=\"check_row_count\",\n    depends_on=[jobs.TaskDependency(task_key=\"ingest\")],\n    run_if=jobs.RunIf.ALL_SUCCESS,\n    condition_task=jobs.ConditionTask(\n        op=jobs.ConditionTaskOp.GREATER_THAN,\n        left=\"{{tasks.ingest.values.row_count}}\",\n        right=\"0\",\n    ),\n)\n```\n\nO que deve ser verdade para que esta `condition_task` seja avaliada?",
     "opciones": [
       {
-        "texto_opcion": "A tarefa `ingest` deve ter sido bem-sucedida, satisfazendo a condição `ALL_SUCCESS` `run_if` em.",
+        "texto_opcion": "A tarefa `ingest` deve ter sido bem-sucedida, satisfazendo a condição `ALL_SUCCESS` `run_if` em `check_row_count`.",
         "es_correcta": true,
         "explicacion": "`run_if=ALL_SUCCESS` é em si uma porta de dependência; `check_row_count` só é executado (e, portanto, sua `condition_task` só é avaliada) depois que `ingest` for bem-sucedido."
       },
@@ -786,7 +786,7 @@
     "pregunta": "Um engenheiro de dados deseja saber como o histórico de execução de uma tarefa `For each` é exibido após a conclusão de uma execução de job.\n\nO que mostra a UI de detalhes da execução do job?",
     "opciones": [
       {
-        "texto_opcion": "Uma tabela de iterações de tarefas, mostrando o status e a duração de cada iteração de.",
+        "texto_opcion": "Uma tabela de iterações de tarefas, mostrando o status e a duração de cada iteração de loop individual.",
         "es_correcta": true,
         "explicacion": "A execução de um job com uma tarefa `For each` é idêntica a qualquer outra execução de job, mas o histórico da tarefa For each é apresentado como uma tabela de iterações com status e duração por iteração."
       },
@@ -815,7 +815,7 @@
     "pregunta": "Um engenheiro de dados precisa escolher entre a tarefa **Executar se** e **Condição If/else** para decidir se um notebook downstream deve executar uma correção de qualidade de dados.\n\nA decisão deve ser baseada no fato de uma contagem de linhas computada (um valor de tempo de execução, não um resultado de tarefa) exceder um limite.\n\nQual mecanismo está correto e por quê?",
     "opciones": [
       {
-        "texto_opcion": "Tarefa `condição If/else`, porque a decisão depende de um valor produzido em tempo de execução.",
+        "texto_opcion": "Tarefa `condição If/else`, porque a decisão depende de um valor produzido em tempo de execução, não apenas se uma tarefa upstream foi bem-sucedida ou falhou.",
         "es_correcta": true,
         "explicacion": "Melhor prática: use `If/else` quando a decisão depende de um valor (contagens de registros, sinalizadores, limites); use `Run if` quando a decisão for puramente sobre sucesso/falha do upstream."
       },

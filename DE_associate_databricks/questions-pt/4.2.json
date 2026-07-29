@@ -32,7 +32,7 @@
     "pregunta": "Uma tarefa de notebook é configurada com um parâmetro base `year_param`. Dentro do caderno, o engenheiro escreve:\n\n```python\ndbutils.widgets.text(\"year_param\", \"2012\", \"Year Parameter\")\nyear_value = dbutils.widgets.get(\"year_param\")\n```\n\nO que `dbutils.widgets.text(...)` realiza aqui?",
     "opciones": [
       {
-        "texto_opcion": "Declara o widget e define um valor padrão usado quando o notebook é executado.",
+        "texto_opcion": "Declara o widget e define um valor padrão usado quando o notebook é executado fora de um job.",
         "es_correcta": true,
         "explicacion": "`dbutils.widgets.text` registra o widget com um padrão substituto (`\"2012\"`), que é substituído pelos `base_parameters` do job quando executado como uma tarefa."
       },
@@ -61,7 +61,7 @@
     "pregunta": "Uma tarefa de notebook contém:\n\n```python\nmessage = \"Hello from the first task\"\ndbutils.jobs.taskValues.set(key=\"message\", value=message)\n```\n\nQual referência de valor dinâmico recupera isso corretamente nos parâmetros de uma tarefa downstream?",
     "opciones": [
       {
-        "texto_opcion": "`{{tasks.output_value.values.message}}` onde `output_value` é a.",
+        "texto_opcion": "`{{tasks.output_value.values.message}}` onde `output_value` é a `task_key` da tarefa upstream.",
         "es_correcta": true,
         "explicacion": "Os valores da tarefa são referenciados com `{{tasks.<task_key>.values.<key>}}`, usando a `task_key` da tarefa produtora, não o nome da variável."
       },
@@ -119,7 +119,7 @@
     "pregunta": "Qual é o objetivo principal de uma tarefa de alerta SQL (`sql_task.alert`) em um job Lakeflow?",
     "opciones": [
       {
-        "texto_opcion": "Atualize um alerta SQL do Databricks e notifique os.",
+        "texto_opcion": "Atualize um alerta SQL do Databricks e notifique os assinantes quando sua condição for atendida.",
         "es_correcta": true,
         "explicacion": "O tipo de tarefa de alerta atualiza um alerta SQL, avalia sua condição e aciona notificações para assinantes se o alerta for acionado."
       },
@@ -148,7 +148,7 @@
     "pregunta": "Um painel AI/BI usado em um `dashboard_task` é publicado SEM permissões de dados compartilhados.\n\nQuais credenciais são usadas para atualizar os dados do painel quando o job é executado?",
     "opciones": [
       {
-        "texto_opcion": "A identidade definida na configuração \"Executar como\" do job.",
+        "texto_opcion": "A identidade definida na configuração \"Executar como\" do job, com padrão para o proprietário do job.",
         "es_correcta": true,
         "explicacion": "Sem permissões de dados compartilhados, a atualização do painel usa a identidade \"Executar como\" configurada do job (proprietário do job por padrão) em vez das credenciais do editor."
       },
@@ -182,7 +182,7 @@
         "explicacion": "Os parâmetros do conjunto de dados não podem ser definidos diretamente na tarefa; eles devem ser anexados primeiro a um widget de filtro do painel."
       },
       {
-        "texto_opcion": "Configure o identificador de URL do widget de filtro do painel para corresponder à chave do.",
+        "texto_opcion": "Configure o identificador de URL do widget de filtro do painel para corresponder à chave do parâmetro do job.",
         "es_correcta": true,
         "explicacion": "Se o identificador de URL de um filtro do painel corresponder a uma chave de parâmetro no nível da tarefa, a tarefa aplicará automaticamente o valor desse parâmetro ao filtro."
       },
@@ -361,7 +361,7 @@
         "explicacion": "`depends_on` cria uma dependência sequencial, não uma execução paralela."
       },
       {
-        "texto_opcion": "Uma tarefa de pipeline que é executada somente após a tarefa `ingest_notebook` ser.",
+        "texto_opcion": "Uma tarefa de pipeline que é executada somente após a tarefa `ingest_notebook` ser concluída com sucesso.",
         "es_correcta": true,
         "explicacion": "`depends_on` com um `TaskDependency` referenciando `ingest_notebook` impõe que esta tarefa de pipeline aguarde que a tarefa upstream seja bem-sucedida antes de ser executada."
       },
@@ -414,7 +414,7 @@
         "explicacion": "`wait_for` não é um campo reconhecido para tarefas de pipeline ou dependências de tarefas em Lakeflow Jobs."
       },
       {
-        "texto_opcion": "Adicionando uma lista `depends_on:` na tarefa que inclui `- task_key:.",
+        "texto_opcion": "Adicionando uma lista `depends_on:` na tarefa que inclui `- task_key: ingest_notebook`.",
         "es_correcta": true,
         "explicacion": "As dependências de tarefas DAB são expressas com uma lista `depends_on` de referências `task_key`, idêntica em estrutura ao campo `depends_on` da API REST."
       },
@@ -438,7 +438,7 @@
     "pregunta": "A tarefa de notebook de um engenheiro de dados é configurada para ler o código-fonte de um Git repository remoto no nível do job (`git_source`), mas essa tarefa única deve usar o notebook salvo no workspace.\n\nO que o engenheiro deve configurar nessa tarefa?",
     "opciones": [
       {
-        "texto_opcion": "Defina `source: WORKSPACE` nessa tarefa para substituir a origem Git.",
+        "texto_opcion": "Defina `source: WORKSPACE` nessa tarefa para substituir a origem Git no nível do job.",
         "es_correcta": true,
         "explicacion": "As tarefas Notebook, dbt, script Python e arquivo SQL suportam fonte controlada por versão do Git, mas isso pode ser substituído por tarefa definindo `source: WORKSPACE`."
       },
@@ -511,7 +511,7 @@
         "explicacion": "Parâmetros de job, parâmetros de tarefa e valores de tarefa são três mecanismos distintos com escopos e comportamento de propagação diferentes."
       },
       {
-        "texto_opcion": "Os parâmetros do job são definidos no nível do job e transferidos automaticamente para tarefas que suportam parâmetros de.",
+        "texto_opcion": "Os parâmetros do job são definidos no nível do job e transferidos automaticamente para tarefas que suportam parâmetros de valor-chave; os parâmetros da tarefa são definidos por tarefa e devem ser referenciados explicitamente.",
         "es_correcta": true,
         "explicacion": "Isso corresponde ao comportamento documentado: os parâmetros do job se propagam automaticamente, enquanto os parâmetros da tarefa exigem configuração explícita em cada tarefa."
       }
@@ -525,7 +525,7 @@
     "pregunta": "Uma equipe está decidindo entre uma tarefa de notebook e uma tarefa de script Python para uma nova etapa de ETL que não precisa de saída de célula interativa ou visualizações ricas, apenas uma execução direta de arquivo `.py`.\n\nDo ponto de vista do tipo de tarefa, o que é verdade?",
     "opciones": [
       {
-        "texto_opcion": "Ambos são tipos de tarefas válidos em Lakeflow Jobs, mas apenas a tarefa do notebook suporta fonte formatada em.",
+        "texto_opcion": "Ambos são tipos de tarefas válidos em Lakeflow Jobs, mas apenas a tarefa do notebook suporta fonte formatada em `.ipynb`/notebook com saída no nível da célula.",
         "es_correcta": true,
         "explicacion": "As tarefas de notebook executam notebooks `.py`, `.ipynb`, `.sql`, `.r` ou `.scala` com parâmetros; um arquivo `.py` simples sem formatação de notebook normalmente é executado como uma tarefa de script Python."
       },
@@ -583,7 +583,7 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```bash\ndatabricks jobs run-now --job-id 123456789 \\\n  --notebook-params '{\"year_param\": \"2026\"}'\n```\n\nO que o sinalizador `--notebook-params` faz neste comando CLI?",
     "opciones": [
       {
-        "texto_opcion": "Substitui os valores dos parâmetros da tarefa do notebook somente para esta.",
+        "texto_opcion": "Substitui os valores dos parâmetros da tarefa do notebook somente para esta execução específica.",
         "es_correcta": true,
         "explicacion": "`--notebook-params` passa uma substituição única de parâmetro para a execução acionada, equivalente a `notebook_params` no corpo `jobs/run-now` da API REST."
       },
@@ -656,7 +656,7 @@
         "explicacion": "O comportamento de nova tentativa é controlado pelas configurações `retry_policy` / `max_retries` de uma tarefa, não por `full_refresh`."
       },
       {
-        "texto_opcion": "Se a atualização do pipeline reprocessa todos os dados históricos do zero ou processa.",
+        "texto_opcion": "Se a atualização do pipeline reprocessa todos os dados históricos do zero ou processa apenas dados novos/alterados.",
         "es_correcta": true,
         "explicacion": "`full_refresh` controla se a atualização do pipeline acionada é uma atualização completa (reprocessando todos os dados) ou uma atualização incremental; `false` solicita o comportamento incremental normal."
       }

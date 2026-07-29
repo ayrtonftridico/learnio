@@ -32,7 +32,7 @@
     "pregunta": "Um engenheiro de dados executa o seguinte código em um pequeno conjunto de dados (cerca de 50 MB):\n\n```python\nspark.conf.set(\"spark.sql.shuffle.partitions\", 8)\ndf_result = df.groupBy(\"region\").sum(\"sales\")\n```\n\nQual é o efeito mais provável desta alteração em comparação com a configuração padrão?",
     "opciones": [
       {
-        "texto_opcion": "Menos partições de saída maiores, reduzindo a sobrecarga de shuffle de muitas.",
+        "texto_opcion": "Menos partições de saída maiores, reduzindo a sobrecarga de shuffle de muitas tarefas pequenas.",
         "es_correcta": true,
         "explicacion": "Com um conjunto de dados pequeno, 200 partições padrão criam muitas tarefas minúsculas com alta sobrecarga de agendamento; reduzir para 8 reduz essa sobrecarga e corresponde melhor ao tamanho dos dados."
       },
@@ -66,7 +66,7 @@
         "explicacion": "Adicionar mais shuffle partitions não elimina o shuffle desnecessário da mesa pequena; isso apenas muda a forma como o shuffle é distribuído."
       },
       {
-        "texto_opcion": "Certifique-se de que spark.sql.autoBroadcastJoinThreshold seja alto o suficiente para que a.",
+        "texto_opcion": "Certifique-se de que spark.sql.autoBroadcastJoinThreshold seja alto o suficiente para que a tabela de dimensões seja transmitida.",
         "es_correcta": true,
         "explicacion": "Como a tabela de dimensão está bem abaixo do limite de transmissão (padrão 10 MB), ativar/confirmar a transmissão evita embaralhar qualquer uma das tabelas e, em vez disso, envia a tabela pequena para todos os executores."
       },
@@ -90,7 +90,7 @@
     "pregunta": "Qual afirmação distingue corretamente `repartition()` de `coalesce()` no PySpark?",
     "opciones": [
       {
-        "texto_opcion": "repartition() sempre aciona um shuffle completo e pode aumentar ou diminuir partições.",
+        "texto_opcion": "repartition() sempre aciona um shuffle completo e pode aumentar ou diminuir partições; coalesce() evita um shuffle completo, mas só pode diminuir as partições.",
         "es_correcta": true,
         "explicacion": "repartition() redistribui os dados uniformemente por meio de um shuffle para qualquer contagem de partição de destino, enquanto coalesce() mescla as partições existentes sem um shuffle completo, portanto, só pode reduzir a contagem."
       },
@@ -119,7 +119,7 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```python\ndf_large.coalesce(1).write.format(\"delta\").save(\"/mnt/output\")\n```\n\nem um DataFrame com 500 GB de dados espalhados por 400 partições. Qual é o resultado mais provável?",
     "opciones": [
       {
-        "texto_opcion": "Todos os dados são canalizados para uma única tarefa, causando lentidão grave ou falha na memória.",
+        "texto_opcion": "Todos os dados são canalizados para uma única tarefa, causando lentidão grave ou falha na memória do executor.",
         "es_correcta": true,
         "explicacion": "coalesce(1) força todos os dados em uma partição processada por uma única tarefa, eliminando o paralelismo e o risco de erros de falta de memória naquele único executor."
       },
@@ -211,7 +211,7 @@
         "explicacion": "AQE afeta vários aspectos da execução de consultas, incluindo a união de shuffle partitions e o tratamento de distorções, não apenas limites de transmissão."
       },
       {
-        "texto_opcion": "O AQE une dinamicamente shuffle partitions em tempo de execução com base em estatísticas de dados reais.",
+        "texto_opcion": "O AQE une dinamicamente shuffle partitions em tempo de execução com base em estatísticas de dados reais, reduzindo a necessidade de ajustar manualmente a contagem de partições.",
         "es_correcta": true,
         "explicacion": "AQE re-optimizes o plano de consulta durante a execução usando estatísticas de tempo de execução, incluindo a fusão de pequenas shuffle partitions, o que diminui a dependência de uma configuração manual fixa."
       },
@@ -245,7 +245,7 @@
         "explicacion": "coalescePartitions foi projetado especificamente para reduzir, e não aumentar, o número de pequenas partições pós-shuffle."
       },
       {
-        "texto_opcion": "Em tempo de execução, o Spark mescla automaticamente as pequenas partições resultantes em menos.",
+        "texto_opcion": "Em tempo de execução, o Spark mescla automaticamente as pequenas partições resultantes em menos partições de tamanho apropriado.",
         "es_correcta": true,
         "explicacion": "coalescePartitions sob AQE monitora tamanhos de partição pós-shuffle e mescla os pequenos em tempo de execução, evitando a sobrecarga de muitas tarefas pequenas sem ajuste manual."
       },
@@ -308,7 +308,7 @@
         "explicacion": "spark.sql.shuffle.partitions afeta operações de shuffle de lote e streaming do Spark SQL/DataFrame, não exclusivamente de streaming."
       },
       {
-        "texto_opcion": "spark.default.parallelism se aplica principalmente a operações RDD.",
+        "texto_opcion": "spark.default.parallelism se aplica principalmente a operações RDD, enquanto spark.sql.shuffle.partitions controla especificamente partições após shuffles DataFrame/SQL.",
         "es_correcta": true,
         "explicacion": "spark.default.parallelism é a configuração herdada da era RDD para paralelismo de tarefas padrão, enquanto spark.sql.shuffle.partitions é a configuração específica do Spark SQL que rege a contagem de partições de saída de shuffle."
       }
@@ -332,7 +332,7 @@
         "explicacion": "O job será executado de forma ineficiente com spills e estágios mais lentos; ele não falha completamente apenas devido a essa configuração."
       },
       {
-        "texto_opcion": "Cada partição se torna muito grande para caber confortavelmente na memória do executor.",
+        "texto_opcion": "Cada partição se torna muito grande para caber confortavelmente na memória do executor, causando excesso de espaço no disco e desempenho mais lento.",
         "es_correcta": true,
         "explicacion": "Com apenas 200 partições espalhadas por 4 TB, cada partição tem dezenas de GB, excedendo em muito os tamanhos de partição ideais e forçando o Spark a despejar dados intermediários no disco."
       },
@@ -409,7 +409,7 @@
     "pregunta": "Um engenheiro de dados compara duas operações em um DataFrame com 50 partições, visando reduzi-lo para 10 partições antes de gravar a saída:\n\n```python\ndf_a = df.repartition(10)\ndf_b = df.coalesce(10)\n```\n\nQual afirmação compara corretamente seu custo de execução?",
     "opciones": [
       {
-        "texto_opcion": "df_a aciona um shuffle completo para redistribuir uniformemente os dados em 10 partições.",
+        "texto_opcion": "df_a aciona um shuffle completo para redistribuir uniformemente os dados em 10 partições, enquanto df_b mescla partições existentes localmente, normalmente evitando um shuffle completo.",
         "es_correcta": true,
         "explicacion": "repartition() sempre executa um shuffle independentemente da direção, enquanto coalesce() tenta combinar partições adjacentes sem mover todos os dados pelo cluster ao reduzir a contagem de partições."
       },
@@ -453,7 +453,7 @@
         "explicacion": "Aumentar ainda mais a contagem de shuffle partitions pioraria o problema, criando ainda mais tarefas pequenas, e não menos."
       },
       {
-        "texto_opcion": "Use coalesce() ou repartition() para consolidar os dados em um número menor.",
+        "texto_opcion": "Use coalesce() ou repartition() para consolidar os dados em um número menor e de tamanho mais apropriado de partições.",
         "es_correcta": true,
         "explicacion": "A redução de um número excessivo de partições pequenas para uma contagem razoável reduz diretamente a sobrecarga de agendamento de tarefas e melhora o rendimento dos estágios downstream."
       }
@@ -540,7 +540,7 @@
         "explicacion": "As permissões grants controlam os direitos de acesso e não têm relação com o consumo de memória em tempo de execução ou erros de OOM."
       },
       {
-        "texto_opcion": "Configurações de memória do executor e sobrecarga de memória relativas ao.",
+        "texto_opcion": "Configurações de memória do executor e sobrecarga de memória relativas ao tamanho dos dados por partição.",
         "es_correcta": true,
         "explicacion": "Os erros de OOM durante o shuffle são mais comumente associados à memória insuficiente do executor ou à sobrecarga em relação ao tamanho dos dados que cada tarefa deve processar, geralmente combinados com poucas partições de shuffle."
       }
@@ -583,7 +583,7 @@
     "pregunta": "Um engenheiro de dados está comparando o comportamento do job com Adaptive Query Execution (AQE) ativado e desativado para uma consulta contendo uma junção com distorção significativa de dados.\n\nCom o AQE desativado, qual é o comportamento mais provável que o engenheiro observaria?",
     "opciones": [
       {
-        "texto_opcion": "As partições distorcidas são processadas como estão por tarefas únicas.",
+        "texto_opcion": "As partições distorcidas são processadas como estão por tarefas únicas, fazendo com que algumas tarefas sejam executadas por muito mais tempo do que outras (tarefas retardatárias).",
         "es_correcta": true,
         "explicacion": "Sem o tratamento de skew join do AQE, o Spark usa o plano de consulta estática e não pode dividir partições superdimensionadas em tempo de execução, deixando dados distorcidos para afunilar tarefas individuais."
       },
@@ -622,7 +622,7 @@
         "explicacion": "A redução de partições via coalesce() diminuiria, e não aumentaria, o paralelismo disponível para o estágio."
       },
       {
-        "texto_opcion": "Aumente spark.sql.shuffle.partitions (ou reparticione o DataFrame) para que mais tarefas possam ser.",
+        "texto_opcion": "Aumente spark.sql.shuffle.partitions (ou reparticione o DataFrame) para que mais tarefas possam ser executadas simultaneamente nos núcleos executores existentes.",
         "es_correcta": true,
         "explicacion": "Aumentar o número de partições cria mais tarefas menores que podem ser agendadas em paralelo nos núcleos executores disponíveis sem a necessidade de executores adicionais."
       },
@@ -641,7 +641,7 @@
     "pregunta": "Um engenheiro de dados executa uma consulta e revisa o Spark UI, observando uma grande quantidade de \"spill de shuffle (disco)\" relatado para um estágio de junção.\n\nQual mudança de ajuste tem maior probabilidade de reduzir esse vazamento?",
     "opciones": [
       {
-        "texto_opcion": "Aumente spark.sql.shuffle.partitions para que cada partição retenha menos dados e caiba mais.",
+        "texto_opcion": "Aumente spark.sql.shuffle.partitions para que cada partição retenha menos dados e caiba mais confortavelmente na memória do executor.",
         "es_correcta": true,
         "explicacion": "O spill de disco durante um shuffle normalmente ocorre quando as partições são muito grandes para a memória de execução disponível; aumentar a contagem de partições reduz o tamanho dos dados por partição e reduz o desperdício."
       },
@@ -680,7 +680,7 @@
         "explicacion": "Neste caso, os broadcast joins estão funcionando bem e são benéficos para o desempenho, portanto desativá-los seria contraproducente."
       },
       {
-        "texto_opcion": "Um cluster frequentemente apresenta erros de OOM do executor causados pela estimativa incorreta do tamanho das.",
+        "texto_opcion": "Um cluster frequentemente apresenta erros de OOM do executor causados pela estimativa incorreta do tamanho das tabelas do Spark e pela transmissão de tabelas que são, na verdade, muito grandes.",
         "es_correcta": true,
         "explicacion": "Se erros de estimativa de tamanho levarem à transmissão de tabelas superdimensionadas e causarem falhas de OOM, desabilitar a transmissão automática evita esse risco, forçando shuffle joins previsíveis."
       },
@@ -714,7 +714,7 @@
         "explicacion": "A contagem de partições tem um efeito mensurável mesmo em conjuntos de dados de tamanho moderado, conforme demonstrado pela desaceleração observada aqui."
       },
       {
-        "texto_opcion": "Muitas partições pequenas aumentam o agendamento de tarefas e a sobrecarga de coordenação em relação à pequena quantidade de.",
+        "texto_opcion": "Muitas partições pequenas aumentam o agendamento de tarefas e a sobrecarga de coordenação em relação à pequena quantidade de job que cada tarefa executa.",
         "es_correcta": true,
         "explicacion": "Com apenas 5 GB de dados divididos em 2.000 partições, cada partição tem apenas alguns MB, portanto, a sobrecarga de iniciar e gerenciar milhares de pequenas tarefas supera qualquer benefício do paralelismo."
       }

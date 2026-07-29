@@ -32,7 +32,7 @@
     "pregunta": "Review this REST API trigger body:\n\n```json\n{\n  \"trigger\": {\n    \"pause_status\": \"UNPAUSED\",\n    \"periodic\": { \"interval\": 1, \"unit\": \"HOURS\" }\n  }\n}\n```\n\nWhat does this configure?",
     "opciones": [
       {
-        "texto_opcion": "A scheduled trigger that runs the job once every hour, currently active.",
+        "texto_opcion": "A scheduled trigger that runs the job once every hour, currently active (not paused).",
         "es_correcta": true,
         "explicacion": "`trigger.periodic` with `interval: 1, unit: HOURS` configures an hourly schedule, and `pause_status: UNPAUSED` means the trigger is active."
       },
@@ -61,7 +61,7 @@
     "pregunta": "A data engineer configures a file arrival trigger on a Unity Catalog volume path. An existing file in that path is later overwritten with new content but keeps the same file name.\n\nWhat happens?",
     "opciones": [
       {
-        "texto_opcion": "No run is triggered, because only new files trigger a run — overwriting an existing.",
+        "texto_opcion": "No run is triggered, because only new files trigger a run — overwriting an existing file with the same name does not.",
         "es_correcta": true,
         "explicacion": "This is a documented limitation: file arrival triggers only fire on new files, not on overwrites of existing files with the same name."
       },
@@ -100,7 +100,7 @@
         "explicacion": "Increasing concurrency would allow more parallel runs, the opposite of consolidating a burst into a single run."
       },
       {
-        "texto_opcion": "`wait_after_last_change_seconds`, set to wait after the most recent arrival.",
+        "texto_opcion": "`wait_after_last_change_seconds`, set to wait after the most recent arrival before starting a run, resetting on each new file.",
         "es_correcta": true,
         "explicacion": "\"Wait after last change\" debounces bursty arrivals — it waits this long after the most recent file arrives before starting a run, and each new arrival resets the timer, so the whole batch is processed together."
       },
@@ -182,7 +182,7 @@
         "explicacion": "These numbers don't match the documented limits of 50 jobs and 10,000 files."
       },
       {
-        "texto_opcion": "A maximum of 50 jobs per workspace can use a file arrival trigger on a given location.",
+        "texto_opcion": "A maximum of 50 jobs per workspace can use a file arrival trigger on a given location, and the location is capped at 10,000 files.",
         "es_correcta": true,
         "explicacion": "These are the documented limits without file events: 50 jobs per workspace on a given location, and a 10,000-file cap on the configured subpath."
       },
@@ -264,7 +264,7 @@
     "pregunta": "A table update trigger is configured to monitor a Unity Catalog view that depends on 11 different supported tables.\n\nWhat happens?",
     "opciones": [
       {
-        "texto_opcion": "The view cannot be used in a table update trigger, since source tables for a view are counted.",
+        "texto_opcion": "The view cannot be used in a table update trigger, since source tables for a view are counted toward the 10-table-per-trigger limit.",
         "es_correcta": true,
         "explicacion": "Source tables for a view count toward the 10-tables-per-trigger limit, so a view depending on 11 tables exceeds the limit and cannot be used."
       },
@@ -322,7 +322,7 @@
     "pregunta": "A data engineer sets both `min_time_between_triggers_seconds: 120` and `wait_after_last_change_seconds: 60` on a table update trigger. A table update occurs at the 5-second mark, and another update occurs at the 115-second mark.\n\nWhen does the trigger actually fire a run, based on the documented interaction of these two settings?",
     "opciones": [
       {
-        "texto_opcion": "Not until after 175 seconds, because the wait-after-last-change timer resets on the update at 115 seconds.",
+        "texto_opcion": "Not until after 175 seconds, because the wait-after-last-change timer resets on the update at 115 seconds, on top of the 120-second minimum.",
         "es_correcta": true,
         "explicacion": "When both options are used, the trigger waits the minimum time between triggers first, then waits the wait-after-last-change period after the last change; an update at 115s resets the 60-second debounce, pushing the fire time to 175s."
       },
@@ -351,7 +351,7 @@
     "pregunta": "A job uses a **continuous** trigger. The trigger is paused while a run is actively executing, and then later resumed.\n\nWhat happens when the trigger is resumed?",
     "opciones": [
       {
-        "texto_opcion": "If a run is still active when resumed, the scheduler waits for that run to finish before.",
+        "texto_opcion": "If a run is still active when resumed, the scheduler waits for that run to finish before starting a new one.",
         "es_correcta": true,
         "explicacion": "This is the documented continuous trigger resume behavior: an in-progress run is allowed to finish before the scheduler starts a new run."
       },
@@ -395,7 +395,7 @@
         "explicacion": "This is explicitly the opposite of the documented recommendation, which warns against this redundant double-continuous setup."
       },
       {
-        "texto_opcion": "Avoid this combination — keep pipeline tasks in triggered mode when orchestrated by a job.",
+        "texto_opcion": "Avoid this combination — keep pipeline tasks in triggered mode when orchestrated by a job, rather than wrapping an already-continuous pipeline in a job-level continuous trigger.",
         "es_correcta": true,
         "explicacion": "Databricks recommends not wrapping an already-continuous pipeline in a job-level continuous trigger; pipeline tasks orchestrated by jobs should use triggered mode instead, to avoid double-continuous execution."
       }
@@ -424,7 +424,7 @@
         "explicacion": "That behavior requires an explicitly configured table update trigger; it is not a default fallback for untriggered jobs."
       },
       {
-        "texto_opcion": "Clicking Run now in the UI, calling the Run now REST endpoint.",
+        "texto_opcion": "Clicking Run now in the UI, calling the Run now REST endpoint, or an external orchestrator like Apache Airflow calling the Jobs API.",
         "es_correcta": true,
         "explicacion": "With no trigger configured, runs only start manually — via the UI's Run now button, the Run now REST endpoint, or an external orchestrator calling the Jobs API."
       }
@@ -438,7 +438,7 @@
     "pregunta": "A data engineer calls:\n\n```json\nPOST /api/2.2/jobs/run-now\n{\n  \"job_id\": 123456789,\n  \"notebook_params\": {\n    \"year_param\": \"2026\"\n  }\n}\n```\n\nWhat kind of trigger does this represent?",
     "opciones": [
       {
-        "texto_opcion": "A manual / API-driven run — it programmatically starts a single run.",
+        "texto_opcion": "A manual / API-driven run — it programmatically starts a single run, independent of any configured trigger.",
         "es_correcta": true,
         "explicacion": "Calling the `jobs/run-now` REST endpoint is a manual/API-driven trigger mechanism, used to start an individual run on demand."
       },
@@ -583,7 +583,7 @@
     "pregunta": "A data engineer pauses an active trigger while a run is currently in progress (non-continuous job).\n\nWhat happens to that in-progress run?",
     "opciones": [
       {
-        "texto_opcion": "It continues to completion; pausing only stops the trigger from.",
+        "texto_opcion": "It continues to completion; pausing only stops the trigger from starting new runs.",
         "es_correcta": true,
         "explicacion": "Pausing a trigger means any currently active run continues to completion, but the trigger stops starting new runs."
       },
@@ -772,7 +772,7 @@
         "explicacion": "File arrival triggers check for new files on a roughly per-minute best-effort basis regardless of this setting; `wait_after_last_change_seconds` controls debounce timing, not the polling interval."
       },
       {
-        "texto_opcion": "The trigger waits 300 seconds after the most recent file arrival before starting a run.",
+        "texto_opcion": "The trigger waits 300 seconds after the most recent file arrival before starting a run, resetting the timer on each new arrival.",
         "es_correcta": true,
         "explicacion": "This implements the debounce behavior: after the last file lands, the trigger waits 300 seconds before firing, and any new arrival during that window resets the countdown."
       }
@@ -815,7 +815,7 @@
     "pregunta": "A data engineer wants to monitor a path in Amazon S3 for new files, but the configured directory has not been created yet by the upstream system.\n\nWhat is the documented behavior of the file arrival trigger in this case?",
     "opciones": [
       {
-        "texto_opcion": "The trigger continues to be evaluated with no error.",
+        "texto_opcion": "The trigger continues to be evaluated with no error, finding no files until the path exists.",
         "es_correcta": true,
         "explicacion": "On S3/GCS, a file arrival trigger pointed at a non-existent or deleted path does not error — S3/GCS don't distinguish empty/non-existent/deleted directories, so it simply finds no files until the path exists."
       },
@@ -844,7 +844,7 @@
     "pregunta": "A data engineer needs to choose between a file arrival trigger and a table update trigger for a new pipeline that ingests raw JSON files from an S3 bucket where an upstream vendor drops files with no fixed schedule.\n\nWhich trigger type is the better fit, and why?",
     "opciones": [
       {
-        "texto_opcion": "File arrival trigger, because the source is raw files in cloud storage.",
+        "texto_opcion": "File arrival trigger, because the source is raw files in cloud storage, not a Unity Catalog table.",
         "es_correcta": true,
         "explicacion": "File arrival triggers are designed for new files landing in a Unity Catalog external location or volume such as S3; table update triggers monitor UC tables/views, not raw incoming files."
       },

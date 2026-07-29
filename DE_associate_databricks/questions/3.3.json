@@ -3,7 +3,7 @@
     "pregunta": "A data engineer has two DataFrames:\n\n`orders_df` (10 million rows) and `customers_df` (500 rows).\n\n```python\nresult = orders_df.join(customers_df, \"customer_id\", \"inner\")\n```\n\nWhich join strategy will Spark most likely use automatically, and why?",
     "opciones": [
       {
-        "texto_opcion": "Broadcast join — `customers_df` is small enough to fit under.",
+        "texto_opcion": "Broadcast join — `customers_df` is small enough to fit under `spark.sql.autoBroadcastJoinThreshold`.",
         "es_correcta": true,
         "explicacion": "Spark's Catalyst optimizer automatically broadcasts small tables (default threshold 10MB) to avoid a shuffle."
       },
@@ -187,7 +187,7 @@
         "explicacion": "Changing the data type does not address the underlying issue of duplicate column names after the join."
       },
       {
-        "texto_opcion": "Use the simplified join syntax `df_a.join`, which keeps only one `id` column.",
+        "texto_opcion": "Use the simplified join syntax `df_a.join(df_b, \"id\")`, which keeps only one `id` column.",
         "es_correcta": true,
         "explicacion": "Joining on a column name string (instead of an explicit equality condition) deduplicates the join key in the result automatically."
       },
@@ -356,7 +356,7 @@
         "explicacion": "Dropping null-key rows is standard inner join behavior, unrelated to broadcasting specifically."
       },
       {
-        "texto_opcion": "If `small_df` is actually large, executors may run out of memory.",
+        "texto_opcion": "If `small_df` is actually large, executors may run out of memory broadcasting it to all nodes.",
         "es_correcta": true,
         "explicacion": "Broadcasting sends a full copy of the DataFrame to every executor; if it's larger than expected, this can cause out-of-memory errors."
       },
@@ -467,7 +467,7 @@
     "pregunta": "What does the following code return?\n\n```python\ndf_a.join(df_b, df_a.key == df_b.key, \"right\")\n```",
     "opciones": [
       {
-        "texto_opcion": "All rows from `df_b`, with matching `df_a` columns or nulls where.",
+        "texto_opcion": "All rows from `df_b`, with matching `df_a` columns or nulls where there is no match.",
         "es_correcta": true,
         "explicacion": "A right join preserves every row of the right DataFrame (`df_b`), filling unmatched left-side columns with null."
       },
@@ -525,7 +525,7 @@
     "pregunta": "A data engineer increases `spark.sql.autoBroadcastJoinThreshold` from its default to a higher value before running a join between a 50MB table and a 2GB table.\n\nWhat is the most likely effect?",
     "opciones": [
       {
-        "texto_opcion": "The 50MB table now qualifies for a broadcast join.",
+        "texto_opcion": "The 50MB table now qualifies for a broadcast join, avoiding a full shuffle.",
         "es_correcta": true,
         "explicacion": "Raising the threshold above the smaller table's size allows the optimizer to broadcast it instead of using sort-merge join."
       },
@@ -656,7 +656,7 @@
         "explicacion": "`distinct()` removes duplicate rows; it does not resolve naming conflicts between columns."
       },
       {
-        "texto_opcion": "Rename `orders_df`'s `id` column with `.withColumnRenamed(\"id\".",
+        "texto_opcion": "Rename `orders_df`'s `id` column with `.withColumnRenamed(\"id\", \"order_id\")` before joining.",
         "es_correcta": true,
         "explicacion": "Renaming the conflicting column before the join avoids ambiguity since both DataFrames will then have unique column names."
       }
@@ -680,7 +680,7 @@
         "explicacion": "Both join types support single or multiple join keys equally."
       },
       {
-        "texto_opcion": "`left_semi` avoids row duplication when a product has multiple matching sales rows.",
+        "texto_opcion": "`left_semi` avoids row duplication when a product has multiple matching sales rows; `inner` would duplicate the product row for each match.",
         "es_correcta": true,
         "explicacion": "An inner join produces one output row per matching pair, duplicating the left row for each match, while `left_semi` returns each matching left row only once."
       },
@@ -699,7 +699,7 @@
     "pregunta": "A data engineer runs the following and notices the result has more rows than expected:\n\n```python\nresult = df_a.join(df_b, \"id\")\n```\n\nWhat is the most likely cause?",
     "opciones": [
       {
-        "texto_opcion": "`df_b` contains duplicate `id` values, causing each match in `df_a` to be duplicated for.",
+        "texto_opcion": "`df_b` contains duplicate `id` values, causing each match in `df_a` to be duplicated for every matching row.",
         "es_correcta": true,
         "explicacion": "When the join key is not unique on one side, every matching combination produces a separate output row, inflating the row count."
       },
@@ -844,7 +844,7 @@
     "pregunta": "A data engineer runs `df_a.crossJoin(df_b)` where `df_a` has 1,000 rows and `df_b` has 1,000 rows.\n\nHow many rows does the result contain, and what is the main concern?",
     "opciones": [
       {
-        "texto_opcion": "1,000,000 rows; the main concern is the explosive growth in result.",
+        "texto_opcion": "1,000,000 rows; the main concern is the explosive growth in result size and compute cost.",
         "es_correcta": true,
         "explicacion": "A cross join multiplies row counts (1,000 x 1,000), which can quickly become very expensive on larger DataFrames."
       },
@@ -873,7 +873,7 @@
     "pregunta": "Which scenario best justifies using a left anti join instead of filtering with a `NOT IN` subquery in Spark SQL?",
     "opciones": [
       {
-        "texto_opcion": "When comparing large DataFrames, since `left_anti` is generally optimized better by Catalyst.",
+        "texto_opcion": "When comparing large DataFrames, since `left_anti` is generally optimized better by Catalyst than correlated subqueries.",
         "es_correcta": true,
         "explicacion": "Anti joins are typically translated into efficient join-based physical plans, while `NOT IN` subqueries can be harder for the optimizer to plan efficiently at scale."
       },

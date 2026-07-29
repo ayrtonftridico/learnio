@@ -3,7 +3,7 @@
     "pregunta": "Um engenheiro de dados abre a UI Lakeflow Jobs e vê uma lista de todos os jobs. Ao lado de cada nome de job existem cinco pequenos indicadores coloridos. O que esses indicadores representam?",
     "opciones": [
       {
-        "texto_opcion": "O resultado (status) das últimas cinco execuções desse job —.",
+        "texto_opcion": "O resultado (status) das últimas cinco execuções desse job — verde para sucesso, vermelho para fracasso.",
         "es_correcta": true,
         "explicacion": "A página da lista de jobs mostra os últimos 5 resultados de execução como miniindicadores codificados por cores ao lado de cada nome de job, permitindo o monitoramento instantâneo do SLA sem abrir cada job individualmente."
       },
@@ -42,7 +42,7 @@
         "explicacion": "A visualização da matriz é organizada por tarefas (linhas) e execuções (colunas), e não por clusters ou dias corridos."
       },
       {
-        "texto_opcion": "Cada **linha** é uma tarefa; cada **coluna** é uma execução de job.",
+        "texto_opcion": "Cada **linha** é uma tarefa; cada **coluna** é uma execução de job. A cor da célula mostra o status dessa tarefa naquela execução.",
         "es_correcta": true,
         "explicacion": "A visualização da matriz é uma grade 2D onde linhas = tarefas e colunas = execuções individuais. A cor de cada célula mostra imediatamente se uma tarefa específica foi bem-sucedida, falhou ou foi ignorada em uma determinada execução."
       },
@@ -76,7 +76,7 @@
         "explicacion": "As tarefas canceladas aparecem **cinza**. Rosa indica que a tarefa foi ignorada devido a condições de dependência."
       },
       {
-        "texto_opcion": "A tarefa foi **ignorada** — provavelmente porque uma dependência upstream falhou e a.",
+        "texto_opcion": "A tarefa foi **ignorada** — provavelmente porque uma dependência upstream falhou e a condição `Executar se` da tarefa não foi atendida.",
         "es_correcta": true,
         "explicacion": "Rosa na visualização de matriz indica uma tarefa ignorada. As tarefas são ignoradas quando uma dependência upstream falha e a condição `Run if` (por exemplo, `Todos bem-sucedidos`) não é satisfeita ou quando a tarefa é desativada."
       }
@@ -95,7 +95,7 @@
         "explicacion": "A página de detalhes da execução da tarefa mostra informações sobre esta tarefa específica — ela não mostra a simultaneidade em nível de cluster entre outros jobs."
       },
       {
-        "texto_opcion": "O rastreamento completo da pilha de erros, duração da tarefa, número de tentativas.",
+        "texto_opcion": "O rastreamento completo da pilha de erros, duração da tarefa, número de tentativas, logs de saída e um link direto para o Spark UI para essa execução.",
         "es_correcta": true,
         "explicacion": "O painel de detalhes de execução da tarefa fornece: mensagens de erro e rastreamentos de pilha para falhas, duração da tarefa, qual tentativa foi (1ª, 2ª para novas tentativas), saída/stdout, logs de driver e um link para o Spark UI para aquela sessão de cluster específica."
       },
@@ -129,7 +129,7 @@
         "explicacion": "As permissões não estendem a janela de retenção de 60 dias da UI. Uma retenção mais longa requer tabelas de sistema, que sejam acessíveis aos usuários com acesso apropriado aos dados."
       },
       {
-        "texto_opcion": "A Jobs UI retém o histórico de execução apenas por **60 dias**. Os dados com mais de 60 dias devem ser consultados nas.",
+        "texto_opcion": "A Jobs UI retém o histórico de execução apenas por **60 dias**. Os dados com mais de 60 dias devem ser consultados nas tabelas do sistema `system.lakeflow`, que retêm 365 dias.",
         "es_correcta": true,
         "explicacion": "A aba Jobs UI Runs tem um limite de retenção de 60 dias. Para análises além de 60 dias, as tabelas do sistema (`system.lakeflow.job_run_timeline`) são a ferramenta correta, retendo até 365 dias de histórico."
       },
@@ -153,7 +153,7 @@
         "explicacion": "`validate` depende diretamente de `transform`. Com `Run if: All Success`, `validate` não pode ser executado quando `transform` falhou e `load` também é ignorado como resultado."
       },
       {
-        "texto_opcion": "`validate` e `load` — eles estão abaixo de `transform` e não podem ser executados porque.",
+        "texto_opcion": "`validate` e `load` — eles estão abaixo de `transform` e não podem ser executados porque sua condição `All Success` não foi atendida.",
         "es_correcta": true,
         "explicacion": "Com `Run if: All Success`, cada tarefa downstream requer que todas as tarefas upstream diretas sejam bem-sucedidas. Como `transform` falhou, `validate` (que depende de `transform`) é ignorado, e `load` (que depende de `validate`) também é ignorado."
       },
@@ -208,7 +208,7 @@
     "pregunta": "O job de ETL de longa duração de um engenheiro de dados (8 tarefas, aproximadamente 4 horas) falha na tarefa 6 de 8. As tarefas 1 a 5 foram bem-sucedidas. Qual é a estratégia de recuperação mais eficiente?",
     "opciones": [
       {
-        "texto_opcion": "**Execução de reparo** — executa novamente apenas a tarefa 6 com falha e as tarefas downstream 7 a 8.",
+        "texto_opcion": "**Execução de reparo** — executa novamente apenas a tarefa 6 com falha e as tarefas downstream 7 a 8, ignorando as 4 horas de job já bem-sucedido.",
         "es_correcta": true,
         "explicacion": "Repair Run é o mecanismo de recuperação eficiente para este cenário. Ele preserva os resultados das tarefas 1 a 5 e apenas reexecuta a tarefa com falha e as dependências downstream, evitando o reprocessamento dispendioso."
       },
@@ -247,7 +247,7 @@
         "explicacion": "A Execução de Reparo inclui a própria tarefa com falha e seus dependentes posteriores. Ignorar a tarefa com falha em si não resolveria a falha."
       },
       {
-        "texto_opcion": "Somente as **tarefas com falha e ignoradas**, além de qualquer um de seus dependentes.",
+        "texto_opcion": "Somente as **tarefas com falha e ignoradas**, além de qualquer um de seus dependentes posteriores que precisem ser reavaliados.",
         "es_correcta": true,
         "explicacion": "O Repair Run é cirúrgico: ele reexecuta apenas tarefas que falharam ou foram ignoradas e reavalia suas dependências downstream. As tarefas que já foram bem-sucedidas são preservadas como estão."
       },
@@ -359,7 +359,7 @@
         "explicacion": "A cláusula `HAVING` filtra `failure_rate_pct > 10` (uma porcentagem), não uma contagem absoluta de 10 falhas."
       },
       {
-        "texto_opcion": "Tarefas em que mais de 10% das execuções nos últimos sete dias terminaram no estado \"FAILED\".",
+        "texto_opcion": "Tarefas em que mais de 10% das execuções nos últimos sete dias terminaram no estado \"FAILED\", juntamente com a porcentagem da taxa de falha.",
         "es_correcta": true,
         "explicacion": "A consulta calcula a taxa de falha por job nos últimos 7 dias usando `system.lakeflow.job_run_timeline` e filtra jobs com taxa de falha acima de 10% — útil para monitoramento proativo de confiabilidade."
       },
@@ -451,7 +451,7 @@
         "explicacion": "As regras de integridade são mecanismos de alerta: elas notificam as equipes, mas não tomam ações corretivas automáticas, como tentar novamente com computação diferente."
       },
       {
-        "texto_opcion": "Um alerta de integridade é acionado porque a duração da execução excedeu o.",
+        "texto_opcion": "Um alerta de integridade é acionado porque a duração da execução (10.800 segundos) excedeu o limite de 7.200 segundos (2 horas).",
         "es_correcta": true,
         "explicacion": "As regras de funcionamento do job definem limites de SLA. Quando `RUN_DURATION_SECONDS > 7200` e a duração real for 10.800 segundos, a regra de integridade é acionada e envia uma notificação."
       },
@@ -471,7 +471,7 @@
     "pregunta": "Um engenheiro de dados vê que a tarefa `api_ingest` frequentemente mostra `amarelo` na visualização da matriz por 5 a 10 minutos antes de ficar verde. O que o amarelo provavelmente indica neste contexto?",
     "opciones": [
       {
-        "texto_opcion": "A tarefa está **aguardando para tentar novamente** após uma falha transitória e, eventualmente.",
+        "texto_opcion": "A tarefa está **aguardando para tentar novamente** após uma falha transitória e, eventualmente, terá êxito em uma tentativa subsequente.",
         "es_correcta": true,
         "explicacion": "Amarelo indica que uma tarefa está aguardando — seja por recursos do cluster, por uma dependência ou aguardando entre novas tentativas. Um padrão amarelo para verde com um intervalo de 5 a 10 minutos sugere fortemente que a tarefa está sendo repetida (`min_retry_interval_millis` introduz a espera)."
       },
@@ -515,7 +515,7 @@
         "explicacion": "`job_run_timeline` é no nível do job, não no nível da tarefa. Ele não pode dividir a duração por tarefa individual em uma execução."
       },
       {
-        "texto_opcion": "Consulte `system.lakeflow.job_task_run_timeline`, agrupe por `task_key` e calcule `AVG)`.",
+        "texto_opcion": "Consulte `system.lakeflow.job_task_run_timeline`, agrupe por `task_key` e calcule `AVG(DATEDIFF(second, start_time, end_time))`.",
         "es_correcta": true,
         "explicacion": "`job_task_run_timeline` fornece granularidade em nível de tarefa, incluindo `task_key`, `start_time` e `end_time`. O agrupamento por `task_key` e a duração média identificam as tarefas mais lentas."
       }
@@ -564,7 +564,7 @@
         "explicacion": "A baixa carga da CPU do driver significa que o driver está subutilizado, o que geralmente é normal para jobs que exigem muito job. A alta utilização da CPU do trabalhador é o melhor indicador de subprovisionamento de computação."
       },
       {
-        "texto_opcion": "Alta **utilização da CPU dos trabalhadores** consistentemente perto de 100% — indicando que os trabalhadores estão.",
+        "texto_opcion": "Alta **utilização da CPU dos trabalhadores** consistentemente perto de 100% — indicando que os trabalhadores estão totalmente saturados e que a computação adicional aceleraria o job.",
         "es_correcta": true,
         "explicacion": "Quando a utilização da CPU do trabalhador está consistentemente próxima de 100%, o cluster está vinculado à computação e provavelmente está subprovisionado. Adicionar trabalhadores ou usar um tipo de nó maior reduziria a duração do job."
       },

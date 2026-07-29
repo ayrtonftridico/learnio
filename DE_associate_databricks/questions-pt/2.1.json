@@ -8,7 +8,7 @@
         "explicacion": "O lote não é necessariamente mais rápido — ele reprocessa todos os dados todas as vezes, o que pode ser ineficiente. O streaming é mais eficiente para dados que chegam continuamente."
       },
       {
-        "texto_opcion": "Em lote, o mecanismo processa todos os dados disponíveis sem rastrear o que foi processado anteriormente.",
+        "texto_opcion": "Em lote, o mecanismo processa todos os dados disponíveis sem rastrear o que foi processado anteriormente; no streaming, ele processa apenas novos dados desde a última execução.",
         "es_correcta": true,
         "explicacion": "O lote lê todos os dados disponíveis em cada execução, enquanto o streaming rastreia o progresso por meio de checkpoints e processa novos registros apenas de forma incremental."
       },
@@ -76,7 +76,7 @@
         "explicacion": "O caminho de saída é definido em `.start(\"/data/events\")`. A localização do checkpoint é um caminho separado usado exclusivamente para metadados de tolerância a falhas."
       },
       {
-        "texto_opcion": "Ele registra quais dados já foram processados para que o fluxo possa continuar de onde parou após uma.",
+        "texto_opcion": "Ele registra quais dados já foram processados para que o fluxo possa continuar de onde parou após uma reinicialização, garantindo o processamento exatamente uma vez.",
         "es_correcta": true,
         "explicacion": "O checkpoint armazena o progresso do fluxo (deslocamentos, estado). Ao reiniciar, o Spark lê o checkpoint para saber o que já foi processado e continua a partir daí."
       }
@@ -90,7 +90,7 @@
     "pregunta": "Uma plataforma de comércio eletrônico calcula **preço médio de venda por hora**. Novos dados de vendas chegam continuamente. Durante a hora 2, chegam os dados atrasados ​​da hora 1.\n\nCom o **processamento em lote**, o que acontece com os resultados da primeira hora?",
     "opciones": [
       {
-        "texto_opcion": "Os dados atrasados da hora 1 são processados juntamente com os dados da hora 2.",
+        "texto_opcion": "Os dados atrasados da hora 1 são processados juntamente com os dados da hora 2, e o resultado da hora 1 anterior é automaticamente substituído pelo valor corrigido.",
         "es_correcta": true,
         "explicacion": "O lote lê TODOS os dados disponíveis em cada execução. Quando a tarefa é executada durante a hora 2, ela inclui registros da hora 1 tardia e recalcula tudo, produzindo resultados corretos para todas as horas."
       },
@@ -134,7 +134,7 @@
         "explicacion": "Por padrão, o streaming pode incluir dados atrasados na janela da marca d’água. Além da marca d’água, os dados atrasados ​​são descartados. De qualquer forma, a lógica com estado é necessária para a agregação correta."
       },
       {
-        "texto_opcion": "A lógica de streaming deve armazenar a soma anterior e contar a hora 1 como estado.",
+        "texto_opcion": "A lógica de streaming deve armazenar a soma anterior e contar a hora 1 como estado, para que possa atualizar corretamente a média quando chegarem dados atrasados.",
         "es_correcta": true,
         "explicacion": "Ao contrário do lote, o streaming não reprocessa dados anteriores. Para atualizar a média da hora 1 com chegadas atrasadas, o mecanismo deve manter o estado (soma, contagem) para essa janela — isso é processamento com estado."
       }
@@ -274,7 +274,7 @@
         "explicacion": "COPY INTO é apropriado para ingestão baseada em arquivo em menor escala, mas streaming (por exemplo, Auto Loader) é o padrão geral recomendado para Bronze no Medallion architecture."
       },
       {
-        "texto_opcion": "Streaming, porque a ingestão do Bronze é, em sua maioria, sem estado (anexos simples).",
+        "texto_opcion": "Streaming, porque a ingestão do Bronze é, em sua maioria, sem estado (anexos simples), possibilitando obter benefícios de eficiência de streaming sem a complexidade das operações com estado.",
         "es_correcta": true,
         "explicacion": "A ingestão de bronze (anexação de dados brutos) não tem estado — sem junções ou agregações. O streaming aqui é eficiente e evita o reprocessamento de dados históricos em cada execução em lote, sem introduzir complexidade com estado."
       },
@@ -308,7 +308,7 @@
         "explicacion": "A latência mais baixa tem um custo: complexidade de streaming com estado. A Databricks recomenda streaming em Silver apenas quando a baixa latência é *muito mais importante* do que a precisão, com plena consciência da complexidade."
       },
       {
-        "texto_opcion": "Processamento em lote com atualização incremental em materialized views.",
+        "texto_opcion": "Processamento em lote com atualização incremental em materialized views, porque o streaming com estado adiciona complexidade significativa para junções e agregações.",
         "es_correcta": true,
         "explicacion": "As junções e agregações em streaming exigem a manutenção do estado, o tratamento de dados atrasados e o gerenciamento de marcas d’água. Lote com materialized views é mais simples e produz resultados precisos automaticamente."
       }
@@ -380,7 +380,7 @@
     "pregunta": "Qual é a principal vantagem do **carregamento incremental** em relação ao reprocessamento completo em lote?",
     "opciones": [
       {
-        "texto_opcion": "O carregamento incremental processa apenas dados novos ou alterados desde a última execução.",
+        "texto_opcion": "O carregamento incremental processa apenas dados novos ou alterados desde a última execução, reduzindo os custos de computação e o tempo de processamento em comparação com o reprocessamento de todo o conjunto de dados.",
         "es_correcta": true,
         "explicacion": "O carregamento incremental rastreia uma marca d'água ou checkpoint para identificar novos dados. Isto evita o reprocessamento redundante de dados históricos, economizando tempo e custos."
       },
@@ -467,7 +467,7 @@
     "pregunta": "Um engenheiro de dados configura a seguinte consulta de streaming:\n\n```python\ndf = spark.readStream.format(\"kafka\") \\\n    .option(\"kafka.bootstrap.servers\", \"broker:9092\") \\\n    .option(\"subscribe\", \"transactions\") \\\n    .load()\n\ndf.writeStream \\\n    .outputMode(\"append\") \\\n    .format(\"delta\") \\\n    .option(\"checkpointLocation\", \"/chk/transactions\") \\\n    .start(\"/data/transactions\")\n```\n\nO stream é executado com êxito por três dias e, em seguida, o cluster é reiniciado. O que acontece quando o stream é reiniciado?",
     "opciones": [
       {
-        "texto_opcion": "O fluxo continua de onde parou, processando apenas mensagens Kafka que chegaram após o último.",
+        "texto_opcion": "O fluxo continua de onde parou, processando apenas mensagens Kafka que chegaram após o último deslocamento confirmado armazenado no checkpoint.",
         "es_correcta": true,
         "explicacion": "O `checkpointLocation` armazena o último deslocamento confirmado do Kafka. Na reinicialização, o Spark lê o checkpoint e retoma a partir desse deslocamento, garantindo o processamento exatamente uma vez sem reprocessar mensagens já consumidas."
       },
@@ -530,7 +530,7 @@
         "explicacion": "Os checkpoints armazenam compensações de progresso do fluxo para tolerância a falhas, não para armazenar registros atrasados. O tratamento tardio dos dados é de responsabilidade das marcas d’água."
       },
       {
-        "texto_opcion": "Marcas d'água — um limite que informa ao mecanismo quanto tempo esperar pelos dados atrasados antes de fechar uma.",
+        "texto_opcion": "Marcas d'água — um limite que informa ao mecanismo quanto tempo esperar pelos dados atrasados antes de fechar uma janela de tempo.",
         "es_correcta": true,
         "explicacion": "As marcas d'água definem o atraso máximo que o mecanismo tolerará. Definir uma marca d'água de 15 minutos garante que os registros que chegam com até 15 minutos de atraso sejam incluídos na janela correta antes de serem finalizados."
       },
@@ -564,7 +564,7 @@
         "explicacion": "O modo de acionamento único em uma consulta de streaming é essencialmente um comportamento em lote. Se o resultado for o comportamento do lote, será mais limpo e simples usar o lote diretamente (por exemplo, job agendado do Spark ou materialized view)."
       },
       {
-        "texto_opcion": "Lote — como os resultados são consumidos apenas uma vez por dia, não há valor comercial no processamento em tempo real.",
+        "texto_opcion": "Lote — como os resultados são consumidos apenas uma vez por dia, não há valor comercial no processamento em tempo real. O lote é mais simples e produz resultados precisos com menor complexidade.",
         "es_correcta": true,
         "explicacion": "Quando a frequência de consumo (diária) corresponde à necessidade do negócio, o streaming adiciona complexidade sem benefício. Lote com programação diária é mais simples, preciso e suficiente."
       },
@@ -598,7 +598,7 @@
         "explicacion": "O modo `complete` reescreve toda a saída em cada gatilho. É usado para agregações onde o resultado completo deve ser atualizado, não para acréscimos simples — seria muito ineficiente para casos de uso somente de acréscimos."
       },
       {
-        "texto_opcion": "Modo `append` — apenas novas linhas adicionadas desde o último gatilho são gravadas na saída.",
+        "texto_opcion": "Modo `append` — apenas novas linhas adicionadas desde o último gatilho são gravadas na saída. Isto é usado para transformações sem estado e pipelines de ingestão simples.",
         "es_correcta": true,
         "explicacion": "O modo `append` grava apenas as linhas recém-geradas em cada gatilho. É o modo correto e mais eficiente para pipelines sem estado, como ingestão bruta em uma tabela Bronze Delta."
       }
@@ -656,7 +656,7 @@
         "explicacion": "O processamento em lote pode lidar com bilhões de registros. A limitação é a latência, não o volume. Na verdade, o lote é preferido para processamento histórico de grande volume."
       },
       {
-        "texto_opcion": "Porque o lote processa todos os dados disponíveis cada vez que é executado e tem latência mínima de minutos.",
+        "texto_opcion": "Porque o lote processa todos os dados disponíveis cada vez que é executado e tem latência mínima de minutos, tornando-o arquitetonicamente incapaz de tempos de resposta inferiores a um minuto.",
         "es_correcta": true,
         "explicacion": "Os jobs em lote têm sobrecarga de agendamento de job, inicialização de cluster (para serverless), varreduras completas de dados e operações de gravação. Mesmo os jobs em lote optimized não podem atingir latência de segundo nível."
       }
@@ -670,7 +670,7 @@
     "pregunta": "Atualmente, uma equipe executa um **job em lote noturno** que processa todos os pedidos das últimas 24 horas. Eles querem migrar para streaming para reduzir a latência. Qual é a **principal compensação** que eles deveriam avaliar?",
     "opciones": [
       {
-        "texto_opcion": "O streaming introduz complexidade com estado para agregações e junções e pode produzir resultados diferentes quando os dados.",
+        "texto_opcion": "O streaming introduz complexidade com estado para agregações e junções e pode produzir resultados diferentes quando os dados que chegam atrasados ficam fora da janela da marca d'água.",
         "es_correcta": true,
         "explicacion": "A principal compensação é simplicidade versus latência. O lote é simples e sempre preciso. O streaming atinge latência mais baixa, mas requer marcas d’água, gerenciamento de estado e tratamento cuidadoso de dados atrasados ​​que podem ser descartados."
       },
@@ -699,7 +699,7 @@
     "pregunta": "Um engenheiro de dados analisa o seguinte design de pipeline:\n\n- **Bronze**: Auto Loader streaming table (eventos JSON brutos)\n- **Prata**: Materialized view com junções e desduplicação\n- **Ouro**: Materialized view com agregações diárias\n\nEste design é consistente com as recomendações Medallion architecture do Databricks?",
     "opciones": [
       {
-        "texto_opcion": "Sim — o streaming em Bronze é recomendado para ingestão eficiente sem estado.",
+        "texto_opcion": "Sim — o streaming em Bronze é recomendado para ingestão eficiente sem estado, e o lote (materialized views) em Silver e Gold é recomendado para operações com estado, como junções e agregações.",
         "es_correcta": true,
         "explicacion": "Isso corresponde às recomendações do Databricks: streaming para ingestão Bronze sem estado (eficiente, sem reprocessamento) e materialized views em lote para Silver/Gold, onde junções, desduplicação e agregações exigem processamento com estado que é mais simples em lote."
       },

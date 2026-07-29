@@ -148,7 +148,7 @@
     "pregunta": "Um engenheiro de dados executa COPY INTO para carregar arquivos JSON, mas alguns arquivos contêm registros malformados. Qual é a maneira correta de lidar com isso em COPY INTO?",
     "opciones": [
       {
-        "texto_opcion": "Use `FORMAT_OPTIONS ('mode' = 'PERMISSIVE')` e adicione uma coluna `_corrupt_record` à.",
+        "texto_opcion": "Use `FORMAT_OPTIONS ('mode' = 'PERMISSIVE')` e adicione uma coluna `_corrupt_record` à tabela de destino para capturar linhas malformadas.",
         "es_correcta": true,
         "explicacion": "<p>COPY INTO passa <code>FORMAT_OPTIONS</code> para o Spark DataFrameReader subjacente. Definir <code>mode = PERMISSIVE</code> (o padrão) armazena registros malformados na coluna <code>_corrupt_record</code> em vez de falhar no job.</p>"
       },
@@ -177,7 +177,7 @@
     "pregunta": "Um engenheiro de dados executa a seguinte instrução:\n\n```sql\nCOPY INTO logs.events\nFROM (\n  SELECT to_timestamp(event_time) AS event_time, upper(event_type) AS event_type\n  FROM 's3://bucket/events/'\n)\nFILEFORMAT = JSON;\n```\n\nO que a subconsulta dentro de `FROM` permite que o engenheiro faça?",
     "opciones": [
       {
-        "texto_opcion": "Aplique transformações de coluna aos dados de origem brutos antes de carregá-los na.",
+        "texto_opcion": "Aplique transformações de coluna aos dados de origem brutos antes de carregá-los na tabela Delta.",
         "es_correcta": true,
         "explicacion": "<p>COPY INTO suporta uma subconsulta SELECT na cláusula FROM para converter, renomear ou transformar colunas no momento da ingestão antes de gravar na tabela Delta.</p>"
       },
@@ -235,7 +235,7 @@
     "pregunta": "Qual afirmação descreve corretamente como COPY INTO difere de `spark.read` seguido por `.write`?",
     "opciones": [
       {
-        "texto_opcion": "COPY INTO rastreia arquivos carregados e ignora a reingestão.",
+        "texto_opcion": "COPY INTO rastreia arquivos carregados e ignora a reingestão; `spark.read` / `.write` não possui rastreamento de arquivo integrado.",
         "es_correcta": true,
         "explicacion": "COPY INTO mantém um histórico de carregamento por arquivo automaticamente. Um job simples `spark.read` + `write` deve implementar sua própria lógica de desduplicação ou substituição."
       },
@@ -322,7 +322,7 @@
     "pregunta": "Um engenheiro de dados está comparando Auto Loader e COPY INTO para um novo pipeline de ingestão. O bucket de origem recebe milhares de novos arquivos por hora. Qual afirmação é precisa?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader é preferido em grandes volumes de arquivos porque usa notificações na nuvem para detectar novos.",
+        "texto_opcion": "Auto Loader é preferido em grandes volumes de arquivos porque usa notificações na nuvem para detectar novos arquivos com eficiência; COPY INTO deve listar o diretório inteiro a cada execução.",
         "es_correcta": true,
         "explicacion": "O modo de notificação de arquivos do Auto Loader evita listagens completas de diretórios, tornando-o mais escalável. COPY INTO lista o diretório em cada execução, o que se torna caro em contagens altas de arquivos."
       },
@@ -366,7 +366,7 @@
         "explicacion": "<p><code>force = true</code> e <code>mergeSchema = true</code> são opções independentes; definir um não afeta o outro.</p>"
       },
       {
-        "texto_opcion": "Todos os arquivos ingeridos anteriormente são recarregados.",
+        "texto_opcion": "Todos os arquivos ingeridos anteriormente são recarregados, criando potencialmente linhas duplicadas.",
         "es_correcta": true,
         "explicacion": "<p><code>force = true</code> ignora o mecanismo de rastreamento de arquivos e ingere novamente todos os arquivos correspondentes, o que duplicará as linhas se a tabela já contiver esses dados.</p>"
       }
@@ -414,7 +414,7 @@
         "explicacion": "<p>A co-localização na mesma região não oferece acesso grant; a autenticação por meio de função IAM, localização externa ou credenciais explícitas é sempre necessária.</p>"
       },
       {
-        "texto_opcion": "Quando o caminho S3 é coberto por um local externo Unity Catalog no qual o engenheiro tem permissão READ FILES ou quando o.",
+        "texto_opcion": "Quando o caminho S3 é coberto por um local externo Unity Catalog no qual o engenheiro tem permissão READ FILES ou quando o cluster tem um perfil de instância do IAM grant com acesso ao bucket.",
         "es_correcta": true,
         "explicacion": "<p>Em workspaces Unity Catalog, o acesso é grant por meio de locais externos ou credenciais de armazenamento gerenciadas em UC. Em workspaces não UC, um perfil de instância do IAM anexado ao cluster é suficiente. Ambas as abordagens permitem que COPY INTO seja executado sem credenciais embutidas.</p>"
       },
@@ -496,7 +496,7 @@
     "pregunta": "Um engenheiro de dados executa a seguinte instrução em uma tabela Delta com Unity Catalog:\n\n```sql\nCOPY INTO main.sales.orders\nFROM 's3://bucket/orders/'\nFILEFORMAT = CSV\nFORMAT_OPTIONS ('header' = 'true', 'inferSchema' = 'true');\n```\n\nQual é o risco de usar `inferSchema = true` na produção?",
     "opciones": [
       {
-        "texto_opcion": "A inferência de esquema lê uma amostra de arquivos e pode inferir tipos incorretos.",
+        "texto_opcion": "A inferência de esquema lê uma amostra de arquivos e pode inferir tipos incorretos, causando falhas de gravação ou coerções silenciosas de tipo.",
         "es_correcta": true,
         "explicacion": "<p>Os tipos inferidos dependem dos dados amostrados e podem mudar entre as execuções (por exemplo, uma coluna inferida como <code>INT</code> em uma execução pode ser inferida como <code>LONG</code> em outra). Definir explicitamente o esquema é mais seguro para pipelines de produção.</p>"
       },
@@ -525,7 +525,7 @@
     "pregunta": "Um engenheiro de dados precisa fornecer credenciais externas para que COPY INTO possa ler em um contêiner do Azure Data Lake Storage Gen2. Qual abordagem é suportada no Databricks?",
     "opciones": [
       {
-        "texto_opcion": "Faça referência a um local externo Unity Catalog ou credencial de armazenamento que envolva as chaves de.",
+        "texto_opcion": "Faça referência a um local externo Unity Catalog ou credencial de armazenamento que envolva as chaves de acesso ADLS.",
         "es_correcta": true,
         "explicacion": "Unity Catalog credenciais de armazenamento e locais externos são a forma recomendada de gerenciar centralmente o acesso à nuvem; COPY INTO os resolve automaticamente quando o caminho corresponde."
       },
@@ -554,7 +554,7 @@
     "pregunta": "Um engenheiro de dados executa o seguinte e recebe um erro:\n\n```sql\nCOPY INTO raw.sensor_data\nFROM 's3://bucket/sensors/'\nFILEFORMAT = TYPE = 'JSON';\n```\n\nO que há de errado com esta afirmação?",
     "opciones": [
       {
-        "texto_opcion": "A cláusula `FILEFORMAT` possui sintaxe inválida.",
+        "texto_opcion": "A cláusula `FILEFORMAT` possui sintaxe inválida; deve ser `FILEFORMAT = JSON` sem parênteses e sem chave `TYPE =`.",
         "es_correcta": true,
         "explicacion": "<p>A sintaxe correta é simplesmente <code>FILEFORMAT = JSON</code>. Nem parênteses nem uma chave <code>TYPE =</code> fazem parte da sintaxe COPY INTO documentada.</p>"
       },
@@ -583,7 +583,7 @@
     "pregunta": "Qual das afirmações a seguir é verdadeira sobre COPY INTO e o log de transações Delta?",
     "opciones": [
       {
-        "texto_opcion": "COPY INTO registra cada arquivo carregado no log de transações Delta.",
+        "texto_opcion": "COPY INTO registra cada arquivo carregado no log de transações Delta, permitindo novas execuções idempotentes.",
         "es_correcta": true,
         "explicacion": "A lista de arquivos ingeridos é armazenada como parte dos metadados de commit Delta, que é como COPY INTO sabe quais arquivos ignorar nas execuções subsequentes."
       },
@@ -651,7 +651,7 @@
         "explicacion": "A retenção VACUUM rege a limpeza do arquivo de dados, não o log de transações. A retenção de log é controlada por `delta.logRetentionDuration`."
       },
       {
-        "texto_opcion": "Aumente o `delta.logRetentionDuration` da tabela Delta para reter o histórico.",
+        "texto_opcion": "Aumente o `delta.logRetentionDuration` da tabela Delta para reter o histórico do log de transações por mais de 90 dias.",
         "es_correcta": true,
         "explicacion": "Os metadados de carregamento COPY INTO são armazenados no log Delta. A retenção de log padrão é de 30 dias; definir `delta.logRetentionDuration` para um período mais longo (por exemplo, `intervalo de 180 dias`) preserva o histórico de rastreamento de arquivos."
       },
@@ -680,7 +680,7 @@
         "explicacion": "'desde' não é uma opção COPY INTO válida. As chaves FORMAT_OPTIONS corretas para filtragem baseada em tempo são 'modifiedAfter' e 'modifiedBefore'."
       },
       {
-        "texto_opcion": "`COPY INTO… FORMAT_OPTIONS ('modificadoDepois' =.",
+        "texto_opcion": "`COPY INTO… FORMAT_OPTIONS ('modificadoDepois' = '2024-03-01T00:00:00')`",
         "es_correcta": true,
         "explicacion": "COPY INTO suporta filtragem de arquivos baseada em tempo via 'modifiedAfter' e 'modifiedBefore' como chaves FORMAT_OPTIONS. Passar um carimbo de data/hora para 'modifiedAfter' restringirá a ingestão apenas aos arquivos modificados após esse ponto, tornando-o adequado para uma janela de ingestão de 24 horas."
       },
@@ -699,7 +699,7 @@
     "pregunta": "Um engenheiro de dados executa COPY INTO em uma tabela Delta, mas a tabela de destino ainda não existe. O que acontece?",
     "opciones": [
       {
-        "texto_opcion": "COPY INTO pode ter sucesso se a tabela for criada primeiro como uma tabela vazia sem esquema com `CREATE TABLE IF NOT EXISTS.",
+        "texto_opcion": "COPY INTO pode ter sucesso se a tabela for criada primeiro como uma tabela vazia sem esquema com `CREATE TABLE IF NOT EXISTS table_name`; o esquema é então inferido dos arquivos de origem.",
         "es_correcta": true,
         "explicacion": "<p>De acordo com a documentação oficial, COPY INTO suporta tabelas Delta sem esquema. O engenheiro cria uma tabela vazia com <code>CREATE TABLE IF NOT EXISTS table_name</code> (nenhum esquema definido) e COPY INTO infere e preenche o esquema na primeira execução. Se a tabela não existir, o comando falhará.</p>"
       },
@@ -738,7 +738,7 @@
         "explicacion": "<p>COPY INTO não nivela automaticamente estruturas aninhadas. Os campos JSON aninhados são armazenados como STRUCT, a menos que sejam explicitamente projetados em uma subconsulta SELECT.</p>"
       },
       {
-        "texto_opcion": "Use uma subconsulta SELECT na cláusula FROM com notação de ponto: `SELECT metadata.source AS source_name.",
+        "texto_opcion": "Use uma subconsulta SELECT na cláusula FROM com notação de ponto: `SELECT metadata.source AS source_name FROM 's3://…'`.",
         "es_correcta": true,
         "explicacion": "<p>A subconsulta FROM de COPY INTO suporta expressões padrão do Spark SQL. Para um campo JSON ingerido como uma estrutura, a notação de ponto (<code>metadata.source</code>) acessa corretamente o campo aninhado e o transforma em uma coluna de nível superior.</p>"
       },
@@ -757,7 +757,7 @@
     "pregunta": "Qual comando SQL redefine o histórico de carregamento COPY INTO para uma tabela Delta para que todos os arquivos de origem sejam reingeridos na próxima execução sem usar `COPY_OPTIONS ('force' = 'true')`?",
     "opciones": [
       {
-        "texto_opcion": "Não há comando SQL; descartar e recriar a tabela Delta é a única maneira de.",
+        "texto_opcion": "Não há comando SQL; descartar e recriar a tabela Delta é a única maneira de redefinir permanentemente o histórico de carregamento.",
         "es_correcta": true,
         "explicacion": "<p>O histórico de carregamento COPY INTO é armazenado no log de transações Delta. Não há comando <code>RESET COPY HISTORY</code>. Descartar e recriar a tabela limpa totalmente o log. <code>COPY_OPTIONS ('force' = 'true')</code> ignora o histórico por execução, mas não o apaga.</p>"
       },

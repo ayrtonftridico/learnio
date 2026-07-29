@@ -3,7 +3,7 @@
     "pregunta": "Um engenheiro de dados executa `DROP TABLE catalog.schema.orders`. A tabela foi criada sem uma cláusula `LOCATION`. O que acontece com os arquivos de dados subjacentes?",
     "opciones": [
       {
-        "texto_opcion": "Tanto os metadados ** quanto ** os arquivos de dados são excluídos — esta é uma tabela gerenciada, portanto.",
+        "texto_opcion": "Tanto os metadados ** quanto ** os arquivos de dados são excluídos — esta é uma tabela gerenciada, portanto, Unity Catalog controla o ciclo de vida dos dados e remove arquivos do armazenamento em nuvem.",
         "es_correcta": true,
         "explicacion": "Tabelas gerenciadas (criadas sem uma cláusula `LOCATION`) dão ao Unity Catalog controle total sobre o ciclo de vida dos dados. `DROP TABLE` remove os metadados do catálogo e os arquivos Parquet/Delta subjacentes do armazenamento gerenciado."
       },
@@ -33,7 +33,7 @@
     "pregunta": "Um engenheiro de dados cria uma tabela externa:\n\n```sql\nCREATE TABLE catalog.schema.raw_events\nUSING DELTA\nLOCATION 'abfss://raw@myaccount.dfs.core.windows.net/events/';\n```\n\nMais tarde, eles executam `DROP TABLE catalog.schema.raw_events`. Qual é o estado dos dados?",
     "opciones": [
       {
-        "texto_opcion": "Os metadados do catálogo são removidos, mas os arquivos de dados em `abfss://raw@myaccount.dfs.core.windows.net/events/`.",
+        "texto_opcion": "Os metadados do catálogo são removidos, mas os arquivos de dados em `abfss://raw@myaccount.dfs.core.windows.net/events/` **permanecem intactos** — tabelas externas não excluem dados no DROP.",
         "es_correcta": true,
         "explicacion": "As tabelas externas registram apenas um ponteiro para os dados gerenciados pelo usuário. `DROP TABLE` remove o registro Unity Catalog, mas deixa os arquivos reais no armazenamento em nuvem intactos."
       },
@@ -63,7 +63,7 @@
     "pregunta": "O que distingue uma **tabela gerenciada** de uma **tabela externa** em Unity Catalog no momento da criação?",
     "opciones": [
       {
-        "texto_opcion": "As tabelas gerenciadas são criadas **sem** uma cláusula `LOCATION`; tabelas externas são criadas **com** uma cláusula.",
+        "texto_opcion": "As tabelas gerenciadas são criadas **sem** uma cláusula `LOCATION`; tabelas externas são criadas **com** uma cláusula `LOCATION` apontando para um caminho de armazenamento em nuvem gerenciado pelo usuário.",
         "es_correcta": true,
         "explicacion": "A presença ou ausência da cláusula `LOCATION` é o que determina o tipo de tabela na criação. Sem `LOCATION`, Unity Catalog atribui armazenamento automaticamente (gerenciado). Com `LOCATION`, a tabela aponta para o armazenamento especificado pelo usuário (externo)."
       },
@@ -92,7 +92,7 @@
     "pregunta": "Um engenheiro de dados acidentalmente executa `DROP TABLE catalog.finance.revenue`. A mesa era uma mesa gerenciada. Como eles podem recuperar os dados dentro da janela permitida?",
     "opciones": [
       {
-        "texto_opcion": "`UNDROP TABLE catalog.finance.revenue;` — Unity Catalog suporta a recuperação de tabelas gerenciadas dentro de uma janela de.",
+        "texto_opcion": "`UNDROP TABLE catalog.finance.revenue;` — Unity Catalog suporta a recuperação de tabelas gerenciadas dentro de uma janela de **7 dias** após DROP, desde que VACUUM não tenha sido executado.",
         "es_correcta": true,
         "explicacion": "O recurso UNDROP do UC permite recuperar tabelas gerenciadas eliminadas em 7 dias. Após 7 dias (ou após a execução do VACUUM), os arquivos são excluídos permanentemente e não podem ser recuperados."
       },
@@ -122,7 +122,7 @@
     "pregunta": "Um engenheiro de dados precisa criar uma tabela externa em Unity Catalog apontando para `abfss://landing@corp.dfs.core.windows.net/raw/`. Qual é o pré-requisito para que isso tenha sucesso?",
     "opciones": [
       {
-        "texto_opcion": "Um **Local Externo** deve ser registrado em Unity Catalog para o caminho.",
+        "texto_opcion": "Um **Local Externo** deve ser registrado em Unity Catalog para o caminho `abfss://landing@corp.dfs.core.windows.net/raw/` (ou um caminho pai), com uma credencial de armazenamento válida.",
         "es_correcta": true,
         "explicacion": "Unity Catalog exige que todos os caminhos de tabelas externas sejam cobertos por um local externo registrado com uma credencial de armazenamento associada. Sem isso, o CREATE TABLE falha com um erro de acesso."
       },
@@ -157,7 +157,7 @@
         "explicacion": "`ALTER CATALOG SET MANAGED LOCATION` é uma alteração apenas de metadados que afeta o armazenamento futuro. Isso não afeta o acesso às tabelas existentes."
       },
       {
-        "texto_opcion": "As tabelas existentes **não são afetadas** — elas permanecem no local de armazenamento atual.",
+        "texto_opcion": "As tabelas existentes **não são afetadas** — elas permanecem no local de armazenamento atual. Somente **novas** tabelas e volumes gerenciados criados após essa alteração usam o novo local.",
         "es_correcta": true,
         "explicacion": "`ALTER CATALOG SET MANAGED LOCATION` é prospectivo - define onde novos objetos serão armazenados. As tabelas existentes permanecem no caminho de armazenamento atual e não são migradas automaticamente."
       },
@@ -187,7 +187,7 @@
         "explicacion": "VACUUM remove versões antigas de arquivos Delta do armazenamento da tabela gerenciada — ele não exclui arquivos do local externo original."
       },
       {
-        "texto_opcion": "**Exclua manualmente** os arquivos originais do local de armazenamento externo — `SET MANAGED` copia dados para o.",
+        "texto_opcion": "**Exclua manualmente** os arquivos originais do local de armazenamento externo — `SET MANAGED` copia dados para o armazenamento gerenciado UC, mas não remove arquivos do caminho externo original.",
         "es_correcta": true,
         "explicacion": "`ALTER TABLE SET MANAGED` move os dados para o armazenamento gerenciado por UC, mas deixa os arquivos originais no local externo. Ambas as cópias existem até que o usuário exclua manualmente os arquivos do caminho original."
       },
@@ -227,7 +227,7 @@
         "explicacion": "O CTAS não preserva o histórico, as permissões ou os comentários da Delta. Ele cria uma nova tabela que requer renomeação, o que aumenta a complexidade. `SET MANAGED` é o preferido."
       },
       {
-        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events SET MANAGED;` — esta é a conversão local recomendada que preserva o histórico Delta.",
+        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events SET MANAGED;` — esta é a conversão local recomendada que preserva o histórico Delta, as permissões e minimiza o tempo de inatividade de gravação.",
         "es_correcta": true,
         "explicacion": "`ALTER TABLE SET MANAGED` é o método de conversão preferido a partir de 2026. Ele preserva o histórico completo do Delta, permissões existentes, tags e comentários. Requer apenas uma breve janela de inatividade para gravações."
       }
@@ -257,7 +257,7 @@
         "explicacion": "Embora `information_schema.tables` tenha uma coluna `table_type`, normalmente mostra `BASE TABLE` — não `MANAGED` vs `EXTERNAL`. `DESCRIBE TABLE EXTENDED` é a fonte definitiva."
       },
       {
-        "texto_opcion": "`DESCRIBE TABLE EXTENDED catalog.schema.orders;` — a saída inclui uma linha `Type` mostrando `MANAGED`.",
+        "texto_opcion": "`DESCRIBE TABLE EXTENDED catalog.schema.orders;` — a saída inclui uma linha `Type` mostrando `MANAGED` ou `EXTERNAL`.",
         "es_correcta": true,
         "explicacion": "`DESCRIBE TABLE EXTENDED` fornece metadados detalhados, incluindo o tipo de tabela (`MANAGED` ou `EXTERNAL`), o local de armazenamento e outras propriedades."
       }
@@ -271,7 +271,7 @@
     "pregunta": "Um engenheiro de dados deseja alterar o local de armazenamento de uma tabela externa existente de um caminho de armazenamento em nuvem para outro. Qual comando consegue isso?",
     "opciones": [
       {
-        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events SET LOCATION 'abfss://new@account.dfs.core.windows.net/events/';` — altera o ponteiro.",
+        "texto_opcion": "`ALTER TABLE catalog.schema.raw_events SET LOCATION 'abfss://new@account.dfs.core.windows.net/events/';` — altera o ponteiro de armazenamento sem mover arquivos.",
         "es_correcta": true,
         "explicacion": "`ALTER TABLE SET LOCATION` altera de onde a tabela externa lê os dados. Ele apenas atualiza o ponteiro de metadados – não move os arquivos de dados reais."
       },
@@ -311,7 +311,7 @@
         "explicacion": "`SET LOCATION` não move arquivos. Somente o ponteiro de metadados é atualizado. Os arquivos devem ser movidos separadamente (por exemplo, via `dbutils.fs.cp` ou ferramentas de armazenamento em nuvem)."
       },
       {
-        "texto_opcion": "Os dados no local antigo **permanecem intocados** — `SET LOCATION` apenas altera o ponteiro de metadados.",
+        "texto_opcion": "Os dados no local antigo **permanecem intocados** — `SET LOCATION` apenas altera o ponteiro de metadados. Nenhum arquivo é movido ou excluído.",
         "es_correcta": true,
         "explicacion": "`ALTER TABLE SET LOCATION` é uma operação somente de metadados. Ele atualiza o ponteiro do catálogo para o caminho de armazenamento, mas não tem efeito nos arquivos físicos no local antigo ou no novo."
       },
@@ -361,7 +361,7 @@
     "pregunta": "Os arquivos de uma tabela externa foram atualizados por uma ferramenta ETL externa que adicionou novos arquivos Parquet ao caminho de armazenamento. A tabela no Databricks não reflete os novos arquivos. Qual comando atualiza os metadados?",
     "opciones": [
       {
-        "texto_opcion": "`MSCK REPAIR TABLE catalog.schema.external_table SYNC METADATA;` — atualiza os metadados de Unity Catalog para refletir os.",
+        "texto_opcion": "`MSCK REPAIR TABLE catalog.schema.external_table SYNC METADATA;` — atualiza os metadados de Unity Catalog para refletir os arquivos adicionados por ferramentas externas.",
         "es_correcta": true,
         "explicacion": "Quando ferramentas externas modificam os arquivos de uma tabela externa sem passar pelo SQL do Databricks, os metadados Unity Catalog podem ficar obsoletos. `MSCK REPAIR TABLE SYNC METADATA` atualiza os metadados para refletir o estado atual do caminho de armazenamento."
       },
@@ -391,7 +391,7 @@
     "pregunta": "Qual dos seguintes cenários é a **melhor justificativa** para usar uma tabela externa em vez de uma tabela gerenciada?",
     "opciones": [
       {
-        "texto_opcion": "Os dados também são acessados pelo Apache Hive no EMR e devem permanecer em um caminho S3.",
+        "texto_opcion": "Os dados também são acessados pelo Apache Hive no EMR e devem permanecer em um caminho S3 específico que ambos os sistemas possam ler diretamente.",
         "es_correcta": true,
         "explicacion": "As tabelas externas são ideais quando os dados devem ser coproprietários ou co-acessados por sistemas que não sejam Databricks. O `LOCATION` fixo garante que os Databricks e as ferramentas externas sejam lidas no mesmo caminho."
       },
@@ -421,7 +421,7 @@
     "pregunta": "Um engenheiro de dados cria uma tabela gerenciada usando:\n\n```sql\nCREATE TABLE catalog.analytics.monthly_sales\nAS SELECT * FROM catalog.raw.orders\nWHERE YEAR(order_date) = 2024;\n```\n\nOnde Unity Catalog armazena os arquivos de dados de `vendas_mensais`?",
     "opciones": [
       {
-        "texto_opcion": "No local de armazenamento gerenciado configurado para o catálogo ou esquema `analytics` — Unity Catalog determina o caminho.",
+        "texto_opcion": "No local de armazenamento gerenciado configurado para o catálogo ou esquema `analytics` — Unity Catalog determina o caminho automaticamente (por exemplo, `abfss://owned@.../analytics/monthly_sales/`).",
         "es_correcta": true,
         "explicacion": "CTAS sem uma cláusula `LOCATION` cria uma tabela gerenciada. O UC atribui o caminho de armazenamento com base na hierarquia de locais gerenciados por catálogo/esquema. O caminho é totalmente gerenciado por UC."
       },
@@ -496,7 +496,7 @@
         "explicacion": "O DEEP CLONE envolve a cópia de todos os arquivos de dados, o que consome muito tempo para tabelas grandes. `SET MANAGED` geralmente é mais rápido para conversão no local."
       },
       {
-        "texto_opcion": "`DEEP CLONE` cria uma **cópia com um novo nome de tabela** (histórico preservado, mas requer renomeação).",
+        "texto_opcion": "`DEEP CLONE` cria uma **cópia com um novo nome de tabela** (histórico preservado, mas requer renomeação); `SET MANAGED` converte **no local** preservando nome, permissões e histórico sem etapas extras.",
         "es_correcta": true,
         "explicacion": "`DEEP CLONE` é melhor para cópias de catálogos cruzados ou criação de sandbox - produz uma tabela separada. `SET MANAGED` é a conversão in-loco que preserva a identidade original da tabela, evitando a complexidade de renomeação."
       }
@@ -511,7 +511,7 @@
     "pregunta": "Uma equipe de engenharia de dados cria todas as tabelas de produção como **tabelas gerenciadas** em Unity Catalog. Um engenheiro júnior pergunta: \"O que evita a perda acidental de dados do DROP TABLE?\" Qual recurso aborda essa preocupação?",
     "opciones": [
       {
-        "texto_opcion": "**UNDROP TABLE** — tabelas gerenciadas eliminadas podem ser recuperadas em 7 dias.",
+        "texto_opcion": "**UNDROP TABLE** — tabelas gerenciadas eliminadas podem ser recuperadas em 7 dias, desde que VACUUM não tenha sido executado e excluído permanentemente os arquivos.",
         "es_correcta": true,
         "explicacion": "UNDROP fornece uma rede de segurança para DROP acidental em tabelas gerenciadas. A janela de retenção de 7 dias permite a recuperação. Esta é uma vantagem importante de governança das tabelas gerenciadas."
       },
@@ -556,7 +556,7 @@
         "explicacion": "`SET MANAGED LOCATION` afeta apenas os padrões de armazenamento de tabelas **gerenciadas** — e não tabelas externas, que sempre usam seu caminho `LOCATION` explícito."
       },
       {
-        "texto_opcion": "Novas tabelas gerenciadas criadas em `prod_schema` armazenarão dados em `abfss://new@account.dfs.core.windows.net/prod/`.",
+        "texto_opcion": "Novas tabelas gerenciadas criadas em `prod_schema` armazenarão dados em `abfss://new@account.dfs.core.windows.net/prod/`; tabelas existentes **não são movidas**.",
         "es_correcta": true,
         "explicacion": "`ALTER SCHEMA SET MANAGED LOCATION` define o armazenamento padrão para futuros objetos gerenciados. Não é retroativo — as tabelas existentes permanecem em seus caminhos de armazenamento atuais."
       }
@@ -576,7 +576,7 @@
         "explicacion": "`SET MANAGED` converte entre tipos externos e gerenciados dentro da mesma tabela. Não é possível mover uma tabela para um catálogo diferente."
       },
       {
-        "texto_opcion": "`CREATE TABLE other_catalog.schema.events_copy DEEP CLONE catalog.staging.events;` — DEEP CLONE cria uma cópia completa com o.",
+        "texto_opcion": "`CREATE TABLE other_catalog.schema.events_copy DEEP CLONE catalog.staging.events;` — DEEP CLONE cria uma cópia completa com o histórico Delta como uma nova tabela gerenciada no catálogo de destino.",
         "es_correcta": true,
         "explicacion": "`DEEP CLONE` copia todos os arquivos de dados e histórico de log Delta. Sem uma cláusula `LOCATION`, o resultado é uma tabela gerenciada no catálogo de destino. Esta é a abordagem recomendada para cópias entre catálogos que exigem preservação do histórico."
       },

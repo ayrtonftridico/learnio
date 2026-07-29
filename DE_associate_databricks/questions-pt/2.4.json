@@ -61,7 +61,7 @@
     "pregunta": "Qual das opções a seguir melhor descreve a diferença entre um **conector padrão** e um **conector gerenciado** em Lakeflow Connect?",
     "opciones": [
       {
-        "texto_opcion": "Os conectores padrão oferecem maior personalização para armazenamento em nuvem e barramentos de mensagens (por exemplo, S3.",
+        "texto_opcion": "Os conectores padrão oferecem maior personalização para armazenamento em nuvem e barramentos de mensagens (por exemplo, S3, Kafka); os conectores gerenciados são totalmente gerenciados pelo Databricks e cobrem bancos de dados (via CDC) e aplicativos SaaS (por exemplo, Salesforce, Workday).",
         "es_correcta": true,
         "explicacion": "<p>De acordo com a documentação oficial, os conectores padrão fornecem níveis mais altos de personalização e direcionam o armazenamento de objetos em nuvem (S3, ADLS, GCS) e barramentos de mensagens (Kafka, Kinesis, Pub/Sub). Os conectores gerenciados são totalmente gerenciados pelo Databricks e abrangem dois subtipos: conectores de banco de dados (MySQL, PostgreSQL, SQL Server via CDC) e conectores SaaS (Salesforce, Workday, ServiceNow).</p>"
       },
@@ -148,7 +148,7 @@
     "pregunta": "Um engenheiro de dados configura um pipeline de ingestão Lakeflow Connect para SQL Server usando a UI ou API do Databricks, selecionando **CDC** como o modo de ingestão:\n\n```sql\nConnector : SQL Server\nHost      : db.corp.com\nDatabase  : sales\nTable     : orders\nTarget    : bronze.sales\nMode      : cdc\n```\n\nO que a seleção do **modo CDC** configura para esse pipeline?",
     "opciones": [
       {
-        "texto_opcion": "O pipeline lê o log de transações do SQL Server para capturar e replicar todas as inserções.",
+        "texto_opcion": "O pipeline lê o log de transações do SQL Server para capturar e replicar todas as inserções, atualizações e exclusões na tabela Delta de destino.",
         "es_correcta": true,
         "explicacion": "Quando o modo CDC é configurado em um pipeline de ingestão Lakeflow Connect, ele usa o log binário/transação do banco de dados de origem (SQL Server CDC ou controle de alterações) para capturar e replicar todas as operações DML — inserções, atualizações e exclusões — para a tabela Delta de destino."
       },
@@ -206,7 +206,7 @@
     "pregunta": "Um engenheiro de dados deseja enviar dados ingeridos de um pipeline Lakeflow Connect para a camada lakehouse correta. Onde o pipeline deve gravar sua saída por padrão?",
     "opciones": [
       {
-        "texto_opcion": "A camada de bronze, como Lakeflow Connect, lida com a ingestão bruta antes de qualquer.",
+        "texto_opcion": "A camada de bronze, como Lakeflow Connect, lida com a ingestão bruta antes de qualquer transformação.",
         "es_correcta": true,
         "explicacion": "Lakeflow Connect é uma ferramenta de ingestão que coloca dados brutos de origem na camada bronze. As transformações para prata/ouro acontecem nos estágios subsequentes do pipeline."
       },
@@ -269,7 +269,7 @@
         "explicacion": "Cada execução após a primeira usa rastreamento de alterações incrementais – não uma recarga completa. Uma carga completa só acontece na execução inicial."
       },
       {
-        "texto_opcion": "O pipeline executa um carregamento completo de todos os dados existentes da tabela de origem e, em paralelo.",
+        "texto_opcion": "O pipeline executa um carregamento completo de todos os dados existentes da tabela de origem e, em paralelo, começa a rastrear alterações para ingestão incremental em execuções subsequentes.",
         "es_correcta": true,
         "explicacion": "Lakeflow Connect sempre executa um carregamento completo na primeira execução do pipeline para capturar todos os dados existentes. Paralelamente, ele começa a rastrear alterações para que as execuções subsequentes ingiram apenas novas inserções, atualizações e exclusões de forma incremental."
       },
@@ -322,7 +322,7 @@
     "pregunta": "Uma ingestão de pipeline Lakeflow Connect gerenciada do Salesforce parou de ser atualizada. O engenheiro de dados verifica os logs do pipeline e vê que a evolução do esquema causou o bloqueio do pipeline. O que provavelmente causou isso?",
     "opciones": [
       {
-        "texto_opcion": "Uma coluna foi removida do objeto Salesforce; os conectores gerenciados lidam automaticamente com novas colunas.",
+        "texto_opcion": "Uma coluna foi removida do objeto Salesforce; os conectores gerenciados lidam automaticamente com novas colunas, mas as exclusões de colunas podem exigir reconciliação manual.",
         "es_correcta": true,
         "explicacion": "<p>De acordo com as perguntas frequentes oficiais, todos os conectores gerenciados lidam automaticamente com colunas novas e excluídas, a menos que você desista. No entanto, as exclusões de colunas podem exigir a reconciliação do esquema na tabela Delta de destino, o que pode bloquear o pipeline se o esquema de destino não puder ser reconciliado automaticamente.</p>"
       },
@@ -395,7 +395,7 @@
         "explicacion": "As colunas <p><code>_lf_*</code> são automaticamente anexadas pela estrutura Lakeflow Connect, e não criadas manualmente pelo engenheiro.</p>"
       },
       {
-        "texto_opcion": "Elas são colunas de metadados anexadas automaticamente por Lakeflow Connect para rastrear informações de operação do CDC.",
+        "texto_opcion": "Elas são colunas de metadados anexadas automaticamente por Lakeflow Connect para rastrear informações de operação do CDC, como status de exclusão e carimbo de data/hora da última modificação da fonte.",
         "es_correcta": true,
         "explicacion": "<p>Lakeflow Connect anexa colunas de metadados do sistema <code>_lf_*</code> às tabelas Delta de destino. Essas colunas expõem detalhes da operação do CDC — como se uma linha foi excluída e quando foi atualizada pela última vez na origem — permitindo que os consumidores downstream processem exclusões e pedidos corretamente. Observação: os nomes exatos das colunas podem variar de acordo com a versão do conector; sempre verifique a documentação do conector específico.</p>"
       }
@@ -453,7 +453,7 @@
         "explicacion": "Lakeflow Connect evolui a tabela existente no local. Ele não cria tabelas com versão para alterações de esquema."
       },
       {
-        "texto_opcion": "O pipeline detecta o novo campo e adiciona automaticamente `annual_revenue_usd` como uma coluna na tabela.",
+        "texto_opcion": "O pipeline detecta o novo campo e adiciona automaticamente `annual_revenue_usd` como uma coluna na tabela Delta de destino.",
         "es_correcta": true,
         "explicacion": "Os conectores gerenciados Lakeflow Connect suportam a evolução do esquema aditivo. Novos campos descobertos na origem são propagados para a tabela Delta de destino."
       }
@@ -482,7 +482,7 @@
         "explicacion": "<p>Os aplicativos SaaS são gerenciados por conectores SaaS gerenciados, não por conectores padrão.</p>"
       },
       {
-        "texto_opcion": "Eles fornecem maior personalização para ingestão de armazenamento de objetos em nuvem (por exemplo, S3, ADLS.",
+        "texto_opcion": "Eles fornecem maior personalização para ingestão de armazenamento de objetos em nuvem (por exemplo, S3, ADLS, GCS) e barramentos de mensagens (por exemplo, Kafka, Kinesis) e podem ser usados com Structured Streaming ou Lakeflow Spark Declarative Pipelines.",
         "es_correcta": true,
         "explicacion": "<p>De acordo com a documentação oficial, os conectores padrão oferecem níveis mais elevados de personalização do pipeline de ingestão em comparação com os conectores gerenciados. Eles têm como alvo o armazenamento de objetos em nuvem e barramentos de mensagens e podem operar em múltiplas camadas da pilha ETL — seja Streaming Estruturado (personalização completa) ou Pipelines Declarativos Lakeflow Spark (experiência mais gerenciada).</p>"
       }
@@ -627,7 +627,7 @@
         "explicacion": "Os logs de eventos de cluster rastreiam eventos de computação. O monitoramento em nível de pipeline está disponível por meio da UI do Pipelines."
       },
       {
-        "texto_opcion": "A interface do usuário do Pipelines no workspace do Databricks, que mostra o status do pipeline.",
+        "texto_opcion": "A interface do usuário do Pipelines no workspace do Databricks, que mostra o status do pipeline, o histórico de execução e as métricas de fluxo de dados.",
         "es_correcta": true,
         "explicacion": "Os pipelines Lakeflow Connect são gerenciados por meio da UI do Databricks Pipelines (igual às Delta Live Tables), fornecendo status de execução, logs de eventos e métricas de produtividade."
       }
@@ -646,7 +646,7 @@
         "explicacion": "<p>O Salesforce é um conector SaaS gerenciado, não um conector padrão. Os conectores padrão são para armazenamento em nuvem e barramentos de mensagens, não para aplicativos SaaS.</p>"
       },
       {
-        "texto_opcion": "Ambos os pipelines usam conectores gerenciados: o pipeline A usa um conector CDC de banco de dados gerenciado (MySQL) e o.",
+        "texto_opcion": "Ambos os pipelines usam conectores gerenciados: o pipeline A usa um conector CDC de banco de dados gerenciado (MySQL) e o pipeline B usa um conector SaaS gerenciado (Salesforce).",
         "es_correcta": true,
         "explicacion": "<p>De acordo com a documentação oficial, MySQL, PostgreSQL e SQL Server são suportados por meio de conectores CDC de banco de dados gerenciados. Salesforce, Workday e ServiceNow são suportados por meio de conectores SaaS gerenciados. Ambos são subtipos de conectores gerenciados em Lakeflow Connect. Os conectores padrão são para armazenamento de objetos em nuvem e barramentos de mensagens, não para bancos de dados ou aplicativos SaaS.</p>"
       },
@@ -709,7 +709,7 @@
         "explicacion": "As operações de simultaneidade são rastreadas pelo log de transações da Delta, não por uma coluna visível ao usuário como `_lf_op`."
       },
       {
-        "texto_opcion": "O tipo de operação CDC — `I` (inserir), `U` ou `D` (excluir) — para cada linha replicada.",
+        "texto_opcion": "O tipo de operação CDC — `I` (inserir), `U` (atualizar) ou `D` (excluir) — para cada linha replicada.",
         "es_correcta": true,
         "explicacion": "`_lf_op` é uma coluna de metadados Lakeflow Connect que armazena o tipo de operação DML da origem, permitindo que a lógica downstream lide com cada alteração corretamente."
       },
@@ -728,7 +728,7 @@
     "pregunta": "Um engenheiro de dados precisa replicar dados de várias tabelas em um banco de dados PostgreSQL para Databricks usando Lakeflow Connect. Qual configuração lida melhor com isso com sobrecarga mínima de pipeline?",
     "opciones": [
       {
-        "texto_opcion": "Configure um único pipeline Lakeflow Connect com diversas tabelas de origem especificadas.",
+        "texto_opcion": "Configure um único pipeline Lakeflow Connect com diversas tabelas de origem especificadas, cada uma delas como uma tabela Delta separada.",
         "es_correcta": true,
         "explicacion": "Lakeflow Connect oferece suporte à ingestão de várias tabelas em um único pipeline, reduzindo a sobrecarga operacional enquanto coloca cada tabela de origem em sua própria tabela Delta na camada bronze."
       },
@@ -786,7 +786,7 @@
     "pregunta": "Um engenheiro de dados está projetando uma ingestão de camada bronze usando Lakeflow Connect de uma fonte MySQL. A camada prateada downstream aplica um `MERGE` para desduplicar registros. Qual recurso Lakeflow Connect torna a lógica prata `MERGE` mais simples de implementar?",
     "opciones": [
       {
-        "texto_opcion": "As colunas de metadados `_lf_op` e `_lf_source_ts`, que indicam o tipo de operação e o carimbo de.",
+        "texto_opcion": "As colunas de metadados `_lf_op` e `_lf_source_ts`, que indicam o tipo de operação e o carimbo de data/hora de origem para solicitar alterações.",
         "es_correcta": true,
         "explicacion": "Ao expor o tipo de operação DML e o carimbo de data/hora de origem, Lakeflow Connect permite que a lógica MERGE downstream aplique corretamente inserções, atualizações e exclusões na ordem correta."
       },
@@ -815,7 +815,7 @@
     "pregunta": "Um engenheiro de dados deseja validar se um pipeline Lakeflow Connect está ingerindo dados corretamente. Eles executam a seguinte consulta:\n\n```sql\nSELECT _lf_op, COUNT(*) as cnt\nFROM bronze.mysql_orders\nGROUP BY _lf_op\n```\n\n| _lf_op | cnt |\n|--------|--------|\n| eu | 48.200 |\n| você | 12.100 |\n| D | 850 |\n\nO que esse resultado confirma?",
     "opciones": [
       {
-        "texto_opcion": "O pipeline capturou inserções, atualizações e exclusões da origem.",
+        "texto_opcion": "O pipeline capturou inserções, atualizações e exclusões da origem, com as contagens de operações visíveis por tipo de evento CDC.",
         "es_correcta": true,
         "explicacion": "Os valores `_lf_op` `I`, `U` e `D` correspondem às operações de inserção, atualização e exclusão do CDC. A consulta confirma que todos os três tipos de DML foram replicados."
       },
@@ -854,7 +854,7 @@
         "explicacion": "Os pipelines Lakeflow Connect não são baseados em notebook. DABs fornece a estrutura correta para a promoção ambiental."
       },
       {
-        "texto_opcion": "Defina o pipeline como código usando a estrutura Declarative Automation Bundles e.",
+        "texto_opcion": "Defina o pipeline como código usando a estrutura Declarative Automation Bundles e parametrize valores específicos do ambiente.",
         "es_correcta": true,
         "explicacion": "Declarative Automation Bundles permite que pipelines sejam definidos como código com configurações parametrizadas, permitindo implantação repetível em ambientes de desenvolvimento/preparação/produção."
       },
@@ -878,7 +878,7 @@
         "explicacion": "Auto Loader é para ingestão baseada em arquivo. O uso de exportações de arquivos ignoraria a integração de API nativa e os recursos em tempo real do Lakeflow Connect."
       },
       {
-        "texto_opcion": "Conector gerenciado – ServiceNow é um aplicativo SaaS acessado por meio da API REST.",
+        "texto_opcion": "Conector gerenciado – ServiceNow é um aplicativo SaaS acessado por meio da API REST, para o qual os conectores gerenciados são projetados.",
         "es_correcta": true,
         "explicacion": "ServiceNow expõe uma API REST/SOAP e é classificado como uma fonte SaaS. Os conectores gerenciados Lakeflow Connect lidam com autenticação e paginação de API para tais sistemas."
       },

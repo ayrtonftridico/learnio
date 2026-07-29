@@ -3,7 +3,7 @@
     "pregunta": "Um engenheiro de dados abre a barra lateral do Databricks e clica em **Workflows**. Eles chegam à página da lista de Jobs. Qual das opções a seguir descreve melhor o que a coluna `Trigger` indica?",
     "opciones": [
       {
-        "texto_opcion": "Como as execuções do job são iniciadas — por exemplo: `Programado`, `Manual`.",
+        "texto_opcion": "Como as execuções do job são iniciadas — por exemplo: `Programado`, `Manual`, `Chegada de arquivo`, `Contínuo` ou `API`.",
         "es_correcta": true,
         "explicacion": "A coluna `Trigger` mostra como um job é iniciado. Isso ajuda os operadores a distinguir rapidamente os jobs de produção programados dos jobs ad-hoc executados manualmente e dos pipelines de ingestão acionados por arquivo."
       },
@@ -42,7 +42,7 @@
         "explicacion": "`QUEUED` é um estado ativo (não terminal), o que significa que a execução não foi iniciada. As execuções concluídas estão no estado `TERMINATED`."
       },
       {
-        "texto_opcion": "A execução está aguardando para ser iniciada porque o limite máximo de.",
+        "texto_opcion": "A execução está aguardando para ser iniciada porque o limite máximo de execução simultânea para esse job foi atingido.",
         "es_correcta": true,
         "explicacion": "`QUEUED` significa que a execução foi acionada, mas ainda não pode ser iniciada — normalmente porque outra execução do mesmo job já está em execução e o limite configurado de `max_concurrent_runs` foi atingido."
       },
@@ -76,7 +76,7 @@
         "explicacion": "`FAILED` e `SUCCEEDED` são valores `result_state`, não valores `lifecycle_state`. O estado do ciclo de vida do terminal é `TERMINATED` (que então tem um `result_state` de `SUCCESS`, `FAILED`, etc.)."
       },
       {
-        "texto_opcion": "`TERMINATED`, `SKIPPED` e `INTERNAL_ERROR` — estes são os estados terminais após os quais.",
+        "texto_opcion": "`TERMINATED`, `SKIPPED` e `INTERNAL_ERROR` — estes são os estados terminais após os quais nenhuma outra mudança de estado ocorre.",
         "es_correcta": true,
         "explicacion": "Os estados terminais sinalizam que a execução terminou. `TERMINATED` cobre a maioria dos resultados (sucesso, falha, cancelado, tempo limite). `SKIPPED` significa que a execução não foi executada. `INTERNAL_ERROR` é uma falha no nível da plataforma. A votação deve parar quando qualquer um destes critérios for atingido."
       }
@@ -100,7 +100,7 @@
         "explicacion": "A falha na inicialização do cluster geralmente resulta em `TERMINATED` + `FAILED` (com um erro no painel Run Events), não em `TIMEDOUT`. `TIMEDOUT` se aplica ao limite de duração geral do job."
       },
       {
-        "texto_opcion": "A execução do job excedeu o limite configurado de `timeout_seconds` e foi interrompida automaticamente.",
+        "texto_opcion": "A execução do job excedeu o limite configurado de `timeout_seconds` e foi interrompida automaticamente pelo Databricks.",
         "es_correcta": true,
         "explicacion": "`TIMEDOUT` como estado de resultado significa que o tempo de execução da execução excedeu o `timeout_seconds` configurado no job. O Databricks encerra automaticamente as execuções que excedem o tempo limite."
       },
@@ -163,7 +163,7 @@
         "explicacion": "A visualização de matriz compara os resultados das tarefas em várias execuções (tarefa x execução). Não mostra estrutura de paralelismo em uma única execução. A visualização DAG é a ferramenta correta."
       },
       {
-        "texto_opcion": "A visualização **DAG** — tarefas paralelas (sem dependência entre elas) aparecem lado a lado.",
+        "texto_opcion": "A visualização **DAG** — tarefas paralelas (sem dependência entre elas) aparecem lado a lado, enquanto tarefas sequenciais são conectadas com setas indicando a cadeia de dependência.",
         "es_correcta": true,
         "explicacion": "O layout visual da visualização DAG coloca tarefas independentes lado a lado (paralelas) e conecta tarefas dependentes com setas direcionadas (sequencial). Isso torna a estrutura de execução imediatamente visível."
       }
@@ -177,7 +177,7 @@
     "pregunta": "Um engenheiro de dados usa a **visualização Timeline** para a execução de um job e observa que `task_load` tem um grande espaço horizontal antes de sua barra iniciar, mesmo que `task_transform` (sua única dependência) tenha sido concluída rapidamente. O que a lacuna indica?",
     "opciones": [
       {
-        "texto_opcion": "Um longo tempo de provisionamento de cluster — `task_load` provavelmente usa um cluster diferente e teve que esperar.",
+        "texto_opcion": "Um longo tempo de provisionamento de cluster — `task_load` provavelmente usa um cluster diferente e teve que esperar que ele iniciasse.",
         "es_correcta": true,
         "explicacion": "Uma lacuna na linha do tempo entre a conclusão de uma dependência e o início de uma tarefa normalmente indica o tempo de inicialização do cluster. Se as tarefas usarem job clusters separados, cada uma precisará de seu próprio provisionamento, o que poderá adicionar minutos ao tempo total de execução."
       },
@@ -206,7 +206,7 @@
     "pregunta": "Um engenheiro de dados verifica o painel **Run Events** em busca de uma execução de job com falha e vê o evento: `Task retrying: task_api_ingest (tentativa 2 de 3)`. O que isso lhes diz?",
     "opciones": [
       {
-        "texto_opcion": "`task_api_ingest` falhou em sua primeira tentativa e está em sua segunda tentativa.",
+        "texto_opcion": "`task_api_ingest` falhou em sua primeira tentativa e está em sua segunda tentativa (mais uma nova tentativa resta depois disso).",
         "es_correcta": true,
         "explicacion": "\"Tentativa 2 de 3\" significa que a tarefa já falhou uma vez e está atualmente na segunda tentativa. Se esta tentativa também falhar, resta uma nova tentativa (tentativa 3). O painel Run Events mostra essa progressão sem a necessidade de ler logs brutos."
       },
@@ -240,7 +240,7 @@
         "explicacion": "Embora esse intervalo capture a latência total pré-tarefa (agendamento + provisionamento), ele não isola especificamente o tempo de inicialização do cluster. `Cluster começando` → `Cluster pronto` é a janela precisa."
       },
       {
-        "texto_opcion": "O carimbo de data/hora de **`Início do cluster`** e o carimbo de data/hora de **`Cluster pronto`** — a diferença é o tempo de.",
+        "texto_opcion": "O carimbo de data/hora de **`Início do cluster`** e o carimbo de data/hora de **`Cluster pronto`** — a diferença é o tempo de provisionamento do cluster.",
         "es_correcta": true,
         "explicacion": "O painel Run Events registra `Cluster start` (o provisionamento começa) e `Cluster ready` (a primeira tarefa pode ser executada). A diferença de tempo entre esses dois eventos é a sobrecarga de inicialização do cluster."
       },
@@ -264,7 +264,7 @@
     "pregunta": "Um engenheiro de dados vê uma tarefa na visualização DAG mostrando um indicador de status **amarelo** durante uma execução ativa. O que esse status significa?",
     "opciones": [
       {
-        "texto_opcion": "A tarefa está **aguardando nova tentativa** — ela falhou na tentativa anterior e está no estado do ciclo de vida.",
+        "texto_opcion": "A tarefa está **aguardando nova tentativa** — ela falhou na tentativa anterior e está no estado do ciclo de vida `WAITING_FOR_RETRY`, pausada antes da próxima tentativa de nova tentativa.",
         "es_correcta": true,
         "explicacion": "Amarelo indica `WAITING_FOR_RETRY`. A tarefa já falhou pelo menos uma vez e agora está aguardando o `min_retry_interval_millis` configurado antes de tentar novamente."
       },
@@ -294,7 +294,7 @@
     "pregunta": "Um engenheiro de dados precisa encontrar todas as execuções com falha de um job específico nos últimos 14 dias sem consultar as tabelas do sistema. Onde na interface do usuário eles podem filtrar por estado de resultado?",
     "opciones": [
       {
-        "texto_opcion": "A guia **Execuções** do job — inclui filtros para estado do resultado e intervalo de datas.",
+        "texto_opcion": "A guia **Execuções** do job — inclui filtros para estado do resultado (`Succeeded`, `Failed`, `Canceled` etc.) e intervalo de datas.",
         "es_correcta": true,
         "explicacion": "A aba Runs em um job específico fornece filtros de estado de resultado e um seletor de intervalo de datas. Isso permite que a filtragem mostre apenas execuções com falha em uma janela de data personalizada, sem gravar nenhum SQL."
       },
@@ -354,7 +354,7 @@
     "pregunta": "A equipe de um engenheiro de dados deseja acompanhar as taxas de falhas em 20 jobs de produção diferentes nos últimos 30 dias. A UI Lakeflow Jobs não é suficiente para isso. Por que?",
     "opciones": [
       {
-        "texto_opcion": "A UI mostra resultados de execução individuais, mas não calcula porcentagens agregadas de taxa de falha.",
+        "texto_opcion": "A UI mostra resultados de execução individuais, mas não calcula porcentagens agregadas de taxa de falha entre tarefas; ele também tem um limite de histórico de 60 dias.",
         "es_correcta": true,
         "explicacion": "A Jobs UI foi projetada para inspeção por job e por execução. Não possui cálculo integrado de taxa de falha entre jobs. Para métricas agregadas em muitos jobs, são necessárias tabelas de sistema com consultas SQL."
       },
@@ -394,7 +394,7 @@
         "explicacion": "O paralelismo de tarefas intra-job é controlado pela estrutura DAG, não por `max_concurrent_runs`. Este estado de resultado refere-se a execuções simultâneas de jobs (várias instâncias do mesmo job), não a tarefas."
       },
       {
-        "texto_opcion": "Uma nova execução foi acionada enquanto o número máximo de execuções simultâneas para esse job já estava ativo.",
+        "texto_opcion": "Uma nova execução foi acionada enquanto o número máximo de execuções simultâneas para esse job já estava ativo, portanto a nova execução foi imediatamente encerrada sem execução.",
         "es_correcta": true,
         "explicacion": "`MAXIMUM_CONCURRENT_RUNS_REACHED` significa que o job tinha um limite de simultaneidade configurado e uma nova execução chegou enquanto esse limite já foi atingido. A nova execução não foi colocada na fila – foi imediatamente encerrada."
       },
@@ -428,7 +428,7 @@
         "explicacion": "`timeout_seconds` encerra o job no limite - ele não envia notificações do Slack. As notificações exigem um destino de notificação e uma regra de integridade."
       },
       {
-        "texto_opcion": "Crie um **destino de notificação** nas configurações do workspace apontando para o webhook do Slack e configure uma **regra.",
+        "texto_opcion": "Crie um **destino de notificação** nas configurações do workspace apontando para o webhook do Slack e configure uma **regra de integridade** no job com `RUN_DURATION_SECONDS > 7200`.",
         "es_correcta": true,
         "explicacion": "Os destinos de notificação do Webhook (Slack, PagerDuty, etc.) são configurados nas configurações do workspace. As regras de integridade definem o limite do SLA. Quando a regra é acionada, a notificação do webhook é acionada."
       }
@@ -442,7 +442,7 @@
     "pregunta": "Um engenheiro de dados configura `no_alert_for_skipped_runs: true` em um job. Quando essa configuração impediria o envio de um e-mail?",
     "opciones": [
       {
-        "texto_opcion": "Quando o resultado de uma execução de job é `SKIPPED` — por exemplo, porque o job foi acionado.",
+        "texto_opcion": "Quando o resultado de uma execução de job é `SKIPPED` — por exemplo, porque o job foi acionado, mas todas as tarefas foram ignoradas devido a falhas upstream ou tarefas desabilitadas.",
         "es_correcta": true,
         "explicacion": "`no_alert_for_skipped_runs: true` suprime a notificação `on_failure` quando o resultado da execução é efetivamente um salto. Isso evita a fadiga do alerta quando os saltos são um comportamento esperado."
       },
@@ -476,7 +476,7 @@
         "explicacion": "Embora as métricas JVM em nível de cluster possam ser coletadas, isso fornece métricas de computação (CPU, memória) — e não histórico de execução de job ou taxas de falha. As tabelas do sistema são a fonte correta para dados de monitoramento em nível de tarefa."
       },
       {
-        "texto_opcion": "Consulte tabelas `system.lakeflow` de um Databricks SQL Warehouse e exporte os dados para Grafana por meio de um conector.",
+        "texto_opcion": "Consulte tabelas `system.lakeflow` de um Databricks SQL Warehouse e exporte os dados para Grafana por meio de um conector JDBC/ODBC ou API — este é o método mais confiável e escalável.",
         "es_correcta": true,
         "explicacion": "A Databricks recomenda tabelas de sistema como fonte preferida para pipelines de monitoramento externo. Eles fornecem até 365 dias de histórico, suportam SQL complexo e podem ser acessados ​​por meio de conexões SQL Warehouse (JDBC/ODBC) que o Grafana pode consultar diretamente."
       },
@@ -500,7 +500,7 @@
     "pregunta": "Um engenheiro de dados analisa um job com falha e abre os detalhes da execução da tarefa. A seção de erro mostra um `java.lang.OutOfMemoryError: limite de sobrecarga do GC excedido`. Sem corrigir o código, quais informações nos detalhes da execução da tarefa ajudam a confirmar a causa raiz?",
     "opciones": [
       {
-        "texto_opcion": "O link **Spark UI** nos detalhes da execução da tarefa — permite a inspeção do uso da memória do executor.",
+        "texto_opcion": "O link **Spark UI** nos detalhes da execução da tarefa — permite a inspeção do uso da memória do executor, tempo de GC e métricas de estágio/tarefa para confirmar a pressão da memória.",
         "es_correcta": true,
         "explicacion": "O erro OOM sugere pressão de memória. O Spark UI (vinculado aos detalhes da execução da tarefa) mostra quebra de memória do executor, porcentagem de tempo de GC e qual estágio/tarefa acionou o OOM — confirmando se é uma data skew, memória insuficiente do executor ou problema broadcast join."
       },
@@ -534,7 +534,7 @@
         "explicacion": "As iterações `For each` do Lakeflow são unidades de orquestração de jobs, não estágios do Spark. Eles são visíveis nos detalhes da tarefa da visualização DAG, não na aba do estágio Spark."
       },
       {
-        "texto_opcion": "Clique no nó de tarefa `For each` — ele se expande para mostrar subexecuções, uma por iteração.",
+        "texto_opcion": "Clique no nó de tarefa `For each` — ele se expande para mostrar subexecuções, uma por iteração, cada uma com seu próprio status e duração.",
         "es_correcta": true,
         "explicacion": "As tarefas `For each` geram subexecuções para cada iteração. Clicar no nó da tarefa em DAG abre a visualização em nível de iteração, mostrando quais iterações foram bem-sucedidas, estão em execução ou falharam."
       },
@@ -569,7 +569,7 @@
         "explicacion": "Azul não é um indicador de aviso de tempo limite. Significa simplesmente que a tarefa está em execução ativa. A imposição de tempo limite usa `timeout_seconds` e resulta no estado de resultado `TIMEDOUT` quando excedido."
       },
       {
-        "texto_opcion": "A tarefa que está **atualmente em execução** — azul indica um estado ativo `RUNNING`.",
+        "texto_opcion": "A tarefa que está **atualmente em execução** — azul indica um estado ativo `RUNNING`, o que significa que a tarefa está em andamento.",
         "es_correcta": true,
         "explicacion": "Azul na visualização DAG indica uma tarefa que está atualmente em execução (no estado do ciclo de vida `RUNNING`). Somente as tarefas em execução ativa aparecem em azul; as tarefas concluídas são verdes ou vermelhas."
       },

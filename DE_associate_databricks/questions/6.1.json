@@ -3,7 +3,7 @@
     "pregunta": "A data engineer opens the Lakeflow Jobs UI and sees a list of all jobs. Next to each job name there are five small colored indicators. What do these indicators represent?",
     "opciones": [
       {
-        "texto_opcion": "The outcome (status) of the last five runs of that job — green for.",
+        "texto_opcion": "The outcome (status) of the last five runs of that job — green for success, red for failure.",
         "es_correcta": true,
         "explicacion": "The job list page shows the last 5 run outcomes as color-coded mini indicators next to each job name, enabling at-a-glance SLA monitoring without opening each job individually."
       },
@@ -47,7 +47,7 @@
         "explicacion": "The matrix view is organized by tasks (rows) and runs (columns), not by clusters or calendar days."
       },
       {
-        "texto_opcion": "Each **row** is a task; each **column** is a job run.",
+        "texto_opcion": "Each **row** is a task; each **column** is a job run. The cell color shows the status of that task in that run.",
         "es_correcta": true,
         "explicacion": "The matrix view is a 2D grid where rows = tasks and columns = individual runs. The color of each cell immediately shows whether a specific task succeeded, failed, or was skipped in a given run."
       }
@@ -76,7 +76,7 @@
         "explicacion": "Running tasks appear **blue** in the Jobs UI. Pink specifically indicates a skipped status."
       },
       {
-        "texto_opcion": "The task was **skipped** — most likely because an upstream dependency failed and the.",
+        "texto_opcion": "The task was **skipped** — most likely because an upstream dependency failed and the task's `Run if` condition was not met.",
         "es_correcta": true,
         "explicacion": "Pink in the matrix view indicates a skipped task. Tasks are skipped when an upstream dependency fails and the `Run if` condition (e.g., `All succeeded`) is not satisfied, or when the task is disabled."
       }
@@ -95,7 +95,7 @@
         "explicacion": "Git commit information is not shown on the task run detail page. It may be referenced in bundle deployment metadata or tags, but not in the run detail view."
       },
       {
-        "texto_opcion": "The full error stack trace, task duration, attempt number, output logs.",
+        "texto_opcion": "The full error stack trace, task duration, attempt number, output logs, and a direct link to the Spark UI for that run.",
         "es_correcta": true,
         "explicacion": "The task run detail panel provides: error messages and stack traces for failures, task duration, which attempt it was (1st, 2nd for retries), output/stdout, driver logs, and a link to the Spark UI for that specific cluster session."
       },
@@ -119,7 +119,7 @@
     "pregunta": "A data engineer needs run history data going back 8 months for an annual SLA review. They open the Runs tab in the Lakeflow Jobs UI but can only see data from the last 2 months. Why?",
     "opciones": [
       {
-        "texto_opcion": "The Jobs UI only retains run history for **60 days**. Data older than 60 days must be queried from the `system.lakeflow`.",
+        "texto_opcion": "The Jobs UI only retains run history for **60 days**. Data older than 60 days must be queried from the `system.lakeflow` system tables, which retain 365 days.",
         "es_correcta": true,
         "explicacion": "The Jobs UI Runs tab has a 60-day retention limit. For analysis beyond 60 days, system tables (`system.lakeflow.job_run_timeline`) are the correct tool, retaining up to 365 days of history."
       },
@@ -153,7 +153,7 @@
         "explicacion": "`validate` directly depends on `transform`. With `Run if: All succeeded`, `validate` cannot run when `transform` failed, and `load` is also skipped as a result."
       },
       {
-        "texto_opcion": "`validate` and `load` — they are downstream of `transform` and cannot run because their `All.",
+        "texto_opcion": "`validate` and `load` — they are downstream of `transform` and cannot run because their `All succeeded` condition is not met.",
         "es_correcta": true,
         "explicacion": "With `Run if: All succeeded`, every downstream task requires all direct upstream tasks to have succeeded. Since `transform` failed, `validate` (which depends on `transform`) is skipped, and `load` (which depends on `validate`) is also skipped."
       },
@@ -223,7 +223,7 @@
         "explicacion": "Re-running the entire job wastes the 4+ hours of already-completed work from tasks 1–5. Repair Run is the efficient alternative."
       },
       {
-        "texto_opcion": "**Repair Run** — re-runs only the failed task 6 and downstream tasks 7–8.",
+        "texto_opcion": "**Repair Run** — re-runs only the failed task 6 and downstream tasks 7–8, skipping the 4 hours of already-succeeded work.",
         "es_correcta": true,
         "explicacion": "Repair Run is the efficient recovery mechanism for this scenario. It preserves the results of tasks 1–5 and only re-executes the failed task and downstream dependencies, avoiding costly re-processing."
       }
@@ -237,7 +237,7 @@
     "pregunta": "A data engineer triggers a **Repair Run** after a job failure. Which tasks does Databricks re-execute?",
     "opciones": [
       {
-        "texto_opcion": "Only the **failed and skipped tasks**, plus any of their downstream.",
+        "texto_opcion": "Only the **failed and skipped tasks**, plus any of their downstream dependents that need to be re-evaluated.",
         "es_correcta": true,
         "explicacion": "Repair Run is surgical: it re-executes only failed or skipped tasks and re-evaluates their downstream dependencies. Tasks that already succeeded are preserved as-is."
       },
@@ -354,7 +354,7 @@
     "pregunta": "A data engineer writes this query:\n\n```sql\nSELECT job_id, COUNT(*) AS total_runs,\n  SUM(CASE WHEN state = 'FAILED' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS failure_rate_pct\nFROM system.lakeflow.job_run_timeline\nWHERE start_time >= CURRENT_TIMESTAMP - INTERVAL 7 DAYS\nGROUP BY job_id\nHAVING failure_rate_pct > 10;\n```\n\nWhat does this query return?",
     "opciones": [
       {
-        "texto_opcion": "Jobs where more than 10% of runs in the last 7 days ended in a `FAILED` state.",
+        "texto_opcion": "Jobs where more than 10% of runs in the last 7 days ended in a `FAILED` state, along with their failure rate percentage.",
         "es_correcta": true,
         "explicacion": "The query calculates failure rate per job over the last 7 days using `system.lakeflow.job_run_timeline` and filters to jobs with a failure rate above 10% — useful for proactive reliability monitoring."
       },
@@ -383,7 +383,7 @@
     "pregunta": "A data engineer needs to calculate the average and P95 run duration per job for succeeded runs in the last 30 days. Which system table should they query?",
     "opciones": [
       {
-        "texto_opcion": "`system.lakeflow.job_run_timeline` — it contains `start_time`, `end_time`.",
+        "texto_opcion": "`system.lakeflow.job_run_timeline` — it contains `start_time`, `end_time`, and `state` for each job run.",
         "es_correcta": true,
         "explicacion": "Duration is calculated from `start_time` and `end_time` in `job_run_timeline`. Filter on `state = 'SUCCEEDED'` and aggregate with `AVG()` and `PERCENTILE()` for trend analysis."
       },
@@ -441,7 +441,7 @@
     "pregunta": "A data engineer sets a job health rule:\n\n```yaml\nhealth:\n  rules:\n    - metric: RUN_DURATION_SECONDS\n      op: GREATER_THAN\n      value: 7200\n```\n\nWhat happens when a job run takes 3 hours (10,800 seconds)?",
     "opciones": [
       {
-        "texto_opcion": "A health alert is triggered because the run duration (10,800 seconds) exceeded the.",
+        "texto_opcion": "A health alert is triggered because the run duration (10,800 seconds) exceeded the threshold of 7,200 seconds (2 hours).",
         "es_correcta": true,
         "explicacion": "Job health rules define SLA thresholds. When `RUN_DURATION_SECONDS > 7200` and the actual duration is 10,800 seconds, the health rule fires and sends a notification."
       },
@@ -481,7 +481,7 @@
         "explicacion": "Skipped tasks appear **pink**. Yellow indicates waiting/retrying, not skipping."
       },
       {
-        "texto_opcion": "The task is **waiting to retry** after a transient failure.",
+        "texto_opcion": "The task is **waiting to retry** after a transient failure, then eventually succeeds on a subsequent attempt.",
         "es_correcta": true,
         "explicacion": "Yellow indicates a task is waiting — either for cluster resources, for a dependency, or waiting between retry attempts. A yellow-to-green pattern with a 5–10 minute gap strongly suggests the task is retrying (`min_retry_interval_millis` introduces the wait)."
       },
@@ -510,7 +510,7 @@
         "explicacion": "Spark stages are lower-level units within a task's execution, not equivalent to Lakeflow tasks. For task-level duration across runs, use `system.lakeflow.job_task_run_timeline`."
       },
       {
-        "texto_opcion": "Query `system.lakeflow.job_task_run_timeline`, group by `task_key`, and calculate `AVG)`.",
+        "texto_opcion": "Query `system.lakeflow.job_task_run_timeline`, group by `task_key`, and calculate `AVG(DATEDIFF(second, start_time, end_time))`.",
         "es_correcta": true,
         "explicacion": "`job_task_run_timeline` provides task-level granularity including `task_key`, `start_time`, and `end_time`. Grouping by `task_key` and averaging duration identifies the slowest tasks."
       },
@@ -529,7 +529,7 @@
     "pregunta": "A data engineer disabled a task `quality_check` in a job to skip it temporarily during an incident. The `load` task has `depends_on: quality_check` and `Run if: All succeeded`. What happens to `load` when the job runs?",
     "opciones": [
       {
-        "texto_opcion": "`load` is **skipped** — a disabled task is treated as skipped.",
+        "texto_opcion": "`load` is **skipped** — a disabled task is treated as skipped, and `Run if: All succeeded` is not met.",
         "es_correcta": true,
         "explicacion": "A disabled task is treated as skipped at runtime. Because `load` uses `Run if: All succeeded` and its upstream dependency (`quality_check`) was skipped (disabled), the `All succeeded` condition is not satisfied and `load` is also skipped."
       },
@@ -559,7 +559,7 @@
     "pregunta": "A data engineering team uses Jobs compute for their production ETL job and wants to understand which metric best indicates that the cluster is under-provisioned (too few workers). Which metric should they monitor?",
     "opciones": [
       {
-        "texto_opcion": "High **Worker CPU Utilization** consistently near 100% — indicating workers are.",
+        "texto_opcion": "High **Worker CPU Utilization** consistently near 100% — indicating workers are fully saturated and additional compute would speed up the job.",
         "es_correcta": true,
         "explicacion": "When Worker CPU Utilization is consistently near 100%, the cluster is compute-bound and is likely under-provisioned. Adding workers or using a larger node type would reduce job duration."
       },

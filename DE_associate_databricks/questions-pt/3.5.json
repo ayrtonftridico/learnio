@@ -308,7 +308,7 @@
         "explicacion": "Como `groupBy(\"category\")` é especificado, a agregação é calculada por categoria, não globalmente."
       },
       {
-        "texto_opcion": "Ele retorna uma linha por “categoria” distinta com a receita total e média.",
+        "texto_opcion": "Ele retorna uma linha por “categoria” distinta com a receita total e média calculada dentro desse grupo.",
         "es_correcta": true,
         "explicacion": "`groupBy` seguido por `.agg` com múltiplas funções agregadas calcula cada agregado independentemente por grupo, retornando uma linha por grupo."
       }
@@ -337,7 +337,7 @@
         "explicacion": "Isso revela apenas quantas linhas duplicadas existiam no total, e não quais valores ou linhas `order_id` específicos foram duplicados."
       },
       {
-        "texto_opcion": "Agrupe por `order_id`, conte as ocorrências, filtre onde contagem > 1 e.",
+        "texto_opcion": "Agrupe por `order_id`, conte as ocorrências, filtre onde contagem > 1 e, em seguida, junte-se novamente à tabela original.",
         "es_correcta": true,
         "explicacion": "Contar ocorrências por `order_id` e filtrar contagens maiores que uma identifica quais IDs estão duplicados, que podem então ser unidos novamente para recuperar as linhas duplicadas completas."
       }
@@ -409,7 +409,7 @@
     "pregunta": "Um engenheiro de dados deseja desduplicar um streaming DataFrame `events_stream` com base em uma coluna `event_id` enquanto o stream está em execução.\n\n```python\ndeduped_df = events_stream.dropDuplicates([\"event_id\"])\n```\n\nQual é uma consideração importante sobre esta operação em Streaming Estruturado?",
     "opciones": [
       {
-        "texto_opcion": "Sem uma marca d'água, o Spark deve reter todos os estados `event_id` vistos anteriormente indefinidamente para detectar.",
+        "texto_opcion": "Sem uma marca d'água, o Spark deve reter todos os estados `event_id` vistos anteriormente indefinidamente para detectar duplicatas, o que pode aumentar o tamanho do estado ilimitadamente.",
         "es_correcta": true,
         "explicacion": "O estado de desduplicação de streaming cresce continuamente, a menos que seja delimitado por uma marca d'água em uma coluna de tempo de evento, já que o Spark precisa se lembrar de chaves anteriores para detectar novas duplicatas."
       },
@@ -438,7 +438,7 @@
     "pregunta": "Um engenheiro de dados precisa encontrar, para cada `customer_id`, a diferença em dias entre valores consecutivos de `order_date`.\n\nQual combinação de funções de janela é apropriada?",
     "opciones": [
       {
-        "texto_opcion": "Use `lag(\"order_date\")` em uma janela particionada por `customer_id` e ordenada por `order_date`.",
+        "texto_opcion": "Use `lag(\"order_date\")` em uma janela particionada por `customer_id` e ordenada por `order_date`, então calcule `datediff` em relação à linha atual.",
         "es_correcta": true,
         "explicacion": "`lag` recupera o valor da linha anterior dentro da partição, permitindo um cálculo direto da diferença de data entre pedidos consecutivos por cliente."
       },
@@ -496,7 +496,7 @@
     "pregunta": "Um engenheiro de dados tem uma tabela onde algumas linhas são duplicatas verdadeiras (idênticas em todas as colunas) e outras compartilham a mesma chave comercial, mas têm valores `last_modified` diferentes devido a atualizações legítimas. O engenheiro precisa manter apenas a versão mais recente por chave comercial e, ao mesmo tempo, remover primeiro as linhas duplicadas exatas.\n\nQual ordem de processamento está correta?",
     "opciones": [
       {
-        "texto_opcion": "Primeiro aplique `dropDuplicates()` sem argumentos para remover linhas duplicadas exatas e, em seguida.",
+        "texto_opcion": "Primeiro aplique `dropDuplicates()` sem argumentos para remover linhas duplicadas exatas e, em seguida, use uma função de janela classificada por `last_modified` para manter apenas a linha mais recente por chave comercial.",
         "es_correcta": true,
         "explicacion": "A remoção de duplicatas exatas primeiro evita distorções na etapa de classificação, e a função da janela isola corretamente a atualização legítima mais recente por chave."
       },
@@ -583,7 +583,7 @@
     "pregunta": "Qual afirmação descreve com precisão uma limitação chave de `dropDuplicates()` quando nenhum subconjunto de coluna é especificado?",
     "opciones": [
       {
-        "texto_opcion": "Linhas que diferem até mesmo por um único valor de coluna.",
+        "texto_opcion": "Linhas que diferem até mesmo por um único valor de coluna, como um carimbo de data/hora ligeiramente diferente, não serão consideradas duplicadas.",
         "es_correcta": true,
         "explicacion": "Sem nenhum subconjunto especificado, `dropDuplicates()` compara todas as colunas, portanto, qualquer diferença - mesmo em um único campo - significa que as linhas são tratadas como distintas."
       },
@@ -641,7 +641,7 @@
     "pregunta": "Um engenheiro de dados percebe que `df.agg(sum(\"amount\"))` retorna `null` mesmo que a coluna `amount` contenha alguns valores numéricos não nulos.\n\nQual é a explicação mais provável?",
     "opciones": [
       {
-        "texto_opcion": "A coluna `amount` é armazenada como um tipo de string contendo valores não numéricos que não podem ser convertidos.",
+        "texto_opcion": "A coluna `amount` é armazenada como um tipo de string contendo valores não numéricos que não podem ser convertidos implicitamente, fazendo com que a soma falhe silenciosamente e retorne nulo.",
         "es_correcta": true,
         "explicacion": "Quando uma coluna destinada a ser numérica contém valores de cadeia de caracteres não convertíveis, a agregação de soma do Spark pode retornar nulo em vez de gerar um erro, dependendo da configuração."
       },
@@ -714,7 +714,7 @@
         "explicacion": "Ambas as funções podem ser usadas com ou sem `partitionBy`; este não é um requisito distintivo."
       },
       {
-        "texto_opcion": "`rank()` deixa lacunas na sequência de classificação após empates, enquanto `dense_rank()` atribui classificações.",
+        "texto_opcion": "`rank()` deixa lacunas na sequência de classificação após empates, enquanto `dense_rank()` atribui classificações consecutivas sem lacunas.",
         "es_correcta": true,
         "explicacion": "Após um empate, `rank()` avança pelo número de linhas empatadas, enquanto `dense_rank()` continua com o próximo número inteiro consecutivo."
       }
@@ -728,7 +728,7 @@
     "pregunta": "Um engenheiro de dados precisa encontrar os três funcionários mais bem pagos em cada “departamento”.\n\n```python\nw = Window.partitionBy(\"department\").orderBy(col(\"salary\").desc())\nresult_df = employees.withColumn(\"rnk\", dense_rank().over(w)).filter(col(\"rnk\") <= 3)\n```\n\nQual é o problema potencial ao usar `dense_rank()` para este requisito?",
     "opciones": [
       {
-        "texto_opcion": "Se vários funcionários empatarem no 3º lugar salarial, todos serão incluídos.",
+        "texto_opcion": "Se vários funcionários empatarem no 3º lugar salarial, todos serão incluídos, resultando em mais de 3 linhas para esse departamento.",
         "es_correcta": true,
         "explicacion": "`dense_rank()` atribui a mesma classificação aos valores empatados, portanto, empates na classificação de corte fazem com que linhas extras satisfaçam `rnk <= 3`, excedendo exatamente 3 resultados."
       },
@@ -757,7 +757,7 @@
     "pregunta": "Um engenheiro de dados executa `df.groupBy(\"product_id\").agg(sum(\"quantity\"), avg(\"price\")).explain()` e percebe um estágio de shuffle no plano físico.\n\nPor que esse shuffle ocorre?",
     "opciones": [
       {
-        "texto_opcion": "Linhas com o mesmo `product_id` podem residir em partições diferentes, portanto.",
+        "texto_opcion": "Linhas com o mesmo `product_id` podem residir em partições diferentes, portanto, o Spark deve embaralhar os dados para reunir as chaves correspondentes antes da agregação.",
         "es_correcta": true,
         "explicacion": "O agrupamento requer a localização conjunta de todas as linhas da mesma chave, o que normalmente exige uma ordem aleatória, a menos que os dados já estejam particionados por essa chave."
       },
@@ -791,7 +791,7 @@
         "explicacion": "Os casos de uso regulatórios e de conformidade exigem números exatos, tornando `countDistinct` a escolha apropriada em vez de uma estimativa."
       },
       {
-        "texto_opcion": "Gerar uma métrica diária no painel mostrando aproximadamente quantos visitantes únicos do site houve.",
+        "texto_opcion": "Gerar uma métrica diária no painel mostrando aproximadamente quantos visitantes únicos do site houve, onde a velocidade é mais importante do que a precisão exata.",
         "es_correcta": true,
         "explicacion": "As métricas do painel que toleram pequenos erros de estimativa se beneficiam da velocidade de `approx_count_distinct`, especialmente em dados de grande escala."
       },
@@ -825,7 +825,7 @@
         "explicacion": "Sem um subconjunto, as linhas com `reading_value` ligeiramente diferentes devido ao arredondamento não serão consideradas duplicadas e serão retidas."
       },
       {
-        "texto_opcion": "Use `dropDuplicates([\"sensor_id\", \"reading_timestamp\"])` para desduplicar com base apenas nas colunas-chave de identificação.",
+        "texto_opcion": "Use `dropDuplicates([\"sensor_id\", \"reading_timestamp\"])` para desduplicar com base apenas nas colunas-chave de identificação, ignorando pequenas diferenças em `reading_value`.",
         "es_correcta": true,
         "explicacion": "Especificar apenas as colunas-chave como subconjunto garante que as duplicatas sejam identificadas pela identidade lógica do evento, ignorando diferenças de valor inconsequentes."
       },
@@ -849,7 +849,7 @@
         "explicacion": "Os limites do quadro negativo referem-se às linhas anteriores, não às seguintes; `(-2, 0)` olha para trás, não para frente."
       },
       {
-        "texto_opcion": "Uma média móvel de três linhas de `amount` dentro de cada região, ordenada por `sale_date`.",
+        "texto_opcion": "Uma média móvel de três linhas de `amount` (a linha atual e as duas linhas anteriores) dentro de cada região, ordenada por `sale_date`.",
         "es_correcta": true,
         "explicacion": "`rowsBetween(-2, 0)` define um quadro que abrange a linha atual e as duas linhas anteriores, então `avg` calcula uma média móvel de 3 linhas por região."
       },

@@ -177,7 +177,7 @@
     "pregunta": "Um engenheiro de dados executa o seguinte e obtém uma `AnalysisException: Reference 'id' is ambiguous`:\n\n```python\ndf_a.join(df_b, df_a.id == df_b.id).select(\"id\")\n```\n\nQual é a melhor solução?",
     "opciones": [
       {
-        "texto_opcion": "Use a sintaxe de junção simplificada `df_a.join`, que mantém apenas uma coluna `id`.",
+        "texto_opcion": "Use a sintaxe de junção simplificada `df_a.join(df_b, \"id\")`, que mantém apenas uma coluna `id`.",
         "es_correcta": true,
         "explicacion": "A união em uma string de nome de coluna (em vez de uma condição de igualdade explícita) desduplica automaticamente a chave de junção no resultado."
       },
@@ -351,7 +351,7 @@
     "pregunta": "Um engenheiro de dados força explicitamente um broadcast join:\n\n```python\nfrom pyspark.sql.functions import broadcast\nresult = large_df.join(broadcast(small_df), \"id\")\n```\n\nQual é o principal risco desta abordagem?",
     "opciones": [
       {
-        "texto_opcion": "Se `small_df` for realmente grande, os executores podem ficar sem memória.",
+        "texto_opcion": "Se `small_df` for realmente grande, os executores podem ficar sem memória transmitindo-o para todos os nós.",
         "es_correcta": true,
         "explicacion": "A transmissão envia uma cópia completa do DataFrame para cada executor; se for maior que o esperado, isso poderá causar erros de falta de memória."
       },
@@ -482,7 +482,7 @@
         "explicacion": "Isso descreve uma junção à esquerda; aqui `df_b` está no lado direito e é o que está totalmente preservado."
       },
       {
-        "texto_opcion": "Todas as linhas de `df_b`, com colunas `df_a` correspondentes ou nulas.",
+        "texto_opcion": "Todas as linhas de `df_b`, com colunas `df_a` correspondentes ou nulas onde não há correspondência.",
         "es_correcta": true,
         "explicacion": "Uma junção à direita preserva cada linha do DataFrame direito (`df_b`), preenchendo colunas incomparáveis do lado esquerdo com nulo."
       }
@@ -540,7 +540,7 @@
         "explicacion": "Aumentar o limite não causa falha automaticamente; simplesmente altera a estratégia de junção escolhida."
       },
       {
-        "texto_opcion": "A tabela de 50 MB agora se qualifica para broadcast join.",
+        "texto_opcion": "A tabela de 50 MB agora se qualifica para broadcast join, evitando um shuffle completo.",
         "es_correcta": true,
         "explicacion": "Aumentar o limite acima do tamanho da tabela menor permite que o optimizer transmita-o em vez de usar a junção sort-merge."
       }
@@ -641,7 +641,7 @@
     "pregunta": "Um engenheiro de dados deseja que o DataFrame final contenha `customers_df.id` de uma junção com `orders_df`, mas `orders_df` também tem uma coluna chamada `id` (uma entidade diferente) que deve ser mantida com um nome diferente.\n\nQual abordagem evita ambiguidade?",
     "opciones": [
       {
-        "texto_opcion": "Renomeie a coluna `id` de `orders_df` com `.withColumnRenamed(\"id\".",
+        "texto_opcion": "Renomeie a coluna `id` de `orders_df` com `.withColumnRenamed(\"id\", \"order_id\")` antes de ingressar.",
         "es_correcta": true,
         "explicacion": "Renomear a coluna conflitante antes da junção evita ambiguidade, pois ambos os DataFrames terão nomes de coluna exclusivos."
       },
@@ -675,7 +675,7 @@
         "explicacion": "Eles diferem quando uma linha da esquerda corresponde a várias linhas da direita: inner duplica a linha, left_semi não."
       },
       {
-        "texto_opcion": "`left_semi` evita a duplicação de linhas quando um produto tem várias linhas de vendas correspondentes.",
+        "texto_opcion": "`left_semi` evita a duplicação de linhas quando um produto tem várias linhas de vendas correspondentes; `inner` duplicaria a linha do produto para cada correspondência.",
         "es_correcta": true,
         "explicacion": "Uma junção interna produz uma linha de saída por par correspondente, duplicando a linha esquerda para cada correspondência, enquanto `left_semi` retorna cada linha esquerda correspondente apenas uma vez."
       },
@@ -699,7 +699,7 @@
     "pregunta": "Um engenheiro de dados executa o seguinte e percebe que o resultado tem mais linhas do que o esperado:\n\n```python\nresult = df_a.join(df_b, \"id\")\n```\n\nQual é a causa mais provável?",
     "opciones": [
       {
-        "texto_opcion": "`df_b` contém valores `id` duplicados, fazendo com que cada correspondência em `df_a` seja duplicada.",
+        "texto_opcion": "`df_b` contém valores `id` duplicados, fazendo com que cada correspondência em `df_a` seja duplicada para cada linha correspondente.",
         "es_correcta": true,
         "explicacion": "Quando a chave de junção não é exclusiva em um lado, cada combinação correspondente produz uma linha de saída separada, aumentando a contagem de linhas."
       },
@@ -859,7 +859,7 @@
         "explicacion": "Uma junção cruzada produz o produto cartesiano (multiplicação), não uma simples adição de contagens de linhas."
       },
       {
-        "texto_opcion": "1.000.000 de linhas; a principal preocupação é o crescimento explosivo.",
+        "texto_opcion": "1.000.000 de linhas; a principal preocupação é o crescimento explosivo no tamanho dos resultados e no custo computacional.",
         "es_correcta": true,
         "explicacion": "Uma junção cruzada multiplica a contagem de linhas (1.000 x 1.000), o que pode rapidamente se tornar muito caro em DataFrames maiores."
       }
@@ -873,7 +873,7 @@
     "pregunta": "Qual cenário justifica melhor o uso de uma anti-junção esquerda em vez de filtrar com uma subconsulta `NOT IN` no Spark SQL?",
     "opciones": [
       {
-        "texto_opcion": "Ao comparar DataFrames grandes, já que `left_anti` geralmente é optimized melhor pelo Catalyst.",
+        "texto_opcion": "Ao comparar DataFrames grandes, já que `left_anti` geralmente é optimized melhor pelo Catalyst do que subconsultas correlacionadas.",
         "es_correcta": true,
         "explicacion": "As anti-junções são normalmente traduzidas em planos físicos eficientes baseados em junções, enquanto as subconsultas `NOT IN` podem ser mais difíceis para o optimizer planejar com eficiência em escala."
       },

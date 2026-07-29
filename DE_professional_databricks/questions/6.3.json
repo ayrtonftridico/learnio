@@ -8,7 +8,7 @@
         "explicacion": "Removes exact incremental capacidade."
       },
       {
-        "texto_opcion": "Consume table_changes()/readChangeFeed between checkpoints processing.",
+        "texto_opcion": "Consume table_changes()/readChangeFeed between checkpoints processing only inserts/updates/deletes",
         "es_correcta": true,
         "explicacion": "CDF delivers incremental changes avoiding full scan."
       },
@@ -37,7 +37,7 @@
         "explicacion": "Time travel reads state, not diff from changes."
       },
       {
-        "texto_opcion": "table_changes('catalog.schema.table', start_version.",
+        "texto_opcion": "table_changes('catalog.schema.table', start_version, end_version)",
         "es_correcta": true,
         "explicacion": "Standard Delta CDF API for version range."
       },
@@ -66,7 +66,7 @@
         "explicacion": "Still full scan if complete source."
       },
       {
-        "texto_opcion": "Incremental stream or batch reading CDF applying MERGE only.",
+        "texto_opcion": "Incremental stream or batch reading CDF applying MERGE only for changed keys",
         "es_correcta": true,
         "explicacion": "Propagates only deltas reducing scan."
       },
@@ -129,7 +129,7 @@
         "explicacion": "It may be enabled but the version has expired."
       },
       {
-        "texto_opcion": "Retention Delta/VACUUM removed files from older versions.",
+        "texto_opcion": "Retention Delta/VACUUM removed files from older versions beyond the CDF window",
         "es_correcta": true,
         "explicacion": "CDF depends on configured retention history."
       },
@@ -163,7 +163,7 @@
         "explicacion": "Dangerous; does not enable CDF."
       },
       {
-        "texto_opcion": "ALTER TABLE t SET TBLPROPERTIES.",
+        "texto_opcion": "ALTER TABLE t SET TBLPROPERTIES (delta.enableChangeDataFeed = true)",
         "es_correcta": true,
         "explicacion": "Default Property Delta for CDF."
       }
@@ -216,7 +216,7 @@
         "explicacion": "No idempotence."
       },
       {
-        "texto_opcion": "MERGE ON key with version/offset or batchId guaranteeing.",
+        "texto_opcion": "MERGE ON key with version/offset or batchId guaranteeing exactly-once semantics",
         "es_correcta": true,
         "explicacion": "Idempotence key avoids duplicates in retries."
       },
@@ -279,7 +279,7 @@
         "explicacion": "Remove incremental font."
       },
       {
-        "texto_opcion": "Propagate incrementally using existing CDC merge keys and.",
+        "texto_opcion": "Propagate incrementally using existing CDC merge keys and timestamps or bronze internal CDF",
         "es_correcta": true,
         "explicacion": "Leverages upstream CDC without rereading full history."
       }
@@ -351,7 +351,7 @@
     "pregunta": "DBU cost tripled after adding derived column recomputing 5 years. Alternative?",
     "opciones": [
       {
-        "texto_opcion": "Incremental backfill by partition/version or recompute only column.",
+        "texto_opcion": "Incremental backfill by partition/version or recompute only column via incremental MERGE",
         "es_correcta": true,
         "explicacion": "Limits scope of recompute."
       },
@@ -380,7 +380,7 @@
     "pregunta": "CDF includes change_type insert/update_preimage/update_postimage/delete. Use in MERGE?",
     "opciones": [
       {
-        "texto_opcion": "Treat different types: apply upsert for inserts/updates.",
+        "texto_opcion": "Treat different types: apply upsert for inserts/updates, delete for removes",
         "es_correcta": true,
         "explicacion": "Correct semantics per operation."
       },
@@ -409,7 +409,7 @@
     "pregunta": "Lakeflow job stores last_processed_version in task value. Benefit?",
     "opciones": [
       {
-        "texto_opcion": "Accurate resumption between runs without rereading CDF from.",
+        "texto_opcion": "Accurate resumption between runs without rereading CDF from version zero",
         "es_correcta": true,
         "explicacion": "Light state between runs."
       },
@@ -525,7 +525,7 @@
     "pregunta": "New column requires populate history without recomputing heavy downstream joins. Abordagin?",
     "opciones": [
       {
-        "texto_opcion": "Backfill column via UPDATE/MERGE partitioned by date using CDF or.",
+        "texto_opcion": "Backfill column via UPDATE/MERGE partitioned by date using CDF or incremental snapshots",
         "es_correcta": true,
         "explicacion": "Scope limited to what is necessary."
       },
@@ -598,7 +598,7 @@
         "explicacion": "Delta Lake feature."
       },
       {
-        "texto_opcion": "Time travel reads complete snapshot.",
+        "texto_opcion": "Time travel reads complete snapshot; CDF returns row-level changes between versions",
         "es_correcta": true,
         "explicacion": "Use different cases."
       }
@@ -627,7 +627,7 @@
         "explicacion": "Full scan."
       },
       {
-        "texto_opcion": "MERGE ON natural key keeping latest by timestamp via.",
+        "texto_opcion": "MERGE ON natural key keeping latest by timestamp via CDF/batch window",
         "es_correcta": true,
         "explicacion": "Incremental dedup without full scan complete history."
       }
@@ -680,7 +680,7 @@
         "explicacion": "Risk orphan facts."
       },
       {
-        "texto_opcion": "Orchestrate MERGE dim first or use FK integrity checks.",
+        "texto_opcion": "Orchestrate MERGE dim first or use FK integrity checks; process facts referencing latest dim version",
         "es_correcta": true,
         "explicacion": "Order and versioning avoid inconsistency."
       },
@@ -757,7 +757,7 @@
     "pregunta": "Bug corrupted silver; recompute from bronze CDF from version X. Steps?",
     "opciones": [
       {
-        "texto_opcion": "Identify good version, reset watermark.",
+        "texto_opcion": "Identify good version, reset watermark, replay CDF interval or restore table + replay",
         "es_correcta": true,
         "explicacion": "Controlled replay using history Delta."
       },
@@ -825,7 +825,7 @@
         "explicacion": "It depends on the case."
       },
       {
-        "texto_opcion": "Overwrite can overwrite entire partitions.",
+        "texto_opcion": "Overwrite can overwrite entire partitions; combine with MERGE for incremental row-level",
         "es_correcta": true,
         "explicacion": "Partition overwrite is not row-level incremental."
       },
@@ -859,7 +859,7 @@
         "explicacion": "Actual retention limit."
       },
       {
-        "texto_opcion": "Retention may expire old versions; accelerate catch-up or.",
+        "texto_opcion": "Retention may expire old versions; accelerate catch-up or increase retention",
         "es_correcta": true,
         "explicacion": "Excessive lag loses ability to read old versions."
       }
@@ -878,7 +878,7 @@
         "explicacion": "Anti-pattern."
       },
       {
-        "texto_opcion": "Insert controlled sequence of versions.",
+        "texto_opcion": "Insert controlled sequence of versions, validate expected output by table_changes",
         "es_correcta": true,
         "explicacion": "Tests simulate incremental Delta commits."
       },
@@ -907,7 +907,7 @@
         "explicacion": "Expensive."
       },
       {
-        "texto_opcion": "Propagate new columns via MERGE schema evolution or auto merge.",
+        "texto_opcion": "Propagate new columns via MERGE schema evolution or auto merge schema settings",
         "es_correcta": true,
         "explicacion": "Incremental includes schema changes."
       },

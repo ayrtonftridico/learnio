@@ -163,7 +163,7 @@
         "explicacion": "<p><code>skipMalformedRows</code> is not a valid COPY INTO option.</p>"
       },
       {
-        "texto_opcion": "Use `FORMAT_OPTIONS ('mode' = 'PERMISSIVE')` and add a `_corrupt_record` column to.",
+        "texto_opcion": "Use `FORMAT_OPTIONS ('mode' = 'PERMISSIVE')` and add a `_corrupt_record` column to the target table to capture malformed rows.",
         "es_correcta": true,
         "explicacion": "<p>COPY INTO passes <code>FORMAT_OPTIONS</code> to the underlying Spark DataFrameReader. Setting <code>mode = PERMISSIVE</code> (the default) stores malformed records in the <code>_corrupt_record</code> column instead of failing the job.</p>"
       }
@@ -187,7 +187,7 @@
         "explicacion": "<p>Incremental file detection is COPY INTO's default idempotency behavior and is not controlled by the subquery.</p>"
       },
       {
-        "texto_opcion": "Apply column transformations to the raw source data before loading it into the.",
+        "texto_opcion": "Apply column transformations to the raw source data before loading it into the Delta table.",
         "es_correcta": true,
         "explicacion": "<p>COPY INTO supports a SELECT subquery in the FROM clause to cast, rename, or transform columns at ingest time before writing to the Delta table.</p>"
       },
@@ -235,7 +235,7 @@
     "pregunta": "Which statement correctly describes how COPY INTO differs from `spark.read` followed by `.write`?",
     "opciones": [
       {
-        "texto_opcion": "COPY INTO tracks loaded files and skips re-ingestion.",
+        "texto_opcion": "COPY INTO tracks loaded files and skips re-ingestion; `spark.read` / `.write` has no built-in file tracking.",
         "es_correcta": true,
         "explicacion": "COPY INTO maintains a load history per file automatically. A plain `spark.read` + `write` job must implement its own deduplication or overwrite logic."
       },
@@ -322,7 +322,7 @@
     "pregunta": "A data engineer is comparing Auto Loader and COPY INTO for a new ingestion pipeline. The source bucket receives thousands of new files per hour. Which statement is accurate?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader is preferred at high file volume because it uses cloud notifications to detect new.",
+        "texto_opcion": "Auto Loader is preferred at high file volume because it uses cloud notifications to detect new files efficiently; COPY INTO must list the entire directory each run.",
         "es_correcta": true,
         "explicacion": "Auto Loader's file notification mode avoids full directory listings, making it more scalable. COPY INTO lists the directory on every execution, which becomes costly at high file counts."
       },
@@ -351,7 +351,7 @@
     "pregunta": "A data engineer executes the following command:\n\n```sql\nCOPY INTO finance.ledger\nFROM 's3://bucket/ledger/'\nFILEFORMAT = PARQUET\nCOPY_OPTIONS ('force' = 'true');\n```\n\nWhat is the risk of using `force = true` in a production pipeline?",
     "opciones": [
       {
-        "texto_opcion": "All previously ingested files are reloaded.",
+        "texto_opcion": "All previously ingested files are reloaded, potentially creating duplicate rows.",
         "es_correcta": true,
         "explicacion": "<p><code>force = true</code> bypasses the file-tracking mechanism and re-ingests every matching file, which will duplicate rows if the table already contains that data.</p>"
       },
@@ -409,7 +409,7 @@
     "pregunta": "A data engineer sets up COPY INTO without specifying inline credentials for an S3 path in a Unity Catalog-enabled workspace. Under what condition will the command succeed without explicit credentials?",
     "opciones": [
       {
-        "texto_opcion": "When the S3 path is covered by a Unity Catalog external location that the engineer has READ FILES permission on.",
+        "texto_opcion": "When the S3 path is covered by a Unity Catalog external location that the engineer has READ FILES permission on, or when the cluster has an IAM instance profile granting access to the bucket.",
         "es_correcta": true,
         "explicacion": "<p>In Unity Catalog workspaces, access is granted via external locations or storage credentials managed in UC. In non-UC workspaces, an IAM instance profile attached to the cluster is sufficient. Both approaches allow COPY INTO to run without inline credentials.</p>"
       },
@@ -496,7 +496,7 @@
     "pregunta": "A data engineer runs the following statement on a Delta table with Unity Catalog:\n\n```sql\nCOPY INTO main.sales.orders\nFROM 's3://bucket/orders/'\nFILEFORMAT = CSV\nFORMAT_OPTIONS ('header' = 'true', 'inferSchema' = 'true');\n```\n\nWhat is the risk of using `inferSchema = true` in production?",
     "opciones": [
       {
-        "texto_opcion": "Schema inference reads a sample of files and may infer incorrect types.",
+        "texto_opcion": "Schema inference reads a sample of files and may infer incorrect types, causing write failures or silent type coercions.",
         "es_correcta": true,
         "explicacion": "<p>Inferred types depend on the sampled data and can change between runs (e.g., a column inferred as <code>INT</code> in one run may be inferred as <code>LONG</code> in another). Explicitly defining the schema is safer for production pipelines.</p>"
       },
@@ -554,7 +554,7 @@
     "pregunta": "A data engineer runs the following and gets an error:\n\n```sql\nCOPY INTO raw.sensor_data\nFROM 's3://bucket/sensors/'\nFILEFORMAT = TYPE = 'JSON';\n```\n\nWhat is wrong with this statement?",
     "opciones": [
       {
-        "texto_opcion": "The `FILEFORMAT` clause has invalid syntax; it should be `FILEFORMAT = JSON` with.",
+        "texto_opcion": "The `FILEFORMAT` clause has invalid syntax; it should be `FILEFORMAT = JSON` with no parentheses and no `TYPE =` key.",
         "es_correcta": true,
         "explicacion": "<p>The correct syntax is simply <code>FILEFORMAT = JSON</code>. Neither parentheses nor a <code>TYPE =</code> key are part of the documented COPY INTO syntax.</p>"
       },
@@ -651,7 +651,7 @@
         "explicacion": "VACUUM retention governs data file cleanup, not the transaction log. The log retention is controlled by `delta.logRetentionDuration`."
       },
       {
-        "texto_opcion": "Increase the Delta table's `delta.logRetentionDuration` to retain transaction log.",
+        "texto_opcion": "Increase the Delta table's `delta.logRetentionDuration` to retain transaction log history beyond 90 days.",
         "es_correcta": true,
         "explicacion": "COPY INTO load metadata is stored in the Delta log. The default log retention is 30 days; setting `delta.logRetentionDuration` to a longer period (e.g., `interval 180 days`) preserves the file-tracking history."
       },
@@ -709,7 +709,7 @@
         "explicacion": "<p>COPY INTO does not auto-create tables. The target table must exist before running the command, even if it is an empty schemaless table.</p>"
       },
       {
-        "texto_opcion": "COPY INTO can succeed if the table is first created as an empty schemaless table with `CREATE TABLE IF NOT EXISTS table_name`.",
+        "texto_opcion": "COPY INTO can succeed if the table is first created as an empty schemaless table with `CREATE TABLE IF NOT EXISTS table_name`; schema is then inferred from the source files.",
         "es_correcta": true,
         "explicacion": "<p>Per the official docs, COPY INTO supports schemaless Delta tables. The engineer creates an empty table with <code>CREATE TABLE IF NOT EXISTS table_name</code> (no schema defined), and COPY INTO infers and populates the schema on first run. If the table does not exist at all, the command fails.</p>"
       },
@@ -728,7 +728,7 @@
     "pregunta": "A data engineer loads JSON data with COPY INTO and the source files contain a nested field `metadata.source`. How can this field be extracted and stored as a top-level column in the ingested Delta table?",
     "opciones": [
       {
-        "texto_opcion": "Use a SELECT subquery in the FROM clause with dot notation: `SELECT metadata.source AS.",
+        "texto_opcion": "Use a SELECT subquery in the FROM clause with dot notation: `SELECT metadata.source AS source_name FROM 's3://…'`.",
         "es_correcta": true,
         "explicacion": "<p>COPY INTO's FROM subquery supports standard Spark SQL expressions. For a JSON field ingested as a struct, dot notation (<code>metadata.source</code>) correctly accesses the nested field and aliases it as a top-level column.</p>"
       },
@@ -767,7 +767,7 @@
         "explicacion": "<p><code>DELETE FROM</code> removes rows but does not affect the COPY INTO file-tracking metadata in the Delta log.</p>"
       },
       {
-        "texto_opcion": "There is no SQL command; dropping and recreating the Delta table is the only.",
+        "texto_opcion": "There is no SQL command; dropping and recreating the Delta table is the only way to permanently reset load history.",
         "es_correcta": true,
         "explicacion": "<p>COPY INTO load history is stored in the Delta transaction log. There is no <code>RESET COPY HISTORY</code> command. Dropping and recreating the table clears the log entirely. <code>COPY_OPTIONS ('force' = 'true')</code> bypasses history per-run but does not erase it.</p>"
       },
@@ -820,7 +820,7 @@
         "explicacion": "`SELECT` grants read access; COPY INTO writes data, so `MODIFY` is required on the target table."
       },
       {
-        "texto_opcion": "`MODIFY` on the target table and `READ FILES` on the.",
+        "texto_opcion": "`MODIFY` on the target table and `READ FILES` on the external location.",
         "es_correcta": true,
         "explicacion": "Writing to a Delta table via COPY INTO requires `MODIFY` (or `ALL PRIVILEGES`) on the table. Reading from cloud storage requires `READ FILES` on the matching Unity Catalog external location."
       },

@@ -61,7 +61,7 @@
     "pregunta": "Auto Loader is ingesting JSON files with `cloudFiles.schemaEvolutionMode` set to its default value. A new column `discount` appears in incoming files that was not in the original schema. What happens?",
     "opciones": [
       {
-        "texto_opcion": "The stream fails on the first micro-batch containing the new column.",
+        "texto_opcion": "The stream fails on the first micro-batch containing the new column; after restart, Auto Loader evolves the schema to include `discount`.",
         "es_correcta": true,
         "explicacion": "The default mode is `addNewColumns`. Auto Loader detects the new column, fails the stream to trigger a re-plan, and on restart incorporates the new column into the schema."
       },
@@ -119,7 +119,7 @@
     "pregunta": "A data engineer sets `cloudFiles.schemaEvolutionMode = 'rescue'` and `rescuedDataColumn = '_rescued'`. A new column `promo_code` arrives in a JSON file. What happens to the data in `promo_code`?",
     "opciones": [
       {
-        "texto_opcion": "The `promo_code` data is captured as JSON inside the `_rescued` column without adding it to.",
+        "texto_opcion": "The `promo_code` data is captured as JSON inside the `_rescued` column without adding it to the main schema.",
         "es_correcta": true,
         "explicacion": "In `rescue` mode, unknown columns are not added to the schema. Instead their data is stored as JSON in the configured `rescuedDataColumn`, keeping the main schema stable."
       },
@@ -163,7 +163,7 @@
         "explicacion": "`rescuedDataColumn` captures more than type mismatches — it also captures unknown columns and case-mismatched field names."
       },
       {
-        "texto_opcion": "Fields missing from the schema, fields with incompatible types.",
+        "texto_opcion": "Fields missing from the schema, fields with incompatible types, and fields with case-mismatched names.",
         "es_correcta": true,
         "explicacion": "`rescuedDataColumn` captures any data that could not be parsed into the defined schema: unknown columns, type mismatches, and case-sensitivity mismatches in field names."
       }
@@ -192,7 +192,7 @@
         "explicacion": "`schemaHints` only overrides types for the specified columns. All other columns are still inferred normally."
       },
       {
-        "texto_opcion": "Auto Loader uses `DOUBLE` for `amount` and `TIMESTAMP` for `event_ts`.",
+        "texto_opcion": "Auto Loader uses `DOUBLE` for `amount` and `TIMESTAMP` for `event_ts`, overriding automatic type inference for those columns.",
         "es_correcta": true,
         "explicacion": "`schemaHints` lets engineers manually specify types for columns where automatic inference would produce the wrong type (e.g., inferring `STRING` instead of `TIMESTAMP`)."
       }
@@ -211,7 +211,7 @@
         "explicacion": "The checkpoint stores offset progress, not schema information. The two schemas are the Auto Loader schema (at `schemaLocation`) and the destination Delta table schema."
       },
       {
-        "texto_opcion": "The schema stored in `cloudFiles.schemaLocation` and the schema of the destination.",
+        "texto_opcion": "The schema stored in `cloudFiles.schemaLocation` and the schema of the destination Delta table.",
         "es_correcta": true,
         "explicacion": "Auto Loader tracks its own inferred schema in `schemaLocation`. The Delta table has its own schema. When Auto Loader evolves its schema, the Delta table must also be updated separately — they do not evolve together automatically."
       },
@@ -235,7 +235,7 @@
     "pregunta": "Auto Loader has evolved its schema to include a new column `region`. The destination Delta table does not have this column. What happens when the stream tries to write?",
     "opciones": [
       {
-        "texto_opcion": "The write fails unless Delta table schema evolution is enabled with `mergeSchema = true` or the column is.",
+        "texto_opcion": "The write fails unless Delta table schema evolution is enabled with `mergeSchema = true` or the column is added via DDL.",
         "es_correcta": true,
         "explicacion": "Auto Loader and the Delta table evolve independently. When Auto Loader adds a new column, the Delta table must be updated separately — either by enabling `mergeSchema` on the write or by running `ALTER TABLE ... ADD COLUMN`."
       },
@@ -293,7 +293,7 @@
     "pregunta": "A team ingests 10 million small JSON files per day from S3. They notice Auto Loader is slow and generates high S3 LIST API costs. Which configuration change should they make?",
     "opciones": [
       {
-        "texto_opcion": "Switch to file notification mode using `cloudFiles.useNotifications = true` to detect new files via S3 events.",
+        "texto_opcion": "Switch to file notification mode using `cloudFiles.useNotifications = true` to detect new files via S3 events instead of directory listing.",
         "es_correcta": true,
         "explicacion": "File notification mode subscribes to S3 event notifications (via SNS/SQS) and receives events when new files arrive, eliminating costly LIST operations on millions of files."
       },
@@ -409,7 +409,7 @@
     "pregunta": "When using Auto Loader, what happens when a column is **renamed** in the source files?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader treats the renamed column as a new column and populates the old column with `NULL`.",
+        "texto_opcion": "Auto Loader treats the renamed column as a new column and populates the old column with `NULL` for new rows.",
         "es_correcta": true,
         "explicacion": "Auto Loader cannot detect renames — it sees them as a new column appearing and the old one disappearing. The old column remains in the schema with `NULL` for new rows, and the renamed column is added."
       },
@@ -438,7 +438,7 @@
     "pregunta": "What happens to a column that is **dropped** from source files when using Auto Loader?",
     "opciones": [
       {
-        "texto_opcion": "Dropped columns are treated as soft deletes — new rows have `NULL` in that column.",
+        "texto_opcion": "Dropped columns are treated as soft deletes — new rows have `NULL` in that column, but the column remains in the schema.",
         "es_correcta": true,
         "explicacion": "Auto Loader does not remove columns from the schema when they disappear from source files. New rows will have `NULL` for missing fields, preserving schema stability."
       },
@@ -482,7 +482,7 @@
         "explicacion": "Auto Loader performs case-sensitive field name matching. `Amount` and `amount` are treated as different fields."
       },
       {
-        "texto_opcion": "The `Amount` value is captured in `_rescued` as JSON because Auto Loader treats field names as.",
+        "texto_opcion": "The `Amount` value is captured in `_rescued` as JSON because Auto Loader treats field names as case-sensitive.",
         "es_correcta": true,
         "explicacion": "`rescuedDataColumn` captures case-mismatched field names. Since `Amount` ≠ `amount` in Auto Loader's case-sensitive comparison, the value goes to `_rescued` rather than the `amount` column."
       }
@@ -525,7 +525,7 @@
     "pregunta": "What type of schema change is **NOT** handled by Auto Loader and requires a manual schema update before the stream can continue?",
     "opciones": [
       {
-        "texto_opcion": "Type changes that are not safe widening.",
+        "texto_opcion": "Type changes that are not safe widening, such as `STRING` to `INT` or `DOUBLE` to `STRING`.",
         "es_correcta": true,
         "explicacion": "Auto Loader only supports safe type widening (e.g., INT → DOUBLE on DBR 16.4+). Incompatible type changes like STRING → INT require manually updating the schema before restarting the stream."
       },
@@ -554,7 +554,7 @@
     "pregunta": "A data engineer uses Auto Loader with `rescuedDataColumn` configured. An incoming file contains a field `price` as `STRING` but the schema defines `price` as `INT`. What happens?",
     "opciones": [
       {
-        "texto_opcion": "The incompatible `price` value is captured in `rescuedDataColumn`.",
+        "texto_opcion": "The incompatible `price` value is captured in `rescuedDataColumn` and the stream continues.",
         "es_correcta": true,
         "explicacion": "When `rescuedDataColumn` is configured, type-incompatible values are stored there as JSON instead of failing the stream. The `price` column in the output will be `NULL` for those rows."
       },
@@ -627,7 +627,7 @@
         "explicacion": "This is reversed. File notification uses real-time cloud events; directory listing scans (lists) the directory on each trigger."
       },
       {
-        "texto_opcion": "Directory listing scans the full directory on each trigger; file notification uses cloud storage events to detect.",
+        "texto_opcion": "Directory listing scans the full directory on each trigger; file notification uses cloud storage events to detect only new files.",
         "es_correcta": true,
         "explicacion": "Directory listing is simple but expensive at scale (LIST API calls on all files). File notification sets up cloud event subscriptions (SNS, Event Grid) and receives events only for new files, making it efficient for millions of files."
       }
@@ -651,7 +651,7 @@
         "explicacion": "There is no threshold-based schema addition. With an explicit immutable schema, new columns are never added regardless of how often they appear."
       },
       {
-        "texto_opcion": "The `loyalty_points` data is captured in `rescuedDataColumn` if configured.",
+        "texto_opcion": "The `loyalty_points` data is captured in `rescuedDataColumn` if configured, or silently ignored if `rescuedDataColumn` is not set.",
         "es_correcta": true,
         "explicacion": "When an explicit schema is provided, it is treated as immutable — Auto Loader will not add new columns. Unknown fields go to `rescuedDataColumn` if configured, otherwise they are dropped."
       },
@@ -762,7 +762,7 @@
         "explicacion": "This is reversed. Streaming tables in Declarative Pipelines handle restarts automatically; raw Structured Streaming requires manual restart."
       },
       {
-        "texto_opcion": "Streaming tables automatically restart on schema changes; Structured Streaming fails and requires a manual.",
+        "texto_opcion": "Streaming tables automatically restart on schema changes; Structured Streaming fails and requires a manual user restart.",
         "es_correcta": true,
         "explicacion": "In Lakeflow Spark Declarative Pipelines, streaming tables handle schema evolution automatically including restarts. With raw Structured Streaming, the user must manually restart the query after a schema change."
       },
@@ -786,7 +786,7 @@
     "pregunta": "A data engineer needs Auto Loader to ingest files from a path where new files arrive continuously, but also needs the ability to **reprocess specific files** from 3 months ago due to a bug. Which statement is correct?",
     "opciones": [
       {
-        "texto_opcion": "Auto Loader cannot reprocess already-processed files by default.",
+        "texto_opcion": "Auto Loader cannot reprocess already-processed files by default; COPY INTO with specific file paths should be used for targeted reprocessing alongside the Auto Loader stream.",
         "es_correcta": true,
         "explicacion": "Auto Loader's checkpoint prevents re-reading already-processed files. For targeted reprocessing of specific historical files, COPY INTO with explicit paths is the recommended complementary approach."
       },
@@ -830,7 +830,7 @@
         "explicacion": "`cloudFiles.schemaLocation` is strongly recommended but not strictly required. Without it, Auto Loader infers the schema each time but does not fail on startup."
       },
       {
-        "texto_opcion": "Auto Loader re-infers the schema from scratch on every restart.",
+        "texto_opcion": "Auto Loader re-infers the schema from scratch on every restart, which can cause inconsistencies if the source files have changed.",
         "es_correcta": true,
         "explicacion": "Without `schemaLocation`, Auto Loader cannot persist the inferred schema. On each restart it re-samples files to infer the schema, which may produce a different schema if new files have arrived."
       }
@@ -854,7 +854,7 @@
         "explicacion": "`inferColumnTypes` only affects how types are inferred initially. Schema evolution is still controlled independently by `cloudFiles.schemaEvolutionMode`."
       },
       {
-        "texto_opcion": "When set to `true`, Auto Loader samples source files to infer precise types like `INT`, `DOUBLE`.",
+        "texto_opcion": "When set to `true`, Auto Loader samples source files to infer precise types like `INT`, `DOUBLE`, and `TIMESTAMP` instead of defaulting to `STRING`.",
         "es_correcta": true,
         "explicacion": "By default, Auto Loader infers most JSON/CSV columns as `STRING` for safety. Setting `cloudFiles.inferColumnTypes = true` enables sampling-based type inference for more precise types."
       },
@@ -888,7 +888,7 @@
         "explicacion": "They are independent. Auto Loader can rebuild the schema location from file sampling. The stream will restart successfully."
       },
       {
-        "texto_opcion": "Auto Loader re-infers the schema by sampling files and writes a new schema to `schemaLocation`.",
+        "texto_opcion": "Auto Loader re-infers the schema by sampling files and writes a new schema to `schemaLocation`, but the checkpoint still prevents reprocessing already-ingested files.",
         "es_correcta": true,
         "explicacion": "The checkpoint and schema location are independent. Deleting `schemaLocation` forces schema re-inference, but the checkpoint offsets are intact so already-processed files are not reprocessed."
       }
@@ -960,7 +960,7 @@
     "pregunta": "A data engineer is setting up Auto Loader for the first time on a directory with 500,000 existing files. Which file detection mode does Databricks recommend for this scale, and why?",
     "opciones": [
       {
-        "texto_opcion": "File notification mode — it uses cloud storage events to detect new files without listing all 500,000.",
+        "texto_opcion": "File notification mode — it uses cloud storage events to detect new files without listing all 500,000 existing files on every trigger.",
         "es_correcta": true,
         "explicacion": "At 500,000+ files, directory listing generates expensive LIST API calls on each trigger. File notification mode subscribes to cloud events and only processes notifications for new files, dramatically reducing cloud API costs and latency."
       },
@@ -1004,7 +1004,7 @@
         "explicacion": "`from_json` does not support schema evolution by default — it requires an explicit schema and fails when the schema changes. The `schema=None` + `schemaLocationKey` combination is only available inside Lakeflow Spark Declarative Pipelines."
       },
       {
-        "texto_opcion": "Pass `schema=None` and set `schemaLocationKey` as options directly inside the `from_json` call.",
+        "texto_opcion": "Pass `schema=None` and set `schemaLocationKey` (and optionally `schemaEvolutionMode`) as options directly inside the `from_json` call.",
         "es_correcta": true,
         "explicacion": "Within Lakeflow Spark Declarative Pipelines, passing `schema=None` plus a unique `schemaLocationKey` directly in the `from_json` call enables automatic schema inference. Adding `schemaEvolutionMode` controls how new columns are handled, mirroring Auto Loader behavior."
       }

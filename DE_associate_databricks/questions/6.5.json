@@ -8,7 +8,7 @@
         "explicacion": "The Spark UI is only accessible when the cluster is running. It cannot be used to diagnose startup failures that occur before Spark starts."
       },
       {
-        "texto_opcion": "The **Cluster Event Log** tab — it shows the sequence of events and where the startup sequence was interrupted.",
+        "texto_opcion": "The **Cluster Event Log** tab — it shows the sequence of events (CREATING, INIT_SCRIPTS_STARTED, INIT_SCRIPTS_FINISHED, DRIVER_HEALTHY) and where the startup sequence was interrupted.",
         "es_correcta": true,
         "explicacion": "The Event Log is the first diagnostic resource for startup failures. The presence or absence of events like `INIT_SCRIPTS_FINISHED` and `DRIVER_HEALTHY` immediately reveals which startup phase failed."
       },
@@ -38,7 +38,7 @@
         "explicacion": "The Spark UI is unavailable when the cluster fails to start. The init script log in cloud storage is the correct location."
       },
       {
-        "texto_opcion": "Check the **init script logs** in the configured cloud storage path — they contain the exact.",
+        "texto_opcion": "Check the **init script logs** in the configured cloud storage path — they contain the exact command that failed and its exit code.",
         "es_correcta": true,
         "explicacion": "When `INIT_SCRIPTS_FINISHED` shows FAILED, the init script log (stored in cloud storage when log delivery is configured) contains the specific error message and the line that produced a non-zero exit code."
       },
@@ -63,7 +63,7 @@
     "pregunta": "A data engineer writes an init script that installs a Python package using `pip`. The cluster sometimes fails to start with an exit code of 1 but works on retry. Which `pip` flag resolves intermittent hash mismatch errors?",
     "opciones": [
       {
-        "texto_opcion": "`--no-cache-dir` — prevents pip from using locally cached files that may be stale or corrupt.",
+        "texto_opcion": "`--no-cache-dir` — prevents pip from using locally cached files that may be stale or corrupt, forcing a fresh download each time.",
         "es_correcta": true,
         "explicacion": "`pip install --no-cache-dir` forces pip to always download packages fresh, preventing errors caused by stale or corrupted cached wheels. This is the recommended flag for init scripts."
       },
@@ -98,7 +98,7 @@
         "explicacion": "`NODE_TYPE = driver` is not a Databricks environment variable. Use `DB_IS_DRIVER`."
       },
       {
-        "texto_opcion": "`DB_IS_DRIVER` — when this variable equals `\"TRUE\"`.",
+        "texto_opcion": "`DB_IS_DRIVER` — when this variable equals `\"TRUE\"`, the script is running on the driver node.",
         "es_correcta": true,
         "explicacion": "`DB_IS_DRIVER` is the Databricks-provided environment variable that distinguishes the driver node from worker nodes in init scripts. Checking `if [[ $DB_IS_DRIVER = \"TRUE\" ]]` limits execution to the driver."
       },
@@ -137,7 +137,7 @@
         "explicacion": "Databricks supports bash init scripts on all DBR versions. The garbled characters indicate a line ending problem, not a script type incompatibility."
       },
       {
-        "texto_opcion": "**Windows CRLF line endings** (^M characters) in the script — Linux systems on the cluster can't parse the Windows-style line.",
+        "texto_opcion": "**Windows CRLF line endings** (^M characters) in the script — Linux systems on the cluster can't parse the Windows-style line endings. Fix by running `dos2unix` on the script file.",
         "es_correcta": true,
         "explicacion": "Windows uses CRLF (\\r\\n) line endings; Linux uses LF (\\n). Shell scripts with Windows line endings fail unpredictably on Linux. The `dos2unix` utility converts the file to Unix line endings."
       }
@@ -151,7 +151,7 @@
     "pregunta": "A data engineer installs a cluster-scoped library `requests==2.28.0` via the cluster Libraries UI. A specific notebook then runs `%pip install requests==2.31.0`. Which version does the notebook use?",
     "opciones": [
       {
-        "texto_opcion": "`requests==2.31.0` — notebook-scoped `%pip install` has **higher precedence** than cluster-scoped libraries.",
+        "texto_opcion": "`requests==2.31.0` — notebook-scoped `%pip install` has **higher precedence** than cluster-scoped libraries and overrides the cluster version for this notebook session only.",
         "es_correcta": true,
         "explicacion": "`%pip install` installs in the notebook's isolated Python environment. Notebook-scoped installs have the highest precedence and override cluster-scoped libraries without affecting other notebooks on the same cluster."
       },
@@ -186,7 +186,7 @@
         "explicacion": "Python packages installed as cluster libraries are available to Python notebooks. The most common cause of `ModuleNotFoundError` after adding a cluster library is forgetting to restart the cluster."
       },
       {
-        "texto_opcion": "The cluster library was added after the cluster was started — cluster-scoped libraries require a.",
+        "texto_opcion": "The cluster library was added after the cluster was started — cluster-scoped libraries require a **cluster restart** to take effect.",
         "es_correcta": true,
         "explicacion": "Cluster-scoped libraries are installed at cluster startup. If a library is added to the cluster's library configuration while the cluster is already running, it is not installed until the next restart."
       },
@@ -226,7 +226,7 @@
         "explicacion": "The Delta transaction log is not loaded entirely into driver memory during a `collect()`. The OOM is caused by the actual DataFrame row data being pulled to the driver."
       },
       {
-        "texto_opcion": "`collect()` transferred all 500 million rows from all executors to the **driver node's JVM heap**.",
+        "texto_opcion": "`collect()` transferred all 500 million rows from all executors to the **driver node's JVM heap**, which could not accommodate that much data.",
         "es_correcta": true,
         "explicacion": "`collect()` is a Spark action that pulls all DataFrame data to the driver. For 500 million rows, this easily exceeds typical driver memory, causing `OutOfMemoryError: Java heap space` on the driver."
       }
@@ -279,7 +279,7 @@
         "explicacion": "AQE manages shuffle partition optimization and join strategy — it does not manage memory overhead for Python processes."
       },
       {
-        "texto_opcion": "Increase `spark.executor.memoryOverhead` — `pandas_udf` uses off-heap memory for Arrow IPC between JVM and.",
+        "texto_opcion": "Increase `spark.executor.memoryOverhead` (e.g., to `2g`) — `pandas_udf` uses off-heap memory for Arrow IPC between JVM and Python, which counts against the overhead budget.",
         "es_correcta": true,
         "explicacion": "`pandas_udf` and PySpark operations use off-heap memory for Python process overhead and Arrow serialization. This memory is counted against `memoryOverhead` (default: max(384MB, 10% of executor.memory)). Increasing it prevents the container from being killed."
       },
@@ -308,7 +308,7 @@
         "explicacion": "A library conflict would cause a Python exception or JVM error, not spot instance preemption. The Event Log provides the definitive cause."
       },
       {
-        "texto_opcion": "The executor was **killed by the cloud provider** (spot instance preemption), not by an OOM error.",
+        "texto_opcion": "The executor was **killed by the cloud provider** (spot instance preemption), not by an OOM error. Action: switch the workers to on-demand instances or accept the retries (Spark reschedules lost tasks automatically).",
         "es_correcta": true,
         "explicacion": "The combination of `ExecutorLostFailure` and `NODES_LOST: spot instance preempted` in the Event Log confirms infrastructure-based loss. Spark automatically reschedules tasks from preempted executors. No code change is needed — only infrastructure decisions."
       },
@@ -328,7 +328,7 @@
     "pregunta": "A data engineer's cluster starts successfully but a notebook fails with:\n\n```\nERROR: Cannot install pandas==1.3.0 because these package versions have conflicting dependencies:\n  numpy==1.24.0 requires numpy>=1.23.5\n  pandas==1.3.0 requires numpy<1.20\n```\n\nWhat is the most likely cause?",
     "opciones": [
       {
-        "texto_opcion": "The Databricks Runtime already includes `numpy==1.24.0`.",
+        "texto_opcion": "The Databricks Runtime already includes `numpy==1.24.0`, and installing `pandas==1.3.0` (which requires `numpy<1.20`) conflicts with the DBR's version.",
         "es_correcta": true,
         "explicacion": "DBR ships with specific, optimized library versions. Installing old libraries that require downgrading core packages like numpy causes dependency conflicts. The fix is to use a pandas version compatible with the DBR's numpy version."
       },
@@ -372,7 +372,7 @@
         "explicacion": "Driver logs show driver-side errors. Executor OOM errors appear in the Spark UI task details, not driver logs. And distinguishing skew vs. general requires task-level size comparison."
       },
       {
-        "texto_opcion": "**Stage Summary Metrics → Max Shuffle Read vs. Median Shuffle Read**: if Max >> Median.",
+        "texto_opcion": "**Stage Summary Metrics → Max Shuffle Read vs. Median Shuffle Read**: if Max >> Median, the OOM is skew-induced (one task got too much data); if all tasks have similar sizes, the cluster is generally under-provisioned.",
         "es_correcta": true,
         "explicacion": "Skew-induced OOM shows one outlier task with dramatically higher data volume than peers. General under-provisioning shows all tasks with similar sizes, all struggling with memory. This distinction determines whether the fix is AQE/salting (skew) or more executor memory (general)."
       }
@@ -422,7 +422,7 @@
         "explicacion": "Both cluster types can use the same DBR version and Python version. The issue is not Python version but missing library declarations."
       },
       {
-        "texto_opcion": "Jobs clusters start with a clean environment each time — libraries installed interactively on the all-purpose.",
+        "texto_opcion": "Jobs clusters start with a clean environment each time — libraries installed interactively on the all-purpose cluster are not present. Libraries must be explicitly defined in the job's cluster configuration.",
         "es_correcta": true,
         "explicacion": "Jobs clusters are ephemeral — they provision fresh each run and do not inherit libraries from all-purpose clusters. All dependencies must be declared in the job's cluster configuration (cluster libraries, requirements.txt, or init scripts)."
       },
@@ -457,7 +457,7 @@
         "explicacion": "Library downloads happen at cluster startup, not during task execution. The 40% GC time at 99% heap utilization indicates a memory pressure issue during task processing."
       },
       {
-        "texto_opcion": "Executor #4 is at 99% JVM heap utilization, causing 40% of compute time to be wasted on GC instead of useful work.",
+        "texto_opcion": "Executor #4 is at 99% JVM heap utilization, causing 40% of compute time to be wasted on GC instead of useful work. Fix: increase `spark.executor.memory` or reduce data per task (more shuffle partitions).",
         "es_correcta": true,
         "explicacion": "15.8 GB of 16 GB used = 99% heap utilization. At this level, GC runs continuously. 40% GC time means 40% of executor compute is wasted. The fix is either more heap memory or less data per task."
       },
@@ -492,7 +492,7 @@
         "explicacion": "While insufficient driver memory could cause failures, this should be checked by reading the Driver Logs (stderr) first. Blindly increasing memory is not the first diagnostic step."
       },
       {
-        "texto_opcion": "Check for **invalid Spark configurations**, incompatible DBR version.",
+        "texto_opcion": "Check for **invalid Spark configurations**, incompatible DBR version, or **metastore connectivity issues** — if init scripts are not involved, the failure is at the Spark/infrastructure level.",
         "es_correcta": true,
         "explicacion": "When the cluster fails without any init script involvement (no `INIT_SCRIPTS_STARTED` event), the failure is in the Spark engine itself, configuration, or infrastructure. Common causes include deprecated config keys, invalid Spark settings, or metastore connection failures visible in Driver Logs (log4j)."
       }
@@ -535,7 +535,7 @@
     "pregunta": "A data engineer's executor is killed by the container manager. The Spark UI shows `ExecutorLostFailure: Container killed by YARN for exceeding memory limits`. The executor has `spark.executor.memory = 8g`. What memory configuration resolves this when the job heavily uses PySpark native Python code?",
     "opciones": [
       {
-        "texto_opcion": "Increase `spark.executor.memoryOverhead` to `2g` — PySpark Python processes run in off-heap memory counted against.",
+        "texto_opcion": "Increase `spark.executor.memoryOverhead` to `2g` — PySpark Python processes run in off-heap memory counted against `memoryOverhead`, not the JVM heap.",
         "es_correcta": true,
         "explicacion": "The container was killed because **total physical memory** (JVM heap + overhead) exceeded the limit. PySpark uses off-heap memory for the Python interpreter. `memoryOverhead` (default ~800MB for 8g heap) needs to be increased for Python-heavy workloads."
       },
@@ -600,7 +600,7 @@
         "explicacion": "DBR upgrades are designed to be compatible with most configurations. Deprecated config warnings can be resolved by updating the specific deprecated properties — rollback is not the recommended approach."
       },
       {
-        "texto_opcion": "Check the **DBR 14 release notes** for breaking changes — identify deprecated config keys in the cluster's Spark.",
+        "texto_opcion": "Check the **DBR 14 release notes** for breaking changes — identify deprecated config keys in the cluster's Spark configuration and remove or replace them.",
         "es_correcta": true,
         "explicacion": "DBR release notes document breaking changes including deprecated or removed Spark configurations. log4j WARN messages about deprecated properties confirm the cluster's Spark configs have incompatible settings that must be updated."
       },
@@ -630,7 +630,7 @@
         "explicacion": "`collect()` causes driver OOM, not `GC overhead limit exceeded` on executors. This error appears when executor JVM heaps are exhausted during task execution."
       },
       {
-        "texto_opcion": "The JVM is spending more than 98% of its time doing garbage collection but recovering less than 2% of heap space — the heap.",
+        "texto_opcion": "The JVM is spending more than 98% of its time doing garbage collection but recovering less than 2% of heap space — the heap is so full that GC cannot free enough memory to continue.",
         "es_correcta": true,
         "explicacion": "`GC overhead limit exceeded` is a JVM safety mechanism that triggers when GC is consuming virtually all CPU time with no meaningful heap recovery. It indicates extreme heap pressure and is a precursor to full OOM."
       },
@@ -654,7 +654,7 @@
     "pregunta": "A data engineer sees the following error when a notebook tries to use a library:\n\n```\nImportError: cannot import name 'CategoricalDtype' from 'pandas.api.types'\n```\n\nThe library was installed successfully. What is the most likely cause?",
     "opciones": [
       {
-        "texto_opcion": "**Library version conflict** — the installed library was built against a different version of pandas than the one in the.",
+        "texto_opcion": "**Library version conflict** — the installed library was built against a different version of pandas than the one in the Databricks Runtime, causing API incompatibilities at import time.",
         "es_correcta": true,
         "explicacion": "A successful install followed by an `ImportError` for a specific class indicates an API incompatibility between library versions. `CategoricalDtype` exists in modern pandas but was moved or renamed in older/newer versions — the installed library was built for a different pandas version."
       },
@@ -683,7 +683,7 @@
     "pregunta": "A data engineer wants to prevent **library conflicts** between different notebooks sharing the same all-purpose cluster. Which approach provides the best isolation?",
     "opciones": [
       {
-        "texto_opcion": "Use **notebook-scoped `%pip install`** in each notebook — each notebook gets its own isolated Python environment.",
+        "texto_opcion": "Use **notebook-scoped `%pip install`** in each notebook — each notebook gets its own isolated Python environment, preventing cross-notebook conflicts.",
         "es_correcta": true,
         "explicacion": "`%pip install` creates an isolated environment for each notebook session. One notebook's libraries do not affect another notebook's environment, even when both run on the same cluster."
       },
@@ -713,7 +713,7 @@
     "pregunta": "A data engineer discovers a cluster fails to start because a pip install in the init script is taking too long and eventually timing out. Which two init script improvements address this?",
     "opciones": [
       {
-        "texto_opcion": "Use `pip install --no-cache-dir --timeout 300 my-package` and store the `.whl` file in Unity Catalog.",
+        "texto_opcion": "Use `pip install --no-cache-dir --timeout 300 my-package` (add a timeout limit) and store the `.whl` file in Unity Catalog Volumes to install locally instead of downloading from PyPI.",
         "es_correcta": true,
         "explicacion": "Adding `--timeout` prevents indefinite hangs during pip installs. Installing from a local `.whl` file in UC Volumes eliminates the external network download entirely — the fastest and most reliable approach for production clusters."
       },

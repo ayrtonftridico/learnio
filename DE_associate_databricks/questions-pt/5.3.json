@@ -66,7 +66,7 @@
         "explicacion": "A autenticação U2M não requer `--client-id`. Esse sinalizador é para OAuth máquina a máquina (M2M) com uma entidade de serviço."
       },
       {
-        "texto_opcion": "Uma janela do navegador é aberta para concluir a autenticação OAuth User-to-Machine (U2M).",
+        "texto_opcion": "Uma janela do navegador é aberta para concluir a autenticação OAuth User-to-Machine (U2M), após a qual as credenciais são salvas em `~/.databrickscfg`.",
         "es_correcta": true,
         "explicacion": "`databricks auth login` inicia o fluxo OAuth U2M abrindo um navegador para login interativo. As credenciais são salvas localmente em `~/.databrickscfg` para futuros comandos CLI."
       },
@@ -160,7 +160,7 @@
         "explicacion": "`auth description` serve para verificar a configuração de autenticação CLI, não para o gerenciamento de usuários do workspace."
       },
       {
-        "texto_opcion": "Os detalhes de autenticação do perfil `prod`.",
+        "texto_opcion": "Os detalhes de autenticação do perfil `prod`, incluindo a URL do host e o método de autenticação.",
         "es_correcta": true,
         "explicacion": "`databricks auth describe` mostra detalhes de configuração para o perfil especificado — host do workspace, método de autenticação e status de credencial — sem expor valores secretos reais."
       },
@@ -214,7 +214,7 @@
         "explicacion": "`validate` apenas valida. A implantação requer um comando `bundle deploy` separado."
       },
       {
-        "texto_opcion": "Valida a configuração do pacote para o destino `prod` com a substituição de variável.",
+        "texto_opcion": "Valida a configuração do pacote para o destino `prod` com a substituição de variável, gera resultados como JSON e faz **nenhuma alteração** no workspace.",
         "es_correcta": true,
         "explicacion": "`bundle validate` é uma operação somente do lado do cliente. Ele resolve YAML, aplica substituições de variáveis ​​e valida o esquema — tudo isso sem tocar no workspace. `--output json` torna o resultado legível por máquina."
       },
@@ -253,7 +253,7 @@
         "explicacion": "`--force` ignora apenas a verificação da ramificação do Git. Ele não destrói e reconstrói recursos — esse comportamento vem de `bundle destroy` + `bundle deploy`."
       },
       {
-        "texto_opcion": "Ignora a verificação de validação do branch Git — a implantação continua mesmo que o branch atual.",
+        "texto_opcion": "Ignora a verificação de validação do branch Git — a implantação continua mesmo que o branch atual não corresponda a `main`.",
         "es_correcta": true,
         "explicacion": "O modo de produção valida se o branch atual do Git corresponde ao `git.branch` configurado. `--force` ignora esta verificação, permitindo a implantação de qualquer branch. Use com moderação para soluções de emergência."
       }
@@ -359,7 +359,7 @@
         "explicacion": "`run-now` desencadeia uma execução imediata. A retomada dos agendamentos requer a atualização do `pause_status` do job, não uma chamada `run-now`."
       },
       {
-        "texto_opcion": "Aciona uma execução imediata (ad-hoc) do job com ID `12345`.",
+        "texto_opcion": "Aciona uma execução imediata (ad-hoc) do job com ID `12345`, independente de sua programação configurada.",
         "es_correcta": true,
         "explicacion": "`databricks jobs run-now` inicia uma execução imediata de job fora do gatilho agendado normal. Este é o equivalente CLI de clicar em 'Executar agora' na UI do Databricks."
       },
@@ -470,7 +470,7 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```bash\ndatabricks fs ls dbfs:/tmp/ --long\n```\n\nO que o sinalizador `--long` adiciona à saída?",
     "opciones": [
       {
-        "texto_opcion": "Detalhes adicionais, como tamanho do arquivo e hora da modificação.",
+        "texto_opcion": "Detalhes adicionais, como tamanho do arquivo e hora da modificação, semelhantes a `ls -l` no Linux.",
         "es_correcta": true,
         "explicacion": "`--long` (equivalente a `ls -l`) adiciona metadados detalhados à listagem: tamanho do arquivo em bytes e carimbo de data e hora de modificação — útil para auditoria e depuração do estado do arquivo."
       },
@@ -596,7 +596,7 @@
         "explicacion": "Os valores secretos nunca são expostos pela CLI ou pela API REST. Somente nomes de chaves são retornados."
       },
       {
-        "texto_opcion": "Somente os **nomes-chave** dos segredos no escopo — nunca os valores.",
+        "texto_opcion": "Somente os **nomes-chave** dos segredos no escopo — nunca os valores reais do segredo.",
         "es_correcta": true,
         "explicacion": "Databricks nunca expõe valores secretos através da CLI ou API. `list-secrets` retorna apenas os nomes das chaves, carimbos de data/hora da última atualização e metadados - nunca os valores reais."
       },
@@ -702,7 +702,7 @@
     "pregunta": "Um engenheiro de segurança diz: *\"Para pipelines do GitHub Actions CI/CD, devemos armazenar PATs do Databricks como GitHub Secrets.\"* Um engenheiro de dados discorda.\n\nQual método de autenticação o Databricks recomenda para GitHub Actions e por quê?",
     "opciones": [
       {
-        "texto_opcion": "**OIDC/Federação de Identidade de Carga de Trabalho** — usa tokens de curta duração emitidos pelo provedor.",
+        "texto_opcion": "**OIDC/Federação de Identidade de Carga de Trabalho** — usa tokens de curta duração emitidos pelo provedor de identidade do GitHub, sem credenciais armazenadas.",
         "es_correcta": true,
         "explicacion": "OIDC é a abordagem recomendada: os executores do GitHub Actions obtêm um token OIDC de curta duração que o Databricks aceita, não exigindo segredos armazenados. Os PATs têm vida longa, estão vinculados ao usuário e representam um risco à segurança."
       },
@@ -732,7 +732,7 @@
     "pregunta": "Um engenheiro de dados configura um workflow do GitHub Actions usando OIDC. A variável de ambiente `DATABRICKS_CLIENT_SECRET` **não** está definida. O que é armazenado no GitHub repository para autenticação?",
     "opciones": [
       {
-        "texto_opcion": "Somente valores não confidenciais: `DATABRICKS_HOST` e `DATABRICKS_CLIENT_ID` — nenhum segredo armazenado.",
+        "texto_opcion": "Somente valores não confidenciais: `DATABRICKS_HOST` e `DATABRICKS_CLIENT_ID` (ID do aplicativo principal do serviço) — nenhum segredo armazenado.",
         "es_correcta": true,
         "explicacion": "OIDC elimina a necessidade de quaisquer credenciais armazenadas. A URL do workspace e o ID do cliente (ID do aplicativo) não são confidenciais e podem ser armazenados como variáveis ​​regulares. O GitHub emite tokens de curta duração automaticamente."
       },
@@ -772,7 +772,7 @@
         "explicacion": "`setup-cli` instala apenas a ferramenta CLI. A implantação requer uma etapa `run: databricks bundle deploy -t <target>` separada."
       },
       {
-        "texto_opcion": "Instala a CLI estável mais recente do Databricks no executor.",
+        "texto_opcion": "Instala a CLI estável mais recente do Databricks no executor GitHub Actions.",
         "es_correcta": true,
         "explicacion": "`databricks/setup-cli@v1` é a ação oficial do GitHub que instala a CLI do Databricks no executor. `@v1` instala a versão mais recente na linha de lançamento principal v1."
       },
@@ -820,7 +820,7 @@
     "pregunta": "De acordo com as melhores práticas da CLI do Databricks, qual é o padrão de workflow CI/CD recomendado para implantar pacotes em ambientes?",
     "opciones": [
       {
-        "texto_opcion": "Validar no PR aberto → Implantar para teste na mesclagem para principal → Implantar para produção após.",
+        "texto_opcion": "Validar no PR aberto → Implantar para teste na mesclagem para principal → Implantar para produção após aprovação manual.",
         "es_correcta": true,
         "explicacion": "Esse padrão de promoção gradual segue as práticas recomendadas DABs: a validação detecta erros antecipadamente, a preparação verifica o comportamento antes da produção e as portas de aprovação manuais protegem as implantações de produção."
       },
@@ -865,7 +865,7 @@
         "explicacion": "`$?` é a variável do código de saída do shell, não um ID de implantação. Os IDs de execução precisariam ser capturados na saída do comando."
       },
       {
-        "texto_opcion": "O código de saída do comando anterior - `0` significa sucesso.",
+        "texto_opcion": "O código de saída do comando anterior - `0` significa sucesso, diferente de zero significa falha.",
         "es_correcta": true,
         "explicacion": "`$?` é uma variável shell padrão do Unix que contém o código de saída do último comando executado. A CLI do Databricks retorna o código de saída `0` em caso de sucesso e um código diferente de zero em caso de falha."
       }

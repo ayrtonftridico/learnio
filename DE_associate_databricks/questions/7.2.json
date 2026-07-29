@@ -3,7 +3,7 @@
     "pregunta": "A data engineer runs `SELECT * FROM prod_catalog.analytics.orders` and receives \"User does not have SELECT on table.\" The user has `SELECT` on the table but nothing else. What is the root cause?",
     "opciones": [
       {
-        "texto_opcion": "The user is missing `USE CATALOG` on `prod_catalog` and/or `USE SCHEMA` on `prod_catalog.analytics` — these gateway.",
+        "texto_opcion": "The user is missing `USE CATALOG` on `prod_catalog` and/or `USE SCHEMA` on `prod_catalog.analytics` — these gateway privileges are required in addition to `SELECT` on the table.",
         "es_correcta": true,
         "explicacion": "In Unity Catalog, accessing any object requires USE privileges on all parent containers. Even with SELECT on the table, without `USE CATALOG` and `USE SCHEMA`, the catalog/schema cannot be resolved."
       },
@@ -48,7 +48,7 @@
         "explicacion": "`SELECT` on a catalog grants the privilege to query all tables in all schemas — but the user also needs `USE CATALOG` and `USE SCHEMA` to navigate the hierarchy. A single catalog-level SELECT without USE is not sufficient."
       },
       {
-        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `data-analysts`;\nGRANT USE SCHEMA  ON SCHEMA prod_catalog.analytics TO.",
+        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `data-analysts`;\nGRANT USE SCHEMA  ON SCHEMA prod_catalog.analytics TO `data-analysts`;\nGRANT SELECT      ON SCHEMA prod_catalog.analytics TO `data-analysts`;\n```",
         "es_correcta": true,
         "explicacion": "Three grants are needed: `USE CATALOG` to navigate the catalog, `USE SCHEMA` to navigate the schema, and `SELECT` on the schema (which inherits to all current and future tables)."
       }
@@ -92,7 +92,7 @@
     "pregunta": "A data engineer runs `REVOKE SELECT ON SCHEMA prod_catalog.analytics FROM analysts`. A user in `analysts` already has an **explicit** `GRANT SELECT ON TABLE prod_catalog.analytics.orders` directly on the table. Can they still query `orders`?",
     "opciones": [
       {
-        "texto_opcion": "Yes — revoking at the schema level only removes the schema-level grant.",
+        "texto_opcion": "Yes — revoking at the schema level only removes the schema-level grant. The **explicit table-level grant** remains in place and still allows SELECT.",
         "es_correcta": true,
         "explicacion": "REVOKE on a parent (schema) does NOT cascade to remove explicit grants on child objects. If a principal has both a schema-level grant and an explicit table-level grant, revoking the schema grant doesn't remove the table-level one."
       },
@@ -122,7 +122,7 @@
     "pregunta": "A data engineer wants to allow the `junior-analysts` group to read data from tables but prevent them from INSERT, UPDATE, or DELETE operations. Which privilege(s) should be granted?",
     "opciones": [
       {
-        "texto_opcion": "`SELECT` on the relevant tables or schema — this allows reading only. `MODIFY` should NOT be granted.",
+        "texto_opcion": "`SELECT` on the relevant tables or schema — this allows reading only. `MODIFY` (which covers INSERT/UPDATE/DELETE) should NOT be granted.",
         "es_correcta": true,
         "explicacion": "`SELECT` grants read-only access. `MODIFY` covers write operations (INSERT, UPDATE, DELETE). Granting only `SELECT` enforces the read-only constraint."
       },
@@ -151,7 +151,7 @@
     "pregunta": "A data engineer runs:\n\n```sql\nGRANT ALL PRIVILEGES ON TABLE prod_catalog.finance.payroll TO `payroll-team`;\n```\n\nDoes `payroll-team` now have the `MANAGE` privilege on `payroll`?",
     "opciones": [
       {
-        "texto_opcion": "No — `ALL PRIVILEGES` does **not** include `MANAGE`. MANAGE must be granted explicitly to prevent accidental.",
+        "texto_opcion": "No — `ALL PRIVILEGES` does **not** include `MANAGE`. MANAGE must be granted explicitly to prevent accidental privilege escalation.",
         "es_correcta": true,
         "explicacion": "`ALL PRIVILEGES` grants all standard data access privileges (SELECT, MODIFY, etc.) but explicitly excludes administrative privileges like `MANAGE`. This prevents accidental privilege escalation."
       },
@@ -180,7 +180,7 @@
     "pregunta": "A principal `contractor@vendor.com` is in the `data-analysts` group, which has `SELECT` on `prod_catalog.finance`. A data engineer runs:\n\n```sql\nDENY SELECT ON TABLE prod_catalog.finance.payroll TO `contractor@vendor.com`;\n```\n\nCan the contractor query `payroll`?",
     "opciones": [
       {
-        "texto_opcion": "No — `DENY` takes precedence over any inherited or explicit `GRANT`.",
+        "texto_opcion": "No — `DENY` takes precedence over any inherited or explicit `GRANT`. The DENY blocks access even though the contractor's group has SELECT on the schema.",
         "es_correcta": true,
         "explicacion": "DENY is the strongest permission state in Unity Catalog. It overrides any GRANT, whether direct or inherited through group membership or parent hierarchy."
       },
@@ -209,7 +209,7 @@
     "pregunta": "A data engineer needs to audit who has SELECT access to `prod_catalog.analytics.orders`. Which command provides this information?",
     "opciones": [
       {
-        "texto_opcion": "`SHOW GRANTS ON TABLE prod_catalog.analytics.orders;` — lists all principals.",
+        "texto_opcion": "`SHOW GRANTS ON TABLE prod_catalog.analytics.orders;` — lists all principals and their privileges on this specific table.",
         "es_correcta": true,
         "explicacion": "`SHOW GRANTS ON TABLE` displays all privilege grants on the specified table, including the principal, privilege type, and object type."
       },
@@ -238,7 +238,7 @@
     "pregunta": "A data engineer transfers table ownership:\n\n```sql\nALTER TABLE prod_catalog.analytics.orders\nSET OWNER TO `analytics-team`;\n```\n\nWhat capabilities does `analytics-team` now have?",
     "opciones": [
       {
-        "texto_opcion": "`analytics-team` has **all privileges** on the `orders` table — including SELECT, MODIFY, MANAGE.",
+        "texto_opcion": "`analytics-team` has **all privileges** on the `orders` table — including SELECT, MODIFY, MANAGE, and the ability to grant/revoke privileges to other principals.",
         "es_correcta": true,
         "explicacion": "Ownership grants full control of the object. The owner can perform all operations and manage permissions without needing explicit GRANTs."
       },
@@ -330,7 +330,7 @@
         "explicacion": "`BROWSE` only allows viewing metadata about the external location — not reading file content. `READ FILES` provides actual file read access."
       },
       {
-        "texto_opcion": "`READ FILES` on the External Location — this privilege allows reading files directly from the cloud.",
+        "texto_opcion": "`READ FILES` on the External Location — this privilege allows reading files directly from the cloud storage path.",
         "es_correcta": true,
         "explicacion": "`READ FILES` is the privilege for direct file access on External Locations. It enables reading raw files (Parquet, JSON, CSV, etc.) from the registered cloud storage path."
       },
@@ -355,7 +355,7 @@
     "pregunta": "A data engineer runs `REVOKE SELECT ON TABLE catalog.schema.orders FROM analyst@company.com`. The command succeeds, but `analyst@company.com` never had an explicit SELECT grant on `orders`. Why did the command succeed?",
     "opciones": [
       {
-        "texto_opcion": "`REVOKE` is **idempotent** — it succeeds even if the privilege was never explicitly granted.",
+        "texto_opcion": "`REVOKE` is **idempotent** — it succeeds even if the privilege was never explicitly granted. There is no error for revoking a non-existent grant.",
         "es_correcta": true,
         "explicacion": "Unity Catalog's REVOKE command does not fail if the specified privilege doesn't exist for that principal. This allows safe REVOKE operations in scripts without checking first."
       },
@@ -384,7 +384,7 @@
     "pregunta": "A data engineer grants `SELECT` on a catalog to a group. What is the effect on schemas and tables within that catalog?",
     "opciones": [
       {
-        "texto_opcion": "`SELECT` on the catalog **inherits to all schemas and tables** within — members of the group can query all current and.",
+        "texto_opcion": "`SELECT` on the catalog **inherits to all schemas and tables** within — members of the group can query all current and future tables in all schemas of that catalog.",
         "es_correcta": true,
         "explicacion": "Privilege inheritance flows top-down in Unity Catalog. Granting SELECT on a catalog cascades to all schemas and tables within it."
       },
@@ -428,7 +428,7 @@
         "explicacion": "Workspace admins do not automatically have catalog-level management rights. Metastore admins and object owners are the appropriate grantors."
       },
       {
-        "texto_opcion": "The **owner** of `orders`, the **owner** of `prod_catalog.analytics` schema.",
+        "texto_opcion": "The **owner** of `orders`, the **owner** of `prod_catalog.analytics` schema, the **metastore admin**, and any principal with `MANAGE` on `orders`.",
         "es_correcta": true,
         "explicacion": "Grants can be made by: (1) the object owner, (2) owners of parent objects, (3) metastore admins, and (4) principals with the MANAGE privilege on the object."
       }
@@ -453,7 +453,7 @@
         "explicacion": "Without `USE CATALOG` and `USE SCHEMA`, the service principal cannot navigate to the schema to create a table. All three grants are needed."
       },
       {
-        "texto_opcion": "```sql\nGRANT USE CATALOG   ON CATALOG prod_catalog TO `etl-pipeline-sp`;\nGRANT USE SCHEMA    ON SCHEMA prod_catalog.staging.",
+        "texto_opcion": "```sql\nGRANT USE CATALOG   ON CATALOG prod_catalog TO `etl-pipeline-sp`;\nGRANT USE SCHEMA    ON SCHEMA prod_catalog.staging TO `etl-pipeline-sp`;\nGRANT CREATE TABLE  ON SCHEMA prod_catalog.staging TO `etl-pipeline-sp`;\n```",
         "es_correcta": true,
         "explicacion": "Creating a table requires: navigating the catalog (`USE CATALOG`), navigating the schema (`USE SCHEMA`), and the create privilege (`CREATE TABLE` on the schema). This is the minimum required set."
       },
@@ -473,7 +473,7 @@
     "pregunta": "A data engineer notices that a `DENY SELECT ON SCHEMA prod_catalog.finance` was applied to a user. That user has an explicit `GRANT SELECT ON TABLE prod_catalog.finance.orders`. Can the user query `orders`?",
     "opciones": [
       {
-        "texto_opcion": "No — `DENY` at the schema level cascades to all tables in the schema, including `orders`.",
+        "texto_opcion": "No — `DENY` at the schema level cascades to all tables in the schema, including `orders`. The DENY overrides the explicit table-level GRANT.",
         "es_correcta": true,
         "explicacion": "DENY cascades down the hierarchy just like GRANT. A schema-level DENY blocks access to all tables in that schema, overriding any table-level GRANT."
       },
@@ -543,7 +543,7 @@
         "explicacion": "The `` `account users` `` group represents all users in the account. Granting to this group provides access to all users without individual grants."
       },
       {
-        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `account users`;\nGRANT USE SCHEMA  ON SCHEMA.",
+        "texto_opcion": "```sql\nGRANT USE CATALOG ON CATALOG prod_catalog TO `account users`;\nGRANT USE SCHEMA  ON SCHEMA prod_catalog.shared TO `account users`;\nGRANT SELECT      ON TABLE prod_catalog.shared.country_codes TO `account users`;\n```",
         "es_correcta": true,
         "explicacion": "`account users` is the built-in group representing all users in the Databricks account. Granting to this group automatically provides access to all current and future users."
       },
@@ -573,7 +573,7 @@
         "explicacion": "`SHOW GRANTS` shows privileges explicitly granted on that specific object — it does not show inherited grants or validate whether all required USE privileges are also in place."
       },
       {
-        "texto_opcion": "Not necessarily — `data-analysts` also needs `USE CATALOG` on `prod_catalog` and `USE SCHEMA` on.",
+        "texto_opcion": "Not necessarily — `data-analysts` also needs `USE CATALOG` on `prod_catalog` and `USE SCHEMA` on `prod_catalog.analytics`. Without these gateway privileges, SELECT alone is insufficient.",
         "es_correcta": true,
         "explicacion": "SHOW GRANTS shows grants on the specific object. Even with SELECT on the schema, members need `USE CATALOG` and `USE SCHEMA` to navigate the hierarchy. Check grants at the catalog and schema level separately."
       },
@@ -603,7 +603,7 @@
         "explicacion": "`MODIFY` allows INSERT/UPDATE/DELETE but not SELECT (read) or CREATE TABLE. Multiple privileges across multiple levels are needed."
       },
       {
-        "texto_opcion": "```sql\nGRANT USE CATALOG   ON CATALOG prod_catalog TO `analytics-sp`;\nGRANT USE SCHEMA    ON SCHEMA prod_catalog.analytics TO.",
+        "texto_opcion": "```sql\nGRANT USE CATALOG   ON CATALOG prod_catalog TO `analytics-sp`;\nGRANT USE SCHEMA    ON SCHEMA prod_catalog.analytics TO `analytics-sp`;\nGRANT SELECT        ON SCHEMA prod_catalog.analytics TO `analytics-sp`;\nGRANT MODIFY        ON SCHEMA prod_catalog.analytics TO `analytics-sp`;\nGRANT CREATE TABLE  ON SCHEMA prod_catalog.analytics TO `analytics-sp`;\n```",
         "es_correcta": true,
         "explicacion": "Five grants are needed: USE CATALOG (navigate catalog), USE SCHEMA (navigate schema), SELECT (read tables), MODIFY (write to tables), and CREATE TABLE (create new tables). All are needed; none are redundant."
       },
@@ -628,7 +628,7 @@
         "explicacion": "When a principal is specified, `SHOW GRANTS` filters to show only grants for that specific principal on the specified object."
       },
       {
-        "texto_opcion": "All privileges **explicitly granted directly to `frank@company.com`** on the `orders` table — showing the principal.",
+        "texto_opcion": "All privileges **explicitly granted directly to `frank@company.com`** on the `orders` table — showing the principal, action type, object type, and object key.",
         "es_correcta": true,
         "explicacion": "`SHOW GRANTS <principal> ON <object>` shows privileges explicitly granted to that specific principal on the specified object. Note: it shows direct grants to that principal, not inherited grants through group membership."
       },
@@ -691,7 +691,7 @@
         "explicacion": "Group membership alone is sufficient. Individual grants are not required when the group already has the necessary privileges."
       },
       {
-        "texto_opcion": "`new-analyst` **immediately** has SELECT on `orders` (and USE on the parent catalog and schema) — group membership.",
+        "texto_opcion": "`new-analyst` **immediately** has SELECT on `orders` (and USE on the parent catalog and schema) — group membership automatically confers all group privileges without any additional GRANT commands.",
         "es_correcta": true,
         "explicacion": "Group-based privilege management is prospective — when a user joins a group, they immediately inherit all privileges granted to that group. No per-user GRANTs are needed."
       },
@@ -711,7 +711,7 @@
     "pregunta": "Which of the following is a key reason to grant privileges to **groups** rather than individual users?",
     "opciones": [
       {
-        "texto_opcion": "When a user joins or leaves a team, only their group membership needs to be updated — no privilege.",
+        "texto_opcion": "When a user joins or leaves a team, only their group membership needs to be updated — no privilege grants or revocations on individual objects are needed.",
         "es_correcta": true,
         "explicacion": "Group-based access control simplifies lifecycle management. Adding a user to a group instantly grants all group privileges; removing them instantly revokes access. No object-level GRANT/REVOKE operations needed."
       },

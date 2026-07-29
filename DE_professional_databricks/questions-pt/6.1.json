@@ -8,7 +8,7 @@
         "explicacion": "Perde recursos Delta como OPTIMIZE, CDF e transações ACID."
       },
       {
-        "texto_opcion": "Migrar para Liquid Clustering em account_id.",
+        "texto_opcion": "Migrar para Liquid Clustering em account_id, txn_date e agendar OPTIMIZE periódico",
         "es_correcta": true,
         "explicacion": "Liquid Clustering reorganiza dados incrementalmente sem explosão de diretórios de partição; OPTIMIZE compacta arquivos pequenos gerados por streaming."
       },
@@ -71,7 +71,7 @@
         "explicacion": "Perde histórico Delta e não impede recriação de small files no streaming."
       },
       {
-        "texto_opcion": "Agendar job diário com OPTIMIZE e definir target de.",
+        "texto_opcion": "Agendar job diário com OPTIMIZE e definir target de tamanho de arquivo via table property",
         "es_correcta": true,
         "explicacion": "OPTIMIZE compacta arquivos pequenos; properties como delta.targetFileSize orientam tamanho ideal."
       },
@@ -153,7 +153,7 @@
         "explicacion": "Economia falsa: consultas degradam e custo total aumenta."
       },
       {
-        "texto_opcion": "Liquid Clustering com colunas country_code.",
+        "texto_opcion": "Liquid Clustering com colunas country_code, customer_segment e auto optimize habilitado",
         "es_correcta": true,
         "explicacion": "Liquid Clustering ajusta layout incrementalmente conforme novos dados e padrões de consulta."
       },
@@ -177,7 +177,7 @@
     "pregunta": "Uma tabela log_api é consultada 90% do tempo com filtro event_date = ontem. event_date tem baixa cardinalidade (365 valores/ano). Particionamento atual está correto, mas arquivos dentro de cada partição estão fragmentados. Próximo passo?",
     "opciones": [
       {
-        "texto_opcion": "Manter partition por event_date e executar OPTIMIZE diário na.",
+        "texto_opcion": "Manter partition por event_date e executar OPTIMIZE diário na partição recente",
         "es_correcta": true,
         "explicacion": "Partição por data de baixa cardinalidade é ideal; OPTIMIZE compacta dentro da partição."
       },
@@ -216,7 +216,7 @@
         "explicacion": "Memória de cluster não altera tamanho de arquivos commitados no storage."
       },
       {
-        "texto_opcion": "Executar OPTIMIZE (ou habilitar auto optimize/compaction) para aplicar target.",
+        "texto_opcion": "Executar OPTIMIZE (ou habilitar auto optimize/compaction) para aplicar target aos arquivos existentes e futuros compactados",
         "es_correcta": true,
         "explicacion": "A property orienta rewrites; compactação via OPTIMIZE materializa o tamanho alvo."
       },
@@ -250,7 +250,7 @@
         "explicacion": "Reorganização completa exige OPTIMIZE, não ocorre no ALTER instantaneamente."
       },
       {
-        "texto_opcion": "Novos writes e OPTIMIZE subsequentes aplicam clustering.",
+        "texto_opcion": "Novos writes e OPTIMIZE subsequentes aplicam clustering; dados antigos beneficiam após rewrite incremental",
         "es_correcta": true,
         "explicacion": "Liquid Clustering aplica-se progressivamente; OPTIMIZE reclusteriza arquivos existentes."
       }
@@ -264,7 +264,7 @@
     "pregunta": "Métricas do Spark UI mostram milhares de tasks de leitura de 2–5 MB em gold_metrics. Qual diagnóstico e correção?",
     "opciones": [
       {
-        "texto_opcion": "Excesso de arquivos pequenos na tabela Delta.",
+        "texto_opcion": "Excesso de arquivos pequenos na tabela Delta; executar OPTIMIZE e revisar frequência de commits do streaming",
         "es_correcta": true,
         "explicacion": "Many tiny files aumentam task overhead; compactação resolve."
       },
@@ -303,7 +303,7 @@
         "explicacion": "OPTIMIZE não altera tipo managed/external."
       },
       {
-        "texto_opcion": "Rewrite completo consome I/O e DBU intensos.",
+        "texto_opcion": "Rewrite completo consome I/O e DBU intensos, competindo com workloads interativos",
         "es_correcta": true,
         "explicacion": "OPTIMIZE FULL reprocessa todos os dados; deve ser agendado em janela de manutenção."
       },
@@ -327,7 +327,7 @@
         "explicacion": "Particionar quasi-unique explode metadados e arquivos."
       },
       {
-        "texto_opcion": "Z-ORDER em coluna quasi-unique não co-localiza blocos úteis.",
+        "texto_opcion": "Z-ORDER em coluna quasi-unique não co-localiza blocos úteis; beneficia colunas com cardinalidade moderada usadas em filtros",
         "es_correcta": true,
         "explicacion": "Z-ORDER funciona melhor em colunas de filtro com cardinalidade intermediária, não IDs quase únicos."
       },
@@ -361,7 +361,7 @@
         "explicacion": "Duplica storage e complexidade desnecessariamente."
       },
       {
-        "texto_opcion": "External table registrada no Unity Catalog com jobs agendados de.",
+        "texto_opcion": "External table registrada no Unity Catalog com jobs agendados de OPTIMIZE e properties de auto optimize",
         "es_correcta": true,
         "explicacion": "External permite location customizada; UC governa metadados e manutenção."
       },
@@ -395,7 +395,7 @@
         "explicacion": "Clustering e auto optimize são complementares."
       },
       {
-        "texto_opcion": "Batch único grande com shuffle desigual.",
+        "texto_opcion": "Batch único grande com shuffle desigual; combinar optimizeWrite com autoCompact e OPTIMIZE programado",
         "es_correcta": true,
         "explicacion": "optimizeWrite ajuda no commit; batches muito heterogêneos ainda precisam compactação posterior."
       }
@@ -443,7 +443,7 @@
         "explicacion": "Tabela minúscula não justifica debate de layout."
       },
       {
-        "texto_opcion": "Quando updates/deletes frequentes ou reclustering dinâmico forem.",
+        "texto_opcion": "Quando updates/deletes frequentes ou reclustering dinâmico forem necessários além de append",
         "es_correcta": true,
         "explicacion": "Clustering lida melhor com mutações e evolução sem rigid partition directories."
       },
@@ -477,7 +477,7 @@
         "explicacion": "DELETE não compacta arquivos; ainda precisa OPTIMIZE."
       },
       {
-        "texto_opcion": "OPTIMIZE WHERE sale_date >= current_date()-7 com Z-ORDER ou.",
+        "texto_opcion": "OPTIMIZE WHERE sale_date >= current_date()-7 com Z-ORDER ou clustering definido",
         "es_correcta": true,
         "explicacion": "OPTIMIZE suporta predicate para limitar escopo de rewrite."
       },
@@ -511,7 +511,7 @@
         "explicacion": "Inadequado para escala lakehouse."
       },
       {
-        "texto_opcion": "Compactar via OPTIMIZE, aumentar tamanho alvo de arquivo e revisar.",
+        "texto_opcion": "Compactar via OPTIMIZE, aumentar tamanho alvo de arquivo e revisar granularidade de commits streaming",
         "es_correcta": true,
         "explicacion": "Reduzir file count diminui pressão de metadata no driver."
       }
@@ -540,7 +540,7 @@
         "explicacion": "Tipo não determina elegibilidade; padrão de filtro sim."
       },
       {
-        "texto_opcion": "Até 3–4 colunas realmente usadas em filtros conjuntos.",
+        "texto_opcion": "Até 3–4 colunas realmente usadas em filtros conjuntos; testar com OPTIMIZE e medir skipping",
         "es_correcta": true,
         "explicacion": "Z-ORDER multi-dimensional perde eficácia além das colunas de filtro principais."
       }
@@ -622,7 +622,7 @@
         "explicacion": "Adiciona pipeline extra sem resolver Delta layout."
       },
       {
-        "texto_opcion": "optimizeWrite + job de OPTIMIZE diário + considerar larger.",
+        "texto_opcion": "optimizeWrite + job de OPTIMIZE diário + considerar larger trigger windows off-peak",
         "es_correcta": true,
         "explicacion": "Combina prevenção no write e cura periódica."
       },
@@ -656,7 +656,7 @@
         "explicacion": "Aumenta custo drasticamente."
       },
       {
-        "texto_opcion": "OPTIMIZE incremental com WHERE na janela quente e Liquid.",
+        "texto_opcion": "OPTIMIZE incremental com WHERE na janela quente e Liquid Clustering para adaptar layout",
         "es_correcta": true,
         "explicacion": "Limita rewrite à fatia consultada frequentemente."
       }
@@ -680,7 +680,7 @@
         "explicacion": "Corrompe transaction log Delta."
       },
       {
-        "texto_opcion": "Criar nova tabela CLUSTER BY, dual-write ou backfill incremental.",
+        "texto_opcion": "Criar nova tabela CLUSTER BY, dual-write ou backfill incremental, cutover após validação",
         "es_correcta": true,
         "explicacion": "Migração gradual evita rewrite único massivo."
       },
@@ -714,7 +714,7 @@
         "explicacion": "Não obrigatório se clustering cobre filtros."
       },
       {
-        "texto_opcion": "Data skipping via stats de clustering/Z-ORDER nos arquivos se event_date.",
+        "texto_opcion": "Data skipping via stats de clustering/Z-ORDER nos arquivos se event_date estiver nas colunas de cluster",
         "es_correcta": true,
         "explicacion": "Sem partition dirs, skipping depende de stats de arquivo e clustering."
       }
@@ -738,7 +738,7 @@
         "explicacion": "Não compacta arquivos no storage."
       },
       {
-        "texto_opcion": "OPTIMIZE periódico para compactar arquivos com deletes e.",
+        "texto_opcion": "OPTIMIZE periódico para compactar arquivos com deletes e reduzir fragmentação",
         "es_correcta": true,
         "explicacion": "DELETE cria arquivos com remoções lógicas; OPTIMIZE reescreve dados vivos compactos."
       },
@@ -772,7 +772,7 @@
         "explicacion": "Perderia ganho já obtido."
       },
       {
-        "texto_opcion": "Incluir state na definição de clustering/Z-ORDER se consultas.",
+        "texto_opcion": "Incluir state na definição de clustering/Z-ORDER se consultas filtram ambos",
         "es_correcta": true,
         "explicacion": "Adicionar coluna secundária de filtro melhora co-localização."
       }
@@ -786,7 +786,7 @@
     "pregunta": "Tabela tem CLUSTER BY (date) mas ingestão chega fora de ordem temporal. Impacto?",
     "opciones": [
       {
-        "texto_opcion": "Liquid Clustering tolera out-of-order writes.",
+        "texto_opcion": "Liquid Clustering tolera out-of-order writes; OPTIMIZE periódico reequilibra layout",
         "es_correcta": true,
         "explicacion": "Clustering incremental lida com ordem variável melhor que static partitions rígidos."
       },
@@ -859,7 +859,7 @@
         "explicacion": "Versões modernas suportam OPTIMIZE amplamente."
       },
       {
-        "texto_opcion": "OPTIMIZE aplica-se a tabelas Delta base subjacentes.",
+        "texto_opcion": "OPTIMIZE aplica-se a tabelas Delta base subjacentes, não diretamente a views",
         "es_correcta": true,
         "explicacion": "Views não possuem arquivos próprios; otimize tabela backing."
       }
@@ -883,7 +883,7 @@
         "explicacion": "Managed suporta OPTIMIZE normalmente."
       },
       {
-        "texto_opcion": "Location padronizado e lifecycle integrado ao catálogo simplificam.",
+        "texto_opcion": "Location padronizado e lifecycle integrado ao catálogo simplificam políticas automáticas de manutenção",
         "es_correcta": true,
         "explicacion": "Plataforma aplica jobs em managed locations conhecidos."
       },
@@ -907,7 +907,7 @@
         "explicacion": "Destrói paralelismo de leitura."
       },
       {
-        "texto_opcion": "Liquid Clustering ou Z-ORDER nas 4 colunas de filtro + partition.",
+        "texto_opcion": "Liquid Clustering ou Z-ORDER nas 4 colunas de filtro + partition opcional por data se append temporal",
         "es_correcta": true,
         "explicacion": "Alinha layout aos filtros reais, evita over-partitioning."
       },
@@ -946,7 +946,7 @@
         "explicacion": "Tabela vazia é caso diferente."
       },
       {
-        "texto_opcion": "Número de arquivos elevado com tamanho médio abaixo do.",
+        "texto_opcion": "Número de arquivos elevado com tamanho médio abaixo do target configurado",
         "es_correcta": true,
         "explicacion": "Many small files sinalizam compactação necessária."
       }

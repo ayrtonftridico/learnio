@@ -67,7 +67,7 @@
         "explicacion": "OPTIMIZE não faz amostragem de arquivos. Ele processa todos os arquivos identificados como não clusterizados ou subclusterizados com base nos metadados de log Delta."
       },
       {
-        "texto_opcion": "Apenas **arquivos novos ou não agrupados** escritos desde o último `OPTIMIZE` — arquivos já agrupados são ignorados.",
+        "texto_opcion": "Apenas **arquivos novos ou não agrupados** escritos desde o último `OPTIMIZE` — arquivos já agrupados são ignorados, tornando cada execução barata.",
         "es_correcta": true,
         "explicacion": "A principal vantagem do Liquid Clustering é a otimização incremental. `OPTIMIZE` rastreia quais arquivos já foram armazenados em cluster e os ignora, processando apenas os arquivos que precisam de cluster."
       },
@@ -92,7 +92,7 @@
     "pregunta": "Um engenheiro de dados deseja alterar as chaves de cluster de uma tabela existente em cluster do Liquid de `(customer_id)` para `(region, order_date)`. Depois de executar `ALTER TABLE ordens CLUSTER BY (região, data_pedido)`, qual é o estado dos dados da tabela?",
     "opciones": [
       {
-        "texto_opcion": "As gravações futuras serão agrupadas por `(region, order_date)`, mas os arquivos históricos existentes permanecerão agrupados.",
+        "texto_opcion": "As gravações futuras serão agrupadas por `(region, order_date)`, mas os arquivos históricos existentes permanecerão agrupados pela chave antiga `(customer_id)` até que `OPTIMIZE FULL` seja executado.",
         "es_correcta": true,
         "explicacion": "`ALTER TABLE CLUSTER BY` altera a configuração do cluster daqui para frente. Ele não reescreve automaticamente os dados históricos. `OPTIMIZE FULL` é necessário para aplicar novas chaves a todos os arquivos existentes."
       },
@@ -132,7 +132,7 @@
         "explicacion": "`REORG TABLE APPLY (PURGE)` é usado para reescrever arquivos para remoção de vetores de exclusão, não para aplicar novas chaves de cluster."
       },
       {
-        "texto_opcion": "`OPTIMIZE FULL catalog.schema.orders;` — agrupa novamente TODOS os arquivos na tabela usando as novas.",
+        "texto_opcion": "`OPTIMIZE FULL catalog.schema.orders;` — agrupa novamente TODOS os arquivos na tabela usando as novas chaves de cluster.",
         "es_correcta": true,
         "explicacion": "`OPTIMIZE FULL` processa todos os arquivos da tabela, independentemente de terem sido armazenados em cluster anteriormente, aplicando as chaves de cluster atuais a todos os dados."
       },
@@ -152,7 +152,7 @@
     "pregunta": "O que `CLUSTER BY AUTO` faz quando usado em uma instrução `CREATE TABLE`?",
     "opciones": [
       {
-        "texto_opcion": "O Databricks seleciona e desenvolve automaticamente chaves de cluster com base em padrões de consulta reais na tabela – sem.",
+        "texto_opcion": "O Databricks seleciona e desenvolve automaticamente chaves de cluster com base em padrões de consulta reais na tabela – sem necessidade de seleção manual de chaves.",
         "es_correcta": true,
         "explicacion": "`CLUSTER BY AUTO` delega a seleção de chave ao Databricks. O sistema monitora quais colunas aparecem nos filtros da cláusula WHERE e escolhe automaticamente as chaves de cluster mais benéficas, atualizando-as à medida que os padrões de consulta mudam."
       },
@@ -181,7 +181,7 @@
     "pregunta": "Um engenheiro de dados executa `OPTIMIZE pedidos ZORDER BY (customer_id);` em uma tabela que foi criada com `CLUSTER BY (customer_id)`. O que acontece?",
     "opciones": [
       {
-        "texto_opcion": "O comando falha com um erro — Liquid Clustering e Z-Order são incompatíveis e não podem.",
+        "texto_opcion": "O comando falha com um erro — Liquid Clustering e Z-Order são incompatíveis e não podem ser usados na mesma tabela.",
         "es_correcta": true,
         "explicacion": "Liquid Clustering (`CLUSTER BY`) e Z-Ordering (`ZORDER BY`) são mutuamente exclusivos. Executar `OPTIMIZE ZORDER BY` em uma tabela em cluster líquido gera um erro."
       },
@@ -221,7 +221,7 @@
         "explicacion": "Colunas de texto livre têm cardinalidade extremamente alta sem padrão — elas não fornecem saltos significativos de dados para filtros baseados em intervalo ou de igualdade."
       },
       {
-        "texto_opcion": "`transaction_date` — colunas de data com cardinalidade baixa a média e uso frequente de filtros são chaves de.",
+        "texto_opcion": "`transaction_date` — colunas de data com cardinalidade baixa a média e uso frequente de filtros são chaves de cluster ideais.",
         "es_correcta": true,
         "explicacion": "`transaction_date` tem cardinalidade média (365 valores exclusivos por ano), é a coluna de filtro primária e permite o salto eficaz de dados - exatamente o perfil para uma boa chave de cluster."
       },
@@ -241,7 +241,7 @@
     "pregunta": "Um engenheiro de dados tem uma tabela com `CLUSTER BY (order_date, customer_id, região, status, product_category, warehouse_id)`. Por que essa configuração é problemática?",
     "opciones": [
       {
-        "texto_opcion": "Muitas chaves de cluster (6) diluem o benefício de ignorar dados — os arquivos devem ser co-localizados por todas as 6.",
+        "texto_opcion": "Muitas chaves de cluster (6) diluem o benefício de ignorar dados — os arquivos devem ser co-localizados por todas as 6 dimensões simultaneamente, reduzindo a eficácia de qualquer filtro de chave única.",
         "es_correcta": true,
         "explicacion": "Liquid Clustering é mais eficaz com teclas 1–4. Adicionar mais chaves força os arquivos a serem organizados por todas as dimensões, reduzindo a concentração de dados de qualquer dimensão única por arquivo e diminuindo a omissão de dados."
       },
@@ -271,7 +271,7 @@
     "pregunta": "**Predictive Optimization (PO)** está habilitado para uma tabela gerenciada Unity Catalog. Quais são as três operações que o PO gerencia automaticamente?",
     "opciones": [
       {
-        "texto_opcion": "`OPTIMIZE` (compactação de arquivo + Liquid Clustering).",
+        "texto_opcion": "`OPTIMIZE` (compactação de arquivo + Liquid Clustering), `VACUUM` (remoção de arquivo órfão) e `ANALYZE` (coleção de estatísticas).",
         "es_correcta": true,
         "explicacion": "PO automatiza exatamente essas três operações de manutenção para tabelas gerenciadas Unity Catalog, executando-as conforme necessário na serverless compute sem qualquer agendamento manual."
       },
@@ -305,7 +305,7 @@
         "explicacion": "PO requer tabelas gerenciadas Unity Catalog. As tabelas metastore do Hive e as tabelas externas devem ser mantidas manualmente."
       },
       {
-        "texto_opcion": "Não — Predictive Optimization se aplica apenas a **Unity Catalog tabelas gerenciadas**.",
+        "texto_opcion": "Não — Predictive Optimization se aplica apenas a **Unity Catalog tabelas gerenciadas**. Tabelas externas e tabelas metastore do Hive não são suportadas.",
         "es_correcta": true,
         "explicacion": "PO é exclusivo para tabelas gerenciadas Unity Catalog. Tabelas externas (seja em Unity Catalog ou no metastore legado do Hive) não são elegíveis para manutenção automatizada de PO."
       },
@@ -433,7 +433,7 @@
         "explicacion": "PO não impede comandos manuais. Os usuários ainda podem executar `OPTIMIZE`, `VACUUM` ou `ANALYZE` manualmente mesmo quando o PO está habilitado."
       },
       {
-        "texto_opcion": "O comando manual `OPTIMIZE ZORDER BY` é executado, mas PO **ignora e não gerencia Z-Order** — PO apenas executa OPTIMIZE com.",
+        "texto_opcion": "O comando manual `OPTIMIZE ZORDER BY` é executado, mas PO **ignora e não gerencia Z-Order** — PO apenas executa OPTIMIZE com Liquid Clustering (não Z-Ordering) quando é executado automaticamente.",
         "es_correcta": true,
         "explicacion": "Um usuário ainda pode executar comandos manuais `OPTIMIZE ZORDER BY`. No entanto, o OPTIMIZE automatizado do PO aplica-se apenas ao Liquid Clustering — ele nunca executa o Z-Order. Os dois são independentes."
       }
@@ -448,7 +448,7 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```sql\nDESCRIBE TABLE EXTENDED my_catalog.my_schema.my_table;\n```\n\nNa saída, eles veem `Clusteringcolumns: customer_id, order_date`. O que isso confirma?",
     "opciones": [
       {
-        "texto_opcion": "A tabela possui **Liquid Clustering configurada** com chaves de cluster `customer_id` e `order_date`.",
+        "texto_opcion": "A tabela possui **Liquid Clustering configurada** com chaves de cluster `customer_id` e `order_date`. A execução de `OPTIMIZE` usará essas colunas para organizar o layout dos dados.",
         "es_correcta": true,
         "explicacion": "`DESCRIBE TABLE EXTENDED` mostra a configuração da tabela, incluindo colunas de cluster. `Clusteringcolumns` confirma que Liquid Clustering está ativo com essas chaves específicas."
       },
@@ -477,7 +477,7 @@
     "pregunta": "Um engenheiro de dados está comparando Liquid Clustering vs. Z-Order para uma grande tabela Delta existente. Qual afirmação descreve corretamente a **diferença de custo de manutenção**?",
     "opciones": [
       {
-        "texto_opcion": "Z-Order requer a reescrita de **todos os arquivos** no escopo de destino (tabela ou partição) em cada execução de OPTIMIZE.",
+        "texto_opcion": "Z-Order requer a reescrita de **todos os arquivos** no escopo de destino (tabela ou partição) em cada execução de OPTIMIZE; Liquid Clustering apenas reescreve **arquivos novos/não clusterizados** de forma incremental.",
         "es_correcta": true,
         "explicacion": "Esta é a principal diferença de custo de manutenção. As reescritas completas de Z-Order tornam as execuções frequentes caras em grande escala. A abordagem incremental do Liquid Clustering mantém cada OPTIMIZE executado de forma barata - apenas novos dados são processados."
       },
@@ -511,7 +511,7 @@
         "explicacion": "`ALTER TABLE CLUSTER BY` não funciona para objetos gerenciados por pipeline como streaming tables. A definição do pipeline controla o esquema da tabela e o clustering."
       },
       {
-        "texto_opcion": "Atualize a definição do pipeline para usar `CREATE STREAMING TABLE ...",
+        "texto_opcion": "Atualize a definição do pipeline para usar `CREATE STREAMING TABLE ... CLUSTER BY (event_date)` e atualize o pipeline - `ALTER TABLE` não pode alterar as chaves de cluster para streaming tables.",
         "es_correcta": true,
         "explicacion": "Streaming tables e materialized views são gerenciados por suas definições de pipeline. As chaves de cluster para objetos gerenciados por pipeline devem ser alteradas na própria definição do pipeline, não com `ALTER TABLE`."
       },
@@ -536,7 +536,7 @@
     "pregunta": "O que `CLUSTER BY NONE` faz com uma tabela existente em cluster de Liquid?",
     "opciones": [
       {
-        "texto_opcion": "Ele **remove a configuração Liquid Clustering** — execuções futuras de OPTIMIZE compactarão apenas arquivos sem aplicar.",
+        "texto_opcion": "Ele **remove a configuração Liquid Clustering** — execuções futuras de OPTIMIZE compactarão apenas arquivos sem aplicar qualquer layout de cluster.",
         "es_correcta": true,
         "explicacion": "`CLUSTER BY NONE` remove a definição da chave de cluster. As execuções futuras de `OPTIMIZE` compactarão os arquivos, mas não aplicarão nenhuma estratégia de cluster."
       },
@@ -575,7 +575,7 @@
         "explicacion": "Embora um VACUUM não operacional seja possível, `bytes_compacted = 0` para um VACUUM é sempre esperado, independentemente de quantos arquivos órfãos foram excluídos - porque `bytes_compacted` é uma métrica OPTIMIZE, não uma métrica VACUUM."
       },
       {
-        "texto_opcion": "PO executou uma operação VACUUM bem-sucedida - `bytes_compacted = 0` é esperado para VACUUM porque VACUUM remove arquivos.",
+        "texto_opcion": "PO executou uma operação VACUUM bem-sucedida - `bytes_compacted = 0` é esperado para VACUUM porque VACUUM remove arquivos órfãos (reduzindo o armazenamento), não compacta arquivos juntos.",
         "es_correcta": true,
         "explicacion": "`bytes_compacted` mede a compactação do arquivo (job de OPTIMIZE), não o armazenamento liberado. VACUUM remove arquivos órfãos/expirados — um VACUUM bem-sucedido mostra 0 `bytes_compacted`, pois é uma operação de exclusão, não uma compactação."
       },
@@ -605,7 +605,7 @@
         "explicacion": "`CLUSTER BY AUTO` requer tabelas gerenciadas Unity Catalog. As tabelas metastore do Hive não são elegíveis."
       },
       {
-        "texto_opcion": "Uma nova tabela cujos padrões de consulta ainda não são conhecidos e espera-se que evoluam ao longo do tempo à medida que.",
+        "texto_opcion": "Uma nova tabela cujos padrões de consulta ainda não são conhecidos e espera-se que evoluam ao longo do tempo à medida que diferentes equipes a utilizam para diversas análises.",
         "es_correcta": true,
         "explicacion": "`CLUSTER BY AUTO` é ideal quando os padrões de consulta são desconhecidos ou variáveis. O Databricks monitora o uso real de consultas e adapta chaves de cluster dinamicamente, eliminando a necessidade de prever e atualizar manualmente as chaves."
       },
@@ -639,7 +639,7 @@
         "explicacion": "O salto de dados não é cache de resultados. É um mecanismo de empilhamento de predicado em nível de arquivo baseado em estatísticas mínimas/máximas por arquivo registradas no log de transações Delta."
       },
       {
-        "texto_opcion": "Após o clustering, as linhas relacionadas são co-localizadas nos mesmos arquivos, portanto.",
+        "texto_opcion": "Após o clustering, as linhas relacionadas são co-localizadas nos mesmos arquivos, portanto, **estatísticas mínimas/máximas por arquivo** (armazenadas no log Delta) permitem que o leitor ignore arquivos onde o intervalo de chaves de cluster não pode corresponder ao filtro de consulta.",
         "es_correcta": true,
         "explicacion": "Delta Lake armazena estatísticas mínimas/máximas para cada arquivo no log Delta. Após Liquid Clustering, os arquivos contêm dados dentro de intervalos estreitos da chave de cluster. Um filtro de consulta como `WHERE customer_id = 12345` pode ignorar todos os arquivos onde `min(customer_id) > 12345` ou `max(customer_id) < 12345`."
       }
@@ -669,7 +669,7 @@
         "explicacion": "A desativação em nível de tabela do PO é uma configuração do tipo tudo ou nada — ela desativa todas as operações do PO (OPTIMIZE, VACUUM, ANALYZE) para aquela tabela."
       },
       {
-        "texto_opcion": "PO está **desativado** para `important_table` — a substituição `disable` no nível da tabela tem precedência sobre o `ENABLE`.",
+        "texto_opcion": "PO está **desativado** para `important_table` — a substituição `disable` no nível da tabela tem precedência sobre o `ENABLE` no nível do catálogo.",
         "es_correcta": true,
         "explicacion": "A herança PO é hierárquica, mas permite a substituição de tabelas individuais. Uma configuração `disable` no nível da tabela tem precedência sobre qualquer `ENABLE` no nível pai, permitindo isenções refinadas."
       }
@@ -729,7 +729,7 @@
         "explicacion": "Esta é uma abordagem semiautomática válida, mas requer agendamento e monitoramento manuais. A abordagem totalmente automatizada usa `CLUSTER BY AUTO` + Predictive Optimization."
       },
       {
-        "texto_opcion": "Crie a tabela com `CLUSTER BY AUTO` e habilite **Predictive Optimization** no nível do catálogo ou esquema - PO executará.",
+        "texto_opcion": "Crie a tabela com `CLUSTER BY AUTO` e habilite **Predictive Optimization** no nível do catálogo ou esquema - PO executará OPTIMIZE, VACUUM e ANALYZE automaticamente usando a serverless compute.",
         "es_correcta": true,
         "explicacion": "`CLUSTER BY AUTO` lida com a seleção de chave adaptativa; PO cuida do agendamento e execução de todas as operações de manutenção. Juntos, eles fornecem gerenciamento de tabelas totalmente automatizado e sem manutenção."
       }
@@ -744,7 +744,7 @@
     "pregunta": "Um engenheiro de dados precisa verificar se Predictive Optimization está habilitado para uma tabela específica. Qual comando está correto?",
     "opciones": [
       {
-        "texto_opcion": "`DESCRIBE TABLE EXTENDED my_catalog.my_schema.my_table;` — procure a linha `Predictive.",
+        "texto_opcion": "`DESCRIBE TABLE EXTENDED my_catalog.my_schema.my_table;` — procure a linha `Predictive optimization` na saída.",
         "es_correcta": true,
         "explicacion": "`DESCRIBE TABLE EXTENDED` (ou `DESCRIBE CATALOG EXTENDED` / `DESCRIBE SCHEMA EXTENDED`) mostra a configuração do PO para esse objeto. Esta é a forma documentada de verificar o status do pedido."
       },

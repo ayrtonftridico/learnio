@@ -8,7 +8,7 @@
         "explicacion": "AQE pode converter sort-merge em broadcast dinamicamente."
       },
       {
-        "texto_opcion": "spark.sql.autoBroadcastJoinThreshold adequado ou hint.",
+        "texto_opcion": "spark.sql.autoBroadcastJoinThreshold adequado ou hint broadcast na dim pequena",
         "es_correcta": true,
         "explicacion": "Broadcast evita shuffle massivo da fato; dim cabe na memória dos executors."
       },
@@ -47,7 +47,7 @@
         "explicacion": "Cria gargalo single-thread."
       },
       {
-        "texto_opcion": "Salting na chave skewed ou isolated skew join via AQE.",
+        "texto_opcion": "Salting na chave skewed ou isolated skew join via AQE (skew hints)",
         "es_correcta": true,
         "explicacion": "AQE detecta skew e divide chaves quentes; salting manual também redistribui."
       }
@@ -76,7 +76,7 @@
         "explicacion": "Photon acelera mas não elimina spill por memória insuficiente."
       },
       {
-        "texto_opcion": "Agregação com cardinalidade altíssima excede memória por partition.",
+        "texto_opcion": "Agregação com cardinalidade altíssima excede memória por partition; reduzir dados antes ou aumentar memória/partitions com salting",
         "es_correcta": true,
         "explicacion": "Spill indica working set maior que memória disponível por task."
       }
@@ -90,7 +90,7 @@
     "pregunta": "Runtime DBR 13+ com AQE habilitado. Join entre 50 GB e 80 GB após filter severo reduz lado B para 5 MB. O que AQE pode fazer?",
     "opciones": [
       {
-        "texto_opcion": "Detectar lado pequeno pós-shuffle/filter e converter para.",
+        "texto_opcion": "Detectar lado pequeno pós-shuffle/filter e converter para broadcast join em runtime",
         "es_correcta": true,
         "explicacion": "AQE reoptimiza plano com estatísticas runtime."
       },
@@ -163,7 +163,7 @@
         "explicacion": "Cross join multiplica cardinalidade catastroficamente."
       },
       {
-        "texto_opcion": "Broadcast só quando tabela cabe com folga abaixo do threshold.",
+        "texto_opcion": "Broadcast só quando tabela cabe com folga abaixo do threshold; 50 GB exige sort-merge ou pré-filtro",
         "es_correcta": true,
         "explicacion": "Broadcast move tabela inteira para cada executor."
       }
@@ -192,7 +192,7 @@
         "explicacion": "Null bucket concentra em poucas tasks."
       },
       {
-        "texto_opcion": "Filtrar ou tratar nulls antes do join.",
+        "texto_opcion": "Filtrar ou tratar nulls antes do join; considerar salting para chaves restantes skewed",
         "es_correcta": true,
         "explicacion": "Null keys concentrados criam skew similar a hot keys."
       }
@@ -221,7 +221,7 @@
         "explicacion": "Para dim minúscula broadcast evita shuffle de TB."
       },
       {
-        "texto_opcion": "Temp view pequena ainda pode precisar estatísticas.",
+        "texto_opcion": "Temp view pequena ainda pode precisar estatísticas; usar broadcast hint ou garantir AQE/broadcast threshold",
         "es_correcta": true,
         "explicacion": "Otimizador pode subestimar tamanho de views; hint garante broadcast."
       }
@@ -240,7 +240,7 @@
         "explicacion": "Spill compression ajuda I/O de spill."
       },
       {
-        "texto_opcion": "Usar AQE para coalesce partitions pós-shuffle e calibrar.",
+        "texto_opcion": "Usar AQE para coalesce partitions pós-shuffle e calibrar spark.sql.shuffle.partitions baseado em volume",
         "es_correcta": true,
         "explicacion": "Balanceia tamanho de task vs overhead."
       },
@@ -264,7 +264,7 @@
     "pregunta": "Explain mostra Exchange hashpartitioning(customer_id). Como reduzir shuffle desnecessário?",
     "opciones": [
       {
-        "texto_opcion": "Eliminar operações upstream que reintroduzem shuffle.",
+        "texto_opcion": "Eliminar operações upstream que reintroduzem shuffle; repartition by range só se necessário; broadcast dim compatível",
         "es_correcta": true,
         "explicacion": "Reduzir stages com exchange redundante."
       },
@@ -303,7 +303,7 @@
         "explicacion": "Coalesce é independente de broadcast decision."
       },
       {
-        "texto_opcion": "Reduz número de partitions de shuffle para evitar tasks.",
+        "texto_opcion": "Reduz número de partitions de shuffle para evitar tasks vazias/small",
         "es_correcta": true,
         "explicacion": "Coalesce partitions adaptativo melhora utilização pós-filter."
       },
@@ -322,7 +322,7 @@
     "pregunta": "Manual salting: fact com key_salted = concat(customer_id, salt) com salt 0-9. Join requer?",
     "opciones": [
       {
-        "texto_opcion": "Duplicar dim com salt correspondente ou join em customer_id após.",
+        "texto_opcion": "Duplicar dim com salt correspondente ou join em customer_id após explode controlado",
         "es_correcta": true,
         "explicacion": "Ambos lados precisam mesma distribuição de salt."
       },
@@ -356,7 +356,7 @@
         "explicacion": "Não resolve pipeline."
       },
       {
-        "texto_opcion": "Sort-merge join estável ou aumentar timeout / usar executors.",
+        "texto_opcion": "Sort-merge join estável ou aumentar timeout / usar executors on-demand estáveis para broadcast",
         "es_correcta": true,
         "explicacion": "Broadcast exige entrega confiável do arquivo broadcast."
       },
@@ -385,7 +385,7 @@
         "explicacion": "Pode aumentar bytes mas remote read é métrica de shuffle exchange."
       },
       {
-        "texto_opcion": "Dados shuffle grandes cross-AZ ou disco lento.",
+        "texto_opcion": "Dados shuffle grandes cross-AZ ou disco lento; considerar local SSD, reduzir shuffle, Photon",
         "es_correcta": true,
         "explicacion": "Shuffle read bound indica I/O de rede/disco em shuffle."
       },
@@ -414,7 +414,7 @@
         "explicacion": "AQE é Spark SQL geral no Databricks."
       },
       {
-        "texto_opcion": "Queries com operações não suportadas por AQE ou estatísticas.",
+        "texto_opcion": "Queries com operações não suportadas por AQE ou estatísticas indisponíveis em subplanos",
         "es_correcta": true,
         "explicacion": "AQE requer runtime stats e planos adaptáveis."
       },
@@ -477,7 +477,7 @@
         "explicacion": "Hints desnecessários complicam manutenção."
       },
       {
-        "texto_opcion": "Quando AQE não detecta skew conhecido e chaves quentes são.",
+        "texto_opcion": "Quando AQE não detecta skew conhecido e chaves quentes são identificadas manualmente",
         "es_correcta": true,
         "explicacion": "Hint complementa AQE para casos de negócio conhecidos."
       },
@@ -496,7 +496,7 @@
     "pregunta": "Executor memory 32g, overhead 0.1, memoryFraction default. Tasks spill mesmo sem skew extremo. Ajuste?",
     "opciones": [
       {
-        "texto_opcion": "Revisar tamanho de partition shuffle, aumentar memory ou reduzir.",
+        "texto_opcion": "Revisar tamanho de partition shuffle, aumentar memory ou reduzir colunas antes de aggregate",
         "es_correcta": true,
         "explicacion": "Memory pressure por partition sizing inadequado."
       },
@@ -559,7 +559,7 @@
         "explicacion": "Complementares."
       },
       {
-        "texto_opcion": "Photon acelera execução CPU/local aggregate.",
+        "texto_opcion": "Photon acelera execução CPU/local aggregate; shuffle de rede persiste se plano exige exchange",
         "es_correcta": true,
         "explicacion": "Photon não elimina shuffle inherentemente necessário."
       },
@@ -622,7 +622,7 @@
         "explicacion": "Otimizador moderno faz broadcast automaticamente."
       },
       {
-        "texto_opcion": "Broadcast ambas dims se ab abaixo threshold.",
+        "texto_opcion": "Broadcast ambas dims se ab abaixo threshold; otimizador pode encadear broadcast hash joins",
         "es_correcta": true,
         "explicacion": "Múltiplas dims pequenas cabem em broadcast encadeado."
       },
@@ -651,7 +651,7 @@
         "explicacion": "Property Delta layout."
       },
       {
-        "texto_opcion": "spark.sql.adaptive.skewJoin.enabled=true.",
+        "texto_opcion": "spark.sql.adaptive.skewJoin.enabled=true (default true em DBR recentes)",
         "es_correcta": true,
         "explicacion": "Flag padrão AQE skew optimization."
       },
@@ -709,7 +709,7 @@
         "explicacion": "Reintroduz shuffle."
       },
       {
-        "texto_opcion": "Reutilizar DataFrame cache/persist ou CTE materializada após.",
+        "texto_opcion": "Reutilizar DataFrame cache/persist ou CTE materializada após primeiro shuffle",
         "es_correcta": true,
         "explicacion": "Evita recomputar shuffle idêntico."
       },
@@ -733,7 +733,7 @@
         "explicacion": "Pode afetar velocidade mas co-localização é plano."
       },
       {
-        "texto_opcion": "Repartition por coluna diferente da partitionBy window.",
+        "texto_opcion": "Repartition por coluna diferente da partitionBy window; shuffle adicional necessário",
         "es_correcta": true,
         "explicacion": "Window partitionBy user_id exige dados por user co-localizados."
       },
@@ -762,7 +762,7 @@
         "explicacion": "Beneficia clusters distribuídos."
       },
       {
-        "texto_opcion": "Evita ler shuffle remoto quando map e reduce colocalizados.",
+        "texto_opcion": "Evita ler shuffle remoto quando map e reduce colocalizados pós-optimização",
         "es_correcta": true,
         "explicacion": "Reduce network IO em AQE optimized plans."
       },
@@ -859,7 +859,7 @@
         "explicacion": "Autoscaling ajuda picos shuffle."
       },
       {
-        "texto_opcion": "Aumentar workers ou usar instâncias com mais network bandwidth e.",
+        "texto_opcion": "Aumentar workers ou usar instâncias com mais network bandwidth e shuffle partitions calibradas",
         "es_correcta": true,
         "explicacion": "Shuffle heavy jobs precisam bandwidth e paralelismo."
       }
@@ -883,7 +883,7 @@
         "explicacion": "Job falha."
       },
       {
-        "texto_opcion": "Adicionar condição de join correta.",
+        "texto_opcion": "Adicionar condição de join correta; evitar produto cartesiano acidental",
         "es_correcta": true,
         "explicacion": "Cross product explode memória."
       },

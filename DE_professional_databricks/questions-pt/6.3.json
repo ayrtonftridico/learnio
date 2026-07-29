@@ -13,7 +13,7 @@
         "explicacion": "Mantém reprocessamento completo."
       },
       {
-        "texto_opcion": "Consumir table_changes()/readChangeFeed entre checkpoints processando.",
+        "texto_opcion": "Consumir table_changes()/readChangeFeed entre checkpoints processando apenas inserts/updates/deletes",
         "es_correcta": true,
         "explicacion": "CDF entrega mudanças incrementais evitando full scan."
       },
@@ -37,7 +37,7 @@
         "explicacion": "Time travel lê estado, não diff de changes."
       },
       {
-        "texto_opcion": "table_changes('catalog.schema.table', start_version.",
+        "texto_opcion": "table_changes('catalog.schema.table', start_version, end_version)",
         "es_correcta": true,
         "explicacion": "API padrão Delta CDF para intervalo de versões."
       },
@@ -71,7 +71,7 @@
         "explicacion": "Perde ACID Delta."
       },
       {
-        "texto_opcion": "Stream ou batch incremental lendo CDF aplicando MERGE só para.",
+        "texto_opcion": "Stream ou batch incremental lendo CDF aplicando MERGE só para changed keys",
         "es_correcta": true,
         "explicacion": "Propaga apenas deltas reduzindo scan."
       },
@@ -134,7 +134,7 @@
         "explicacion": "UC suporta CDF."
       },
       {
-        "texto_opcion": "Retention Delta/VACUUM removeu arquivos de versões antigas.",
+        "texto_opcion": "Retention Delta/VACUUM removeu arquivos de versões antigas além da janela CDF",
         "es_correcta": true,
         "explicacion": "CDF depende de history retention configurada."
       }
@@ -153,7 +153,7 @@
         "explicacion": "Perigoso; não habilita CDF."
       },
       {
-        "texto_opcion": "ALTER TABLE t SET TBLPROPERTIES.",
+        "texto_opcion": "ALTER TABLE t SET TBLPROPERTIES (delta.enableChangeDataFeed = true)",
         "es_correcta": true,
         "explicacion": "Property Delta padrão para CDF."
       },
@@ -221,7 +221,7 @@
         "explicacion": "Duplicatas em retry."
       },
       {
-        "texto_opcion": "MERGE ON key com version/offset ou batchId garantindo.",
+        "texto_opcion": "MERGE ON key com version/offset ou batchId garantindo exactly-once semantics",
         "es_correcta": true,
         "explicacion": "Chave de idempotência evita duplicatas em retries."
       }
@@ -245,7 +245,7 @@
         "explicacion": "Reprocessa tudo sempre."
       },
       {
-        "texto_opcion": "Persistir última end_version processada e usar start =.",
+        "texto_opcion": "Persistir última end_version processada e usar start = last+1 a cada run",
         "es_correcta": true,
         "explicacion": "Watermark de versão garante continuidade."
       },
@@ -279,7 +279,7 @@
         "explicacion": "Desperdiça infra CDC."
       },
       {
-        "texto_opcion": "Propagar incremental usando merge keys e timestamps CDC existentes.",
+        "texto_opcion": "Propagar incremental usando merge keys e timestamps CDC existentes ou CDF interno bronze",
         "es_correcta": true,
         "explicacion": "Aproveita CDC upstream sem reler histórico completo."
       }
@@ -351,7 +351,7 @@
     "pregunta": "Custo DBU triplicou após adicionar coluna derivada recomputando 5 anos. Alternativa?",
     "opciones": [
       {
-        "texto_opcion": "Backfill incremental por partição/version ou recomputar só coluna.",
+        "texto_opcion": "Backfill incremental por partição/version ou recomputar só coluna via MERGE incremental",
         "es_correcta": true,
         "explicacion": "Limita escopo de recompute."
       },
@@ -395,7 +395,7 @@
         "explicacion": "Perde upserts."
       },
       {
-        "texto_opcion": "Tratar tipos distintos: apply upsert para inserts/updates.",
+        "texto_opcion": "Tratar tipos distintos: apply upsert para inserts/updates, delete para removes",
         "es_correcta": true,
         "explicacion": "Semântica correta por operação."
       }
@@ -511,7 +511,7 @@
         "explicacion": "Piora otimizador."
       },
       {
-        "texto_opcion": "Reduzir intervalo por batch, particionar processamento por.",
+        "texto_opcion": "Reduzir intervalo por batch, particionar processamento por partição de data",
         "es_correcta": true,
         "explicacion": "Menores janelas de versão reduzem scan."
       }
@@ -535,7 +535,7 @@
         "explicacion": "Reprocessamento total."
       },
       {
-        "texto_opcion": "Backfill coluna via UPDATE/MERGE particionado por date usando CDF.",
+        "texto_opcion": "Backfill coluna via UPDATE/MERGE particionado por date usando CDF ou snapshots incrementais",
         "es_correcta": true,
         "explicacion": "Escopo limitado ao necessário."
       },
@@ -598,7 +598,7 @@
         "explicacion": "Delta Lake feature."
       },
       {
-        "texto_opcion": "Time travel lê snapshot completo; CDF retorna row-level.",
+        "texto_opcion": "Time travel lê snapshot completo; CDF retorna row-level changes entre versões",
         "es_correcta": true,
         "explicacion": "Use cases diferentes."
       }
@@ -612,7 +612,7 @@
     "pregunta": "Bronze append-only com duplicatas raras. Silver dedup incremental?",
     "opciones": [
       {
-        "texto_opcion": "MERGE ON natural key mantendo latest por timestamp via.",
+        "texto_opcion": "MERGE ON natural key mantendo latest por timestamp via CDF/batch window",
         "es_correcta": true,
         "explicacion": "Dedup incremental sem full scan histórico completo."
       },
@@ -656,7 +656,7 @@
         "explicacion": "Erro contábil."
       },
       {
-        "texto_opcion": "Suportar reprocessamento de janela fechada idempotente ou.",
+        "texto_opcion": "Suportar reprocessamento de janela fechada idempotente ou versioning gold",
         "es_correcta": true,
         "explicacion": "Late data exige correção incremental controlada."
       }
@@ -680,7 +680,7 @@
         "explicacion": "Perde modelo."
       },
       {
-        "texto_opcion": "Orquestrar MERGE dim primeiro ou usar FK integrity checks.",
+        "texto_opcion": "Orquestrar MERGE dim primeiro ou usar FK integrity checks; process facts referencing latest dim version",
         "es_correcta": true,
         "explicacion": "Ordem e versionamento evitam inconsistência."
       },
@@ -757,7 +757,7 @@
     "pregunta": "Bug corrompeu silver; recomputar from bronze CDF desde versão X. Passos?",
     "opciones": [
       {
-        "texto_opcion": "Identificar versão boa, reset watermark.",
+        "texto_opcion": "Identificar versão boa, reset watermark, replay CDF interval ou restore table + replay",
         "es_correcta": true,
         "explicacion": "Controlled replay usando history Delta."
       },
@@ -820,7 +820,7 @@
         "explicacion": "Suportado com cuidado."
       },
       {
-        "texto_opcion": "Overwrite pode substituir partições inteiras.",
+        "texto_opcion": "Overwrite pode substituir partições inteiras; combinar com MERGE para row-level incremental",
         "es_correcta": true,
         "explicacion": "Partition overwrite não é row-level incremental."
       },
@@ -859,7 +859,7 @@
         "explicacion": "Precisa processamento."
       },
       {
-        "texto_opcion": "Retention pode expirar versões antigas.",
+        "texto_opcion": "Retention pode expirar versões antigas; acelerar catch-up ou aumentar retention",
         "es_correcta": true,
         "explicacion": "Lag excessivo perde ability to read old versions."
       }
@@ -878,7 +878,7 @@
         "explicacion": "Arriscado."
       },
       {
-        "texto_opcion": "Inserir sequência controlada de versions.",
+        "texto_opcion": "Inserir sequência controlada de versions, validar output esperado por table_changes",
         "es_correcta": true,
         "explicacion": "Testes simulam commits Delta incrementais."
       },
@@ -917,7 +917,7 @@
         "explicacion": "Perde dados."
       },
       {
-        "texto_opcion": "Propagar novas colunas via MERGE schema evolution ou auto merge.",
+        "texto_opcion": "Propagar novas colunas via MERGE schema evolution ou auto merge schema settings",
         "es_correcta": true,
         "explicacion": "Incremental inclui schema changes."
       }

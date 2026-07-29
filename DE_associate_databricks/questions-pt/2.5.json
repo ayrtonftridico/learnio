@@ -32,7 +32,7 @@
     "pregunta": "Qual afirmação descreve corretamente a diferença entre a conectividade JDBC e ODBC em notebooks Databricks?",
     "opciones": [
       {
-        "texto_opcion": "JDBC é baseado em Java e usado nativamente pelo Spark; ODBC normalmente é usado por ferramentas de.",
+        "texto_opcion": "JDBC é baseado em Java e usado nativamente pelo Spark; ODBC normalmente é usado por ferramentas de BI que se conectam ao Databricks como fonte de dados.",
         "es_correcta": true,
         "explicacion": "O conector integrado do Spark usa JDBC para ler bancos de dados externos. ODBC é o protocolo que as ferramentas de BI (Tableau, Power BI) usam para conectar TO Databricks por meio do driver Simba."
       },
@@ -129,7 +129,7 @@
         "explicacion": "O Spark pode criar mais partições do que nós; as partições são distribuídas entre as tarefas disponíveis, não vinculadas 1 para 1 aos nós."
       },
       {
-        "texto_opcion": "`partitionColumn`, `lowerBound` e `upperBound` são necessários junto com `numPartitions`.",
+        "texto_opcion": "`partitionColumn`, `lowerBound` e `upperBound` são necessários junto com `numPartitions` para leituras paralelas.",
         "es_correcta": true,
         "explicacion": "O Spark precisa de uma coluna numérica ou de data para dividir (`partitionColumn`) e os limites do intervalo para dividir o job entre as partições. Sem eles, `numPartitions` é ignorado e uma única partição é usada."
       },
@@ -245,7 +245,7 @@
         "explicacion": "`append` é totalmente suportado para gravações JDBC e é comumente usado para carregar novos dados de forma incremental em uma tabela existente."
       },
       {
-        "texto_opcion": "`append` insere novas linhas ao lado das existentes; `overwrite` elimina a tabela e a recria.",
+        "texto_opcion": "`append` insere novas linhas ao lado das existentes; `overwrite` elimina a tabela e a recria com os novos dados.",
         "es_correcta": true,
         "explicacion": "Com JDBC, `overwrite` emite um DROP TABLE e depois CREATE TABLE + INSERT. `append` apenas emite INSERTs na estrutura da tabela existente."
       },
@@ -438,7 +438,7 @@
     "pregunta": "Qual cenário é mais adequado para usar uma abordagem de ingestão JDBC em um notebook Databricks em vez de montar armazenamento em nuvem?",
     "opciones": [
       {
-        "texto_opcion": "Ler dados transacionais atuais de um RDBMS operacional (por exemplo.",
+        "texto_opcion": "Ler dados transacionais atuais de um RDBMS operacional (por exemplo, PostgreSQL) que não está disponível no armazenamento em nuvem.",
         "es_correcta": true,
         "explicacion": "JDBC é a ferramenta apropriada quando a fonte é um RDBMS ativo. A montagem de armazenamento em nuvem (DBFS, ADLS) é para fontes baseadas em arquivo. JDBC faz a ponte entre o Spark e bancos de dados relacionais."
       },
@@ -467,7 +467,7 @@
     "pregunta": "Um engenheiro de dados escreve o seguinte código para assimilar de um banco de dados Oracle:\n\n```python\ndf = spark.read.format(\"jdbc\") \\\n    .option(\"url\", \"jdbc:oracle:thin:@host:1521:ORCL\") \\\n    .option(\"dbtable\", \"HR.EMPLOYEES\") \\\n    .option(\"user\", \"hr\") \\\n    .option(\"password\", \"hr123\") \\\n    .load()\n```\n\nQual é a principal preocupação de segurança com este código?",
     "opciones": [
       {
-        "texto_opcion": "A senha é codificada como texto simples no notebook.",
+        "texto_opcion": "A senha é codificada como texto simples no notebook, que ficará visível no histórico do notebook e no controle de versão.",
         "es_correcta": true,
         "explicacion": "As credenciais codificadas em notebooks são expostas no histórico de revisões, painéis compartilhados e logs. Os segredos do Databricks (`dbutils.secrets.get()`) devem ser usados."
       },
@@ -525,7 +525,7 @@
     "pregunta": "Um engenheiro de dados está projetando uma solução em que uma ferramenta de BI externa (Power BI) consultará o Databricks SQL diretamente. Qual protocolo de conectividade a ferramenta de BI deve usar para se conectar ao Databricks?",
     "opciones": [
       {
-        "texto_opcion": "ODBC usando o driver ODBC do Databricks (Simba), configurado com o caminho HTTP SQL warehouse e o token.",
+        "texto_opcion": "ODBC usando o driver ODBC do Databricks (Simba), configurado com o caminho HTTP SQL warehouse e o token de acesso pessoal.",
         "es_correcta": true,
         "explicacion": "Ferramentas de BI como o Power BI conectam-se ao Databricks como uma fonte de dados usando o driver Simba ODBC. Este é o padrão padrão para conectividade de ferramenta de BI externa com Databricks SQL warehouses."
       },
@@ -569,7 +569,7 @@
         "explicacion": "`.repartition(1)` na verdade causa um shuffle completo para coletar todos os dados em uma única partição, o que adiciona sobrecarga. Não melhora o rendimento de gravação."
       },
       {
-        "texto_opcion": "Reduz o paralelismo: apenas um executor grava no banco de dados, diminuindo o rendimento.",
+        "texto_opcion": "Reduz o paralelismo: apenas um executor grava no banco de dados, diminuindo o rendimento, mas também reduzindo as conexões simultâneas.",
         "es_correcta": true,
         "explicacion": "`.repartition(1)` recolhe os dados em uma única partição, o que significa que um executor abre uma conexão JDBC. Isso evita sobrecarregar o banco de dados de destino com conexões, mas é um gargalo para grandes conjuntos de dados."
       }

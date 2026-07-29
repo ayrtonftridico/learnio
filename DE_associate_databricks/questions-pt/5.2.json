@@ -47,7 +47,7 @@
         "explicacion": "`targets` é recomendado, mas não obrigatório. Um pacote com apenas `bundle.name` é sintaticamente válido e pode ser implementado."
       },
       {
-        "texto_opcion": "É uma configuração de pacote válida — `bundle.name` é o único campo.",
+        "texto_opcion": "É uma configuração de pacote válida — `bundle.name` é o único campo obrigatório.",
         "es_correcta": true,
         "explicacion": "`bundle.name` é o único campo obrigatório em um `databricks.yml`. Todas as outras chaves de nível superior (`destinos`, `recursos`, `variáveis`, etc.) são opcionais ou recomendadas, não obrigatórias."
       }
@@ -90,7 +90,7 @@
     "pregunta": "Um engenheiro de dados analisa este snippet `databricks.yml`:\n\n```yaml\nbundle:\n  name: data-platform\n\ninclude:\n  - resources/jobs/*.yml\n  - resources/pipelines/*.yml\n  - config/variables.yml\n```\n\nO que a chave `include` realiza?",
     "opciones": [
       {
-        "texto_opcion": "Mescla arquivos YAML adicionais na configuração do bundle no tempo de processamento.",
+        "texto_opcion": "Mescla arquivos YAML adicionais na configuração do bundle no tempo de processamento, permitindo que o projeto seja dividido em vários arquivos.",
         "es_correcta": true,
         "explicacion": "`include` aceita padrões glob e mescla todos os arquivos YAML correspondentes no pacote no momento do processamento. Isso permite a estrutura modular do projeto sem colocar tudo em um arquivo."
       },
@@ -192,7 +192,7 @@
         "explicacion": "O modo de desenvolvimento **desativa** o bloqueio de implantação para permitir uma iteração mais rápida. O bloqueio de implantação é ativado no modo **produção**."
       },
       {
-        "texto_opcion": "Todos os agendamentos e gatilhos de job são pausados automaticamente para evitar execuções.",
+        "texto_opcion": "Todos os agendamentos e gatilhos de job são pausados automaticamente para evitar execuções acidentais de produção.",
         "es_correcta": true,
         "explicacion": "O modo de desenvolvimento pausa todos os agendamentos e gatilhos, permite execuções simultâneas de jobs, desativa o bloqueio de implantação e prefixa automaticamente nomes de recursos — tudo para oferecer suporte a iterações mais rápidas e sem riscos."
       }
@@ -216,7 +216,7 @@
         "explicacion": "`git.branch` é um recurso de modo de produção usado para impor qual branch pode ser usado para implantações de produção."
       },
       {
-        "texto_opcion": "A implantação falha na validação porque o branch atual do Git não corresponde ao branch necessário (`main`).",
+        "texto_opcion": "A implantação falha na validação porque o branch atual do Git (`feature/hotfix`) não corresponde ao branch necessário (`main`).",
         "es_correcta": true,
         "explicacion": "O modo de produção valida se o branch atual do Git corresponde ao valor `git.branch` especificado no destino. Isso evita implantações acidentais de filiais não principais."
       },
@@ -356,7 +356,7 @@
         "explicacion": "A CLI não substitui strings vazias por variáveis ausentes. Uma variável não definida sem um padrão causa uma falha na implantação."
       },
       {
-        "texto_opcion": "A implantação falha — variáveis sem padrões devem ser definidas explicitamente via `--var`, uma variável de ambiente.",
+        "texto_opcion": "A implantação falha — variáveis sem padrões devem ser definidas explicitamente via `--var`, uma variável de ambiente, o bloco `targets.variables` ou um arquivo `variable-overrides.json`.",
         "es_correcta": true,
         "explicacion": "Variáveis sem valor `default` devem ser fornecidas antes da implantação. Se nenhum valor for fornecido por meio de qualquer um dos quatro métodos, a CLI gerará um erro."
       },
@@ -717,7 +717,7 @@
         "explicacion": "`run_as` é um conceito de controle de acesso do Databricks para identidade de execução de job, não para permissões do sistema de arquivos."
       },
       {
-        "texto_opcion": "A identidade usada para **executar** jobs e pipelines implantados.",
+        "texto_opcion": "A identidade usada para **executar** jobs e pipelines implantados, desacoplados da identidade do usuário de implantação.",
         "es_correcta": true,
         "explicacion": "`run_as` especifica quem executa os recursos implantados (jobs, pipelines). É independente de quem implanta o pacote. Esta é a abordagem recomendada para produção para evitar vincular jobs a contas de usuários individuais."
       }
@@ -741,7 +741,7 @@
         "explicacion": "As permissões de pacote são aplicadas a recursos implantados individuais, não ao nível do workspace."
       },
       {
-        "texto_opcion": "Todos os recursos implantados pelo pacote — jobs.",
+        "texto_opcion": "Todos os recursos implantados pelo pacote — jobs, pipelines e outros objetos do Databricks.",
         "es_correcta": true,
         "explicacion": "As `permissões` de nível superior em `databricks.yml` são aplicadas a TODOS os recursos implantados pelo pacote. As permissões por recurso também podem ser definidas em definições de recursos individuais."
       },
@@ -760,7 +760,7 @@
     "pregunta": "Um engenheiro de dados executa:\n\n```bash\ndatabricks bundle validate -t prod\n```\n\nNenhuma implantação acontece. O que esse comando faz?",
     "opciones": [
       {
-        "texto_opcion": "Verifica a configuração do pacote em busca de erros de sintaxe.",
+        "texto_opcion": "Verifica a configuração do pacote em busca de erros de sintaxe, violações de esquema e resolução de variáveis sem implantar nada.",
         "es_correcta": true,
         "explicacion": "`databricks bundle validate` processa o YAML, resolve substituições e variáveis e valida a configuração em relação ao esquema do bundle — tudo isso sem fazer nenhuma alteração no workspace."
       },
@@ -964,7 +964,7 @@
     "pregunta": "Dois engenheiros de dados, Alice e Bob, implantam seu destino `dev` local do mesmo pacote no mesmo workspace compartilhado. Ambos usam `mode: development`.\n\nComo é que a Databricks evita que os seus recursos implantados colidam?",
     "opciones": [
       {
-        "texto_opcion": "Os nomes dos recursos são automaticamente prefixados com `[dev <short_username>]`.",
+        "texto_opcion": "Os nomes dos recursos são automaticamente prefixados com `[dev <short_username>]`, tornando as implantações de Alice e Bob nomeadas de forma exclusiva.",
         "es_correcta": true,
         "explicacion": "`mode: development` precede o nome abreviado do usuário de implantação em todos os nomes de recursos. O job de Alice se torna `[dev alice]My Job` e o de Bob se torna `[dev bob]My Job`, evitando colisões em um workspace compartilhado."
       },
@@ -1024,7 +1024,7 @@
     "pregunta": "Um engenheiro de dados sênior diz: *\"Deveríamos colocar todas as definições de job em um único arquivo `databricks.yml` massivo.\"*\n\nUm engenheiro júnior discorda. Qual argumento suporta melhor o uso de arquivos YAML modulares com `include`?",
     "opciones": [
       {
-        "texto_opcion": "Os arquivos modulares permitem que os membros da equipe trabalhem em recursos individuais de forma independente.",
+        "texto_opcion": "Os arquivos modulares permitem que os membros da equipe trabalhem em recursos individuais de forma independente, reduzam conflitos de mesclagem e mantenham cada arquivo focado em uma única preocupação.",
         "es_correcta": true,
         "explicacion": "A modularização com `include` permite o desenvolvimento paralelo (arquivos separados por recurso), diferenças mais claras na revisão de código e manutenção mais fácil — exatamente os mesmos benefícios de qualquer separação de interesses de engenharia de software."
       },
@@ -1054,7 +1054,7 @@
     "pregunta": "Um engenheiro de dados analisa o seguinte e identifica o que está errado:\n\n```yaml\ntargets:\n  prod:\n    mode: production\n    run_as:\n      service_principal_name: \"prod-sp@company.com\"\n    workspace:\n      root_path: /Workspace/Users/alice@company.com/.bundle/my-bundle/prod\n```\n\nQue erro de validação `mode: production` gerará sobre esta configuração?",
     "opciones": [
       {
-        "texto_opcion": "O modo de produção valida que os caminhos do workspace NÃO são substituídos por caminhos específicos do usuário.",
+        "texto_opcion": "O modo de produção valida que os caminhos do workspace NÃO são substituídos por caminhos específicos do usuário (`/Workspace/Users/<nome>/...`). Usar um caminho de usuário codificado viola esta regra.",
         "es_correcta": true,
         "explicacion": "O modo de produção exige que os caminhos do workspace sejam caminhos compartilhados/de nível de serviço, e não específicos do usuário. A codificação `alice@company.com` em `root_path` vincula o pacote de produção a um usuário específico, o que o modo de produção proíbe explicitamente."
       },

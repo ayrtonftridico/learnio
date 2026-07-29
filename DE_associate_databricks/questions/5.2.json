@@ -37,7 +37,7 @@
         "explicacion": "`resources` is recommended but not required. The only required field is `bundle.name`."
       },
       {
-        "texto_opcion": "It is a valid bundle configuration — `bundle.name` is the only.",
+        "texto_opcion": "It is a valid bundle configuration — `bundle.name` is the only required field.",
         "es_correcta": true,
         "explicacion": "`bundle.name` is the only required field in a `databricks.yml`. All other top-level keys (`targets`, `resources`, `variables`, etc.) are optional or recommended, not required."
       },
@@ -90,7 +90,7 @@
     "pregunta": "A data engineer reviews this `databricks.yml` snippet:\n\n```yaml\nbundle:\n  name: data-platform\n\ninclude:\n  - resources/jobs/*.yml\n  - resources/pipelines/*.yml\n  - config/variables.yml\n```\n\nWhat does the `include` key accomplish?",
     "opciones": [
       {
-        "texto_opcion": "Merges additional YAML files into the bundle configuration at processing time.",
+        "texto_opcion": "Merges additional YAML files into the bundle configuration at processing time, allowing the project to be split across multiple files.",
         "es_correcta": true,
         "explicacion": "`include` accepts glob patterns and merges all matching YAML files into the bundle at processing time. This enables modular project structure without putting everything in one file."
       },
@@ -182,7 +182,7 @@
         "explicacion": "Development mode **disables** the deployment lock to allow faster iteration. The deployment lock is enabled in **production** mode."
       },
       {
-        "texto_opcion": "All job schedules and triggers are automatically paused to prevent accidental.",
+        "texto_opcion": "All job schedules and triggers are automatically paused to prevent accidental production runs.",
         "es_correcta": true,
         "explicacion": "Development mode pauses all schedules and triggers, enables concurrent job runs, disables the deployment lock, and auto-prefixes resource names — all to support faster iteration without risk."
       },
@@ -206,7 +206,7 @@
     "pregunta": "A data engineer deploys a bundle with `mode: production` and specifies:\n\n```yaml\ntargets:\n  prod:\n    mode: production\n    git:\n      branch: main\n```\n\nThe engineer is currently on branch `feature/hotfix`. What happens when they run `databricks bundle deploy -t prod`?",
     "opciones": [
       {
-        "texto_opcion": "The deployment fails validation because the current Git branch does not match the.",
+        "texto_opcion": "The deployment fails validation because the current Git branch (`feature/hotfix`) does not match the required branch (`main`).",
         "es_correcta": true,
         "explicacion": "Production mode validates that the current Git branch matches the `git.branch` value specified in the target. This prevents accidental deployments from non-main branches."
       },
@@ -264,7 +264,7 @@
     "pregunta": "A data engineer wants production mode to NOT allow cluster overrides. They accidentally run:\n\n```bash\ndatabricks bundle deploy -t prod --cluster-id 9999-888888-wxyz789\n```\n\nWhat is the result?",
     "opciones": [
       {
-        "texto_opcion": "The command fails — production mode does not allow cluster overrides with.",
+        "texto_opcion": "The command fails — production mode does not allow cluster overrides with `--cluster-id`.",
         "es_correcta": true,
         "explicacion": "Production mode explicitly blocks cluster overrides. Only development mode allows `--cluster-id` to override cluster definitions. This is a safety feature to ensure prod uses properly defined cluster specs."
       },
@@ -351,7 +351,7 @@
     "pregunta": "A data engineer defines a variable with NO default:\n\n```yaml\nvariables:\n  db_password:\n    description: \"Database password\"\n```\n\nWhat happens if the engineer runs `databricks bundle deploy -t prod` without setting this variable?",
     "opciones": [
       {
-        "texto_opcion": "The deployment fails — variables without defaults must be explicitly set via `--var`, an environment variable.",
+        "texto_opcion": "The deployment fails — variables without defaults must be explicitly set via `--var`, an environment variable, the `targets.variables` block, or a `variable-overrides.json` file.",
         "es_correcta": true,
         "explicacion": "Variables without a `default` value must be provided before deployment. If no value is supplied through any of the four methods, the CLI raises an error."
       },
@@ -688,7 +688,7 @@
         "explicacion": "There is no separate `databricks bundle build` command required. `databricks bundle deploy` handles the full build-upload-deploy lifecycle."
       },
       {
-        "texto_opcion": "During `databricks bundle deploy` — the wheel is built and uploaded automatically.",
+        "texto_opcion": "During `databricks bundle deploy` — the wheel is built and uploaded automatically before the job is deployed.",
         "es_correcta": true,
         "explicacion": "`databricks bundle deploy` automatically runs the `build` command, builds the wheel, uploads it to the workspace, and deploys the job referencing it — all in one step."
       }
@@ -702,7 +702,7 @@
     "pregunta": "A production bundle needs jobs to run as a service principal, not as the deploying developer. The engineer adds:\n\n```yaml\ntargets:\n  prod:\n    mode: production\n    run_as:\n      service_principal_name: \"prod-sp@company.com\"\n```\n\nWhat does the `run_as` setting control?",
     "opciones": [
       {
-        "texto_opcion": "The identity used to **execute** deployed jobs and pipelines.",
+        "texto_opcion": "The identity used to **execute** deployed jobs and pipelines, decoupled from the deploying user's identity.",
         "es_correcta": true,
         "explicacion": "`run_as` specifies who runs the deployed resources (jobs, pipelines). It is independent from who deploys the bundle. This is the recommended approach for production to avoid tying jobs to individual user accounts."
       },
@@ -731,7 +731,7 @@
     "pregunta": "A data engineer sets global permissions in `databricks.yml`:\n\n```yaml\npermissions:\n  - level: CAN_MANAGE\n    group_name: data-engineers\n  - level: CAN_RUN\n    group_name: data-analysts\n```\n\nTo which resources do these permissions apply?",
     "opciones": [
       {
-        "texto_opcion": "All resources deployed by the bundle — jobs, pipelines.",
+        "texto_opcion": "All resources deployed by the bundle — jobs, pipelines, and other Databricks objects.",
         "es_correcta": true,
         "explicacion": "Top-level `permissions` in `databricks.yml` are applied to ALL resources deployed by the bundle. Per-resource permissions can also be set within individual resource definitions."
       },
@@ -760,7 +760,7 @@
     "pregunta": "A data engineer runs:\n\n```bash\ndatabricks bundle validate -t prod\n```\n\nNo deployment happens. What does this command do?",
     "opciones": [
       {
-        "texto_opcion": "Checks the bundle configuration for syntax errors, schema violations.",
+        "texto_opcion": "Checks the bundle configuration for syntax errors, schema violations, and variable resolution without deploying anything.",
         "es_correcta": true,
         "explicacion": "`databricks bundle validate` processes the YAML, resolves substitutions and variables, and validates the configuration against the bundle schema — all without making any changes to the workspace."
       },
@@ -974,7 +974,7 @@
         "explicacion": "Development mode actually **disables** the deployment lock to allow faster iteration. Locking is not used to prevent collisions between developers."
       },
       {
-        "texto_opcion": "Resource names are automatically prefixed with `[dev <short_username>]`.",
+        "texto_opcion": "Resource names are automatically prefixed with `[dev <short_username>]`, making Alice's and Bob's deployments uniquely named.",
         "es_correcta": true,
         "explicacion": "`mode: development` prepends the deploying user's short name to all resource names. Alice's job becomes `[dev alice]My Job` and Bob's becomes `[dev bob]My Job`, preventing collisions in a shared workspace."
       },
@@ -1029,7 +1029,7 @@
         "explicacion": "All included files use the same bundle configuration schema. `include` does not enable different schema versions."
       },
       {
-        "texto_opcion": "Modular files allow team members to work on individual resources independently, reduce merge conflicts.",
+        "texto_opcion": "Modular files allow team members to work on individual resources independently, reduce merge conflicts, and keep each file focused on a single concern.",
         "es_correcta": true,
         "explicacion": "Modularization with `include` enables parallel development (separate files per resource), clearer diffs in code review, and easier maintenance — exactly the same benefits as any software engineering separation of concerns."
       },
@@ -1069,7 +1069,7 @@
         "explicacion": "`git.branch` in production mode is optional. Specifying it enables branch validation, but omitting it does not cause an error."
       },
       {
-        "texto_opcion": "Production mode validates that workspace paths are NOT overridden to user-specific paths (`/Workspace/Users/<name>/...`).",
+        "texto_opcion": "Production mode validates that workspace paths are NOT overridden to user-specific paths (`/Workspace/Users/<name>/...`). Using a hardcoded user path violates this rule.",
         "es_correcta": true,
         "explicacion": "Production mode requires workspace paths to be shared/service-level paths, not user-specific. Hardcoding `alice@company.com` in `root_path` ties the production bundle to a specific user, which production mode explicitly forbids."
       }

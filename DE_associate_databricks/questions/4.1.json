@@ -3,7 +3,7 @@
     "pregunta": "A data engineer is designing a Lakeflow Job with the following tasks:\n- `ingest`: loads raw data (no dependencies)\n- `validate`: depends on `ingest`\n- `transform`: depends on `ingest`\n- `load`: depends on `validate` AND `transform`\n\nWhich statement best describes how Databricks will execute this job?",
     "opciones": [
       {
-        "texto_opcion": "`ingest` runs first, then `validate` and `transform` run in parallel.",
+        "texto_opcion": "`ingest` runs first, then `validate` and `transform` run in parallel, then `load` runs last.",
         "es_correcta": true,
         "explicacion": "Databricks executes upstream tasks before downstream tasks and runs as many tasks in parallel as possible. `validate` and `transform` both depend only on `ingest`, so they can run concurrently."
       },
@@ -47,7 +47,7 @@
         "explicacion": "In Lakeflow Jobs, DAG edges represent task execution dependencies (which tasks must finish before others start), not data lineage between tables."
       },
       {
-        "texto_opcion": "A directed acyclic graph where nodes represent tasks and edges represent execution order.",
+        "texto_opcion": "A directed acyclic graph where nodes represent tasks and edges represent execution order dependencies.",
         "es_correcta": true,
         "explicacion": "In Lakeflow Jobs, each node in the DAG is a task and edges show which tasks must complete before others can start. Cycles are not permitted."
       }
@@ -153,7 +153,7 @@
         "explicacion": "File arrival is a job-level trigger type, not a mechanism for conditional branching within a running job's DAG."
       },
       {
-        "texto_opcion": "An **If/else condition task** that evaluates a boolean expression to.",
+        "texto_opcion": "An **If/else condition task** that evaluates a boolean expression to branch the DAG.",
         "es_correcta": true,
         "explicacion": "The If/else condition task evaluates a boolean expression and routes execution to different branches of the DAG, allowing conditional execution of downstream tasks."
       },
@@ -192,7 +192,7 @@
         "explicacion": "`ALL_DONE` runs regardless of upstream outcome. `ALL_FAILED` only runs when every upstream task has failed — these are distinct conditions."
       },
       {
-        "texto_opcion": "No — `ALL_FAILED` requires every upstream task to have failed.",
+        "texto_opcion": "No — `ALL_FAILED` requires every upstream task to have failed, but `job_b` succeeded.",
         "es_correcta": true,
         "explicacion": "`ALL_FAILED` only triggers the task when ALL upstream dependencies have failed. Since `job_b` succeeded, the condition is not met and `job_c` is skipped."
       }
@@ -337,7 +337,7 @@
         "explicacion": "`task_key` is a DAG-level identifier for task ordering. It has no relationship to Unity Catalog table keys or schemas."
       },
       {
-        "texto_opcion": "It is a unique identifier for the task within the job.",
+        "texto_opcion": "It is a unique identifier for the task within the job, used to reference it in `depends_on` lists.",
         "es_correcta": true,
         "explicacion": "`task_key` uniquely identifies each task in the job definition and is the value referenced in other tasks' `depends_on` arrays to establish DAG edges."
       }
@@ -351,7 +351,7 @@
     "pregunta": "A data engineer reviews this YAML snippet:\n\n```yaml\n- task_key: notify\n  depends_on:\n    - task_key: load\n  run_if: NONE_FAILED\n  notebook_task:\n    notebook_path: ./notify.py\n```\n\n`load` was skipped because its upstream dependency failed. Does `notify` run?",
     "opciones": [
       {
-        "texto_opcion": "No — a skipped task counts as not having run, and `NONE_FAILED` requires at least one upstream task to have run.",
+        "texto_opcion": "No — a skipped task counts as not having run, and `NONE_FAILED` requires at least one upstream task to have run (and none to have failed).",
         "es_correcta": true,
         "explicacion": "`NONE_FAILED` requires that no upstream failed AND at least one ran. A skipped `load` means it did not run, so the condition is not satisfied."
       },
@@ -385,7 +385,7 @@
         "explicacion": "Run Job triggers a different job, not the current one. Self-restart is not a supported DAG pattern."
       },
       {
-        "texto_opcion": "Triggering a separate, independently defined job within the same workspace as.",
+        "texto_opcion": "Triggering a separate, independently defined job within the same workspace as part of a larger orchestration DAG.",
         "es_correcta": true,
         "explicacion": "The Run Job task type allows one job to trigger another job within the workspace, enabling modular pipeline composition within a DAG."
       },
@@ -530,7 +530,7 @@
         "explicacion": "A Trigger is a mechanism that initiates a Job run based on conditions. A Task is a unit of work within the Job. They are distinct concepts."
       },
       {
-        "texto_opcion": "A Job is the primary resource for coordinating, scheduling, and running operations.",
+        "texto_opcion": "A Job is the primary resource for coordinating, scheduling, and running operations; Tasks are the individual units of work within a Job.",
         "es_correcta": true,
         "explicacion": "In Lakeflow Jobs, a Job is the top-level orchestration resource and Tasks are the nodes in the DAG that perform the actual work."
       },
@@ -612,7 +612,7 @@
     "pregunta": "What is the relationship between **Declarative Automation Bundles (DABs)** and Lakeflow Jobs DAGs?",
     "opciones": [
       {
-        "texto_opcion": "DABs let engineers define Lakeflow Jobs, tasks, and their DAG dependencies in YAML files for version-controlled.",
+        "texto_opcion": "DABs let engineers define Lakeflow Jobs, tasks, and their DAG dependencies in YAML files for version-controlled, as-code deployment.",
         "es_correcta": true,
         "explicacion": "Declarative Automation Bundles (formerly Databricks Asset Bundles) allow the full job DAG — including tasks, dependencies, and `run_if` conditions — to be defined in `databricks.yml` and deployed via the Databricks CLI."
       },
@@ -670,7 +670,7 @@
     "pregunta": "In the Lakeflow Jobs UI, a data engineer wants to add a dependency between two existing tasks. Which UI action accomplishes this?",
     "opciones": [
       {
-        "texto_opcion": "Select the downstream task, use the **Depends on** field to add the upstream task.",
+        "texto_opcion": "Select the downstream task, use the **Depends on** field to add the upstream task, then click **Save task**.",
         "es_correcta": true,
         "explicacion": "The UI workflow is: select the downstream task → use the Depends on field → add the upstream task → choose a Run if condition → Save task."
       },
@@ -796,7 +796,7 @@
         "explicacion": "`pipelines.workflows` and `steps` are not valid DAB YAML keys for Lakeflow Jobs. The correct path is `resources.jobs`."
       },
       {
-        "texto_opcion": "Jobs are defined under `resources.jobs`, each containing a `tasks` list where each task has a `task_key`.",
+        "texto_opcion": "Jobs are defined under `resources.jobs`, each containing a `tasks` list where each task has a `task_key`, optional `depends_on`, and a task type definition.",
         "es_correcta": true,
         "explicacion": "In DABs, the hierarchy is `bundle → resources → jobs → [job_name] → tasks → [task_key, depends_on, run_if, task_type]`."
       },
@@ -844,7 +844,7 @@
     "pregunta": "Which statement about cycles in a Lakeflow Jobs DAG is correct?",
     "opciones": [
       {
-        "texto_opcion": "Cycles are not allowed — if task A depends on task B and task B also depends on task A.",
+        "texto_opcion": "Cycles are not allowed — if task A depends on task B and task B also depends on task A, Databricks will reject the configuration.",
         "es_correcta": true,
         "explicacion": "A DAG is by definition acyclic. Databricks enforces this constraint and will fail to save or validate any job configuration containing a dependency cycle."
       },
