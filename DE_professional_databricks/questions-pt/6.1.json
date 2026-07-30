@@ -3,12 +3,12 @@
     "pregunta": "Uma fintech mantém fact_transactions (800 GB) com filtros diários por account_id e txn_date. Particionar por txn_date gera milhares de arquivos pequenos após micro-batches de streaming. Qual abordagem de layout reduz small files e melhora pruning?",
     "opciones": [
       {
-        "texto_opcion": "Particionar também por account_id, particionar coluna de alta — particionar coluna de alta cardinalidade cria milhões de diretórios e piora o small-file problem.",
+        "texto_opcion": "Particionar também por account_id.",
         "es_correcta": false,
         "explicacion": "Particionar coluna de alta cardinalidade cria milhões de diretórios e piora o small-file problem."
       },
       {
-        "texto_opcion": "Executar VACUUM com retention 0 horas diariamente — vACUUM remove arquivos obsoletos — vACUUM remove arquivos obsoletos; não resolve layout nem clustering de leitura.",
+        "texto_opcion": "Executar VACUUM com retention 0 horas diariamente.",
         "es_correcta": false,
         "explicacion": "VACUUM remove arquivos obsoletos; não resolve layout nem clustering de leitura."
       },
@@ -32,7 +32,7 @@
     "pregunta": "Um analista filtra fact_events (2 TB) quase sempre por user_id e event_type. A tabela está particionada por event_date. Consultas ainda fazem scan de 40% dos arquivos. O que aplicar após OPTIMIZE?",
     "opciones": [
       {
-        "texto_opcion": "Aumentar spark.sql.files.maxPartitionBytes para 2 GB",
+        "texto_opcion": "Aumentar spark.sql.files.maxPartitionBytes para 2 GB.",
         "es_correcta": false,
         "explicacion": "Aumenta tamanho de task de leitura mas não melhora data skipping por colunas de filtro."
       },
@@ -47,7 +47,7 @@
         "explicacion": "Z-ORDER co-localiza registros com mesmos valores de filtro dentro de cada arquivo, reduzindo bytes lidos."
       },
       {
-        "texto_opcion": "Reparticionar o DataFrame por user_id antes de cada write",
+        "texto_opcion": "Reparticionar o DataFrame por user_id antes de cada write.",
         "es_correcta": false,
         "explicacion": "Repartition no write não substitui layout persistente; gera shuffle caro a cada ingestão."
       }
@@ -95,7 +95,7 @@
         "explicacion": "Quebra consistência de metadados Delta e é error-prone."
       },
       {
-        "texto_opcion": "Manter external e executar OPTIMIZE manualmente via notebook ad hoc — funciona pontualmente mas não integra bem políticas automáticas de layout.",
+        "texto_opcion": "Manter external e executar OPTIMIZE manualmente via notebook ad hoc.",
         "es_correcta": false,
         "explicacion": "Funciona pontualmente mas não integra bem políticas automáticas de layout."
       },
@@ -105,7 +105,7 @@
         "explicacion": "Managed tables simplificam lifecycle; CLONE preserva histórico Delta quando aplicável."
       },
       {
-        "texto_opcion": "Desabilitar Unity Catalog e usar hive metastore legado, retrocede governança — retrocede governança; não resolve layout.",
+        "texto_opcion": "Desabilitar Unity Catalog e usar hive metastore legado — retrocede governança; não resolve layout.",
         "es_correcta": false,
         "explicacion": "Retrocede governança; não resolve layout."
       }
@@ -119,7 +119,7 @@
     "pregunta": "Após carga bulk de 120 milhões de linhas, fact_orders ficou com 8 mil arquivos medianos. O SLA de consulta exige leitura eficiente por order_id. Qual sequência é mais adequada?",
     "opciones": [
       {
-        "texto_opcion": "TRUNCATE TABLE e reinserir com coalesce(1) — coalesce(1) cria arquivo gigante e.",
+        "texto_opcion": "TRUNCATE TABLE e reinserir com coalesce(1).",
         "es_correcta": false,
         "explicacion": "coalesce(1) cria arquivo gigante e perde paralelismo; TRUNCATE apaga histórico."
       },
@@ -129,7 +129,7 @@
         "explicacion": "Properties sozinhas não reescrevem arquivos existentes desorganizados."
       },
       {
-        "texto_opcion": "VACUUM catalog.schema.fact_orders RETAIN 168 HOURS imediatamente",
+        "texto_opcion": "VACUUM catalog.schema.fact_orders RETAIN 168 HOURS imediatamente.",
         "es_correcta": false,
         "explicacion": "VACUUM limpa histórico; não reorganiza dados ativos para consulta."
       },
@@ -148,12 +148,12 @@
     "pregunta": "Novas cargas chegam continuamente em dim_customer com skew em country_code. O time quer layout adaptativo sem escolher colunas de Z-ORDER manualmente a cada mudança de padrão de consulta. O que recomendar?",
     "opciones": [
       {
-        "texto_opcion": "Particionar por country_code em tabela com 200 países e micro-updates — alta cardinalidade + updates frequentes amplificam small files.",
+        "texto_opcion": "Particionar por country_code em tabela com 200 países e micro-updates.",
         "es_correcta": false,
         "explicacion": "Alta cardinalidade + updates frequentes amplificam small files."
       },
       {
-        "texto_opcion": "Desabilitar OPTIMIZE para economizar DBU, economia falsa: consultas degradam — economia falsa: consultas degradam e custo total aumenta.",
+        "texto_opcion": "Desabilitar OPTIMIZE para economizar DBU — economia falsa: consultas degradam e custo total aumenta.",
         "es_correcta": false,
         "explicacion": "Economia falsa: consultas degradam e custo total aumenta."
       },
@@ -182,7 +182,7 @@
         "explicacion": "request_id tem cardinalidade extrema; inviabiliza layout."
       },
       {
-        "texto_opcion": "Migrar para CSV gzip no lake, perde transações Delta e mecanismos — perde transações Delta e mecanismos de OPTIMIZE/Z-ORDER.",
+        "texto_opcion": "Migrar para CSV gzip no lake — perde transações Delta e mecanismos de OPTIMIZE/Z-ORDER.",
         "es_correcta": false,
         "explicacion": "Perde transações Delta e mecanismos de OPTIMIZE/Z-ORDER."
       },
@@ -192,7 +192,7 @@
         "explicacion": "Partição por data de baixa cardinalidade é ideal; OPTIMIZE compacta dentro da partição."
       },
       {
-        "texto_opcion": "Remover particionamento e usar só Liquid Clustering em event_date — perde partition pruning eficiente já adequado ao padrão de consulta.",
+        "texto_opcion": "Remover particionamento e usar só Liquid Clustering em event_date.",
         "es_correcta": false,
         "explicacion": "Perde partition pruning eficiente já adequado ao padrão de consulta."
       }
@@ -211,17 +211,17 @@
         "explicacion": "A property orienta rewrites; compactação via OPTIMIZE materializa o tamanho alvo."
       },
       {
-        "texto_opcion": "Apenas ALTER TABLE SET TBLPROPERTIES sem jobs de manutenção — property não reescreve arquivos já gravados automaticamente configurado de ponta a ponta para o workload descrito.",
+        "texto_opcion": "Apenas ALTER TABLE SET TBLPROPERTIES sem jobs de manutenção — property não reescreve arquivos já gravados automaticamente.",
         "es_correcta": false,
         "explicacion": "Property não reescreve arquivos já gravados automaticamente."
       },
       {
-        "texto_opcion": "Reduzir spark.sql.shuffle.partitions para 2, afeta shuffle de queries, afeta shuffle de queries — afeta shuffle de queries, não tamanho de arquivos de write streaming.",
+        "texto_opcion": "Reduzir spark.sql.shuffle.partitions para 2 — afeta shuffle de queries, não tamanho de arquivos de write streaming.",
         "es_correcta": false,
         "explicacion": "Afeta shuffle de queries, não tamanho de arquivos de write streaming."
       },
       {
-        "texto_opcion": "Trocar para instance type com mais memória, memória de cluster não altera tamanho de — memória de cluster não altera tamanho de arquivos commitados no storage.",
+        "texto_opcion": "Trocar para instance type com mais memória — memória de cluster não altera tamanho de arquivos commitados no storage.",
         "es_correcta": false,
         "explicacion": "Memória de cluster não altera tamanho de arquivos commitados no storage."
       }
@@ -240,7 +240,7 @@
         "explicacion": "Reorganização completa exige OPTIMIZE, não ocorre no ALTER instantaneamente."
       },
       {
-        "texto_opcion": "Clustering só funciona em tabelas vazias, pode ser adicionado a tabelas — pode ser adicionado a tabelas existentes com manutenção posterior.",
+        "texto_opcion": "Clustering só funciona em tabelas vazias — pode ser adicionado a tabelas existentes com manutenção posterior.",
         "es_correcta": false,
         "explicacion": "Pode ser adicionado a tabelas existentes com manutenção posterior."
       },
@@ -264,7 +264,7 @@
     "pregunta": "Métricas do Spark UI mostram milhares de tasks de leitura de 2–5 MB em gold_metrics. Qual diagnóstico e correção?",
     "opciones": [
       {
-        "texto_opcion": "Falta de broadcast join na query, broadcast otimiza joins específicos — broadcast otimiza joins específicos, não layout de tabela base comum em desenhos legados, porém inadequado neste caso.",
+        "texto_opcion": "Falta de broadcast join na query — broadcast otimiza joins específicos, não layout de tabela base.",
         "es_correcta": false,
         "explicacion": "Broadcast otimiza joins específicos, não layout de tabela base."
       },
@@ -274,12 +274,12 @@
         "explicacion": "Many tiny files aumentam task overhead; compactação resolve."
       },
       {
-        "texto_opcion": "Photon desabilitado, photon melhora execução mas não é causa raiz de milhares de — photon melhora execução mas não é causa raiz de milhares de arquivos minúsculos.",
+        "texto_opcion": "Photon desabilitado — photon melhora execução mas não é causa raiz de milhares de arquivos minúsculos.",
         "es_correcta": false,
         "explicacion": "Photon melhora execução mas não é causa raiz de milhares de arquivos minúsculos."
       },
       {
-        "texto_opcion": "Skew extremo exigindo salting imediato, skew afeta distribuição de shuffle — skew afeta distribuição de shuffle — skew afeta distribuição de shuffle; arquivos uniformemente pequenos indicam small-file problem.",
+        "texto_opcion": "Skew extremo exigindo salting imediato — skew afeta distribuição de shuffle; arquivos uniformemente pequenos indicam small-file problem.",
         "es_correcta": false,
         "explicacion": "Skew afeta distribuição de shuffle; arquivos uniformemente pequenos indicam small-file problem."
       }
@@ -351,7 +351,7 @@
     "pregunta": "Política corporativa exige que dados gold fiquem no storage account da equipe, mas otimizações de layout devem ser rastreadas pelo metastore. Qual configuração equilibra?",
     "opciones": [
       {
-        "texto_opcion": "Managed table em DBFS legado sem UC, dBFS legado foge de governança moderna e — dBFS legado foge de governança moderna e location corporativa.",
+        "texto_opcion": "Managed table em DBFS legado sem UC — dBFS legado foge de governança moderna e location corporativa.",
         "es_correcta": false,
         "explicacion": "DBFS legado foge de governança moderna e location corporativa."
       },
@@ -419,7 +419,7 @@
         "explicacion": "Pode criar small files se promo_id tiver alta cardinalidade."
       },
       {
-        "texto_opcion": "Executar VACUUM FULL, vACUUM não existe como FULL, vACUUM não existe como FULL — vACUUM não existe como FULL; e VACUUM não adiciona colunas de layout.",
+        "texto_opcion": "Executar VACUUM FULL.",
         "es_correcta": false,
         "explicacion": "VACUUM não existe como FULL; e VACUUM não adiciona colunas de layout."
       },
@@ -453,7 +453,7 @@
         "explicacion": "Clustering lida melhor com mutações e evolução sem rigid partition directories."
       },
       {
-        "texto_opcion": "Sempre clustering porque partition nunca funciona, partition por data ainda é excelente para.",
+        "texto_opcion": "Sempre clustering porque partition nunca funciona — partition por data ainda é excelente para append-only puro com filtros temporais.",
         "es_correcta": false,
         "explicacion": "Partition por data ainda é excelente para append-only puro com filtros temporais."
       }
@@ -482,7 +482,7 @@
         "explicacion": "Reescreve tabela inteira desnecessariamente."
       },
       {
-        "texto_opcion": "DELETE histórico antes de OPTIMIZE, dELETE não compacta arquivos — dELETE não compacta arquivos; ainda precisa OPTIMIZE.",
+        "texto_opcion": "DELETE histórico antes de OPTIMIZE — dELETE não compacta arquivos; ainda precisa OPTIMIZE.",
         "es_correcta": false,
         "explicacion": "DELETE não compacta arquivos; ainda precisa OPTIMIZE."
       }
@@ -511,7 +511,7 @@
         "explicacion": "Reduzir file count diminui pressão de metadata no driver."
       },
       {
-        "texto_opcion": "Aumentar memória do driver para 1 TB permanentemente, mascara sintoma — mascara sintoma; file count continua degradando listagens e queries.",
+        "texto_opcion": "Aumentar memória do driver para 1 TB permanentemente — mascara sintoma; file count continua degradando listagens e queries.",
         "es_correcta": false,
         "explicacion": "Mascara sintoma; file count continua degradando listagens e queries."
       }
@@ -540,7 +540,7 @@
         "explicacion": "Incluir colunas não filtradas dilui Z-ORDER."
       },
       {
-        "texto_opcion": "Nenhuma; Z-ORDER é deprecated, z-ORDER continua válido, z-ORDER continua válido — z-ORDER continua válido — z-ORDER continua válido; Liquid Clustering é alternativa moderna.",
+        "texto_opcion": "Nenhuma; Z-ORDER é deprecated — z-ORDER continua válido; Liquid Clustering é alternativa moderna.",
         "es_correcta": false,
         "explicacion": "Z-ORDER continua válido; Liquid Clustering é alternativa moderna."
       }
@@ -554,7 +554,7 @@
     "pregunta": "Qual comando verifica colunas de clustering ativas em tabela Delta?",
     "opciones": [
       {
-        "texto_opcion": "DESCRIBE DETAIL ou SHOW TBLPROPERTIES e definição DDL com CLUSTER BY.",
+        "texto_opcion": "DESCRIBE DETAIL ou SHOW TBLPROPERTIES e definição DDL com CLUSTER BY",
         "es_correcta": true,
         "explicacion": "Metadados Delta expõem clustering via DDL e table details."
       },
@@ -564,12 +564,12 @@
         "explicacion": "Não existe conf global; clustering é por tabela."
       },
       {
-        "texto_opcion": "SELECT * FROM history('table'), history mostra commits — history mostra commits, não necessariamente layout clustering atual.",
+        "texto_opcion": "SELECT * FROM history('table') — history mostra commits, não necessariamente layout clustering atual.",
         "es_correcta": false,
         "explicacion": "History mostra commits, não necessariamente layout clustering atual."
       },
       {
-        "texto_opcion": "VACUUM table RETAIN 0 HOURS, vACUUM limpa arquivos removidos — vACUUM limpa arquivos removidos, não inspeciona clustering.",
+        "texto_opcion": "VACUUM table RETAIN 0 HOURS — vACUUM limpa arquivos removidos, não inspeciona clustering.",
         "es_correcta": false,
         "explicacion": "VACUUM limpa arquivos removidos, não inspeciona clustering."
       }
@@ -598,7 +598,7 @@
         "explicacion": "Managed table lifecycle inclui cleanup de storage pelo metastore."
       },
       {
-        "texto_opcion": "Arquivos permanecem forever no storage sem VACUUM manual — managed drop remove dados; diferente de external.",
+        "texto_opcion": "Arquivos permanecem forever no storage sem VACUUM manual.",
         "es_correcta": false,
         "explicacion": "Managed drop remove dados; diferente de external."
       }
@@ -680,7 +680,7 @@
         "explicacion": "Migração gradual evita rewrite único massivo."
       },
       {
-        "texto_opcion": "ALTER PARTITION sem OPTIMIZE, sintaxe/mecânica diferente — sintaxe/mecânica diferente; clustering requer abordagem Delta moderna.",
+        "texto_opcion": "ALTER PARTITION sem OPTIMIZE — sintaxe/mecânica diferente; clustering requer abordagem Delta moderna.",
         "es_correcta": false,
         "explicacion": "Sintaxe/mecânica diferente; clustering requer abordagem Delta moderna."
       },
@@ -704,7 +704,7 @@
         "explicacion": "Não obrigatório se clustering cobre filtros."
       },
       {
-        "texto_opcion": "Full scan sempre porque partition foi removido, clustering substitui partition pruning — clustering substitui partition pruning directory-based por file skipping.",
+        "texto_opcion": "Full scan sempre porque partition foi removido — clustering substitui partition pruning directory-based por file skipping.",
         "es_correcta": false,
         "explicacion": "Clustering substitui partition pruning directory-based por file skipping."
       },
@@ -738,7 +738,7 @@
         "explicacion": "CDF não causa small files por si; deletes sim."
       },
       {
-        "texto_opcion": "Usar CACHE TABLE sem OPTIMIZE, cache acelera leitura repetida mas — cache acelera leitura repetida mas não corrige layout persistido.",
+        "texto_opcion": "Usar CACHE TABLE sem OPTIMIZE — cache acelera leitura repetida mas não corrige layout persistido.",
         "es_correcta": false,
         "explicacion": "Cache acelera leitura repetida mas não corrige layout persistido."
       },
@@ -830,7 +830,7 @@
         "explicacion": "Credencial storage, não layout."
       },
       {
-        "texto_opcion": "spark.databricks.delta.retentionDurationCheck.enabled=false",
+        "texto_opcion": "spark.databricks.delta.retentionDurationCheck.enabled=false.",
         "es_correcta": false,
         "explicacion": "Relacionado a VACUUM safety, não compact."
       }
@@ -849,12 +849,12 @@
         "explicacion": "Photon não é prerequisite de OPTIMIZE."
       },
       {
-        "texto_opcion": "Views precisam ser external, tipo view não suporta OPTIMIZE — tipo view não suporta OPTIMIZE independente de external.",
+        "texto_opcion": "Views precisam ser external — tipo view não suporta OPTIMIZE independente de external.",
         "es_correcta": false,
         "explicacion": "Tipo view não suporta OPTIMIZE independente de external."
       },
       {
-        "texto_opcion": "OPTIMIZE exige Databricks Runtime 6.0 — versões modernas suportam OPTIMIZE amplamente comum em desenhos legados, porém inadequado neste caso.",
+        "texto_opcion": "OPTIMIZE exige Databricks Runtime 6.0 — versões modernas suportam OPTIMIZE amplamente.",
         "es_correcta": false,
         "explicacion": "Versões modernas suportam OPTIMIZE amplamente."
       },

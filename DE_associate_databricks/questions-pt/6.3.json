@@ -32,7 +32,7 @@
     "pregunta": "No modelo de execução do Spark, qual das operações a seguir cria um **shuffle boundary** — dividindo um job em vários estágios?",
     "opciones": [
       {
-        "texto_opcion": "`select(\"col1\", \"col2\")` — selecionar colunas envia dados para o driver — `select()` é uma transformação estreita operando por partição.",
+        "texto_opcion": "`select(\"col1\", \"col2\")` — selecionar colunas envia dados para o driver.",
         "es_correcta": false,
         "explicacion": "`select()` é uma transformação estreita operando por partição. Ele não embaralha os dados nem os envia ao driver."
       },
@@ -47,7 +47,7 @@
         "explicacion": "`groupBy()` seguido de agregação requer uma ampla transformação - os dados de todos os executores são redistribuídos (embaralhados) pela chave do grupo, criando um limite de estágio."
       },
       {
-        "texto_opcion": "`coalesce(2)` — reduzir partições causa movimentação de dados — `coalesce()` mescla partições sem shuffle completo.",
+        "texto_opcion": "`coalesce(2)` — reduzir partições causa movimentação de dados.",
         "es_correcta": false,
         "explicacion": "`coalesce()` mescla partições sem shuffle completo — ele move dados localmente e não cria um limite de estágio de shuffle. `repartition()` (não `coalesce`) causa uma confusão."
       }
@@ -62,17 +62,17 @@
     "pregunta": "Um engenheiro de dados examina as métricas resumidas de um estágio e vê:\n\n- Duração mínima: 0,5s\n- Duração mediana: 1,2s\n- 75º percentil Duração: 1,5s\n- Duração máxima: 48 minutos\n\nO que esse padrão indica?",
     "opciones": [
       {
-        "texto_opcion": "**Subprovisionamento de cluster** — todas as tarefas deveriam levar aproximadamente o mesmo tempo se o cluster tivesse recursos suficientes — o subprovisionamento faz com que todas as tarefas sejam executadas de maneira lenta e uniforme. Quando apenas a duração máxima é extrema enquanto a mediana é baixa, isso indica distorção em partições específicas.",
+        "texto_opcion": "**Subprovisionamento de cluster** — todas as tarefas deveriam levar aproximadamente o mesmo tempo se o cluster tivesse recursos suficientes.",
         "es_correcta": false,
         "explicacion": "O subprovisionamento faz com que todas as tarefas sejam executadas de maneira lenta e uniforme. Quando apenas a duração máxima é extrema enquanto a mediana é baixa, isso indica distorção em partições específicas."
       },
       {
-        "texto_opcion": "**Gargalo de rede** — a tarefa esperou 48 minutos para embaralhar os dados de executores remotos — atrasos na rede apareceriam como um alto `Shuffle Read Blocked Time` — atrasos na rede apareceriam como um alto `Shuffle Read Blocked Time`.",
+        "texto_opcion": "**Gargalo de rede** — a tarefa esperou 48 minutos para embaralhar os dados de executores remotos.",
         "es_correcta": false,
         "explicacion": "Atrasos na rede apareceriam como um alto `Shuffle Read Blocked Time`. Uma única tarefa com duração de 48 minutos, enquanto outras levam de 1 a 2 segundos, é a principal assinatura de data skew."
       },
       {
-        "texto_opcion": "**Spill de disco** — o máximo de 48 minutos significa que a tarefa está gravando grandes quantidades de dados no disco — o spill de disco é detectado por meio de valores `Spill (Disk)` diferentes de zero, e não apenas pela duração.",
+        "texto_opcion": "**Spill de disco** — o máximo de 48 minutos significa que a tarefa está gravando grandes quantidades de dados no disco.",
         "es_correcta": false,
         "explicacion": "O spill de disco é detectado por meio de valores `Spill (Disk)` diferentes de zero, e não apenas pela duração. A disparidade de duração entre as tarefas é o indicador de data skew, não de vazamento."
       },
@@ -97,17 +97,17 @@
         "explicacion": "A coluna Shuffle Read mostra diretamente os tamanhos das partições após a redistribuição. A tarefa 2, que recebe 6,2 GB, enquanto todas as outras recebem aproximadamente 55–60 MB, confirma uma tecla de atalho (uma chave de junção/agrupar por aparece em um número desproporcional de linhas), fazendo com que todos os dados caiam em uma única partição."
       },
       {
-        "texto_opcion": "Derrame de disco — A tarefa 2 está gravando 6,2 GB no disco, fazendo com que demore mais, 6,2 GB estão na coluna **Shuffle Read** — 6,2 GB estão na coluna **Shuffle Read**, o que significa que a Tarefa 2 está lendo essa quantidade de dados do modo aleatório.",
+        "texto_opcion": "Derrame de disco — A tarefa 2 está gravando 6,2 GB no disco, fazendo com que demore mais.",
         "es_correcta": false,
         "explicacion": "6,2 GB estão na coluna **Shuffle Read**, o que significa que a Tarefa 2 está lendo essa quantidade de dados do modo aleatório, e não gravando no disco. Spill é uma métrica separada mostrada na coluna `Spill (Disk)`."
       },
       {
-        "texto_opcion": "Falha do executor — A tarefa 2 foi executada em um nó com defeito e teve que ser reiniciada, causando tempo extra — a falha do executor seria mostrada como um erro de tarefa e status de finalização/reinicialização — a falha do executor seria mostrada como um erro de tarefa e status de finalização/reinicialização.",
+        "texto_opcion": "Falha do executor — A tarefa 2 foi executada em um nó com defeito e teve que ser reiniciada, causando tempo extra.",
         "es_correcta": false,
         "explicacion": "A falha do executor seria mostrada como um erro de tarefa e status de finalização/reinicialização. O tamanho extremo da shuffle read da tarefa 2 (6,2 GB) confirma que a causa é o volume de dados, não a integridade do executor."
       },
       {
-        "texto_opcion": "Limitação de rede — a tarefa 2 foi atribuída a um executor distante da fonte de dados — a proximidade da rede afeta a leitura dos dados de origem (bytes de entrada), e não a distribuição do shuffle do tamanho da leitura.",
+        "texto_opcion": "Limitação de rede — a tarefa 2 foi atribuída a um executor distante da fonte de dados.",
         "es_correcta": false,
         "explicacion": "A proximidade da rede afeta a leitura dos dados de origem (bytes de entrada), e não a distribuição do shuffle do tamanho da leitura. A shuffle read de 6,2 GB versus 55 MB para outros é definitivamente um problema de distribuição de dados (distorção)."
       }
@@ -127,7 +127,7 @@
         "explicacion": "As métricas de spill são métricas de volume de dados (bytes), não métricas de contagem de operações. Eles medem quantos dados foram despejados da memória de execução para o disco."
       },
       {
-        "texto_opcion": "`Spill (Disk)` é maior que `Spill (Memory)` porque o disco compacta os dados com mais eficiência — a relação é oposta: `Spill (Memory)` > `Spill (Disk)` porque os bytes do disco são serializados/compactados. Nesta questão, 18 GB > 4,2 GB confirma a direção correta adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "texto_opcion": "`Spill (Disk)` é maior que `Spill (Memory)` porque o disco compacta os dados com mais eficiência — a relação é oposta: `Spill (Memory)` > `Spill (Disk)` porque os bytes do disco são serializados/compactados. Nesta questão, 18 GB > 4,2 GB confirma a direção correta.",
         "es_correcta": false,
         "explicacion": "A relação é oposta: `Spill (Memory)` > `Spill (Disk)` porque os bytes do disco são serializados/compactados. Nesta questão, 18 GB > 4,2 GB confirma a direção correta."
       },
@@ -151,22 +151,22 @@
     "pregunta": "Um engenheiro de dados executa uma grande junção entre uma tabela de 500 GB e uma tabela de dimensão de 10 MB. A adesão leva 45 minutos. A aba Stages mostra uma grande operação de shuffle. Qual é a solução mais eficiente?",
     "opciones": [
       {
-        "texto_opcion": "Habilite AQE (`spark.sql.adaptive.enabled = true`) e espere que ele corrija a junção automaticamente — aQE pode converter a junção em broadcast join se detectar que o lado pequeno é pequeno o suficiente.",
+        "texto_opcion": "Habilite AQE (`spark.sql.adaptive.enabled = true`) e espere que ele corrija a junção automaticamente.",
         "es_correcta": false,
         "explicacion": "AQE pode converter a junção em broadcast join se detectar que o lado pequeno é pequeno o suficiente — mas com uma tabela de 10 MB, uma dica `broadcast()` explícita é mais confiável e imediata."
       },
       {
-        "texto_opcion": "Aumente `spark.sql.shuffle.partitions` de 200 para 2.000 para reduzir os dados por partição, mais partições reduzem o tamanho por partição — mais partições reduzem o tamanho por partição, mas ainda exigem que o shuffle aconteça.",
+        "texto_opcion": "Aumente `spark.sql.shuffle.partitions` de 200 para 2.000 para reduzir os dados por partição.",
         "es_correcta": false,
         "explicacion": "Mais partições reduzem o tamanho por partição, mas ainda exigem que o shuffle aconteça. O shuffle em si (transferência de rede de 500 GB) é o gargalo. Um broadcast join elimina totalmente o shuffle."
       },
       {
-        "texto_opcion": "Use um **broadcast join** — a tabela de 10 MB cabe na memória, então transmiti-la elimina totalmente o shuffle:\n\n```python\nresult = large_df.join(broadcast(small_df), \"key\")\n```",
+        "texto_opcion": "Use um **broadcast join** — a tabela de 10 MB cabe na memória, então transmiti-la elimina totalmente o shuffle:\n\n```python\nresult = large_df.join(broadcast(small_df), \"key\")\n```.",
         "es_correcta": true,
         "explicacion": "Quando um lado de uma junção é pequeno o suficiente para caber na memória do executor, um broadcast join evita embaralhar a tabela grande. A mesa pequena é enviada a todos os executores uma vez, e a mesa grande é unida localmente – eliminando o dispendioso shuffle."
       },
       {
-        "texto_opcion": "Salgue a chave de junção da tabela grande para distribuir os dados de maneira mais uniforme — salting é usado para corrigir distorções em uma junção baseada em shuffle — salting é usado para corrigir distorções em uma junção baseada em shuffle.",
+        "texto_opcion": "Salgue a chave de junção da tabela grande para distribuir os dados de maneira mais uniforme.",
         "es_correcta": false,
         "explicacion": "Salting é usado para corrigir distorções em uma junção baseada em shuffle. Se a tabela de 10 MB puder ser transmitida, o shuffle deverá ser totalmente eliminado em vez de optimized através do salting."
       }
@@ -186,12 +186,12 @@
         "explicacion": "Um estágio travado em 99% é uma assinatura clássica de tarefa retardatária. 199 de 200 tarefas foram concluídas rapidamente, mas 1 ou 2 tarefas estão processando partições enormes (inclinação), atrasando todo o estágio e desperdiçando recursos ociosos do executor."
       },
       {
-        "texto_opcion": "O piloto está consolidando os resultados de todas as tarefas antes de concluir a etapa — o driver agrega resultados apenas para ações que retornam dados (como `collect()`) — o driver agrega resultados apenas para ações que retornam dados (como `collect()`). Para a maioria das operações (como gravações), o estágio é concluído quando todas as tarefas terminam.",
+        "texto_opcion": "O piloto está consolidando os resultados de todas as tarefas antes de concluir a etapa.",
         "es_correcta": false,
         "explicacion": "O driver agrega resultados apenas para ações que retornam dados (como `collect()`). Para a maioria das operações (como gravações), o estágio é concluído quando todas as tarefas terminam. O padrão de 99% indica tarefas dispersas, e não consolidação de drivers."
       },
       {
-        "texto_opcion": "O spill de disco está impedindo a conclusão do estágio — o Spark está gravando dados no disco antes de fechar o estágio — embora o spill possa contribuir para uma lentidão retardatária, o padrão de 99% indica especificamente que a grande maioria das tarefas está.",
+        "texto_opcion": "O spill de disco está impedindo a conclusão do estágio — o Spark está gravando dados no disco antes de fechar o estágio.",
         "es_correcta": false,
         "explicacion": "Embora o spill possa contribuir para uma lentidão retardatária, o padrão de 99% indica especificamente que a grande maioria das tarefas está concluída e algumas ainda estão em execução – o que é a assinatura distorcida/retardatária."
       },
@@ -211,17 +211,17 @@
     "pregunta": "Um engenheiro de dados deseja detectar distorções de dados **programaticamente** antes de executar uma associação cara. Qual código PySpark verifica corretamente a distribuição de linhas entre partições?",
     "opciones": [
       {
-        "texto_opcion": "```python\ndf.explain(True)\n```, `explain()` shows the query plan (logical and physical), not actual runtime partition statistics — `getNumPartitions()` retorna o número total de partições — não diz nada sobre quantas linhas há em cada partição. Skew requer conhecer a *distribuição*, não apenas a contagem aplicado entre ambientes por consistência operacional.",
+        "texto_opcion": "```píton\ndf.rdd.getNumPartitions()\n``` — `getNumPartitions()` retorna o número total de partições — não diz nada sobre quantas linhas há em cada partição. Skew requer conhecer a *distribuição*, não apenas a contagem.",
         "es_correcta": false,
         "explicacion": "`getNumPartitions()` retorna o número total de partições — não diz nada sobre quantas linhas há em cada partição. Skew requer conhecer a *distribuição*, não apenas a contagem."
       },
       {
-        "texto_opcion": "```python\ndf.groupBy(\"join_key\").count().show()\n```, this counts rows per `join_key` value (useful for finding hot keys) — `explain()` mostra o plano de consulta (lógico e físico), não as estatísticas reais da partição de tempo de execução. A distribuição de linhas de partição requer a execução de `spark_partition_id()` nos dados reais.",
+        "texto_opcion": "```píton\ndf.explain(Verdadeiro)\n``` — `explain()` mostra o plano de consulta (lógico e físico), não as estatísticas reais da partição de tempo de execução. A distribuição de linhas de partição requer a execução de `spark_partition_id()` nos dados reais.",
         "es_correcta": false,
         "explicacion": "`explain()` mostra o plano de consulta (lógico e físico), não as estatísticas reais da partição de tempo de execução. A distribuição de linhas de partição requer a execução de `spark_partition_id()` nos dados reais."
       },
       {
-        "texto_opcion": "```python\ndf.rdd.getNumPartitions()\n```, `getNumPartitions()` returns the total number of partitions — it says nothing about how many — isso conta as linhas por valor `join_key` (útil para encontrar teclas de atalho), mas não por partição. A distribuição de partições usa `spark_partition_id()` usado como caminho principal nesta arquitetura.",
+        "texto_opcion": "```píton\ndf.groupBy(\"join_key\").count().show()\n``` — isso conta as linhas por valor `join_key` (útil para encontrar teclas de atalho), mas não por partição. A distribuição de partições usa `spark_partition_id()`.",
         "es_correcta": false,
         "explicacion": "Isso conta as linhas por valor `join_key` (útil para encontrar teclas de atalho), mas não por partição. A distribuição de partições usa `spark_partition_id()`."
       },
@@ -246,17 +246,17 @@
         "explicacion": "A salga aumenta artificialmente a cardinalidade da chave distorcida anexando um sufixo aleatório (por exemplo, `US_0`, `US_1`, ..., `US_9`). A pequena mesa é replicada para corresponder a cada balde de sal. Isso força os 70% dos dados dos “EUA” em N partições menores, em vez de uma gigante."
       },
       {
-        "texto_opcion": "**Repartição em `country_code`** — redistribui os dados por país para um carregamento mais uniforme — `repartition(\"country_code\")` hashes por country_code - mas como `US` ainda recebe um balde de hash, ele cria uma partição enorme.",
+        "texto_opcion": "**Repartição em `country_code`** — redistribui os dados por país para um carregamento mais uniforme.",
         "es_correcta": false,
         "explicacion": "`repartition(\"country_code\")` hashes por country_code - mas como `US` ainda recebe um balde de hash, ele cria uma partição enorme. A salga é necessária para quebrar a tecla de atalho."
       },
       {
-        "texto_opcion": "**Filtre as linhas `US`** antes de ingressar e junte-as separadamente, esta abordagem de duas etapas funciona como uma solução alternativa — esta abordagem de duas etapas funciona como uma solução alternativa, mas requer união de resultados e é complexa. Salting é a técnica padrão que lida com a tecla de atalho em uma única junção.",
+        "texto_opcion": "**Filtre as linhas `US`** antes de ingressar e junte-as separadamente — esta abordagem de duas etapas funciona como uma solução alternativa, mas requer união de resultados e é complexa. Salting é a técnica padrão que lida com a tecla de atalho em uma única junção.",
         "es_correcta": false,
         "explicacion": "Esta abordagem de duas etapas funciona como uma solução alternativa, mas requer união de resultados e é complexa. Salting é a técnica padrão que lida com a tecla de atalho em uma única junção."
       },
       {
-        "texto_opcion": "**Aumente `spark.sql.shuffle.partitions` para 10000** — mais partições reduzem a concentração de `US`, mais partições não ajudam com uma tecla de atalho — mais partições não ajudam com uma tecla de atalho — mais partições não ajudam com uma tecla de atalho.",
+        "texto_opcion": "**Aumente `spark.sql.shuffle.partitions` para 10000** — mais partições reduzem a concentração de `US`.",
         "es_correcta": false,
         "explicacion": "Mais partições não ajudam com uma tecla de atalho. Se todas as linhas `US` tiverem hash para a mesma chave, elas sempre pousarão na mesma partição, independentemente de quantas partições existirem no total."
       }
@@ -305,17 +305,17 @@
         "explicacion": "A distinção entre spill causado por distorção (uma tarefa derrama massivamente) e spill geral (todas as tarefas derramam igualmente) determina a correção: distorção → AQE/salga; geral → aumentar partições ou memória do executor."
       },
       {
-        "texto_opcion": "Aumente imediatamente `spark.executor.memory` para dobrar o valor atual, aumentar a memória pode ajudar no desperdício geral — aumentar a memória pode ajudar no desperdício geral, mas desperdiça recursos se a causa for distorcida (apenas uma tarefa é derramada). Diagnosticar a distribuição primeiro.",
+        "texto_opcion": "Aumente imediatamente `spark.executor.memory` para dobrar o valor atual — aumentar a memória pode ajudar no desperdício geral, mas desperdiça recursos se a causa for distorcida (apenas uma tarefa é derramada). Diagnosticar a distribuição primeiro.",
         "es_correcta": false,
         "explicacion": "Aumentar a memória pode ajudar no desperdício geral, mas desperdiça recursos se a causa for distorcida (apenas uma tarefa é derramada). Diagnosticar a distribuição primeiro."
       },
       {
-        "texto_opcion": "Reinicie o cluster — os dados derramados no disco podem ser corrompidos e causar falhas em cascata — o vazamento de disco do Spark é uma operação gerenciada – os dados são gravados e lidos corretamente. O spill não causa corrupção de dados. Reiniciar não é a resposta apropriada como escolha padrão de produção neste cenário.",
+        "texto_opcion": "Reinicie o cluster — os dados derramados no disco podem ser corrompidos e causar falhas em cascata — o vazamento de disco do Spark é uma operação gerenciada – os dados são gravados e lidos corretamente. O spill não causa corrupção de dados. Reiniciar não é a resposta apropriada.",
         "es_correcta": false,
         "explicacion": "O vazamento de disco do Spark é uma operação gerenciada – os dados são gravados e lidos corretamente. O spill não causa corrupção de dados. Reiniciar não é a resposta apropriada."
       },
       {
-        "texto_opcion": "Abra a aba SQL e procure os nós `Exchange` – os nós do Exchange causam todos os vazamentos — embora os nós do Exchange representem shuffles (uma fonte de spill), a etapa de diagnóstico imediata após ver um spill diferente de zero na aba Stages é observar a distribuição.",
+        "texto_opcion": "Abra a aba SQL e procure os nós `Exchange` – os nós do Exchange causam todos os vazamentos.",
         "es_correcta": false,
         "explicacion": "Embora os nós do Exchange representem shuffles (uma fonte de spill), a etapa de diagnóstico imediata após ver um spill diferente de zero na aba Stages é observar a distribuição de spill em nível de tarefa nos detalhes do estágio."
       }
@@ -359,7 +359,7 @@
     "pregunta": "Um engenheiro de dados vê na aba Stages:\n\nShuffle write: 85 GB\nShuffle read: 85 GB\n\nA próxima etapa processa esses dados com `groupBy().agg()`. Qual é o tamanho de partição de destino recomendado para os dados embaralhados e como eles devem ajustar as partições?",
     "opciones": [
       {
-        "texto_opcion": "Alvo **1 partição por GB** de dados de shuffle — 85 GB = 85 partições, 1 partição por GB resulta em 1 GB por partição — 1 partição por GB resulta em 1 GB por partição, o que é 5–10x acima do intervalo alvo recomendado de 100–200 MB.",
+        "texto_opcion": "Alvo **1 partição por GB** de dados de shuffle — 85 GB = 85 partições — 1 partição por GB resulta em 1 GB por partição, o que é 5–10x acima do intervalo alvo recomendado de 100–200 MB.",
         "es_correcta": false,
         "explicacion": "1 partição por GB resulta em 1 GB por partição, o que é 5–10x acima do intervalo alvo recomendado de 100–200 MB."
       },
@@ -369,7 +369,7 @@
         "explicacion": "200 é o padrão, não um valor ideal. 85 GB/200 = 425 MB por partição, o que está acima do intervalo alvo e provavelmente causará vazamento."
       },
       {
-        "texto_opcion": "Destino **1 partição por núcleo executor** — para um cluster de 20 núcleos, use 20 partições, 1 partição por núcleo ignora o volume de dados — 1 partição por núcleo ignora o volume de dados.",
+        "texto_opcion": "Destino **1 partição por núcleo executor** — para um cluster de 20 núcleos, use 20 partições.",
         "es_correcta": false,
         "explicacion": "1 partição por núcleo ignora o volume de dados. Com 85 GB e 20 partições, cada partição teria 4,25 GB – muito grande e causaria vazamento grave."
       },
@@ -399,12 +399,12 @@
         "explicacion": "O GC Time reflete a garbage collection da JVM no processo executor, não no desempenho da rede. Problemas de rede apareceriam como um tempo alto de shuffle read bloqueada."
       },
       {
-        "texto_opcion": "O executor nº 3 é o mais eficiente – alto tempo de GC significa que ele está processando mais dados e produzindo mais objetos inúteis — o tempo elevado de GC é um problema de desempenho, não um indicador de eficiência — o tempo elevado de GC é um problema de desempenho, não um indicador de eficiência. Isso significa que o executor está lutando com a memória, não que esteja fazendo um job mais útil.",
+        "texto_opcion": "O executor nº 3 é o mais eficiente – alto tempo de GC significa que ele está processando mais dados e produzindo mais objetos inúteis.",
         "es_correcta": false,
         "explicacion": "O tempo elevado de GC é um problema de desempenho, não um indicador de eficiência. Isso significa que o executor está lutando com a memória, não que esteja fazendo um job mais útil."
       },
       {
-        "texto_opcion": "O executor nº 3 falhou e está reiniciando – o tempo do GC se acumula devido a múltiplas tentativas, se o executor tivesse falhado — se o executor tivesse falhado, ele seria exibido como `Dead` ou teria tarefas com falha — se o executor tivesse falhado, ele seria exibido como `Dead` ou teria tarefas com falha. O acúmulo de tempo de GC em um executor em execução indica pressão de memória ativa, não falha.",
+        "texto_opcion": "O executor nº 3 falhou e está reiniciando – o tempo do GC se acumula devido a múltiplas tentativas — se o executor tivesse falhado, ele seria exibido como `Dead` ou teria tarefas com falha. O acúmulo de tempo de GC em um executor em execução indica pressão de memória ativa, não falha.",
         "es_correcta": false,
         "explicacion": "Se o executor tivesse falhado, ele seria exibido como `Dead` ou teria tarefas com falha. O acúmulo de tempo de GC em um executor em execução indica pressão de memória ativa, não falha."
       }
@@ -429,12 +429,12 @@
         "explicacion": "O tratamento de skew join do AQE divide partições grandes - ele não converte SortMergeJoin em BroadcastHashJoin. A mudança de estratégia de junção acontece quando um lado de junção é detectado como pequeno o suficiente para ser transmitido."
       },
       {
-        "texto_opcion": "AQE fundiu duas pequenas shuffle partitions em uma, alterando o algoritmo de junção — a união de shuffle partitions é um recurso AQE separado (`coalescePartitions`). A conversão de SortMergeJoin em BroadcastHashJoin é o recurso `dynamicJoinSelection` do AQE selecionado para atender as restrições citadas Isso o torna inadequado frente à restrição principal do enunciado..",
+        "texto_opcion": "AQE fundiu duas pequenas shuffle partitions em uma, alterando o algoritmo de junção — a união de shuffle partitions é um recurso AQE separado (`coalescePartitions`). A conversão de SortMergeJoin em BroadcastHashJoin é o recurso `dynamicJoinSelection` do AQE.",
         "es_correcta": false,
         "explicacion": "A união de shuffle partitions é um recurso AQE separado (`coalescePartitions`). A conversão de SortMergeJoin em BroadcastHashJoin é o recurso `dynamicJoinSelection` do AQE."
       },
       {
-        "texto_opcion": "O desenvolvedor usou explicitamente a dica `broadcast()`, substituindo o plano inicial do optimizer — uma dica `broadcast()` explícita teria resultado em BroadcastHashJoin desde o início, não em uma mudança de tempo de execução. O comportamento descrito é a adaptação dinâmica do plano da AQE adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "texto_opcion": "O desenvolvedor usou explicitamente a dica `broadcast()`, substituindo o plano inicial do optimizer — uma dica `broadcast()` explícita teria resultado em BroadcastHashJoin desde o início, não em uma mudança de tempo de execução. O comportamento descrito é a adaptação dinâmica do plano da AQE.",
         "es_correcta": false,
         "explicacion": "Uma dica `broadcast()` explícita teria resultado em BroadcastHashJoin desde o início, não em uma mudança de tempo de execução. O comportamento descrito é a adaptação dinâmica do plano da AQE."
       }
@@ -453,17 +453,17 @@
         "explicacion": "200 GB de dados de shuffle/200 partições = 1 GB por partição. Cada tarefa no estágio groupBy processa 1 GB de dados de shuffle. Aumentar para 2.000 partições reduz cada uma para 100 MB — cabendo na memória do executor e eliminando o desperdício de 150 GB."
       },
       {
-        "texto_opcion": "Adicione mais nós de job ao cluster: mais executores processam o Estágio 2 com mais rapidez, mais nós aumentam o paralelismo — mais nós aumentam o paralelismo, mas se ainda existirem 200 partições, cada partição ainda terá 1 GB.",
+        "texto_opcion": "Adicione mais nós de job ao cluster: mais executores processam o Estágio 2 com mais rapidez.",
         "es_correcta": false,
         "explicacion": "Mais nós aumentam o paralelismo, mas se ainda existirem 200 partições, cada partição ainda terá 1 GB. A questão do vazamento é sobre o volume de dados por partição, que requer mais partições – não apenas mais nós."
       },
       {
-        "texto_opcion": "Use `coalesce(50)` para reduzir a contagem de partições — menos partições maiores processam os dados mais rapidamente — `coalesce(50)` criaria partições maiores (200 GB / 50 = 4 GB cada), piorando drasticamente o.",
+        "texto_opcion": "Use `coalesce(50)` para reduzir a contagem de partições — menos partições maiores processam os dados mais rapidamente.",
         "es_correcta": false,
         "explicacion": "`coalesce(50)` criaria partições maiores (200 GB / 50 = 4 GB cada), piorando drasticamente o vazamento. A solução é mais partições, não menos."
       },
       {
-        "texto_opcion": "Cache a saída do Estágio 1 - isso evita que o Estágio 2 tenha que recalcular o shuffle — o cache da saída do Estágio 1 só ajuda se o Estágio 2 ler várias vezes — o cache da saída do Estágio 1 só ajuda se o Estágio 2 ler várias vezes.",
+        "texto_opcion": "Cache a saída do Estágio 1 - isso evita que o Estágio 2 tenha que recalcular o shuffle.",
         "es_correcta": false,
         "explicacion": "O cache da saída do Estágio 1 só ajuda se o Estágio 2 ler várias vezes. O vazamento no Estágio 2 é causado pelo volume de dados por partição, não pela releitura do Estágio 1. Mais partições é a solução correta."
       }
@@ -478,12 +478,12 @@
     "pregunta": "O job de um engenheiro de dados falha com `java.lang.OutOfMemoryError: Java heap space` no Executor #7. Depois de encontrar o erro nos detalhes da tarefa, qual aba Spark UI eles devem verificar em seguida para determinar se foi causado por data skew ou insuficiência geral de memória?",
     "opciones": [
       {
-        "texto_opcion": "**Guia Ambiente** — verifique se `spark.executor.memory` está definido abaixo do mínimo recomendado — embora seja útil verificar a configuração da memória, a guia Ambiente mostra as configurações, não a causa deste OOM específico. A distribuição de dados em nível de tarefa (aba Stages) é a ferramenta de diagnóstico adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "texto_opcion": "**Guia Ambiente** — verifique se `spark.executor.memory` está definido abaixo do mínimo recomendado — embora seja útil verificar a configuração da memória, a guia Ambiente mostra as configurações, não a causa deste OOM específico. A distribuição de dados em nível de tarefa (aba Stages) é a ferramenta de diagnóstico.",
         "es_correcta": false,
         "explicacion": "Embora seja útil verificar a configuração da memória, a guia Ambiente mostra as configurações, não a causa deste OOM específico. A distribuição de dados em nível de tarefa (aba Stages) é a ferramenta de diagnóstico."
       },
       {
-        "texto_opcion": "**aba Jobs** — verifique se algum outro job foi executado simultaneamente e consumiu a memória do mesmo executor — os job clusters executam um job por vez; all-purpose clusters podem compartilhar, mas a aba Jobs mostra informações em nível de job, e não competição de memória por executor. As métricas de estágio são a ferramenta de diagnóstico certa usado como caminho principal nesta arquitetura.",
+        "texto_opcion": "**aba Jobs** — verifique se algum outro job foi executado simultaneamente e consumiu a memória do mesmo executor — os job clusters executam um job por vez; all-purpose clusters podem compartilhar, mas a aba Jobs mostra informações em nível de job, e não competição de memória por executor. As métricas de estágio são a ferramenta de diagnóstico certa.",
         "es_correcta": false,
         "explicacion": "Os job clusters executam um job por vez; all-purpose clusters podem compartilhar, mas a aba Jobs mostra informações em nível de job, e não competição de memória por executor. As métricas de estágio são a ferramenta de diagnóstico certa."
       },
@@ -508,12 +508,12 @@
     "pregunta": "Um engenheiro de dados vê a **execução especulativa** em ação no Spark UI: duas entradas de tarefas com o mesmo índice de partição, uma marcada como `SUCCESS (Killed)` e uma `SUCCESS`. O que isto significa?",
     "opciones": [
       {
-        "texto_opcion": "Um checkpoint desencadeou uma recomputação da tarefa, resultando em duas execuções bem-sucedidas — o checkpoint salva dados no armazenamento e evita a recomputação — não causa execução duplicada de tarefas. O padrão descrito é uma execução especulativa adotado como padrão da equipe, embora não seja o melhor aqui Isso o torna inadequado frente à restrição principal do enunciado..",
+        "texto_opcion": "Um checkpoint desencadeou uma recomputação da tarefa, resultando em duas execuções bem-sucedidas — o checkpoint salva dados no armazenamento e evita a recomputação — não causa execução duplicada de tarefas. O padrão descrito é uma execução especulativa.",
         "es_correcta": false,
         "explicacion": "O checkpoint salva dados no armazenamento e evita a recomputação — não causa execução duplicada de tarefas. O padrão descrito é uma execução especulativa."
       },
       {
-        "texto_opcion": "Dois executores processaram a mesma partição em paralelo para duplicar a taxa de transferência — o Spark não divide partições para processamento paralelo (isso exigiria reparticionamento). A execução especulativa duplica a tarefa lenta – o vencedor fica com o resultado; o perdedor é descartado comum em desenhos legados, porém inadequado neste caso.",
+        "texto_opcion": "Dois executores processaram a mesma partição em paralelo para duplicar a taxa de transferência — o Spark não divide partições para processamento paralelo (isso exigiria reparticionamento). A execução especulativa duplica a tarefa lenta – o vencedor fica com o resultado; o perdedor é descartado.",
         "es_correcta": false,
         "explicacion": "O Spark não divide partições para processamento paralelo (isso exigiria reparticionamento). A execução especulativa duplica a tarefa lenta – o vencedor fica com o resultado; o perdedor é descartado."
       },
@@ -547,12 +547,12 @@
         "explicacion": "Os nós `Exchange` no plano de consulta Spark representam operações de shuffle. `hashpartitioning(customer_id, 200)` significa que os dados são particionados pelo valor hash de `customer_id` em 200 shuffle partitions."
       },
       {
-        "texto_opcion": "Uma operação de **scan** — o Databricks lê 200 arquivos particionados por `customer_id` — as verificações de arquivos aparecem como nós `FileScan` ou `Scan`.",
+        "texto_opcion": "Uma operação de **scan** — o Databricks lê 200 arquivos particionados por `customer_id`.",
         "es_correcta": false,
         "explicacion": "As verificações de arquivos aparecem como nós `FileScan` ou `Scan`. `Exchange` é especificamente o operador shuffle no plano físico do Spark."
       },
       {
-        "texto_opcion": "Uma **troca de transmissão** — a coluna `customer_id` está sendo transmitida para todos os executores — uma troca de transmissão apareceria como `BroadcastExchange`.",
+        "texto_opcion": "Uma **troca de transmissão** — a coluna `customer_id` está sendo transmitida para todos os executores.",
         "es_correcta": false,
         "explicacion": "Uma troca de transmissão apareceria como `BroadcastExchange`. O nó `Exchange` simples com `hashpartitioning` indica um shuffle padrão, não uma transmissão."
       }
@@ -577,7 +577,7 @@
         "explicacion": "`cache()` é lento — é avaliado apenas quando uma ação é chamada. O Spark não valida antecipadamente a memória disponível. Se os dados não couberem, ele armazena parcialmente em cache e despeja o restante."
       },
       {
-        "texto_opcion": "O Spark compacta automaticamente os dados de 500 GB em 300 GB para caber na memória — o Spark usa serialização e alguma compactação para o nível de armazenamento `MEMORY_AND_DISK`, mas não compacta 500 GB para 300 GB. A remoção para o disco é o comportamento real adotado como padrão da equipe, embora não seja o melhor aqui.",
+        "texto_opcion": "O Spark compacta automaticamente os dados de 500 GB em 300 GB para caber na memória — o Spark usa serialização e alguma compactação para o nível de armazenamento `MEMORY_AND_DISK`, mas não compacta 500 GB para 300 GB. A remoção para o disco é o comportamento real.",
         "es_correcta": false,
         "explicacion": "O Spark usa serialização e alguma compactação para o nível de armazenamento `MEMORY_AND_DISK`, mas não compacta 500 GB para 300 GB. A remoção para o disco é o comportamento real."
       },
@@ -612,7 +612,7 @@
         "explicacion": "`spark.sql.autoBroadcastJoinThreshold` é especificamente para detecção de transmissão *automática*. A dica `broadcast()` ignora totalmente esse limite."
       },
       {
-        "texto_opcion": "Sim — mas serão transmitidos `pedidos` (1 TB), e não `produtos`, porque o limite seleciona a tabela maior — o limite se aplica ao lado **menor** da junção — a tabela que cabe na memória e é enviada a todos os executores — o limite se aplica ao lado **menor** da junção.",
+        "texto_opcion": "Sim — mas serão transmitidos `pedidos` (1 TB), e não `produtos`, porque o limite seleciona a tabela maior.",
         "es_correcta": false,
         "explicacion": "O limite se aplica ao lado **menor** da junção — a tabela que cabe na memória e é enviada a todos os executores. `produtos` (30 MB) são transmitidos; `pedidos` (1 TB) não é."
       }
@@ -632,17 +632,17 @@
         "explicacion": "Shuffle Grava > 0 somente quando a saída do estágio alimenta um estágio downstream por meio de um shuffle (por exemplo, o estágio termina com groupBy, join ou orderBy). 0 shuffle write significa que este é um estágio final de gravação no armazenamento ou que o estágio contém apenas transformações estreitas."
       },
       {
-        "texto_opcion": "O Spark compactou todos os dados de shuffle em 0 bytes usando compactação LZ4, a compactação reduz o tamanho do shuffle, mas nunca para 0 bytes — a compactação reduz o tamanho do shuffle, mas nunca para 0 bytes — a compactação reduz o tamanho do shuffle, mas nunca para 0 bytes.",
+        "texto_opcion": "O Spark compactou todos os dados de shuffle em 0 bytes usando compactação LZ4 — a compactação reduz o tamanho do shuffle, mas nunca para 0 bytes. 0 bytes na coluna Shuffle Write significa que nenhum dado de shuffle foi gravado porque nenhuma transformação ampla segue esse estágio.",
         "es_correcta": false,
         "explicacion": "A compactação reduz o tamanho do shuffle, mas nunca para 0 bytes. 0 bytes na coluna Shuffle Write significa que nenhum dado de shuffle foi gravado porque nenhuma transformação ampla segue esse estágio."
       },
       {
-        "texto_opcion": "Este estágio falhou antes de gravar qualquer dado de shuffle – 0 bytes indica execução incompleta, se o estágio mostrar tarefas concluídas — se o estágio mostrar tarefas concluídas, 0 shuffle write é um resultado válido, o que significa que não é necessário embaralhar.",
+        "texto_opcion": "Este estágio falhou antes de gravar qualquer dado de shuffle – 0 bytes indica execução incompleta — se o estágio mostrar tarefas concluídas, 0 shuffle write é um resultado válido, o que significa que não é necessário embaralhar. Um estágio com falha mostraria tarefas com falha, e não 0 shuffle write.",
         "es_correcta": false,
         "explicacion": "Se o estágio mostrar tarefas concluídas, 0 shuffle write é um resultado válido, o que significa que não é necessário embaralhar. Um estágio com falha mostraria tarefas com falha, e não 0 shuffle write."
       },
       {
-        "texto_opcion": "O estágio usou um broadcast join, que sempre reporta 0 bytes de shuffle write, embora broadcast joins elimine o shuffle para a operação de — embora broadcast joins elimine o shuffle para a operação de junção, a presença de shuffle write 0 pode ser por vários motivos.",
+        "texto_opcion": "O estágio usou um broadcast join, que sempre reporta 0 bytes de shuffle write — embora broadcast joins elimine o shuffle para a operação de junção, a presença de shuffle write 0 pode ser por vários motivos. A interpretação mais precisa é que nenhuma transformação ampla segue este estágio específico.",
         "es_correcta": false,
         "explicacion": "Embora broadcast joins elimine o shuffle para a operação de junção, a presença de shuffle write 0 pode ser por vários motivos. A interpretação mais precisa é que nenhuma transformação ampla segue este estágio específico."
       }
@@ -692,7 +692,7 @@
         "explicacion": "`collect()` é uma ação do Spark que extrai todos os dados de todos os executores para o driver. Para 50 milhões de linhas, isso pode facilmente exceder o heap JVM do driver (`spark.driver.memory`). A aba Executors mostraria o uso máximo de memória do nó do driver."
       },
       {
-        "texto_opcion": "O DataFrame não foi armazenado em cache corretamente antes de `collect()`, causando uma recomputação que sobrecarregou o driver — o cache é para memória do executor, não para memória do driver — o cache é para memória do executor, não para memória do driver.",
+        "texto_opcion": "O DataFrame não foi armazenado em cache corretamente antes de `collect()`, causando uma recomputação que sobrecarregou o driver.",
         "es_correcta": false,
         "explicacion": "O cache é para memória do executor, não para memória do driver. `collect()` OOM ocorre independentemente do armazenamento em cache porque os dados devem ser movidos fisicamente para a JVM do driver independentemente."
       },
@@ -702,7 +702,7 @@
         "explicacion": "Os metadados de shuffle são pequenos. O driver OOM de `collect()` é causado pelos dados reais sendo movidos para o heap do driver - 50 milhões de linhas de dados, não metadados."
       },
       {
-        "texto_opcion": "O contexto do Spark expirou enquanto aguardava que todos os executores retornassem suas partições, os tempos limite causam erros diferentes — os tempos limite causam erros diferentes — os tempos limite causam erros diferentes — os tempos limite causam erros diferentes.",
+        "texto_opcion": "O contexto do Spark expirou enquanto aguardava que todos os executores retornassem suas partições — os tempos limite causam erros diferentes. Um erro OOM após `collect()` em 50 milhões de linhas é claramente causado pelo volume de dados que excede o heap do driver, não por um tempo limite.",
         "es_correcta": false,
         "explicacion": "Os tempos limite causam erros diferentes. Um erro OOM após `collect()` em 50 milhões de linhas é claramente causado pelo volume de dados que excede o heap do driver, não por um tempo limite."
       }
@@ -722,17 +722,17 @@
         "explicacion": "A aba Stages mostra Shuffle Write (bytes) como uma coluna para cada estágio. A classificação por esta coluna em ordem decrescente identifica imediatamente qual estágio produziu a maior quantidade de saída de shuffle."
       },
       {
-        "texto_opcion": "A coluna **Saída** — shuffle write é categorizada como saída de dados, a coluna `Output` mostra os dados gravados no armazenamento — a coluna `Output` mostra os dados gravados no armazenamento permanente (DBFS, Delta).",
+        "texto_opcion": "A coluna **Saída** — shuffle write é categorizada como saída de dados.",
         "es_correcta": false,
         "explicacion": "A coluna `Output` mostra os dados gravados no armazenamento permanente (DBFS, Delta). `Shuffle Write` é uma coluna separada para dados gravados em arquivos de shuffle temporários."
       },
       {
-        "texto_opcion": "A coluna **Tarefas** — mais tarefas significa que mais dados de shuffle foram gravados — a contagem de tarefas não é proporcional ao volume de dados de shuffle — a contagem de tarefas não é proporcional ao volume de dados de shuffle.",
+        "texto_opcion": "A coluna **Tarefas** — mais tarefas significa que mais dados de shuffle foram gravados.",
         "es_correcta": false,
         "explicacion": "A contagem de tarefas não é proporcional ao volume de dados de shuffle. A coluna `Shuffle Write` mostra diretamente o total de bytes gravados em arquivos de shuffle por estágio."
       },
       {
-        "texto_opcion": "A coluna **Input** do estágio downstream — a shuffle write é igual à entrada do estágio downstream — enquanto o Shuffle Read do estágio downstream corresponde ao Shuffle Write do estágio upstream, a.",
+        "texto_opcion": "A coluna **Input** do estágio downstream — a shuffle write é igual à entrada do estágio downstream.",
         "es_correcta": false,
         "explicacion": "Enquanto o Shuffle Read do estágio downstream corresponde ao Shuffle Write do estágio upstream, a coluna `Shuffle Write` mostra diretamente qual estágio produziu os dados sem a necessidade de fazer referência cruzada aos estágios downstream."
       }
@@ -746,12 +746,12 @@
     "pregunta": "No Spark UI, o que **GC Time** na aba Executorss mede e qual é a importância do desempenho de um alto tempo de GC?",
     "opciones": [
       {
-        "texto_opcion": "O tempo de GC mede o tempo que o escalonador automático do cluster gastou recuperando nós executores ociosos — o escalonamento automático é uma operação de gerenciamento de cluster, não relatada nas métricas Spark UI. GC Time refere-se à garbage collection da JVM nos processos executores em execução como desenho principal para este requisito Isso o torna inadequado frente à restrição principal do enunciado..",
+        "texto_opcion": "O tempo de GC mede o tempo que o escalonador automático do cluster gastou recuperando nós executores ociosos — o escalonamento automático é uma operação de gerenciamento de cluster, não relatada nas métricas Spark UI. GC Time refere-se à garbage collection da JVM nos processos executores em execução.",
         "es_correcta": false,
         "explicacion": "O escalonamento automático é uma operação de gerenciamento de cluster, não relatada nas métricas Spark UI. GC Time refere-se à garbage collection da JVM nos processos executores em execução."
       },
       {
-        "texto_opcion": "O GC Time mede o tempo gasto gravando dados no diretório de lixo/temp do disco como parte do spill — o spill no disco é uma métrica separada (`Spill (Disk)`). O GC Time mede especificamente as pausas na garbage collection da JVM, que são operações de gerenciamento de memória, não de E/S de disco usado como caminho principal nesta arquitetura Isso o torna inadequado frente à restrição principal do enunciado..",
+        "texto_opcion": "O GC Time mede o tempo gasto gravando dados no diretório de lixo/temp do disco como parte do spill — o spill no disco é uma métrica separada (`Spill (Disk)`). O GC Time mede especificamente as pausas na garbage collection da JVM, que são operações de gerenciamento de memória, não de E/S de disco.",
         "es_correcta": false,
         "explicacion": "O spill no disco é uma métrica separada (`Spill (Disk)`). O GC Time mede especificamente as pausas na garbage collection da JVM, que são operações de gerenciamento de memória, não de E/S de disco."
       },
@@ -786,12 +786,12 @@
         "explicacion": "0 Shuffle Read significa que o Estágio 5 não consome a saída de shuffle de um estágio anterior. 0 Shuffle Write significa que não produz saída de shuffle. Entrada de 500 GB significa que ele lê dados de origem brutos. Este perfil corresponde a um estágio final de gravação apenas com transformações estreitas."
       },
       {
-        "texto_opcion": "A **broadcast join** — o lado pequeno foi transmitido, portanto nenhuma shuffle write é mostrada — broadcast joins mostram Shuffle Read diferente de zero no lado receptor (para a transferência de dados de transmissão) e normalmente 0 Shuffle Write se forem o estágio.",
+        "texto_opcion": "A **broadcast join** — o lado pequeno foi transmitido, portanto nenhuma shuffle write é mostrada.",
         "es_correcta": false,
         "explicacion": "Broadcast joins mostram Shuffle Read diferente de zero no lado receptor (para a transferência de dados de transmissão) e normalmente 0 Shuffle Write se forem o estágio final. No entanto, a entrada de 500 GB sem nenhum shuffle é mais consistente com um estágio estreito de leitura e gravação pura."
       },
       {
-        "texto_opcion": "Um **estágio de junção** — ambas as mesas foram localizadas no mesmo local, portanto não foi necessário embaralhar — as junções de bucket co-localizadas podem evitar shuffle e mostrariam 0 leitura/shuffle write — as junções de bucket co-localizadas podem evitar shuffle e mostrariam 0 leitura/shuffle write.",
+        "texto_opcion": "Um **estágio de junção** — ambas as mesas foram localizadas no mesmo local, portanto não foi necessário embaralhar.",
         "es_correcta": false,
         "explicacion": "As junções de bucket co-localizadas podem evitar shuffle e mostrariam 0 leitura/shuffle write. No entanto, os estágios de junção normalmente mostram Shuffle Read (leitura do shuffle upstream). Com 500 GB de entrada e 0 métricas de shuffle, isso é mais consistente com um estágio de varredura + gravação."
       }
@@ -805,7 +805,7 @@
     "pregunta": "Um engenheiro de dados define `spark.memory.fraction = 0,8` (acima do padrão de 0,6). Que efeito isso tem?",
     "opciones": [
       {
-        "texto_opcion": "Os executores recebem 80% mais memória física nos nós do cluster, `spark.memory.fraction` é uma fração do heap JVM — `spark.memory.fraction` é uma fração do heap JVM `spark.executor.memory` já configurado — ele não solicita memória física adicional do cluster como escolha padrão de produção neste cenário.",
+        "texto_opcion": "Os executores recebem 80% mais memória física nos nós do cluster — `spark.memory.fraction` é uma fração do heap JVM `spark.executor.memory` já configurado — ele não solicita memória física adicional do cluster.",
         "es_correcta": false,
         "explicacion": "`spark.memory.fraction` é uma fração do heap JVM `spark.executor.memory` já configurado — ele não solicita memória física adicional do cluster."
       },
@@ -820,7 +820,7 @@
         "explicacion": "`spark.memory.fraction` controla qual fração do heap JVM está disponível para o gerenciador de memória unificado do Spark (execução + memória de armazenamento). Aumentar de 0,6 para 0,8 dá ao Spark 20% mais espaço de heap, reduzindo a pressão e o desperdício de memória de execução."
       },
       {
-        "texto_opcion": "O Spark usará 80% das shuffle partitions, reduzindo o custo total do shuffle em 20% — `spark.memory.fraction` não tem nada a ver com a contagem de shuffle de partições. Ele controla quanto do heap JVM o Spark usa para seu gerenciador de memória aplicado entre ambientes por consistência operacional.",
+        "texto_opcion": "O Spark usará 80% das shuffle partitions, reduzindo o custo total do shuffle em 20% — `spark.memory.fraction` não tem nada a ver com a contagem de shuffle de partições. Ele controla quanto do heap JVM o Spark usa para seu gerenciador de memória.",
         "es_correcta": false,
         "explicacion": "`spark.memory.fraction` não tem nada a ver com a contagem de shuffle de partições. Ele controla quanto do heap JVM o Spark usa para seu gerenciador de memória."
       }
@@ -835,12 +835,12 @@
     "pregunta": "Um engenheiro de dados vê duas métricas separadas em um estágio: `Spill (memória) = 25 GB` e `Spill (disco) = 4 GB`. Por que `Spill (Memory)` é aproximadamente 6x maior que `Spill (Disk)`?",
     "opciones": [
       {
-        "texto_opcion": "Os 25 GB representam 25 tarefas separadas que ocuparam 1 GB cada; os 4 GB são o total de dados exclusivos — `Spill (Memory)` é uma métrica de volume total (bytes), não uma contagem de tarefas. Ambas as métricas são o volume total em todas as tarefas – medido apenas em diferentes estágios do processo de spill comum em desenhos legados, porém inadequado neste caso.",
+        "texto_opcion": "Os 25 GB representam 25 tarefas separadas que ocuparam 1 GB cada; os 4 GB são o total de dados exclusivos — `Spill (Memory)` é uma métrica de volume total (bytes), não uma contagem de tarefas. Ambas as métricas são o volume total em todas as tarefas – medido apenas em diferentes estágios do processo de spill.",
         "es_correcta": false,
         "explicacion": "`Spill (Memory)` é uma métrica de volume total (bytes), não uma contagem de tarefas. Ambas as métricas são o volume total em todas as tarefas – medido apenas em diferentes estágios do processo de spill."
       },
       {
-        "texto_opcion": "Os 25 GB foram distribuídos em arquivos de disco mapeados na memória; os 4 GB são o que resta após a desduplicação — spill (Memory) é o tamanho da memória antes da serialização; Spill (Disco) é o tamanho do disco após a serialização. Não há etapa de desduplicação no processo de spill selecionado para atender as restrições citadas.",
+        "texto_opcion": "Os 25 GB foram distribuídos em arquivos de disco mapeados na memória; os 4 GB são o que resta após a desduplicação — spill (Memory) é o tamanho da memória antes da serialização; Spill (Disco) é o tamanho do disco após a serialização. Não há etapa de desduplicação no processo de spill.",
         "es_correcta": false,
         "explicacion": "Spill (Memory) é o tamanho da memória antes da serialização; Spill (Disco) é o tamanho do disco após a serialização. Não há etapa de desduplicação no processo de spill."
       },
@@ -864,7 +864,7 @@
     "pregunta": "Um engenheiro de dados tem uma junção que é executada em 2 horas com `SortMergeJoin`. Eles permitem AQE. Na próxima execução, a aba SQL mostra que a junção foi convertida para `BroadcastHashJoin` e o job termina em 15 minutos. Qual é a explicação mais provável?",
     "opciones": [
       {
-        "texto_opcion": "O AQE armazenou em cache o resultado da junção da primeira execução, portanto, a segunda execução usou dados armazenados em cache — aQE não implementa cache de resultados de execução cruzada. A aceleração descrita acontece dentro da mesma execução com base na adaptação do plano de tempo de execução selecionado para atender as restrições citadas.",
+        "texto_opcion": "O AQE armazenou em cache o resultado da junção da primeira execução, portanto, a segunda execução usou dados armazenados em cache — aQE não implementa cache de resultados de execução cruzada. A aceleração descrita acontece dentro da mesma execução com base na adaptação do plano de tempo de execução.",
         "es_correcta": false,
         "explicacion": "AQE não implementa cache de resultados de execução cruzada. A aceleração descrita acontece dentro da mesma execução com base na adaptação do plano de tempo de execução."
       },
@@ -874,7 +874,7 @@
         "explicacion": "A aceleração de 8x é consistente com a eliminação de um grande shuffle. AQE coleta estatísticas de dados reais durante a execução e, se um lado da junção for pequeno o suficiente, converte dinamicamente o SortMergeJoin planejado (embaralhar + classificar ambos os lados) em BroadcastHashJoin (transmitir no lado pequeno, sem embaralhar no lado grande)."
       },
       {
-        "texto_opcion": "AQE aumentou `spark.sql.shuffle.partitions` para reduzir spill, o que melhorou o desempenho da classificação — embora o AQE possa unir shuffle partitions, uma conversão `SortMergeJoin → BroadcastHashJoin` trata de eliminar totalmente o shuffle - não de ajustar a contagem de partições configurado de ponta a ponta para o workload descrito.",
+        "texto_opcion": "AQE aumentou `spark.sql.shuffle.partitions` para reduzir spill, o que melhorou o desempenho da classificação — embora o AQE possa unir shuffle partitions, uma conversão `SortMergeJoin → BroadcastHashJoin` trata de eliminar totalmente o shuffle - não de ajustar a contagem de partições.",
         "es_correcta": false,
         "explicacion": "Embora o AQE possa unir shuffle partitions, uma conversão `SortMergeJoin → BroadcastHashJoin` trata de eliminar totalmente o shuffle - não de ajustar a contagem de partições."
       },

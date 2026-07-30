@@ -13,12 +13,12 @@
         "explicacion": "Task count correlates with parallelism, not necessarily slowness. The bottleneck stage is identified by Duration, not task count."
       },
       {
-        "texto_opcion": "**Executors tab**, sorted by **Task Time** (descending) — the busiest executor is the bottleneck",
+        "texto_opcion": "**Executors tab**, sorted by **Task Time** (descending) — the busiest executor is the bottleneck.",
         "es_correcta": false,
         "explicacion": "The Executors tab shows per-executor resource usage, not which stage is slowest. The Stages tab sorted by Duration is the correct starting point."
       },
       {
-        "texto_opcion": "**SQL tab**, sorted by **Query ID** — later queries take longer because earlier ones use cached data",
+        "texto_opcion": "**SQL tab**, sorted by **Query ID** — later queries take longer because earlier ones use cached data.",
         "es_correcta": false,
         "explicacion": "Ordering by Query ID shows execution sequence, not duration. Sort by Duration in the Stages tab to identify the bottleneck."
       }
@@ -37,12 +37,12 @@
         "explicacion": "`groupBy()` followed by aggregation requires a wide transformation — data from all executors is redistributed (shuffled) by the group key, creating a stage boundary."
       },
       {
-        "texto_opcion": "`coalesce(2)` — reducing partitions causes data movement, `coalesce()` merges partitions without a full.",
+        "texto_opcion": "`coalesce(2)` — reducing partitions causes data movement.",
         "es_correcta": false,
         "explicacion": "`coalesce()` merges partitions without a full shuffle — it moves data locally and does not create a shuffle stage boundary. `repartition()` (not `coalesce`) does cause a shuffle."
       },
       {
-        "texto_opcion": "`select(\"col1\", \"col2\")` — selecting columns sends data to the driver — `select()` is a narrow transformation operating per partition.",
+        "texto_opcion": "`select(\"col1\", \"col2\")` — selecting columns sends data to the driver.",
         "es_correcta": false,
         "explicacion": "`select()` is a narrow transformation operating per partition. It does not shuffle data or send it to the driver."
       },
@@ -62,17 +62,17 @@
     "pregunta": "A data engineer examines Summary Metrics for a stage and sees:\n\n- Min Duration: 0.5s\n- Median Duration: 1.2s\n- 75th percentile Duration: 1.5s\n- Max Duration: 48 minutes\n\nWhat does this pattern indicate?",
     "opciones": [
       {
-        "texto_opcion": "**Cluster under-provisioning** — all tasks should take roughly the same time if the cluster had enough resources — under-provisioning causes all tasks to run slow uniformly.",
+        "texto_opcion": "**Cluster under-provisioning** — all tasks should take roughly the same time if the cluster had enough resources.",
         "es_correcta": false,
         "explicacion": "Under-provisioning causes all tasks to run slow uniformly. When only the Max Duration is extreme while Median is low, that indicates skew on specific partitions."
       },
       {
-        "texto_opcion": "**Network bottleneck** — the task waited 48 minutes for shuffle data from remote executors — network delays would show up as high `Shuffle Read Blocked Time` — network delays would show up as high `Shuffle Read Blocked Time`.",
+        "texto_opcion": "**Network bottleneck** — the task waited 48 minutes for shuffle data from remote executors.",
         "es_correcta": false,
         "explicacion": "Network delays would show up as high `Shuffle Read Blocked Time`. A single task with 48-minute duration while others take 1–2 seconds is the primary signature of data skew."
       },
       {
-        "texto_opcion": "**Disk spill** — the 48-minute max means the task is writing large amounts of data to disk — disk spill is detected via non-zero `Spill (Disk)` values, not from duration alone.",
+        "texto_opcion": "**Disk spill** — the 48-minute max means the task is writing large amounts of data to disk.",
         "es_correcta": false,
         "explicacion": "Disk spill is detected via non-zero `Spill (Disk)` values, not from duration alone. Duration skew between tasks is the indicator of data skew, not spill."
       },
@@ -92,7 +92,7 @@
     "pregunta": "A data engineer opens a stage in the Spark UI and sees this pattern in the task list:\n\n```\nTask 0:  Duration=2s,   Shuffle Read=55 MB\nTask 1:  Duration=2s,   Shuffle Read=60 MB\nTask 2:  Duration=37min, Shuffle Read=6.2 GB\nTask 3:  Duration=2s,   Shuffle Read=58 MB\n```\n\nWhat is the root cause and what does this confirm?",
     "opciones": [
       {
-        "texto_opcion": "Network throttling — Task 2 was assigned to an executor far from the data source — network proximity affects reading source data (input bytes), not shuffle read size distribution.",
+        "texto_opcion": "Network throttling — Task 2 was assigned to an executor far from the data source.",
         "es_correcta": false,
         "explicacion": "Network proximity affects reading source data (input bytes), not shuffle read size distribution. The 6.2 GB Shuffle Read vs. 55 MB for others is definitively a data distribution (skew) problem."
       },
@@ -102,12 +102,12 @@
         "explicacion": "The Shuffle Read column directly shows partition sizes after redistribution. Task 2 receiving 6.2 GB while all others receive ~55–60 MB confirms a hot key (one join/group-by key appears in a disproportionate number of rows), causing all that data to land in a single partition."
       },
       {
-        "texto_opcion": "Disk spill — Task 2 is writing 6.2 GB to disk, causing it to take longer, 6.2 GB is in the **Shuffle Read** column — 6.2 GB is in the **Shuffle Read** column, meaning Task 2 is reading that much data from shuffle — not writing to disk.",
+        "texto_opcion": "Disk spill — Task 2 is writing 6.2 GB to disk, causing it to take longer.",
         "es_correcta": false,
         "explicacion": "6.2 GB is in the **Shuffle Read** column, meaning Task 2 is reading that much data from shuffle — not writing to disk. Spill is a separate metric shown in the `Spill (Disk)` column."
       },
       {
-        "texto_opcion": "Executor failure — Task 2 ran on a faulty node and had to restart, causing the extra time — executor failure would show as a task error and killed/restarted status — executor failure would show as a task error and killed/restarted status.",
+        "texto_opcion": "Executor failure — Task 2 ran on a faulty node and had to restart, causing the extra time.",
         "es_correcta": false,
         "explicacion": "Executor failure would show as a task error and killed/restarted status. Task 2's extreme Shuffle Read Size (6.2 GB) confirms the cause is data volume, not executor health."
       }
@@ -127,7 +127,7 @@
         "explicacion": "Spill metrics are data volume metrics (bytes), not operation count metrics. They measure how much data was evicted from execution memory to disk."
       },
       {
-        "texto_opcion": "`Spill (Memory)` shows data in RAM; `Spill (Disk)` shows data on SSD. They are different data — both metrics refer to the same data that overflowed execution memory — measured before (memory) and after (disk) serialization. They are not independent datasets configured end-to-end for the stated workload.",
+        "texto_opcion": "`Spill (Memory)` shows data in RAM; `Spill (Disk)` shows data on SSD. They are different data — both metrics refer to the same data that overflowed execution memory — measured before (memory) and after (disk) serialization. They are not independent datasets.",
         "es_correcta": false,
         "explicacion": "Both metrics refer to the same data that overflowed execution memory — measured before (memory) and after (disk) serialization. They are not independent datasets."
       },
@@ -151,22 +151,22 @@
     "pregunta": "A data engineer runs a large join between a 500 GB table and a 10 MB dimension table. The join takes 45 minutes. The Stages tab shows a large shuffle operation. What is the most efficient fix?",
     "opciones": [
       {
-        "texto_opcion": "Use a **broadcast join** — the 10 MB table fits in memory, so broadcasting it eliminates the shuffle entirely:\n\n```python\nresult = large_df.join(broadcast(small_df), \"key\")\n```",
+        "texto_opcion": "Use a **broadcast join** — the 10 MB table fits in memory, so broadcasting it eliminates the shuffle entirely:\n\n```python\nresult = large_df.join(broadcast(small_df), \"key\")\n```.",
         "es_correcta": true,
         "explicacion": "When one side of a join is small enough to fit in executor memory, a broadcast join avoids shuffling the large table. The small table is sent to all executors once, and the large table is joined locally — eliminating the expensive shuffle."
       },
       {
-        "texto_opcion": "Increase `spark.sql.shuffle.partitions` from 200 to 2000 to reduce the data per partition — more partitions reduce per-partition size but still require the shuffle to happen.",
+        "texto_opcion": "Increase `spark.sql.shuffle.partitions` from 200 to 2000 to reduce the data per partition.",
         "es_correcta": false,
         "explicacion": "More partitions reduce per-partition size but still require the shuffle to happen. The shuffle itself (network transfer of 500 GB) is the bottleneck. A broadcast join eliminates the shuffle entirely."
       },
       {
-        "texto_opcion": "Enable AQE (`spark.sql.adaptive.enabled = true`) and wait for it to fix the join automatically — aQE may convert the join to a broadcast join if it detects the small side is small enough.",
+        "texto_opcion": "Enable AQE (`spark.sql.adaptive.enabled = true`) and wait for it to fix the join automatically.",
         "es_correcta": false,
         "explicacion": "AQE may convert the join to a broadcast join if it detects the small side is small enough — but with a 10 MB table, an explicit `broadcast()` hint is more reliable and immediate."
       },
       {
-        "texto_opcion": "Salt the join key of the large table to distribute the data more evenly, salting is used to fix skew in a shuffle-based join — salting is used to fix skew in a shuffle-based join.",
+        "texto_opcion": "Salt the join key of the large table to distribute the data more evenly — salting is used to fix skew in a shuffle-based join. If the 10 MB table can be broadcast, the shuffle should be eliminated entirely rather than optimized through salting.",
         "es_correcta": false,
         "explicacion": "Salting is used to fix skew in a shuffle-based join. If the 10 MB table can be broadcast, the shuffle should be eliminated entirely rather than optimized through salting."
       }
@@ -181,7 +181,7 @@
     "pregunta": "What does it mean when a stage's progress bar stays at **99% for several minutes** while all other stages have completed?",
     "opciones": [
       {
-        "texto_opcion": "The driver is consolidating results from all tasks before marking the stage complete — the driver aggregates results only for actions that return data (like `collect()`) — the driver aggregates results only for actions that return data (like `collect()`).",
+        "texto_opcion": "The driver is consolidating results from all tasks before marking the stage complete.",
         "es_correcta": false,
         "explicacion": "The driver aggregates results only for actions that return data (like `collect()`). For most operations (like writes), the stage completes when all tasks finish. The 99% pattern indicates straggler tasks, not driver consolidation."
       },
@@ -196,7 +196,7 @@
         "explicacion": "A stage at 99% means most tasks have already completed. It is near the end of execution, held up by a few slow straggler tasks — not at the beginning."
       },
       {
-        "texto_opcion": "Disk spill is preventing the stage from finishing — Spark is writing data to disk before closing the stage — while spill can contribute to straggler slowness, the 99% pattern specifically indicates that the vast majority.",
+        "texto_opcion": "Disk spill is preventing the stage from finishing — Spark is writing data to disk before closing the stage.",
         "es_correcta": false,
         "explicacion": "While spill can contribute to straggler slowness, the 99% pattern specifically indicates that the vast majority of tasks are done and a few are still running — which is the skew/straggler signature."
       }
@@ -216,17 +216,17 @@
         "explicacion": "`spark_partition_id()` returns the partition ID for each row. Grouping by it and counting rows reveals the distribution across partitions — uneven row counts confirm skew before the join even runs."
       },
       {
-        "texto_opcion": "```python\ndf.rdd.getNumPartitions()\n```, `getNumPartitions()` returns the total number of partitions — it says nothing about how many — `getNumPartitions()` returns the total number of partitions — it says nothing about how many rows are in each partition. Skew requires knowing the *distribution*, not just the count.",
+        "texto_opcion": "```python\ndf.rdd.getNumPartitions()\n``` — `getNumPartitions()` returns the total number of partitions — it says nothing about how many rows are in each partition. Skew requires knowing the *distribution*, not just the count.",
         "es_correcta": false,
         "explicacion": "`getNumPartitions()` returns the total number of partitions — it says nothing about how many rows are in each partition. Skew requires knowing the *distribution*, not just the count."
       },
       {
-        "texto_opcion": "```python\ndf.groupBy(\"join_key\").count().show()\n```, this counts rows per `join_key` value (useful for finding hot keys) — this counts rows per `join_key` value (useful for finding hot keys), but not per partition. Partition distribution uses `spark_partition_id()` adopted as the standard pattern for the team.",
+        "texto_opcion": "```python\ndf.groupBy(\"join_key\").count().show()\n``` — this counts rows per `join_key` value (useful for finding hot keys), but not per partition. Partition distribution uses `spark_partition_id()`.",
         "es_correcta": false,
         "explicacion": "This counts rows per `join_key` value (useful for finding hot keys), but not per partition. Partition distribution uses `spark_partition_id()`."
       },
       {
-        "texto_opcion": "```python\ndf.explain(True)\n```, `explain()` shows the query plan (logical and physical), not actual runtime partition statistics — `explain()` shows the query plan (logical and physical), not actual runtime partition statistics. Partition row distribution requires executing `spark_partition_id()` on the actual data.",
+        "texto_opcion": "```python\ndf.explain(True)\n``` — `explain()` shows the query plan (logical and physical), not actual runtime partition statistics. Partition row distribution requires executing `spark_partition_id()` on the actual data.",
         "es_correcta": false,
         "explicacion": "`explain()` shows the query plan (logical and physical), not actual runtime partition statistics. Partition row distribution requires executing `spark_partition_id()` on the actual data."
       }
@@ -241,7 +241,7 @@
     "pregunta": "A data engineer is experiencing data skew in a join where the column `country_code` has 70% of rows with the value `US`. AQE alone has not resolved the skew. Which technique should they apply?",
     "opciones": [
       {
-        "texto_opcion": "**Filter out `US` rows** before joining and join them separately, this two-pass approach works as a workaround but requires union of results — this two-pass approach works as a workaround but requires union of results and is complex. Salting is the standard technique that handles the hot key within a single join.",
+        "texto_opcion": "**Filter out `US` rows** before joining and join them separately — this two-pass approach works as a workaround but requires union of results and is complex. Salting is the standard technique that handles the hot key within a single join.",
         "es_correcta": false,
         "explicacion": "This two-pass approach works as a workaround but requires union of results and is complex. Salting is the standard technique that handles the hot key within a single join."
       },
@@ -251,7 +251,7 @@
         "explicacion": "Salting artificially increases the cardinality of the skewed key by appending a random suffix (e.g., `US_0`, `US_1`, ..., `US_9`). The small table is replicated to match each salt bucket. This forces the 70% `US` data into N smaller partitions instead of one giant one."
       },
       {
-        "texto_opcion": "**Increase `spark.sql.shuffle.partitions` to 10000** — more partitions reduce `US` concentration, more partitions don't help a hot key — more partitions don't help a hot key — more partitions don't help a hot key. If all `US` rows hash to the same key, they will always land in the same partition regardless of how many total partitions exist.",
+        "texto_opcion": "**Increase `spark.sql.shuffle.partitions` to 10000** — more partitions reduce `US` concentration — more partitions don't help a hot key. If all `US` rows hash to the same key, they will always land in the same partition regardless of how many total partitions exist.",
         "es_correcta": false,
         "explicacion": "More partitions don't help a hot key. If all `US` rows hash to the same key, they will always land in the same partition regardless of how many total partitions exist."
       },
@@ -300,7 +300,7 @@
     "pregunta": "A data engineer reads: *'Spill (Disk) > 0 in the Stages tab.'* What should be their immediate next diagnostic step?",
     "opciones": [
       {
-        "texto_opcion": "Immediately increase `spark.executor.memory` to double the current value, increasing memory may help general spill but wastes resources if the — increasing memory may help general spill but wastes resources if the cause is skew (only one task spills). Diagnose the distribution first.",
+        "texto_opcion": "Immediately increase `spark.executor.memory` to double the current value — increasing memory may help general spill but wastes resources if the cause is skew (only one task spills). Diagnose the distribution first.",
         "es_correcta": false,
         "explicacion": "Increasing memory may help general spill but wastes resources if the cause is skew (only one task spills). Diagnose the distribution first."
       },
@@ -310,12 +310,12 @@
         "explicacion": "The distinction between skew-caused spill (one task spills massively) and general spill (all tasks spill equally) determines the fix: skew → AQE/salting; general → increase partitions or executor memory."
       },
       {
-        "texto_opcion": "Open the SQL tab and look for `Exchange` nodes — Exchange nodes cause all spill, while Exchange nodes represent shuffles (a spill source) — while Exchange nodes represent shuffles (a spill source), the immediate diagnostic step after seeing non-zero spill in the Stages tab is.",
+        "texto_opcion": "Open the SQL tab and look for `Exchange` nodes — Exchange nodes cause all spill.",
         "es_correcta": false,
         "explicacion": "While Exchange nodes represent shuffles (a spill source), the immediate diagnostic step after seeing non-zero spill in the Stages tab is to look at task-level spill distribution in the stage detail."
       },
       {
-        "texto_opcion": "Restart the cluster — spill data on disk can become corrupt and cause cascading failures, spark's disk spill is a managed operation — data is written and read back — spark's disk spill is a managed operation.",
+        "texto_opcion": "Restart the cluster — spill data on disk can become corrupt and cause cascading failures — spark's disk spill is a managed operation — data is written and read back correctly. Spill does not cause data corruption. Restart is not the appropriate response.",
         "es_correcta": false,
         "explicacion": "Spark's disk spill is a managed operation — data is written and read back correctly. Spill does not cause data corruption. Restart is not the appropriate response."
       }
@@ -329,12 +329,12 @@
     "pregunta": "A data engineer configures:\n\n```python\nspark.conf.set(\"spark.sql.shuffle.partitions\", \"2000\")\n```\n\nThe job previously used 200 shuffle partitions with consistent disk spill. Why does increasing shuffle partitions reduce disk spill?",
     "opciones": [
       {
-        "texto_opcion": "More partitions enable Spark to use SSDs instead of HDDs for temporary storage, the storage medium (SSD vs, the storage medium (SSD vs — the storage medium (SSD vs — the storage medium (SSD vs. HDD) is a cluster configuration issue, not controlled by `spark.sql.shuffle.partitions`. The benefit is smaller per-partition data volume.",
+        "texto_opcion": "More partitions enable Spark to use SSDs instead of HDDs for temporary storage — the storage medium (SSD vs. HDD) is a cluster configuration issue, not controlled by `spark.sql.shuffle.partitions`. The benefit is smaller per-partition data volume.",
         "es_correcta": false,
         "explicacion": "The storage medium (SSD vs. HDD) is a cluster configuration issue, not controlled by `spark.sql.shuffle.partitions`. The benefit is smaller per-partition data volume."
       },
       {
-        "texto_opcion": "More shuffle partitions allocate more total executor memory across the cluster, the number of shuffle partitions does not change the total — the number of shuffle partitions does not change the total cluster memory — the number of shuffle partitions does not change the total cluster memory. It only changes how data is divided — smaller partitions per task, reducing per-task memory pressure.",
+        "texto_opcion": "More shuffle partitions allocate more total executor memory across the cluster — the number of shuffle partitions does not change the total cluster memory. It only changes how data is divided — smaller partitions per task, reducing per-task memory pressure.",
         "es_correcta": false,
         "explicacion": "The number of shuffle partitions does not change the total cluster memory. It only changes how data is divided — smaller partitions per task, reducing per-task memory pressure."
       },
@@ -344,7 +344,7 @@
         "explicacion": "If shuffle write is 200 GB with 200 partitions, each partition averages 1 GB. With 2000 partitions, each averages 100 MB — fitting much more easily in executor memory, reducing or eliminating spill."
       },
       {
-        "texto_opcion": "Spark compresses data more efficiently when there are more partitions, compression is independent of partition count — compression is independent of partition count. The benefit of more partitions is that each task handles less data, reducing memory pressure.",
+        "texto_opcion": "Spark compresses data more efficiently when there are more partitions — compression is independent of partition count. The benefit of more partitions is that each task handles less data, reducing memory pressure.",
         "es_correcta": false,
         "explicacion": "Compression is independent of partition count. The benefit of more partitions is that each task handles less data, reducing memory pressure."
       }
@@ -359,12 +359,12 @@
     "pregunta": "A data engineer sees in the Stages tab:\n\n- Shuffle Write: 85 GB\n- Shuffle Read: 85 GB\n\nThe next stage processes this data with a `groupBy().agg()`. What is the recommended target partition size for the shuffled data, and how should they tune partitions?",
     "opciones": [
       {
-        "texto_opcion": "Target **1 partition per GB** of shuffle data — 85 GB = 85 partitions, 1 partition per GB results in 1 GB per partition — 1 partition per GB results in 1 GB per partition, which is 5–10x above the recommended 100–200 MB target range.",
+        "texto_opcion": "Target **1 partition per GB** of shuffle data — 85 GB = 85 partitions — 1 partition per GB results in 1 GB per partition, which is 5–10x above the recommended 100–200 MB target range.",
         "es_correcta": false,
         "explicacion": "1 partition per GB results in 1 GB per partition, which is 5–10x above the recommended 100–200 MB target range."
       },
       {
-        "texto_opcion": "Target **1 partition per executor core** — for a 20-core cluster, use 20 partitions, 1 partition per core ignores data volume — 1 partition per core ignores data volume.",
+        "texto_opcion": "Target **1 partition per executor core** — for a 20-core cluster, use 20 partitions.",
         "es_correcta": false,
         "explicacion": "1 partition per core ignores data volume. With 85 GB and 20 partitions, each partition would be 4.25 GB — far too large and would cause severe spill."
       },
@@ -374,7 +374,7 @@
         "explicacion": "The rule of thumb for shuffle partition sizing is 100–200 MB per partition. With 85 GB total shuffle data, approximately 425–850 partitions keeps each task at a manageable size."
       },
       {
-        "texto_opcion": "Always use exactly **200 shuffle partitions** — this is the Databricks default and is optimized, 200 is the default — 200 is the default, not an optimal value.",
+        "texto_opcion": "Always use exactly **200 shuffle partitions** — this is the Databricks default and is optimized.",
         "es_correcta": false,
         "explicacion": "200 is the default, not an optimal value. 85 GB / 200 = 425 MB per partition, which is above the target range and likely to cause spill."
       }
@@ -389,7 +389,7 @@
     "pregunta": "A data engineer checks the Executors tab in Spark UI and finds that Executor #3 has **GC Time = 35% of Task Time**, while all other executors show 3–5%. What does this indicate?",
     "opciones": [
       {
-        "texto_opcion": "Executor #3 is running on a different cloud availability zone with slower network connectivity — gC Time reflects JVM garbage collection within the executor process, not network performance. Network issues would appear as high Shuffle Read Blocked Time plausible at first glance, yet weaker than the best option.",
+        "texto_opcion": "Executor #3 is running on a different cloud availability zone with slower network connectivity — gC Time reflects JVM garbage collection within the executor process, not network performance. Network issues would appear as high Shuffle Read Blocked Time.",
         "es_correcta": false,
         "explicacion": "GC Time reflects JVM garbage collection within the executor process, not network performance. Network issues would appear as high Shuffle Read Blocked Time."
       },
@@ -399,7 +399,7 @@
         "explicacion": "GC Time > 10% of Task Time is a warning sign; 35% is severe. High GC overhead means the JVM heap is nearly full and the garbage collector is running frequently, significantly reducing useful computation time."
       },
       {
-        "texto_opcion": "Executor #3 has failed and is restarting — GC time accumulates from multiple attempts, if the executor had failed — if the executor had failed, it would show as `Dead` or have failed tasks. GC Time accumulation within a running executor indicates active memory pressure, not failure.",
+        "texto_opcion": "Executor #3 has failed and is restarting — GC time accumulates from multiple attempts — if the executor had failed, it would show as `Dead` or have failed tasks. GC Time accumulation within a running executor indicates active memory pressure, not failure.",
         "es_correcta": false,
         "explicacion": "If the executor had failed, it would show as `Dead` or have failed tasks. GC Time accumulation within a running executor indicates active memory pressure, not failure."
       },
@@ -424,17 +424,17 @@
         "explicacion": "AQE uses actual runtime statistics (not pre-execution estimates) to make join strategy decisions. If a join side proves to be small enough, AQE converts the planned SortMergeJoin (with shuffle) to a BroadcastHashJoin (no shuffle for the small side)."
       },
       {
-        "texto_opcion": "The developer explicitly used the `broadcast()` hint, overriding the optimizer's initial plan — an explicit `broadcast()` hint would have resulted in BroadcastHashJoin from the start, not a runtime switch. The described behavior is AQE's dynamic plan adaptation selected to meet the constraints described here.",
+        "texto_opcion": "The developer explicitly used the `broadcast()` hint, overriding the optimizer's initial plan — an explicit `broadcast()` hint would have resulted in BroadcastHashJoin from the start, not a runtime switch. The described behavior is AQE's dynamic plan adaptation.",
         "es_correcta": false,
         "explicacion": "An explicit `broadcast()` hint would have resulted in BroadcastHashJoin from the start, not a runtime switch. The described behavior is AQE's dynamic plan adaptation."
       },
       {
-        "texto_opcion": "AQE merged two small shuffle partitions into one, changing the join algorithm, coalescing shuffle partitions is a separate AQE feature — coalescing shuffle partitions is a separate AQE feature (`coalescePartitions`). Converting SortMergeJoin to BroadcastHashJoin is the `dynamicJoinSelection` feature of AQE.",
+        "texto_opcion": "AQE merged two small shuffle partitions into one, changing the join algorithm — coalescing shuffle partitions is a separate AQE feature (`coalescePartitions`). Converting SortMergeJoin to BroadcastHashJoin is the `dynamicJoinSelection` feature of AQE.",
         "es_correcta": false,
         "explicacion": "Coalescing shuffle partitions is a separate AQE feature (`coalescePartitions`). Converting SortMergeJoin to BroadcastHashJoin is the `dynamicJoinSelection` feature of AQE."
       },
       {
-        "texto_opcion": "AQE detected data skew and applied salting automatically, converting the join type, aQE's skew join handling splits large partitions — it does not convert — aQE's skew join handling splits large partitions — it does not convert SortMergeJoin to BroadcastHashJoin — aQE's skew join handling splits large partitions — it does not convert SortMergeJoin to BroadcastHashJoin. The join strategy switch happens when a join side is detected to be small enough to broadcast.",
+        "texto_opcion": "AQE detected data skew and applied salting automatically, converting the join type — aQE's skew join handling splits large partitions — it does not convert SortMergeJoin to BroadcastHashJoin. The join strategy switch happens when a join side is detected to be small enough to broadcast.",
         "es_correcta": false,
         "explicacion": "AQE's skew join handling splits large partitions — it does not convert SortMergeJoin to BroadcastHashJoin. The join strategy switch happens when a join side is detected to be small enough to broadcast."
       }
@@ -448,7 +448,7 @@
     "pregunta": "A data engineer runs a query and the Stages tab shows:\n\n- Stage 1 (scan): Duration=30s, Shuffle Write=200 GB\n- Stage 2 (groupBy): Duration=2h, Spill(Disk)=150 GB\n\nWhich configuration change most directly addresses Stage 2's performance problem?",
     "opciones": [
       {
-        "texto_opcion": "Cache Stage 1's output — this prevents Stage 2 from having to recompute the shuffle, caching Stage 1's output only helps if Stage 2 reads from it multiple times — caching Stage 1's output only helps if Stage 2 reads from it multiple times. The spill in Stage 2 is caused by per-partition data volume, not by re-reading Stage 1. More partitions is the correct fix.",
+        "texto_opcion": "Cache Stage 1's output — this prevents Stage 2 from having to recompute the shuffle.",
         "es_correcta": false,
         "explicacion": "Caching Stage 1's output only helps if Stage 2 reads from it multiple times. The spill in Stage 2 is caused by per-partition data volume, not by re-reading Stage 1. More partitions is the correct fix."
       },
@@ -458,7 +458,7 @@
         "explicacion": "200 GB of shuffle data / 200 partitions = 1 GB per partition. Each task in the groupBy stage processes 1 GB of shuffle data. Increasing to 2000 partitions reduces each to 100 MB — fitting in executor memory and eliminating the 150 GB spill."
       },
       {
-        "texto_opcion": "Add more worker nodes to the cluster — more executors process Stage 2 faster, more nodes increases parallelism but if 200 partitions still — more nodes increases parallelism but if 200 partitions still exist, each partition still has 1 GB. The spill issue is about per-partition data volume, which requires more partitions — not just more nodes.",
+        "texto_opcion": "Add more worker nodes to the cluster — more executors process Stage 2 faster.",
         "es_correcta": false,
         "explicacion": "More nodes increases parallelism but if 200 partitions still exist, each partition still has 1 GB. The spill issue is about per-partition data volume, which requires more partitions — not just more nodes."
       },
@@ -478,12 +478,12 @@
     "pregunta": "A data engineer's job fails with `java.lang.OutOfMemoryError: Java heap space` on Executor #7. After finding the error in the task detail, which Spark UI tab should they check next to determine if it was caused by data skew vs. general memory insufficiency?",
     "opciones": [
       {
-        "texto_opcion": "**Storage tab** — check if too much data is cached and reducing execution memory, excessive caching can reduce execution memory and contribute to OOM — excessive caching can reduce execution memory and contribute to OOM — excessive caching can reduce execution memory and contribute to OOM.",
+        "texto_opcion": "**Storage tab** — check if too much data is cached and reducing execution memory — excessive caching can reduce execution memory and contribute to OOM. However, the first check after an OOM should be whether skew caused one task to overwhelm one executor — which is visible in Stage summary metrics.",
         "es_correcta": false,
         "explicacion": "Excessive caching can reduce execution memory and contribute to OOM. However, the first check after an OOM should be whether skew caused one task to overwhelm one executor — which is visible in Stage summary metrics."
       },
       {
-        "texto_opcion": "**Environment tab** — check if `spark.executor.memory` is set below the recommended minimum, while checking the memory configuration is useful — while checking the memory configuration is useful, the Environment tab shows settings, not the cause of this specific OOM.",
+        "texto_opcion": "**Environment tab** — check if `spark.executor.memory` is set below the recommended minimum — while checking the memory configuration is useful, the Environment tab shows settings, not the cause of this specific OOM. Task-level data distribution (Stages tab) is the diagnostic tool.",
         "es_correcta": false,
         "explicacion": "While checking the memory configuration is useful, the Environment tab shows settings, not the cause of this specific OOM. Task-level data distribution (Stages tab) is the diagnostic tool."
       },
@@ -493,7 +493,7 @@
         "explicacion": "The Stages summary metrics distinguish skew-caused OOM (only the max task is huge) from general OOM (all tasks near the limit). This distinction determines whether the fix is AQE/salting or bigger executor memory."
       },
       {
-        "texto_opcion": "**Jobs tab** — check if any other jobs ran concurrently that consumed the same executor's memory, jobs compute clusters run one job at a time — jobs compute clusters run one job at a time — jobs compute clusters run one job at a time; all-purpose clusters may share, but the Jobs tab shows job-level info, not per-executor memory competition. Stage metrics are the right diagnostic tool.",
+        "texto_opcion": "**Jobs tab** — check if any other jobs ran concurrently that consumed the same executor's memory — jobs compute clusters run one job at a time; all-purpose clusters may share, but the Jobs tab shows job-level info, not per-executor memory competition. Stage metrics are the right diagnostic tool.",
         "es_correcta": false,
         "explicacion": "Jobs compute clusters run one job at a time; all-purpose clusters may share, but the Jobs tab shows job-level info, not per-executor memory competition. Stage metrics are the right diagnostic tool."
       }
@@ -508,7 +508,7 @@
     "pregunta": "A data engineer sees **speculative execution** in action in the Spark UI: two task entries with the same partition index, one marked `SUCCESS (Killed)` and one `SUCCESS`. What does this mean?",
     "opciones": [
       {
-        "texto_opcion": "A checkpoint triggered a recomputation of the task, resulting in two successful runs, checkpointing saves data to storage and prevents recomputation — it doesn't — checkpointing saves data to storage and prevents recomputation — checkpointing saves data to storage and prevents recomputation — it doesn't cause duplicate task execution. The described pattern is speculative execution.",
+        "texto_opcion": "A checkpoint triggered a recomputation of the task, resulting in two successful runs — checkpointing saves data to storage and prevents recomputation — it doesn't cause duplicate task execution. The described pattern is speculative execution.",
         "es_correcta": false,
         "explicacion": "Checkpointing saves data to storage and prevents recomputation — it doesn't cause duplicate task execution. The described pattern is speculative execution."
       },
@@ -518,7 +518,7 @@
         "explicacion": "Task retries appear as different attempt numbers (Attempt 1, Attempt 2), not two simultaneously running tasks. Speculative execution launches two copies simultaneously."
       },
       {
-        "texto_opcion": "Two executors processed the same partition in parallel to double throughput, spark does not split partitions for parallel processing (that — spark does not split partitions for parallel processing (that would require repartitioning) — spark does not split partitions for parallel processing (that would require repartitioning). Speculative execution duplicates the slow task — the winner keeps the result; the loser is discarded.",
+        "texto_opcion": "Two executors processed the same partition in parallel to double throughput — spark does not split partitions for parallel processing (that would require repartitioning). Speculative execution duplicates the slow task — the winner keeps the result; the loser is discarded.",
         "es_correcta": false,
         "explicacion": "Spark does not split partitions for parallel processing (that would require repartitioning). Speculative execution duplicates the slow task — the winner keeps the result; the loser is discarded."
       },
@@ -537,12 +537,12 @@
     "pregunta": "A data engineer examines the **SQL tab** of the Spark UI and sees the following node in the query plan:\n\n`Exchange hashpartitioning(customer_id#12, 200)`\n\nWhat does this node represent?",
     "opciones": [
       {
-        "texto_opcion": "A **scan** operation — Databricks reads 200 files partitioned by `customer_id` — file scans appear as `FileScan` or `Scan` nodes — file scans appear as `FileScan` or `Scan` nodes.",
+        "texto_opcion": "A **scan** operation — Databricks reads 200 files partitioned by `customer_id`.",
         "es_correcta": false,
         "explicacion": "File scans appear as `FileScan` or `Scan` nodes. `Exchange` is specifically the shuffle operator in Spark's physical plan."
       },
       {
-        "texto_opcion": "A **broadcast exchange** — the `customer_id` column is being broadcast to all executors — a broadcast exchange would appear as `BroadcastExchange`.",
+        "texto_opcion": "A **broadcast exchange** — the `customer_id` column is being broadcast to all executors.",
         "es_correcta": false,
         "explicacion": "A broadcast exchange would appear as `BroadcastExchange`. The plain `Exchange` node with `hashpartitioning` indicates a standard shuffle, not a broadcast."
       },
@@ -577,12 +577,12 @@
         "explicacion": "`cache()` is lazy — it is evaluated only when an action is called. Spark doesn't validate available memory upfront. If the data doesn't fit, it partially caches and evicts the rest."
       },
       {
-        "texto_opcion": "The job runs faster because even a partial 300 GB cache reduces re-computation, while partial caching can help if the same data is read — while partial caching can help if the same data is read multiple times, the overall effect here is negative: filling 300 GB.",
+        "texto_opcion": "The job runs faster because even a partial 300 GB cache reduces re-computation — while partial caching can help if the same data is read multiple times, the overall effect here is negative: filling 300 GB with cached data leaves no execution memory for active tasks, causing spill.",
         "es_correcta": false,
         "explicacion": "While partial caching can help if the same data is read multiple times, the overall effect here is negative: filling 300 GB with cached data leaves no execution memory for active tasks, causing spill."
       },
       {
-        "texto_opcion": "Spark automatically compresses the 500 GB data to 300 GB to fit in memory, spark uses serialization and some compression for `MEMORY_AND_DISK` — spark uses serialization and some compression for `MEMORY_AND_DISK` storage level, but it doesn't compress 500 GB down — spark uses serialization and some compression for `MEMORY_AND_DISK` storage level, but it doesn't compress 500 GB down to 300 GB. Eviction to disk is the actual behavior.",
+        "texto_opcion": "Spark automatically compresses the 500 GB data to 300 GB to fit in memory — spark uses serialization and some compression for `MEMORY_AND_DISK` storage level, but it doesn't compress 500 GB down to 300 GB. Eviction to disk is the actual behavior.",
         "es_correcta": false,
         "explicacion": "Spark uses serialization and some compression for `MEMORY_AND_DISK` storage level, but it doesn't compress 500 GB down to 300 GB. Eviction to disk is the actual behavior."
       }
@@ -597,7 +597,7 @@
     "pregunta": "A data engineer wants to eliminate shuffle for a join between `orders` (1 TB) and `products` (30 MB). They set:\n\n```python\nspark.conf.set(\"spark.sql.autoBroadcastJoinThreshold\", \"50m\")\n```\n\nWill this trigger a broadcast join? Why?",
     "opciones": [
       {
-        "texto_opcion": "Yes — but `orders` (1 TB) will be broadcast, not `products`, because the threshold selects the larger table — the threshold applies to the **smaller** side of the join — the threshold applies to the **smaller** side of the join — the table that fits in memory and gets sent to all executors. `products` (30 MB) is broadcast; `orders` (1 TB) is not.",
+        "texto_opcion": "Yes — but `orders` (1 TB) will be broadcast, not `products`, because the threshold selects the larger table.",
         "es_correcta": false,
         "explicacion": "The threshold applies to the **smaller** side of the join — the table that fits in memory and gets sent to all executors. `products` (30 MB) is broadcast; `orders` (1 TB) is not."
       },
@@ -612,7 +612,7 @@
         "explicacion": "`spark.sql.autoBroadcastJoinThreshold = 50m` tells Spark to broadcast any join side smaller than 50 MB. Since `products` is 30 MB, it qualifies for automatic broadcasting, eliminating the shuffle."
       },
       {
-        "texto_opcion": "No — the threshold must be set in bytes, not megabytes. `\"50m\"` is an invalid value — spark configuration values support size suffixes: `50m` = 50 megabytes, `50g` = 50 gigabytes. The value `\"50m\"` is valid adopted as the standard pattern for the team.",
+        "texto_opcion": "No — the threshold must be set in bytes, not megabytes. `\"50m\"` is an invalid value — spark configuration values support size suffixes: `50m` = 50 megabytes, `50g` = 50 gigabytes. The value `\"50m\"` is valid.",
         "es_correcta": false,
         "explicacion": "Spark configuration values support size suffixes: `50m` = 50 megabytes, `50g` = 50 gigabytes. The value `\"50m\"` is valid."
       }
@@ -632,17 +632,17 @@
         "explicacion": "Shuffle Write > 0 only when the stage's output feeds a downstream stage via a shuffle (e.g., the stage ends with a groupBy, join, or orderBy). 0 shuffle write means either this is a final stage writing to storage, or the stage only contains narrow transformations."
       },
       {
-        "texto_opcion": "Spark compressed all shuffle data to 0 bytes using LZ4 compression, compression reduces shuffle size but never to 0 bytes — compression reduces shuffle size but never to 0 bytes. 0 bytes in the Shuffle Write column means no shuffle data was written because no wide transformation follows this stage.",
+        "texto_opcion": "Spark compressed all shuffle data to 0 bytes using LZ4 compression — compression reduces shuffle size but never to 0 bytes. 0 bytes in the Shuffle Write column means no shuffle data was written because no wide transformation follows this stage.",
         "es_correcta": false,
         "explicacion": "Compression reduces shuffle size but never to 0 bytes. 0 bytes in the Shuffle Write column means no shuffle data was written because no wide transformation follows this stage."
       },
       {
-        "texto_opcion": "This stage failed before writing any shuffle data — 0 bytes indicates incomplete execution, if the stage shows completed tasks — if the stage shows completed tasks, 0 shuffle write is a valid result meaning no shuffle is needed. A failed stage would show failed tasks, not 0 shuffle write.",
+        "texto_opcion": "This stage failed before writing any shuffle data — 0 bytes indicates incomplete execution — if the stage shows completed tasks, 0 shuffle write is a valid result meaning no shuffle is needed. A failed stage would show failed tasks, not 0 shuffle write.",
         "es_correcta": false,
         "explicacion": "If the stage shows completed tasks, 0 shuffle write is a valid result meaning no shuffle is needed. A failed stage would show failed tasks, not 0 shuffle write."
       },
       {
-        "texto_opcion": "The stage used a broadcast join, which always reports 0 bytes of shuffle write, while broadcast joins do eliminate shuffle for the join — while broadcast joins do eliminate shuffle for the join operation, the presence of 0 shuffle write could be for many reasons — while broadcast joins do eliminate shuffle for the join operation, the presence of 0 shuffle write could be for many reasons.",
+        "texto_opcion": "The stage used a broadcast join, which always reports 0 bytes of shuffle write — while broadcast joins do eliminate shuffle for the join operation, the presence of 0 shuffle write could be for many reasons. The most accurate interpretation is that no wide transformation follows this specific stage.",
         "es_correcta": false,
         "explicacion": "While broadcast joins do eliminate shuffle for the join operation, the presence of 0 shuffle write could be for many reasons. The most accurate interpretation is that no wide transformation follows this specific stage."
       }
@@ -662,17 +662,17 @@
         "explicacion": "Hash-based repartitioning assigns all rows with the same key value to the same partition. A hot key like `UNKNOWN` that appears in millions of rows will always land in the same partition regardless of how many total partitions exist."
       },
       {
-        "texto_opcion": "`repartition()` is a narrow transformation and does not shuffle data, so it has no effect on distribution — `repartition()` *does* perform a full shuffle — it is a wide transformation — `repartition()` *does* perform a full shuffle — it is a wide transformation. The problem is not that it doesn't shuffle, but that hash partitioning puts all same-key rows together.",
+        "texto_opcion": "`repartition()` is a narrow transformation and does not shuffle data, so it has no effect on distribution.",
         "es_correcta": false,
         "explicacion": "`repartition()` *does* perform a full shuffle — it is a wide transformation. The problem is not that it doesn't shuffle, but that hash partitioning puts all same-key rows together."
       },
       {
-        "texto_opcion": "`repartition()` can only redistribute by partition ID, not by column value, `repartition(n, `repartition(n, `repartition(n — `repartition(n, column)` does partition by column value using hashing. The issue is that the same column value always hashes to the same bucket.",
+        "texto_opcion": "`repartition()` can only redistribute by partition ID, not by column value — `repartition(n, column)` does partition by column value using hashing. The issue is that the same column value always hashes to the same bucket.",
         "es_correcta": false,
         "explicacion": "`repartition(n, column)` does partition by column value using hashing. The issue is that the same column value always hashes to the same bucket."
       },
       {
-        "texto_opcion": "`repartition(400)` would fix the skew because 400 is above the 200-partition default, the number 400 is irrelevant to fixing a hot key — the number 400 is irrelevant to fixing a hot key — the number 400 is irrelevant to fixing a hot key. Whether you use 200 or 400 or 4000 partitions, `UNKNOWN` will always map to exactly one partition via hashing.",
+        "texto_opcion": "`repartition(400)` would fix the skew because 400 is above the 200-partition default — the number 400 is irrelevant to fixing a hot key. Whether you use 200 or 400 or 4000 partitions, `UNKNOWN` will always map to exactly one partition via hashing.",
         "es_correcta": false,
         "explicacion": "The number 400 is irrelevant to fixing a hot key. Whether you use 200 or 400 or 4000 partitions, `UNKNOWN` will always map to exactly one partition via hashing."
       }
@@ -687,7 +687,7 @@
     "pregunta": "A data engineer uses `df.collect()` in a notebook to examine 50 million rows. Shortly after, the Databricks notebook crashes with a driver OOM error. What is the root cause visible in the Spark UI?",
     "opciones": [
       {
-        "texto_opcion": "The Spark context timed out while waiting for all executors to return their partitions, timeouts cause different errors, timeouts cause different errors — timeouts cause different errors.",
+        "texto_opcion": "The Spark context timed out while waiting for all executors to return their partitions — timeouts cause different errors. An OOM error after `collect()` on 50 million rows is clearly caused by the data volume exceeding driver heap, not by a timeout.",
         "es_correcta": false,
         "explicacion": "Timeouts cause different errors. An OOM error after `collect()` on 50 million rows is clearly caused by the data volume exceeding driver heap, not by a timeout."
       },
@@ -697,7 +697,7 @@
         "explicacion": "Shuffle metadata is small. The driver OOM from `collect()` is caused by the actual data being moved to the driver heap — 50 million rows of data, not metadata."
       },
       {
-        "texto_opcion": "The DataFrame was not properly cached before `collect()`, causing recomputation that overwhelmed the driver, caching is for executor memory — caching is for executor memory, not driver memory.",
+        "texto_opcion": "The DataFrame was not properly cached before `collect()`, causing recomputation that overwhelmed the driver — caching is for executor memory, not driver memory. `collect()` OOM occurs regardless of caching because the data must physically move to the driver JVM regardless.",
         "es_correcta": false,
         "explicacion": "Caching is for executor memory, not driver memory. `collect()` OOM occurs regardless of caching because the data must physically move to the driver JVM regardless."
       },
@@ -722,17 +722,17 @@
         "explicacion": "The Stages tab shows Shuffle Write (bytes) as a column for each stage. Sorting by this column descending immediately identifies which stage produced the most shuffle output."
       },
       {
-        "texto_opcion": "The **Output** column — shuffle write is categorized as data output — the `Output` column shows data written to permanent storage (DBFS, Delta) — the `Output` column shows data written to permanent storage (DBFS, Delta).",
+        "texto_opcion": "The **Output** column — shuffle write is categorized as data output.",
         "es_correcta": false,
         "explicacion": "The `Output` column shows data written to permanent storage (DBFS, Delta). `Shuffle Write` is a separate column for data written to temporary shuffle files."
       },
       {
-        "texto_opcion": "The **Input** column of the downstream stage — the shuffle write equals the downstream stage's input — while the downstream stage's Shuffle Read corresponds to the upstream stage's.",
+        "texto_opcion": "The **Input** column of the downstream stage — the shuffle write equals the downstream stage's input.",
         "es_correcta": false,
         "explicacion": "While the downstream stage's Shuffle Read corresponds to the upstream stage's Shuffle Write, the `Shuffle Write` column directly shows which stage produced the data without needing to cross-reference downstream stages."
       },
       {
-        "texto_opcion": "The **Tasks** column — more tasks means more shuffle data was written — task count is not proportional to shuffle data volume — task count is not proportional to shuffle data volume. The `Shuffle Write` column directly shows total bytes written to shuffle files per stage.",
+        "texto_opcion": "The **Tasks** column — more tasks means more shuffle data was written.",
         "es_correcta": false,
         "explicacion": "Task count is not proportional to shuffle data volume. The `Shuffle Write` column directly shows total bytes written to shuffle files per stage."
       }
@@ -746,12 +746,12 @@
     "pregunta": "In the Spark UI, what does **GC Time** in the Executors tab measure, and what is the performance significance of high GC time?",
     "opciones": [
       {
-        "texto_opcion": "GC Time indicates how long tasks waited for stale cache entries to be cleared from executor memory — cache eviction in Spark is managed by the storage memory manager, not the JVM GC directly. GC Time is specifically JVM heap garbage collection — reclaiming Java objects no longer referenced selected to meet the constraints described here.",
+        "texto_opcion": "GC Time indicates how long tasks waited for stale cache entries to be cleared from executor memory — cache eviction in Spark is managed by the storage memory manager, not the JVM GC directly. GC Time is specifically JVM heap garbage collection — reclaiming Java objects no longer referenced.",
         "es_correcta": false,
         "explicacion": "Cache eviction in Spark is managed by the storage memory manager, not the JVM GC directly. GC Time is specifically JVM heap garbage collection — reclaiming Java objects no longer referenced."
       },
       {
-        "texto_opcion": "GC Time measures the time the cluster auto-scaler spent reclaiming idle executor nodes, auto-scaling is a cluster management operation — auto-scaling is a cluster management operation, not reported in Spark UI metrics. GC Time refers to JVM garbage collection within running executor processes used as the main path in this architecture.",
+        "texto_opcion": "GC Time measures the time the cluster auto-scaler spent reclaiming idle executor nodes — auto-scaling is a cluster management operation, not reported in Spark UI metrics. GC Time refers to JVM garbage collection within running executor processes.",
         "es_correcta": false,
         "explicacion": "Auto-scaling is a cluster management operation, not reported in Spark UI metrics. GC Time refers to JVM garbage collection within running executor processes."
       },
@@ -761,7 +761,7 @@
         "explicacion": "When the JVM heap fills with objects, the garbage collector runs to free memory. This pauses or interrupts computation. If GC Time exceeds 10% of Task Time, the executor is memory-constrained and would benefit from more memory or fewer objects in heap."
       },
       {
-        "texto_opcion": "GC Time measures the time spent writing data to the disk garbage/temp directory as part of spill, spill to disk is a separate metric (`Spill (Disk)`) — spill to disk is a separate metric (`Spill (Disk)`). GC Time specifically measures JVM garbage collection pauses, which are memory management operations, not disk I/O.",
+        "texto_opcion": "GC Time measures the time spent writing data to the disk garbage/temp directory as part of spill — spill to disk is a separate metric (`Spill (Disk)`). GC Time specifically measures JVM garbage collection pauses, which are memory management operations, not disk I/O.",
         "es_correcta": false,
         "explicacion": "Spill to disk is a separate metric (`Spill (Disk)`). GC Time specifically measures JVM garbage collection pauses, which are memory management operations, not disk I/O."
       }
@@ -781,17 +781,17 @@
         "explicacion": "0 Shuffle Read means Stage 5 doesn't consume shuffle output from a prior stage. 0 Shuffle Write means it doesn't produce shuffle output. 500 GB Input means it reads raw source data. This profile matches a final write stage with only narrow transformations."
       },
       {
-        "texto_opcion": "A **groupBy aggregation** — 500 GB input is grouped and aggregated without shuffle, `groupBy` is a wide transformation requiring a shuffle — `groupBy` is a wide transformation requiring a shuffle — `groupBy` is a wide transformation requiring a shuffle.",
+        "texto_opcion": "A **groupBy aggregation** — 500 GB input is grouped and aggregated without shuffle — `groupBy` is a wide transformation requiring a shuffle. It would show non-zero Shuffle Write (for the pre-aggregate data sent to reduce tasks) and non-zero Shuffle Read.",
         "es_correcta": false,
         "explicacion": "`groupBy` is a wide transformation requiring a shuffle. It would show non-zero Shuffle Write (for the pre-aggregate data sent to reduce tasks) and non-zero Shuffle Read."
       },
       {
-        "texto_opcion": "A **join stage** — both tables were co-located so no shuffle was needed, co-located bucket joins can avoid shuffles and would show 0 — co-located bucket joins can avoid shuffles and would show 0 Shuffle Read/Write.",
+        "texto_opcion": "A **join stage** — both tables were co-located so no shuffle was needed.",
         "es_correcta": false,
         "explicacion": "Co-located bucket joins can avoid shuffles and would show 0 Shuffle Read/Write. However, join stages typically show Shuffle Read (reading from the upstream shuffle). With 500 GB Input and 0 shuffle metrics, this is more consistent with a scan+write stage."
       },
       {
-        "texto_opcion": "A **broadcast join** — the small side was broadcast, so no shuffle write is shown, broadcast joins show non-zero Shuffle Read on the receiving side (for the — broadcast joins show non-zero Shuffle Read on the receiving side (for the broadcast data transfer) and typically 0 Shuffle.",
+        "texto_opcion": "A **broadcast join** — the small side was broadcast, so no shuffle write is shown.",
         "es_correcta": false,
         "explicacion": "Broadcast joins show non-zero Shuffle Read on the receiving side (for the broadcast data transfer) and typically 0 Shuffle Write if they're the final stage. However, 500 GB Input with no shuffle at all is more consistent with a pure read+write narrow stage."
       }
@@ -805,7 +805,7 @@
     "pregunta": "A data engineer sets `spark.memory.fraction = 0.8` (up from the default of 0.6). What effect does this have?",
     "opciones": [
       {
-        "texto_opcion": "Executors are allocated 80% more physical memory on the cluster nodes — `spark.memory.fraction` is a fraction of the already-configured `spark.executor.memory` JVM heap — it does not request additional physical memory from the cluster applied across environments for operational consistency.",
+        "texto_opcion": "Executors are allocated 80% more physical memory on the cluster nodes — `spark.memory.fraction` is a fraction of the already-configured `spark.executor.memory` JVM heap — it does not request additional physical memory from the cluster.",
         "es_correcta": false,
         "explicacion": "`spark.memory.fraction` is a fraction of the already-configured `spark.executor.memory` JVM heap — it does not request additional physical memory from the cluster."
       },
@@ -815,7 +815,7 @@
         "explicacion": "`spark.memory.fraction` controls what fraction of the JVM heap is available to Spark's unified memory manager (execution + storage memory). Increasing from 0.6 to 0.8 gives Spark 20% more heap space, reducing execution memory pressure and spill."
       },
       {
-        "texto_opcion": "Spark will use 80% of shuffle partitions, reducing the total shuffle cost by 20% — `spark.memory.fraction` has nothing to do with shuffle partition count. It controls how much of the JVM heap Spark uses for its memory manager adopted as the standard pattern for the team That makes it a weaker fit against the main constraint in the prompt..",
+        "texto_opcion": "Spark will use 80% of shuffle partitions, reducing the total shuffle cost by 20% — `spark.memory.fraction` has nothing to do with shuffle partition count. It controls how much of the JVM heap Spark uses for its memory manager.",
         "es_correcta": false,
         "explicacion": "`spark.memory.fraction` has nothing to do with shuffle partition count. It controls how much of the JVM heap Spark uses for its memory manager."
       },
@@ -835,7 +835,7 @@
     "pregunta": "A data engineer sees two separate metrics in a stage: `Spill (Memory) = 25 GB` and `Spill (Disk) = 4 GB`. Why is `Spill (Memory)` approximately 6x larger than `Spill (Disk)`?",
     "opciones": [
       {
-        "texto_opcion": "The 25 GB represents 25 separate tasks that spilled 1 GB each; the 4 GB is the total unique data — `Spill (Memory)` is a total volume metric (bytes), not a task count. Both metrics are total volume across all tasks — just measured at different stages of the spill process selected to meet the constraints described here.",
+        "texto_opcion": "The 25 GB represents 25 separate tasks that spilled 1 GB each; the 4 GB is the total unique data — `Spill (Memory)` is a total volume metric (bytes), not a task count. Both metrics are total volume across all tasks — just measured at different stages of the spill process.",
         "es_correcta": false,
         "explicacion": "`Spill (Memory)` is a total volume metric (bytes), not a task count. Both metrics are total volume across all tasks — just measured at different stages of the spill process."
       },
@@ -845,7 +845,7 @@
         "explicacion": "Java objects in the JVM heap have significant overhead (object headers, boxed types, etc.) and are uncompressed. When spilled to disk, Spark serializes and compresses the data, dramatically reducing its size. A ~6:1 ratio between memory and disk spill is typical."
       },
       {
-        "texto_opcion": "The 25 GB was spilled to memory-mapped disk files; the 4 GB is what remains after deduplication — spill (Memory) is the in-memory size before serialization; Spill (Disk) is the on-disk size after serialization. There is no deduplication step in the spill process selected to meet the constraints described here.",
+        "texto_opcion": "The 25 GB was spilled to memory-mapped disk files; the 4 GB is what remains after deduplication — spill (Memory) is the in-memory size before serialization; Spill (Disk) is the on-disk size after serialization. There is no deduplication step in the spill process.",
         "es_correcta": false,
         "explicacion": "Spill (Memory) is the in-memory size before serialization; Spill (Disk) is the on-disk size after serialization. There is no deduplication step in the spill process."
       },
@@ -864,12 +864,12 @@
     "pregunta": "A data engineer has a join that runs in 2 hours with `SortMergeJoin`. They enable AQE. In the next run, the SQL tab shows the join was converted to `BroadcastHashJoin` and the job finishes in 15 minutes. What is the most likely explanation?",
     "opciones": [
       {
-        "texto_opcion": "AQE increased `spark.sql.shuffle.partitions` to reduce spill, which improved the sort performance, while AQE can coalesce shuffle partitions — while AQE can coalesce shuffle partitions, a `SortMergeJoin → BroadcastHashJoin` conversion is about eliminating the shuffle entirely — not about partition count tuning.",
+        "texto_opcion": "AQE increased `spark.sql.shuffle.partitions` to reduce spill, which improved the sort performance — while AQE can coalesce shuffle partitions, a `SortMergeJoin → BroadcastHashJoin` conversion is about eliminating the shuffle entirely — not about partition count tuning.",
         "es_correcta": false,
         "explicacion": "While AQE can coalesce shuffle partitions, a `SortMergeJoin → BroadcastHashJoin` conversion is about eliminating the shuffle entirely — not about partition count tuning."
       },
       {
-        "texto_opcion": "AQE cached the join result from the first run, so the second run used cached data, aQE does not implement cross-run result caching — aQE does not implement cross-run result caching. The described speedup happens within the same run based on runtime plan adaptation adopted as the standard pattern for the team.",
+        "texto_opcion": "AQE cached the join result from the first run, so the second run used cached data — aQE does not implement cross-run result caching. The described speedup happens within the same run based on runtime plan adaptation.",
         "es_correcta": false,
         "explicacion": "AQE does not implement cross-run result caching. The described speedup happens within the same run based on runtime plan adaptation."
       },
@@ -879,7 +879,7 @@
         "explicacion": "The 8x speedup is consistent with eliminating a large shuffle. AQE collects actual data statistics during execution and, if a join side is small enough, dynamically converts the planned SortMergeJoin (shuffle + sort both sides) to BroadcastHashJoin (broadcast small side, no shuffle on large side)."
       },
       {
-        "texto_opcion": "AQE automatically increased the cluster size, providing more CPUs to run the sort faster, aQE does not auto-scale clusters, aQE does not auto-scale clusters — aQE does not auto-scale clusters. It optimizes the query plan based on runtime statistics — aQE does not auto-scale clusters. It optimizes the query plan based on runtime statistics. The speedup here is from eliminating the expensive shuffle, not from adding compute.",
+        "texto_opcion": "AQE automatically increased the cluster size, providing more CPUs to run the sort faster — aQE does not auto-scale clusters. It optimizes the query plan based on runtime statistics. The speedup here is from eliminating the expensive shuffle, not from adding compute.",
         "es_correcta": false,
         "explicacion": "AQE does not auto-scale clusters. It optimizes the query plan based on runtime statistics. The speedup here is from eliminating the expensive shuffle, not from adding compute."
       }

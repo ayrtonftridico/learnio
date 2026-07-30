@@ -3,7 +3,7 @@
     "pregunta": "A data engineer notices that a Spark SQL job is producing 200 shuffle output partitions for every wide transformation, even when the dataset is only a few hundred MB.\n\nWhich configuration parameter controls this default behavior?",
     "opciones": [
       {
-        "texto_opcion": "spark.default.parallelism, this affects RDD operations and.",
+        "texto_opcion": "spark.default.parallelism.",
         "es_correcta": false,
         "explicacion": "This affects RDD operations and the default parallelism of the cluster, not the number of post-shuffle partitions for DataFrame/SQL operations."
       },
@@ -32,7 +32,7 @@
     "pregunta": "A data engineer runs the following code on a small dataset (~50 MB):\n\n```python\nspark.conf.set(\"spark.sql.shuffle.partitions\", 8)\ndf_result = df.groupBy(\"region\").sum(\"sales\")\n```\n\nWhat is the most likely effect of this change compared to the default setting?",
     "opciones": [
       {
-        "texto_opcion": "Spark will ignore the setting and continue using 200 partitions for this query — unless Adaptive Query Execution overrides it, this setting is.",
+        "texto_opcion": "Spark will ignore the setting and continue using 200 partitions for this query.",
         "es_correcta": false,
         "explicacion": "Unless Adaptive Query Execution overrides it, this setting is applied directly to shuffle operations triggered after it is set."
       },
@@ -42,12 +42,12 @@
         "explicacion": "With a small dataset, 200 default partitions creates many tiny tasks with high scheduling overhead; lowering to 8 reduces that overhead and better matches data size."
       },
       {
-        "texto_opcion": "The aggregation will be computed without a shuffle at all — groupBy with sum still requires a shuffle to group.",
+        "texto_opcion": "The aggregation will be computed without a shuffle at all.",
         "es_correcta": false,
         "explicacion": "groupBy with sum still requires a shuffle to group matching keys together, regardless of the partition count configured."
       },
       {
-        "texto_opcion": "The job will fail because 8 is below the minimum allowed value — there is no enforced minimum value for spark.sql.shuffle.partitions; any positive integer is valid.",
+        "texto_opcion": "The job will fail because 8 is below the minimum allowed value.",
         "es_correcta": false,
         "explicacion": "There is no enforced minimum value for spark.sql.shuffle.partitions; any positive integer is valid."
       }
@@ -61,7 +61,7 @@
     "pregunta": "A data engineer is joining a 2 GB fact table with a 5 MB dimension table. The job is slower than expected and the Spark UI shows a full shuffle stage for both tables.\n\nWhich change would most directly address this?",
     "opciones": [
       {
-        "texto_opcion": "Increase spark.sql.shuffle.partitions to add more parallelism to the shuffle — adding more shuffle partitions does not eliminate the unnecessary shuffle of the small.",
+        "texto_opcion": "Increase spark.sql.shuffle.partitions to add more parallelism to the shuffle.",
         "es_correcta": false,
         "explicacion": "Adding more shuffle partitions does not eliminate the unnecessary shuffle of the small table; it only changes how the shuffle is distributed."
       },
@@ -71,12 +71,12 @@
         "explicacion": "Since the dimension table is well under the broadcast threshold (default 10 MB), enabling/confirming broadcast avoids shuffling either table and sends the small table to all executors instead."
       },
       {
-        "texto_opcion": "Use coalesce() on the fact table before the join — coalesce() reduces partition count without a shuffle, but it does not change.",
+        "texto_opcion": "Use coalesce() on the fact table before the join.",
         "es_correcta": false,
         "explicacion": "coalesce() reduces partition count without a shuffle, but it does not change the join strategy and can cause data skew on a 2 GB table."
       },
       {
-        "texto_opcion": "Cache the fact table in memory before joining, caching the large table may speed up — caching the large table may speed up repeated access but does not avoid the shuffle join itself.",
+        "texto_opcion": "Cache the fact table in memory before joining — caching the large table may speed up repeated access but does not avoid the shuffle join itself.",
         "es_correcta": false,
         "explicacion": "Caching the large table may speed up repeated access but does not avoid the shuffle join itself."
       }
@@ -100,12 +100,12 @@
         "explicacion": "repartition() is available directly on the DataFrame API in PySpark, not just on RDDs."
       },
       {
-        "texto_opcion": "Both operations are functionally identical and differ only in naming, they differ significantly in execution: coalesce() — they differ significantly in execution: coalesce() avoids data movement when possible, while repartition() always redistributes data evenly.",
+        "texto_opcion": "Both operations are functionally identical and differ only in naming — they differ significantly in execution: coalesce() avoids data movement when possible, while repartition() always redistributes data evenly.",
         "es_correcta": false,
         "explicacion": "They differ significantly in execution: coalesce() avoids data movement when possible, while repartition() always redistributes data evenly."
       },
       {
-        "texto_opcion": "coalesce() always triggers a full shuffle and can increase or decrease partitions; repartition() avoids a full shuffle — this reverses the actual behavior: coalesce() is the shuffle-avoiding operation, and repartition() is the one that performs a full shuffle.",
+        "texto_opcion": "coalesce() always triggers a full shuffle and can increase or decrease partitions; repartition() avoids a full shuffle.",
         "es_correcta": false,
         "explicacion": "This reverses the actual behavior: coalesce() is the shuffle-avoiding operation, and repartition() is the one that performs a full shuffle."
       }
@@ -129,7 +129,7 @@
         "explicacion": "coalesce(1) explicitly reduces the in-memory partition count to one before the write, so output is written as a single file/partition by one task."
       },
       {
-        "texto_opcion": "The job runs faster because coalesce avoids a shuffle, while coalesce avoids a full shuffle",
+        "texto_opcion": "The job runs faster because coalesce avoids a shuffle, while coalesce avoids a full shuffle.",
         "es_correcta": false,
         "explicacion": "While coalesce avoids a full shuffle, collapsing 400 partitions of 500 GB into 1 still creates a massive serial bottleneck that outweighs the shuffle savings."
       },
@@ -158,12 +158,12 @@
         "explicacion": "Memory overhead covers off-heap usage (JVM overhead, shuffle buffers); if it is too low relative to executor memory, the executor can be killed by the cluster manager even though heap memory looks sufficient."
       },
       {
-        "texto_opcion": "spark.databricks.delta.optimizeWrite.enabled — this setting affects Delta write file sizing, not.",
+        "texto_opcion": "spark.databricks.delta.optimizeWrite.enabled.",
         "es_correcta": false,
         "explicacion": "This setting affects Delta write file sizing, not executor memory allocation during an aggregation."
       },
       {
-        "texto_opcion": "spark.sql.shuffle.partitions only, with no need to check memory settings",
+        "texto_opcion": "spark.sql.shuffle.partitions only, with no need to check memory settings.",
         "es_correcta": false,
         "explicacion": "While increasing shuffle partitions can reduce per-task memory pressure, it does not address the underlying overhead memory configuration that commonly causes OOM kills."
       }
@@ -216,7 +216,7 @@
         "explicacion": "AQE uses the configured value as an initial target and then adjusts at runtime; it does not disable the setting outright."
       },
       {
-        "texto_opcion": "AQE only affects broadcast join thresholds and has no relationship to shuffle partitions — aQE affects multiple aspects of query execution, including coalescing shuffle partitions and.",
+        "texto_opcion": "AQE only affects broadcast join thresholds and has no relationship to shuffle partitions.",
         "es_correcta": false,
         "explicacion": "AQE affects multiple aspects of query execution, including coalescing shuffle partitions and handling skew, not just broadcast thresholds."
       },
@@ -235,12 +235,12 @@
     "pregunta": "A data engineer enables the following configuration in a Databricks notebook:\n\n```python\nspark.conf.set(\"spark.sql.adaptive.enabled\", \"true\")\nspark.conf.set(\"spark.sql.adaptive.coalescePartitions.enabled\", \"true\")\n```\n\nWhat effect does this combination have on a job that originally produces 200 small shuffle partitions after a filter that removes 95% of the rows?",
     "opciones": [
       {
-        "texto_opcion": "This setting only applies to streaming queries, not batch jobs — aQE coalescing of partitions applies to batch SQL and DataFrame queries as well as.",
+        "texto_opcion": "This setting only applies to streaming queries, not batch jobs.",
         "es_correcta": false,
         "explicacion": "AQE coalescing of partitions applies to batch SQL and DataFrame queries as well as streaming, wherever shuffles occur."
       },
       {
-        "texto_opcion": "Spark increases the partition count further to maximize parallelism — coalescePartitions is specifically designed to reduce, not increase, the.",
+        "texto_opcion": "Spark increases the partition count further to maximize parallelism.",
         "es_correcta": false,
         "explicacion": "coalescePartitions is specifically designed to reduce, not increase, the number of small post-shuffle partitions."
       },
@@ -250,7 +250,7 @@
         "explicacion": "coalescePartitions under AQE monitors post-shuffle partition sizes and merges small ones together at runtime, avoiding the overhead of many tiny tasks without manual tuning."
       },
       {
-        "texto_opcion": "The job will fail because coalescePartitions requires shuffle.partitions to be — aQE coalescing works independently of the static shuffle.partitions.",
+        "texto_opcion": "The job will fail because coalescePartitions requires shuffle.partitions to be manually lowered first.",
         "es_correcta": false,
         "explicacion": "AQE coalescing works independently of the static shuffle.partitions value and does not require manual pre-tuning to function."
       }
@@ -279,7 +279,7 @@
         "explicacion": "This threshold controls broadcast join eligibility based on table size and does not detect or correct join-key skew."
       },
       {
-        "texto_opcion": "spark.sql.adaptive.coalescePartitions.enabled",
+        "texto_opcion": "spark.sql.adaptive.coalescePartitions.enabled.",
         "es_correcta": false,
         "explicacion": "This feature merges small partitions together; it does not split oversized, skewed partitions."
       }
@@ -293,17 +293,17 @@
     "pregunta": "Which statement best describes the difference between `spark.default.parallelism` and `spark.sql.shuffle.partitions`?",
     "opciones": [
       {
-        "texto_opcion": "spark.default.parallelism overrides spark.sql.shuffle.partitions in all DataFrame operations, for DataFrame and SQL shuffle operations — for DataFrame and SQL shuffle operations, spark.sql.shuffle.partitions takes precedence, not spark.default.parallelism.",
+        "texto_opcion": "spark.default.parallelism overrides spark.sql.shuffle.partitions in all DataFrame operations — for DataFrame and SQL shuffle operations, spark.sql.shuffle.partitions takes precedence, not spark.default.parallelism.",
         "es_correcta": false,
         "explicacion": "For DataFrame and SQL shuffle operations, spark.sql.shuffle.partitions takes precedence, not spark.default.parallelism."
       },
       {
-        "texto_opcion": "spark.sql.shuffle.partitions only affects streaming jobs, spark.sql.shuffle.partitions affects both batch and streaming — spark.sql.shuffle.partitions affects both batch and streaming Spark SQL/DataFrame shuffle operations, not streaming exclusively.",
+        "texto_opcion": "spark.sql.shuffle.partitions only affects streaming jobs — spark.sql.shuffle.partitions affects both batch and streaming Spark SQL/DataFrame shuffle operations, not streaming exclusively.",
         "es_correcta": false,
         "explicacion": "spark.sql.shuffle.partitions affects both batch and streaming Spark SQL/DataFrame shuffle operations, not streaming exclusively."
       },
       {
-        "texto_opcion": "They are aliases for the exact same internal configuration value, they are tracked as separate configuration parameters — they are tracked as separate configuration parameters and can be set to different values, affecting different parts of the engine.",
+        "texto_opcion": "They are aliases for the exact same internal configuration value — they are tracked as separate configuration parameters and can be set to different values, affecting different parts of the engine.",
         "es_correcta": false,
         "explicacion": "They are tracked as separate configuration parameters and can be set to different values, affecting different parts of the engine."
       },
@@ -322,17 +322,17 @@
     "pregunta": "A job processes a 4 TB dataset but spark.sql.shuffle.partitions is left at the default value of 200. The Spark UI shows shuffle stages with very large, multi-GB partitions and frequent disk spill.\n\nWhat is the most likely consequence of leaving this default value unchanged for such a large dataset?",
     "opciones": [
       {
-        "texto_opcion": "The job will fail immediately with a configuration error, the job will run, the job will run — the job will run, just inefficiently with spill and slower stages.",
+        "texto_opcion": "The job will fail immediately with a configuration error — the job will run, just inefficiently with spill and slower stages; it does not fail outright due to this setting alone.",
         "es_correcta": false,
         "explicacion": "The job will run, just inefficiently with spill and slower stages; it does not fail outright due to this setting alone."
       },
       {
-        "texto_opcion": "Partition size is unrelated to spark.sql.shuffle.partitions and depends only on the input file format — post-shuffle partition size is a direct function of total shuffled data divided by the configured partition.",
+        "texto_opcion": "Partition size is unrelated to spark.sql.shuffle.partitions and depends only on the input file format.",
         "es_correcta": false,
         "explicacion": "Post-shuffle partition size is a direct function of total shuffled data divided by the configured partition count, so this setting matters significantly."
       },
       {
-        "texto_opcion": "Spark automatically raises the value internally once data exceeds 1 TB — without AQE coalescing/repartitioning logic actively adjusting it, the static.",
+        "texto_opcion": "Spark automatically raises the value internally once data exceeds 1 TB.",
         "es_correcta": false,
         "explicacion": "Without AQE coalescing/repartitioning logic actively adjusting it, the static shuffle.partitions value does not auto-scale based on data volume."
       },
@@ -414,17 +414,17 @@
         "explicacion": "repartition() always performs a shuffle regardless of direction, while coalesce() tries to combine adjacent partitions without moving all data across the cluster when reducing partition count."
       },
       {
-        "texto_opcion": "Neither operation incurs any data movement since both reduce partition count, repartition() does incur data movement via a shuffle even though — repartition() does incur data movement via a shuffle even though it reduces the partition count, unlike coalesce().",
+        "texto_opcion": "Neither operation incurs any data movement since both reduce partition count — repartition() does incur data movement via a shuffle even though it reduces the partition count, unlike coalesce().",
         "es_correcta": false,
         "explicacion": "repartition() does incur data movement via a shuffle even though it reduces the partition count, unlike coalesce()."
       },
       {
-        "texto_opcion": "df_b triggers a full shuffle while df_a avoids one, this reverses the actual behavior, this reverses the actual behavior — this reverses the actual behavior; coalesce() is the one that avoids a full shuffle, not repartition().",
+        "texto_opcion": "df_b triggers a full shuffle while df_a avoids one — this reverses the actual behavior; coalesce() is the one that avoids a full shuffle, not repartition().",
         "es_correcta": false,
         "explicacion": "This reverses the actual behavior; coalesce() is the one that avoids a full shuffle, not repartition()."
       },
       {
-        "texto_opcion": "Both operations have identical execution costs since they reach the same final partition count, despite the same target count — despite the same target count, the underlying execution mechanics differ significantly in terms of data movement and cost.",
+        "texto_opcion": "Both operations have identical execution costs since they reach the same final partition count — despite the same target count, the underlying execution mechanics differ significantly in terms of data movement and cost.",
         "es_correcta": false,
         "explicacion": "Despite the same target count, the underlying execution mechanics differ significantly in terms of data movement and cost."
       }
@@ -438,12 +438,12 @@
     "pregunta": "A Lakeflow job ingests thousands of small files per run, resulting in a DataFrame with thousands of tiny partitions and very slow downstream processing due to scheduling overhead.\n\nWhich approach would best address this issue before further transformations?",
     "opciones": [
       {
-        "texto_opcion": "Disable spark.sql.autoBroadcastJoinThreshold entirely — the broadcast threshold relates to join strategy selection, not to the number of small file-based.",
+        "texto_opcion": "Disable spark.sql.autoBroadcastJoinThreshold entirely.",
         "es_correcta": false,
         "explicacion": "The broadcast threshold relates to join strategy selection, not to the number of small file-based partitions created during ingestion."
       },
       {
-        "texto_opcion": "Increase spark.sql.shuffle.partitions to match the number of small files — increasing the shuffle partition count further would worsen the problem by.",
+        "texto_opcion": "Increase spark.sql.shuffle.partitions to match the number of small files.",
         "es_correcta": false,
         "explicacion": "Increasing the shuffle partition count further would worsen the problem by creating even more small tasks, not fewer."
       },
@@ -482,7 +482,7 @@
         "explicacion": "The setting is an absolute byte-size threshold, not a percentage of available cluster memory."
       },
       {
-        "texto_opcion": "Gigabytes, with a default of 1 GB, the unit is bytes and the.",
+        "texto_opcion": "Gigabytes, with a default of 1 GB.",
         "es_correcta": false,
         "explicacion": "The unit is bytes and the default threshold is 10 MB, not measured or defaulted in gigabytes."
       }
@@ -501,7 +501,7 @@
         "explicacion": "Caching dim_df keeps it in memory for reuse but does not change the join strategy to broadcast."
       },
       {
-        "texto_opcion": "```python\nresult = fact_df.coalesce(1).join(dim_df, \"id\")\n``` — coalesce(1) reduces fact_df's partitions but does not instruct Spark to.",
+        "texto_opcion": "```python\nresult = fact_df.coalesce(1).join(dim_df, \"id\")\n```.",
         "es_correcta": false,
         "explicacion": "coalesce(1) reduces fact_df's partitions but does not instruct Spark to use a broadcast join strategy for dim_df."
       },
@@ -511,7 +511,7 @@
         "explicacion": "The broadcast() hint explicitly forces Spark to broadcast dim_df for this join, overriding the disabled autoBroadcastJoinThreshold for just this operation."
       },
       {
-        "texto_opcion": "```python\nspark.conf.set\nresult = fact_df.join\n``` — changing shuffle.partitions does not force a broadcast join strategy — changing shuffle.partitions does not force a broadcast join strategy.",
+        "texto_opcion": "```python\nspark.conf.set(\"spark.sql.shuffle.partitions\", 1)\nresult = fact_df.join(dim_df, \"id\")\n```.",
         "es_correcta": false,
         "explicacion": "Changing shuffle.partitions does not force a broadcast join strategy; it only affects shuffle partition count for shuffle-based joins."
       }
@@ -525,12 +525,12 @@
     "pregunta": "A data engineer observes frequent out-of-memory errors during large shuffle-heavy jobs. Which tuning parameter should typically be investigated first as a root cause?",
     "opciones": [
       {
-        "texto_opcion": "The Git branch the notebook is checked out from — source control branching has no effect on runtime.",
+        "texto_opcion": "The Git branch the notebook is checked out from.",
         "es_correcta": false,
         "explicacion": "Source control branching has no effect on runtime memory usage or shuffle behavior."
       },
       {
-        "texto_opcion": "The Lakeflow Jobs trigger type used to schedule the workflow — trigger type (scheduled, file arrival, etc.) determines when a job runs, not.",
+        "texto_opcion": "The Lakeflow Jobs trigger type used to schedule the workflow.",
         "es_correcta": false,
         "explicacion": "Trigger type (scheduled, file arrival, etc.) determines when a job runs, not its in-memory resource consumption."
       },
@@ -540,7 +540,7 @@
         "explicacion": "OOM errors during shuffles are most commonly tied to insufficient executor memory or overhead relative to the size of data each task must process, often combined with too few shuffle partitions."
       },
       {
-        "texto_opcion": "Unity Catalog GRANT statements on the source tables — permission grants control access rights and have no.",
+        "texto_opcion": "Unity Catalog GRANT statements on the source tables.",
         "es_correcta": false,
         "explicacion": "Permission grants control access rights and have no relationship to runtime memory consumption or OOM errors."
       }
@@ -559,17 +559,17 @@
         "explicacion": "spark.executor.instances explicitly sets how many executor JVMs are started, directly controlling the total parallel processing capacity available."
       },
       {
-        "texto_opcion": "It sets the number of cores allocated within a single executor — cores per executor are controlled separately by spark.executor.cores, not by.",
+        "texto_opcion": "It sets the number of cores allocated within a single executor.",
         "es_correcta": false,
         "explicacion": "Cores per executor are controlled separately by spark.executor.cores, not by spark.executor.instances."
       },
       {
-        "texto_opcion": "It defines the number of partitions used in shuffle operations — shuffle partition count is governed by spark.sql.shuffle.partitions, unrelated.",
+        "texto_opcion": "It defines the number of partitions used in shuffle operations.",
         "es_correcta": false,
         "explicacion": "Shuffle partition count is governed by spark.sql.shuffle.partitions, unrelated to the number of executor processes."
       },
       {
-        "texto_opcion": "It sets the broadcast join size threshold for the cluster — broadcast join size eligibility is controlled by.",
+        "texto_opcion": "It sets the broadcast join size threshold for the cluster.",
         "es_correcta": false,
         "explicacion": "Broadcast join size eligibility is controlled by spark.sql.autoBroadcastJoinThreshold, a separate parameter entirely."
       }
@@ -588,7 +588,7 @@
         "explicacion": "Without AQE's skew join handling, Spark uses the static query plan and cannot split oversized partitions at runtime, leaving skewed data to bottleneck individual tasks."
       },
       {
-        "texto_opcion": "Spark automatically falls back to a broadcast join regardless of table size — disabling AQE does not force broadcast joins — disabling AQE does not force broadcast joins; join strategy selection still follows the static cost-based optimizer and configured thresholds.",
+        "texto_opcion": "Spark automatically falls back to a broadcast join regardless of table size.",
         "es_correcta": false,
         "explicacion": "Disabling AQE does not force broadcast joins; join strategy selection still follows the static cost-based optimizer and configured thresholds."
       },
@@ -598,7 +598,7 @@
         "explicacion": "Spark does not raise an explicit error for skew; it simply runs slower due to imbalanced task durations, without AQE's mitigation."
       },
       {
-        "texto_opcion": "Shuffle partitions are automatically increased to compensate for skew, without AQE — without AQE, the shuffle partition count remains static as configured and is — without AQE, the shuffle partition count remains static as configured and is not dynamically adjusted to address skew.",
+        "texto_opcion": "Shuffle partitions are automatically increased to compensate for skew.",
         "es_correcta": false,
         "explicacion": "Without AQE, the shuffle partition count remains static as configured and is not dynamically adjusted to address skew."
       }
@@ -641,12 +641,12 @@
     "pregunta": "A data engineer runs a query and reviews the Spark UI, observing a large amount of \"shuffle spill (disk)\" reported for a join stage.\n\nWhich tuning change is most likely to reduce this spill?",
     "opciones": [
       {
-        "texto_opcion": "Set spark.sql.autoBroadcastJoinThreshold to -1 regardless of table sizes — disabling broadcast joins indiscriminately could force unnecessary shuffles on.",
+        "texto_opcion": "Set spark.sql.autoBroadcastJoinThreshold to -1 regardless of table sizes.",
         "es_correcta": false,
         "explicacion": "Disabling broadcast joins indiscriminately could force unnecessary shuffles on tables that would otherwise avoid one, worsening rather than fixing spill."
       },
       {
-        "texto_opcion": "Reduce spark.executor.cores to 1 to limit concurrent memory usage — while this may reduce memory contention slightly, it severely limits parallelism and.",
+        "texto_opcion": "Reduce spark.executor.cores to 1 to limit concurrent memory usage.",
         "es_correcta": false,
         "explicacion": "While this may reduce memory contention slightly, it severely limits parallelism and is not the primary recommended fix for shuffle spill caused by oversized partitions."
       },
@@ -656,7 +656,7 @@
         "explicacion": "Disk spill during a shuffle typically occurs when partitions are too large for available execution memory; increasing the partition count reduces per-partition data size and lowers spill."
       },
       {
-        "texto_opcion": "Disable spark.sql.adaptive.skewJoin.enabled to simplify the query plan — disabling skew handling would not reduce spill and could worsen performance if.",
+        "texto_opcion": "Disable spark.sql.adaptive.skewJoin.enabled to simplify the query plan.",
         "es_correcta": false,
         "explicacion": "Disabling skew handling would not reduce spill and could worsen performance if skew is also present, since it removes a helpful optimization."
       }
@@ -675,17 +675,17 @@
         "explicacion": "If size estimation errors lead to broadcasting oversized tables and causing OOM failures, disabling automatic broadcasting avoids that risk by forcing predictable shuffle joins instead."
       },
       {
-        "texto_opcion": "A job needs faster shuffle stage scheduling for small datasets, shuffle scheduling speed is influenced by partition — shuffle scheduling speed is influenced by partition count settings, not by the broadcast join threshold.",
+        "texto_opcion": "A job needs faster shuffle stage scheduling for small datasets — shuffle scheduling speed is influenced by partition count settings, not by the broadcast join threshold.",
         "es_correcta": false,
         "explicacion": "Shuffle scheduling speed is influenced by partition count settings, not by the broadcast join threshold."
       },
       {
-        "texto_opcion": "A job frequently joins a 500 KB lookup table with a 10 TB fact table and broadcast joins work reliably — in this case broadcast joins are working well and beneficial for performance, so — in this case broadcast joins are working well and beneficial for performance, so disabling them would be counterproductive.",
+        "texto_opcion": "A job frequently joins a 500 KB lookup table with a 10 TB fact table and broadcast joins work reliably.",
         "es_correcta": false,
         "explicacion": "In this case broadcast joins are working well and beneficial for performance, so disabling them would be counterproductive."
       },
       {
-        "texto_opcion": "A job is reading data using Auto Loader with file notification mode, auto Loader's ingestion mode is unrelated to join strategy — auto Loader's ingestion mode is unrelated to join strategy selection or the broadcast threshold setting.",
+        "texto_opcion": "A job is reading data using Auto Loader with file notification mode — auto Loader's ingestion mode is unrelated to join strategy selection or the broadcast threshold setting.",
         "es_correcta": false,
         "explicacion": "Auto Loader's ingestion mode is unrelated to join strategy selection or the broadcast threshold setting."
       }
@@ -704,7 +704,7 @@
         "explicacion": "With only 5 GB of data split into 2000 partitions, each partition is only a few MB, so the overhead of launching and managing thousands of tiny tasks outweighs any parallelism benefit."
       },
       {
-        "texto_opcion": "Setting shuffle.partitions above 200 is not supported by Spark and silently falls back to the default, spark fully supports values above 200",
+        "texto_opcion": "Setting shuffle.partitions above 200 is not supported by Spark and silently falls back to the default, spark fully supports values above 200.",
         "es_correcta": false,
         "explicacion": "Spark fully supports values above 200; there is no enforced ceiling that causes a silent fallback to the default."
       },
@@ -714,7 +714,7 @@
         "explicacion": "Shuffle partition count and broadcast join eligibility are independent settings; changing one does not disable the other."
       },
       {
-        "texto_opcion": "The dataset size is too small for shuffle.partitions to have any measurable effect on performance — partition count does have a measurable effect even on moderately sized datasets, as.",
+        "texto_opcion": "The dataset size is too small for shuffle.partitions to have any measurable effect on performance.",
         "es_correcta": false,
         "explicacion": "Partition count does have a measurable effect even on moderately sized datasets, as demonstrated by the slowdown observed here."
       }

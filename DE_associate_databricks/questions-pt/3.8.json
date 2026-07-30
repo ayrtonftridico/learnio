@@ -71,12 +71,12 @@
         "explicacion": "`@dp.expect` é a ação WARN – ela retém registros inválidos e rastreia apenas a violação."
       },
       {
-        "texto_opcion": "`@dp.expect_or_quarantine`, não há decorador",
+        "texto_opcion": "`@dp.expect_or_quarantine`, não há decorador.",
         "es_correcta": false,
         "explicacion": "Não há decorador `expect_or_quarantine`. A quarentena é um padrão avançado implementado manualmente, não uma ação integrada."
       },
       {
-        "texto_opcion": "`@dp.expect_or_fail`, `expect_or_fail` interrompe toda a.",
+        "texto_opcion": "`@dp.expect_or_fail`.",
         "es_correcta": false,
         "explicacion": "`expect_or_fail` interrompe toda a atualização do pipeline na primeira violação, em vez de apenas descartar o registro inválido."
       }
@@ -177,7 +177,7 @@
     "pregunta": "Um engenheiro de dados deseja impor duas regras de qualidade em um streaming table e **descartar** qualquer registro que falhe em qualquer uma das regras. Qual abordagem Python está correta?\n\n```python\nfrom pyspark import pipelines as dp\n```",
     "opciones": [
       {
-        "texto_opcion": "```python\n@dp.table()\n@dp.expect_or_drop\n@dp.expect_or_drop\ndef clean_orders():\n    return spark.readStream.table\n``` — `@dp.expect_or_drop` requer exatamente dois argumentos de string (nome, restrição), não uma lista. Use `@dp.expect_all_or_drop` para múltiplas regras.",
+        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_or_drop([\"id NÃO É NULO\", \"quantidade > 0\"])\ndef pedidos_limpos():\n    retornar spark.readStream.table(\"bronze.orders\")\n```.",
         "es_correcta": false,
         "explicacion": "`@dp.expect_or_drop` requer exatamente dois argumentos de string (nome, restrição), não uma lista. Use `@dp.expect_all_or_drop` para múltiplas regras."
       },
@@ -187,12 +187,12 @@
         "explicacion": "`@dp.expect_all_or_drop` aceita um ditado de pares `{name: restrição}` e descarta qualquer registro que falhe em pelo menos uma regra."
       },
       {
-        "texto_opcion": "```python\n@dp.table()\n@dp.expect_or_drop([\"id IS NOT NULL\", \"quantity > 0\"])\ndef clean_orders():\n    return spark.readStream.table(\"bronze.orders\")\n``` — embora empilhar decoradores `@dp.expect_or_drop` seja possível, `@dp.expect_all_or_drop` é a maneira idiomática e mais limpa de aplicar múltiplas regras DROP.",
+        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_or_drop(\"valid_id\", \"id NÃO É NULO\")\n@dp.expect_or_drop(\"quantidade_positiva\", \"quantidade > 0\")\ndef pedidos_limpos():\n    retornar spark.readStream.table(\"bronze.orders\")\n```.",
         "es_correcta": false,
         "explicacion": "Embora empilhar decoradores `@dp.expect_or_drop` seja possível, `@dp.expect_all_or_drop` é a maneira idiomática e mais limpa de aplicar múltiplas regras DROP."
       },
       {
-        "texto_opcion": "```python\n@dp.table()\n@dp.expect_all\ndef clean_orders():\n    return spark.readStream.table\n```, `@dp.expect_all` applies the WARN action, not DROP. Violating records would still be written to the target — `@dp.expect_all` aplica a ação WARN, não DROP. Os registros violados ainda seriam gravados no destino.",
+        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_all({\"valid_id\": \"id NÃO É NULO\", \"positiva_qty\": \"quantidade > 0\"})\ndef pedidos_limpos():\n    retornar spark.readStream.table(\"bronze.orders\")\n``` — `@dp.expect_all` aplica a ação WARN, não DROP. Os registros violados ainda seriam gravados no destino.",
         "es_correcta": false,
         "explicacion": "`@dp.expect_all` aplica a ação WARN, não DROP. Os registros violados ainda seriam gravados no destino."
       }
@@ -211,7 +211,7 @@
         "explicacion": "O SDP avalia as restrições como expressões booleanas SQL por registro. Eles não podem incluir funções Python personalizadas, chamadas externas ou subconsultas que façam referência a outras tabelas."
       },
       {
-        "texto_opcion": "Deve fazer referência a pelo menos duas colunas para ser válido — restrições de coluna única como `price >= 0` ou `id IS.",
+        "texto_opcion": "Deve fazer referência a pelo menos duas colunas para ser válido.",
         "es_correcta": false,
         "explicacion": "Restrições de coluna única como `price >= 0` ou `id IS NOT NULL` são perfeitamente válidas."
       },
@@ -221,7 +221,7 @@
         "explicacion": "Subconsultas que fazem referência a outras tabelas não são explicitamente permitidas em restrições de expectativa."
       },
       {
-        "texto_opcion": "Deve ser escrito em Python mesmo ao usar a interface SQL pipeline — pipelines SQL usam sintaxe de restrição SQL.",
+        "texto_opcion": "Deve ser escrito em Python mesmo ao usar a interface SQL pipeline.",
         "es_correcta": false,
         "explicacion": "Pipelines SQL usam sintaxe de restrição SQL (`CONSTRAINT name EXPECT (expression)`); nenhum Python é necessário."
       }
@@ -250,7 +250,7 @@
         "explicacion": "`expect_all_or_fail` falha na primeira violação de qualquer regra, não em todas as regras sendo violadas ao mesmo tempo."
       },
       {
-        "texto_opcion": "O registro é escrito com um aviso porque `status` passa na validação, com `_or_fail`",
+        "texto_opcion": "O registro é escrito com um aviso porque `status` passa na validação, com `_or_fail`.",
         "es_correcta": false,
         "explicacion": "Com `_or_fail`, passar algumas regras é irrelevante. Qualquer violação única interrompe a atualização do pipeline."
       }
@@ -298,17 +298,17 @@
         "explicacion": "O SDP rastreia contagens de aprovação/reprovação por expectativa no log de eventos e as apresenta na aba Quality de dados da UI do pipeline."
       },
       {
-        "texto_opcion": "Nos logs do driver do cluster em `stderr`, as métricas de expectativa são armazenadas — as métricas de expectativa são armazenadas no log de eventos do SDP e não impressas no driver stderr.",
+        "texto_opcion": "Nos logs do driver do cluster em `stderr` — as métricas de expectativa são armazenadas no log de eventos do SDP e não impressas no driver stderr.",
         "es_correcta": false,
         "explicacion": "As métricas de expectativa são armazenadas no log de eventos do SDP e não impressas no driver stderr."
       },
       {
-        "texto_opcion": "Na visualização da linhagem da coluna de Unity Catalog — a linhagem Unity Catalog rastreia o fluxo de dados entre tabelas, não as métricas de restrição de.",
+        "texto_opcion": "Na visualização da linhagem da coluna de Unity Catalog.",
         "es_correcta": false,
         "explicacion": "A linhagem Unity Catalog rastreia o fluxo de dados entre tabelas, não as métricas de restrição de qualidade de dados em tempo de execução."
       },
       {
-        "texto_opcion": "No Spark UI na seção de métricas SQL, o Spark UI mostra métricas de execução em nível — o Spark UI mostra métricas de execução em nível de estágio, não contagens de expectativas de aprovação/reprovação do pipeline.",
+        "texto_opcion": "No Spark UI na seção de métricas SQL — o Spark UI mostra métricas de execução em nível de estágio, não contagens de expectativas de aprovação/reprovação do pipeline.",
         "es_correcta": false,
         "explicacion": "O Spark UI mostra métricas de execução em nível de estágio, não contagens de expectativas de aprovação/reprovação do pipeline."
       }
@@ -327,17 +327,17 @@
         "explicacion": "Uma única restrição pode combinar múltiplas condições usando operadores booleanos SQL (`AND`, `OR`). Todas as condições são avaliadas como uma expressão booleana."
       },
       {
-        "texto_opcion": "`@dp.expect(\"datas_validas\", datas_de_verificação(data_inicial, data_final))` — funções Python personalizadas não são explicitamente permitidas.",
+        "texto_opcion": "`@dp.expect(\"datas_validas\", datas_de_verificação(data_inicial, data_final))`.",
         "es_correcta": false,
         "explicacion": "Funções Python personalizadas não são explicitamente permitidas em restrições de expectativa. Somente expressões booleanas SQL padrão são válidas."
       },
       {
-        "texto_opcion": "`@dp.expect_all(\"datas_validas\", \"data_inicial <= data_final\")` — `@dp.expect_all` requer um argumento dict `{name: restrição}`, não dois.",
+        "texto_opcion": "`@dp.expect_all(\"datas_validas\", \"data_inicial <= data_final\")`.",
         "es_correcta": false,
         "explicacion": "`@dp.expect_all` requer um argumento dict `{name: restrição}`, não dois argumentos posicionais de string."
       },
       {
-        "texto_opcion": "`@dp.expect(\"datas_validas\", \"data_inicial <= data_final\", \"data_inicial NÃO É NULA\")` — `@dp.expect` aceita exatamente dois argumentos (nome, restrição). Várias condições devem ser combinadas em uma única expressão SQL.",
+        "texto_opcion": "`@dp.expect(\"datas_validas\", \"data_inicial <= data_final\", \"data_inicial NÃO É NULA\")`.",
         "es_correcta": false,
         "explicacion": "`@dp.expect` aceita exatamente dois argumentos (nome, restrição). Várias condições devem ser combinadas em uma única expressão SQL."
       }
@@ -385,7 +385,7 @@
         "explicacion": "As tabelas delta impõem `NOT NULL` (evita nulos em uma coluna) e `CHECK` (valida uma expressão booleana) para cada operação de gravação."
       },
       {
-        "texto_opcion": "`WARN` e `DROP`, `WARN` e `DROP` são ações de expectativa de.",
+        "texto_opcion": "`WARN` e `DROP`.",
         "es_correcta": false,
         "explicacion": "`WARN` e `DROP` são ações de expectativa de pipeline, não tipos de restrição em nível de tabela."
       },
@@ -414,12 +414,12 @@
         "explicacion": "Um nome esperado deve ser exclusivo em um determinado conjunto de dados, mas o mesmo nome pode ser reutilizado em vários conjuntos de dados no mesmo pipeline."
       },
       {
-        "texto_opcion": "O pipeline falha na inicialização porque os nomes das expectativas devem ser globalmente exclusivos — o requisito de exclusividade tem como escopo um único conjunto de dados, não todo o pipeline.",
+        "texto_opcion": "O pipeline falha na inicialização porque os nomes das expectativas devem ser globalmente exclusivos.",
         "es_correcta": false,
         "explicacion": "O requisito de exclusividade tem como escopo um único conjunto de dados, não todo o pipeline."
       },
       {
-        "texto_opcion": "Apenas o primeiro conjunto de dados mantém a expectativa; o segundo é ignorado — ambos os conjuntos de dados rastreiam independentemente suas próprias.",
+        "texto_opcion": "Apenas o primeiro conjunto de dados mantém a expectativa; o segundo é ignorado.",
         "es_correcta": false,
         "explicacion": "Ambos os conjuntos de dados rastreiam independentemente suas próprias expectativas de `\"valid_price\"` com métricas separadas."
       },
@@ -443,12 +443,12 @@
         "explicacion": "As restrições de expectativa do SDP são restritas a expressões booleanas SQL. Funções Python personalizadas, chamadas de serviço externas e subconsultas que fazem referência a outras tabelas são proibidas."
       },
       {
-        "texto_opcion": "Sim – você pode agrupar a chamada REST em uma UDF Python e referenciá-la na restrição — funções Python personalizadas (incluindo UDFs que chamam serviços externos) não são — funções Python personalizadas (incluindo UDFs que chamam serviços externos) não são explicitamente permitidas em restrições de expectativa.",
+        "texto_opcion": "Sim – você pode agrupar a chamada REST em uma UDF Python e referenciá-la na restrição.",
         "es_correcta": false,
         "explicacion": "Funções Python personalizadas (incluindo UDFs que chamam serviços externos) não são explicitamente permitidas em restrições de expectativa."
       },
       {
-        "texto_opcion": "Sim - use `@dp.expect_or_fail` com um lambda Python como restrição, o argumento de restrição deve ser uma string SQL — o argumento de restrição deve ser uma string SQL, não uma chamada Python. Lambdas não são suportados.",
+        "texto_opcion": "Sim - use `@dp.expect_or_fail` com um lambda Python como restrição — o argumento de restrição deve ser uma string SQL, não uma chamada Python. Lambdas não são suportados.",
         "es_correcta": false,
         "explicacion": "O argumento de restrição deve ser uma string SQL, não uma chamada Python. Lambdas não são suportados."
       },
@@ -617,17 +617,17 @@
         "explicacion": "`@dp.expect_all` aceita um ditado que pode ser definido uma vez e reutilizado em várias definições de conjunto de dados, reduzindo a duplicação."
       },
       {
-        "texto_opcion": "Copie os decoradores `@dp.expect` para cada função da tabela individualmente, embora válido — embora válido, copiar decoradores para todas as funções não é sustentável.",
+        "texto_opcion": "Copie os decoradores `@dp.expect` para cada função da tabela individualmente.",
         "es_correcta": false,
         "explicacion": "Embora válido, copiar decoradores para todas as funções não é sustentável. O padrão de reutilização de dict com `@dp.expect_all` é a abordagem recomendada."
       },
       {
-        "texto_opcion": "Use `@dp.expect_all_or_fail` para garantir consistência em todas as tabelas — a escolha da ação (WARN vs FAIL) é independente da capacidade de.",
+        "texto_opcion": "Use `@dp.expect_all_or_fail` para garantir consistência em todas as tabelas.",
         "es_correcta": false,
         "explicacion": "A escolha da ação (WARN vs FAIL) é independente da capacidade de reutilização. `@dp.expect_all` com um ditado compartilhado é correto para WARN em várias tabelas."
       },
       {
-        "texto_opcion": "Crie um conjunto Great Expectations e faça referência a ele dentro do decorador `@dp.table` — great Expectations é uma estrutura externa e não pode ser referenciada dentro de decoradores.",
+        "texto_opcion": "Crie um conjunto Great Expectations e faça referência a ele dentro do decorador `@dp.table`.",
         "es_correcta": false,
         "explicacion": "Great Expectations é uma estrutura externa e não pode ser referenciada dentro de decoradores `@dp.table`. Precisaria ser chamado separadamente."
       }
@@ -641,7 +641,7 @@
     "pregunta": "Qual afirmação descreve com precisão a diferença entre uma **expectativa de pipeline** e uma **restrição CHECK da tabela Delta**?",
     "opciones": [
       {
-        "texto_opcion": "As restrições CHECK suportam ações WARN, DROP e FAIL, como expectativas de pipeline — as restrições CHECK permitem ou rejeitam uma gravação — não há conceito WARN ou DROP no nível da tabela usado como caminho principal nesta arquitetura Isso o torna inadequado frente à restrição principal do enunciado..",
+        "texto_opcion": "As restrições CHECK suportam ações WARN, DROP e FAIL, como expectativas de pipeline — as restrições CHECK permitem ou rejeitam uma gravação — não há conceito WARN ou DROP no nível da tabela.",
         "es_correcta": false,
         "explicacion": "As restrições CHECK permitem ou rejeitam uma gravação — não há conceito WARN ou DROP no nível da tabela."
       },
@@ -651,12 +651,12 @@
         "explicacion": "As expectativas do pipeline são executadas somente dentro de uma atualização do pipeline SDP. As restrições CHECK são de nível de tabela e bloqueiam qualquer gravação (lote, streaming ou direta) que as viole."
       },
       {
-        "texto_opcion": "Ambos são avaliados usando o módulo `pyspark.pipelines`, as restrições CHECK são definidas com SQL DDL e fazem — as restrições CHECK são definidas com SQL DDL (`CREATE TABLE` / `ALTER TABLE`) e fazem parte do protocolo Delta Lake, não do módulo SDP `pyspark.pipelines`.",
+        "texto_opcion": "Ambos são avaliados usando o módulo `pyspark.pipelines` — as restrições CHECK são definidas com SQL DDL (`CREATE TABLE` / `ALTER TABLE`) e fazem parte do protocolo Delta Lake, não do módulo SDP `pyspark.pipelines`.",
         "es_correcta": false,
         "explicacion": "As restrições CHECK são definidas com SQL DDL (`CREATE TABLE` / `ALTER TABLE`) e fazem parte do protocolo Delta Lake, não do módulo SDP `pyspark.pipelines`."
       },
       {
-        "texto_opcion": "As expectativas do pipeline substituem as restrições CHECK e as tornam redundantes, eles são complementares — eles são complementares — eles são complementares. As expectativas do pipeline gerenciam a qualidade dentro de um pipeline; As restrições CHECK impõem regras para todas as gravações, independentemente da origem.",
+        "texto_opcion": "As expectativas do pipeline substituem as restrições CHECK e as tornam redundantes — eles são complementares. As expectativas do pipeline gerenciam a qualidade dentro de um pipeline; As restrições CHECK impõem regras para todas as gravações, independentemente da origem.",
         "es_correcta": false,
         "explicacion": "Eles são complementares. As expectativas do pipeline gerenciam a qualidade dentro de um pipeline; As restrições CHECK impõem regras para todas as gravações, independentemente da origem."
       }
@@ -733,12 +733,12 @@
         "explicacion": "A quarentena é um padrão manual avançado que o engenheiro deve implementar explicitamente. A ação FAIL integrada simplesmente interrompe o pipeline."
       },
       {
-        "texto_opcion": "O pipeline ignora os registros violados na próxima execução e continua automaticamente — fAIL interrompe totalmente a atualização e não implementa nenhum comportamento automático de pular e continuar aplicado entre ambientes por consistência operacional.",
+        "texto_opcion": "O pipeline ignora os registros violados na próxima execução e continua automaticamente — fAIL interrompe totalmente a atualização e não implementa nenhum comportamento automático de pular e continuar.",
         "es_correcta": false,
         "explicacion": "FAIL interrompe totalmente a atualização e não implementa nenhum comportamento automático de pular e continuar."
       },
       {
-        "texto_opcion": "Nada — o pipeline tenta novamente automaticamente após um intervalo configurável — as novas tentativas automáticas não resolvem falhas de qualidade de dados. Uma expectativa FAIL requer intervenção humana explícita comum em desenhos legados, porém inadequado neste caso.",
+        "texto_opcion": "Nada — o pipeline tenta novamente automaticamente após um intervalo configurável — as novas tentativas automáticas não resolvem falhas de qualidade de dados. Uma expectativa FAIL requer intervenção humana explícita.",
         "es_correcta": false,
         "explicacion": "As novas tentativas automáticas não resolvem falhas de qualidade de dados. Uma expectativa FAIL requer intervenção humana explícita."
       },
@@ -757,12 +757,12 @@
     "pregunta": "Um engenheiro de dados está escolhendo entre `@dp.expect_or_drop` e `@dp.expect_all_or_drop`. Quando `@dp.expect_all_or_drop` deve ser preferido?",
     "opciones": [
       {
-        "texto_opcion": "Quando regras diferentes devem ter ações diferentes (algumas DROP, outras WARN) — ações mistas requerem empilhamento de decoradores individuais.",
+        "texto_opcion": "Quando regras diferentes devem ter ações diferentes (algumas DROP, outras WARN).",
         "es_correcta": false,
         "explicacion": "Ações mistas requerem empilhamento de decoradores individuais (`@dp.expect`, `@dp.expect_or_drop`). `expect_all_or_drop` aplica a mesma ação DROP a todas as regras do dict."
       },
       {
-        "texto_opcion": "Somente ao usar a sintaxe SQL; Python não suporta `expect_all_or_drop` — `@dp.expect_all_or_drop` é um decorador Python em `pyspark.pipelines`.",
+        "texto_opcion": "Somente ao usar a sintaxe SQL; Python não suporta `expect_all_or_drop`.",
         "es_correcta": false,
         "explicacion": "`@dp.expect_all_or_drop` é um decorador Python em `pyspark.pipelines`. Não é uma construção SQL."
       },
@@ -772,7 +772,7 @@
         "explicacion": "`expect_all_or_drop` aceita um ditado de múltiplas regras e descarta registros que falhem em qualquer uma delas. É a forma idiomática de aplicar várias regras DROP de uma só vez."
       },
       {
-        "texto_opcion": "Quando um registro deve ser descartado somente se **todas** as regras falharem simultaneamente — `expect_all_or_drop` elimina um registro se **qualquer** regra única no dict falhar, não quando todas falharem juntas.",
+        "texto_opcion": "Quando um registro deve ser descartado somente se **todas** as regras falharem simultaneamente.",
         "es_correcta": false,
         "explicacion": "`expect_all_or_drop` elimina um registro se **qualquer** regra única no dict falhar, não quando todas falharem juntas."
       }
@@ -820,17 +820,17 @@
         "explicacion": "Great Expectations suporta lógica Python arbitrária, distribuições estatísticas e pesquisas externas — casos de uso não suportados pela sintaxe de restrição somente SQL do SDP."
       },
       {
-        "texto_opcion": "Quando o engenheiro deseja usar ações WARN, DROP ou FAIL declarativamente, wARN, wARN — wARN, DROP e FAIL são ações nativas de expectativa do SDP — wARN, DROP e FAIL são ações nativas de expectativa do SDP.",
+        "texto_opcion": "Quando o engenheiro deseja usar ações WARN, DROP ou FAIL declarativamente.",
         "es_correcta": false,
         "explicacion": "WARN, DROP e FAIL são ações nativas de expectativa do SDP. Grandes Esperanças não se integra a essas ações em nível de pipeline."
       },
       {
-        "texto_opcion": "Quando as expectativas precisam estar visíveis na aba Quality de dados da UI do pipeline — somente as expectativas nativas do SDP aparecem na aba Quality de dados da.",
+        "texto_opcion": "Quando as expectativas precisam estar visíveis na aba Quality de dados da UI do pipeline.",
         "es_correcta": false,
         "explicacion": "Somente as expectativas nativas do SDP aparecem na aba Quality de dados da interface do usuário do pipeline. Os resultados das Grandes Expectativas são gerenciados separadamente."
       },
       {
-        "texto_opcion": "Quando o engenheiro deseja evitar a importação de `pyspark.pipelines` — evitar uma importação não é um motivo arquitetônico válido — evitar uma importação não é um motivo arquitetônico válido.",
+        "texto_opcion": "Quando o engenheiro deseja evitar a importação de `pyspark.pipelines`.",
         "es_correcta": false,
         "explicacion": "Evitar uma importação não é um motivo arquitetônico válido. Use Grandes Esperanças quando as restrições nativas baseadas em SQL forem insuficientes para a lógica de validação necessária."
       }
@@ -878,17 +878,17 @@
         "explicacion": "O empilhamento `@dp.expect` (WARN) e `@dp.expect_or_drop` (DROP) aplica ações diferentes a cada regra independentemente no mesmo conjunto de dados."
       },
       {
-        "texto_opcion": "```python\n@dp.table()\n@dp.expect_or_drop\ndef gold_sales_summary():\n    return spark.read.table\n``` — `@dp.expect_all` aplica a mesma ação WARN a todas as regras. Não é possível misturar ações WARN e DROP em um único decorador usado como caminho principal nesta arquitetura Isso o torna inadequado frente à restrição principal do enunciado..",
+        "texto_opcion": "```píton\n@dp.materialized_view()\n@dp.expect_all({\"warn_null_region\": \"região NÃO É NULA\", \"drop_negative_sales\": \"total_sales >= 0\"})\ndef gold_sales_summary():\n    retornar spark.read.table(\"silver.orders\")\n``` — `@dp.expect_all` aplica a mesma ação WARN a todas as regras. Não é possível misturar ações WARN e DROP em um único decorador.",
         "es_correcta": false,
         "explicacion": "`@dp.expect_all` aplica a mesma ação WARN a todas as regras. Não é possível misturar ações WARN e DROP em um único decorador."
       },
       {
-        "texto_opcion": "```python\n@dp.materialized_view()\n@dp.expect_all\ndef gold_sales_summary():\n    return spark.read.table\n``` — `@dp.expect_all_or_drop` aplica DROP a todas as regras. Não pode aplicar WARN a uma regra e DROP a outra plausível à primeira vista, porém mais fraco que a melhor opção Isso o torna inadequado frente à restrição principal do enunciado..",
+        "texto_opcion": "```píton\n@dp.materialized_view()\n@dp.expect_all_or_drop({\"warn_null_region\": \"região NÃO É NULA\", \"drop_negative_sales\": \"total_sales >= 0\"})\ndef gold_sales_summary():\n    retornar spark.read.table(\"silver.orders\")\n``` — `@dp.expect_all_or_drop` aplica DROP a todas as regras. Não pode aplicar WARN a uma regra e DROP a outra.",
         "es_correcta": false,
         "explicacion": "`@dp.expect_all_or_drop` aplica DROP a todas as regras. Não pode aplicar WARN a uma regra e DROP a outra."
       },
       {
-        "texto_opcion": "```python\n@dp.materialized_view()\n@dp.expect_all_or_drop\ndef gold_sales_summary():\n    return spark.read.table\n``` — `@dp.expect_or_drop` leva dois argumentos de string posicionais (nome, restrição), não um ditado. Use `@dp.expect_all_or_drop` para DROP de múltiplas regras no estilo dict.",
+        "texto_opcion": "```píton\n@dp.table()\n@dp.expect_or_drop({\"warn_null_region\": \"região NÃO É NULA\", \"drop_negative_sales\": \"total_sales >= 0\"})\ndef gold_sales_summary():\n    retornar spark.read.table(\"silver.orders\")\n```.",
         "es_correcta": false,
         "explicacion": "`@dp.expect_or_drop` leva dois argumentos de string posicionais (nome, restrição), não um ditado. Use `@dp.expect_all_or_drop` para DROP de múltiplas regras no estilo dict."
       }

@@ -13,12 +13,12 @@
         "explicacion": "`READ FILES` é para locais externos (caminhos de armazenamento em nuvem), não para tabelas Delta. `SELECT` é o privilégio correto para ler dados da tabela."
       },
       {
-        "texto_opcion": "O erro significa que o usuário precisa de `MODIFY` além de `SELECT` — as consultas de leitura exigem ambos, `MODIFY` é para operações INSERT — `MODIFY` é para operações INSERT, UPDATE, DELETE — `MODIFY` é para operações INSERT, UPDATE, DELETE. `SELECT` por si só é suficiente para consultas somente leitura. O problema aqui é a falta de privilégios USE nos contêineres pai.",
+        "texto_opcion": "O erro significa que o usuário precisa de `MODIFY` além de `SELECT` — as consultas de leitura exigem ambos.",
         "es_correcta": false,
         "explicacion": "`MODIFY` é para operações INSERT, UPDATE, DELETE. `SELECT` por si só é suficiente para consultas somente leitura. O problema aqui é a falta de privilégios USE nos contêineres pai."
       },
       {
-        "texto_opcion": "O usuário deve ser adicionado como proprietário do esquema antes de poder consultar qualquer tabela no esquema, a propriedade não é necessária para ler tabelas — a propriedade não é necessária para ler tabelas — a propriedade não é necessária para ler tabelas. O problema está faltando os privilégios de gateway `USE CATALOG` e `USE SCHEMA`.",
+        "texto_opcion": "O usuário deve ser adicionado como proprietário do esquema antes de poder consultar qualquer tabela no esquema — a propriedade não é necessária para ler tabelas. O problema está faltando os privilégios de gateway `USE CATALOG` e `USE SCHEMA`.",
         "es_correcta": false,
         "explicacion": "A propriedade não é necessária para ler tabelas. O problema está faltando os privilégios de gateway `USE CATALOG` e `USE SCHEMA`."
       }
@@ -33,7 +33,7 @@
     "pregunta": "Qual é o SQL correto para grant um grupo `data-analysts` a capacidade de ler todas as tabelas em `prod_catalog.analytics`?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nGRANT SELECT ON CATALOG prod_catalog TO `data-analysts`;\n```, `SELECT` on a catalog grants the privilege to query all tables in all — `ALL PRIVILEGES` nas permissões excessivas do esquema grants (incluindo CREATE TABLE, MODIFY, etc.). Para acesso somente leitura, grant somente `USE CATALOG`, `USE SCHEMA` e `SELECT`.",
+        "texto_opcion": "```sql\nGRANT TODOS OS PRIVILÉGIOS NO SCHEMA prod_catalog.analytics TO `data-analysts`;\n``` — `ALL PRIVILEGES` nas permissões excessivas do esquema grants (incluindo CREATE TABLE, MODIFY, etc.). Para acesso somente leitura, grant somente `USE CATALOG`, `USE SCHEMA` e `SELECT`.",
         "es_correcta": false,
         "explicacion": "`ALL PRIVILEGES` nas permissões excessivas do esquema grants (incluindo CREATE TABLE, MODIFY, etc.). Para acesso somente leitura, grant somente `USE CATALOG`, `USE SCHEMA` e `SELECT`."
       },
@@ -43,12 +43,12 @@
         "explicacion": "São necessários três grants: `USE CATALOG` para navegar no catálogo, `USE SCHEMA` para navegar no esquema e `SELECT` no esquema (que herda todas as tabelas atuais e futuras)."
       },
       {
-        "texto_opcion": "```sql\nGRANT ALL PRIVILEGES ON SCHEMA prod_catalog.analytics TO `data-analysts`;\n```, `ALL PRIVILEGES` on the schema grants excessive permissions (including — sem `USE CATALOG` e `USE SCHEMA`, os usuários em `data-analysts` não podem navegar para o esquema mesmo com `SELECT`. Todos os três grants são obrigatórios.",
+        "texto_opcion": "```sql\nGRANT SELECIONE NO SCHEMA prod_catalog.analytics TO `analistas de dados`;\n``` — sem `USE CATALOG` e `USE SCHEMA`, os usuários em `data-analysts` não podem navegar para o esquema mesmo com `SELECT`. Todos os três grants são obrigatórios.",
         "es_correcta": false,
         "explicacion": "Sem `USE CATALOG` e `USE SCHEMA`, os usuários em `data-analysts` não podem navegar para o esquema mesmo com `SELECT`. Todos os três grants são obrigatórios."
       },
       {
-        "texto_opcion": "```sql\nGRANT SELECT ON SCHEMA prod_catalog.analytics TO `data-analysts`;\n```, without `USE CATALOG` and `USE SCHEMA`, without `USE CATALOG` and `USE SCHEMA` — `SELECT` em um catálogo grants o privilégio para consultar todas as tabelas em todos os esquemas.",
+        "texto_opcion": "```sql\nGRANT SELECIONE NO CATALOG prod_catalog TO `analistas de dados`;\n``` — `SELECT` em um catálogo grants o privilégio para consultar todas as tabelas em todos os esquemas - mas o usuário também precisa de `USE CATALOG` e `USE SCHEMA` para navegar na hierarquia. Um único SELECT em nível de catálogo sem USE não é suficiente.",
         "es_correcta": false,
         "explicacion": "`SELECT` em um catálogo grants o privilégio para consultar todas as tabelas em todos os esquemas - mas o usuário também precisa de `USE CATALOG` e `USE SCHEMA` para navegar na hierarquia. Um único SELECT em nível de catálogo sem USE não é suficiente."
       }
@@ -73,7 +73,7 @@
         "explicacion": "A herança de privilégio em Unity Catalog é prospectiva — granting SELECT em um esquema se aplica automaticamente a todas as tabelas futuras criadas dentro desse esquema. Esta é uma vantagem importante dos grants em nível de esquema."
       },
       {
-        "texto_opcion": "Não — a herança se aplica apenas a tabelas que existiam no momento do GRANT. Novas tabelas requerem grants explícitos — a herança de privilégios UC é prospectiva – aplica-se a todos os objetos filhos futuros.",
+        "texto_opcion": "Não — a herança se aplica apenas a tabelas que existiam no momento do GRANT. Novas tabelas requerem grants explícitos.",
         "es_correcta": false,
         "explicacion": "A herança de privilégios UC é prospectiva – aplica-se a todos os objetos filhos futuros. Novas tabelas herdam automaticamente privilégios granted no nível do esquema."
       },
@@ -92,7 +92,7 @@
     "pregunta": "Um engenheiro de dados executa `REVOKE SELECT ON SCHEMA prod_catalog.analytics FROM analistas`. Um usuário em `analistas` já possui um **explícito** `GRANT SELECT ON TABLE prod_catalog.analytics.orders` diretamente na tabela. Eles ainda podem consultar `pedidos`?",
     "opciones": [
       {
-        "texto_opcion": "Não — a revogação no nível do esquema remove todos os grants herdados e diretos nas tabelas filhas — rEVOKE não cascata para remover grants explícitos em objetos filhos — rEVOKE não cascata para remover grants explícitos em objetos filhos.",
+        "texto_opcion": "Não — a revogação no nível do esquema remove todos os grants herdados e diretos nas tabelas filhas.",
         "es_correcta": false,
         "explicacion": "REVOKE não cascata para remover grants explícitos em objetos filhos. O nível de tabela explícito GRANT permanece, a menos que explicitamente revoked com `REVOKE SELECT ON TABLE ... FROM analistas`."
       },
@@ -102,12 +102,12 @@
         "explicacion": "REVOKE em um pai (esquema) NÃO é cascata para remover grants explícitos em objetos filhos. Se um principal tiver um grant em nível de esquema e um grant explícito em nível de tabela, revogar o esquema grant não remove o de nível de tabela."
       },
       {
-        "texto_opcion": "Somente se o administrador do esquema confirmar explicitamente a revogação com `CONFIRM REVOKE` — não há comando `CONFIRM REVOKE` em Unity Catalog SQL. REVOKE entra em vigor imediatamente priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "texto_opcion": "Somente se o administrador do esquema confirmar explicitamente a revogação com `CONFIRM REVOKE` — não há comando `CONFIRM REVOKE` em Unity Catalog SQL. REVOKE entra em vigor imediatamente.",
         "es_correcta": false,
         "explicacion": "Não há comando `CONFIRM REVOKE` em Unity Catalog SQL. REVOKE entra em vigor imediatamente."
       },
       {
-        "texto_opcion": "O comportamento depende da versão do modelo de privilégio Unity Catalog — cascatas v1.0, versões mais antigas não — rEVOKE em um pai nunca é cascata para remover grants explícitos de nível filho, independentemente.",
+        "texto_opcion": "O comportamento depende da versão do modelo de privilégio Unity Catalog — cascatas v1.0, versões mais antigas não.",
         "es_correcta": false,
         "explicacion": "REVOKE em um pai nunca é cascata para remover grants explícitos de nível filho, independentemente da versão do modelo de privilégio. grants explícitos devem ser explicitamente revoked."
       }
@@ -122,7 +122,7 @@
     "pregunta": "Um engenheiro de dados deseja permitir que o grupo de `analistas juniores` leia dados de tabelas, mas impedi-los de operações INSERT, UPDATE ou DELETE. Quais privilégios devem ser granted?",
     "opciones": [
       {
-        "texto_opcion": "`READ FILES` nas tabelas relevantes — este é o privilégio somente leitura para tabelas Delta — `READ FILES` é para locais externos, não para acesso em nível de tabela.",
+        "texto_opcion": "`READ FILES` nas tabelas relevantes — este é o privilégio somente leitura para tabelas Delta.",
         "es_correcta": false,
         "explicacion": "`READ FILES` é para locais externos, não para acesso em nível de tabela. `SELECT` é o privilégio correto para leitura de tabelas."
       },
@@ -132,12 +132,12 @@
         "explicacion": "`SELECT` grants acesso somente leitura. `MODIFY` cobre operações de gravação (INSERT, UPDATE, DELETE). Granting apenas `SELECT` impõe a restrição somente leitura."
       },
       {
-        "texto_opcion": "`SELECT` e `BROWSE` — BROWSE permite acesso de leitura, SELECT permite consultas SQL — `BROWSE` permite a visualização de metadados sem acesso aos dados.",
+        "texto_opcion": "`SELECT` e `BROWSE` — BROWSE permite acesso de leitura, SELECT permite consultas SQL.",
         "es_correcta": false,
         "explicacion": "`BROWSE` permite a visualização de metadados sem acesso aos dados - não permite consultas SQL. `SELECT` sozinho é o privilégio somente leitura correto."
       },
       {
-        "texto_opcion": "`ALL PRIVILEGES` menos `MODIFY` — grant ALL e então revoke MODIFY, essa abordagem grant primeiro os privilégios — essa abordagem grant primeiro os privilégios desnecessários e depois tentaria revoke eles.",
+        "texto_opcion": "`ALL PRIVILEGES` menos `MODIFY` — grant ALL e então revoke MODIFY.",
         "es_correcta": false,
         "explicacion": "Essa abordagem grant primeiro os privilégios desnecessários e depois tentaria revoke eles - complexa e propensa a erros. Simplesmente grant `SELECT` sem `MODIFY` para acesso somente leitura."
       }
@@ -185,17 +185,17 @@
         "explicacion": "DENY é o estado de permissão mais forte em Unity Catalog. Ele substitui qualquer GRANT, seja direto ou herdado por meio de associação a um grupo ou hierarquia pai."
       },
       {
-        "texto_opcion": "Sim — o grupo GRANT substitui o nível individual DENY em Unity Catalog, o oposto é verdadeiro: DENY substitui GRANT — o oposto é verdadeiro: DENY substitui GRANT — o oposto é verdadeiro: DENY substitui GRANT. Um DENY explícito em qualquer nível vence qualquer GRANT em qualquer outro nível.",
+        "texto_opcion": "Sim — o grupo GRANT substitui o nível individual DENY em Unity Catalog — o oposto é verdadeiro: DENY substitui GRANT. Um DENY explícito em qualquer nível vence qualquer GRANT em qualquer outro nível.",
         "es_correcta": false,
         "explicacion": "O oposto é verdadeiro: DENY substitui GRANT. Um DENY explícito em qualquer nível vence qualquer GRANT em qualquer outro nível."
       },
       {
-        "texto_opcion": "O comportamento é indefinido — DENY e GRANT no mesmo nível causam um erro de conflito, não há erro de conflito — não há erro de conflito. O comportamento de DENY é bem definido: ele sempre substitui GRANT.",
+        "texto_opcion": "O comportamento é indefinido — DENY e GRANT no mesmo nível causam um erro de conflito — não há erro de conflito. O comportamento de DENY é bem definido: ele sempre substitui GRANT.",
         "es_correcta": false,
         "explicacion": "Não há erro de conflito. O comportamento de DENY é bem definido: ele sempre substitui GRANT."
       },
       {
-        "texto_opcion": "Sim — DENY bloqueia apenas o acesso ao usuário individual, mas o acesso herdado do grupo não pode ser bloqueado — dENY aplica-se ao principal especificado (mesmo se eles estiverem em um grupo com acesso).",
+        "texto_opcion": "Sim — DENY bloqueia apenas o acesso ao usuário individual, mas o acesso herdado do grupo não pode ser bloqueado.",
         "es_correcta": false,
         "explicacion": "DENY aplica-se ao principal especificado (mesmo se eles estiverem em um grupo com acesso). O DENY vence — o contratante não pode acessar a mesa."
       }
@@ -214,17 +214,17 @@
         "explicacion": "`SHOW GRANTS ON TABLE` exibe todos os privilégios grants na tabela especificada, incluindo o principal, tipo de privilégio e tipo de objeto."
       },
       {
-        "texto_opcion": "`DESCRIBE TABLE EXTENDED prod_catalog.analytics.orders;` — a seção de permissões mostra todos os grants — `DESCRIBE TABLE EXTENDED` mostra os metadados da tabela (colunas, tipos, local de armazenamento, etc.), mas.",
+        "texto_opcion": "`DESCRIBE TABLE EXTENDED prod_catalog.analytics.orders;` — a seção de permissões mostra todos os grants.",
         "es_correcta": false,
         "explicacion": "`DESCRIBE TABLE EXTENDED` mostra os metadados da tabela (colunas, tipos, local de armazenamento, etc.), mas não os privilégios grants. `SHOW GRANTS` é o comando correto."
       },
       {
-        "texto_opcion": "`SELECT * FROM system.access.grants WHERE object_name = 'orders';` — embora as tabelas do sistema possam ser consultadas para auditoria de acesso, o comando SQL.",
+        "texto_opcion": "`SELECT * FROM system.access.grants WHERE object_name = 'orders';`.",
         "es_correcta": false,
         "explicacion": "Embora as tabelas do sistema possam ser consultadas para auditoria de acesso, o comando SQL padrão para visualização de grants é `SHOW GRANTS ON TABLE`, não uma consulta direta à tabela do sistema."
       },
       {
-        "texto_opcion": "`MOSTRAR PERMISSÕES PARA TABELA prod_catalog.analytics.orders;`, `SHOW PERMISSIONS` não é um comando SQL válido do — `SHOW PERMISSIONS` não é um comando SQL válido do Databricks. A sintaxe correta é `SHOW GRANTS ON TABLE`.",
+        "texto_opcion": "`MOSTRAR PERMISSÕES PARA TABELA prod_catalog.analytics.orders;` — `SHOW PERMISSIONS` não é um comando SQL válido do Databricks. A sintaxe correta é `SHOW GRANTS ON TABLE`.",
         "es_correcta": false,
         "explicacion": "`SHOW PERMISSIONS` não é um comando SQL válido do Databricks. A sintaxe correta é `SHOW GRANTS ON TABLE`."
       }
@@ -282,7 +282,7 @@
         "explicacion": "Torná-los proprietários daria controle total, incluindo acesso aos dados e a capacidade de excluir o esquema. `MANAGE` é a escolha correta para delegar apenas o gerenciamento de permissões."
       },
       {
-        "texto_opcion": "`GRANT ADMIN ON SCHEMA prod_catalog.analytics TO `team-lead@company.com`;` — Capacidade de gerenciamento do ADMIN grants — `ADMIN` não é um privilégio Unity Catalog padrão para esquemas.",
+        "texto_opcion": "`GRANT ADMIN ON SCHEMA prod_catalog.analytics TO `team-lead@company.com`;` — Capacidade de gerenciamento do ADMIN grants.",
         "es_correcta": false,
         "explicacion": "`ADMIN` não é um privilégio Unity Catalog padrão para esquemas. O privilégio correto para gerenciamento de permissões delegadas é `MANAGE`."
       }
@@ -335,7 +335,7 @@
         "explicacion": "`CREATE EXTERNAL TABLE` permite registrar tabelas naquele local, mas não grant acesso direto à leitura do arquivo. `READ FILES` é necessário para leitura direta de arquivos."
       },
       {
-        "texto_opcion": "`SELECT` no local externo — SELECT fornece acesso de leitura a qualquer local registrado, `SELECT` é para leitura de tabelas Delta",
+        "texto_opcion": "`SELECT` no local externo — SELECT fornece acesso de leitura a qualquer local registrado.",
         "es_correcta": false,
         "explicacion": "`SELECT` é para leitura de tabelas Delta, não para acesso direto a arquivos em locais externos. `READ FILES` é o privilégio correto para acesso em nível de arquivo."
       },
@@ -355,12 +355,12 @@
     "pregunta": "Um engenheiro de dados executa `REVOKE SELECT ON TABLE catalog.schema.orders FROM analyze@company.com`. O comando foi bem-sucedido, mas `analyst@company.com` nunca teve um SELECT grant explícito em `orders`. Por que o comando foi bem-sucedido?",
     "opciones": [
       {
-        "texto_opcion": "REVOKE remove grants diretos e grants herdados ao mesmo tempo, rEVOKE em uma tabela específica remove apenas grants explícitos em — rEVOKE em uma tabela específica remove apenas grants explícitos em nível de tabela, não grants herdados de esquemas pai. O sucesso aqui se deve ao fato de REVOKE ser idempotente — não porque remove o acesso herdado.",
+        "texto_opcion": "REVOKE remove grants diretos e grants herdados ao mesmo tempo.",
         "es_correcta": false,
         "explicacion": "REVOKE em uma tabela específica remove apenas grants explícitos em nível de tabela, não grants herdados de esquemas pai. O sucesso aqui se deve ao fato de REVOKE ser idempotente — não porque remove o acesso herdado."
       },
       {
-        "texto_opcion": "Unity Catalog cria automaticamente um grant antes de revogar para garantir consistência, uC não cria grants antes de revogar — uC não cria grants antes de revogar — uC não cria grants antes de revogar. REVOKE simplesmente tem sucesso sem efeito se grant não existir - este é o comportamento idempotente.",
+        "texto_opcion": "Unity Catalog cria automaticamente um grant antes de revogar para garantir consistência — uC não cria grants antes de revogar. REVOKE simplesmente tem sucesso sem efeito se grant não existir - este é o comportamento idempotente.",
         "es_correcta": false,
         "explicacion": "UC não cria grants antes de revogar. REVOKE simplesmente tem sucesso sem efeito se grant não existir - este é o comportamento idempotente."
       },
@@ -394,12 +394,12 @@
         "explicacion": "O SELECT em nível de catálogo é transmitido em cascata para todas as tabelas. Não existe um \"SELECT em nível de catálogo\" que se aplique apenas a metadados."
       },
       {
-        "texto_opcion": "`SELECT` em um catálogo não tem efeito — SELECT só pode ser granted no nível da tabela, `SELECT` pode ser granted no nível de catálogo — `SELECT` pode ser granted no nível de catálogo, esquema ou tabela. Granting em cascata de nível superior para todos os objetos filhos.",
+        "texto_opcion": "`SELECT` em um catálogo não tem efeito — SELECT só pode ser granted no nível da tabela — `SELECT` pode ser granted no nível de catálogo, esquema ou tabela. Granting em cascata de nível superior para todos os objetos filhos.",
         "es_correcta": false,
         "explicacion": "`SELECT` pode ser granted no nível de catálogo, esquema ou tabela. Granting em cascata de nível superior para todos os objetos filhos."
       },
       {
-        "texto_opcion": "`SELECT` no catálogo grants acesso de leitura somente às tabelas no esquema padrão, o SELECT no nível do catálogo é transmitido em cascata para TODOS os — o SELECT no nível do catálogo é transmitido em cascata para TODOS os esquemas e tabelas do catálogo — não apenas para o esquema padrão.",
+        "texto_opcion": "`SELECT` no catálogo grants acesso de leitura somente às tabelas no esquema padrão — o SELECT no nível do catálogo é transmitido em cascata para TODOS os esquemas e tabelas do catálogo — não apenas para o esquema padrão.",
         "es_correcta": false,
         "explicacion": "O SELECT no nível do catálogo é transmitido em cascata para TODOS os esquemas e tabelas do catálogo — não apenas para o esquema padrão."
       }
@@ -418,17 +418,17 @@
         "explicacion": "Grants podem ser feitos por: (1) o proprietário do objeto, (2) proprietários de objetos pai, (3) administradores de metastore e (4) principais com o privilégio MANAGE no objeto."
       },
       {
-        "texto_opcion": "Somente o administrador do metastore — usuários regulares não podem ter privilégios grant em tabelas de — proprietários de objetos, proprietários pais e detentores de MANAGE também podem ter privilégios grant.",
+        "texto_opcion": "Somente o administrador do metastore — usuários regulares não podem ter privilégios grant em tabelas de produção.",
         "es_correcta": false,
         "explicacion": "Proprietários de objetos, proprietários pais e detentores de MANAGE também podem ter privilégios grant. Os administradores do metastore não são os grantors exclusivos."
       },
       {
-        "texto_opcion": "Qualquer usuário com SELECT na tabela — SELECT implica na capacidade de compartilhar acesso — `SELECT` permite a leitura de dados - não grant a capacidade de gerenciar permissões — `SELECT` permite a leitura de dados - não grant a capacidade de gerenciar permissões.",
+        "texto_opcion": "Qualquer usuário com SELECT na tabela — SELECT implica na capacidade de compartilhar acesso.",
         "es_correcta": false,
         "explicacion": "`SELECT` permite a leitura de dados - não grant a capacidade de gerenciar permissões. Somente proprietários, proprietários pais, administradores de metastore e titulares de MANAGE podem ter privilégios grant."
       },
       {
-        "texto_opcion": "Somente administradores do workspace — eles têm controle total sobre todos os objetos do catálogo — os administradores do workspace não têm automaticamente direitos de gerenciamento no nível do catálogo.",
+        "texto_opcion": "Somente administradores do workspace — eles têm controle total sobre todos os objetos do catálogo.",
         "es_correcta": false,
         "explicacion": "Os administradores do workspace não têm automaticamente direitos de gerenciamento no nível do catálogo. Administradores de metastore e proprietários de objetos são os grantors apropriados."
       }
@@ -443,17 +443,17 @@
     "pregunta": "Um principal de serviço `etl-pipeline-sp` precisa CRIAR novas tabelas Delta em `prod_catalog.staging`. Qual conjunto mínimo de privilégios é necessário?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nGRANT ALL PRIVILEGES ON CATALOG prod_catalog TO `etl-pipeline-sp`;\n```, `ALL PRIVILEGES` on the catalog is excessive — it grants — sem `USE CATALOG` e `USE SCHEMA`, o principal do serviço não pode navegar até o esquema para criar uma tabela. Todos os três grants são necessários plausível à primeira vista, porém mais fraco que a melhor opção.",
+        "texto_opcion": "```sql\nGRANT CRIAR TABELA NO CATALOG prod_catalog TO `etl-pipeline-sp`;\n``` — sem `USE CATALOG` e `USE SCHEMA`, o principal do serviço não pode navegar até o esquema para criar uma tabela. Todos os três grants são necessários.",
         "es_correcta": false,
         "explicacion": "Sem `USE CATALOG` e `USE SCHEMA`, o principal do serviço não pode navegar até o esquema para criar uma tabela. Todos os três grants são necessários."
       },
       {
-        "texto_opcion": "```sql\nGRANT MODIFY ON SCHEMA prod_catalog.staging TO `etl-pipeline-sp`;\n```, `MODIFY` grants INSERT/UPDATE/DELETE on existing tables — `ALL PRIVILEGES` no catálogo é excessivo — grants acesso de leitura/gravação a todas as tabelas existentes, não apenas a capacidade de criar novas. O princípio do menor privilégio deve ser aplicado.",
+        "texto_opcion": "```sql\nGRANT TODOS OS PRIVILÉGIOS NO CATALOG prod_catalog TO `etl-pipeline-sp`;\n``` — `ALL PRIVILEGES` no catálogo é excessivo — grants acesso de leitura/gravação a todas as tabelas existentes, não apenas a capacidade de criar novas. O princípio do menor privilégio deve ser aplicado.",
         "es_correcta": false,
         "explicacion": "`ALL PRIVILEGES` no catálogo é excessivo — grants acesso de leitura/gravação a todas as tabelas existentes, não apenas a capacidade de criar novas. O princípio do menor privilégio deve ser aplicado."
       },
       {
-        "texto_opcion": "```sql\nGRANT CREATE TABLE ON CATALOG prod_catalog TO `etl-pipeline-sp`;\n```, without `USE CATALOG` and `USE SCHEMA`, without `USE CATALOG` and `USE SCHEMA` — `MODIFY` grants INSERT/UPDATE/DELETE em tabelas existentes. Não grant a capacidade de CRIAR novas tabelas. `CREATE TABLE` é o privilégio correto comum em desenhos legados, porém inadequado neste caso.",
+        "texto_opcion": "```sql\nGRANT MODIFICAR NO ESQUEMA prod_catalog.staging PARA `etl-pipeline-sp`;\n``` — `MODIFY` grants INSERT/UPDATE/DELETE em tabelas existentes. Não grant a capacidade de CRIAR novas tabelas. `CREATE TABLE` é o privilégio correto.",
         "es_correcta": false,
         "explicacion": "`MODIFY` grants INSERT/UPDATE/DELETE em tabelas existentes. Não grant a capacidade de CRIAR novas tabelas. `CREATE TABLE` é o privilégio correto."
       },
@@ -478,17 +478,17 @@
         "explicacion": "DENY desce em cascata na hierarquia assim como GRANT. Um DENY em nível de esquema bloqueia o acesso a todas as tabelas nesse esquema, substituindo qualquer GRANT em nível de tabela."
       },
       {
-        "texto_opcion": "Sim - o nível de tabela explícito GRANT é mais específico que o nível de esquema DENY e tem precedência, em Unity Catalog — em Unity Catalog, a especificidade não determina a precedência - DENY sempre vence GRANT, independentemente do nível em que são aplicados.",
+        "texto_opcion": "Sim - o nível de tabela explícito GRANT é mais específico que o nível de esquema DENY e tem precedência.",
         "es_correcta": false,
         "explicacion": "Em Unity Catalog, a especificidade não determina a precedência - DENY sempre vence GRANT, independentemente do nível em que são aplicados."
       },
       {
-        "texto_opcion": "O comportamento é indefinido - DENY e GRANT conflitantes na mesma tabela causam um erro, não há erro, não há erro — não há erro. O comportamento é bem definido: DENY sempre vence. O acesso foi negado.",
+        "texto_opcion": "O comportamento é indefinido - DENY e GRANT conflitantes na mesma tabela causam um erro — não há erro. O comportamento é bem definido: DENY sempre vence. O acesso foi negado.",
         "es_correcta": false,
         "explicacion": "Não há erro. O comportamento é bem definido: DENY sempre vence. O acesso foi negado."
       },
       {
-        "texto_opcion": "Sim - DENY no nível do esquema bloqueia apenas operações no nível do esquema (como USE SCHEMA), não SELECT no nível da tabela — dENY em nível de esquema é cascata para todos os objetos no esquema, incluindo tabelas. Bloqueia SELECT em todas as tabelas do esquema.",
+        "texto_opcion": "Sim - DENY no nível do esquema bloqueia apenas operações no nível do esquema (como USE SCHEMA), não SELECT no nível da tabela.",
         "es_correcta": false,
         "explicacion": "DENY em nível de esquema é cascata para todos os objetos no esquema, incluindo tabelas. Bloqueia SELECT em todas as tabelas do esquema."
       }
@@ -533,7 +533,7 @@
     "pregunta": "Um engenheiro de dados deseja grant que todos os usuários da conta leiam o acesso a uma tabela de referência `prod_catalog.shared.country_codes`. Qual principal deve ser usado?",
     "opciones": [
       {
-        "texto_opcion": "There is no way to grant to all users — each user must be individually granted access, the `` `account users` `` group represents all users in the account — o grupo `` `usuários da conta` `` representa todos os usuários da conta. Granting para este grupo fornece acesso a todos os usuários sem grants individuais.",
+        "texto_opcion": "Não há como grant para todos os usuários — cada usuário deve ter acesso granted individualmente — o grupo `` `usuários da conta` `` representa todos os usuários da conta. Granting para este grupo fornece acesso a todos os usuários sem grants individuais.",
         "es_correcta": false,
         "explicacion": "O grupo `` `usuários da conta` `` representa todos os usuários da conta. Granting para este grupo fornece acesso a todos os usuários sem grants individuais."
       },
@@ -543,12 +543,12 @@
         "explicacion": "`account users` é o grupo interno que representa todos os usuários na conta do Databricks. Granting a este grupo fornece automaticamente acesso a todos os usuários atuais e futuros."
       },
       {
-        "texto_opcion": "```sql\nGRANT SELECT ON TABLE prod_catalog.shared.country_codes TO PUBLIC;\n```, `PUBLIC` is not a recognized principal in Unity Catalog SQL — `PUBLIC` não é um principal reconhecido na sintaxe Unity Catalog SQL. O grupo interno correto para todos os usuários da conta é `` `usuários da conta` `` priorizado por simplicidade, mas deixa de lado uma restrição-chave.",
+        "texto_opcion": "```sql\nGRANT SELECIONE NA TABELA prod_catalog.shared.country_codes PARA PÚBLICO;\n``` — `PUBLIC` não é um principal reconhecido na sintaxe Unity Catalog SQL. O grupo interno correto para todos os usuários da conta é `` `usuários da conta` ``.",
         "es_correcta": false,
         "explicacion": "`PUBLIC` não é um principal reconhecido na sintaxe Unity Catalog SQL. O grupo interno correto para todos os usuários da conta é `` `usuários da conta` ``."
       },
       {
-        "texto_opcion": "```sql\nGRANT SELECT ON TABLE prod_catalog.shared.country_codes TO `workspace-users`;\n```, `workspace-users` is not the correct group name for all account users — `workspace-users` não é o nome de grupo correto para todos os usuários da conta. O grupo interno correto é `` `usuários da conta` `` como escolha padrão de produção neste cenário.",
+        "texto_opcion": "```sql\nGRANT SELECIONE NA TABELA prod_catalog.shared.country_codes PARA `workspace-users`;\n``` — `workspace-users` não é o nome de grupo correto para todos os usuários da conta. O grupo interno correto é `` `usuários da conta` ``.",
         "es_correcta": false,
         "explicacion": "`workspace-users` não é o nome de grupo correto para todos os usuários da conta. O grupo interno correto é `` `usuários da conta` ``."
       }
@@ -568,12 +568,12 @@
         "explicacion": "SELECT em um esquema herda todas as tabelas — não está limitado aos metadados. O problema são os privilégios USE ausentes para navegação de catálogo/esquema."
       },
       {
-        "texto_opcion": "Sim - `SELECT` no esquema implica automaticamente que `USE CATALOG` e `USE SCHEMA` também são granted — os privilégios `SELECT` e `USE` são separados e independentes. Ter SELECT no esquema NÃO implica privilégios de USE em contêineres pai comum em desenhos legados, porém inadequado neste caso.",
+        "texto_opcion": "Sim - `SELECT` no esquema implica automaticamente que `USE CATALOG` e `USE SCHEMA` também são granted — os privilégios `SELECT` e `USE` são separados e independentes. Ter SELECT no esquema NÃO implica privilégios de USE em contêineres pai.",
         "es_correcta": false,
         "explicacion": "Os privilégios `SELECT` e `USE` são separados e independentes. Ter SELECT no esquema NÃO implica privilégios de USE em contêineres pai."
       },
       {
-        "texto_opcion": "Sim — `SHOW GRANTS` mostra apenas permissões efetivas, então se SELECT for mostrado, significa acesso total de leitura — `SHOW GRANTS` mostra privilégios explicitamente granted naquele objeto específico — `SHOW GRANTS` mostra privilégios explicitamente granted naquele objeto específico - ele não mostra grants herdados ou valida se todos os privilégios USE necessários também estão em vigor.",
+        "texto_opcion": "Sim — `SHOW GRANTS` mostra apenas permissões efetivas, então se SELECT for mostrado, significa acesso total de leitura.",
         "es_correcta": false,
         "explicacion": "`SHOW GRANTS` mostra privilégios explicitamente granted naquele objeto específico - ele não mostra grants herdados ou valida se todos os privilégios USE necessários também estão em vigor."
       },
@@ -593,12 +593,12 @@
     "pregunta": "Um engenheiro de dados precisa grant `analytics-sp` a capacidade de ler e gravar dados em todas as tabelas em `prod_catalog.analytics` e criar novas tabelas. Qual é o conjunto mínimo correto de privilégios?",
     "opciones": [
       {
-        "texto_opcion": "```sql\nGRANT ALL PRIVILEGES ON SCHEMA prod_catalog.analytics TO `analytics-sp`;\n```, while this grants the right privileges on the schema — `ALL PRIVILEGES` no catálogo é excessivo - é o acesso grants a todos os esquemas, não apenas `analítica`. O princípio do menor privilégio requer o escopo do esquema específico aplicado entre ambientes por consistência operacional como escolha padrão de produção neste cenário.",
+        "texto_opcion": "```sql\nGRANT TODOS OS PRIVILÉGIOS NO CATALOG prod_catalog TO `analytics-sp`;\n``` — `ALL PRIVILEGES` no catálogo é excessivo - é o acesso grants a todos os esquemas, não apenas `analítica`. O princípio do menor privilégio requer o escopo do esquema específico.",
         "es_correcta": false,
         "explicacion": "`ALL PRIVILEGES` no catálogo é excessivo - é o acesso grants a todos os esquemas, não apenas `analítica`. O princípio do menor privilégio requer o escopo do esquema específico."
       },
       {
-        "texto_opcion": "```sql\nGRANT ALL PRIVILEGES ON CATALOG prod_catalog TO `analytics-sp`;\n```, `ALL PRIVILEGES` on the catalog is excessive — it grants access to — `MODIFY` permite INSERT/UPDATE/DELETE mas não SELECT (ler) ou CREATE TABLE. São necessários vários privilégios em vários níveis plausível à primeira vista, porém mais fraco que a melhor opção Isso o torna inadequado frente à restrição principal do enunciado..",
+        "texto_opcion": "```sql\nGRANT MODIFICAR NO ESQUEMA prod_catalog.analytics PARA `analytics-sp`;\n``` — `MODIFY` permite INSERT/UPDATE/DELETE mas não SELECT (ler) ou CREATE TABLE. São necessários vários privilégios em vários níveis.",
         "es_correcta": false,
         "explicacion": "`MODIFY` permite INSERT/UPDATE/DELETE mas não SELECT (ler) ou CREATE TABLE. São necessários vários privilégios em vários níveis."
       },
@@ -608,7 +608,7 @@
         "explicacion": "São necessários cinco grants: USE CATALOG (navegar no catálogo), USE SCHEMA (navegar no esquema), SELECT (ler tabelas), MODIFY (gravar em tabelas) e CREATE TABLE (criar novas tabelas). Todos são necessários; nenhum é redundante."
       },
       {
-        "texto_opcion": "```sql\nGRANT MODIFY ON SCHEMA prod_catalog.analytics TO `analytics-sp`;\n```, `MODIFY` allows INSERT/UPDATE/DELETE but not SELECT (read) or — embora este grantseja os privilégios corretos no esquema, ele ainda perde os privilégios de gateway `USE CATALOG` e `USE SCHEMA`. Sem eles, `analytics-sp` não pode navegar até o esquema usado como caminho principal nesta arquitetura aplicado entre ambientes por consistência operacional.",
+        "texto_opcion": "```sql\nGRANT TODOS OS PRIVILÉGIOS NO SCHEMA prod_catalog.analytics TO `analytics-sp`;\n``` — embora este grantseja os privilégios corretos no esquema, ele ainda perde os privilégios de gateway `USE CATALOG` e `USE SCHEMA`. Sem eles, `analytics-sp` não pode navegar até o esquema.",
         "es_correcta": false,
         "explicacion": "Embora este grantseja os privilégios corretos no esquema, ele ainda perde os privilégios de gateway `USE CATALOG` e `USE SCHEMA`. Sem eles, `analytics-sp` não pode navegar até o esquema."
       }
@@ -628,17 +628,17 @@
         "explicacion": "`SHOW GRANTS <principal> ON <object>` mostra privilégios explicitamente granted para aquele principal específico no objeto especificado. Nota: mostra grants diretos para esse principal, não grants herdados por meio de associação ao grupo."
       },
       {
-        "texto_opcion": "O acesso efetivo que `frank@company.com` tem em `pedidos`, incluindo associações herdadas a grupos, `SHOW GRANTS` mostra grants explícitos — `SHOW GRANTS` mostra grants explícitos, não permissões efetivas — `SHOW GRANTS` mostra grants explícitos, não permissões efetivas.",
+        "texto_opcion": "O acesso efetivo que `frank@company.com` tem em `pedidos`, incluindo associações herdadas a grupos.",
         "es_correcta": false,
         "explicacion": "`SHOW GRANTS` mostra grants explícitos, não permissões efetivas. Permissões efetivas (incluindo herança de grupo) exigem a verificação de grants em todos os níveis e em todos os grupos aos quais o usuário pertence."
       },
       {
-        "texto_opcion": "Todos os privilégios que qualquer principal tem em `orders` — o parâmetro principal restringe o resultado a esse usuário, quando um principal é especificado — quando um principal é especificado, `SHOW GRANTS` filtra para mostrar apenas grants para esse principal específico no objeto especificado.",
+        "texto_opcion": "Todos os privilégios que qualquer principal tem em `orders` — o parâmetro principal restringe o resultado a esse usuário — quando um principal é especificado, `SHOW GRANTS` filtra para mostrar apenas grants para esse principal específico no objeto especificado.",
         "es_correcta": false,
         "explicacion": "Quando um principal é especificado, `SHOW GRANTS` filtra para mostrar apenas grants para esse principal específico no objeto especificado."
       },
       {
-        "texto_opcion": "Um erro — SHOW GRANTS requer propriedade ou privilégio MANAGE para especificar um usuário individual — embora SHOW GRANTS exija privilégios elevados (propriedade, MANAGE ou administrador de metastore), especificar um usuário principal.",
+        "texto_opcion": "Um erro — SHOW GRANTS requer propriedade ou privilégio MANAGE para especificar um usuário individual.",
         "es_correcta": false,
         "explicacion": "Embora SHOW GRANTS exija privilégios elevados (propriedade, MANAGE ou administrador de metastore), especificar um usuário principal individual é uma sintaxe válida e não causa um erro por si só."
       }
@@ -686,7 +686,7 @@
         "explicacion": "O gerenciamento de privilégios baseado em grupo é prospectivo — quando um usuário ingressa em um grupo, ele herda imediatamente todos os privilégios granted a esse grupo. Não são necessários GRANTs por usuário."
       },
       {
-        "texto_opcion": "`new-analyst` herda privilégios de grupo após a próxima reinicialização do cluster — a herança de privilégios de grupo entra em vigor imediatamente quando a associação ao grupo é estabelecida — não é necessário reiniciar o cluster como escolha padrão de produção neste cenário.",
+        "texto_opcion": "`new-analyst` herda privilégios de grupo após a próxima reinicialização do cluster — a herança de privilégios de grupo entra em vigor imediatamente quando a associação ao grupo é estabelecida — não é necessário reiniciar o cluster.",
         "es_correcta": false,
         "explicacion": "A herança de privilégios de grupo entra em vigor imediatamente quando a associação ao grupo é estabelecida — não é necessário reiniciar o cluster."
       },
@@ -696,7 +696,7 @@
         "explicacion": "Os privilégios atribuídos aos grupos aplicam-se automaticamente a todos os membros atuais e futuros. Nenhuma etapa de propagação explícita é necessária."
       },
       {
-        "texto_opcion": "`new-analyst` tem acesso apenas se também tiver um SELECT grant individual na tabela, a adesão ao grupo por si só é suficiente — a adesão ao grupo por si só é suficiente. grants individuais não são necessários quando o grupo já possui os privilégios necessários comum em desenhos legados, porém inadequado neste caso.",
+        "texto_opcion": "`new-analyst` tem acesso apenas se também tiver um SELECT grant individual na tabela — a adesão ao grupo por si só é suficiente. grants individuais não são necessários quando o grupo já possui os privilégios necessários.",
         "es_correcta": false,
         "explicacion": "A adesão ao grupo por si só é suficiente. grants individuais não são necessários quando o grupo já possui os privilégios necessários."
       }
@@ -716,7 +716,7 @@
         "explicacion": "O UC suporta granting para usuários individuais, grupos e entidades de serviço. Grantir para grupos é uma prática recomendada, não uma limitação técnica."
       },
       {
-        "texto_opcion": "Os grants do grupo são auditados automaticamente enquanto os grants dos usuários individuais não são rastreados — unity Catalog audita todas as operações grant independentemente do tipo principal — unity Catalog audita todas as operações grant independentemente do tipo principal. A razão para usar grupos é a simplicidade do ciclo de vida, e não a auditoria diferencial.",
+        "texto_opcion": "Os grants do grupo são auditados automaticamente enquanto os grants dos usuários individuais não são rastreados.",
         "es_correcta": false,
         "explicacion": "Unity Catalog audita todas as operações grant independentemente do tipo principal. A razão para usar grupos é a simplicidade do ciclo de vida, e não a auditoria diferencial."
       },
@@ -726,7 +726,7 @@
         "explicacion": "O controle de acesso baseado em grupo simplifica o gerenciamento do ciclo de vida. Adicionar um usuário a um grupo instantaneamente grants todos os privilégios do grupo; removendo-os instantaneamente do acesso revokes. Nenhuma operação GRANT/REVOKE em nível de objeto é necessária."
       },
       {
-        "texto_opcion": "Os grupos têm maior prioridade de consulta em clusters Databricks do que usuários individuais — a prioridade da consulta não está relacionada ao fato de os privilégios serem grant concedidos a grupos ou indivíduos — a prioridade da consulta não está relacionada ao fato de os privilégios serem grant concedidos a grupos ou indivíduos.",
+        "texto_opcion": "Os grupos têm maior prioridade de consulta em clusters Databricks do que usuários individuais.",
         "es_correcta": false,
         "explicacion": "A prioridade da consulta não está relacionada ao fato de os privilégios serem grant concedidos a grupos ou indivíduos. Esta é puramente uma melhor prática de governança/gestão, e não uma consideração de desempenho."
       }
