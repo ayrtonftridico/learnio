@@ -1,0 +1,1771 @@
+[
+  {
+    "pregunta": "um serviço Agent SDK deve continuar chamando ferramentas até que o modelo termine sem tool_use. Contexto: um sistema de pesquisa multiagente com coordenador, pesquisa na web e subagentes de síntese.",
+    "opciones": [
+      {
+        "texto_opcion": "Loop em stop_reason end_turn vs tool_use; enviar blocos tool_result até end_turn",
+        "es_correcta": true,
+        "explicacion": "Os fluxos agênicos exigem um loop externo que envia os resultados da ferramenta até que o modelo pare de solicitar ferramentas."
+      },
+      {
+        "texto_opcion": "Sair após a primeira mensagem do assistente, independentemente de stop_reason — a saída prematura ignora as rodadas de ferramentas necessárias configurado de ponta a ponta para o workload descrito",
+        "es_correcta": false,
+        "explicacion": "A saída prematura ignora as rodadas de ferramentas necessárias."
+      },
+      {
+        "texto_opcion": "Desativar ferramentas após uma rodada para force end_turn — interrompe os fluxos de trabalho do agente em várias etapas como a opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de trabalho de agentes em várias etapas."
+      },
+      {
+        "texto_opcion": "Pesquise a API de mensagens a cada segundo sem ler stop_reason — a pesquisa por si só não implementa o contrato de loop de ferramentas — a votação por si só não implementa o contrato de loop de ferramentas",
+        "es_correcta": false,
+        "explicacion": "A votação por si só não implementa o contrato de loop de ferramentas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason ciclo"
+    ]
+  },
+  {
+    "pregunta": "um agente de reembolso retorna JSON estruturado de uma ferramenta de pesquisa de pedidos para Claude. Contexto de produção: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. O que o arquiteto deve fazer?",
+    "opciones": [
+      {
+        "texto_opcion": "Incorporar resultados apenas no prompt do sistema na próxima curva — os resultados da ferramenta pertencem ao canal da ferramenta, não à injeção apenas do sistema",
+        "es_correcta": false,
+        "explicacion": "Os resultados da ferramenta pertencem ao canal da ferramenta e não à injeção apenas do sistema."
+      },
+      {
+        "texto_opcion": "Retorna blobs binários sem codificação no conteúdo tool_result — a API espera conteúdo serializável em blocos tool_result selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "A API espera conteúdo serializável em blocos tool_result."
+      },
+      {
+        "texto_opcion": "Anexar a saída da ferramenta como uma nova mensagem de usuário sem tool_use_id — quebra o protocolo da ferramenta e confunde a atribuição — quebra o protocolo da ferramenta e confunde atribuição",
+        "es_correcta": false,
+        "explicacion": "Quebra o protocolo da ferramenta e confunde atribuição."
+      },
+      {
+        "texto_opcion": "Envie tool_result com tool_use_id correspondente ao bloco tool_use anterior e conteúdo como string ou carga útil estruturada",
+        "es_correcta": true,
+        "explicacion": "Cada tool_result deve fazer referência ao tool_use_id de origem para o modelo correlacionar as saídas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "formato tool_result"
+    ]
+  },
+  {
+    "pregunta": "um agente de pesquisa ocasionalmente faz um loop indefinido chamando a mesma ferramenta de pesquisa. Contexto: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR.",
+    "opciones": [
+      {
+        "texto_opcion": "Confie no modelo para encerrar automaticamente sem proteção externa — os modelos podem repetir chamadas de ferramenta sem um hard cap configurado de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "Os modelos podem repetir chamadas de ferramenta sem limite rígido."
+      },
+      {
+        "texto_opcion": "Remova todas as ferramentas no meio da execução sem notificar o usuário — a remoção abrupta da ferramenta causa confusão no estado parcial selecionado para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "A remoção abrupta da ferramenta causa um estado parcial confuso."
+      },
+      {
+        "texto_opcion": "Defina a temperatura apenas como zero — a temperatura não garante a terminação do loop aplicada em todos os ambientes para consistência operacional — a temperatura não garante o encerramento do loop",
+        "es_correcta": false,
+        "explicacion": "A temperatura não garante o encerramento do loop."
+      },
+      {
+        "texto_opcion": "Limite as iterações no código do aplicativo e interrompa quando stop_reason for end_turn ou o máximo de rodadas for excedido",
+        "es_correcta": true,
+        "explicacion": "Os limites de iteração programática evitam loops de ferramentas descontrolados além do modelo stop_reason sozinho."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "máximo de rodadas de ferramenta"
+    ]
+  },
+  {
+    "pregunta": "Claude solicita três pesquisas independentes em um turno de assistente. Contexto de produção: um sistema de pesquisa multiagente com subagentes coordenador, busca na web e síntese. O que o arquiteto deve fazer?",
+    "opciones": [
+      {
+        "texto_opcion": "Execute todos os blocos tool_use simultaneamente e retorne um tool_result por tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser executadas em paralelo com blocos de resultados correspondentes."
+      },
+      {
+        "texto_opcion": "Execute as ferramentas sequencialmente e elimine dois dos três resultados – os blocos tool_result ausentes violam o contrato da API como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Os blocos tool_result ausentes violam o contrato da API."
+      },
+      {
+        "texto_opcion": "Aguarde end_turn antes de executar qualquer ferramenta — atrasa o trabalho paralelo válido e quebra o contrato de giro — atrasa o trabalho paralelo válido e quebra o contrato de turno",
+        "es_correcta": false,
+        "explicacion": "Atrasa o trabalho paralelo válido e quebra o contrato de turno."
+      },
+      {
+        "texto_opcion": "Mesclar todas as saídas em um único tool_result — cada tool_use_id precisa de seu próprio tool_result, frequentemente visto em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "Cada tool_use_id precisa de seu próprio tool_result."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "chamadas de ferramentas paralelas"
+    ]
+  },
+  {
+    "pregunta": "a etapa dois precisa de um account_id retornado somente após a etapa um create_customer ser bem-sucedida. Contexto: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR.",
+    "opciones": [
+      {
+        "texto_opcion": "Dispare create_customer e charge_card sempre em paralelo - charge_card não terá account_id se a criação não tiver sido concluída, aplicada em todos os ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "charge_card não terá account_id se a criação não tiver sido concluída."
+      },
+      {
+        "texto_opcion": "Ignore tool_result para create_customer para salvar tokens – as ferramentas downstream perdem o contexto de entrada necessário como design primário para este requisito aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "As ferramentas downstream perdem o contexto de entrada necessário."
+      },
+      {
+        "texto_opcion": "Account_id codificado no prompt do sistema – frágil e ignora saídas de ferramentas dinâmicas priorizadas para simplificar, embora perca uma restrição importante — frágil e ignora as saídas dinâmicas da ferramenta",
+        "es_correcta": false,
+        "explicacion": "Frágil e ignora as saídas dinâmicas da ferramenta."
+      },
+      {
+        "texto_opcion": "Execute create_customer primeiro; passe seu tool_result para o próximo turno antes de chamar as ferramentas dependentes",
+        "es_correcta": true,
+        "explicacion": "Ferramentas dependentes requerem execução sequencial e passagem explícita de resultados anteriores."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas dependentes"
+    ]
+  },
+  {
+    "pregunta": "seu manipulador recebe stop_reason tool_use na última mensagem do assistente. Cenário: um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. Qual escolha arquitetônica é a melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Execute as ferramentas solicitadas, anexe mensagens tool_result e chame o modelo novamente",
+        "es_correcta": true,
+        "explicacion": "stop_reason tool_use sinaliza execução pendente da ferramenta antes que a curva possa ser concluída."
+      },
+      {
+        "texto_opcion": "Trate tool_use como end_turn e retorne ao usuário imediatamente - deixa as chamadas de ferramenta não atendidas",
+        "es_correcta": false,
+        "explicacion": "Deixa as chamadas de ferramenta não atendidas."
+      },
+      {
+        "texto_opcion": "Tente novamente o mesmo prompt sem resultados da ferramenta – o modelo repetirá a mesma solicitação tool_use",
+        "es_correcta": false,
+        "explicacion": "O modelo repetirá a mesma solicitação tool_use."
+      },
+      {
+        "texto_opcion": "Converta blocos tool_use em mensagens de usuário de texto simples - o tipo de bloco errado quebra a análise de protocolo",
+        "es_correcta": false,
+        "explicacion": "O tipo de bloco errado interrompe a análise do protocolo."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason tool_use"
+    ]
+  },
+  {
+    "pregunta": "uma API externa retorna HTTP 503 durante uma chamada de ferramenta dentro do loop do agente. Cenário: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Qual escolha arquitetônica é a melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Engula o erro e envie um tool_result vazio - o modelo não tem sinal para mudar a estratégia como projeto primário para este requisito",
+        "es_correcta": false,
+        "explicacion": "O modelo carece de sinal para mudar a estratégia."
+      },
+      {
+        "texto_opcion": "Retorne tool_result com is_error ou texto de erro estruturado para que o modelo possa tentar novamente ou escalar",
+        "es_correcta": true,
+        "explicacion": "As falhas da ferramenta devem retornar através de tool_result para que o modelo possa se recuperar ou pedir ajuda."
+      },
+      {
+        "texto_opcion": "Tente novamente a chamada HTTP silenciosamente para sempre dentro da ferramenta – pode travar o loop do agente sem reconhecimento do modelo",
+        "es_correcta": false,
+        "explicacion": "Pode travar o loop do agente sem reconhecimento do modelo."
+      },
+      {
+        "texto_opcion": "Travar todo o processo do agente sem uma mensagem do usuário – baixa confiabilidade e sem degradação normal — baixa confiabilidade e nenhuma degradação elegante",
+        "es_correcta": false,
+        "explicacion": "Baixa confiabilidade e nenhuma degradação elegante."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "erro na execução da ferramenta"
+    ]
+  },
+  {
+    "pregunta": "uma vez mistura explicação de texto com vários blocos tool_use. Revisão de projeto para um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Selecione a abordagem mais apropriada.",
+    "opciones": [
+      {
+        "texto_opcion": "Retirar blocos de texto antes de enviá-los para observabilidade — perde o contexto de raciocínio para operadores plausíveis à primeira vista, mas é mais fraco que a melhor opção — perde o contexto de raciocínio para os operadores adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Perde o contexto de raciocínio para os operadores."
+      },
+      {
+        "texto_opcion": "Preservar a ordem de bloqueio do conteúdo do assistente ao registrar; execute todos os tool_use referenciados nessa mensagem",
+        "es_correcta": true,
+        "explicacion": "A ordem dos blocos reflete a intenção do modelo; todas as entradas tool_use no turno devem ser honradas."
+      },
+      {
+        "texto_opcion": "Reordene os blocos tool_result em ordem alfabética pelo nome da ferramenta – a incompatibilidade de ordem pode confundir a depuração e não substituir a correspondência de ID frequentemente vista em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "A incompatibilidade de pedidos pode confundir a depuração, e não substituir a correspondência de ID."
+      },
+      {
+        "texto_opcion": "Executa apenas o primeiro bloco tool_use — ignora ações adicionais solicitadas no mesmo turno usado como caminho principal nesta arquitetura. Isso o torna um ajuste mais fraco em relação à restrição principal no prompt como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Ignora ações adicionais solicitadas no mesmo turno."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ordenação de blocos de conteúdo"
+    ]
+  },
+  {
+    "pregunta": "você transmite tokens de assistente e detecta tool_use JSON parcial no meio do fluxo. Cenário: loops de ferramentas de tratamento de serviço Agent SDK de produção e fluxo de controle stop_reason. Qual escolha arquitetônica é a melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Desative o streaming para evitar tool_use totalmente — o streaming é compatível quando o buffer está correto",
+        "es_correcta": false,
+        "explicacion": "O streaming é compatível quando o buffer está correto."
+      },
+      {
+        "texto_opcion": "Ignore tool_use durante o stream e manipule apenas texto – perde chamadas de ferramenta emitidas no stream",
+        "es_correcta": false,
+        "explicacion": "Perde chamadas de ferramenta emitidas no fluxo."
+      },
+      {
+        "texto_opcion": "Execute ferramentas em cada evento delta – JSON parcial causa chamadas de ferramenta com falha ou erradas",
+        "es_correcta": false,
+        "explicacion": "JSON parcial causa chamadas de ferramenta erradas ou com falha."
+      },
+      {
+        "texto_opcion": "Buffer até que o bloco tool_use seja concluído e então execute; não execute em deltas parciais",
+        "es_correcta": true,
+        "explicacion": "O streaming requer a espera de cargas úteis tool_use completas antes da execução."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "transmissão tool_use"
+    ]
+  },
+  {
+    "pregunta": "depois de enviar tool_results, quem fala a seguir no padrão da API de mensagens? Revisão de projeto para um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Selecione a abordagem mais apropriada.",
+    "opciones": [
+      {
+        "texto_opcion": "Chame o modelo novamente com a lista de mensagens atualizada; o assistente produz o próximo turno",
+        "es_correcta": true,
+        "explicacion": "O loop alterna o assistente tool_use com o cliente tool_result e depois a continuação do assistente."
+      },
+      {
+        "texto_opcion": "Inserir uma mensagem sintética do sistema em vez de chamar o modelo — ignora a curva do modelo que interpreta a saída da ferramenta como desenho principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Ignora a curva do modelo que interpreta a saída da ferramenta."
+      },
+      {
+        "texto_opcion": "Exigir que o usuário humano digite ok após cada tool_result – interrompe os fluxos do agente autônomo desnecessariamente — interrompe fluxos de agentes autônomos desnecessariamente",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de agentes autônomos desnecessariamente."
+      },
+      {
+        "texto_opcion": "Exclua mensagens anteriores do assistente antes de continuar — remove o contexto tool_use que o modelo precisa ser configurado de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "Remove o contexto tool_use que o modelo precisa."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "turno do usuário após ferramentas"
+    ]
+  },
+  {
+    "pregunta": "uma ferramenta de consulta de banco de dados de longa duração às vezes excede o SLA dentro de uma sessão de agente. Revisão de projeto para um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP. Selecione a abordagem mais apropriada.",
+    "opciones": [
+      {
+        "texto_opcion": "Encerre a sessão sem retornar nenhum tool_result – deixa a conversa em um estado inválido selecionado para atender as restrições citadas selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "Deixa a conversa em um estado inválido."
+      },
+      {
+        "texto_opcion": "Bloqueie o loop até que a consulta termine, não importa quanto tempo — viola os SLAs de latência e prende os trabalhadores — viola SLAs de latência e prende trabalhadores",
+        "es_correcta": false,
+        "explicacion": "Viola SLAs de latência e prende trabalhadores."
+      },
+      {
+        "texto_opcion": "Implemente tempos limite no nível da ferramenta e retorne um erro de tempo limite conciso em tool_result",
+        "es_correcta": true,
+        "explicacion": "A execução limitada da ferramenta evita que o loop do agente seja interrompido em dependências suspensas."
+      },
+      {
+        "texto_opcion": "Tente novamente a consulta ilimitada dentro do manipulador de ferramentas — mesmo risco de travamento sem limite aplicado em todos os ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "O mesmo risco de travamento sem tampa."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tempo limite da ferramenta"
+    ]
+  },
+  {
+    "pregunta": "um agente de pagamento pode tentar novamente charge_order após falhas de rede ambíguas. Contexto de produção: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. O que o arquiteto deve fazer?",
+    "opciones": [
+      {
+        "texto_opcion": "Permitir cobranças duplicadas em cada nova tentativa — risco financeiro em falhas ambíguas configuradas de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "Risco financeiro em falhas ambíguas."
+      },
+      {
+        "texto_opcion": "Projete ferramentas de cobrança com chaves de idempotência e status duplicado de superfície em tool_result",
+        "es_correcta": true,
+        "explicacion": "Ferramentas idempotentes permitem novas tentativas seguras sem cobrança dupla quando o loop se repete."
+      },
+      {
+        "texto_opcion": "Desative totalmente as tentativas para todas as ferramentas – correções excessivas; ferramentas somente leitura se beneficiam de novas tentativas",
+        "es_correcta": false,
+        "explicacion": "Correções excessivas; ferramentas somente leitura se beneficiam de novas tentativas."
+      },
+      {
+        "texto_opcion": "Ocultar a contagem de novas tentativas do modelo – o modelo não pode ajustar a estratégia sem contexto de falha selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "O modelo não pode ajustar a estratégia sem contexto de falha."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas idempotentes"
+    ]
+  },
+  {
+    "pregunta": "uma ferramenta de pesquisa não encontra registros para uma consulta válida. Contexto: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream.",
+    "opciones": [
+      {
+        "texto_opcion": "Retorna HTTP 404 apenas na camada de transporte — o modelo vê falha na ferramenta, e não uma semântica de sucesso vazia como opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "O modelo vê a falha da ferramenta, não uma semântica vazia de sucesso."
+      },
+      {
+        "texto_opcion": "Retornar tool_result informando zero resultados com campos consistentes com esquema, não um resultado omitido",
+        "es_correcta": true,
+        "explicacion": "Resultados vazios, mas explícitos, permitem que o modelo raciocine sobre as próximas etapas."
+      },
+      {
+        "texto_opcion": "Omitir tool_result quando nada for encontrado — viola o contrato de um resultado por tool_use selecionado para atender às restrições descritas aqui adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Viola o contrato de um resultado por tool_use."
+      },
+      {
+        "texto_opcion": "Fabricar registros de espaço reservado — introduz dados alucinados no fluxo de trabalho usado como caminho principal nesta arquitetura comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "Introduz dados alucinados no fluxo de trabalho."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "resultado de ferramenta vazia"
+    ]
+  },
+  {
+    "pregunta": "retomar uma sessão do agente após uma reinicialização do processo no meio do loop da ferramenta. Cenário: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Qual escolha arquitetônica é a melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Persistir histórico completo de mensagens, incluindo blocos tool_use pendentes e reproduzir resultados de ferramentas não cumpridos",
+        "es_correcta": true,
+        "explicacion": "O estado de mensagem durável é necessário para continuar uma rodada de ferramentas parcialmente concluída."
+      },
+      {
+        "texto_opcion": "Inicie uma nova conversa e espere que o usuário repita o contexto - perde a correlação tool_use e o trabalho anterior selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "Perde a correlação tool_use e o trabalho anterior."
+      },
+      {
+        "texto_opcion": "Persistir apenas o último trecho de texto do assistente — insuficiente para reconstruir o estado do protocolo da ferramenta priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Insuficiente para reconstruir o estado do protocolo da ferramenta."
+      },
+      {
+        "texto_opcion": "Preencher automaticamente ferramentas pendentes com dados simulados na reinicialização — arriscado na produção e oculta falhas reais — arriscado na produção e esconde falhas reais",
+        "es_correcta": false,
+        "explicacion": "Arriscado na produção e esconde falhas reais."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "estado de conversa"
+    ]
+  },
+  {
+    "pregunta": "um serviço Agent SDK deve continuar chamando ferramentas até que o modelo termine sem tool_use. Contexto de produção: um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Loop em stop_reason end_turn vs tool_use; enviar blocos tool_result até end_turn",
+        "es_correcta": true,
+        "explicacion": "Os fluxos agênicos exigem um loop externo que envia os resultados da ferramenta até que o modelo pare de solicitar ferramentas."
+      },
+      {
+        "texto_opcion": "Sair após a primeira mensagem do assistente, independentemente de stop_reason — a saída prematura ignora as rodadas de ferramentas necessárias como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "A saída prematura ignora as rodadas de ferramentas necessárias."
+      },
+      {
+        "texto_opcion": "Desativar ferramentas após uma rodada para force end_turn — interrompe fluxos de trabalho de agentes de várias etapas usados como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de trabalho de agentes em várias etapas."
+      },
+      {
+        "texto_opcion": "Pesquise a API de mensagens a cada segundo sem ler stop_reason — a pesquisa por si só não implementa o contrato de loop de ferramentas — a votação por si só não implementa o contrato de loop de ferramentas",
+        "es_correcta": false,
+        "explicacion": "A votação por si só não implementa o contrato de loop de ferramentas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason ciclo"
+    ]
+  },
+  {
+    "pregunta": "um agente de reembolso retorna JSON estruturado de uma ferramenta de pesquisa de pedidos para Claude. Contexto de produção: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Anexar a saída da ferramenta como uma nova mensagem de usuário sem tool_use_id — quebra o protocolo da ferramenta e confunde a atribuição — quebra o protocolo da ferramenta e confunde atribuição",
+        "es_correcta": false,
+        "explicacion": "Quebra o protocolo da ferramenta e confunde atribuição."
+      },
+      {
+        "texto_opcion": "Incorporar resultados apenas no prompt do sistema na próxima curva — os resultados da ferramenta pertencem ao canal da ferramenta, não à injeção apenas do sistema",
+        "es_correcta": false,
+        "explicacion": "Os resultados da ferramenta pertencem ao canal da ferramenta e não à injeção apenas do sistema."
+      },
+      {
+        "texto_opcion": "Retorna blobs binários sem codificação no conteúdo tool_result — a API espera conteúdo serializável em blocos tool_result plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "A API espera conteúdo serializável em blocos tool_result."
+      },
+      {
+        "texto_opcion": "Envie tool_result com tool_use_id correspondente ao bloco tool_use anterior e conteúdo como string ou carga útil estruturada",
+        "es_correcta": true,
+        "explicacion": "Cada tool_result deve fazer referência ao tool_use_id de origem para o modelo correlacionar as saídas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "formato tool_result"
+    ]
+  },
+  {
+    "pregunta": "um agente de pesquisa ocasionalmente faz um loop indefinido chamando a mesma ferramenta de pesquisa. Revisão de projeto para um sistema de pesquisa multiagente com coordenador, pesquisa na web e subagentes de síntese. Selecione a abordagem mais apropriada. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Remova todas as ferramentas no meio da execução sem notificar o usuário – a remoção abrupta da ferramenta causa um estado parcial confuso, plausível à primeira vista, mas mais fraco do que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "A remoção abrupta da ferramenta causa um estado parcial confuso."
+      },
+      {
+        "texto_opcion": "Defina a temperatura apenas para zero — a temperatura não garante a terminação do loop, frequentemente vista em projetos legados, mas não é ideal para este caso — a temperatura não garante o encerramento do loop",
+        "es_correcta": false,
+        "explicacion": "A temperatura não garante o encerramento do loop."
+      },
+      {
+        "texto_opcion": "Limite as iterações no código do aplicativo e interrompa quando stop_reason for end_turn ou o máximo de rodadas for excedido",
+        "es_correcta": true,
+        "explicacion": "Os limites de iteração programática evitam loops de ferramentas descontrolados além do modelo stop_reason sozinho."
+      },
+      {
+        "texto_opcion": "Confie no modelo para encerrar automaticamente sem proteção externa — os modelos podem repetir chamadas de ferramenta sem um hard cap configurado de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "Os modelos podem repetir chamadas de ferramenta sem limite rígido."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "máximo de rodadas de ferramenta"
+    ]
+  },
+  {
+    "pregunta": "Claude solicita três pesquisas independentes em um turno de assistente. Cenário: um sistema de pesquisa multiagente com coordenador, busca na web e subagentes de síntese. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Mesclar todas as saídas em um único tool_result — cada tool_use_id precisa de seu próprio tool_result selecionado para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "Cada tool_use_id precisa de seu próprio tool_result."
+      },
+      {
+        "texto_opcion": "Execute todos os blocos tool_use simultaneamente e retorne um tool_result por tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser executadas em paralelo com blocos de resultados correspondentes."
+      },
+      {
+        "texto_opcion": "Execute as ferramentas sequencialmente e elimine dois dos três resultados – os blocos tool_result ausentes violam o contrato da API como desenho principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Os blocos tool_result ausentes violam o contrato da API."
+      },
+      {
+        "texto_opcion": "Aguarde end_turn antes de executar qualquer ferramenta — atrasa o trabalho paralelo válido e quebra o contrato de giro — atrasa o trabalho paralelo válido e quebra o contrato de turno",
+        "es_correcta": false,
+        "explicacion": "Atrasa o trabalho paralelo válido e quebra o contrato de turno."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "chamadas de ferramentas paralelas"
+    ]
+  },
+  {
+    "pregunta": "a etapa dois precisa de um account_id retornado somente após a etapa um create_customer ser bem-sucedida. Contexto de produção: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute create_customer primeiro; passe seu tool_result para o próximo turno antes de chamar as ferramentas dependentes",
+        "es_correcta": true,
+        "explicacion": "Ferramentas dependentes requerem execução sequencial e passagem explícita de resultados anteriores."
+      },
+      {
+        "texto_opcion": "Account_id codificado no prompt do sistema — frágil e ignora saídas de ferramentas dinâmicas aplicadas em ambientes para consistência operacional — frágil e ignora as saídas dinâmicas da ferramenta",
+        "es_correcta": false,
+        "explicacion": "Frágil e ignora as saídas dinâmicas da ferramenta."
+      },
+      {
+        "texto_opcion": "Dispare create_customer e charge_card sempre em paralelo - charge_card não terá account_id se a criação não tiver sido concluída, usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "charge_card não terá account_id se a criação não tiver sido concluída."
+      },
+      {
+        "texto_opcion": "Ignore tool_result para create_customer para salvar tokens – as ferramentas downstream perdem o contexto de entrada necessário como design primário para este requisito",
+        "es_correcta": false,
+        "explicacion": "As ferramentas downstream perdem o contexto de entrada necessário."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas dependentes"
+    ]
+  },
+  {
+    "pregunta": "seu manipulador recebe stop_reason tool_use na última mensagem do assistente. Contexto de produção: um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Tente novamente o mesmo prompt sem resultados da ferramenta – o modelo repetirá a mesma solicitação tool_use",
+        "es_correcta": false,
+        "explicacion": "O modelo repetirá a mesma solicitação tool_use."
+      },
+      {
+        "texto_opcion": "Execute as ferramentas solicitadas, anexe mensagens tool_result e chame o modelo novamente",
+        "es_correcta": true,
+        "explicacion": "stop_reason tool_use sinaliza execução pendente da ferramenta antes que a curva possa ser concluída."
+      },
+      {
+        "texto_opcion": "Converta blocos tool_use em mensagens de usuário de texto simples - o tipo de bloco errado quebra a análise de protocolo",
+        "es_correcta": false,
+        "explicacion": "O tipo de bloco errado interrompe a análise do protocolo."
+      },
+      {
+        "texto_opcion": "Trate tool_use como end_turn e retorne ao usuário imediatamente - deixa as chamadas de ferramenta não atendidas",
+        "es_correcta": false,
+        "explicacion": "Deixa as chamadas de ferramenta não atendidas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason tool_use"
+    ]
+  },
+  {
+    "pregunta": "uma API externa retorna HTTP 503 durante uma chamada de ferramenta dentro do loop do agente. Contexto de produção: um sistema de pesquisa multiagente com subagentes coordenador, busca na web e síntese. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Retorne tool_result com is_error ou texto de erro estruturado para que o modelo possa tentar novamente ou escalar",
+        "es_correcta": true,
+        "explicacion": "As falhas da ferramenta devem retornar através de tool_result para que o modelo possa se recuperar ou pedir ajuda."
+      },
+      {
+        "texto_opcion": "Engula o erro e envie um tool_result vazio – o modelo não tem sinal para mudar a estratégia priorizada por simplicidade, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "O modelo carece de sinal para mudar a estratégia."
+      },
+      {
+        "texto_opcion": "Tente novamente a chamada HTTP silenciosamente para sempre dentro da ferramenta – pode travar o loop do agente sem reconhecimento do modelo comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "Pode travar o loop do agente sem reconhecimento do modelo."
+      },
+      {
+        "texto_opcion": "Travar todo o processo do agente sem uma mensagem do usuário – baixa confiabilidade e sem degradação normal — baixa confiabilidade e nenhuma degradação elegante",
+        "es_correcta": false,
+        "explicacion": "Baixa confiabilidade e nenhuma degradação elegante."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "erro na execução da ferramenta"
+    ]
+  },
+  {
+    "pregunta": "uma vez mistura explicação de texto com vários blocos tool_use. Cenário: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Retirar blocos de texto antes de enviar para observabilidade — perde contexto de raciocínio para operadores configurados de ponta a ponta para a carga de trabalho declarada — perde o contexto de raciocínio para os operadores",
+        "es_correcta": false,
+        "explicacion": "Perde o contexto de raciocínio para os operadores."
+      },
+      {
+        "texto_opcion": "Executa apenas o primeiro bloco tool_use — ignora ações adicionais solicitadas no mesmo turno que um projeto primário para este requisito aplicado entre ambientes por consistência operacional Isso o torna inadequado frente à restrição principal do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Ignora ações adicionais solicitadas no mesmo turno."
+      },
+      {
+        "texto_opcion": "Preservar a ordem de bloqueio do conteúdo do assistente ao registrar; execute todos os tool_use referenciados nessa mensagem",
+        "es_correcta": true,
+        "explicacion": "A ordem dos blocos reflete a intenção do modelo; todas as entradas tool_use no turno devem ser honradas."
+      },
+      {
+        "texto_opcion": "Reordenar os blocos tool_result em ordem alfabética por nome da ferramenta — a incompatibilidade de ordem pode confundir a depuração, não substituir a correspondência de id selecionada para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "A incompatibilidade de pedidos pode confundir a depuração, e não substituir a correspondência de ID."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ordenação de blocos de conteúdo"
+    ]
+  },
+  {
+    "pregunta": "você transmite tokens de assistente e detecta tool_use JSON parcial no meio do fluxo. Contexto de produção: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute ferramentas em cada evento delta – JSON parcial causa chamadas de ferramenta com falha ou erradas",
+        "es_correcta": false,
+        "explicacion": "JSON parcial causa chamadas de ferramenta erradas ou com falha."
+      },
+      {
+        "texto_opcion": "Ignore tool_use durante o stream e manipule apenas texto – perde chamadas de ferramenta emitidas no stream",
+        "es_correcta": false,
+        "explicacion": "Perde chamadas de ferramenta emitidas no fluxo."
+      },
+      {
+        "texto_opcion": "Desative o streaming para evitar tool_use totalmente — o streaming é compatível quando o buffer está correto",
+        "es_correcta": false,
+        "explicacion": "O streaming é compatível quando o buffer está correto."
+      },
+      {
+        "texto_opcion": "Buffer até que o bloco tool_use seja concluído e então execute; não execute em deltas parciais",
+        "es_correcta": true,
+        "explicacion": "O streaming requer a espera de cargas úteis tool_use completas antes da execução."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "transmissão tool_use"
+    ]
+  },
+  {
+    "pregunta": "depois de enviar tool_results, quem fala a seguir no padrão da API de mensagens? Revisão de projeto para loops de ferramentas de manipulação de serviço de produção Agent SDK e fluxo de controle stop_reason. Selecione a abordagem mais apropriada. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Exclua mensagens anteriores do assistente antes de continuar — remove o contexto tool_use que o modelo precisa priorizar para simplificar, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "Remove o contexto tool_use que o modelo precisa."
+      },
+      {
+        "texto_opcion": "Inserir uma mensagem sintética do sistema em vez de chamar o modelo — ignora a curva do modelo que interpreta a saída da ferramenta aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Ignora a curva do modelo que interpreta a saída da ferramenta."
+      },
+      {
+        "texto_opcion": "Exigir que o usuário humano digite ok após cada tool_result – interrompe os fluxos do agente autônomo desnecessariamente — interrompe fluxos de agentes autônomos desnecessariamente",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de agentes autônomos desnecessariamente."
+      },
+      {
+        "texto_opcion": "Chame o modelo novamente com a lista de mensagens atualizada; o assistente produz o próximo turno",
+        "es_correcta": true,
+        "explicacion": "O loop alterna o assistente tool_use com o cliente tool_result e depois a continuação do assistente."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "turno do usuário após ferramentas"
+    ]
+  },
+  {
+    "pregunta": "uma ferramenta de consulta de banco de dados de longa duração às vezes excede o SLA dentro de uma sessão de agente. Contexto: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Bloqueie o loop até que a consulta termine, não importa quanto tempo — viola os SLAs de latência e prende os trabalhadores — viola SLAs de latência e prende trabalhadores",
+        "es_correcta": false,
+        "explicacion": "Viola SLAs de latência e prende trabalhadores."
+      },
+      {
+        "texto_opcion": "Tente novamente a consulta ilimitada dentro do manipulador de ferramentas - mesmo risco de travamento sem limite como design primário para este requisito",
+        "es_correcta": false,
+        "explicacion": "O mesmo risco de travamento sem tampa."
+      },
+      {
+        "texto_opcion": "Encerre a sessão sem retornar nenhum tool_result – deixa a conversa em um estado inválido configurado de ponta a ponta para o workload descrito",
+        "es_correcta": false,
+        "explicacion": "Deixa a conversa em um estado inválido."
+      },
+      {
+        "texto_opcion": "Implemente tempos limite no nível da ferramenta e retorne um erro de tempo limite conciso em tool_result",
+        "es_correcta": true,
+        "explicacion": "A execução limitada da ferramenta evita que o loop do agente seja interrompido em dependências suspensas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tempo limite da ferramenta"
+    ]
+  },
+  {
+    "pregunta": "um agente de pagamento pode tentar novamente charge_order após falhas de rede ambíguas. Cenário: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Ocultar a contagem de novas tentativas do modelo – o modelo não pode ajustar a estratégia sem contexto de falha como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "O modelo não pode ajustar a estratégia sem contexto de falha."
+      },
+      {
+        "texto_opcion": "Desative totalmente as tentativas para todas as ferramentas – correções excessivas; ferramentas somente leitura se beneficiam de novas tentativas",
+        "es_correcta": false,
+        "explicacion": "Correções excessivas; ferramentas somente leitura se beneficiam de novas tentativas."
+      },
+      {
+        "texto_opcion": "Projete ferramentas de cobrança com chaves de idempotência e status duplicado de superfície em tool_result",
+        "es_correcta": true,
+        "explicacion": "Ferramentas idempotentes permitem novas tentativas seguras sem cobrança dupla quando o loop se repete."
+      },
+      {
+        "texto_opcion": "Permitir cobranças duplicadas em cada nova tentativa — risco financeiro em falhas ambíguas aplicadas em ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Risco financeiro em falhas ambíguas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas idempotentes"
+    ]
+  },
+  {
+    "pregunta": "uma ferramenta de pesquisa não encontra registros para uma consulta válida. Contexto de produção: um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Omitir tool_result quando nada for encontrado - viola o contrato de um resultado por tool_use configurado de ponta a ponta para a carga de trabalho declarada como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Viola o contrato de um resultado por tool_use."
+      },
+      {
+        "texto_opcion": "Retorna HTTP 404 apenas na camada de transporte – o modelo vê falha na ferramenta, não uma semântica de sucesso vazia configurada de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "O modelo vê a falha da ferramenta, não uma semântica vazia de sucesso."
+      },
+      {
+        "texto_opcion": "Fabricar registros de espaço reservado — introduz dados alucinados no fluxo de trabalho como um projeto principal para este requisito usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Introduz dados alucinados no fluxo de trabalho."
+      },
+      {
+        "texto_opcion": "Retornar tool_result informando zero resultados com campos consistentes com esquema, não um resultado omitido",
+        "es_correcta": true,
+        "explicacion": "Resultados vazios, mas explícitos, permitem que o modelo raciocine sobre as próximas etapas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "resultado de ferramenta vazia"
+    ]
+  },
+  {
+    "pregunta": "retomar uma sessão do agente após uma reinicialização do processo no meio do loop da ferramenta. Contexto: um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Persistir histórico completo de mensagens, incluindo blocos tool_use pendentes e reproduzir resultados de ferramentas não cumpridos",
+        "es_correcta": true,
+        "explicacion": "O estado de mensagem durável é necessário para continuar uma rodada de ferramentas parcialmente concluída."
+      },
+      {
+        "texto_opcion": "Persistir apenas o último trecho de texto do assistente — insuficiente para reconstruir o estado do protocolo da ferramenta como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Insuficiente para reconstruir o estado do protocolo da ferramenta."
+      },
+      {
+        "texto_opcion": "Preencher automaticamente ferramentas pendentes com dados simulados na reinicialização — arriscado na produção e oculta falhas reais — arriscado na produção e esconde falhas reais",
+        "es_correcta": false,
+        "explicacion": "Arriscado na produção e esconde falhas reais."
+      },
+      {
+        "texto_opcion": "Inicie uma nova conversa e espere que o usuário repita o contexto - perde a correlação tool_use e o trabalho anterior selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "Perde a correlação tool_use e o trabalho anterior."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "estado de conversa"
+    ]
+  },
+  {
+    "pregunta": "um serviço Agent SDK deve continuar chamando ferramentas até que o modelo termine sem tool_use. Contexto: um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Desativar ferramentas após uma rodada para force end_turn — interrompe fluxos de trabalho de agente em várias etapas aplicados em ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de trabalho de agentes em várias etapas."
+      },
+      {
+        "texto_opcion": "Loop em stop_reason end_turn vs tool_use; enviar blocos tool_result até end_turn",
+        "es_correcta": true,
+        "explicacion": "Os fluxos agênicos exigem um loop externo que envia os resultados da ferramenta até que o modelo pare de solicitar ferramentas."
+      },
+      {
+        "texto_opcion": "Pesquise a API de mensagens a cada segundo sem ler stop_reason — a pesquisa por si só não implementa o contrato de loop de ferramentas — a votação por si só não implementa o contrato de loop de ferramentas",
+        "es_correcta": false,
+        "explicacion": "A votação por si só não implementa o contrato de loop de ferramentas."
+      },
+      {
+        "texto_opcion": "Sair após a primeira mensagem do assistente, independentemente de stop_reason — a saída prematura ignora as rodadas de ferramentas necessárias adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "A saída prematura ignora as rodadas de ferramentas necessárias."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason ciclo"
+    ]
+  },
+  {
+    "pregunta": "um agente de reembolso retorna JSON estruturado de uma ferramenta de pesquisa de pedidos para Claude. Contexto de produção: um assistente empresarial RAG sobre PDFs de políticas com ferramentas de documento MCP. O que o arquiteto deve fazer? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Anexar a saída da ferramenta como uma nova mensagem de usuário sem tool_use_id — quebra o protocolo da ferramenta e confunde a atribuição — quebra o protocolo da ferramenta e confunde atribuição",
+        "es_correcta": false,
+        "explicacion": "Quebra o protocolo da ferramenta e confunde atribuição."
+      },
+      {
+        "texto_opcion": "Retorna blobs binários sem codificação no conteúdo tool_result — a API espera conteúdo serializável em blocos tool_result comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "A API espera conteúdo serializável em blocos tool_result."
+      },
+      {
+        "texto_opcion": "Incorporar resultados apenas no prompt do sistema na próxima curva — os resultados da ferramenta pertencem ao canal da ferramenta, não à injeção apenas do sistema",
+        "es_correcta": false,
+        "explicacion": "Os resultados da ferramenta pertencem ao canal da ferramenta e não à injeção apenas do sistema."
+      },
+      {
+        "texto_opcion": "Envie tool_result com tool_use_id correspondente ao bloco tool_use anterior e conteúdo como string ou carga útil estruturada",
+        "es_correcta": true,
+        "explicacion": "Cada tool_result deve fazer referência ao tool_use_id de origem para o modelo correlacionar as saídas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "formato tool_result"
+    ]
+  },
+  {
+    "pregunta": "um agente de pesquisa ocasionalmente faz um loop indefinido chamando a mesma ferramenta de pesquisa. Contexto: um serviço de produção Agent SDK, loops de ferramentas de tratamento e fluxo de controle stop_reason. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Limite as iterações no código do aplicativo e interrompa quando stop_reason for end_turn ou o máximo de rodadas for excedido",
+        "es_correcta": true,
+        "explicacion": "Os limites de iteração programática evitam loops de ferramentas descontrolados além do modelo stop_reason sozinho."
+      },
+      {
+        "texto_opcion": "Remova todas as ferramentas no meio da execução sem notificar o usuário – a remoção abrupta da ferramenta causa confusão na configuração de estado parcial de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "A remoção abrupta da ferramenta causa um estado parcial confuso."
+      },
+      {
+        "texto_opcion": "Confie no modelo para encerrar automaticamente sem proteção externa — os modelos podem repetir chamadas de ferramenta sem um limite rígido aplicado em todos os ambientes para obter consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Os modelos podem repetir chamadas de ferramenta sem limite rígido."
+      },
+      {
+        "texto_opcion": "Defina a temperatura apenas para zero — a temperatura não garante a terminação do loop, frequentemente vista em projetos legados, mas não é ideal para este caso — a temperatura não garante o encerramento do loop",
+        "es_correcta": false,
+        "explicacion": "A temperatura não garante o encerramento do loop."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "máximo de rodadas de ferramenta"
+    ]
+  },
+  {
+    "pregunta": "Claude solicita três pesquisas independentes em um turno de assistente. Contexto de produção: um sistema de pesquisa multiagente com subagentes coordenador, busca na web e síntese. O que o arquiteto deve fazer? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute as ferramentas sequencialmente e elimine dois dos três resultados – os blocos tool_result ausentes violam o contrato da API adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Os blocos tool_result ausentes violam o contrato da API."
+      },
+      {
+        "texto_opcion": "Execute todos os blocos tool_use simultaneamente e retorne um tool_result por tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser executadas em paralelo com blocos de resultados correspondentes."
+      },
+      {
+        "texto_opcion": "Aguarde end_turn antes de executar qualquer ferramenta — atrasa o trabalho paralelo válido e quebra o contrato de giro — atrasa o trabalho paralelo válido e quebra o contrato de turno",
+        "es_correcta": false,
+        "explicacion": "Atrasa o trabalho paralelo válido e quebra o contrato de turno."
+      },
+      {
+        "texto_opcion": "Mesclar todas as saídas em um único tool_result — cada tool_use_id precisa de seu próprio tool_result selecionado para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "Cada tool_use_id precisa de seu próprio tool_result."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "chamadas de ferramentas paralelas"
+    ]
+  },
+  {
+    "pregunta": "a etapa dois precisa de um account_id retornado somente após a etapa um create_customer ser bem-sucedida. Cenário: um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore tool_result para create_customer para salvar tokens – as ferramentas downstream perdem o contexto de entrada necessário configurado de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "As ferramentas downstream perdem o contexto de entrada necessário."
+      },
+      {
+        "texto_opcion": "Account_id codificado no prompt do sistema – frágil e ignora saídas de ferramentas dinâmicas como a opção de produção padrão neste cenário — frágil e ignora as saídas dinâmicas da ferramenta",
+        "es_correcta": false,
+        "explicacion": "Frágil e ignora as saídas dinâmicas da ferramenta."
+      },
+      {
+        "texto_opcion": "Execute create_customer primeiro; passe seu tool_result para o próximo turno antes de chamar as ferramentas dependentes",
+        "es_correcta": true,
+        "explicacion": "Ferramentas dependentes requerem execução sequencial e passagem explícita de resultados anteriores."
+      },
+      {
+        "texto_opcion": "Dispare create_customer e charge_card sempre em paralelo - charge_card não terá account_id se a criação não tiver sido concluída selecionada para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "charge_card não terá account_id se a criação não tiver sido concluída."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas dependentes"
+    ]
+  },
+  {
+    "pregunta": "seu manipulador recebe stop_reason tool_use na última mensagem do assistente. Contexto: um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Converta blocos tool_use em mensagens de usuário de texto simples - o tipo de bloco errado quebra a análise de protocolo",
+        "es_correcta": false,
+        "explicacion": "O tipo de bloco errado interrompe a análise do protocolo."
+      },
+      {
+        "texto_opcion": "Execute as ferramentas solicitadas, anexe mensagens tool_result e chame o modelo novamente",
+        "es_correcta": true,
+        "explicacion": "stop_reason tool_use sinaliza execução pendente da ferramenta antes que a curva possa ser concluída."
+      },
+      {
+        "texto_opcion": "Trate tool_use como end_turn e retorne ao usuário imediatamente - deixa as chamadas de ferramenta não atendidas",
+        "es_correcta": false,
+        "explicacion": "Deixa as chamadas de ferramenta não atendidas."
+      },
+      {
+        "texto_opcion": "Tente novamente o mesmo prompt sem resultados da ferramenta – o modelo repetirá a mesma solicitação tool_use",
+        "es_correcta": false,
+        "explicacion": "O modelo repetirá a mesma solicitação tool_use."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason tool_use"
+    ]
+  },
+  {
+    "pregunta": "uma API externa retorna HTTP 503 durante uma chamada de ferramenta dentro do loop do agente. Cenário: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Engula o erro e envie um tool_result vazio - o modelo não tem sinal para mudar a estratégia como projeto primário para este requisito",
+        "es_correcta": false,
+        "explicacion": "O modelo carece de sinal para mudar a estratégia."
+      },
+      {
+        "texto_opcion": "Travar todo o processo do agente sem uma mensagem do usuário – baixa confiabilidade e sem degradação normal — baixa confiabilidade e nenhuma degradação elegante",
+        "es_correcta": false,
+        "explicacion": "Baixa confiabilidade e nenhuma degradação elegante."
+      },
+      {
+        "texto_opcion": "Tente novamente a chamada HTTP silenciosamente para sempre dentro da ferramenta – pode travar o loop do agente sem reconhecimento do modelo",
+        "es_correcta": false,
+        "explicacion": "Pode travar o loop do agente sem reconhecimento do modelo."
+      },
+      {
+        "texto_opcion": "Retorne tool_result com is_error ou texto de erro estruturado para que o modelo possa tentar novamente ou escalar",
+        "es_correcta": true,
+        "explicacion": "As falhas da ferramenta devem retornar através de tool_result para que o modelo possa se recuperar ou pedir ajuda."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "erro na execução da ferramenta"
+    ]
+  },
+  {
+    "pregunta": "uma vez mistura explicação de texto com vários blocos tool_use. Contexto: um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Preservar a ordem de bloqueio do conteúdo do assistente ao registrar; execute todos os tool_use referenciados nessa mensagem",
+        "es_correcta": true,
+        "explicacion": "A ordem dos blocos reflete a intenção do modelo; todas as entradas tool_use no turno devem ser honradas."
+      },
+      {
+        "texto_opcion": "Retirar blocos de texto antes de enviar para observabilidade — perde contexto de raciocínio para operadores usados como caminho principal nesta arquitetura — perde o contexto de raciocínio para os operadores",
+        "es_correcta": false,
+        "explicacion": "Perde o contexto de raciocínio para os operadores."
+      },
+      {
+        "texto_opcion": "Executa apenas o primeiro bloco tool_use — ignora ações adicionais solicitadas no mesmo turno selecionado para atender às restrições descritas aqui comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "Ignora ações adicionais solicitadas no mesmo turno."
+      },
+      {
+        "texto_opcion": "Reordene os blocos tool_result em ordem alfabética por nome da ferramenta - a incompatibilidade de ordem pode confundir a depuração, não substituir a correspondência de ID",
+        "es_correcta": false,
+        "explicacion": "A incompatibilidade de pedidos pode confundir a depuração, e não substituir a correspondência de ID."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ordenação de blocos de conteúdo"
+    ]
+  },
+  {
+    "pregunta": "você transmite tokens de assistente e detecta tool_use JSON parcial no meio do fluxo. Cenário: um assistente de produtividade do desenvolvedor usando ferramentas integradas mais servidores MCP. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Buffer até que o bloco tool_use seja concluído e então execute; não execute em deltas parciais",
+        "es_correcta": true,
+        "explicacion": "O streaming requer a espera de cargas úteis tool_use completas antes da execução."
+      },
+      {
+        "texto_opcion": "Ignore tool_use durante o stream e manipule apenas texto – perde chamadas de ferramenta emitidas no stream",
+        "es_correcta": false,
+        "explicacion": "Perde chamadas de ferramenta emitidas no fluxo."
+      },
+      {
+        "texto_opcion": "Desative o streaming para evitar tool_use totalmente — o streaming é compatível quando o buffer está correto",
+        "es_correcta": false,
+        "explicacion": "O streaming é compatível quando o buffer está correto."
+      },
+      {
+        "texto_opcion": "Execute ferramentas em cada evento delta – JSON parcial causa chamadas de ferramenta com falha ou erradas",
+        "es_correcta": false,
+        "explicacion": "JSON parcial causa chamadas de ferramenta erradas ou com falha."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "transmissão tool_use"
+    ]
+  },
+  {
+    "pregunta": "depois de enviar tool_results, quem fala a seguir no padrão da API de mensagens? Contexto: um serviço de produção Agent SDK, loops de ferramentas de tratamento e fluxo de controle stop_reason. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Inserir uma mensagem sintética do sistema em vez de chamar o modelo — ignora a curva do modelo que interpreta a saída da ferramenta",
+        "es_correcta": false,
+        "explicacion": "Ignora a curva do modelo que interpreta a saída da ferramenta."
+      },
+      {
+        "texto_opcion": "Exigir que o usuário humano digite ok após cada tool_result – interrompe os fluxos do agente autônomo desnecessariamente — interrompe fluxos de agentes autônomos desnecessariamente",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de agentes autônomos desnecessariamente."
+      },
+      {
+        "texto_opcion": "Exclua mensagens anteriores do assistente antes de continuar - remove o contexto tool_use que o modelo precisa adotar como padrão para a equipe",
+        "es_correcta": false,
+        "explicacion": "Remove o contexto tool_use que o modelo precisa."
+      },
+      {
+        "texto_opcion": "Chame o modelo novamente com a lista de mensagens atualizada; o assistente produz o próximo turno",
+        "es_correcta": true,
+        "explicacion": "O loop alterna o assistente tool_use com o cliente tool_result e depois a continuação do assistente."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "turno do usuário após ferramentas"
+    ]
+  },
+  {
+    "pregunta": "uma ferramenta de consulta de banco de dados de longa duração às vezes excede o SLA dentro de uma sessão de agente. Contexto: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Bloqueie o loop até que a consulta termine, não importa quanto tempo — viola os SLAs de latência e prende os trabalhadores — viola SLAs de latência e prende trabalhadores",
+        "es_correcta": false,
+        "explicacion": "Viola SLAs de latência e prende trabalhadores."
+      },
+      {
+        "texto_opcion": "Encerre a sessão sem retornar nenhum tool_result – deixa a conversa em um estado inválido como escolha padrão de produção neste cenário priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Deixa a conversa em um estado inválido."
+      },
+      {
+        "texto_opcion": "Implemente tempos limite no nível da ferramenta e retorne um erro de tempo limite conciso em tool_result",
+        "es_correcta": true,
+        "explicacion": "A execução limitada da ferramenta evita que o loop do agente seja interrompido em dependências suspensas."
+      },
+      {
+        "texto_opcion": "Tente novamente a consulta ilimitada dentro do manipulador de ferramentas – mesmo risco de travamento sem um limite configurado de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "O mesmo risco de travamento sem tampa."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tempo limite da ferramenta"
+    ]
+  },
+  {
+    "pregunta": "um agente de pagamento pode tentar novamente charge_order após falhas de rede ambíguas. Revisão de projeto para um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Selecione a abordagem mais apropriada. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Desative totalmente as tentativas para todas as ferramentas – correções excessivas; ferramentas somente leitura se beneficiam de novas tentativas",
+        "es_correcta": false,
+        "explicacion": "Correções excessivas; ferramentas somente leitura se beneficiam de novas tentativas."
+      },
+      {
+        "texto_opcion": "Ocultar a contagem de novas tentativas do modelo – o modelo não pode ajustar a estratégia sem contexto de falha plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "O modelo não pode ajustar a estratégia sem contexto de falha."
+      },
+      {
+        "texto_opcion": "Permitir cobranças duplicadas em cada nova tentativa — risco financeiro em falhas ambíguas como projeto principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Risco financeiro em falhas ambíguas."
+      },
+      {
+        "texto_opcion": "Projete ferramentas de cobrança com chaves de idempotência e status duplicado de superfície em tool_result",
+        "es_correcta": true,
+        "explicacion": "Ferramentas idempotentes permitem novas tentativas seguras sem cobrança dupla quando o loop se repete."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas idempotentes"
+    ]
+  },
+  {
+    "pregunta": "uma ferramenta de pesquisa não encontra registros para uma consulta válida. Cenário: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Retornar tool_result informando zero resultados com campos consistentes com esquema, não um resultado omitido",
+        "es_correcta": true,
+        "explicacion": "Resultados vazios, mas explícitos, permitem que o modelo raciocine sobre as próximas etapas."
+      },
+      {
+        "texto_opcion": "Retorna HTTP 404 apenas na camada de transporte — o modelo vê falha na ferramenta, e não uma semântica de sucesso vazia como opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "O modelo vê a falha da ferramenta, não uma semântica vazia de sucesso."
+      },
+      {
+        "texto_opcion": "Fabricar registros de espaço reservado — introduz dados alucinados no fluxo de trabalho selecionado para atender às restrições descritas aqui comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "Introduz dados alucinados no fluxo de trabalho."
+      },
+      {
+        "texto_opcion": "Omitir tool_result quando nada for encontrado — viola o contrato de um resultado por tool_use aplicado em todos os ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Viola o contrato de um resultado por tool_use."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "resultado de ferramenta vazia"
+    ]
+  },
+  {
+    "pregunta": "retomar uma sessão do agente após uma reinicialização do processo no meio do loop da ferramenta. Revisão de projeto para um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Selecione a abordagem mais apropriada. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Persistir apenas o último trecho de texto do assistente — insuficiente para reconstruir o estado do protocolo da ferramenta priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Insuficiente para reconstruir o estado do protocolo da ferramenta."
+      },
+      {
+        "texto_opcion": "Inicie uma nova conversa e espere que o usuário repita o contexto - perde a correlação tool_use e o trabalho anterior usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Perde a correlação tool_use e o trabalho anterior."
+      },
+      {
+        "texto_opcion": "Preencher automaticamente ferramentas pendentes com dados simulados na reinicialização — arriscado na produção e oculta falhas reais — arriscado na produção e esconde falhas reais",
+        "es_correcta": false,
+        "explicacion": "Arriscado na produção e esconde falhas reais."
+      },
+      {
+        "texto_opcion": "Persistir histórico completo de mensagens, incluindo blocos tool_use pendentes e reproduzir resultados de ferramentas não cumpridos",
+        "es_correcta": true,
+        "explicacion": "O estado de mensagem durável é necessário para continuar uma rodada de ferramentas parcialmente concluída."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "estado de conversa"
+    ]
+  },
+  {
+    "pregunta": "um serviço Agent SDK deve continuar chamando ferramentas até que o modelo termine sem tool_use. Contexto: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Sair após a primeira mensagem do assistente, independentemente de stop_reason — a saída prematura ignora as rodadas de ferramentas necessárias comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "A saída prematura ignora as rodadas de ferramentas necessárias."
+      },
+      {
+        "texto_opcion": "Pesquise a API de mensagens a cada segundo sem ler stop_reason — a pesquisa por si só não implementa o contrato de loop de ferramentas — a votação por si só não implementa o contrato de loop de ferramentas",
+        "es_correcta": false,
+        "explicacion": "A votação por si só não implementa o contrato de loop de ferramentas."
+      },
+      {
+        "texto_opcion": "Loop em stop_reason end_turn vs tool_use; enviar blocos tool_result até end_turn",
+        "es_correcta": true,
+        "explicacion": "Os fluxos agênicos exigem um loop externo que envia os resultados da ferramenta até que o modelo pare de solicitar ferramentas."
+      },
+      {
+        "texto_opcion": "Desativar ferramentas após uma rodada para force end_turn — interrompe fluxos de trabalho de agente em várias etapas aplicados em ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de trabalho de agentes em várias etapas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason ciclo"
+    ]
+  },
+  {
+    "pregunta": "um agente de reembolso retorna JSON estruturado de uma ferramenta de pesquisa de pedidos para Claude. Cenário: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Envie tool_result com tool_use_id correspondente ao bloco tool_use anterior e conteúdo como string ou carga útil estruturada",
+        "es_correcta": true,
+        "explicacion": "Cada tool_result deve fazer referência ao tool_use_id de origem para o modelo correlacionar as saídas."
+      },
+      {
+        "texto_opcion": "Retorna blobs binários sem codificação no conteúdo tool_result — a API espera conteúdo serializável em blocos tool_result usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "A API espera conteúdo serializável em blocos tool_result."
+      },
+      {
+        "texto_opcion": "Incorporar resultados apenas no prompt do sistema na próxima curva — os resultados da ferramenta pertencem ao canal da ferramenta, não à injeção apenas do sistema",
+        "es_correcta": false,
+        "explicacion": "Os resultados da ferramenta pertencem ao canal da ferramenta e não à injeção apenas do sistema."
+      },
+      {
+        "texto_opcion": "Anexar a saída da ferramenta como uma nova mensagem de usuário sem tool_use_id — quebra o protocolo da ferramenta e confunde a atribuição — quebra o protocolo da ferramenta e confunde atribuição",
+        "es_correcta": false,
+        "explicacion": "Quebra o protocolo da ferramenta e confunde atribuição."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "formato tool_result"
+    ]
+  },
+  {
+    "pregunta": "um agente de pesquisa ocasionalmente faz um loop indefinido chamando a mesma ferramenta de pesquisa. Contexto de produção: um sistema de pesquisa multiagente com subagentes coordenador, busca na web e síntese. O que o arquiteto deve fazer? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Defina a temperatura apenas como zero — a temperatura não garante a terminação do loop configurada de ponta a ponta para a carga de trabalho declarada — a temperatura não garante o encerramento do loop",
+        "es_correcta": false,
+        "explicacion": "A temperatura não garante o encerramento do loop."
+      },
+      {
+        "texto_opcion": "Limite as iterações no código do aplicativo e interrompa quando stop_reason for end_turn ou o máximo de rodadas for excedido",
+        "es_correcta": true,
+        "explicacion": "Os limites de iteração programática evitam loops de ferramentas descontrolados além do modelo stop_reason sozinho."
+      },
+      {
+        "texto_opcion": "Confie no modelo para encerrar automaticamente sem proteção externa — os modelos podem repetir chamadas de ferramenta sem um hard cap usado como caminho principal nesta arquitetura — os modelos podem repetir chamadas de ferramenta sem limite rígido",
+        "es_correcta": false,
+        "explicacion": "Os modelos podem repetir chamadas de ferramenta sem limite rígido."
+      },
+      {
+        "texto_opcion": "Remova todas as ferramentas no meio da execução, sem notificar o usuário — a remoção abrupta da ferramenta causa estado parcial confuso, priorizado pela simplicidade, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "A remoção abrupta da ferramenta causa um estado parcial confuso."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "máximo de rodadas de ferramenta"
+    ]
+  },
+  {
+    "pregunta": "Claude solicita três pesquisas independentes em um turno de assistente. Cenário: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Mesclar todas as saídas em um único tool_result — cada tool_use_id precisa de seu próprio tool_result aplicado em todos os ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Cada tool_use_id precisa de seu próprio tool_result."
+      },
+      {
+        "texto_opcion": "Execute as ferramentas sequencialmente e elimine dois dos três resultados – os blocos tool_result ausentes violam o contrato da API comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "Os blocos tool_result ausentes violam o contrato da API."
+      },
+      {
+        "texto_opcion": "Execute todos os blocos tool_use simultaneamente e retorne um tool_result por tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser executadas em paralelo com blocos de resultados correspondentes."
+      },
+      {
+        "texto_opcion": "Aguarde end_turn antes de executar qualquer ferramenta — atrasa o trabalho paralelo válido e quebra o contrato de giro — atrasa o trabalho paralelo válido e quebra o contrato de turno",
+        "es_correcta": false,
+        "explicacion": "Atrasa o trabalho paralelo válido e quebra o contrato de turno."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "chamadas de ferramentas paralelas"
+    ]
+  },
+  {
+    "pregunta": "a etapa dois precisa de um account_id retornado somente após a etapa um create_customer ser bem-sucedida. Revisão de projeto para um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Account_id codificado no prompt do sistema – frágil e ignora saídas de ferramentas dinâmicas plausíveis à primeira vista, mas mais fracas que a melhor opção — frágil e ignora as saídas dinâmicas da ferramenta",
+        "es_correcta": false,
+        "explicacion": "Frágil e ignora as saídas dinâmicas da ferramenta."
+      },
+      {
+        "texto_opcion": "Dispare create_customer e charge_card sempre em paralelo - charge_card não possui account_id se a criação não tiver sido concluída de forma plausível à primeira vista, mas é mais fraca do que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "charge_card não terá account_id se a criação não tiver sido concluída."
+      },
+      {
+        "texto_opcion": "Execute create_customer primeiro; passe seu tool_result para o próximo turno antes de chamar as ferramentas dependentes",
+        "es_correcta": true,
+        "explicacion": "Ferramentas dependentes requerem execução sequencial e passagem explícita de resultados anteriores."
+      },
+      {
+        "texto_opcion": "Ignore tool_result para create_customer para salvar tokens – as ferramentas downstream perdem o contexto de entrada necessário como design primário para este requisito plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "As ferramentas downstream perdem o contexto de entrada necessário."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas dependentes"
+    ]
+  },
+  {
+    "pregunta": "seu manipulador recebe stop_reason tool_use na última mensagem do assistente. Cenário: um assistente de produtividade do desenvolvedor usando ferramentas integradas mais servidores MCP. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute as ferramentas solicitadas, anexe mensagens tool_result e chame o modelo novamente",
+        "es_correcta": true,
+        "explicacion": "stop_reason tool_use sinaliza execução pendente da ferramenta antes que a curva possa ser concluída."
+      },
+      {
+        "texto_opcion": "Tente novamente o mesmo prompt sem resultados da ferramenta – o modelo repetirá a mesma solicitação tool_use",
+        "es_correcta": false,
+        "explicacion": "O modelo repetirá a mesma solicitação tool_use."
+      },
+      {
+        "texto_opcion": "Trate tool_use como end_turn e retorne ao usuário imediatamente - deixa as chamadas de ferramenta não atendidas",
+        "es_correcta": false,
+        "explicacion": "Deixa as chamadas de ferramenta não atendidas."
+      },
+      {
+        "texto_opcion": "Converta blocos tool_use em mensagens de usuário de texto simples - o tipo de bloco errado quebra a análise de protocolo",
+        "es_correcta": false,
+        "explicacion": "O tipo de bloco errado interrompe a análise do protocolo."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason tool_use"
+    ]
+  },
+  {
+    "pregunta": "uma API externa retorna HTTP 503 durante uma chamada de ferramenta dentro do loop do agente. Contexto de produção: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. O que o arquiteto deve fazer? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Travar todo o processo do agente sem uma mensagem do usuário – baixa confiabilidade e sem degradação normal — baixa confiabilidade e nenhuma degradação elegante",
+        "es_correcta": false,
+        "explicacion": "Baixa confiabilidade e nenhuma degradação elegante."
+      },
+      {
+        "texto_opcion": "Engula o erro e envie um tool_result vazio – o modelo não tem sinal para mudar a estratégia como opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "O modelo carece de sinal para mudar a estratégia."
+      },
+      {
+        "texto_opcion": "Retorne tool_result com is_error ou texto de erro estruturado para que o modelo possa tentar novamente ou escalar",
+        "es_correcta": true,
+        "explicacion": "As falhas da ferramenta devem retornar através de tool_result para que o modelo possa se recuperar ou pedir ajuda."
+      },
+      {
+        "texto_opcion": "Tente novamente a chamada HTTP silenciosamente para sempre dentro da ferramenta – pode travar o loop do agente sem reconhecimento do modelo",
+        "es_correcta": false,
+        "explicacion": "Pode travar o loop do agente sem reconhecimento do modelo."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "erro na execução da ferramenta"
+    ]
+  },
+  {
+    "pregunta": "uma vez mistura explicação de texto com vários blocos tool_use. Revisão de projeto para um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Preservar a ordem de bloqueio do conteúdo do assistente ao registrar; execute todos os tool_use referenciados nessa mensagem",
+        "es_correcta": true,
+        "explicacion": "A ordem dos blocos reflete a intenção do modelo; todas as entradas tool_use no turno devem ser honradas."
+      },
+      {
+        "texto_opcion": "Reordenar os blocos tool_result em ordem alfabética por nome da ferramenta — a incompatibilidade de ordem pode confundir a depuração, não substituir a correspondência de id priorizada para simplificar, embora perca uma restrição chave",
+        "es_correcta": false,
+        "explicacion": "A incompatibilidade de pedidos pode confundir a depuração, e não substituir a correspondência de ID."
+      },
+      {
+        "texto_opcion": "Retirar blocos de texto antes de enviá-los para observabilidade — perde o contexto de raciocínio para operadores plausíveis à primeira vista, mas é mais fraco que a melhor opção — perde o contexto de raciocínio para os operadores",
+        "es_correcta": false,
+        "explicacion": "Perde o contexto de raciocínio para os operadores."
+      },
+      {
+        "texto_opcion": "Execute apenas o primeiro bloco tool_use — ignora ações adicionais solicitadas no mesmo turno aplicadas em todos os ambientes para consistência operacional priorizado por simplicidade, mas deixa de lado uma restrição-chave Isso o torna inadequado frente à restrição principal do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Ignora ações adicionais solicitadas no mesmo turno."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ordenação de blocos de conteúdo"
+    ]
+  },
+  {
+    "pregunta": "você transmite tokens de assistente e detecta tool_use JSON parcial no meio do fluxo. Cenário: um assistente de produtividade do desenvolvedor usando ferramentas integradas mais servidores MCP. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore tool_use durante o stream e manipule apenas texto – perde chamadas de ferramenta emitidas no stream",
+        "es_correcta": false,
+        "explicacion": "Perde chamadas de ferramenta emitidas no fluxo."
+      },
+      {
+        "texto_opcion": "Desative o streaming para evitar tool_use totalmente — o streaming é compatível quando o buffer está correto",
+        "es_correcta": false,
+        "explicacion": "O streaming é compatível quando o buffer está correto."
+      },
+      {
+        "texto_opcion": "Buffer até que o bloco tool_use seja concluído e então execute; não execute em deltas parciais",
+        "es_correcta": true,
+        "explicacion": "O streaming requer a espera de cargas úteis tool_use completas antes da execução."
+      },
+      {
+        "texto_opcion": "Execute ferramentas em cada evento delta – JSON parcial causa chamadas de ferramenta com falha ou erradas",
+        "es_correcta": false,
+        "explicacion": "JSON parcial causa chamadas de ferramenta erradas ou com falha."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "transmissão tool_use"
+    ]
+  },
+  {
+    "pregunta": "depois de enviar tool_results, quem fala a seguir no padrão da API de mensagens? Contexto: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Exigir que o usuário humano digite ok após cada tool_result – interrompe os fluxos do agente autônomo desnecessariamente — interrompe fluxos de agentes autônomos desnecessariamente",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de agentes autônomos desnecessariamente."
+      },
+      {
+        "texto_opcion": "Chame o modelo novamente com a lista de mensagens atualizada; o assistente produz o próximo turno",
+        "es_correcta": true,
+        "explicacion": "O loop alterna o assistente tool_use com o cliente tool_result e depois a continuação do assistente."
+      },
+      {
+        "texto_opcion": "Exclua mensagens anteriores do assistente antes de continuar — remove o contexto tool_use que o modelo precisa selecionar para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "Remove o contexto tool_use que o modelo precisa."
+      },
+      {
+        "texto_opcion": "Inserir uma mensagem sintética do sistema em vez de chamar o modelo — ignora a curva do modelo que interpreta a saída da ferramenta plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Ignora a curva do modelo que interpreta a saída da ferramenta."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "turno do usuário após ferramentas"
+    ]
+  },
+  {
+    "pregunta": "uma ferramenta de consulta de banco de dados de longa duração às vezes excede o SLA dentro de uma sessão de agente. Revisão de projeto para um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Tente novamente a consulta ilimitada dentro do manipulador de ferramentas — mesmo risco de travamento sem um limite selecionado para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "O mesmo risco de travamento sem tampa."
+      },
+      {
+        "texto_opcion": "Implemente tempos limite no nível da ferramenta e retorne um erro de tempo limite conciso em tool_result",
+        "es_correcta": true,
+        "explicacion": "A execução limitada da ferramenta evita que o loop do agente seja interrompido em dependências suspensas."
+      },
+      {
+        "texto_opcion": "Bloqueie o loop até que a consulta termine, não importa quanto tempo — viola os SLAs de latência e prende os trabalhadores — viola SLAs de latência e prende trabalhadores",
+        "es_correcta": false,
+        "explicacion": "Viola SLAs de latência e prende trabalhadores."
+      },
+      {
+        "texto_opcion": "Encerre a sessão sem retornar nenhum tool_result – deixa a conversa em um estado inválido usado como caminho principal nesta arquitetura adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Deixa a conversa em um estado inválido."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tempo limite da ferramenta"
+    ]
+  },
+  {
+    "pregunta": "um agente de pagamento pode tentar novamente charge_order após falhas de rede ambíguas. Revisão de projeto para loops de ferramentas de manipulação de serviço de produção Agent SDK e fluxo de controle stop_reason. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Projete ferramentas de cobrança com chaves de idempotência e status duplicado de superfície em tool_result",
+        "es_correcta": true,
+        "explicacion": "Ferramentas idempotentes permitem novas tentativas seguras sem cobrança dupla quando o loop se repete."
+      },
+      {
+        "texto_opcion": "Permitir cobranças duplicadas em cada nova tentativa — risco financeiro em falhas ambíguas usadas como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Risco financeiro em falhas ambíguas."
+      },
+      {
+        "texto_opcion": "Ocultar a contagem de novas tentativas do modelo – o modelo não pode ajustar a estratégia sem contexto de falha plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "O modelo não pode ajustar a estratégia sem contexto de falha."
+      },
+      {
+        "texto_opcion": "Desative totalmente as tentativas para todas as ferramentas – correções excessivas; ferramentas somente leitura se beneficiam de novas tentativas",
+        "es_correcta": false,
+        "explicacion": "Correções excessivas; ferramentas somente leitura se beneficiam de novas tentativas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas idempotentes"
+    ]
+  },
+  {
+    "pregunta": "uma ferramenta de pesquisa não encontra registros para uma consulta válida. Revisão de projeto para um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Retornar tool_result informando zero resultados com campos consistentes com esquema, não um resultado omitido",
+        "es_correcta": true,
+        "explicacion": "Resultados vazios, mas explícitos, permitem que o modelo raciocine sobre as próximas etapas."
+      },
+      {
+        "texto_opcion": "Fabricar registros de espaço reservado — introduz dados alucinados no fluxo de trabalho selecionado para atender às restrições descritas aqui adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Introduz dados alucinados no fluxo de trabalho."
+      },
+      {
+        "texto_opcion": "Omitir tool_result quando nada for encontrado — viola o contrato de um resultado por tool_use aplicado em todos os ambientes para consistência operacional priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Viola o contrato de um resultado por tool_use."
+      },
+      {
+        "texto_opcion": "Retornar HTTP 404 apenas na camada de transporte - o modelo vê falha na ferramenta, não um sucesso semântico vazio, plausível à primeira vista, mas mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "O modelo vê a falha da ferramenta, não uma semântica vazia de sucesso."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "resultado de ferramenta vazia"
+    ]
+  },
+  {
+    "pregunta": "retomar uma sessão do agente após uma reinicialização do processo no meio do loop da ferramenta. Cenário: um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Persistir apenas o último trecho de texto do assistente — insuficiente para reconstruir o estado do protocolo da ferramenta aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Insuficiente para reconstruir o estado do protocolo da ferramenta."
+      },
+      {
+        "texto_opcion": "Preencher automaticamente ferramentas pendentes com dados simulados na reinicialização — arriscado na produção e oculta falhas reais — arriscado na produção e esconde falhas reais",
+        "es_correcta": false,
+        "explicacion": "Arriscado na produção e esconde falhas reais."
+      },
+      {
+        "texto_opcion": "Inicie uma nova conversa e espere que o usuário repita o contexto - perde a correlação tool_use e o trabalho anterior configurado de ponta a ponta para o workload descrito",
+        "es_correcta": false,
+        "explicacion": "Perde a correlação tool_use e o trabalho anterior."
+      },
+      {
+        "texto_opcion": "Persistir histórico completo de mensagens, incluindo blocos tool_use pendentes e reproduzir resultados de ferramentas não cumpridos",
+        "es_correcta": true,
+        "explicacion": "O estado de mensagem durável é necessário para continuar uma rodada de ferramentas parcialmente concluída."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "estado de conversa"
+    ]
+  },
+  {
+    "pregunta": "um serviço Agent SDK deve continuar chamando ferramentas até que o modelo termine sem tool_use. Contexto: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Sair após a primeira mensagem do assistente, independentemente de stop_reason — a saída prematura ignora as rodadas de ferramentas necessárias comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "A saída prematura ignora as rodadas de ferramentas necessárias."
+      },
+      {
+        "texto_opcion": "Loop em stop_reason end_turn vs tool_use; enviar blocos tool_result até end_turn",
+        "es_correcta": true,
+        "explicacion": "Os fluxos agênicos exigem um loop externo que envia os resultados da ferramenta até que o modelo pare de solicitar ferramentas."
+      },
+      {
+        "texto_opcion": "Pesquise a API de mensagens a cada segundo sem ler stop_reason — a pesquisa por si só não implementa o contrato de loop de ferramentas — a votação por si só não implementa o contrato de loop de ferramentas",
+        "es_correcta": false,
+        "explicacion": "A votação por si só não implementa o contrato de loop de ferramentas."
+      },
+      {
+        "texto_opcion": "Desativar ferramentas após uma rodada para force end_turn — quebra fluxos de trabalho de agentes de várias etapas selecionados para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "Interrompe fluxos de trabalho de agentes em várias etapas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason ciclo"
+    ]
+  },
+  {
+    "pregunta": "um agente de reembolso retorna JSON estruturado de uma ferramenta de pesquisa de pedidos para Claude. Revisão de projeto para um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Selecione a abordagem mais apropriada. Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Incorporar resultados apenas no prompt do sistema na próxima curva — os resultados da ferramenta pertencem ao canal da ferramenta, não à injeção apenas do sistema",
+        "es_correcta": false,
+        "explicacion": "Os resultados da ferramenta pertencem ao canal da ferramenta e não à injeção apenas do sistema."
+      },
+      {
+        "texto_opcion": "Anexar a saída da ferramenta como uma nova mensagem de usuário sem tool_use_id — quebra o protocolo da ferramenta e confunde a atribuição — quebra o protocolo da ferramenta e confunde atribuição",
+        "es_correcta": false,
+        "explicacion": "Quebra o protocolo da ferramenta e confunde atribuição."
+      },
+      {
+        "texto_opcion": "Retorna blobs binários sem codificação no conteúdo tool_result — a API espera conteúdo serializável em blocos tool_result adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "A API espera conteúdo serializável em blocos tool_result."
+      },
+      {
+        "texto_opcion": "Envie tool_result com tool_use_id correspondente ao bloco tool_use anterior e conteúdo como string ou carga útil estruturada",
+        "es_correcta": true,
+        "explicacion": "Cada tool_result deve fazer referência ao tool_use_id de origem para o modelo correlacionar as saídas."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "formato tool_result"
+    ]
+  },
+  {
+    "pregunta": "um agente de pesquisa ocasionalmente faz um loop indefinido chamando a mesma ferramenta de pesquisa. Contexto: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Remova todas as ferramentas no meio da execução sem notificar o usuário — a remoção abrupta da ferramenta causa confusão no estado parcial como projeto principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "A remoção abrupta da ferramenta causa um estado parcial confuso."
+      },
+      {
+        "texto_opcion": "Confie no modelo para encerrar automaticamente sem proteção externa — os modelos podem repetir chamadas de ferramenta sem limite rígido como opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "Os modelos podem repetir chamadas de ferramenta sem limite rígido."
+      },
+      {
+        "texto_opcion": "Limite as iterações no código do aplicativo e interrompa quando stop_reason for end_turn ou o máximo de rodadas for excedido",
+        "es_correcta": true,
+        "explicacion": "Os limites de iteração programática evitam loops de ferramentas descontrolados além do modelo stop_reason sozinho."
+      },
+      {
+        "texto_opcion": "Defina a temperatura apenas para zero - a temperatura não garante a terminação do loop plausível à primeira vista, mas mais fraca do que a melhor opção — a temperatura não garante o encerramento do loop",
+        "es_correcta": false,
+        "explicacion": "A temperatura não garante o encerramento do loop."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "máximo de rodadas de ferramenta"
+    ]
+  },
+  {
+    "pregunta": "Claude solicita três pesquisas independentes em um turno de assistente. Cenário: um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute as ferramentas sequencialmente e elimine dois dos três resultados – os blocos tool_result ausentes violam o contrato da API como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Os blocos tool_result ausentes violam o contrato da API."
+      },
+      {
+        "texto_opcion": "Aguarde end_turn antes de executar qualquer ferramenta — atrasa o trabalho paralelo válido e quebra o contrato de giro — atrasa o trabalho paralelo válido e quebra o contrato de turno",
+        "es_correcta": false,
+        "explicacion": "Atrasa o trabalho paralelo válido e quebra o contrato de turno."
+      },
+      {
+        "texto_opcion": "Mesclar todas as saídas em um único tool_result — cada tool_use_id precisa de seu próprio tool_result, frequentemente visto em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "Cada tool_use_id precisa de seu próprio tool_result."
+      },
+      {
+        "texto_opcion": "Execute todos os blocos tool_use simultaneamente e retorne um tool_result por tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser executadas em paralelo com blocos de resultados correspondentes."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "chamadas de ferramentas paralelas"
+    ]
+  },
+  {
+    "pregunta": "a etapa dois precisa de um account_id retornado somente após a etapa um create_customer ser bem-sucedida. Contexto de produção: um serviço de produção Agent SDK, loops de ferramentas de manipulação e fluxo de controle stop_reason. O que o arquiteto deve fazer? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Account_id codificado no prompt do sistema – frágil e ignora saídas de ferramentas dinâmicas priorizadas para simplificar, embora perca uma restrição importante — frágil e ignora as saídas dinâmicas da ferramenta",
+        "es_correcta": false,
+        "explicacion": "Frágil e ignora as saídas dinâmicas da ferramenta."
+      },
+      {
+        "texto_opcion": "Execute create_customer primeiro; passe seu tool_result para o próximo turno antes de chamar as ferramentas dependentes",
+        "es_correcta": true,
+        "explicacion": "Ferramentas dependentes requerem execução sequencial e passagem explícita de resultados anteriores."
+      },
+      {
+        "texto_opcion": "Dispare create_customer e charge_card sempre em paralelo - charge_card não terá account_id se a criação não tiver sido concluída, visto frequentemente em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "charge_card não terá account_id se a criação não tiver sido concluída."
+      },
+      {
+        "texto_opcion": "Ignore tool_result para create_customer para salvar tokens – as ferramentas downstream perdem o contexto de entrada necessário priorizado por simplicidade, embora perca uma restrição chave",
+        "es_correcta": false,
+        "explicacion": "As ferramentas downstream perdem o contexto de entrada necessário."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "ferramentas dependentes"
+    ]
+  }
+]

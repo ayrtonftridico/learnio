@@ -1,0 +1,1742 @@
+[
+  {
+    "pregunta": "a read-only analyst agent should query warehouses but not mutate production tables. Production context: a production Agent SDK service handling tool loops and stop_reason control flow. What should the architect do?",
+    "opciones": [
+      {
+        "texto_opcion": "Remove tool descriptions but leave handlers registered — handlers may still be reachable depending on host",
+        "es_correcta": false,
+        "explicacion": "Handlers may still be reachable depending on host."
+      },
+      {
+        "texto_opcion": "Configure allowedTools to include get_schema and run_read_query only at request time",
+        "es_correcta": true,
+        "explicacion": "allowedTools restricts which tools the model may invoke on a per-request basis."
+      },
+      {
+        "texto_opcion": "Grant all MCP tools because descriptions mention read-only — descriptions do not enforce permissions",
+        "es_correcta": false,
+        "explicacion": "Descriptions do not enforce permissions."
+      },
+      {
+        "texto_opcion": "List forbidden tools in the user message each turn plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Not enforced by the API."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "after any database write tool runs, you must invalidate a cache key pattern. Scenario: a multi-agent research system with coordinator, web search, and synthesis subagents. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Register a PostToolUse hook that inspects tool name and triggers cache invalidation",
+        "es_correcta": true,
+        "explicacion": "Hooks run programmatic side effects tied to tool lifecycle events."
+      },
+      {
+        "texto_opcion": "Only invalidate manually during business hours — misses automated agent writes off-hours applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Misses automated agent writes off-hours."
+      },
+      {
+        "texto_opcion": "Invalidate cache on every user message — too broad and harms performance as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Too broad and harms performance."
+      },
+      {
+        "texto_opcion": "Ask the model to remember to invalidate cache in text — model may omit post-action maintenance prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Model may omit post-action maintenance."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "block delete_table unless the session carries an admin role claim. Scenario: a production Agent SDK service handling tool loops and stop_reason control flow. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Remove delete_table from the prompt examples only — tool may still be registered and callable",
+        "es_correcta": false,
+        "explicacion": "Tool may still be registered and callable."
+      },
+      {
+        "texto_opcion": "Hope Claude refuses delete_table for non-admins — model refusal is not a security control",
+        "es_correcta": false,
+        "explicacion": "Model refusal is not a security control."
+      },
+      {
+        "texto_opcion": "Implement PreToolUse hook to deny execution when role claim missing",
+        "es_correcta": true,
+        "explicacion": "PreToolUse hooks enforce authorization before side-effecting tools run."
+      },
+      {
+        "texto_opcion": "Document delete_table as admins only in the tool description — description is not authorization",
+        "es_correcta": false,
+        "explicacion": "Description is not authorization."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "you plan overnight bulk classification of 500k support tickets via Message Batches. Production context: a production Agent SDK service handling tool loops and stop_reason control flow. What should the architect do?",
+    "opciones": [
+      {
+        "texto_opcion": "Design batch jobs within documented size and concurrency limits; shard into multiple batch requests",
+        "es_correcta": true,
+        "explicacion": "Message Batches has service limits requiring sharding and monitoring."
+      },
+      {
+        "texto_opcion": "Use streaming Messages API for each ticket synchronously — poor fit for massive offline bulk",
+        "es_correcta": false,
+        "explicacion": "Poor fit for massive offline bulk."
+      },
+      {
+        "texto_opcion": "Submit all 500k records in one batch file regardless of limits — request may fail or throttle",
+        "es_correcta": false,
+        "explicacion": "Request may fail or throttle."
+      },
+      {
+        "texto_opcion": "Skip result polling because batches are async fire-and-forget — you may never retrieve completed outputs",
+        "es_correcta": false,
+        "explicacion": "You may never retrieve completed outputs."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Message Batches limits"
+    ]
+  },
+  {
+    "pregunta": "latency-sensitive chatbot vs monthly invoice categorization backlog. Context: a developer productivity assistant using built-in tools plus MCP servers.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Message Batches for sub-second user chat replies — batch latency unsuitable for interactive UX",
+        "es_correcta": false,
+        "explicacion": "Batch latency unsuitable for interactive UX."
+      },
+      {
+        "texto_opcion": "Mix batch and chat in one conversation thread id — different APIs serve different interaction models",
+        "es_correcta": false,
+        "explicacion": "Different APIs serve different interaction models."
+      },
+      {
+        "texto_opcion": "Use Messages API for realtime chat; Message Batches for offline backlog processing",
+        "es_correcta": true,
+        "explicacion": "Batch API optimizes cost and throughput for non-interactive workloads."
+      },
+      {
+        "texto_opcion": "Run monthly backlog through synchronous chat loops — expensive and operationally fragile",
+        "es_correcta": false,
+        "explicacion": "Expensive and operationally fragile."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "batch vs realtime"
+    ]
+  },
+  {
+    "pregunta": "Claude emits get_user and get_orders tool_use blocks together with no dependency. Context: a developer productivity assistant using built-in tools plus MCP servers.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute both tools concurrently and return matching tool_results before the next model call",
+        "es_correcta": true,
+        "explicacion": "Same-turn independent tools should parallelize for latency."
+      },
+      {
+        "texto_opcion": "Execute only get_user and ignore get_orders — incomplete fulfillment of the assistant turn prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Incomplete fulfillment of the assistant turn."
+      },
+      {
+        "texto_opcion": "Execute get_orders before get_user always alphabetically — unneeded serialization increases latency configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Unneeded serialization increases latency."
+      },
+      {
+        "texto_opcion": "Return one combined tool_result for both — violates per-tool_use_id pairing prioritized for simplicity, though it misses a key constraint prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Violates per-tool_use_id pairing."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "parallel tools same turn"
+    ]
+  },
+  {
+    "pregunta": "create_shipment requires package_id from pack_items tool in the prior round. Design review for a multi-agent research system with coordinator, web search, and synthesis subagents. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Complete pack_items, return tool_result, then allow create_shipment in the subsequent assistant turn",
+        "es_correcta": true,
+        "explicacion": "Cross-turn dependencies require sequential tool loop rounds."
+      },
+      {
+        "texto_opcion": "Batch both tools into one external API call outside the protocol — breaks model visibility into steps as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Breaks model visibility into steps."
+      },
+      {
+        "texto_opcion": "Register create_shipment in allowedTools before pack_items runs — allowed list does not remove data dependency configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Allowed list does not remove data dependency."
+      },
+      {
+        "texto_opcion": "Pass fake package_id to unblock create_shipment — causes downstream logistics errors as a primary design for this requirement as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Causes downstream logistics errors."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dependent tools sequencing"
+    ]
+  },
+  {
+    "pregunta": "security wants alerts when rare admin tools fire. Context: a production Agent SDK service handling tool loops and stop_reason control flow.",
+    "opciones": [
+      {
+        "texto_opcion": "Review chat transcripts weekly by hand — too slow for incident response used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Too slow for incident response."
+      },
+      {
+        "texto_opcion": "Ask Claude to log admin tool usage in natural language — unstructured and unreliable for alerting used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Unstructured and unreliable for alerting."
+      },
+      {
+        "texto_opcion": "Emit metrics and alerts from PostToolUse hooks on sensitive tool names",
+        "es_correcta": true,
+        "explicacion": "Hooks centralize security telemetry without trusting model narration."
+      },
+      {
+        "texto_opcion": "Disable hooks to reduce log volume — removes real-time detection as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Removes real-time detection."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "hook observability"
+    ]
+  },
+  {
+    "pregunta": "tool availability changes after user completes MFA step-up. Context: an enterprise RAG assistant over policy PDFs with MCP document tools.",
+    "opciones": [
+      {
+        "texto_opcion": "Never change allowedTools mid-session — misses step-up authentication patterns",
+        "es_correcta": false,
+        "explicacion": "Misses step-up authentication patterns."
+      },
+      {
+        "texto_opcion": "Update allowedTools on the next request after MFA success to include sensitive tools",
+        "es_correcta": true,
+        "explicacion": "allowedTools can change per request based on session state."
+      },
+      {
+        "texto_opcion": "Register all tools upfront and prompt user not to cheat — does not enforce step-up gating",
+        "es_correcta": false,
+        "explicacion": "Does not enforce step-up gating."
+      },
+      {
+        "texto_opcion": "Require MFA inside every tool description — mFA belongs in session policy, not tool docs",
+        "es_correcta": false,
+        "explicacion": "MFA belongs in session policy, not tool docs."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dynamic allowedTools"
+    ]
+  },
+  {
+    "pregunta": "a workflow expects Claude to pick among similar lookup tools as needed. Design review for a Claude Code CI pipeline that must run non-interactively on every PR. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Force tool_choice any on every turn — forces tool use even when a direct answer suffices prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Forces tool use even when a direct answer suffices."
+      },
+      {
+        "texto_opcion": "Provide twelve overlapping tools with identical descriptions — ambiguous routing harms selection as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Ambiguous routing harms selection."
+      },
+      {
+        "texto_opcion": "Disable tools to simplify routing — removes necessary actions from the agent as a primary design for this requirement as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Removes necessary actions from the agent."
+      },
+      {
+        "texto_opcion": "Use tool_choice auto and clear distinct tool descriptions so the model selects appropriately",
+        "es_correcta": true,
+        "explicacion": "auto lets the model choose tools when multiple are valid."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice auto"
+    ]
+  },
+  {
+    "pregunta": "pipeline must always call extract_fields tool before responding to API clients. Context: a multi-agent research system with coordinator, web search, and synthesis subagents.",
+    "opciones": [
+      {
+        "texto_opcion": "Set tool_choice to require a specific tool or any tool on turns that must produce structured extraction",
+        "es_correcta": true,
+        "explicacion": "Required tool choice guarantees tool invocation when mandatory."
+      },
+      {
+        "texto_opcion": "Use tool_choice none on extraction turns — explicitly prevents needed tool calls as a primary design for this requirement plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Explicitly prevents needed tool calls."
+      },
+      {
+        "texto_opcion": "Hope the model always chooses extract_fields voluntarily — voluntary selection can be skipped as a primary design for this requirement plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Voluntary selection can be skipped."
+      },
+      {
+        "texto_opcion": "Parse free text with regex instead of tools — bypasses the structured tool contract often seen in legacy designs but not ideal for this case as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Bypasses the structured tool contract."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice required"
+    ]
+  },
+  {
+    "pregunta": "a Message Batch completes but 2% of rows failed validation. Design review for a structured data extraction service that emits validated JSON for downstream systems. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Discard the entire batch if any row fails — wastes 98% successful work adopted as the standard pattern for the team often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Wastes 98% successful work."
+      },
+      {
+        "texto_opcion": "Mark batch succeeded without reading result files — silent data loss on failed rows often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Silent data loss on failed rows."
+      },
+      {
+        "texto_opcion": "Re-submit the full batch unchanged indefinitely — repeats the same validation failures prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Repeats the same validation failures."
+      },
+      {
+        "texto_opcion": "Download batch results, route failures to a dead-letter queue, and retry or inspect separately",
+        "es_correcta": true,
+        "explicacion": "Batch processing needs partial failure handling, not all-or-nothing assumptions."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "batch partial failure"
+    ]
+  },
+  {
+    "pregunta": "PostToolUse hooks add 800ms each and users notice slowness. Context: an enterprise RAG assistant over policy PDFs with MCP document tools.",
+    "opciones": [
+      {
+        "texto_opcion": "Run synchronous third-party CRM sync inside PreToolUse always — blocks tool execution on slow integrations as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Blocks tool execution on slow integrations."
+      },
+      {
+        "texto_opcion": "Disable tools instead of optimizing hooks — over-reduces functionality often seen in legacy designs but not ideal for this case selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Over-reduces functionality."
+      },
+      {
+        "texto_opcion": "Offload non-critical hook work to async workers; keep hooks lean on the critical path",
+        "es_correcta": true,
+        "explicacion": "Hook design should balance enforcement with latency budgets."
+      },
+      {
+        "texto_opcion": "Remove all hooks to restore speed — loses enforcement and observability selected to meet the constraints described here often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Loses enforcement and observability."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "hook latency"
+    ]
+  },
+  {
+    "pregunta": "user cancels while two parallel tools are in flight. Context: a developer productivity assistant using built-in tools plus MCP servers.",
+    "opciones": [
+      {
+        "texto_opcion": "Abort without sending any tool_result — leaves the message list in an invalid state as the default production choice in this scenario selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Leaves the message list in an invalid state."
+      },
+      {
+        "texto_opcion": "Restart the entire conversation from scratch automatically — heavy-handed and loses valid context often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Heavy-handed and loses valid context."
+      },
+      {
+        "texto_opcion": "Cancel in-flight tool tasks if possible and return cancelled status in tool_result to the model",
+        "es_correcta": true,
+        "explicacion": "Cancellation should propagate to parallel tool executors cleanly."
+      },
+      {
+        "texto_opcion": "Let tools finish silently after user cancel — may apply unwanted side effects selected to meet the constraints described here as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "May apply unwanted side effects."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "multi-tool cancellation"
+    ]
+  },
+  {
+    "pregunta": "a read-only analyst agent should query warehouses but not mutate production tables. Production context: an enterprise RAG assistant over policy PDFs with MCP document tools. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Remove tool descriptions but leave handlers registered — handlers may still be reachable depending on host",
+        "es_correcta": false,
+        "explicacion": "Handlers may still be reachable depending on host."
+      },
+      {
+        "texto_opcion": "Grant all MCP tools because descriptions mention read-only — descriptions do not enforce permissions",
+        "es_correcta": false,
+        "explicacion": "Descriptions do not enforce permissions."
+      },
+      {
+        "texto_opcion": "List forbidden tools in the user message each turn used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Not enforced by the API."
+      },
+      {
+        "texto_opcion": "Configure allowedTools to include get_schema and run_read_query only at request time",
+        "es_correcta": true,
+        "explicacion": "allowedTools restricts which tools the model may invoke on a per-request basis."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "after any database write tool runs, you must invalidate a cache key pattern. Context: a structured data extraction service that emits validated JSON for downstream systems. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Register a PostToolUse hook that inspects tool name and triggers cache invalidation",
+        "es_correcta": true,
+        "explicacion": "Hooks run programmatic side effects tied to tool lifecycle events."
+      },
+      {
+        "texto_opcion": "Only invalidate manually during business hours — misses automated agent writes off-hours prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Misses automated agent writes off-hours."
+      },
+      {
+        "texto_opcion": "Invalidate cache on every user message — too broad and harms performance prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Too broad and harms performance."
+      },
+      {
+        "texto_opcion": "Ask the model to remember to invalidate cache in text — model may omit post-action maintenance configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Model may omit post-action maintenance."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "block delete_table unless the session carries an admin role claim. Context: a structured data extraction service that emits validated JSON for downstream systems. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Hope Claude refuses delete_table for non-admins — model refusal is not a security control",
+        "es_correcta": false,
+        "explicacion": "Model refusal is not a security control."
+      },
+      {
+        "texto_opcion": "Implement PreToolUse hook to deny execution when role claim missing",
+        "es_correcta": true,
+        "explicacion": "PreToolUse hooks enforce authorization before side-effecting tools run."
+      },
+      {
+        "texto_opcion": "Remove delete_table from the prompt examples only — tool may still be registered and callable",
+        "es_correcta": false,
+        "explicacion": "Tool may still be registered and callable."
+      },
+      {
+        "texto_opcion": "Document delete_table as admins only in the tool description — description is not authorization",
+        "es_correcta": false,
+        "explicacion": "Description is not authorization."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "you plan overnight bulk classification of 500k support tickets via Message Batches. Scenario: a customer support resolution agent with order lookup, refund, and escalate tools. Which architectural choice is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Design batch jobs within documented size and concurrency limits; shard into multiple batch requests",
+        "es_correcta": true,
+        "explicacion": "Message Batches has service limits requiring sharding and monitoring."
+      },
+      {
+        "texto_opcion": "Skip result polling because batches are async fire-and-forget — you may never retrieve completed outputs",
+        "es_correcta": false,
+        "explicacion": "You may never retrieve completed outputs."
+      },
+      {
+        "texto_opcion": "Submit all 500k records in one batch file regardless of limits — request may fail or throttle",
+        "es_correcta": false,
+        "explicacion": "Request may fail or throttle."
+      },
+      {
+        "texto_opcion": "Use streaming Messages API for each ticket synchronously — poor fit for massive offline bulk",
+        "es_correcta": false,
+        "explicacion": "Poor fit for massive offline bulk."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Message Batches limits"
+    ]
+  },
+  {
+    "pregunta": "latency-sensitive chatbot vs monthly invoice categorization backlog. Context: a developer productivity assistant using built-in tools plus MCP servers. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Run monthly backlog through synchronous chat loops — expensive and operationally fragile",
+        "es_correcta": false,
+        "explicacion": "Expensive and operationally fragile."
+      },
+      {
+        "texto_opcion": "Use Messages API for realtime chat; Message Batches for offline backlog processing",
+        "es_correcta": true,
+        "explicacion": "Batch API optimizes cost and throughput for non-interactive workloads."
+      },
+      {
+        "texto_opcion": "Mix batch and chat in one conversation thread id — different APIs serve different interaction models",
+        "es_correcta": false,
+        "explicacion": "Different APIs serve different interaction models."
+      },
+      {
+        "texto_opcion": "Use Message Batches for sub-second user chat replies — batch latency unsuitable for interactive UX",
+        "es_correcta": false,
+        "explicacion": "Batch latency unsuitable for interactive UX."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "batch vs realtime"
+    ]
+  },
+  {
+    "pregunta": "Claude emits get_user and get_orders tool_use blocks together with no dependency. Design review for a Claude Code CI pipeline that must run non-interactively on every PR. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute get_orders before get_user always alphabetically — unneeded serialization increases latency applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Unneeded serialization increases latency."
+      },
+      {
+        "texto_opcion": "Execute both tools concurrently and return matching tool_results before the next model call",
+        "es_correcta": true,
+        "explicacion": "Same-turn independent tools should parallelize for latency."
+      },
+      {
+        "texto_opcion": "Execute only get_user and ignore get_orders — incomplete fulfillment of the assistant turn applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Incomplete fulfillment of the assistant turn."
+      },
+      {
+        "texto_opcion": "Return one combined tool_result for both — violates per-tool_use_id pairing as a primary design for this requirement applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Violates per-tool_use_id pairing."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "parallel tools same turn"
+    ]
+  },
+  {
+    "pregunta": "create_shipment requires package_id from pack_items tool in the prior round. Context: a Claude Code code-generation workflow across a multi-repo monorepo. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Batch both tools into one external API call outside the protocol — breaks model visibility into steps applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Breaks model visibility into steps."
+      },
+      {
+        "texto_opcion": "Pass fake package_id to unblock create_shipment — causes downstream logistics errors adopted as the standard pattern for the team applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Causes downstream logistics errors."
+      },
+      {
+        "texto_opcion": "Complete pack_items, return tool_result, then allow create_shipment in the subsequent assistant turn",
+        "es_correcta": true,
+        "explicacion": "Cross-turn dependencies require sequential tool loop rounds."
+      },
+      {
+        "texto_opcion": "Register create_shipment in allowedTools before pack_items runs — allowed list does not remove data dependency applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Allowed list does not remove data dependency."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dependent tools sequencing"
+    ]
+  },
+  {
+    "pregunta": "security wants alerts when rare admin tools fire. Context: a structured data extraction service that emits validated JSON for downstream systems. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Emit metrics and alerts from PostToolUse hooks on sensitive tool names",
+        "es_correcta": true,
+        "explicacion": "Hooks centralize security telemetry without trusting model narration."
+      },
+      {
+        "texto_opcion": "Ask Claude to log admin tool usage in natural language — unstructured and unreliable for alerting often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Unstructured and unreliable for alerting."
+      },
+      {
+        "texto_opcion": "Disable hooks to reduce log volume — removes real-time detection often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Removes real-time detection."
+      },
+      {
+        "texto_opcion": "Review chat transcripts weekly by hand — too slow for incident response often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Too slow for incident response."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "hook observability"
+    ]
+  },
+  {
+    "pregunta": "tool availability changes after user completes MFA step-up. Context: a Claude Code code-generation workflow across a multi-repo monorepo. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Update allowedTools on the next request after MFA success to include sensitive tools",
+        "es_correcta": true,
+        "explicacion": "allowedTools can change per request based on session state."
+      },
+      {
+        "texto_opcion": "Never change allowedTools mid-session — misses step-up authentication patterns",
+        "es_correcta": false,
+        "explicacion": "Misses step-up authentication patterns."
+      },
+      {
+        "texto_opcion": "Require MFA inside every tool description — mFA belongs in session policy, not tool docs",
+        "es_correcta": false,
+        "explicacion": "MFA belongs in session policy, not tool docs."
+      },
+      {
+        "texto_opcion": "Register all tools upfront and prompt user not to cheat — does not enforce step-up gating",
+        "es_correcta": false,
+        "explicacion": "Does not enforce step-up gating."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dynamic allowedTools"
+    ]
+  },
+  {
+    "pregunta": "a workflow expects Claude to pick among similar lookup tools as needed. Design review for a Claude Code CI pipeline that must run non-interactively on every PR. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Provide twelve overlapping tools with identical descriptions — ambiguous routing harms selection configured end-to-end for the stated workload prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Ambiguous routing harms selection."
+      },
+      {
+        "texto_opcion": "Force tool_choice any on every turn — forces tool use even when a direct answer suffices as a primary design for this requirement That makes it a weaker fit against the main constraint in the prompt",
+        "es_correcta": false,
+        "explicacion": "Forces tool use even when a direct answer suffices."
+      },
+      {
+        "texto_opcion": "Use tool_choice auto and clear distinct tool descriptions so the model selects appropriately",
+        "es_correcta": true,
+        "explicacion": "auto lets the model choose tools when multiple are valid."
+      },
+      {
+        "texto_opcion": "Disable tools to simplify routing — removes necessary actions from the agent prioritized for simplicity, though it misses a key constraint configured end-to-end for the stated workload That makes it a weaker fit against the main constraint in the prompt.",
+        "es_correcta": false,
+        "explicacion": "Removes necessary actions from the agent."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice auto"
+    ]
+  },
+  {
+    "pregunta": "pipeline must always call extract_fields tool before responding to API clients. Production context: a Claude Code CI pipeline that must run non-interactively on every PR. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Parse free text with regex instead of tools — bypasses the structured tool contract used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Bypasses the structured tool contract."
+      },
+      {
+        "texto_opcion": "Set tool_choice to require a specific tool or any tool on turns that must produce structured extraction",
+        "es_correcta": true,
+        "explicacion": "Required tool choice guarantees tool invocation when mandatory."
+      },
+      {
+        "texto_opcion": "Use tool_choice none on extraction turns — explicitly prevents needed tool calls as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Explicitly prevents needed tool calls."
+      },
+      {
+        "texto_opcion": "Hope the model always chooses extract_fields voluntarily — voluntary selection can be skipped as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Voluntary selection can be skipped."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice required"
+    ]
+  },
+  {
+    "pregunta": "a Message Batch completes but 2% of rows failed validation. Design review for a multi-agent research system with coordinator, web search, and synthesis subagents. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Download batch results, route failures to a dead-letter queue, and retry or inspect separately",
+        "es_correcta": true,
+        "explicacion": "Batch processing needs partial failure handling, not all-or-nothing assumptions."
+      },
+      {
+        "texto_opcion": "Re-submit the full batch unchanged indefinitely — repeats the same validation failures plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Repeats the same validation failures."
+      },
+      {
+        "texto_opcion": "Discard the entire batch if any row fails — wastes 98% successful work configured end-to-end for the stated workload plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Wastes 98% successful work."
+      },
+      {
+        "texto_opcion": "Mark batch succeeded without reading result files — silent data loss on failed rows plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Silent data loss on failed rows."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "batch partial failure"
+    ]
+  },
+  {
+    "pregunta": "PostToolUse hooks add 800ms each and users notice slowness. Context: a production Agent SDK service handling tool loops and stop_reason control flow. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Remove all hooks to restore speed — loses enforcement and observability as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Loses enforcement and observability."
+      },
+      {
+        "texto_opcion": "Offload non-critical hook work to async workers; keep hooks lean on the critical path",
+        "es_correcta": true,
+        "explicacion": "Hook design should balance enforcement with latency budgets."
+      },
+      {
+        "texto_opcion": "Disable tools instead of optimizing hooks — over-reduces functionality as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Over-reduces functionality."
+      },
+      {
+        "texto_opcion": "Run synchronous third-party CRM sync inside PreToolUse always — blocks tool execution on slow integrations",
+        "es_correcta": false,
+        "explicacion": "Blocks tool execution on slow integrations."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "hook latency"
+    ]
+  },
+  {
+    "pregunta": "user cancels while two parallel tools are in flight. Production context: a multi-agent research system with coordinator, web search, and synthesis subagents. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Let tools finish silently after user cancel — may apply unwanted side effects as the default production choice in this scenario configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "May apply unwanted side effects."
+      },
+      {
+        "texto_opcion": "Cancel in-flight tool tasks if possible and return cancelled status in tool_result to the model",
+        "es_correcta": true,
+        "explicacion": "Cancellation should propagate to parallel tool executors cleanly."
+      },
+      {
+        "texto_opcion": "Restart the entire conversation from scratch automatically — heavy-handed and loses valid context configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Heavy-handed and loses valid context."
+      },
+      {
+        "texto_opcion": "Abort without sending any tool_result — leaves the message list in an invalid state configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Leaves the message list in an invalid state."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "multi-tool cancellation"
+    ]
+  },
+  {
+    "pregunta": "a read-only analyst agent should query warehouses but not mutate production tables. Scenario: a Claude Code CI pipeline that must run non-interactively on every PR. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Remove tool descriptions but leave handlers registered — handlers may still be reachable depending on host",
+        "es_correcta": false,
+        "explicacion": "Handlers may still be reachable depending on host."
+      },
+      {
+        "texto_opcion": "Configure allowedTools to include get_schema and run_read_query only at request time",
+        "es_correcta": true,
+        "explicacion": "allowedTools restricts which tools the model may invoke on a per-request basis."
+      },
+      {
+        "texto_opcion": "List forbidden tools in the user message each turn adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Not enforced by the API."
+      },
+      {
+        "texto_opcion": "Grant all MCP tools because descriptions mention read-only — descriptions do not enforce permissions",
+        "es_correcta": false,
+        "explicacion": "Descriptions do not enforce permissions."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "after any database write tool runs, you must invalidate a cache key pattern. Design review for a Claude Code CI pipeline that must run non-interactively on every PR. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Only invalidate manually during business hours — misses automated agent writes off-hours applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Misses automated agent writes off-hours."
+      },
+      {
+        "texto_opcion": "Invalidate cache on every user message — too broad and harms performance applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Too broad and harms performance."
+      },
+      {
+        "texto_opcion": "Ask the model to remember to invalidate cache in text — model may omit post-action maintenance plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Model may omit post-action maintenance."
+      },
+      {
+        "texto_opcion": "Register a PostToolUse hook that inspects tool name and triggers cache invalidation",
+        "es_correcta": true,
+        "explicacion": "Hooks run programmatic side effects tied to tool lifecycle events."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "block delete_table unless the session carries an admin role claim. Design review for a Claude Code CI pipeline that must run non-interactively on every PR. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Remove delete_table from the prompt examples only — tool may still be registered and callable",
+        "es_correcta": false,
+        "explicacion": "Tool may still be registered and callable."
+      },
+      {
+        "texto_opcion": "Implement PreToolUse hook to deny execution when role claim missing",
+        "es_correcta": true,
+        "explicacion": "PreToolUse hooks enforce authorization before side-effecting tools run."
+      },
+      {
+        "texto_opcion": "Document delete_table as admins only in the tool description — description is not authorization",
+        "es_correcta": false,
+        "explicacion": "Description is not authorization."
+      },
+      {
+        "texto_opcion": "Hope Claude refuses delete_table for non-admins — model refusal is not a security control",
+        "es_correcta": false,
+        "explicacion": "Model refusal is not a security control."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "you plan overnight bulk classification of 500k support tickets via Message Batches. Production context: a Claude Code CI pipeline that must run non-interactively on every PR. What should the architect do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use streaming Messages API for each ticket synchronously — poor fit for massive offline bulk",
+        "es_correcta": false,
+        "explicacion": "Poor fit for massive offline bulk."
+      },
+      {
+        "texto_opcion": "Submit all 500k records in one batch file regardless of limits — request may fail or throttle",
+        "es_correcta": false,
+        "explicacion": "Request may fail or throttle."
+      },
+      {
+        "texto_opcion": "Design batch jobs within documented size and concurrency limits; shard into multiple batch requests",
+        "es_correcta": true,
+        "explicacion": "Message Batches has service limits requiring sharding and monitoring."
+      },
+      {
+        "texto_opcion": "Skip result polling because batches are async fire-and-forget — you may never retrieve completed outputs",
+        "es_correcta": false,
+        "explicacion": "You may never retrieve completed outputs."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Message Batches limits"
+    ]
+  },
+  {
+    "pregunta": "latency-sensitive chatbot vs monthly invoice categorization backlog. Design review for a customer support resolution agent with order lookup, refund, and escalate tools. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use Message Batches for sub-second user chat replies — batch latency unsuitable for interactive UX",
+        "es_correcta": false,
+        "explicacion": "Batch latency unsuitable for interactive UX."
+      },
+      {
+        "texto_opcion": "Mix batch and chat in one conversation thread id — different APIs serve different interaction models",
+        "es_correcta": false,
+        "explicacion": "Different APIs serve different interaction models."
+      },
+      {
+        "texto_opcion": "Run monthly backlog through synchronous chat loops — expensive and operationally fragile",
+        "es_correcta": false,
+        "explicacion": "Expensive and operationally fragile."
+      },
+      {
+        "texto_opcion": "Use Messages API for realtime chat; Message Batches for offline backlog processing",
+        "es_correcta": true,
+        "explicacion": "Batch API optimizes cost and throughput for non-interactive workloads."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "batch vs realtime"
+    ]
+  },
+  {
+    "pregunta": "Claude emits get_user and get_orders tool_use blocks together with no dependency. Design review for a structured data extraction service that emits validated JSON for downstream systems. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute only get_user and ignore get_orders — incomplete fulfillment of the assistant turn prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Incomplete fulfillment of the assistant turn."
+      },
+      {
+        "texto_opcion": "Return one combined tool_result for both — violates per-tool_use_id pairing prioritized for simplicity, though it misses a key constraint prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Violates per-tool_use_id pairing."
+      },
+      {
+        "texto_opcion": "Execute both tools concurrently and return matching tool_results before the next model call",
+        "es_correcta": true,
+        "explicacion": "Same-turn independent tools should parallelize for latency."
+      },
+      {
+        "texto_opcion": "Execute get_orders before get_user always alphabetically — unneeded serialization increases latency often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Unneeded serialization increases latency."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "parallel tools same turn"
+    ]
+  },
+  {
+    "pregunta": "create_shipment requires package_id from pack_items tool in the prior round. Context: a multi-agent research system with coordinator, web search, and synthesis subagents. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Complete pack_items, return tool_result, then allow create_shipment in the subsequent assistant turn",
+        "es_correcta": true,
+        "explicacion": "Cross-turn dependencies require sequential tool loop rounds."
+      },
+      {
+        "texto_opcion": "Pass fake package_id to unblock create_shipment — causes downstream logistics errors configured end-to-end for the stated workload adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Causes downstream logistics errors."
+      },
+      {
+        "texto_opcion": "Batch both tools into one external API call outside the protocol — breaks model visibility into steps adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Breaks model visibility into steps."
+      },
+      {
+        "texto_opcion": "Register create_shipment in allowedTools before pack_items runs — allowed list does not remove data dependency as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Allowed list does not remove data dependency."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dependent tools sequencing"
+    ]
+  },
+  {
+    "pregunta": "security wants alerts when rare admin tools fire. Context: a structured data extraction service that emits validated JSON for downstream systems. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable hooks to reduce log volume — removes real-time detection configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Removes real-time detection."
+      },
+      {
+        "texto_opcion": "Review chat transcripts weekly by hand — too slow for incident response as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Too slow for incident response."
+      },
+      {
+        "texto_opcion": "Ask Claude to log admin tool usage in natural language — unstructured and unreliable for alerting configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Unstructured and unreliable for alerting."
+      },
+      {
+        "texto_opcion": "Emit metrics and alerts from PostToolUse hooks on sensitive tool names",
+        "es_correcta": true,
+        "explicacion": "Hooks centralize security telemetry without trusting model narration."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "hook observability"
+    ]
+  },
+  {
+    "pregunta": "tool availability changes after user completes MFA step-up. Scenario: a Claude Code CI pipeline that must run non-interactively on every PR. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Update allowedTools on the next request after MFA success to include sensitive tools",
+        "es_correcta": true,
+        "explicacion": "allowedTools can change per request based on session state."
+      },
+      {
+        "texto_opcion": "Register all tools upfront and prompt user not to cheat — does not enforce step-up gating",
+        "es_correcta": false,
+        "explicacion": "Does not enforce step-up gating."
+      },
+      {
+        "texto_opcion": "Never change allowedTools mid-session — misses step-up authentication patterns",
+        "es_correcta": false,
+        "explicacion": "Misses step-up authentication patterns."
+      },
+      {
+        "texto_opcion": "Require MFA inside every tool description — mFA belongs in session policy, not tool docs",
+        "es_correcta": false,
+        "explicacion": "MFA belongs in session policy, not tool docs."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dynamic allowedTools"
+    ]
+  },
+  {
+    "pregunta": "a workflow expects Claude to pick among similar lookup tools as needed. Context: a developer productivity assistant using built-in tools plus MCP servers. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Use tool_choice auto and clear distinct tool descriptions so the model selects appropriately",
+        "es_correcta": true,
+        "explicacion": "auto lets the model choose tools when multiple are valid."
+      },
+      {
+        "texto_opcion": "Force tool_choice any on every turn — forces tool use even when a direct answer suffices prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Forces tool use even when a direct answer suffices."
+      },
+      {
+        "texto_opcion": "Provide twelve overlapping tools with identical descriptions — ambiguous routing harms selection prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Ambiguous routing harms selection."
+      },
+      {
+        "texto_opcion": "Disable tools to simplify routing — removes necessary actions from the agent selected to meet the constraints described here prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Removes necessary actions from the agent."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice auto"
+    ]
+  },
+  {
+    "pregunta": "pipeline must always call extract_fields tool before responding to API clients. Scenario: a multi-agent research system with coordinator, web search, and synthesis subagents. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Set tool_choice to require a specific tool or any tool on turns that must produce structured extraction",
+        "es_correcta": true,
+        "explicacion": "Required tool choice guarantees tool invocation when mandatory."
+      },
+      {
+        "texto_opcion": "Hope the model always chooses extract_fields voluntarily — voluntary selection can be skipped adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Voluntary selection can be skipped."
+      },
+      {
+        "texto_opcion": "Parse free text with regex instead of tools — bypasses the structured tool contract as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Bypasses the structured tool contract."
+      },
+      {
+        "texto_opcion": "Use tool_choice none on extraction turns — explicitly prevents needed tool calls as a primary design for this requirement as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Explicitly prevents needed tool calls."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice required"
+    ]
+  },
+  {
+    "pregunta": "a Message Batch completes but 2% of rows failed validation. Scenario: a production Agent SDK service handling tool loops and stop_reason control flow. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Download batch results, route failures to a dead-letter queue, and retry or inspect separately",
+        "es_correcta": true,
+        "explicacion": "Batch processing needs partial failure handling, not all-or-nothing assumptions."
+      },
+      {
+        "texto_opcion": "Discard the entire batch if any row fails — wastes 98% successful work often seen in legacy designs but not ideal for this case as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Wastes 98% successful work."
+      },
+      {
+        "texto_opcion": "Re-submit the full batch unchanged indefinitely — repeats the same validation failures plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Repeats the same validation failures."
+      },
+      {
+        "texto_opcion": "Mark batch succeeded without reading result files — silent data loss on failed rows as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Silent data loss on failed rows."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "batch partial failure"
+    ]
+  },
+  {
+    "pregunta": "PostToolUse hooks add 800ms each and users notice slowness. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Run synchronous third-party CRM sync inside PreToolUse always — blocks tool execution on slow integrations",
+        "es_correcta": false,
+        "explicacion": "Blocks tool execution on slow integrations."
+      },
+      {
+        "texto_opcion": "Disable tools instead of optimizing hooks — over-reduces functionality adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Over-reduces functionality."
+      },
+      {
+        "texto_opcion": "Offload non-critical hook work to async workers; keep hooks lean on the critical path",
+        "es_correcta": true,
+        "explicacion": "Hook design should balance enforcement with latency budgets."
+      },
+      {
+        "texto_opcion": "Remove all hooks to restore speed — loses enforcement and observability configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Loses enforcement and observability."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "hook latency"
+    ]
+  },
+  {
+    "pregunta": "user cancels while two parallel tools are in flight. Context: a customer support resolution agent with order lookup, refund, and escalate tools. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Abort without sending any tool_result — leaves the message list in an invalid state adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Leaves the message list in an invalid state."
+      },
+      {
+        "texto_opcion": "Cancel in-flight tool tasks if possible and return cancelled status in tool_result to the model",
+        "es_correcta": true,
+        "explicacion": "Cancellation should propagate to parallel tool executors cleanly."
+      },
+      {
+        "texto_opcion": "Let tools finish silently after user cancel — may apply unwanted side effects plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "May apply unwanted side effects."
+      },
+      {
+        "texto_opcion": "Restart the entire conversation from scratch automatically — heavy-handed and loses valid context used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Heavy-handed and loses valid context."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "multi-tool cancellation"
+    ]
+  },
+  {
+    "pregunta": "a read-only analyst agent should query warehouses but not mutate production tables. Design review for a developer productivity assistant using built-in tools plus MCP servers. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Remove tool descriptions but leave handlers registered — handlers may still be reachable depending on host",
+        "es_correcta": false,
+        "explicacion": "Handlers may still be reachable depending on host."
+      },
+      {
+        "texto_opcion": "Configure allowedTools to include get_schema and run_read_query only at request time",
+        "es_correcta": true,
+        "explicacion": "allowedTools restricts which tools the model may invoke on a per-request basis."
+      },
+      {
+        "texto_opcion": "Grant all MCP tools because descriptions mention read-only — descriptions do not enforce permissions",
+        "es_correcta": false,
+        "explicacion": "Descriptions do not enforce permissions."
+      },
+      {
+        "texto_opcion": "List forbidden tools in the user message each turn often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Not enforced by the API."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "after any database write tool runs, you must invalidate a cache key pattern. Production context: a Claude Code CI pipeline that must run non-interactively on every PR. What should the architect do? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Ask the model to remember to invalidate cache in text — model may omit post-action maintenance prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Model may omit post-action maintenance."
+      },
+      {
+        "texto_opcion": "Only invalidate manually during business hours — misses automated agent writes off-hours selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Misses automated agent writes off-hours."
+      },
+      {
+        "texto_opcion": "Invalidate cache on every user message — too broad and harms performance prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Too broad and harms performance."
+      },
+      {
+        "texto_opcion": "Register a PostToolUse hook that inspects tool name and triggers cache invalidation",
+        "es_correcta": true,
+        "explicacion": "Hooks run programmatic side effects tied to tool lifecycle events."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "block delete_table unless the session carries an admin role claim. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Implement PreToolUse hook to deny execution when role claim missing",
+        "es_correcta": true,
+        "explicacion": "PreToolUse hooks enforce authorization before side-effecting tools run."
+      },
+      {
+        "texto_opcion": "Remove delete_table from the prompt examples only — tool may still be registered and callable",
+        "es_correcta": false,
+        "explicacion": "Tool may still be registered and callable."
+      },
+      {
+        "texto_opcion": "Document delete_table as admins only in the tool description — description is not authorization",
+        "es_correcta": false,
+        "explicacion": "Description is not authorization."
+      },
+      {
+        "texto_opcion": "Hope Claude refuses delete_table for non-admins — model refusal is not a security control",
+        "es_correcta": false,
+        "explicacion": "Model refusal is not a security control."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "you plan overnight bulk classification of 500k support tickets via Message Batches. Context: a customer support resolution agent with order lookup, refund, and escalate tools. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Skip result polling because batches are async fire-and-forget — you may never retrieve completed outputs",
+        "es_correcta": false,
+        "explicacion": "You may never retrieve completed outputs."
+      },
+      {
+        "texto_opcion": "Submit all 500k records in one batch file regardless of limits — request may fail or throttle",
+        "es_correcta": false,
+        "explicacion": "Request may fail or throttle."
+      },
+      {
+        "texto_opcion": "Use streaming Messages API for each ticket synchronously — poor fit for massive offline bulk",
+        "es_correcta": false,
+        "explicacion": "Poor fit for massive offline bulk."
+      },
+      {
+        "texto_opcion": "Design batch jobs within documented size and concurrency limits; shard into multiple batch requests",
+        "es_correcta": true,
+        "explicacion": "Message Batches has service limits requiring sharding and monitoring."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Message Batches limits"
+    ]
+  },
+  {
+    "pregunta": "latency-sensitive chatbot vs monthly invoice categorization backlog. Production context: a structured data extraction service that emits validated JSON for downstream systems. What should the architect do? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Mix batch and chat in one conversation thread id — different APIs serve different interaction models",
+        "es_correcta": false,
+        "explicacion": "Different APIs serve different interaction models."
+      },
+      {
+        "texto_opcion": "Use Message Batches for sub-second user chat replies — batch latency unsuitable for interactive UX",
+        "es_correcta": false,
+        "explicacion": "Batch latency unsuitable for interactive UX."
+      },
+      {
+        "texto_opcion": "Run monthly backlog through synchronous chat loops — expensive and operationally fragile",
+        "es_correcta": false,
+        "explicacion": "Expensive and operationally fragile."
+      },
+      {
+        "texto_opcion": "Use Messages API for realtime chat; Message Batches for offline backlog processing",
+        "es_correcta": true,
+        "explicacion": "Batch API optimizes cost and throughput for non-interactive workloads."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "batch vs realtime"
+    ]
+  },
+  {
+    "pregunta": "Claude emits get_user and get_orders tool_use blocks together with no dependency. Design review for an enterprise RAG assistant over policy PDFs with MCP document tools. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Return one combined tool_result for both — violates per-tool_use_id pairing plausible at first glance, yet weaker than the best option as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Violates per-tool_use_id pairing."
+      },
+      {
+        "texto_opcion": "Execute both tools concurrently and return matching tool_results before the next model call",
+        "es_correcta": true,
+        "explicacion": "Same-turn independent tools should parallelize for latency."
+      },
+      {
+        "texto_opcion": "Execute get_orders before get_user always alphabetically — unneeded serialization increases latency often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Unneeded serialization increases latency."
+      },
+      {
+        "texto_opcion": "Execute only get_user and ignore get_orders — incomplete fulfillment of the assistant turn often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Incomplete fulfillment of the assistant turn."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "parallel tools same turn"
+    ]
+  },
+  {
+    "pregunta": "create_shipment requires package_id from pack_items tool in the prior round. Context: a developer productivity assistant using built-in tools plus MCP servers. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Batch both tools into one external API call outside the protocol — breaks model visibility into steps used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Breaks model visibility into steps."
+      },
+      {
+        "texto_opcion": "Complete pack_items, return tool_result, then allow create_shipment in the subsequent assistant turn",
+        "es_correcta": true,
+        "explicacion": "Cross-turn dependencies require sequential tool loop rounds."
+      },
+      {
+        "texto_opcion": "Pass fake package_id to unblock create_shipment — causes downstream logistics errors prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Causes downstream logistics errors."
+      },
+      {
+        "texto_opcion": "Register create_shipment in allowedTools before pack_items runs — allowed list does not remove data dependency used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Allowed list does not remove data dependency."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dependent tools sequencing"
+    ]
+  },
+  {
+    "pregunta": "security wants alerts when rare admin tools fire. Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Emit metrics and alerts from PostToolUse hooks on sensitive tool names",
+        "es_correcta": true,
+        "explicacion": "Hooks centralize security telemetry without trusting model narration."
+      },
+      {
+        "texto_opcion": "Disable hooks to reduce log volume — removes real-time detection adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Removes real-time detection."
+      },
+      {
+        "texto_opcion": "Review chat transcripts weekly by hand — too slow for incident response adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Too slow for incident response."
+      },
+      {
+        "texto_opcion": "Ask Claude to log admin tool usage in natural language — unstructured and unreliable for alerting adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Unstructured and unreliable for alerting."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "hook observability"
+    ]
+  },
+  {
+    "pregunta": "tool availability changes after user completes MFA step-up. Scenario: a Claude Code code-generation workflow across a multi-repo monorepo. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Never change allowedTools mid-session — misses step-up authentication patterns",
+        "es_correcta": false,
+        "explicacion": "Misses step-up authentication patterns."
+      },
+      {
+        "texto_opcion": "Register all tools upfront and prompt user not to cheat — does not enforce step-up gating",
+        "es_correcta": false,
+        "explicacion": "Does not enforce step-up gating."
+      },
+      {
+        "texto_opcion": "Update allowedTools on the next request after MFA success to include sensitive tools",
+        "es_correcta": true,
+        "explicacion": "allowedTools can change per request based on session state."
+      },
+      {
+        "texto_opcion": "Require MFA inside every tool description — mFA belongs in session policy, not tool docs",
+        "es_correcta": false,
+        "explicacion": "MFA belongs in session policy, not tool docs."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dynamic allowedTools"
+    ]
+  },
+  {
+    "pregunta": "a workflow expects Claude to pick among similar lookup tools as needed. Scenario: a Claude Code CI pipeline that must run non-interactively on every PR. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use tool_choice auto and clear distinct tool descriptions so the model selects appropriately",
+        "es_correcta": true,
+        "explicacion": "auto lets the model choose tools when multiple are valid."
+      },
+      {
+        "texto_opcion": "Force tool_choice any on every turn — forces tool use even when a direct answer suffices as a primary design for this requirement plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Forces tool use even when a direct answer suffices."
+      },
+      {
+        "texto_opcion": "Disable tools to simplify routing — removes necessary actions from the agent plausible at first glance, yet weaker than the best option as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Removes necessary actions from the agent."
+      },
+      {
+        "texto_opcion": "Provide twelve overlapping tools with identical descriptions — ambiguous routing harms selection often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Ambiguous routing harms selection."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice auto"
+    ]
+  },
+  {
+    "pregunta": "pipeline must always call extract_fields tool before responding to API clients. Context: a Claude Code CI pipeline that must run non-interactively on every PR. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Parse free text with regex instead of tools — bypasses the structured tool contract plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Bypasses the structured tool contract."
+      },
+      {
+        "texto_opcion": "Use tool_choice none on extraction turns — explicitly prevents needed tool calls as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Explicitly prevents needed tool calls."
+      },
+      {
+        "texto_opcion": "Hope the model always chooses extract_fields voluntarily — voluntary selection can be skipped configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Voluntary selection can be skipped."
+      },
+      {
+        "texto_opcion": "Set tool_choice to require a specific tool or any tool on turns that must produce structured extraction",
+        "es_correcta": true,
+        "explicacion": "Required tool choice guarantees tool invocation when mandatory."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice required"
+    ]
+  },
+  {
+    "pregunta": "a Message Batch completes but 2% of rows failed validation. Scenario: a multi-agent research system with coordinator, web search, and synthesis subagents. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Download batch results, route failures to a dead-letter queue, and retry or inspect separately",
+        "es_correcta": true,
+        "explicacion": "Batch processing needs partial failure handling, not all-or-nothing assumptions."
+      },
+      {
+        "texto_opcion": "Re-submit the full batch unchanged indefinitely — repeats the same validation failures adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Repeats the same validation failures."
+      },
+      {
+        "texto_opcion": "Discard the entire batch if any row fails — wastes 98% successful work used as the main path in this architecture adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Wastes 98% successful work."
+      },
+      {
+        "texto_opcion": "Mark batch succeeded without reading result files — silent data loss on failed rows prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Silent data loss on failed rows."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "batch partial failure"
+    ]
+  },
+  {
+    "pregunta": "PostToolUse hooks add 800ms each and users notice slowness. Design review for a multi-agent research system with coordinator, web search, and synthesis subagents. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Offload non-critical hook work to async workers; keep hooks lean on the critical path",
+        "es_correcta": true,
+        "explicacion": "Hook design should balance enforcement with latency budgets."
+      },
+      {
+        "texto_opcion": "Run synchronous third-party CRM sync inside PreToolUse always — blocks tool execution on slow integrations selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Blocks tool execution on slow integrations."
+      },
+      {
+        "texto_opcion": "Disable tools instead of optimizing hooks — over-reduces functionality applied across environments for operational consistency prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Over-reduces functionality."
+      },
+      {
+        "texto_opcion": "Remove all hooks to restore speed — loses enforcement and observability prioritized for simplicity, though it applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Loses enforcement and observability."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "hook latency"
+    ]
+  },
+  {
+    "pregunta": "user cancels while two parallel tools are in flight. Scenario: a production Agent SDK service handling tool loops and stop_reason control flow. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Cancel in-flight tool tasks if possible and return cancelled status in tool_result to the model",
+        "es_correcta": true,
+        "explicacion": "Cancellation should propagate to parallel tool executors cleanly."
+      },
+      {
+        "texto_opcion": "Restart the entire conversation from scratch automatically — heavy-handed and loses valid context selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Heavy-handed and loses valid context."
+      },
+      {
+        "texto_opcion": "Let tools finish silently after user cancel — may apply unwanted side effects selected to meet the constraints described here selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "May apply unwanted side effects."
+      },
+      {
+        "texto_opcion": "Abort without sending any tool_result — leaves the message list in an invalid state selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Leaves the message list in an invalid state."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "multi-tool cancellation"
+    ]
+  },
+  {
+    "pregunta": "a read-only analyst agent should query warehouses but not mutate production tables. Scenario: a Claude Code CI pipeline that must run non-interactively on every PR. Which architectural choice is best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Configure allowedTools to include get_schema and run_read_query only at request time",
+        "es_correcta": true,
+        "explicacion": "allowedTools restricts which tools the model may invoke on a per-request basis."
+      },
+      {
+        "texto_opcion": "Grant all MCP tools because descriptions mention read-only — descriptions do not enforce permissions",
+        "es_correcta": false,
+        "explicacion": "Descriptions do not enforce permissions."
+      },
+      {
+        "texto_opcion": "Remove tool descriptions but leave handlers registered — handlers may still be reachable depending on host",
+        "es_correcta": false,
+        "explicacion": "Handlers may still be reachable depending on host."
+      },
+      {
+        "texto_opcion": "List forbidden tools in the user message each turn adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Not enforced by the API."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "after any database write tool runs, you must invalidate a cache key pattern. Production context: a production Agent SDK service handling tool loops and stop_reason control flow. What should the architect do? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Register a PostToolUse hook that inspects tool name and triggers cache invalidation",
+        "es_correcta": true,
+        "explicacion": "Hooks run programmatic side effects tied to tool lifecycle events."
+      },
+      {
+        "texto_opcion": "Invalidate cache on every user message — too broad and harms performance selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Too broad and harms performance."
+      },
+      {
+        "texto_opcion": "Only invalidate manually during business hours — misses automated agent writes off-hours selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Misses automated agent writes off-hours."
+      },
+      {
+        "texto_opcion": "Ask the model to remember to invalidate cache in text — model may omit post-action maintenance selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Model may omit post-action maintenance."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "block delete_table unless the session carries an admin role claim. Production context: a structured data extraction service that emits validated JSON for downstream systems. What should the architect do? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Hope Claude refuses delete_table for non-admins — model refusal is not a security control",
+        "es_correcta": false,
+        "explicacion": "Model refusal is not a security control."
+      },
+      {
+        "texto_opcion": "Implement PreToolUse hook to deny execution when role claim missing",
+        "es_correcta": true,
+        "explicacion": "PreToolUse hooks enforce authorization before side-effecting tools run."
+      },
+      {
+        "texto_opcion": "Remove delete_table from the prompt examples only — tool may still be registered and callable",
+        "es_correcta": false,
+        "explicacion": "Tool may still be registered and callable."
+      },
+      {
+        "texto_opcion": "Document delete_table as admins only in the tool description — description is not authorization",
+        "es_correcta": false,
+        "explicacion": "Description is not authorization."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse hook"
+    ]
+  },
+  {
+    "pregunta": "you plan overnight bulk classification of 500k support tickets via Message Batches. Scenario: an enterprise RAG assistant over policy PDFs with MCP document tools. Which architectural choice is best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Submit all 500k records in one batch file regardless of limits — request may fail or throttle",
+        "es_correcta": false,
+        "explicacion": "Request may fail or throttle."
+      },
+      {
+        "texto_opcion": "Use streaming Messages API for each ticket synchronously — poor fit for massive offline bulk",
+        "es_correcta": false,
+        "explicacion": "Poor fit for massive offline bulk."
+      },
+      {
+        "texto_opcion": "Skip result polling because batches are async fire-and-forget — you may never retrieve completed outputs",
+        "es_correcta": false,
+        "explicacion": "You may never retrieve completed outputs."
+      },
+      {
+        "texto_opcion": "Design batch jobs within documented size and concurrency limits; shard into multiple batch requests",
+        "es_correcta": true,
+        "explicacion": "Message Batches has service limits requiring sharding and monitoring."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Message Batches limits"
+    ]
+  }
+]

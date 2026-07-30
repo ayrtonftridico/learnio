@@ -112,6 +112,8 @@ Regras:
 | `PDE_google` | Google Cloud | 900 | 50 / 120 |
 | `SnowPro_Core_snowflake` | Snowflake | 900 | 100 / 115 |
 | `dbt_Analytics_Engineering` | dbt Labs | 850 | 65 / 120 |
+| `CCAR_F_anthropic` | Anthropic | 900 | 60 / 120 |
+| `CCAR_P_anthropic` | Anthropic | 900 | 63 / 120 |
 
 ---
 
@@ -142,7 +144,7 @@ Regras:
   - Protegem termos de produto (Unity Catalog, job cluster, BigQuery, etc.)
   - Cache: `{exam}/.translate_cache_{en|pt}.json` (ignorado no git)
 
-### 4.2 Bancos novos (Azure DP-203, SnowPro, GCP PDE, dbt)
+### 4.2 Bancos novos (Azure DP-203, SnowPro, GCP PDE, dbt, Anthropic)
 
 Gerados por agentes (Grok/Composer) + tooling local:
 
@@ -153,6 +155,9 @@ tools/bankgen/
   snowflake_core.py
   gcp_pde.py
   dbt_analytics.py
+  anthropic_architect.py # CCAR-F + CCAR-P
+  anthropic_cards_f.py
+  anthropic_cards_p.py
   rebalance_options.py   # pós-processo de qualidade de alternativas
   generate_all.py        # legado / orquestração parcial
 ```

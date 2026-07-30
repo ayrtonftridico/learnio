@@ -1,0 +1,1742 @@
+[
+  {
+    "pregunta": "um agente analista somente leitura deve consultar os armazéns, mas não alterar as tabelas de produção. Contexto de produção: um serviço de produção Agent SDK, loops de ferramentas de manipulação e fluxo de controle stop_reason. O que o arquiteto deve fazer?",
+    "opciones": [
+      {
+        "texto_opcion": "Grant todas as ferramentas MCP porque as descrições mencionam somente leitura - as descrições não concedem permissões orce priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "As descrições não concedem permissões."
+      },
+      {
+        "texto_opcion": "Liste as ferramentas proibidas na mensagem do usuário, cada uma delas plausível à primeira vista, mas mais fraca do que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Não enforced pela API."
+      },
+      {
+        "texto_opcion": "Remova as descrições das ferramentas, mas deixe os manipuladores registrados — os manipuladores ainda podem ser acessados dependendo do host",
+        "es_correcta": false,
+        "explicacion": "Os manipuladores ainda podem estar acessíveis dependendo do host."
+      },
+      {
+        "texto_opcion": "Configure allowedTools para incluir get_schema e run_read_query somente no momento da solicitação",
+        "es_correcta": true,
+        "explicacion": "allowedTools restringe quais ferramentas o modelo pode invocar por solicitação."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "após a execução de qualquer ferramenta de gravação de banco de dados, você deverá invalidar um padrão de chave de cache. Cenário: um sistema de pesquisa multiagente com coordenador, busca na web e subagentes de síntese. Qual escolha arquitetônica é a melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Registre um gancho PostToolUse que inspeciona o nome da ferramenta e aciona a invalidação do cache",
+        "es_correcta": true,
+        "explicacion": "Os ganchos executam efeitos colaterais programáticos vinculados a eventos do ciclo de vida da ferramenta."
+      },
+      {
+        "texto_opcion": "Peça ao modelo para lembrar de invalidar o cache no texto — o modelo pode omitir a manutenção pós-ação comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "O modelo pode omitir a manutenção pós-ação."
+      },
+      {
+        "texto_opcion": "Invalidar cache em cada mensagem do usuário — muito amplo e prejudica o desempenho como opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "Muito amplo e prejudica o desempenho."
+      },
+      {
+        "texto_opcion": "Invalidar manualmente apenas durante o horário comercial – perde gravações automatizadas do agente fora do horário comercial",
+        "es_correcta": false,
+        "explicacion": "Perde as gravações do agente automatizado fora do horário comercial."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "bloqueie delete_table, a menos que a sessão tenha uma reivindicação de função administrativa. Cenário: um serviço de produção Agent SDK, loops de ferramentas de tratamento e fluxo de controle stop_reason. Qual escolha arquitetônica é a melhor?",
+    "opciones": [
+      {
+        "texto_opcion": "Remova delete_table apenas dos exemplos de prompt — a ferramenta ainda pode estar registrada e pode ser chamada",
+        "es_correcta": false,
+        "explicacion": "A ferramenta ainda pode estar registrada e chamável."
+      },
+      {
+        "texto_opcion": "Espero que Claude recuse delete_table para não administradores – a recusa do modelo não é um controle de segurança",
+        "es_correcta": false,
+        "explicacion": "A recusa do modelo não é um controle de segurança."
+      },
+      {
+        "texto_opcion": "Implementar o gancho PreToolUse para a execução deny quando a reivindicação de função estiver faltando",
+        "es_correcta": true,
+        "explicacion": "PreToolUse conecta a autorização enforce antes da execução das ferramentas de efeito colateral."
+      },
+      {
+        "texto_opcion": "Documente delete_table como administradores apenas na descrição da ferramenta - descrição não é autorização",
+        "es_correcta": false,
+        "explicacion": "Descrição não é autorização."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "você planeja a classificação em massa durante a noite de 500 mil tickets de suporte por meio de lotes de mensagens. Contexto de produção: um serviço de produção Agent SDK, loops de ferramentas de manipulação e fluxo de controle stop_reason. O que o arquiteto deve fazer?",
+    "opciones": [
+      {
+        "texto_opcion": "Envie todos os 500 mil registros em um arquivo em lote, independentemente dos limites — a solicitação pode falhar ou ser limitada comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "A solicitação pode falhar ou ser limitada."
+      },
+      {
+        "texto_opcion": "Use a API de mensagens de streaming para cada ticket de forma síncrona – inadequada para grandes volumes off-line — não é adequado para grandes volumes off-line",
+        "es_correcta": false,
+        "explicacion": "Não é adequado para grandes volumes off-line."
+      },
+      {
+        "texto_opcion": "Projete trabalhos em lote dentro de limites documentados de tamanho e simultaneidade; fragmentar em várias solicitações em lote",
+        "es_correcta": true,
+        "explicacion": "Message Batches tem limites de serviço que exigem fragmentação e monitoramento."
+      },
+      {
+        "texto_opcion": "Ignore a pesquisa de resultados porque os lotes são assíncronos, dispare e esqueça - você nunca poderá recuperar resultados concluídos como desenho principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Você nunca poderá recuperar resultados concluídos."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Limites de lotes de mensagens"
+    ]
+  },
+  {
+    "pregunta": "chatbot sensível à latência versus backlog de categorização de faturas mensais. Contexto: um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP.",
+    "opciones": [
+      {
+        "texto_opcion": "Misture lote e bate-papo em um ID de thread de conversa — APIs diferentes atendem a modelos de interação diferentes plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "APIs diferentes atendem a modelos de interação diferentes."
+      },
+      {
+        "texto_opcion": "Use a API de mensagens para bate-papo em tempo real; Lotes de mensagens para processamento de pendências off-line",
+        "es_correcta": true,
+        "explicacion": "Custo e taxa de transferência da API optimize em lote para cargas de trabalho não interativas."
+      },
+      {
+        "texto_opcion": "Use lotes de mensagens para respostas de bate-papo do usuário em menos de um segundo – latência de lote inadequada para experiência do usuário interativa",
+        "es_correcta": false,
+        "explicacion": "Latência de lote inadequada para UX interativa."
+      },
+      {
+        "texto_opcion": "Execute o backlog mensal por meio de loops de bate-papo síncronos – caros e operacionalmente fragile — caro e operacionalmente fragile configurado de ponta a ponta para o workload descrito",
+        "es_correcta": false,
+        "explicacion": "Caro e operacionalmente fragile."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "lote vs tempo real"
+    ]
+  },
+  {
+    "pregunta": "Claude emite blocos get_user e get_orders tool_use juntos sem dependência. Contexto: um assistente de produtividade do desenvolvedor usando ferramentas integradas mais servidores MCP.",
+    "opciones": [
+      {
+        "texto_opcion": "Retorna um tool_result combinado para ambos - viola o emparelhamento por tool_use_id priorizado para simplificar, embora perca uma restrição chave selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "Viola o emparelhamento por tool_use_id."
+      },
+      {
+        "texto_opcion": "Execute apenas get_user e ignore get_orders — cumprimento incompleto do turno do assistente priorizado por simplicidade, embora perca uma restrição importante comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "Cumprimento incompleto do turno do assistente."
+      },
+      {
+        "texto_opcion": "Execute as duas ferramentas simultaneamente e retorne os resultados de tool_results correspondentes antes da próxima chamada de modelo",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser paralelas quanto à latência."
+      },
+      {
+        "texto_opcion": "Execute get_orders antes de get_user sempre em ordem alfabética – a serialização desnecessária aumenta a latência configurada de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "A serialização desnecessária aumenta a latência."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "ferramentas paralelas no mesmo turno"
+    ]
+  },
+  {
+    "pregunta": "create_shipment requer package_id da ferramenta pack_items na rodada anterior. Revisão de projeto para um sistema de pesquisa multiagente com coordenador, pesquisa na web e subagentes de síntese. Selecione a abordagem mais apropriada.",
+    "opciones": [
+      {
+        "texto_opcion": "Conclua pack_items, retorne tool_result e permita create_shipment no próximo turno do assistente",
+        "es_correcta": true,
+        "explicacion": "As dependências entre curvas exigem rodadas sequenciais de loop de ferramentas."
+      },
+      {
+        "texto_opcion": "Passar package_id falso para desbloquear create_shipment – causa erros de logística downstream como projeto principal para este requisito — causa erros logísticos posteriores adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Causa erros logísticos posteriores."
+      },
+      {
+        "texto_opcion": "Registre create_shipment em allowedTools antes da execução de pack_items - a lista permitida não remove a dependência de dados configurada de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "A lista permitida não remove a dependência de dados."
+      },
+      {
+        "texto_opcion": "Agrupe ambas as ferramentas em uma chamada de API externa fora do protocolo – divide a visibilidade do modelo em etapas como um design primário para este requisito aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Divide a visibilidade do modelo em etapas."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "sequenciamento de ferramentas dependentes"
+    ]
+  },
+  {
+    "pregunta": "a segurança deseja alertas quando ferramentas administrativas raras são acionadas. Contexto: um serviço de produção Agent SDK, loops de ferramentas de tratamento e fluxo de controle stop_reason.",
+    "opciones": [
+      {
+        "texto_opcion": "Emite métricas e alertas de ganchos PostToolUse em nomes de ferramentas confidenciais",
+        "es_correcta": true,
+        "explicacion": "Os ganchos centralizam a telemetria de segurança sem confiar na narração do modelo."
+      },
+      {
+        "texto_opcion": "Peça a Claude para registrar o uso da ferramenta administrativa em linguagem natural – não estruturada e não confiável para alertas — não estruturado e não confiável para alertas",
+        "es_correcta": false,
+        "explicacion": "Não estruturado e não confiável para alertas."
+      },
+      {
+        "texto_opcion": "Revise as transcrições do bate-papo semanalmente manualmente – muito lento para a resposta a incidentes usada como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Muito lento para resposta a incidentes."
+      },
+      {
+        "texto_opcion": "Desabilitar ganchos para reduzir o volume de log — remove a detecção em tempo real como um projeto primário para este requisito adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Remove a detecção em tempo real."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "observabilidade do gancho"
+    ]
+  },
+  {
+    "pregunta": "a disponibilidade da ferramenta muda depois que o usuário conclui a etapa de MFA. Contexto: um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP.",
+    "opciones": [
+      {
+        "texto_opcion": "Exigir MFA dentro de cada descrição de ferramenta – mFA pertence à política de sessão, não aos documentos da ferramenta",
+        "es_correcta": false,
+        "explicacion": "A MFA pertence à política de sessão, não aos documentos de ferramentas."
+      },
+      {
+        "texto_opcion": "Nunca altere allowedTools no meio da sessão – perde padrões de autenticação passo a passo — perde padrões de autenticação avançados",
+        "es_correcta": false,
+        "explicacion": "Perde padrões de autenticação avançados."
+      },
+      {
+        "texto_opcion": "Registre todas as ferramentas antecipadamente e peça ao usuário para não trapacear - não enforce step-up gate — não enforce step-up gating",
+        "es_correcta": false,
+        "explicacion": "Não enforce step-up gating."
+      },
+      {
+        "texto_opcion": "Atualização allowedTools na próxima solicitação após sucesso do MFA para incluir ferramentas confidenciais",
+        "es_correcta": true,
+        "explicacion": "allowedTools pode mudar por solicitação com base no estado da sessão."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dinâmico allowedTools"
+    ]
+  },
+  {
+    "pregunta": "um fluxo de trabalho espera que Claude escolha entre ferramentas de pesquisa semelhantes conforme necessário. Revisão de projeto para um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Selecione a abordagem mais apropriada.",
+    "opciones": [
+      {
+        "texto_opcion": "Use tool_choice auto e limpe descrições de ferramentas distintas para que o modelo selecione adequadamente",
+        "es_correcta": true,
+        "explicacion": "auto permite que o modelo escolha ferramentas quando múltiplas são válidas."
+      },
+      {
+        "texto_opcion": "Fornece doze ferramentas sobrepostas com descrições idênticas – roteamento ambíguo prejudica a seleção como projeto primário para este requisito — o roteamento ambíguo prejudica a seleção",
+        "es_correcta": false,
+        "explicacion": "O roteamento ambíguo prejudica a seleção."
+      },
+      {
+        "texto_opcion": "Desativar ferramentas para simplificar o roteamento — remove ações necessárias do agente como projeto principal para esse requisito — remove as ações necessárias do agente",
+        "es_correcta": false,
+        "explicacion": "Remove as ações necessárias do agente."
+      },
+      {
+        "texto_opcion": "Force tool_choice any em cada turno — ferramenta forces usada mesmo quando uma resposta direta é priorizada o suficiente para simplificar, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "A ferramenta Forces é usada mesmo quando uma resposta direta é suficiente."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice automático"
+    ]
+  },
+  {
+    "pregunta": "pipeline deve sempre chamar a ferramenta extract_fields antes de responder aos clientes da API. Contexto: um sistema de pesquisa multiagente com coordenador, pesquisa na web e subagentes de síntese.",
+    "opciones": [
+      {
+        "texto_opcion": "Defina tool_choice para exigir uma ferramenta específica ou qualquer ferramenta em turnos que deva produzir extração estruturada",
+        "es_correcta": true,
+        "explicacion": "A escolha da ferramenta obrigatória garante a invocação da ferramenta quando obrigatória."
+      },
+      {
+        "texto_opcion": "Use tool_choice none em turnos de extração — evita explicitamente chamadas de ferramentas necessárias como um projeto primário para este requisito plausível à primeira vista, mas mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Impede explicitamente chamadas de ferramentas necessárias."
+      },
+      {
+        "texto_opcion": "Analise texto livre com regex em vez de ferramentas — ignora o contrato de ferramenta estruturada frequentemente visto em designs legados, mas não é ideal para este caso adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Ignora o contrato de ferramenta estruturada."
+      },
+      {
+        "texto_opcion": "Espero que o modelo sempre escolha extract_fields voluntariamente - a seleção voluntária pode ser ignorada como projeto principal para este requisito comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "A seleção voluntária pode ser ignorada."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice obrigatório"
+    ]
+  },
+  {
+    "pregunta": "um lote de mensagens é concluído, mas 2% das linhas falharam na validação. Revisão de projeto para um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Selecione a abordagem mais apropriada.",
+    "opciones": [
+      {
+        "texto_opcion": "Descarte o lote inteiro se alguma linha falhar – desperdiça 98% do trabalho bem-sucedido adotado como padrão para a equipe — desperdiça 98% de trabalho bem-sucedido selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "Desperdiça 98% de trabalho bem-sucedido."
+      },
+      {
+        "texto_opcion": "Baixe resultados em lote, encaminhe falhas para uma fila de mensagens não entregues e tente novamente ou inspecione separadamente",
+        "es_correcta": true,
+        "explicacion": "O processamento em lote precisa de tratamento parcial de falhas, e não de suposições de tudo ou nada."
+      },
+      {
+        "texto_opcion": "Reenviar o lote completo inalterado indefinidamente — repete as mesmas falhas de validação priorizadas para simplificar, embora perca uma restrição importante plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Repete as mesmas falhas de validação."
+      },
+      {
+        "texto_opcion": "Marcar lote como bem-sucedido sem ler arquivos de resultados — perda silenciosa de dados em linhas com falha, frequentemente vista em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "Perda silenciosa de dados em linhas com falha."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "falha parcial do lote"
+    ]
+  },
+  {
+    "pregunta": "Os ganchos PostToolUse adicionam 800 ms cada e os usuários percebem lentidão. Contexto: um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP.",
+    "opciones": [
+      {
+        "texto_opcion": "Remova todos os ganchos para restaurar a velocidade - perde o enforcement e a observabilidade selecionada para atender às restrições descritas aqui — perde enforcement e observabilidade",
+        "es_correcta": false,
+        "explicacion": "Perde enforcement e observabilidade."
+      },
+      {
+        "texto_opcion": "Desative ferramentas em vez de otimizar ganchos — reduz excessivamente a funcionalidade frequentemente vista em designs legados, mas não é ideal para este caso usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Reduz excessivamente a funcionalidade."
+      },
+      {
+        "texto_opcion": "Execute sempre a sincronização síncrona de CRM de terceiros dentro de PreToolUse — bloqueia a execução da ferramenta em integrações lentas como a opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "Bloqueia a execução da ferramenta em integrações lentas."
+      },
+      {
+        "texto_opcion": "Transferir trabalho de gancho não crítico para trabalhadores assíncronos; mantenha os ganchos apoiados no caminho crítico",
+        "es_correcta": true,
+        "explicacion": "O design do gancho deve equilibrar o enforcement com os orçamentos de latência."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "latência do gancho"
+    ]
+  },
+  {
+    "pregunta": "o usuário cancela enquanto duas ferramentas paralelas estão em operação. Contexto: um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP.",
+    "opciones": [
+      {
+        "texto_opcion": "Cancele as tarefas da ferramenta em andamento, se possível, e retorne o status cancelado em tool_result para o modelo",
+        "es_correcta": true,
+        "explicacion": "O cancelamento deve ser propagado de forma limpa para os executores de ferramentas paralelas."
+      },
+      {
+        "texto_opcion": "Permitir que as ferramentas terminem silenciosamente após o cancelamento do usuário — pode aplicar efeitos colaterais indesejados selecionados para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "Pode aplicar efeitos colaterais indesejados."
+      },
+      {
+        "texto_opcion": "Reinicie toda a conversa do zero automaticamente – é pesado e perde o contexto válido, frequentemente visto em designs legados, mas não é ideal para este caso priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Pesado e perde o contexto válido."
+      },
+      {
+        "texto_opcion": "Abortar sem enviar nenhum tool_result — deixa a lista de mensagens em um estado inválido como a opção de produção padrão neste cenário selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "Deixa a lista de mensagens em um estado inválido."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "cancelamento multi-ferramenta"
+    ]
+  },
+  {
+    "pregunta": "um agente analista somente leitura deve consultar os armazéns, mas não alterar as tabelas de produção. Contexto de produção: um assistente empresarial RAG sobre PDFs de políticas com ferramentas de documento MCP. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Configure allowedTools para incluir get_schema e run_read_query somente no momento da solicitação",
+        "es_correcta": true,
+        "explicacion": "allowedTools restringe quais ferramentas o modelo pode invocar por solicitação."
+      },
+      {
+        "texto_opcion": "Remova as descrições das ferramentas, mas deixe os manipuladores registrados — os manipuladores ainda podem ser acessados dependendo do host",
+        "es_correcta": false,
+        "explicacion": "Os manipuladores ainda podem estar acessíveis dependendo do host."
+      },
+      {
+        "texto_opcion": "Grant todas as ferramentas MCP porque as descrições mencionam somente leitura - as descrições não concedem permissões orce priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "As descrições não concedem permissões."
+      },
+      {
+        "texto_opcion": "Liste as ferramentas proibidas na mensagem do usuário em cada turno usado como caminho principal nesta arquitetura adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Não enforced pela API."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "após a execução de qualquer ferramenta de gravação de banco de dados, você deverá invalidar um padrão de chave de cache. Contexto: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Peça ao modelo para lembrar de invalidar o cache no texto — o modelo pode omitir a manutenção pós-ação selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "O modelo pode omitir a manutenção pós-ação."
+      },
+      {
+        "texto_opcion": "Invalidar manualmente apenas durante o horário comercial – perde gravações automatizadas do agente fora do horário comercial — perde as gravações do agente automatizado fora do horário comercial",
+        "es_correcta": false,
+        "explicacion": "Perde as gravações do agente automatizado fora do horário comercial."
+      },
+      {
+        "texto_opcion": "Invalidar o cache em cada mensagem do usuário – muito amplo e prejudica o desempenho priorizado pela simplicidade, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "Muito amplo e prejudica o desempenho."
+      },
+      {
+        "texto_opcion": "Registre um gancho PostToolUse que inspeciona o nome da ferramenta e aciona a invalidação do cache",
+        "es_correcta": true,
+        "explicacion": "Os ganchos executam efeitos colaterais programáticos vinculados a eventos do ciclo de vida da ferramenta."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "bloqueie delete_table, a menos que a sessão tenha uma reivindicação de função administrativa. Contexto: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Documente delete_table como administradores apenas na descrição da ferramenta - descrição não é autorização",
+        "es_correcta": false,
+        "explicacion": "Descrição não é autorização."
+      },
+      {
+        "texto_opcion": "Espero que Claude recuse delete_table para não administradores – a recusa do modelo não é um controle de segurança",
+        "es_correcta": false,
+        "explicacion": "A recusa do modelo não é um controle de segurança."
+      },
+      {
+        "texto_opcion": "Implementar o gancho PreToolUse para a execução deny quando a reivindicação de função estiver faltando",
+        "es_correcta": true,
+        "explicacion": "PreToolUse conecta a autorização enforce antes da execução das ferramentas de efeito colateral."
+      },
+      {
+        "texto_opcion": "Remova delete_table apenas dos exemplos de prompt — a ferramenta ainda pode estar registrada e pode ser chamada",
+        "es_correcta": false,
+        "explicacion": "A ferramenta ainda pode estar registrada e chamável."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "você planeja a classificação em massa durante a noite de 500 mil tickets de suporte por meio de lotes de mensagens. Cenário: um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Envie todos os 500 mil registros em um arquivo em lote, independentemente dos limites — a solicitação pode falhar ou ser limitada como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "A solicitação pode falhar ou ser limitada."
+      },
+      {
+        "texto_opcion": "Projete trabalhos em lote dentro de limites documentados de tamanho e simultaneidade; fragmentar em várias solicitações em lote",
+        "es_correcta": true,
+        "explicacion": "Message Batches tem limites de serviço que exigem fragmentação e monitoramento."
+      },
+      {
+        "texto_opcion": "Use a API de mensagens de streaming para cada ticket de forma síncrona – inadequada para grandes volumes off-line — não é adequado para grandes volumes off-line",
+        "es_correcta": false,
+        "explicacion": "Não é adequado para grandes volumes off-line."
+      },
+      {
+        "texto_opcion": "Ignore a pesquisa de resultados porque os lotes são assíncronos, dispare e esqueça - você nunca poderá recuperar resultados concluídos plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Você nunca poderá recuperar resultados concluídos."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Limites de lotes de mensagens"
+    ]
+  },
+  {
+    "pregunta": "chatbot sensível à latência versus backlog de categorização de faturas mensais. Contexto: um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute o backlog mensal por meio de loops de bate-papo síncronos – caros e operacionalmente fragile — caro e operacionalmente fragile aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Caro e operacionalmente fragile."
+      },
+      {
+        "texto_opcion": "Use a API de mensagens para bate-papo em tempo real; Lotes de mensagens para processamento de pendências off-line",
+        "es_correcta": true,
+        "explicacion": "Custo e taxa de transferência da API optimize em lote para cargas de trabalho não interativas."
+      },
+      {
+        "texto_opcion": "Use lotes de mensagens para respostas de bate-papo do usuário em menos de um segundo – latência de lote inadequada para experiência do usuário interativa",
+        "es_correcta": false,
+        "explicacion": "Latência de lote inadequada para UX interativa."
+      },
+      {
+        "texto_opcion": "Misture lote e bate-papo em um ID de thread de conversa — APIs diferentes atendem a modelos de interação diferentes plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "APIs diferentes atendem a modelos de interação diferentes."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "lote vs tempo real"
+    ]
+  },
+  {
+    "pregunta": "Claude emite blocos get_user e get_orders tool_use juntos sem dependência. Revisão de projeto para um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Selecione a abordagem mais apropriada. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute as duas ferramentas simultaneamente e retorne os resultados de tool_results correspondentes antes da próxima chamada de modelo",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser paralelas quanto à latência."
+      },
+      {
+        "texto_opcion": "Execute get_orders antes de get_user sempre em ordem alfabética – a serialização desnecessária aumenta a latência aplicada em todos os ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "A serialização desnecessária aumenta a latência."
+      },
+      {
+        "texto_opcion": "Execute apenas get_user e ignore get_orders — cumprimento incompleto do turno do assistente aplicado em todos os ambientes para consistência operacional como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Cumprimento incompleto do turno do assistente."
+      },
+      {
+        "texto_opcion": "Retornar um tool_result combinado para ambos - viola o emparelhamento por tool_use_id como design primário para este requisito configurado de ponta a ponta para o workload descrito",
+        "es_correcta": false,
+        "explicacion": "Viola o emparelhamento por tool_use_id."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "ferramentas paralelas no mesmo turno"
+    ]
+  },
+  {
+    "pregunta": "create_shipment requer package_id da ferramenta pack_items na rodada anterior. Contexto: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Agrupe ambas as ferramentas em uma chamada de API externa fora do protocolo — divide a visibilidade do modelo em etapas aplicadas em ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Divide a visibilidade do modelo em etapas."
+      },
+      {
+        "texto_opcion": "Passar package_id falso para desbloquear create_shipment – causa erros de logística downstream adotados como padrão para a equipe — causa erros logísticos posteriores aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Causa erros logísticos posteriores."
+      },
+      {
+        "texto_opcion": "Registre create_shipment em allowedTools antes da execução de pack_items – a lista permitida não remove a dependência de dados aplicada em ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "A lista permitida não remove a dependência de dados."
+      },
+      {
+        "texto_opcion": "Conclua pack_items, retorne tool_result e permita create_shipment no próximo turno do assistente",
+        "es_correcta": true,
+        "explicacion": "As dependências entre curvas exigem rodadas sequenciais de loop de ferramentas."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "sequenciamento de ferramentas dependentes"
+    ]
+  },
+  {
+    "pregunta": "a segurança deseja alertas quando ferramentas administrativas raras são acionadas. Contexto: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Revise as transcrições do bate-papo semanalmente manualmente – muito lento para resposta a incidentes frequentemente vistos em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "Muito lento para resposta a incidentes."
+      },
+      {
+        "texto_opcion": "Peça a Claude para registrar o uso da ferramenta administrativa em linguagem natural – não estruturada e não confiável para alertas — não estruturado e não confiável para alertas",
+        "es_correcta": false,
+        "explicacion": "Não estruturado e não confiável para alertas."
+      },
+      {
+        "texto_opcion": "Emite métricas e alertas de ganchos PostToolUse em nomes de ferramentas confidenciais",
+        "es_correcta": true,
+        "explicacion": "Os ganchos centralizam a telemetria de segurança sem confiar na narração do modelo."
+      },
+      {
+        "texto_opcion": "Desativar ganchos para reduzir o volume de log — remove a detecção em tempo real frequentemente vista em designs legados, mas não é ideal para este caso como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Remove a detecção em tempo real."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "observabilidade do gancho"
+    ]
+  },
+  {
+    "pregunta": "a disponibilidade da ferramenta muda depois que o usuário conclui a etapa de MFA. Contexto: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Atualização allowedTools na próxima solicitação após sucesso do MFA para incluir ferramentas confidenciais",
+        "es_correcta": true,
+        "explicacion": "allowedTools pode mudar por solicitação com base no estado da sessão."
+      },
+      {
+        "texto_opcion": "Nunca altere allowedTools no meio da sessão – perde padrões de autenticação passo a passo — perde padrões de autenticação avançados",
+        "es_correcta": false,
+        "explicacion": "Perde padrões de autenticação avançados."
+      },
+      {
+        "texto_opcion": "Exigir MFA dentro de cada descrição de ferramenta – mFA pertence à política de sessão, não aos documentos da ferramenta",
+        "es_correcta": false,
+        "explicacion": "A MFA pertence à política de sessão, não aos documentos de ferramentas."
+      },
+      {
+        "texto_opcion": "Registre todas as ferramentas antecipadamente e peça ao usuário para não trapacear - não enforce step-up gate — não enforce step-up gating",
+        "es_correcta": false,
+        "explicacion": "Não enforce step-up gating."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dinâmico allowedTools"
+    ]
+  },
+  {
+    "pregunta": "um fluxo de trabalho espera que Claude escolha entre ferramentas de pesquisa semelhantes conforme necessário. Revisão de projeto para um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Selecione a abordagem mais apropriada. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Force tool_choice qualquer em cada turno — ferramenta forces usada mesmo quando uma resposta direta é suficiente como design primário para este requisito. Isso o torna um ajuste mais fraco contra a restrição principal no prompt",
+        "es_correcta": false,
+        "explicacion": "A ferramenta Forces é usada mesmo quando uma resposta direta é suficiente."
+      },
+      {
+        "texto_opcion": "Use tool_choice auto e limpe descrições de ferramentas distintas para que o modelo selecione adequadamente",
+        "es_correcta": true,
+        "explicacion": "auto permite que o modelo escolha ferramentas quando múltiplas são válidas."
+      },
+      {
+        "texto_opcion": "Desativar ferramentas para simplificar o roteamento — remove as ações necessárias do agente priorizadas para simplificar, embora perca uma restrição importante comum em desenhos legados, porém inadequado neste caso Isso o torna inadequado frente à restrição principal do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Remove as ações necessárias do agente."
+      },
+      {
+        "texto_opcion": "Fornece doze ferramentas sobrepostas com descrições idênticas – roteamento ambíguo prejudica a seleção configurada de ponta a ponta para a carga de trabalho declarada — o roteamento ambíguo prejudica a seleção selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "O roteamento ambíguo prejudica a seleção."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice automático"
+    ]
+  },
+  {
+    "pregunta": "pipeline deve sempre chamar a ferramenta extract_fields antes de responder aos clientes da API. Contexto de produção: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Analisar texto livre com regex em vez de ferramentas — ignora o contrato de ferramenta estruturada usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Ignora o contrato de ferramenta estruturada."
+      },
+      {
+        "texto_opcion": "Espero que o modelo sempre escolha extract_fields voluntariamente - a seleção voluntária pode ser ignorada como projeto principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "A seleção voluntária pode ser ignorada."
+      },
+      {
+        "texto_opcion": "Use tool_choice none em turnos de extração — evita explicitamente chamadas de ferramentas necessárias como projeto principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Impede explicitamente chamadas de ferramentas necessárias."
+      },
+      {
+        "texto_opcion": "Defina tool_choice para exigir uma ferramenta específica ou qualquer ferramenta em turnos que deva produzir extração estruturada",
+        "es_correcta": true,
+        "explicacion": "A escolha da ferramenta obrigatória garante a invocação da ferramenta quando obrigatória."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice obrigatório"
+    ]
+  },
+  {
+    "pregunta": "um lote de mensagens é concluído, mas 2% das linhas falharam na validação. Revisão de projeto para um sistema de pesquisa multiagente com coordenador, pesquisa na web e subagentes de síntese. Selecione a abordagem mais apropriada. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Descarte o lote inteiro se alguma linha falhar – desperdiça 98% do trabalho bem-sucedido configurado de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "Desperdiça 98% de trabalho bem-sucedido."
+      },
+      {
+        "texto_opcion": "Reenviar o lote completo inalterado indefinidamente — repete as mesmas falhas de validação plausíveis à primeira vista, mas mais fracas que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Repete as mesmas falhas de validação."
+      },
+      {
+        "texto_opcion": "Baixe resultados em lote, encaminhe falhas para uma fila de mensagens não entregues e tente novamente ou inspecione separadamente",
+        "es_correcta": true,
+        "explicacion": "O processamento em lote precisa de tratamento parcial de falhas, e não de suposições de tudo ou nada."
+      },
+      {
+        "texto_opcion": "Marcar lote com sucesso sem ler arquivos de resultados — perda silenciosa de dados em linhas com falha, plausível à primeira vista, mas mais fraca que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Perda silenciosa de dados em linhas com falha."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "falha parcial do lote"
+    ]
+  },
+  {
+    "pregunta": "Os ganchos PostToolUse adicionam 800 ms cada e os usuários percebem lentidão. Contexto: loops de ferramentas de tratamento de serviço Agent SDK de produção e fluxo de controle stop_reason. Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute sempre sincronização síncrona de CRM de terceiros dentro de PreToolUse — bloqueia a execução da ferramenta em integrações lentas",
+        "es_correcta": false,
+        "explicacion": "Bloqueia a execução da ferramenta em integrações lentas."
+      },
+      {
+        "texto_opcion": "Desativar ferramentas em vez de otimizar ganchos — reduz excessivamente a funcionalidade como opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "Reduz excessivamente a funcionalidade."
+      },
+      {
+        "texto_opcion": "Remova todos os ganchos para restaurar a velocidade - perde o enforcement e a observabilidade como projeto principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Perde enforcement e observabilidade."
+      },
+      {
+        "texto_opcion": "Transferir trabalho de gancho não crítico para trabalhadores assíncronos; mantenha os ganchos apoiados no caminho crítico",
+        "es_correcta": true,
+        "explicacion": "O design do gancho deve equilibrar o enforcement com os orçamentos de latência."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "latência do gancho"
+    ]
+  },
+  {
+    "pregunta": "o usuário cancela enquanto duas ferramentas paralelas estão em operação. Contexto de produção: um sistema de pesquisa multiagente com subagentes coordenador, busca na web e síntese. O que o arquiteto deve fazer? Conjunto de restrições nº 2.",
+    "opciones": [
+      {
+        "texto_opcion": "Permitir que as ferramentas terminem silenciosamente após o cancelamento do usuário — pode aplicar efeitos colaterais indesejados como opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "Pode aplicar efeitos colaterais indesejados."
+      },
+      {
+        "texto_opcion": "Cancele as tarefas da ferramenta em andamento, se possível, e retorne o status cancelado em tool_result para o modelo",
+        "es_correcta": true,
+        "explicacion": "O cancelamento deve ser propagado de forma limpa para os executores de ferramentas paralelas."
+      },
+      {
+        "texto_opcion": "Abortar sem enviar nenhum tool_result — deixa a lista de mensagens em um estado inválido configurado de ponta a ponta para a carga de trabalho declarada como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Deixa a lista de mensagens em um estado inválido."
+      },
+      {
+        "texto_opcion": "Reinicie toda a conversa do zero automaticamente – é pesado e perde o contexto válido configurado de ponta a ponta para a carga de trabalho declarada aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Pesado e perde o contexto válido."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "cancelamento multi-ferramenta"
+    ]
+  },
+  {
+    "pregunta": "um agente analista somente leitura deve consultar os armazéns, mas não alterar as tabelas de produção. Cenário: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Remova as descrições das ferramentas, mas deixe os manipuladores registrados — os manipuladores ainda podem ser acessados dependendo do host",
+        "es_correcta": false,
+        "explicacion": "Os manipuladores ainda podem estar acessíveis dependendo do host."
+      },
+      {
+        "texto_opcion": "Listar ferramentas proibidas na mensagem do usuário a cada turno adotado como padrão para a equipe priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Não enforced pela API."
+      },
+      {
+        "texto_opcion": "Configure allowedTools para incluir get_schema e run_read_query somente no momento da solicitação",
+        "es_correcta": true,
+        "explicacion": "allowedTools restringe quais ferramentas o modelo pode invocar por solicitação."
+      },
+      {
+        "texto_opcion": "Grant todas as ferramentas MCP porque as descrições mencionam somente leitura - as descrições não concedem permissões orce comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "As descrições não concedem permissões."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "após a execução de qualquer ferramenta de gravação de banco de dados, você deverá invalidar um padrão de chave de cache. Revisão de projeto para um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Selecione a abordagem mais apropriada. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Invalidar o cache em cada mensagem do usuário — muito amplo e prejudica o desempenho aplicado em todos os ambientes para obter consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Muito amplo e prejudica o desempenho."
+      },
+      {
+        "texto_opcion": "Invalidar manualmente apenas durante o horário comercial – perde gravações automatizadas do agente fora do horário comercial — perde as gravações do agente automatizado fora do horário comercial",
+        "es_correcta": false,
+        "explicacion": "Perde as gravações do agente automatizado fora do horário comercial."
+      },
+      {
+        "texto_opcion": "Peça ao modelo para lembrar de invalidar o cache no texto — o modelo pode omitir a manutenção pós-ação selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "O modelo pode omitir a manutenção pós-ação."
+      },
+      {
+        "texto_opcion": "Registre um gancho PostToolUse que inspeciona o nome da ferramenta e aciona a invalidação do cache",
+        "es_correcta": true,
+        "explicacion": "Os ganchos executam efeitos colaterais programáticos vinculados a eventos do ciclo de vida da ferramenta."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "bloqueie delete_table, a menos que a sessão tenha uma reivindicação de função administrativa. Revisão de projeto para um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Selecione a abordagem mais apropriada. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Documente delete_table como administradores apenas na descrição da ferramenta - descrição não é autorização",
+        "es_correcta": false,
+        "explicacion": "Descrição não é autorização."
+      },
+      {
+        "texto_opcion": "Espero que Claude recuse delete_table para não administradores – a recusa do modelo não é um controle de segurança",
+        "es_correcta": false,
+        "explicacion": "A recusa do modelo não é um controle de segurança."
+      },
+      {
+        "texto_opcion": "Remova delete_table apenas dos exemplos de prompt — a ferramenta ainda pode estar registrada e pode ser chamada",
+        "es_correcta": false,
+        "explicacion": "A ferramenta ainda pode estar registrada e chamável."
+      },
+      {
+        "texto_opcion": "Implementar o gancho PreToolUse para a execução deny quando a reivindicação de função estiver faltando",
+        "es_correcta": true,
+        "explicacion": "PreToolUse conecta a autorização enforce antes da execução das ferramentas de efeito colateral."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "você planeja a classificação em massa durante a noite de 500 mil tickets de suporte por meio de lotes de mensagens. Contexto de produção: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. O que o arquiteto deve fazer? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Projete trabalhos em lote dentro de limites documentados de tamanho e simultaneidade; fragmentar em várias solicitações em lote",
+        "es_correcta": true,
+        "explicacion": "Message Batches tem limites de serviço que exigem fragmentação e monitoramento."
+      },
+      {
+        "texto_opcion": "Ignore a pesquisa de resultados porque os lotes são assíncronos, dispare e esqueça - você nunca poderá recuperar resultados concluídos usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Você nunca poderá recuperar resultados concluídos."
+      },
+      {
+        "texto_opcion": "Use a API de mensagens de streaming para cada ticket de forma síncrona – inadequada para grandes volumes off-line — não é adequado para grandes volumes off-line",
+        "es_correcta": false,
+        "explicacion": "Não é adequado para grandes volumes off-line."
+      },
+      {
+        "texto_opcion": "Envie todos os 500 mil registros em um arquivo em lote, independentemente dos limites — a solicitação pode falhar ou ser limitada comum em desenhos legados, porém inadequado neste caso",
+        "es_correcta": false,
+        "explicacion": "A solicitação pode falhar ou ser limitada."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Limites de lotes de mensagens"
+    ]
+  },
+  {
+    "pregunta": "chatbot sensível à latência versus backlog de categorização de faturas mensais. Revisão de projeto para um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. Selecione a abordagem mais apropriada. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute o backlog mensal por meio de loops de bate-papo síncronos – caros e operacionalmente fragile — caro e operacionalmente fragile como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Caro e operacionalmente fragile."
+      },
+      {
+        "texto_opcion": "Use a API de mensagens para bate-papo em tempo real; Lotes de mensagens para processamento de pendências off-line",
+        "es_correcta": true,
+        "explicacion": "Custo e taxa de transferência da API optimize em lote para cargas de trabalho não interativas."
+      },
+      {
+        "texto_opcion": "Use lotes de mensagens para respostas de bate-papo do usuário em menos de um segundo – latência de lote inadequada para experiência do usuário interativa",
+        "es_correcta": false,
+        "explicacion": "Latência de lote inadequada para UX interativa."
+      },
+      {
+        "texto_opcion": "Misture lote e bate-papo em um ID de thread de conversa — APIs diferentes atendem a modelos de interação diferentes aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "APIs diferentes atendem a modelos de interação diferentes."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "lote vs tempo real"
+    ]
+  },
+  {
+    "pregunta": "Claude emite blocos get_user e get_orders tool_use juntos sem dependência. Revisão de projeto para um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Selecione a abordagem mais apropriada. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute get_orders antes de get_user sempre em ordem alfabética – a serialização desnecessária aumenta a latência frequentemente vista em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "A serialização desnecessária aumenta a latência."
+      },
+      {
+        "texto_opcion": "Execute as duas ferramentas simultaneamente e retorne os resultados de tool_results correspondentes antes da próxima chamada de modelo",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser paralelas quanto à latência."
+      },
+      {
+        "texto_opcion": "Retorna um tool_result combinado para ambos - viola o emparelhamento por tool_use_id priorizado para simplificar, embora perca uma restrição chave aplicado entre ambientes por consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Viola o emparelhamento por tool_use_id."
+      },
+      {
+        "texto_opcion": "Execute apenas get_user e ignore get_orders — cumprimento incompleto do turno do assistente priorizado por simplicidade, embora perca uma restrição importante como desenho principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Cumprimento incompleto do turno do assistente."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "ferramentas paralelas no mesmo turno"
+    ]
+  },
+  {
+    "pregunta": "create_shipment requer package_id da ferramenta pack_items na rodada anterior. Contexto: um sistema de pesquisa multiagente com coordenador, pesquisa na web e subagentes de síntese. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Conclua pack_items, retorne tool_result e permita create_shipment no próximo turno do assistente",
+        "es_correcta": true,
+        "explicacion": "As dependências entre curvas exigem rodadas sequenciais de loop de ferramentas."
+      },
+      {
+        "texto_opcion": "Registre create_shipment em allowedTools antes da execução de pack_items - a lista permitida não remove a dependência de dados como a opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "A lista permitida não remove a dependência de dados."
+      },
+      {
+        "texto_opcion": "Agrupe ambas as ferramentas em uma chamada de API externa fora do protocolo – divide a visibilidade do modelo em etapas adotadas como padrão para a equipe como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "Divide a visibilidade do modelo em etapas."
+      },
+      {
+        "texto_opcion": "Passar package_id falso para desbloquear create_shipment — causa erros de logística downstream configurados de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "Causa erros logísticos posteriores."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "sequenciamento de ferramentas dependentes"
+    ]
+  },
+  {
+    "pregunta": "a segurança deseja alertas quando ferramentas administrativas raras são acionadas. Contexto: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Revise as transcrições do bate-papo semanalmente manualmente – muito lento para resposta a incidentes como projeto principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Muito lento para resposta a incidentes."
+      },
+      {
+        "texto_opcion": "Emite métricas e alertas de ganchos PostToolUse em nomes de ferramentas confidenciais",
+        "es_correcta": true,
+        "explicacion": "Os ganchos centralizam a telemetria de segurança sem confiar na narração do modelo."
+      },
+      {
+        "texto_opcion": "Desativar ganchos para reduzir o volume de log — remove a detecção em tempo real configurada de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "Remove a detecção em tempo real."
+      },
+      {
+        "texto_opcion": "Peça a Claude para registrar o uso da ferramenta administrativa em linguagem natural – não estruturada e não confiável para alertas",
+        "es_correcta": false,
+        "explicacion": "Não estruturado e não confiável para alertas."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "observabilidade do gancho"
+    ]
+  },
+  {
+    "pregunta": "a disponibilidade da ferramenta muda depois que o usuário conclui a etapa de MFA. Cenário: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Exigir MFA dentro de cada descrição de ferramenta – mFA pertence à política de sessão, não aos documentos da ferramenta",
+        "es_correcta": false,
+        "explicacion": "A MFA pertence à política de sessão, não aos documentos de ferramentas."
+      },
+      {
+        "texto_opcion": "Nunca altere allowedTools no meio da sessão – perde padrões de autenticação passo a passo — perde padrões de autenticação avançados",
+        "es_correcta": false,
+        "explicacion": "Perde padrões de autenticação avançados."
+      },
+      {
+        "texto_opcion": "Atualização allowedTools na próxima solicitação após sucesso do MFA para incluir ferramentas confidenciais",
+        "es_correcta": true,
+        "explicacion": "allowedTools pode mudar por solicitação com base no estado da sessão."
+      },
+      {
+        "texto_opcion": "Registre todas as ferramentas antecipadamente e peça ao usuário para não trapacear - não enforce step-up gate — não enforce step-up gating",
+        "es_correcta": false,
+        "explicacion": "Não enforce step-up gating."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dinâmico allowedTools"
+    ]
+  },
+  {
+    "pregunta": "um fluxo de trabalho espera que Claude escolha entre ferramentas de pesquisa semelhantes conforme necessário. Contexto: um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Desativar ferramentas para simplificar o roteamento — remove as ações necessárias do agente selecionado para atender às restrições descritas aqui priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Remove as ações necessárias do agente."
+      },
+      {
+        "texto_opcion": "Force tool_choice any em cada turno — ferramenta forces usada mesmo quando uma resposta direta é priorizada o suficiente para simplificar, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "A ferramenta Forces é usada mesmo quando uma resposta direta é suficiente."
+      },
+      {
+        "texto_opcion": "Use tool_choice auto e limpe descrições de ferramentas distintas para que o modelo selecione adequadamente",
+        "es_correcta": true,
+        "explicacion": "auto permite que o modelo escolha ferramentas quando múltiplas são válidas."
+      },
+      {
+        "texto_opcion": "Forneça doze ferramentas sobrepostas com descrições idênticas — o roteamento ambíguo prejudica a seleção priorizada pela simplicidade, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "O roteamento ambíguo prejudica a seleção."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice automático"
+    ]
+  },
+  {
+    "pregunta": "pipeline deve sempre chamar a ferramenta extract_fields antes de responder aos clientes da API. Cenário: um sistema de pesquisa multiagente com coordenador, busca na web e subagentes de síntese. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Defina tool_choice para exigir uma ferramenta específica ou qualquer ferramenta em turnos que deva produzir extração estruturada",
+        "es_correcta": true,
+        "explicacion": "A escolha da ferramenta obrigatória garante a invocação da ferramenta quando obrigatória."
+      },
+      {
+        "texto_opcion": "Use tool_choice none em turnos de extração — evita explicitamente chamadas de ferramentas necessárias como projeto principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Impede explicitamente chamadas de ferramentas necessárias."
+      },
+      {
+        "texto_opcion": "Espero que o modelo sempre escolha extract_fields voluntariamente - a seleção voluntária pode ser ignorada, adotada como padrão para a equipe",
+        "es_correcta": false,
+        "explicacion": "A seleção voluntária pode ser ignorada."
+      },
+      {
+        "texto_opcion": "Analisar texto livre com regex em vez de ferramentas — ignora o contrato de ferramenta estruturada como design principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "Ignora o contrato de ferramenta estruturada."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice obrigatório"
+    ]
+  },
+  {
+    "pregunta": "um lote de mensagens é concluído, mas 2% das linhas falharam na validação. Cenário: um serviço de produção Agent SDK, loops de ferramentas de tratamento e fluxo de controle stop_reason. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Marcar lote como bem-sucedido sem ler arquivos de resultados — perda silenciosa de dados em linhas com falha como a opção de produção padrão neste cenário",
+        "es_correcta": false,
+        "explicacion": "Perda silenciosa de dados em linhas com falha."
+      },
+      {
+        "texto_opcion": "Reenviar o lote completo inalterado indefinidamente — repete as mesmas falhas de validação plausíveis à primeira vista, mas mais fracas que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Repete as mesmas falhas de validação."
+      },
+      {
+        "texto_opcion": "Descarte o lote inteiro se alguma linha falhar — desperdiça 98% do trabalho bem-sucedido, frequentemente visto em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "Desperdiça 98% de trabalho bem-sucedido."
+      },
+      {
+        "texto_opcion": "Baixe resultados em lote, encaminhe falhas para uma fila de mensagens não entregues e tente novamente ou inspecione separadamente",
+        "es_correcta": true,
+        "explicacion": "O processamento em lote precisa de tratamento parcial de falhas, e não de suposições de tudo ou nada."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "falha parcial do lote"
+    ]
+  },
+  {
+    "pregunta": "Os ganchos PostToolUse adicionam 800 ms cada e os usuários percebem lentidão. Revisão de projeto para um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Selecione a abordagem mais apropriada. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Remova todos os ganchos para restaurar a velocidade - perde o enforcement e a observabilidade configurada de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "Perde enforcement e observabilidade."
+      },
+      {
+        "texto_opcion": "Transferir trabalho de gancho não crítico para trabalhadores assíncronos; mantenha os ganchos apoiados no caminho crítico",
+        "es_correcta": true,
+        "explicacion": "O design do gancho deve equilibrar o enforcement com os orçamentos de latência."
+      },
+      {
+        "texto_opcion": "Desabilitar ferramentas em vez de otimizar ganchos — reduz demais a funcionalidade adotada como padrão para a equipe — reduz excessivamente a funcionalidade",
+        "es_correcta": false,
+        "explicacion": "Reduz excessivamente a funcionalidade."
+      },
+      {
+        "texto_opcion": "Execute sempre sincronização síncrona de CRM de terceiros dentro de PreToolUse — bloqueia a execução da ferramenta em integrações lentas plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Bloqueia a execução da ferramenta em integrações lentas."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "latência do gancho"
+    ]
+  },
+  {
+    "pregunta": "o usuário cancela enquanto duas ferramentas paralelas estão em operação. Contexto: um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. Conjunto de restrições nº 3.",
+    "opciones": [
+      {
+        "texto_opcion": "Abortar sem enviar nenhum tool_result — deixa a lista de mensagens em estado inválido adotado como padrão para a equipe — deixa a lista de mensagens em um estado inválido selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "Deixa a lista de mensagens em um estado inválido."
+      },
+      {
+        "texto_opcion": "Cancele as tarefas da ferramenta em andamento, se possível, e retorne o status cancelado em tool_result para o modelo",
+        "es_correcta": true,
+        "explicacion": "O cancelamento deve ser propagado de forma limpa para os executores de ferramentas paralelas."
+      },
+      {
+        "texto_opcion": "Reinicie toda a conversa do zero automaticamente - é pesado e perde o contexto válido usado como caminho principal nesta arquitetura usado como caminho principal nesta arquitetura Isso o torna inadequado frente à restrição principal do enunciado.",
+        "es_correcta": false,
+        "explicacion": "Pesado e perde o contexto válido."
+      },
+      {
+        "texto_opcion": "Deixe as ferramentas terminarem silenciosamente após o cancelamento do usuário — pode aplicar efeitos colaterais indesejados, plausíveis à primeira vista, mas mais fracos do que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Pode aplicar efeitos colaterais indesejados."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "cancelamento multi-ferramenta"
+    ]
+  },
+  {
+    "pregunta": "um agente analista somente leitura deve consultar os armazéns, mas não alterar as tabelas de produção. Revisão de projeto para um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Liste as ferramentas proibidas na mensagem do usuário a cada turno, frequentemente vistas em designs legados, mas não ideais para este caso",
+        "es_correcta": false,
+        "explicacion": "Não enforced pela API."
+      },
+      {
+        "texto_opcion": "Configure allowedTools para incluir get_schema e run_read_query somente no momento da solicitação",
+        "es_correcta": true,
+        "explicacion": "allowedTools restringe quais ferramentas o modelo pode invocar por solicitação."
+      },
+      {
+        "texto_opcion": "Remova as descrições das ferramentas, mas deixe os manipuladores registrados — os manipuladores ainda podem ser acessados dependendo do host",
+        "es_correcta": false,
+        "explicacion": "Os manipuladores ainda podem estar acessíveis dependendo do host."
+      },
+      {
+        "texto_opcion": "Grant todas as ferramentas MCP porque as descrições mencionam somente leitura - as descrições não concedem permissões orce selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "As descrições não concedem permissões."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "após a execução de qualquer ferramenta de gravação de banco de dados, você deverá invalidar um padrão de chave de cache. Contexto de produção: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. O que o arquiteto deve fazer? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Invalidar manualmente apenas durante o horário comercial – perde gravações automatizadas do agente fora do horário comercial — perde as gravações do agente automatizado fora do horário comercial",
+        "es_correcta": false,
+        "explicacion": "Perde as gravações do agente automatizado fora do horário comercial."
+      },
+      {
+        "texto_opcion": "Peça ao modelo para lembrar de invalidar o cache no texto — o modelo pode omitir a manutenção pós-ação como escolha padrão de produção neste cenário",
+        "es_correcta": false,
+        "explicacion": "O modelo pode omitir a manutenção pós-ação."
+      },
+      {
+        "texto_opcion": "Registre um gancho PostToolUse que inspeciona o nome da ferramenta e aciona a invalidação do cache",
+        "es_correcta": true,
+        "explicacion": "Os ganchos executam efeitos colaterais programáticos vinculados a eventos do ciclo de vida da ferramenta."
+      },
+      {
+        "texto_opcion": "Invalidar o cache em cada mensagem do usuário – muito amplo e prejudica o desempenho priorizado pela simplicidade, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "Muito amplo e prejudica o desempenho."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "bloqueie delete_table, a menos que a sessão tenha uma reivindicação de função administrativa. Revisão de projeto para um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Remova delete_table apenas dos exemplos de prompt — a ferramenta ainda pode estar registrada e pode ser chamada",
+        "es_correcta": false,
+        "explicacion": "A ferramenta ainda pode estar registrada e chamável."
+      },
+      {
+        "texto_opcion": "Espero que Claude recuse delete_table para não administradores – a recusa do modelo não é um controle de segurança",
+        "es_correcta": false,
+        "explicacion": "A recusa do modelo não é um controle de segurança."
+      },
+      {
+        "texto_opcion": "Documente delete_table como administradores apenas na descrição da ferramenta - descrição não é autorização",
+        "es_correcta": false,
+        "explicacion": "Descrição não é autorização."
+      },
+      {
+        "texto_opcion": "Implementar o gancho PreToolUse para a execução deny quando a reivindicação de função estiver faltando",
+        "es_correcta": true,
+        "explicacion": "PreToolUse conecta a autorização enforce antes da execução das ferramentas de efeito colateral."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "você planeja a classificação em massa durante a noite de 500 mil tickets de suporte por meio de lotes de mensagens. Contexto: um agente de resolução de suporte ao cliente com ferramentas de consulta de pedidos, reembolso e escalonamento. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use a API de mensagens de streaming para cada ticket de forma síncrona – inadequada para grandes volumes off-line — não é adequado para grandes volumes off-line",
+        "es_correcta": false,
+        "explicacion": "Não é adequado para grandes volumes off-line."
+      },
+      {
+        "texto_opcion": "Projete trabalhos em lote dentro de limites documentados de tamanho e simultaneidade; fragmentar em várias solicitações em lote",
+        "es_correcta": true,
+        "explicacion": "Message Batches tem limites de serviço que exigem fragmentação e monitoramento."
+      },
+      {
+        "texto_opcion": "Envie todos os 500 mil registros em um arquivo em lote, independentemente dos limites — a solicitação pode falhar ou ser limitada configurado de ponta a ponta para o workload descrito",
+        "es_correcta": false,
+        "explicacion": "A solicitação pode falhar ou ser limitada."
+      },
+      {
+        "texto_opcion": "Ignore a pesquisa de resultados porque os lotes são assíncronos, dispare e esqueça - você nunca poderá recuperar resultados concluídos usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Você nunca poderá recuperar resultados concluídos."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Limites de lotes de mensagens"
+    ]
+  },
+  {
+    "pregunta": "chatbot sensível à latência versus backlog de categorização de faturas mensais. Contexto de produção: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. O que o arquiteto deve fazer? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Use lotes de mensagens para respostas de bate-papo do usuário em menos de um segundo – latência de lote inadequada para experiência do usuário interativa",
+        "es_correcta": false,
+        "explicacion": "Latência de lote inadequada para UX interativa."
+      },
+      {
+        "texto_opcion": "Execute o backlog mensal por meio de loops de bate-papo síncronos – caros e operacionalmente fragile — caro e operacionalmente fragile adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Caro e operacionalmente fragile."
+      },
+      {
+        "texto_opcion": "Use a API de mensagens para bate-papo em tempo real; Lotes de mensagens para processamento de pendências off-line",
+        "es_correcta": true,
+        "explicacion": "Custo e taxa de transferência da API optimize em lote para cargas de trabalho não interativas."
+      },
+      {
+        "texto_opcion": "Misture lote e bate-papo em um ID de thread de conversa — APIs diferentes atendem a modelos de interação diferentes plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "APIs diferentes atendem a modelos de interação diferentes."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "lote vs tempo real"
+    ]
+  },
+  {
+    "pregunta": "Claude emite blocos get_user e get_orders tool_use juntos sem dependência. Revisão de projeto para um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute get_orders antes de get_user sempre em ordem alfabética – a serialização desnecessária aumenta a latência frequentemente vista em designs legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "A serialização desnecessária aumenta a latência."
+      },
+      {
+        "texto_opcion": "Execute as duas ferramentas simultaneamente e retorne os resultados de tool_results correspondentes antes da próxima chamada de modelo",
+        "es_correcta": true,
+        "explicacion": "Ferramentas independentes no mesmo turno devem ser paralelas quanto à latência."
+      },
+      {
+        "texto_opcion": "Execute apenas get_user e ignore get_orders — cumprimento incompleto do turno do assistente frequentemente visto em designs legados, mas não é ideal para este caso configurado de ponta a ponta para o workload descrito",
+        "es_correcta": false,
+        "explicacion": "Cumprimento incompleto do turno do assistente."
+      },
+      {
+        "texto_opcion": "Retorna um tool_result combinado para ambos - viola o emparelhamento por tool_use_id plausível à primeira vista, mas mais fraco que a melhor opção selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "Viola o emparelhamento por tool_use_id."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "ferramentas paralelas no mesmo turno"
+    ]
+  },
+  {
+    "pregunta": "create_shipment requer package_id da ferramenta pack_items na rodada anterior. Contexto: um assistente de produtividade do desenvolvedor usando ferramentas integradas e servidores MCP. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Agrupar ambas as ferramentas em uma chamada de API externa fora do protocolo — divide a visibilidade do modelo em etapas usadas como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Divide a visibilidade do modelo em etapas."
+      },
+      {
+        "texto_opcion": "Conclua pack_items, retorne tool_result e permita create_shipment no próximo turno do assistente",
+        "es_correcta": true,
+        "explicacion": "As dependências entre curvas exigem rodadas sequenciais de loop de ferramentas."
+      },
+      {
+        "texto_opcion": "Registre create_shipment em allowedTools antes da execução de pack_items - a lista permitida não remove a dependência de dados usada como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "A lista permitida não remove a dependência de dados."
+      },
+      {
+        "texto_opcion": "Passar package_id falso para desbloquear create_shipment — causa erros logísticos posteriores priorizados pela simplicidade, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "Causa erros logísticos posteriores."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "sequenciamento de ferramentas dependentes"
+    ]
+  },
+  {
+    "pregunta": "a segurança deseja alertas quando ferramentas administrativas raras são acionadas. Revisão de projeto para loops de ferramentas de manipulação de serviço de produção Agent SDK e fluxo de controle stop_reason. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Peça a Claude para registrar o uso da ferramenta administrativa em linguagem natural – não estruturada e não confiável para alertas",
+        "es_correcta": false,
+        "explicacion": "Não estruturado e não confiável para alertas."
+      },
+      {
+        "texto_opcion": "Revise as transcrições do bate-papo semanalmente manualmente – muito lento para a resposta a incidentes adotada como padrão para a equipe",
+        "es_correcta": false,
+        "explicacion": "Muito lento para resposta a incidentes."
+      },
+      {
+        "texto_opcion": "Desativar ganchos para reduzir o volume de log — remove a detecção em tempo real adotada como padrão para a equipe plausível à primeira vista, porém mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Remove a detecção em tempo real."
+      },
+      {
+        "texto_opcion": "Emite métricas e alertas de ganchos PostToolUse em nomes de ferramentas confidenciais",
+        "es_correcta": true,
+        "explicacion": "Os ganchos centralizam a telemetria de segurança sem confiar na narração do modelo."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "observabilidade do gancho"
+    ]
+  },
+  {
+    "pregunta": "a disponibilidade da ferramenta muda depois que o usuário conclui a etapa de MFA. Cenário: um fluxo de trabalho de geração de código Claude Code em um monorepo multi-repo. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Registre todas as ferramentas antecipadamente e peça ao usuário para não trapacear - não enforce step-up gate — não enforce step-up gating",
+        "es_correcta": false,
+        "explicacion": "Não enforce step-up gating."
+      },
+      {
+        "texto_opcion": "Nunca altere allowedTools no meio da sessão – perde padrões de autenticação passo a passo — perde padrões de autenticação avançados",
+        "es_correcta": false,
+        "explicacion": "Perde padrões de autenticação avançados."
+      },
+      {
+        "texto_opcion": "Exigir MFA dentro de cada descrição de ferramenta – mFA pertence à política de sessão, não aos documentos da ferramenta",
+        "es_correcta": false,
+        "explicacion": "A MFA pertence à política de sessão, não aos documentos de ferramentas."
+      },
+      {
+        "texto_opcion": "Atualização allowedTools na próxima solicitação após sucesso do MFA para incluir ferramentas confidenciais",
+        "es_correcta": true,
+        "explicacion": "allowedTools pode mudar por solicitação com base no estado da sessão."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "dinâmico allowedTools"
+    ]
+  },
+  {
+    "pregunta": "um fluxo de trabalho espera que Claude escolha entre ferramentas de pesquisa semelhantes conforme necessário. Cenário: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Force tool_choice qualquer em cada turno — ferramenta forces usada mesmo quando uma resposta direta é suficiente como design primário para este requisito — a ferramenta Forces é usada mesmo quando uma resposta direta é suficiente",
+        "es_correcta": false,
+        "explicacion": "A ferramenta Forces é usada mesmo quando uma resposta direta é suficiente."
+      },
+      {
+        "texto_opcion": "Use tool_choice auto e limpe descrições de ferramentas distintas para que o modelo selecione adequadamente",
+        "es_correcta": true,
+        "explicacion": "auto permite que o modelo escolha ferramentas quando múltiplas são válidas."
+      },
+      {
+        "texto_opcion": "Desativar ferramentas para simplificar o roteamento — remove ações necessárias do agente que são plausíveis à primeira vista, mas são mais fracas que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Remove as ações necessárias do agente."
+      },
+      {
+        "texto_opcion": "Fornece doze ferramentas sobrepostas com descrições idênticas — roteamento ambíguo prejudica a seleção frequentemente vista em projetos legados, mas não é ideal para este caso",
+        "es_correcta": false,
+        "explicacion": "O roteamento ambíguo prejudica a seleção."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice automático"
+    ]
+  },
+  {
+    "pregunta": "pipeline deve sempre chamar a ferramenta extract_fields antes de responder aos clientes da API. Contexto: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Defina tool_choice para exigir uma ferramenta específica ou qualquer ferramenta em turnos que deva produzir extração estruturada",
+        "es_correcta": true,
+        "explicacion": "A escolha da ferramenta obrigatória garante a invocação da ferramenta quando obrigatória."
+      },
+      {
+        "texto_opcion": "Analisar texto livre com regex em vez de ferramentas — ignora o contrato de ferramenta estruturada, plausível à primeira vista, mas mais fraco que a melhor opção",
+        "es_correcta": false,
+        "explicacion": "Ignora o contrato de ferramenta estruturada."
+      },
+      {
+        "texto_opcion": "Use tool_choice none em turnos de extração — evita explicitamente chamadas de ferramentas necessárias como opção de produção padrão neste cenário — impede explicitamente chamadas de ferramentas necessárias",
+        "es_correcta": false,
+        "explicacion": "Impede explicitamente chamadas de ferramentas necessárias."
+      },
+      {
+        "texto_opcion": "Espero que o modelo sempre escolha extract_fields voluntariamente - a seleção voluntária pode ser ignorada configurada de ponta a ponta para a carga de trabalho declarada",
+        "es_correcta": false,
+        "explicacion": "A seleção voluntária pode ser ignorada."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "tool_choice obrigatório"
+    ]
+  },
+  {
+    "pregunta": "um lote de mensagens é concluído, mas 2% das linhas falharam na validação. Cenário: um sistema de pesquisa multiagente com coordenador, busca na web e subagentes de síntese. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Descarte o lote inteiro se alguma linha falhar — desperdiça 98% do trabalho bem-sucedido usado como caminho principal nesta arquitetura — desperdiça 98% de trabalho bem-sucedido",
+        "es_correcta": false,
+        "explicacion": "Desperdiça 98% de trabalho bem-sucedido."
+      },
+      {
+        "texto_opcion": "Reenviar o lote completo inalterado indefinidamente — repete as mesmas falhas de validação adotadas como padrão para a equipe priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Repete as mesmas falhas de validação."
+      },
+      {
+        "texto_opcion": "Baixe resultados em lote, encaminhe falhas para uma fila de mensagens não entregues e tente novamente ou inspecione separadamente",
+        "es_correcta": true,
+        "explicacion": "O processamento em lote precisa de tratamento parcial de falhas, e não de suposições de tudo ou nada."
+      },
+      {
+        "texto_opcion": "Marcar lote como bem-sucedido sem ler arquivos de resultados — perda silenciosa de dados em linhas com falha priorizadas para simplificar, embora perca uma restrição importante",
+        "es_correcta": false,
+        "explicacion": "Perda silenciosa de dados em linhas com falha."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "falha parcial do lote"
+    ]
+  },
+  {
+    "pregunta": "Os ganchos PostToolUse adicionam 800 ms cada e os usuários percebem lentidão. Revisão de projeto para um sistema de pesquisa multiagente com coordenador, pesquisa na web e subagentes de síntese. Selecione a abordagem mais apropriada. Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Transferir trabalho de gancho não crítico para trabalhadores assíncronos; mantenha os ganchos apoiados no caminho crítico",
+        "es_correcta": true,
+        "explicacion": "O design do gancho deve equilibrar o enforcement com os orçamentos de latência."
+      },
+      {
+        "texto_opcion": "Execute sempre sincronização síncrona de CRM de terceiros dentro de PreToolUse — bloqueia a execução da ferramenta em integrações lentas selecionadas para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "Bloqueia a execução da ferramenta em integrações lentas."
+      },
+      {
+        "texto_opcion": "Desative ferramentas em vez de otimizar ganchos — reduz excessivamente a funcionalidade aplicada em ambientes para consistência operacional adotado como padrão da equipe, embora não seja o melhor aqui",
+        "es_correcta": false,
+        "explicacion": "Reduz excessivamente a funcionalidade."
+      },
+      {
+        "texto_opcion": "Remova todos os ganchos para restaurar a velocidade - perde o enforcement e a observabilidade priorizada pela simplicidade, embora seja aplicada em todos os ambientes para consistência operacional",
+        "es_correcta": false,
+        "explicacion": "Perde enforcement e observabilidade."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "latência do gancho"
+    ]
+  },
+  {
+    "pregunta": "o usuário cancela enquanto duas ferramentas paralelas estão em operação. Cenário: um serviço de produção Agent SDK, loops de ferramentas de tratamento e fluxo de controle stop_reason. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 4.",
+    "opciones": [
+      {
+        "texto_opcion": "Abortar sem enviar nenhum tool_result — deixa a lista de mensagens em um estado inválido selecionado para atender às restrições descritas aqui usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Deixa a lista de mensagens em um estado inválido."
+      },
+      {
+        "texto_opcion": "Reinicie toda a conversa do zero automaticamente – é pesado e perde o contexto válido selecionado para atender às restrições descritas aqui usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Pesado e perde o contexto válido."
+      },
+      {
+        "texto_opcion": "Cancele as tarefas da ferramenta em andamento, se possível, e retorne o status cancelado em tool_result para o modelo",
+        "es_correcta": true,
+        "explicacion": "O cancelamento deve ser propagado de forma limpa para os executores de ferramentas paralelas."
+      },
+      {
+        "texto_opcion": "Permitir que as ferramentas terminem silenciosamente após o cancelamento do usuário — pode aplicar efeitos colaterais indesejados selecionados para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "Pode aplicar efeitos colaterais indesejados."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "cancelamento multi-ferramenta"
+    ]
+  },
+  {
+    "pregunta": "um agente analista somente leitura deve consultar os armazéns, mas não alterar as tabelas de produção. Cenário: um pipeline de CI Claude Code que deve ser executado de forma não interativa em cada PR. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Listar ferramentas proibidas na mensagem do usuário a cada turno adotado como padrão para a equipe priorizado por simplicidade, mas deixa de lado uma restrição-chave",
+        "es_correcta": false,
+        "explicacion": "Não enforced pela API."
+      },
+      {
+        "texto_opcion": "Remova as descrições das ferramentas, mas deixe os manipuladores registrados — os manipuladores ainda podem ser acessados dependendo do host",
+        "es_correcta": false,
+        "explicacion": "Os manipuladores ainda podem estar acessíveis dependendo do host."
+      },
+      {
+        "texto_opcion": "Grant todas as ferramentas MCP porque as descrições mencionam somente leitura - as descrições não concedem permissões orce selecionado para atender as restrições citadas",
+        "es_correcta": false,
+        "explicacion": "As descrições não concedem permissões."
+      },
+      {
+        "texto_opcion": "Configure allowedTools para incluir get_schema e run_read_query somente no momento da solicitação",
+        "es_correcta": true,
+        "explicacion": "allowedTools restringe quais ferramentas o modelo pode invocar por solicitação."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "allowedTools"
+    ]
+  },
+  {
+    "pregunta": "após a execução de qualquer ferramenta de gravação de banco de dados, você deverá invalidar um padrão de chave de cache. Contexto de produção: um serviço de produção Agent SDK, loops de ferramentas de manipulação e fluxo de controle stop_reason. O que o arquiteto deve fazer? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Peça ao modelo para lembrar de invalidar o cache no texto — o modelo pode omitir a manutenção pós-ação como desenho principal para este requisito",
+        "es_correcta": false,
+        "explicacion": "O modelo pode omitir a manutenção pós-ação."
+      },
+      {
+        "texto_opcion": "Invalidar manualmente apenas durante o horário comercial – perde gravações automatizadas do agente fora do horário comercial — perde as gravações do agente automatizado fora do horário comercial",
+        "es_correcta": false,
+        "explicacion": "Perde as gravações do agente automatizado fora do horário comercial."
+      },
+      {
+        "texto_opcion": "Invalidar cache em todas as mensagens do usuário — muito amplo e prejudica o desempenho selecionado para atender às restrições descritas aqui",
+        "es_correcta": false,
+        "explicacion": "Muito amplo e prejudica o desempenho."
+      },
+      {
+        "texto_opcion": "Registre um gancho PostToolUse que inspeciona o nome da ferramenta e aciona a invalidação do cache",
+        "es_correcta": true,
+        "explicacion": "Os ganchos executam efeitos colaterais programáticos vinculados a eventos do ciclo de vida da ferramenta."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PostToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "bloqueie delete_table, a menos que a sessão tenha uma reivindicação de função administrativa. Contexto de produção: um serviço estruturado de extração de dados que emite JSON validado para sistemas downstream. O que o arquiteto deve fazer? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Implementar o gancho PreToolUse para a execução deny quando a reivindicação de função estiver faltando",
+        "es_correcta": true,
+        "explicacion": "PreToolUse conecta a autorização enforce antes da execução das ferramentas de efeito colateral."
+      },
+      {
+        "texto_opcion": "Espero que Claude recuse delete_table para não administradores – a recusa do modelo não é um controle de segurança",
+        "es_correcta": false,
+        "explicacion": "A recusa do modelo não é um controle de segurança."
+      },
+      {
+        "texto_opcion": "Documente delete_table como administradores apenas na descrição da ferramenta - descrição não é autorização",
+        "es_correcta": false,
+        "explicacion": "Descrição não é autorização."
+      },
+      {
+        "texto_opcion": "Remova delete_table apenas dos exemplos de prompt — a ferramenta ainda pode estar registrada e pode ser chamada",
+        "es_correcta": false,
+        "explicacion": "A ferramenta ainda pode estar registrada e chamável."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "PreToolUse gancho"
+    ]
+  },
+  {
+    "pregunta": "você planeja a classificação em massa durante a noite de 500 mil tickets de suporte por meio de lotes de mensagens. Cenário: um assistente corporativo RAG sobre PDFs de políticas com ferramentas de documento MCP. Qual escolha arquitetônica é a melhor? Conjunto de restrições nº 5.",
+    "opciones": [
+      {
+        "texto_opcion": "Projete trabalhos em lote dentro de limites documentados de tamanho e simultaneidade; fragmentar em várias solicitações em lote",
+        "es_correcta": true,
+        "explicacion": "Message Batches tem limites de serviço que exigem fragmentação e monitoramento."
+      },
+      {
+        "texto_opcion": "Envie todos os 500 mil registros em um arquivo em lote, independentemente dos limites — a solicitação pode falhar ou ser limitada configurado de ponta a ponta para o workload descrito",
+        "es_correcta": false,
+        "explicacion": "A solicitação pode falhar ou ser limitada."
+      },
+      {
+        "texto_opcion": "Ignore a pesquisa de resultados porque os lotes são assíncronos, dispare e esqueça - você nunca poderá recuperar resultados concluídos usado como caminho principal nesta arquitetura",
+        "es_correcta": false,
+        "explicacion": "Você nunca poderá recuperar resultados concluídos."
+      },
+      {
+        "texto_opcion": "Use a API de mensagens de streaming para cada ticket de forma síncrona – inadequada para grandes volumes off-line — não é adequado para grandes volumes off-line",
+        "es_correcta": false,
+        "explicacion": "Não é adequado para grandes volumes off-line."
+      }
+    ],
+    "tags": [
+      "1.4",
+      "Limites de lotes de mensagens"
+    ]
+  }
+]

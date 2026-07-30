@@ -1,0 +1,1771 @@
+[
+  {
+    "pregunta": "an Agent SDK service must keep calling tools until the model finishes without tool_use. Context: a multi-agent research system with coordinator, web search, and synthesis subagents.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable tools after one round to force end_turn — breaks multi-step agent workflows as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Breaks multi-step agent workflows."
+      },
+      {
+        "texto_opcion": "Loop on stop_reason end_turn vs tool_use; send tool_result blocks until end_turn",
+        "es_correcta": true,
+        "explicacion": "Agentic flows require an outer loop that submits tool results until the model stops requesting tools."
+      },
+      {
+        "texto_opcion": "Poll the Messages API every second without reading stop_reason — polling alone does not implement the tool loop contract",
+        "es_correcta": false,
+        "explicacion": "Polling alone does not implement the tool loop contract."
+      },
+      {
+        "texto_opcion": "Exit after the first assistant message regardless of stop_reason — premature exit skips required tool rounds as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Premature exit skips required tool rounds."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason loop"
+    ]
+  },
+  {
+    "pregunta": "a refund agent returns structured JSON from an order lookup tool to Claude. Production context: a Claude Code CI pipeline that must run non-interactively on every PR. What should the architect do?",
+    "opciones": [
+      {
+        "texto_opcion": "Append tool output as a new user message without tool_use_id — breaks the tool protocol and confuses attribution",
+        "es_correcta": false,
+        "explicacion": "Breaks the tool protocol and confuses attribution."
+      },
+      {
+        "texto_opcion": "Send tool_result with tool_use_id matching the prior tool_use block and content as string or structured payload",
+        "es_correcta": true,
+        "explicacion": "Each tool_result must reference the originating tool_use_id for the model to correlate outputs."
+      },
+      {
+        "texto_opcion": "Return binary blobs without encoding in the tool_result content — aPI expects serializable content in tool_result blocks",
+        "es_correcta": false,
+        "explicacion": "API expects serializable content in tool_result blocks."
+      },
+      {
+        "texto_opcion": "Embed results only in the system prompt on the next turn — tool results belong in the tool channel, not system-only injection",
+        "es_correcta": false,
+        "explicacion": "Tool results belong in the tool channel, not system-only injection."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool_result format"
+    ]
+  },
+  {
+    "pregunta": "a research agent occasionally loops indefinitely calling the same search tool. Context: a Claude Code CI pipeline that must run non-interactively on every PR.",
+    "opciones": [
+      {
+        "texto_opcion": "Set temperature to zero only — temperature does not guarantee loop termination applied across environments for operational consistency configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Temperature does not guarantee loop termination."
+      },
+      {
+        "texto_opcion": "Trust the model to self-terminate with no outer guard — models can repeat tool calls without a hard cap configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Models can repeat tool calls without a hard cap."
+      },
+      {
+        "texto_opcion": "Cap iterations in application code and break when stop_reason is end_turn or max rounds exceeded",
+        "es_correcta": true,
+        "explicacion": "Programmatic iteration limits prevent runaway tool loops beyond model stop_reason alone."
+      },
+      {
+        "texto_opcion": "Remove all tools mid-run without notifying the user — abrupt tool removal causes confusing partial state selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Abrupt tool removal causes confusing partial state."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "max tool rounds"
+    ]
+  },
+  {
+    "pregunta": "Claude requests three independent lookups in one assistant turn. Production context: a multi-agent research system with coordinator, web search, and synthesis subagents. What should the architect do?",
+    "opciones": [
+      {
+        "texto_opcion": "Execute all tool_use blocks concurrently and return one tool_result per tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Independent tools in the same turn should run in parallel with matched result blocks."
+      },
+      {
+        "texto_opcion": "Run tools sequentially and drop two of three results — missing tool_result blocks violate the API contract often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Missing tool_result blocks violate the API contract."
+      },
+      {
+        "texto_opcion": "Wait for end_turn before executing any tool — delays valid parallel work and breaks the turn contract adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Delays valid parallel work and breaks the turn contract."
+      },
+      {
+        "texto_opcion": "Merge all outputs into a single tool_result — each tool_use_id needs its own tool_result often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Each tool_use_id needs its own tool_result."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "parallel tool calls"
+    ]
+  },
+  {
+    "pregunta": "step two needs an account_id returned only after step one create_customer succeeds. Context: a Claude Code CI pipeline that must run non-interactively on every PR.",
+    "opciones": [
+      {
+        "texto_opcion": "Hard-code account_id in the system prompt — brittle and bypasses dynamic tool outputs prioritized for simplicity, though it misses a key constraint prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Brittle and bypasses dynamic tool outputs."
+      },
+      {
+        "texto_opcion": "Run create_customer first; pass its tool_result into the next turn before calling dependent tools",
+        "es_correcta": true,
+        "explicacion": "Dependent tools require sequential execution and explicit passing of prior outputs."
+      },
+      {
+        "texto_opcion": "Skip tool_result for create_customer to save tokens — downstream tools lose required input context as a primary design for this requirement applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Downstream tools lose required input context."
+      },
+      {
+        "texto_opcion": "Fire create_customer and charge_card in parallel always — charge_card lacks account_id if create has not finished applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "charge_card lacks account_id if create has not finished."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "dependent tools"
+    ]
+  },
+  {
+    "pregunta": "your handler receives stop_reason tool_use on the latest assistant message. Scenario: a customer support resolution agent with order lookup, refund, and escalate tools. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Convert tool_use blocks to plain text user messages — wrong block type breaks protocol parsing",
+        "es_correcta": false,
+        "explicacion": "Wrong block type breaks protocol parsing."
+      },
+      {
+        "texto_opcion": "Treat tool_use as end_turn and return to the user immediately — leaves tool calls unfulfilled",
+        "es_correcta": false,
+        "explicacion": "Leaves tool calls unfulfilled."
+      },
+      {
+        "texto_opcion": "Retry the identical prompt without tool results — model will repeat the same tool_use request",
+        "es_correcta": false,
+        "explicacion": "Model will repeat the same tool_use request."
+      },
+      {
+        "texto_opcion": "Execute requested tools, append tool_result messages, and call the model again",
+        "es_correcta": true,
+        "explicacion": "stop_reason tool_use signals pending tool execution before the turn can complete."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason tool_use"
+    ]
+  },
+  {
+    "pregunta": "an external API returns HTTP 503 during a tool call inside the agent loop. Scenario: a structured data extraction service that emits validated JSON for downstream systems. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Swallow the error and send an empty tool_result — model lacks signal to change strategy as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Model lacks signal to change strategy."
+      },
+      {
+        "texto_opcion": "Crash the whole agent process without a user message — poor reliability and no graceful degradation applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Poor reliability and no graceful degradation."
+      },
+      {
+        "texto_opcion": "Return tool_result with is_error or structured error text so the model can retry or escalate",
+        "es_correcta": true,
+        "explicacion": "Tool failures should flow back through tool_result so the model can recover or ask for help."
+      },
+      {
+        "texto_opcion": "Retry the HTTP call silently forever inside the tool — can hang the agent loop without model awareness as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Can hang the agent loop without model awareness."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "error in tool execution"
+    ]
+  },
+  {
+    "pregunta": "a turn mixes text explanation with multiple tool_use blocks. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Reorder tool_result blocks alphabetically by tool name — order mismatch can confuse debugging, not replace id matching often seen in legacy designs but not ideal for this case plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Order mismatch can confuse debugging, not replace id matching."
+      },
+      {
+        "texto_opcion": "Execute only the first tool_use block — ignores additional requested actions in the same turn used as the main path in this architecture That makes it a weaker fit against the main constraint in the prompt",
+        "es_correcta": false,
+        "explicacion": "Ignores additional requested actions in the same turn."
+      },
+      {
+        "texto_opcion": "Preserve assistant content block order when logging; execute every tool_use referenced in that message",
+        "es_correcta": true,
+        "explicacion": "Block order reflects model intent; all tool_use entries in the turn must be honored."
+      },
+      {
+        "texto_opcion": "Strip text blocks before sending to observability — loses reasoning context for operators plausible at first glance, yet weaker than the best option often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Loses reasoning context for operators."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "content block ordering"
+    ]
+  },
+  {
+    "pregunta": "you stream assistant tokens and detect partial tool_use JSON mid-stream. Scenario: a production Agent SDK service handling tool loops and stop_reason control flow. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore tool_use during stream and only handle text — misses tool calls emitted in the stream",
+        "es_correcta": false,
+        "explicacion": "Misses tool calls emitted in the stream."
+      },
+      {
+        "texto_opcion": "Execute tools on every delta event — partial JSON causes failed or wrong tool calls",
+        "es_correcta": false,
+        "explicacion": "Partial JSON causes failed or wrong tool calls."
+      },
+      {
+        "texto_opcion": "Disable streaming to avoid tool_use entirely — streaming is compatible when buffering is correct",
+        "es_correcta": false,
+        "explicacion": "Streaming is compatible when buffering is correct."
+      },
+      {
+        "texto_opcion": "Buffer until the tool_use block is complete, then execute; do not run on partial deltas",
+        "es_correcta": true,
+        "explicacion": "Streaming requires waiting for complete tool_use payloads before execution."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "streaming tool_use"
+    ]
+  },
+  {
+    "pregunta": "after submitting tool_results, who speaks next in the Messages API pattern? Design review for a Claude Code CI pipeline that must run non-interactively on every PR. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Require the human user to type ok after every tool_result — breaks autonomous agent flows unnecessarily configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Breaks autonomous agent flows unnecessarily."
+      },
+      {
+        "texto_opcion": "Delete prior assistant messages before continuing — removes tool_use context the model needs configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Removes tool_use context the model needs."
+      },
+      {
+        "texto_opcion": "Insert a synthetic system message instead of calling the model — skips the model turn that interprets tool output as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Skips the model turn that interprets tool output."
+      },
+      {
+        "texto_opcion": "Call the model again with the updated message list; the assistant produces the next turn",
+        "es_correcta": true,
+        "explicacion": "The loop alternates assistant tool_use with client tool_result, then assistant continuation."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "user turn after tools"
+    ]
+  },
+  {
+    "pregunta": "a long-running database query tool sometimes exceeds SLA inside an agent session. Design review for a developer productivity assistant using built-in tools plus MCP servers. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Kill the session without returning any tool_result — leaves the conversation in an invalid state applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Leaves the conversation in an invalid state."
+      },
+      {
+        "texto_opcion": "Retry the query unbounded inside the tool handler — same hang risk without a cap applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Same hang risk without a cap."
+      },
+      {
+        "texto_opcion": "Implement tool-level timeouts and return a concise timeout error in tool_result",
+        "es_correcta": true,
+        "explicacion": "Bounded tool execution prevents the agent loop from stalling on hung dependencies."
+      },
+      {
+        "texto_opcion": "Block the loop until the query finishes no matter how long — violates latency SLAs and ties up workers prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Violates latency SLAs and ties up workers."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool timeout"
+    ]
+  },
+  {
+    "pregunta": "a payment agent may retry charge_order after ambiguous network failures. Production context: a Claude Code CI pipeline that must run non-interactively on every PR. What should the architect do?",
+    "opciones": [
+      {
+        "texto_opcion": "Allow duplicate charges on every retry — financial risk on ambiguous failures configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Financial risk on ambiguous failures."
+      },
+      {
+        "texto_opcion": "Disable retries entirely for all tools — over-corrects; read-only tools benefit from retries configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Over-corrects; read-only tools benefit from retries."
+      },
+      {
+        "texto_opcion": "Hide retry count from the model — model cannot adjust strategy without failure context often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Model cannot adjust strategy without failure context."
+      },
+      {
+        "texto_opcion": "Design charge tools with idempotency keys and surface duplicate status in tool_result",
+        "es_correcta": true,
+        "explicacion": "Idempotent tools let safe retries without double-charging when the loop repeats."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "idempotent tools"
+    ]
+  },
+  {
+    "pregunta": "a search tool finds no records for a valid query. Context: a structured data extraction service that emits validated JSON for downstream systems.",
+    "opciones": [
+      {
+        "texto_opcion": "Fabricate placeholder records — introduces hallucinated data into the workflow used as the main path in this architecture selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Introduces hallucinated data into the workflow."
+      },
+      {
+        "texto_opcion": "Return tool_result stating zero results with schema-consistent fields, not an omitted result",
+        "es_correcta": true,
+        "explicacion": "Empty but explicit results let the model reason about next steps."
+      },
+      {
+        "texto_opcion": "Omit tool_result when nothing is found — violates one-result-per-tool_use contract selected to meet the constraints described here used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Violates one-result-per-tool_use contract."
+      },
+      {
+        "texto_opcion": "Return HTTP 404 at the transport layer only — model sees tool failure, not an empty success semantic as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Model sees tool failure, not an empty success semantic."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "empty tool result"
+    ]
+  },
+  {
+    "pregunta": "resuming an agent session after a process restart mid tool loop. Scenario: a Claude Code code-generation workflow across a multi-repo monorepo. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Start a fresh conversation and hope the user repeats context — loses tool_use correlation and prior work",
+        "es_correcta": false,
+        "explicacion": "Loses tool_use correlation and prior work."
+      },
+      {
+        "texto_opcion": "Persist only the last assistant text snippet — insufficient to reconstruct tool protocol state",
+        "es_correcta": false,
+        "explicacion": "Insufficient to reconstruct tool protocol state."
+      },
+      {
+        "texto_opcion": "Persist full message history including pending tool_use blocks and replay unfulfilled tool_results",
+        "es_correcta": true,
+        "explicacion": "Durable message state is required to continue a partially completed tool round."
+      },
+      {
+        "texto_opcion": "Auto-fulfill pending tools with mock data on restart — risky in production and hides real failures",
+        "es_correcta": false,
+        "explicacion": "Risky in production and hides real failures."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "conversation state"
+    ]
+  },
+  {
+    "pregunta": "an Agent SDK service must keep calling tools until the model finishes without tool_use. Production context: a customer support resolution agent with order lookup, refund, and escalate tools. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Poll the Messages API every second without reading stop_reason — polling alone does not implement the tool loop contract",
+        "es_correcta": false,
+        "explicacion": "Polling alone does not implement the tool loop contract."
+      },
+      {
+        "texto_opcion": "Disable tools after one round to force end_turn — breaks multi-step agent workflows used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Breaks multi-step agent workflows."
+      },
+      {
+        "texto_opcion": "Exit after the first assistant message regardless of stop_reason — premature exit skips required tool rounds used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Premature exit skips required tool rounds."
+      },
+      {
+        "texto_opcion": "Loop on stop_reason end_turn vs tool_use; send tool_result blocks until end_turn",
+        "es_correcta": true,
+        "explicacion": "Agentic flows require an outer loop that submits tool results until the model stops requesting tools."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason loop"
+    ]
+  },
+  {
+    "pregunta": "a refund agent returns structured JSON from an order lookup tool to Claude. Production context: a Claude Code CI pipeline that must run non-interactively on every PR. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Return binary blobs without encoding in the tool_result content — aPI expects serializable content in tool_result blocks",
+        "es_correcta": false,
+        "explicacion": "API expects serializable content in tool_result blocks."
+      },
+      {
+        "texto_opcion": "Send tool_result with tool_use_id matching the prior tool_use block and content as string or structured payload",
+        "es_correcta": true,
+        "explicacion": "Each tool_result must reference the originating tool_use_id for the model to correlate outputs."
+      },
+      {
+        "texto_opcion": "Embed results only in the system prompt on the next turn — tool results belong in the tool channel, not system-only injection",
+        "es_correcta": false,
+        "explicacion": "Tool results belong in the tool channel, not system-only injection."
+      },
+      {
+        "texto_opcion": "Append tool output as a new user message without tool_use_id — breaks the tool protocol and confuses attribution",
+        "es_correcta": false,
+        "explicacion": "Breaks the tool protocol and confuses attribution."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool_result format"
+    ]
+  },
+  {
+    "pregunta": "a research agent occasionally loops indefinitely calling the same search tool. Design review for a multi-agent research system with coordinator, web search, and synthesis subagents. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Trust the model to self-terminate with no outer guard — models can repeat tool calls without a hard cap configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Models can repeat tool calls without a hard cap."
+      },
+      {
+        "texto_opcion": "Cap iterations in application code and break when stop_reason is end_turn or max rounds exceeded",
+        "es_correcta": true,
+        "explicacion": "Programmatic iteration limits prevent runaway tool loops beyond model stop_reason alone."
+      },
+      {
+        "texto_opcion": "Remove all tools mid-run without notifying the user — abrupt tool removal causes confusing partial state plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Abrupt tool removal causes confusing partial state."
+      },
+      {
+        "texto_opcion": "Set temperature to zero only — temperature does not guarantee loop termination often seen in legacy designs but not ideal for this case plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Temperature does not guarantee loop termination."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "max tool rounds"
+    ]
+  },
+  {
+    "pregunta": "Claude requests three independent lookups in one assistant turn. Scenario: a multi-agent research system with coordinator, web search, and synthesis subagents. Which architectural choice is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Merge all outputs into a single tool_result — each tool_use_id needs its own tool_result selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Each tool_use_id needs its own tool_result."
+      },
+      {
+        "texto_opcion": "Wait for end_turn before executing any tool — delays valid parallel work and breaks the turn contract selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Delays valid parallel work and breaks the turn contract."
+      },
+      {
+        "texto_opcion": "Run tools sequentially and drop two of three results — missing tool_result blocks violate the API contract selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Missing tool_result blocks violate the API contract."
+      },
+      {
+        "texto_opcion": "Execute all tool_use blocks concurrently and return one tool_result per tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Independent tools in the same turn should run in parallel with matched result blocks."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "parallel tool calls"
+    ]
+  },
+  {
+    "pregunta": "step two needs an account_id returned only after step one create_customer succeeds. Production context: a Claude Code CI pipeline that must run non-interactively on every PR. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Hard-code account_id in the system prompt — brittle and bypasses dynamic tool outputs applied across environments for operational consistency used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Brittle and bypasses dynamic tool outputs."
+      },
+      {
+        "texto_opcion": "Fire create_customer and charge_card in parallel always — charge_card lacks account_id if create has not finished used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "charge_card lacks account_id if create has not finished."
+      },
+      {
+        "texto_opcion": "Run create_customer first; pass its tool_result into the next turn before calling dependent tools",
+        "es_correcta": true,
+        "explicacion": "Dependent tools require sequential execution and explicit passing of prior outputs."
+      },
+      {
+        "texto_opcion": "Skip tool_result for create_customer to save tokens — downstream tools lose required input context as a primary design for this requirement applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Downstream tools lose required input context."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "dependent tools"
+    ]
+  },
+  {
+    "pregunta": "your handler receives stop_reason tool_use on the latest assistant message. Production context: a customer support resolution agent with order lookup, refund, and escalate tools. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Retry the identical prompt without tool results — model will repeat the same tool_use request",
+        "es_correcta": false,
+        "explicacion": "Model will repeat the same tool_use request."
+      },
+      {
+        "texto_opcion": "Execute requested tools, append tool_result messages, and call the model again",
+        "es_correcta": true,
+        "explicacion": "stop_reason tool_use signals pending tool execution before the turn can complete."
+      },
+      {
+        "texto_opcion": "Treat tool_use as end_turn and return to the user immediately — leaves tool calls unfulfilled",
+        "es_correcta": false,
+        "explicacion": "Leaves tool calls unfulfilled."
+      },
+      {
+        "texto_opcion": "Convert tool_use blocks to plain text user messages — wrong block type breaks protocol parsing",
+        "es_correcta": false,
+        "explicacion": "Wrong block type breaks protocol parsing."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason tool_use"
+    ]
+  },
+  {
+    "pregunta": "an external API returns HTTP 503 during a tool call inside the agent loop. Production context: a multi-agent research system with coordinator, web search, and synthesis subagents. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Retry the HTTP call silently forever inside the tool — can hang the agent loop without model awareness prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Can hang the agent loop without model awareness."
+      },
+      {
+        "texto_opcion": "Crash the whole agent process without a user message — poor reliability and no graceful degradation often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Poor reliability and no graceful degradation."
+      },
+      {
+        "texto_opcion": "Swallow the error and send an empty tool_result — model lacks signal to change strategy prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Model lacks signal to change strategy."
+      },
+      {
+        "texto_opcion": "Return tool_result with is_error or structured error text so the model can retry or escalate",
+        "es_correcta": true,
+        "explicacion": "Tool failures should flow back through tool_result so the model can recover or ask for help."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "error in tool execution"
+    ]
+  },
+  {
+    "pregunta": "a turn mixes text explanation with multiple tool_use blocks. Scenario: a Claude Code CI pipeline that must run non-interactively on every PR. Which architectural choice is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute only the first tool_use block — ignores additional requested actions in the same turn as a primary design for this requirement configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Ignores additional requested actions in the same turn."
+      },
+      {
+        "texto_opcion": "Strip text blocks before sending to observability — loses reasoning context for operators configured end-to-end for the stated workload selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Loses reasoning context for operators."
+      },
+      {
+        "texto_opcion": "Reorder tool_result blocks alphabetically by tool name — order mismatch can confuse debugging, not replace id matching selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Order mismatch can confuse debugging, not replace id matching."
+      },
+      {
+        "texto_opcion": "Preserve assistant content block order when logging; execute every tool_use referenced in that message",
+        "es_correcta": true,
+        "explicacion": "Block order reflects model intent; all tool_use entries in the turn must be honored."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "content block ordering"
+    ]
+  },
+  {
+    "pregunta": "you stream assistant tokens and detect partial tool_use JSON mid-stream. Production context: a Claude Code code-generation workflow across a multi-repo monorepo. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Ignore tool_use during stream and only handle text — misses tool calls emitted in the stream",
+        "es_correcta": false,
+        "explicacion": "Misses tool calls emitted in the stream."
+      },
+      {
+        "texto_opcion": "Disable streaming to avoid tool_use entirely — streaming is compatible when buffering is correct",
+        "es_correcta": false,
+        "explicacion": "Streaming is compatible when buffering is correct."
+      },
+      {
+        "texto_opcion": "Buffer until the tool_use block is complete, then execute; do not run on partial deltas",
+        "es_correcta": true,
+        "explicacion": "Streaming requires waiting for complete tool_use payloads before execution."
+      },
+      {
+        "texto_opcion": "Execute tools on every delta event — partial JSON causes failed or wrong tool calls",
+        "es_correcta": false,
+        "explicacion": "Partial JSON causes failed or wrong tool calls."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "streaming tool_use"
+    ]
+  },
+  {
+    "pregunta": "after submitting tool_results, who speaks next in the Messages API pattern? Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Call the model again with the updated message list; the assistant produces the next turn",
+        "es_correcta": true,
+        "explicacion": "The loop alternates assistant tool_use with client tool_result, then assistant continuation."
+      },
+      {
+        "texto_opcion": "Delete prior assistant messages before continuing — removes tool_use context the model needs prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Removes tool_use context the model needs."
+      },
+      {
+        "texto_opcion": "Require the human user to type ok after every tool_result — breaks autonomous agent flows unnecessarily prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Breaks autonomous agent flows unnecessarily."
+      },
+      {
+        "texto_opcion": "Insert a synthetic system message instead of calling the model — skips the model turn that interprets tool output applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Skips the model turn that interprets tool output."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "user turn after tools"
+    ]
+  },
+  {
+    "pregunta": "a long-running database query tool sometimes exceeds SLA inside an agent session. Context: a Claude Code code-generation workflow across a multi-repo monorepo. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Kill the session without returning any tool_result — leaves the conversation in an invalid state as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Leaves the conversation in an invalid state."
+      },
+      {
+        "texto_opcion": "Implement tool-level timeouts and return a concise timeout error in tool_result",
+        "es_correcta": true,
+        "explicacion": "Bounded tool execution prevents the agent loop from stalling on hung dependencies."
+      },
+      {
+        "texto_opcion": "Block the loop until the query finishes no matter how long — violates latency SLAs and ties up workers applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Violates latency SLAs and ties up workers."
+      },
+      {
+        "texto_opcion": "Retry the query unbounded inside the tool handler — same hang risk without a cap as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Same hang risk without a cap."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool timeout"
+    ]
+  },
+  {
+    "pregunta": "a payment agent may retry charge_order after ambiguous network failures. Scenario: a Claude Code code-generation workflow across a multi-repo monorepo. Which architectural choice is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable retries entirely for all tools — over-corrects; read-only tools benefit from retries applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Over-corrects; read-only tools benefit from retries."
+      },
+      {
+        "texto_opcion": "Design charge tools with idempotency keys and surface duplicate status in tool_result",
+        "es_correcta": true,
+        "explicacion": "Idempotent tools let safe retries without double-charging when the loop repeats."
+      },
+      {
+        "texto_opcion": "Hide retry count from the model — model cannot adjust strategy without failure context prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Model cannot adjust strategy without failure context."
+      },
+      {
+        "texto_opcion": "Allow duplicate charges on every retry — financial risk on ambiguous failures applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Financial risk on ambiguous failures."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "idempotent tools"
+    ]
+  },
+  {
+    "pregunta": "a search tool finds no records for a valid query. Production context: a customer support resolution agent with order lookup, refund, and escalate tools. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Fabricate placeholder records — introduces hallucinated data into the workflow as a primary design for this requirement configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Introduces hallucinated data into the workflow."
+      },
+      {
+        "texto_opcion": "Omit tool_result when nothing is found — violates one-result-per-tool_use contract configured end-to-end for the stated workload as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Violates one-result-per-tool_use contract."
+      },
+      {
+        "texto_opcion": "Return tool_result stating zero results with schema-consistent fields, not an omitted result",
+        "es_correcta": true,
+        "explicacion": "Empty but explicit results let the model reason about next steps."
+      },
+      {
+        "texto_opcion": "Return HTTP 404 at the transport layer only — model sees tool failure, not an empty success semantic configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Model sees tool failure, not an empty success semantic."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "empty tool result"
+    ]
+  },
+  {
+    "pregunta": "resuming an agent session after a process restart mid tool loop. Context: an enterprise RAG assistant over policy PDFs with MCP document tools. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Persist only the last assistant text snippet — insufficient to reconstruct tool protocol state",
+        "es_correcta": false,
+        "explicacion": "Insufficient to reconstruct tool protocol state."
+      },
+      {
+        "texto_opcion": "Persist full message history including pending tool_use blocks and replay unfulfilled tool_results",
+        "es_correcta": true,
+        "explicacion": "Durable message state is required to continue a partially completed tool round."
+      },
+      {
+        "texto_opcion": "Start a fresh conversation and hope the user repeats context — loses tool_use correlation and prior work",
+        "es_correcta": false,
+        "explicacion": "Loses tool_use correlation and prior work."
+      },
+      {
+        "texto_opcion": "Auto-fulfill pending tools with mock data on restart — risky in production and hides real failures",
+        "es_correcta": false,
+        "explicacion": "Risky in production and hides real failures."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "conversation state"
+    ]
+  },
+  {
+    "pregunta": "an Agent SDK service must keep calling tools until the model finishes without tool_use. Context: a developer productivity assistant using built-in tools plus MCP servers. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable tools after one round to force end_turn — breaks multi-step agent workflows applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Breaks multi-step agent workflows."
+      },
+      {
+        "texto_opcion": "Loop on stop_reason end_turn vs tool_use; send tool_result blocks until end_turn",
+        "es_correcta": true,
+        "explicacion": "Agentic flows require an outer loop that submits tool results until the model stops requesting tools."
+      },
+      {
+        "texto_opcion": "Exit after the first assistant message regardless of stop_reason — premature exit skips required tool rounds applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Premature exit skips required tool rounds."
+      },
+      {
+        "texto_opcion": "Poll the Messages API every second without reading stop_reason — polling alone does not implement the tool loop contract applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Polling alone does not implement the tool loop contract."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason loop"
+    ]
+  },
+  {
+    "pregunta": "a refund agent returns structured JSON from an order lookup tool to Claude. Production context: an enterprise RAG assistant over policy PDFs with MCP document tools. What should the architect do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Embed results only in the system prompt on the next turn — tool results belong in the tool channel, not system-only injection",
+        "es_correcta": false,
+        "explicacion": "Tool results belong in the tool channel, not system-only injection."
+      },
+      {
+        "texto_opcion": "Send tool_result with tool_use_id matching the prior tool_use block and content as string or structured payload",
+        "es_correcta": true,
+        "explicacion": "Each tool_result must reference the originating tool_use_id for the model to correlate outputs."
+      },
+      {
+        "texto_opcion": "Return binary blobs without encoding in the tool_result content — aPI expects serializable content in tool_result blocks",
+        "es_correcta": false,
+        "explicacion": "API expects serializable content in tool_result blocks."
+      },
+      {
+        "texto_opcion": "Append tool output as a new user message without tool_use_id — breaks the tool protocol and confuses attribution",
+        "es_correcta": false,
+        "explicacion": "Breaks the tool protocol and confuses attribution."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool_result format"
+    ]
+  },
+  {
+    "pregunta": "a research agent occasionally loops indefinitely calling the same search tool. Context: a production Agent SDK service handling tool loops and stop_reason control flow. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Set temperature to zero only — temperature does not guarantee loop termination often seen in legacy designs but not ideal for this case applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Temperature does not guarantee loop termination."
+      },
+      {
+        "texto_opcion": "Trust the model to self-terminate with no outer guard — models can repeat tool calls without a hard cap applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Models can repeat tool calls without a hard cap."
+      },
+      {
+        "texto_opcion": "Cap iterations in application code and break when stop_reason is end_turn or max rounds exceeded",
+        "es_correcta": true,
+        "explicacion": "Programmatic iteration limits prevent runaway tool loops beyond model stop_reason alone."
+      },
+      {
+        "texto_opcion": "Remove all tools mid-run without notifying the user — abrupt tool removal causes confusing partial state configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Abrupt tool removal causes confusing partial state."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "max tool rounds"
+    ]
+  },
+  {
+    "pregunta": "Claude requests three independent lookups in one assistant turn. Production context: a multi-agent research system with coordinator, web search, and synthesis subagents. What should the architect do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Run tools sequentially and drop two of three results — missing tool_result blocks violate the API contract selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Missing tool_result blocks violate the API contract."
+      },
+      {
+        "texto_opcion": "Merge all outputs into a single tool_result — each tool_use_id needs its own tool_result selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Each tool_use_id needs its own tool_result."
+      },
+      {
+        "texto_opcion": "Execute all tool_use blocks concurrently and return one tool_result per tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Independent tools in the same turn should run in parallel with matched result blocks."
+      },
+      {
+        "texto_opcion": "Wait for end_turn before executing any tool — delays valid parallel work and breaks the turn contract selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Delays valid parallel work and breaks the turn contract."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "parallel tool calls"
+    ]
+  },
+  {
+    "pregunta": "step two needs an account_id returned only after step one create_customer succeeds. Scenario: a customer support resolution agent with order lookup, refund, and escalate tools. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Fire create_customer and charge_card in parallel always — charge_card lacks account_id if create has not finished selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "charge_card lacks account_id if create has not finished."
+      },
+      {
+        "texto_opcion": "Run create_customer first; pass its tool_result into the next turn before calling dependent tools",
+        "es_correcta": true,
+        "explicacion": "Dependent tools require sequential execution and explicit passing of prior outputs."
+      },
+      {
+        "texto_opcion": "Skip tool_result for create_customer to save tokens — downstream tools lose required input context configured end-to-end for the stated workload as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Downstream tools lose required input context."
+      },
+      {
+        "texto_opcion": "Hard-code account_id in the system prompt — brittle and bypasses dynamic tool outputs as the default production choice in this scenario configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Brittle and bypasses dynamic tool outputs."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "dependent tools"
+    ]
+  },
+  {
+    "pregunta": "your handler receives stop_reason tool_use on the latest assistant message. Context: a developer productivity assistant using built-in tools plus MCP servers. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Convert tool_use blocks to plain text user messages — wrong block type breaks protocol parsing",
+        "es_correcta": false,
+        "explicacion": "Wrong block type breaks protocol parsing."
+      },
+      {
+        "texto_opcion": "Execute requested tools, append tool_result messages, and call the model again",
+        "es_correcta": true,
+        "explicacion": "stop_reason tool_use signals pending tool execution before the turn can complete."
+      },
+      {
+        "texto_opcion": "Retry the identical prompt without tool results — model will repeat the same tool_use request",
+        "es_correcta": false,
+        "explicacion": "Model will repeat the same tool_use request."
+      },
+      {
+        "texto_opcion": "Treat tool_use as end_turn and return to the user immediately — leaves tool calls unfulfilled",
+        "es_correcta": false,
+        "explicacion": "Leaves tool calls unfulfilled."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason tool_use"
+    ]
+  },
+  {
+    "pregunta": "an external API returns HTTP 503 during a tool call inside the agent loop. Scenario: a structured data extraction service that emits validated JSON for downstream systems. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Crash the whole agent process without a user message — poor reliability and no graceful degradation adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Poor reliability and no graceful degradation."
+      },
+      {
+        "texto_opcion": "Return tool_result with is_error or structured error text so the model can retry or escalate",
+        "es_correcta": true,
+        "explicacion": "Tool failures should flow back through tool_result so the model can recover or ask for help."
+      },
+      {
+        "texto_opcion": "Retry the HTTP call silently forever inside the tool — can hang the agent loop without model awareness as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Can hang the agent loop without model awareness."
+      },
+      {
+        "texto_opcion": "Swallow the error and send an empty tool_result — model lacks signal to change strategy as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Model lacks signal to change strategy."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "error in tool execution"
+    ]
+  },
+  {
+    "pregunta": "a turn mixes text explanation with multiple tool_use blocks. Context: an enterprise RAG assistant over policy PDFs with MCP document tools. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute only the first tool_use block — ignores additional requested actions in the same turn selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Ignores additional requested actions in the same turn."
+      },
+      {
+        "texto_opcion": "Preserve assistant content block order when logging; execute every tool_use referenced in that message",
+        "es_correcta": true,
+        "explicacion": "Block order reflects model intent; all tool_use entries in the turn must be honored."
+      },
+      {
+        "texto_opcion": "Strip text blocks before sending to observability — loses reasoning context for operators used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Loses reasoning context for operators."
+      },
+      {
+        "texto_opcion": "Reorder tool_result blocks alphabetically by tool name — order mismatch can confuse debugging, not replace id matching used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Order mismatch can confuse debugging, not replace id matching."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "content block ordering"
+    ]
+  },
+  {
+    "pregunta": "you stream assistant tokens and detect partial tool_use JSON mid-stream. Scenario: a developer productivity assistant using built-in tools plus MCP servers. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable streaming to avoid tool_use entirely — streaming is compatible when buffering is correct",
+        "es_correcta": false,
+        "explicacion": "Streaming is compatible when buffering is correct."
+      },
+      {
+        "texto_opcion": "Buffer until the tool_use block is complete, then execute; do not run on partial deltas",
+        "es_correcta": true,
+        "explicacion": "Streaming requires waiting for complete tool_use payloads before execution."
+      },
+      {
+        "texto_opcion": "Ignore tool_use during stream and only handle text — misses tool calls emitted in the stream",
+        "es_correcta": false,
+        "explicacion": "Misses tool calls emitted in the stream."
+      },
+      {
+        "texto_opcion": "Execute tools on every delta event — partial JSON causes failed or wrong tool calls",
+        "es_correcta": false,
+        "explicacion": "Partial JSON causes failed or wrong tool calls."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "streaming tool_use"
+    ]
+  },
+  {
+    "pregunta": "after submitting tool_results, who speaks next in the Messages API pattern? Context: a production Agent SDK service handling tool loops and stop_reason control flow. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Call the model again with the updated message list; the assistant produces the next turn",
+        "es_correcta": true,
+        "explicacion": "The loop alternates assistant tool_use with client tool_result, then assistant continuation."
+      },
+      {
+        "texto_opcion": "Insert a synthetic system message instead of calling the model — skips the model turn that interprets tool output adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Skips the model turn that interprets tool output."
+      },
+      {
+        "texto_opcion": "Delete prior assistant messages before continuing — removes tool_use context the model needs adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Removes tool_use context the model needs."
+      },
+      {
+        "texto_opcion": "Require the human user to type ok after every tool_result — breaks autonomous agent flows unnecessarily adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Breaks autonomous agent flows unnecessarily."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "user turn after tools"
+    ]
+  },
+  {
+    "pregunta": "a long-running database query tool sometimes exceeds SLA inside an agent session. Context: a Claude Code code-generation workflow across a multi-repo monorepo. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Kill the session without returning any tool_result — leaves the conversation in an invalid state configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Leaves the conversation in an invalid state."
+      },
+      {
+        "texto_opcion": "Retry the query unbounded inside the tool handler — same hang risk without a cap configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Same hang risk without a cap."
+      },
+      {
+        "texto_opcion": "Block the loop until the query finishes no matter how long — violates latency SLAs and ties up workers plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Violates latency SLAs and ties up workers."
+      },
+      {
+        "texto_opcion": "Implement tool-level timeouts and return a concise timeout error in tool_result",
+        "es_correcta": true,
+        "explicacion": "Bounded tool execution prevents the agent loop from stalling on hung dependencies."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool timeout"
+    ]
+  },
+  {
+    "pregunta": "a payment agent may retry charge_order after ambiguous network failures. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Allow duplicate charges on every retry — financial risk on ambiguous failures as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Financial risk on ambiguous failures."
+      },
+      {
+        "texto_opcion": "Hide retry count from the model — model cannot adjust strategy without failure context as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Model cannot adjust strategy without failure context."
+      },
+      {
+        "texto_opcion": "Design charge tools with idempotency keys and surface duplicate status in tool_result",
+        "es_correcta": true,
+        "explicacion": "Idempotent tools let safe retries without double-charging when the loop repeats."
+      },
+      {
+        "texto_opcion": "Disable retries entirely for all tools — over-corrects; read-only tools benefit from retries as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Over-corrects; read-only tools benefit from retries."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "idempotent tools"
+    ]
+  },
+  {
+    "pregunta": "a search tool finds no records for a valid query. Scenario: a Claude Code code-generation workflow across a multi-repo monorepo. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Return tool_result stating zero results with schema-consistent fields, not an omitted result",
+        "es_correcta": true,
+        "explicacion": "Empty but explicit results let the model reason about next steps."
+      },
+      {
+        "texto_opcion": "Omit tool_result when nothing is found — violates one-result-per-tool_use contract applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Violates one-result-per-tool_use contract."
+      },
+      {
+        "texto_opcion": "Return HTTP 404 at the transport layer only — model sees tool failure, not an empty success semantic as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Model sees tool failure, not an empty success semantic."
+      },
+      {
+        "texto_opcion": "Fabricate placeholder records — introduces hallucinated data into the workflow selected to meet the constraints described here as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Introduces hallucinated data into the workflow."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "empty tool result"
+    ]
+  },
+  {
+    "pregunta": "resuming an agent session after a process restart mid tool loop. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Auto-fulfill pending tools with mock data on restart — risky in production and hides real failures",
+        "es_correcta": false,
+        "explicacion": "Risky in production and hides real failures."
+      },
+      {
+        "texto_opcion": "Persist only the last assistant text snippet — insufficient to reconstruct tool protocol state",
+        "es_correcta": false,
+        "explicacion": "Insufficient to reconstruct tool protocol state."
+      },
+      {
+        "texto_opcion": "Start a fresh conversation and hope the user repeats context — loses tool_use correlation and prior work",
+        "es_correcta": false,
+        "explicacion": "Loses tool_use correlation and prior work."
+      },
+      {
+        "texto_opcion": "Persist full message history including pending tool_use blocks and replay unfulfilled tool_results",
+        "es_correcta": true,
+        "explicacion": "Durable message state is required to continue a partially completed tool round."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "conversation state"
+    ]
+  },
+  {
+    "pregunta": "an Agent SDK service must keep calling tools until the model finishes without tool_use. Context: a structured data extraction service that emits validated JSON for downstream systems. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Exit after the first assistant message regardless of stop_reason — premature exit skips required tool rounds applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Premature exit skips required tool rounds."
+      },
+      {
+        "texto_opcion": "Loop on stop_reason end_turn vs tool_use; send tool_result blocks until end_turn",
+        "es_correcta": true,
+        "explicacion": "Agentic flows require an outer loop that submits tool results until the model stops requesting tools."
+      },
+      {
+        "texto_opcion": "Disable tools after one round to force end_turn — breaks multi-step agent workflows applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Breaks multi-step agent workflows."
+      },
+      {
+        "texto_opcion": "Poll the Messages API every second without reading stop_reason — polling alone does not implement the tool loop contract as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Polling alone does not implement the tool loop contract."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason loop"
+    ]
+  },
+  {
+    "pregunta": "a refund agent returns structured JSON from an order lookup tool to Claude. Scenario: a Claude Code code-generation workflow across a multi-repo monorepo. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Embed results only in the system prompt on the next turn — tool results belong in the tool channel, not system-only injection",
+        "es_correcta": false,
+        "explicacion": "Tool results belong in the tool channel, not system-only injection."
+      },
+      {
+        "texto_opcion": "Return binary blobs without encoding in the tool_result content — aPI expects serializable content in tool_result blocks",
+        "es_correcta": false,
+        "explicacion": "API expects serializable content in tool_result blocks."
+      },
+      {
+        "texto_opcion": "Send tool_result with tool_use_id matching the prior tool_use block and content as string or structured payload",
+        "es_correcta": true,
+        "explicacion": "Each tool_result must reference the originating tool_use_id for the model to correlate outputs."
+      },
+      {
+        "texto_opcion": "Append tool output as a new user message without tool_use_id — breaks the tool protocol and confuses attribution",
+        "es_correcta": false,
+        "explicacion": "Breaks the tool protocol and confuses attribution."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool_result format"
+    ]
+  },
+  {
+    "pregunta": "a research agent occasionally loops indefinitely calling the same search tool. Production context: a multi-agent research system with coordinator, web search, and synthesis subagents. What should the architect do? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Remove all tools mid-run without notifying the user — abrupt tool removal causes confusing partial state prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Abrupt tool removal causes confusing partial state."
+      },
+      {
+        "texto_opcion": "Trust the model to self-terminate with no outer guard — models can repeat tool calls without a hard cap used as the main path in this architecture configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Models can repeat tool calls without a hard cap."
+      },
+      {
+        "texto_opcion": "Cap iterations in application code and break when stop_reason is end_turn or max rounds exceeded",
+        "es_correcta": true,
+        "explicacion": "Programmatic iteration limits prevent runaway tool loops beyond model stop_reason alone."
+      },
+      {
+        "texto_opcion": "Set temperature to zero only — temperature does not guarantee loop termination configured end-to-end for the stated workload used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Temperature does not guarantee loop termination."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "max tool rounds"
+    ]
+  },
+  {
+    "pregunta": "Claude requests three independent lookups in one assistant turn. Scenario: a structured data extraction service that emits validated JSON for downstream systems. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Merge all outputs into a single tool_result — each tool_use_id needs its own tool_result applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Each tool_use_id needs its own tool_result."
+      },
+      {
+        "texto_opcion": "Wait for end_turn before executing any tool — delays valid parallel work and breaks the turn contract applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Delays valid parallel work and breaks the turn contract."
+      },
+      {
+        "texto_opcion": "Execute all tool_use blocks concurrently and return one tool_result per tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Independent tools in the same turn should run in parallel with matched result blocks."
+      },
+      {
+        "texto_opcion": "Run tools sequentially and drop two of three results — missing tool_result blocks violate the API contract used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Missing tool_result blocks violate the API contract."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "parallel tool calls"
+    ]
+  },
+  {
+    "pregunta": "step two needs an account_id returned only after step one create_customer succeeds. Design review for an enterprise RAG assistant over policy PDFs with MCP document tools. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Hard-code account_id in the system prompt — brittle and bypasses dynamic tool outputs plausible at first glance, yet weaker than the best option plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Brittle and bypasses dynamic tool outputs."
+      },
+      {
+        "texto_opcion": "Fire create_customer and charge_card in parallel always — charge_card lacks account_id if create has not finished plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "charge_card lacks account_id if create has not finished."
+      },
+      {
+        "texto_opcion": "Skip tool_result for create_customer to save tokens — downstream tools lose required input context as a primary design for this requirement adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Downstream tools lose required input context."
+      },
+      {
+        "texto_opcion": "Run create_customer first; pass its tool_result into the next turn before calling dependent tools",
+        "es_correcta": true,
+        "explicacion": "Dependent tools require sequential execution and explicit passing of prior outputs."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "dependent tools"
+    ]
+  },
+  {
+    "pregunta": "your handler receives stop_reason tool_use on the latest assistant message. Scenario: a developer productivity assistant using built-in tools plus MCP servers. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Convert tool_use blocks to plain text user messages — wrong block type breaks protocol parsing",
+        "es_correcta": false,
+        "explicacion": "Wrong block type breaks protocol parsing."
+      },
+      {
+        "texto_opcion": "Treat tool_use as end_turn and return to the user immediately — leaves tool calls unfulfilled",
+        "es_correcta": false,
+        "explicacion": "Leaves tool calls unfulfilled."
+      },
+      {
+        "texto_opcion": "Execute requested tools, append tool_result messages, and call the model again",
+        "es_correcta": true,
+        "explicacion": "stop_reason tool_use signals pending tool execution before the turn can complete."
+      },
+      {
+        "texto_opcion": "Retry the identical prompt without tool results — model will repeat the same tool_use request",
+        "es_correcta": false,
+        "explicacion": "Model will repeat the same tool_use request."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason tool_use"
+    ]
+  },
+  {
+    "pregunta": "an external API returns HTTP 503 during a tool call inside the agent loop. Production context: a Claude Code code-generation workflow across a multi-repo monorepo. What should the architect do? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Return tool_result with is_error or structured error text so the model can retry or escalate",
+        "es_correcta": true,
+        "explicacion": "Tool failures should flow back through tool_result so the model can recover or ask for help."
+      },
+      {
+        "texto_opcion": "Retry the HTTP call silently forever inside the tool — can hang the agent loop without model awareness adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Can hang the agent loop without model awareness."
+      },
+      {
+        "texto_opcion": "Crash the whole agent process without a user message — poor reliability and no graceful degradation often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Poor reliability and no graceful degradation."
+      },
+      {
+        "texto_opcion": "Swallow the error and send an empty tool_result — model lacks signal to change strategy as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Model lacks signal to change strategy."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "error in tool execution"
+    ]
+  },
+  {
+    "pregunta": "a turn mixes text explanation with multiple tool_use blocks. Design review for an enterprise RAG assistant over policy PDFs with MCP document tools. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Strip text blocks before sending to observability — loses reasoning context for operators plausible at first glance, yet weaker than the best option prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Loses reasoning context for operators."
+      },
+      {
+        "texto_opcion": "Reorder tool_result blocks alphabetically by tool name — order mismatch can confuse debugging, not replace id matching prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Order mismatch can confuse debugging, not replace id matching."
+      },
+      {
+        "texto_opcion": "Execute only the first tool_use block — ignores additional requested actions in the same turn applied across environments for operational consistency plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Ignores additional requested actions in the same turn."
+      },
+      {
+        "texto_opcion": "Preserve assistant content block order when logging; execute every tool_use referenced in that message",
+        "es_correcta": true,
+        "explicacion": "Block order reflects model intent; all tool_use entries in the turn must be honored."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "content block ordering"
+    ]
+  },
+  {
+    "pregunta": "you stream assistant tokens and detect partial tool_use JSON mid-stream. Scenario: a developer productivity assistant using built-in tools plus MCP servers. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Execute tools on every delta event — partial JSON causes failed or wrong tool calls",
+        "es_correcta": false,
+        "explicacion": "Partial JSON causes failed or wrong tool calls."
+      },
+      {
+        "texto_opcion": "Ignore tool_use during stream and only handle text — misses tool calls emitted in the stream",
+        "es_correcta": false,
+        "explicacion": "Misses tool calls emitted in the stream."
+      },
+      {
+        "texto_opcion": "Disable streaming to avoid tool_use entirely — streaming is compatible when buffering is correct",
+        "es_correcta": false,
+        "explicacion": "Streaming is compatible when buffering is correct."
+      },
+      {
+        "texto_opcion": "Buffer until the tool_use block is complete, then execute; do not run on partial deltas",
+        "es_correcta": true,
+        "explicacion": "Streaming requires waiting for complete tool_use payloads before execution."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "streaming tool_use"
+    ]
+  },
+  {
+    "pregunta": "after submitting tool_results, who speaks next in the Messages API pattern? Context: a Claude Code code-generation workflow across a multi-repo monorepo. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Insert a synthetic system message instead of calling the model — skips the model turn that interprets tool output selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Skips the model turn that interprets tool output."
+      },
+      {
+        "texto_opcion": "Require the human user to type ok after every tool_result — breaks autonomous agent flows unnecessarily often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Breaks autonomous agent flows unnecessarily."
+      },
+      {
+        "texto_opcion": "Delete prior assistant messages before continuing — removes tool_use context the model needs selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Removes tool_use context the model needs."
+      },
+      {
+        "texto_opcion": "Call the model again with the updated message list; the assistant produces the next turn",
+        "es_correcta": true,
+        "explicacion": "The loop alternates assistant tool_use with client tool_result, then assistant continuation."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "user turn after tools"
+    ]
+  },
+  {
+    "pregunta": "a long-running database query tool sometimes exceeds SLA inside an agent session. Design review for a developer productivity assistant using built-in tools plus MCP servers. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Kill the session without returning any tool_result — leaves the conversation in an invalid state often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Leaves the conversation in an invalid state."
+      },
+      {
+        "texto_opcion": "Implement tool-level timeouts and return a concise timeout error in tool_result",
+        "es_correcta": true,
+        "explicacion": "Bounded tool execution prevents the agent loop from stalling on hung dependencies."
+      },
+      {
+        "texto_opcion": "Retry the query unbounded inside the tool handler — same hang risk without a cap selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Same hang risk without a cap."
+      },
+      {
+        "texto_opcion": "Block the loop until the query finishes no matter how long — violates latency SLAs and ties up workers selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Violates latency SLAs and ties up workers."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool timeout"
+    ]
+  },
+  {
+    "pregunta": "a payment agent may retry charge_order after ambiguous network failures. Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Design charge tools with idempotency keys and surface duplicate status in tool_result",
+        "es_correcta": true,
+        "explicacion": "Idempotent tools let safe retries without double-charging when the loop repeats."
+      },
+      {
+        "texto_opcion": "Hide retry count from the model — model cannot adjust strategy without failure context used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Model cannot adjust strategy without failure context."
+      },
+      {
+        "texto_opcion": "Allow duplicate charges on every retry — financial risk on ambiguous failures used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Financial risk on ambiguous failures."
+      },
+      {
+        "texto_opcion": "Disable retries entirely for all tools — over-corrects; read-only tools benefit from retries as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Over-corrects; read-only tools benefit from retries."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "idempotent tools"
+    ]
+  },
+  {
+    "pregunta": "a search tool finds no records for a valid query. Design review for an enterprise RAG assistant over policy PDFs with MCP document tools. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Return HTTP 404 at the transport layer only — model sees tool failure, not an empty success semantic plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Model sees tool failure, not an empty success semantic."
+      },
+      {
+        "texto_opcion": "Omit tool_result when nothing is found — violates one-result-per-tool_use contract applied across environments for operational consistency selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Violates one-result-per-tool_use contract."
+      },
+      {
+        "texto_opcion": "Fabricate placeholder records — introduces hallucinated data into the workflow selected to meet the constraints described here plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Introduces hallucinated data into the workflow."
+      },
+      {
+        "texto_opcion": "Return tool_result stating zero results with schema-consistent fields, not an omitted result",
+        "es_correcta": true,
+        "explicacion": "Empty but explicit results let the model reason about next steps."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "empty tool result"
+    ]
+  },
+  {
+    "pregunta": "resuming an agent session after a process restart mid tool loop. Scenario: an enterprise RAG assistant over policy PDFs with MCP document tools. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Persist full message history including pending tool_use blocks and replay unfulfilled tool_results",
+        "es_correcta": true,
+        "explicacion": "Durable message state is required to continue a partially completed tool round."
+      },
+      {
+        "texto_opcion": "Start a fresh conversation and hope the user repeats context — loses tool_use correlation and prior work",
+        "es_correcta": false,
+        "explicacion": "Loses tool_use correlation and prior work."
+      },
+      {
+        "texto_opcion": "Persist only the last assistant text snippet — insufficient to reconstruct tool protocol state",
+        "es_correcta": false,
+        "explicacion": "Insufficient to reconstruct tool protocol state."
+      },
+      {
+        "texto_opcion": "Auto-fulfill pending tools with mock data on restart — risky in production and hides real failures",
+        "es_correcta": false,
+        "explicacion": "Risky in production and hides real failures."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "conversation state"
+    ]
+  },
+  {
+    "pregunta": "an Agent SDK service must keep calling tools until the model finishes without tool_use. Context: a Claude Code CI pipeline that must run non-interactively on every PR. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Exit after the first assistant message regardless of stop_reason — premature exit skips required tool rounds selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Premature exit skips required tool rounds."
+      },
+      {
+        "texto_opcion": "Poll the Messages API every second without reading stop_reason — polling alone does not implement the tool loop contract",
+        "es_correcta": false,
+        "explicacion": "Polling alone does not implement the tool loop contract."
+      },
+      {
+        "texto_opcion": "Disable tools after one round to force end_turn — breaks multi-step agent workflows selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Breaks multi-step agent workflows."
+      },
+      {
+        "texto_opcion": "Loop on stop_reason end_turn vs tool_use; send tool_result blocks until end_turn",
+        "es_correcta": true,
+        "explicacion": "Agentic flows require an outer loop that submits tool results until the model stops requesting tools."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "stop_reason loop"
+    ]
+  },
+  {
+    "pregunta": "a refund agent returns structured JSON from an order lookup tool to Claude. Design review for an enterprise RAG assistant over policy PDFs with MCP document tools. Select the most appropriate approach. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Embed results only in the system prompt on the next turn — tool results belong in the tool channel, not system-only injection",
+        "es_correcta": false,
+        "explicacion": "Tool results belong in the tool channel, not system-only injection."
+      },
+      {
+        "texto_opcion": "Return binary blobs without encoding in the tool_result content — aPI expects serializable content in tool_result blocks",
+        "es_correcta": false,
+        "explicacion": "API expects serializable content in tool_result blocks."
+      },
+      {
+        "texto_opcion": "Send tool_result with tool_use_id matching the prior tool_use block and content as string or structured payload",
+        "es_correcta": true,
+        "explicacion": "Each tool_result must reference the originating tool_use_id for the model to correlate outputs."
+      },
+      {
+        "texto_opcion": "Append tool output as a new user message without tool_use_id — breaks the tool protocol and confuses attribution",
+        "es_correcta": false,
+        "explicacion": "Breaks the tool protocol and confuses attribution."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "tool_result format"
+    ]
+  },
+  {
+    "pregunta": "a research agent occasionally loops indefinitely calling the same search tool. Context: a Claude Code CI pipeline that must run non-interactively on every PR. Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Cap iterations in application code and break when stop_reason is end_turn or max rounds exceeded",
+        "es_correcta": true,
+        "explicacion": "Programmatic iteration limits prevent runaway tool loops beyond model stop_reason alone."
+      },
+      {
+        "texto_opcion": "Set temperature to zero only — temperature does not guarantee loop termination plausible at first glance, yet weaker than the best option as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Temperature does not guarantee loop termination."
+      },
+      {
+        "texto_opcion": "Trust the model to self-terminate with no outer guard — models can repeat tool calls without a hard cap as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Models can repeat tool calls without a hard cap."
+      },
+      {
+        "texto_opcion": "Remove all tools mid-run without notifying the user — abrupt tool removal causes confusing partial state as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Abrupt tool removal causes confusing partial state."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "max tool rounds"
+    ]
+  },
+  {
+    "pregunta": "Claude requests three independent lookups in one assistant turn. Scenario: an enterprise RAG assistant over policy PDFs with MCP document tools. Which architectural choice is best? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Run tools sequentially and drop two of three results — missing tool_result blocks violate the API contract often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Missing tool_result blocks violate the API contract."
+      },
+      {
+        "texto_opcion": "Wait for end_turn before executing any tool — delays valid parallel work and breaks the turn contract configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Delays valid parallel work and breaks the turn contract."
+      },
+      {
+        "texto_opcion": "Merge all outputs into a single tool_result — each tool_use_id needs its own tool_result often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Each tool_use_id needs its own tool_result."
+      },
+      {
+        "texto_opcion": "Execute all tool_use blocks concurrently and return one tool_result per tool_use_id",
+        "es_correcta": true,
+        "explicacion": "Independent tools in the same turn should run in parallel with matched result blocks."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "parallel tool calls"
+    ]
+  },
+  {
+    "pregunta": "step two needs an account_id returned only after step one create_customer succeeds. Production context: a production Agent SDK service handling tool loops and stop_reason control flow. What should the architect do? Constraint set #5.",
+    "opciones": [
+      {
+        "texto_opcion": "Hard-code account_id in the system prompt — brittle and bypasses dynamic tool outputs prioritized for simplicity, though it misses a key constraint prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Brittle and bypasses dynamic tool outputs."
+      },
+      {
+        "texto_opcion": "Run create_customer first; pass its tool_result into the next turn before calling dependent tools",
+        "es_correcta": true,
+        "explicacion": "Dependent tools require sequential execution and explicit passing of prior outputs."
+      },
+      {
+        "texto_opcion": "Skip tool_result for create_customer to save tokens — downstream tools lose required input context prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Downstream tools lose required input context."
+      },
+      {
+        "texto_opcion": "Fire create_customer and charge_card in parallel always — charge_card lacks account_id if create has not finished often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "charge_card lacks account_id if create has not finished."
+      }
+    ],
+    "tags": [
+      "1.1",
+      "dependent tools"
+    ]
+  }
+]

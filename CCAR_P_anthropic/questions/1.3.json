@@ -1,0 +1,1481 @@
+[
+  {
+    "pregunta": "order support and fraud investigation share Claude but have different data rules. Design review for a structured data extraction service that emits validated JSON for downstream systems. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Split into separate services/contexts with distinct tool sets, indexes, prompts, and auth—not one mega-assistant",
+        "es_correcta": true,
+        "explicacion": "Bounded contexts reduce coupling and enforce different policies per domain."
+      },
+      {
+        "texto_opcion": "Differentiate only by changing the user greeting — does not enforce authorization boundaries used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Does not enforce authorization boundaries."
+      },
+      {
+        "texto_opcion": "One shared agent with all tools for simplicity — fraud investigators get unnecessary order refund tools configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Fraud investigators get unnecessary order refund tools."
+      },
+      {
+        "texto_opcion": "Merge audit logs across contexts without labels — impossible to investigate per domain plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Impossible to investigate per domain."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Bounded context"
+    ]
+  },
+  {
+    "pregunta": "each tool should map to one backend capability with validated inputs. Design review for a structured data extraction service that emits validated JSON for downstream systems. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "One mega-tool that accepts raw SQL strings — injection and over-broad access prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Injection and over-broad access."
+      },
+      {
+        "texto_opcion": "Design small, composable tools with strict JSON schemas and server-side authorization checks",
+        "es_correcta": true,
+        "explicacion": "Clear tool boundaries improve reliability, testing, and least privilege."
+      },
+      {
+        "texto_opcion": "Skip input validation because the model is smart — malformed calls still hit backends as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Malformed calls still hit backends."
+      },
+      {
+        "texto_opcion": "Tools that return entire database dumps selected to meet the constraints described here plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Excessive data exposure."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Tool boundary design"
+    ]
+  },
+  {
+    "pregunta": "embedding pipeline changes weekly; chat API must stay stable. Production context: a Claude Code code-generation workflow across a multi-repo monorepo. What should the architect do?",
+    "opciones": [
+      {
+        "texto_opcion": "Decouple ingestion/indexing services from online retrieval API and version indexes independently",
+        "es_correcta": true,
+        "explicacion": "Separating retrieval ingestion from query path enables safe reindexing and rollbacks."
+      },
+      {
+        "texto_opcion": "Rebuild indexes inside the chat request path — latency spikes and coupling often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Latency spikes and coupling."
+      },
+      {
+        "texto_opcion": "Store vectors only in the model context — not scalable for large corpora prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Not scalable for large corpora."
+      },
+      {
+        "texto_opcion": "Ship embedding changes without version pins — silent retrieval regressions as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Silent retrieval regressions."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retrieval separation"
+    ]
+  },
+  {
+    "pregunta": "product teams tweak prompts daily; eval must not run in production traffic. Context: a multi-agent research system with coordinator, web search, and synthesis subagents.",
+    "opciones": [
+      {
+        "texto_opcion": "Judge quality only by random user thumbs-up applied across environments for operational consistency plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Noisy and delayed signal."
+      },
+      {
+        "texto_opcion": "Run eval queries against production without isolation — skews metrics and risks data leaks applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Skews metrics and risks data leaks."
+      },
+      {
+        "texto_opcion": "Skip regression tests on prompt changes — regressions reach users first selected to meet the constraints described here applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Regressions reach users first."
+      },
+      {
+        "texto_opcion": "Run offline eval pipelines and CI gates on golden sets separate from live inference services",
+        "es_correcta": true,
+        "explicacion": "Evaluation is its own service with datasets, metrics, and release gates."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Eval service split"
+    ]
+  },
+  {
+    "pregunta": "multiple teams contribute instructions to one assistant. Design review for a customer support resolution agent with order lookup, refund, and escalate tools. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Ban all customization — ignores legitimate team needs; use modules instead often seen in legacy designs but not ideal for this case often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Ignores legitimate team needs; use modules instead."
+      },
+      {
+        "texto_opcion": "Hard-code prompts in three repos without sync — inconsistent behavior by channel often seen in legacy designs but not ideal for this case selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Inconsistent behavior by channel."
+      },
+      {
+        "texto_opcion": "Let each team paste instructions into production via chat selected to meet the constraints described here applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Uncontrolled drift."
+      },
+      {
+        "texto_opcion": "Centralize prompt templates with ownership tags, version control, and review gates; compose via structured modules",
+        "es_correcta": true,
+        "explicacion": "Prompt ownership prevents conflicting instructions and enables audited changes."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Prompt ownership"
+    ]
+  },
+  {
+    "pregunta": "agents need user session memory but also shared case records. Production context: an enterprise RAG assistant over policy PDFs with MCP document tools. What should the architect do?",
+    "opciones": [
+      {
+        "texto_opcion": "Share one global session across all users as a primary design for this requirement That makes it a weaker fit against the main constraint in the prompt prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Privacy disaster."
+      },
+      {
+        "texto_opcion": "Rely on full chat history as the database — context limits and inconsistency prioritized for simplicity, though it misses a key constraint applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Context limits and inconsistency."
+      },
+      {
+        "texto_opcion": "Store PII only in prompts never persisted — breaks continuity for legitimate support configured end-to-end for the stated workload applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Breaks continuity for legitimate support."
+      },
+      {
+        "texto_opcion": "Keep ephemeral conversation state per session; persist canonical case facts in a store the tools read/write—not unbounded chat logs",
+        "es_correcta": true,
+        "explicacion": "Architects separate conversational state from system-of-record data."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Session vs shared state"
+    ]
+  },
+  {
+    "pregunta": "ten client apps call Claude capabilities with different scopes. Scenario: a Claude Code code-generation workflow across a multi-repo monorepo. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Implement rate limits differently in each app plausible at first glance, yet weaker than the best option prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Inconsistent protection."
+      },
+      {
+        "texto_opcion": "Skip request logging at the edge applied across environments for operational consistency That makes it a weaker fit against the main constraint in the prompt plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Hard to trace incidents."
+      },
+      {
+        "texto_opcion": "Place an API gateway for auth, rate limits, routing, and request logging before internal agent services",
+        "es_correcta": true,
+        "explicacion": "Gateways enforce cross-cutting controls consistently for all AI entry points."
+      },
+      {
+        "texto_opcion": "Expose raw agent endpoints publicly without auth adopted as the standard pattern for the team That makes it a weaker fit against the used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Abuse and data leaks."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "API gateway"
+    ]
+  },
+  {
+    "pregunta": "system prompt and policy docs repeat on every call. Scenario: a Claude Code code-generation workflow across a multi-repo monorepo. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Disable caching because debugging is harder — throws away major cost/latency wins used as the main path in this architecture applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Throws away major cost/latency wins."
+      },
+      {
+        "texto_opcion": "Invalidate cache only on model version changes used as the main path in this architecture That makes it a weaker fit against the main constraint in the prompt as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Misses document updates."
+      },
+      {
+        "texto_opcion": "Cache stable prompt prefixes with prompt caching; cache retrieval results separately with TTL keyed by query/doc version",
+        "es_correcta": true,
+        "explicacion": "Caching belongs at prompt and retrieval layers with explicit invalidation on content changes."
+      },
+      {
+        "texto_opcion": "Cache entire responses including user PII forever — privacy and staleness issues as the default production choice in this scenario configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Privacy and staleness issues."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Cache layer placement"
+    ]
+  },
+  {
+    "pregunta": "SRE needs traces across model, tools, and retrieval. Context: an enterprise RAG assistant over policy PDFs with MCP document tools.",
+    "opciones": [
+      {
+        "texto_opcion": "Use unrelated trace ids per service — breaks end-to-end analysis often seen in legacy designs but not ideal for this case as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Breaks end-to-end analysis."
+      },
+      {
+        "texto_opcion": "Log only final assistant text — cannot pinpoint tool vs model failures as the default production choice in this scenario plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Cannot pinpoint tool vs model failures."
+      },
+      {
+        "texto_opcion": "Disable spans to save 1% CPU plausible at first glance, yet weaker than the best option as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Blind during outages."
+      },
+      {
+        "texto_opcion": "Emit structured traces/spans per component with correlation IDs shared across services",
+        "es_correcta": true,
+        "explicacion": "Unified tracing across decoupled AI microservices speeds incident response."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Observability split"
+    ]
+  },
+  {
+    "pregunta": "workloads mix cheap classification and deep reasoning. Scenario: an enterprise RAG assistant over policy PDFs with MCP document tools. Which architectural choice is best?",
+    "opciones": [
+      {
+        "texto_opcion": "Let end users pick model names — most users lack context; support burden rises as the default production choice in this scenario prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Most users lack context; support burden rises."
+      },
+      {
+        "texto_opcion": "Always route to Opus — wastes budget on trivial tasks often seen in legacy designs but not ideal for this case used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Wastes budget on trivial tasks."
+      },
+      {
+        "texto_opcion": "Introduce a routing service that classifies intent and selects model tier before the main agent loop",
+        "es_correcta": true,
+        "explicacion": "Routing decouples policy from every caller and centralizes cost/latency tradeoffs."
+      },
+      {
+        "texto_opcion": "Hard-code model choice in each client app — inconsistent upgrades and tuning prioritized for simplicity, though it misses a key constraint as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Inconsistent upgrades and tuning."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Model router layer"
+    ]
+  },
+  {
+    "pregunta": "new agent tool rollout must be reversible within minutes. Context: a structured data extraction service that emits validated JSON for downstream systems.",
+    "opciones": [
+      {
+        "texto_opcion": "Maintain separate prod clones per experiment manually configured end-to-end for the stated workload That makes it a weaker fit against the main constraint in the prompt plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Error-prone and slow."
+      },
+      {
+        "texto_opcion": "Wrap tool enablement and prompt variants in feature flags with per-cohort targeting and automatic rollback hooks",
+        "es_correcta": true,
+        "explicacion": "Feature flags decouple deployment from release for AI behavior changes."
+      },
+      {
+        "texto_opcion": "Deploy prompt changes directly to 100% traffic — no fast rollback on regressions plausible at first glance, yet weaker than the best option selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "No fast rollback on regressions."
+      },
+      {
+        "texto_opcion": "Never experiment in production — misses real traffic learning; use controlled flags instead plausible at first glance, yet weaker than the best option adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Misses real traffic learning; use controlled flags instead."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Feature flags"
+    ]
+  },
+  {
+    "pregunta": "legal must approve prompt changes affecting disclosures. Design review for a multi-agent research system with coordinator, web search, and synthesis subagents. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Reuse staging prompts in prod accidentally — compliance and behavior mismatches often seen in legacy designs but not ideal for this case used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Compliance and behavior mismatches."
+      },
+      {
+        "texto_opcion": "Version models but not prompts — cannot reproduce incidents used as the main path in this architecture applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Cannot reproduce incidents."
+      },
+      {
+        "texto_opcion": "Edit production prompts in the dashboard without history plausible at first glance, yet weaker than the best option selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "No audit trail."
+      },
+      {
+        "texto_opcion": "Store prompts in version control with semver, change tickets, and pinned production versions per environment",
+        "es_correcta": true,
+        "explicacion": "Prompt versioning is configuration management, not informal doc edits."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Versioning prompts"
+    ]
+  },
+  {
+    "pregunta": "document ingestion includes OCR, PII redaction, and chunking before vectors. Design review for a structured data extraction service that emits validated JSON for downstream systems. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Skip PII redaction in ingestion — compliance violation in indexes as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Compliance violation in indexes."
+      },
+      {
+        "texto_opcion": "Combine ingestion and chat in one serverless function with no queue — poor scalability and failure isolation",
+        "es_correcta": false,
+        "explicacion": "Poor scalability and failure isolation."
+      },
+      {
+        "texto_opcion": "OCR every upload synchronously before answering plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Blocks user latency."
+      },
+      {
+        "texto_opcion": "Keep heavy ETL/ingestion pipelines off the online inference path in dedicated workers",
+        "es_correcta": true,
+        "explicacion": "Data prep and inference scale differently and should not share runtime pools."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Data vs inference pipeline"
+    ]
+  },
+  {
+    "pregunta": "team proposes one microservice per tool endpoint (40 services). Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach.",
+    "opciones": [
+      {
+        "texto_opcion": "Group tools by domain boundary and shared auth domain; avoid nano-services that multiply operational overhead",
+        "es_correcta": true,
+        "explicacion": "Decomposition should follow domain cohesion, not one-service-per-tool dogma."
+      },
+      {
+        "texto_opcion": "Ignore shared auth and duplicate secrets per nano-service adopted as the standard pattern for the team plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Secret sprawl."
+      },
+      {
+        "texto_opcion": "Split by individual prompt lines selected to meet the constraints described here That makes it a weaker fit against the main constraint in the prompt",
+        "es_correcta": false,
+        "explicacion": "Absurd ops cost."
+      },
+      {
+        "texto_opcion": "Monolith all domains in one deploy with shared admin keys — blast radius and coupling plausible at first glance, yet weaker than the best option selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Blast radius and coupling."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Microservice granularity"
+    ]
+  },
+  {
+    "pregunta": "order support and fraud investigation share Claude but have different data rules. Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Differentiate only by changing the user greeting — does not enforce authorization boundaries selected to meet the constraints described here prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Does not enforce authorization boundaries."
+      },
+      {
+        "texto_opcion": "One shared agent with all tools for simplicity — fraud investigators get unnecessary order refund tools applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Fraud investigators get unnecessary order refund tools."
+      },
+      {
+        "texto_opcion": "Split into separate services/contexts with distinct tool sets, indexes, prompts, and auth—not one mega-assistant",
+        "es_correcta": true,
+        "explicacion": "Bounded contexts reduce coupling and enforce different policies per domain."
+      },
+      {
+        "texto_opcion": "Merge audit logs across contexts without labels — impossible to investigate per domain prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Impossible to investigate per domain."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Bounded context"
+    ]
+  },
+  {
+    "pregunta": "each tool should map to one backend capability with validated inputs. Context: a developer productivity assistant using built-in tools plus MCP servers. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "One mega-tool that accepts raw SQL strings — injection and over-broad access plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Injection and over-broad access."
+      },
+      {
+        "texto_opcion": "Tools that return entire database dumps applied across environments for operational consistency selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Excessive data exposure."
+      },
+      {
+        "texto_opcion": "Skip input validation because the model is smart — malformed calls still hit backends as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Malformed calls still hit backends."
+      },
+      {
+        "texto_opcion": "Design small, composable tools with strict JSON schemas and server-side authorization checks",
+        "es_correcta": true,
+        "explicacion": "Clear tool boundaries improve reliability, testing, and least privilege."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Tool boundary design"
+    ]
+  },
+  {
+    "pregunta": "embedding pipeline changes weekly; chat API must stay stable. Context: a customer support resolution agent with order lookup, refund, and escalate tools. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Store vectors only in the model context — not scalable for large corpora applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Not scalable for large corpora."
+      },
+      {
+        "texto_opcion": "Decouple ingestion/indexing services from online retrieval API and version indexes independently",
+        "es_correcta": true,
+        "explicacion": "Separating retrieval ingestion from query path enables safe reindexing and rollbacks."
+      },
+      {
+        "texto_opcion": "Rebuild indexes inside the chat request path — latency spikes and coupling as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Latency spikes and coupling."
+      },
+      {
+        "texto_opcion": "Ship embedding changes without version pins — silent retrieval regressions as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Silent retrieval regressions."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retrieval separation"
+    ]
+  },
+  {
+    "pregunta": "product teams tweak prompts daily; eval must not run in production traffic. Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Run offline eval pipelines and CI gates on golden sets separate from live inference services",
+        "es_correcta": true,
+        "explicacion": "Evaluation is its own service with datasets, metrics, and release gates."
+      },
+      {
+        "texto_opcion": "Judge quality only by random user thumbs-up as the default production choice in this scenario plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Noisy and delayed signal."
+      },
+      {
+        "texto_opcion": "Run eval queries against production without isolation — skews metrics and risks data leaks as a primary design for this requirement as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Skews metrics and risks data leaks."
+      },
+      {
+        "texto_opcion": "Skip regression tests on prompt changes — regressions reach users first as the default production choice in this scenario plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Regressions reach users first."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Eval service split"
+    ]
+  },
+  {
+    "pregunta": "multiple teams contribute instructions to one assistant. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Centralize prompt templates with ownership tags, version control, and review gates; compose via structured modules",
+        "es_correcta": true,
+        "explicacion": "Prompt ownership prevents conflicting instructions and enables audited changes."
+      },
+      {
+        "texto_opcion": "Let each team paste instructions into production via chat selected to meet the constraints described here plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Uncontrolled drift."
+      },
+      {
+        "texto_opcion": "Ban all customization — ignores legitimate team needs; use modules instead plausible at first glance, yet weaker than the best option adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Ignores legitimate team needs; use modules instead."
+      },
+      {
+        "texto_opcion": "Hard-code prompts in three repos without sync — inconsistent behavior by channel adopted as the standard pattern for the team plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Inconsistent behavior by channel."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Prompt ownership"
+    ]
+  },
+  {
+    "pregunta": "agents need user session memory but also shared case records. Scenario: an enterprise RAG assistant over policy PDFs with MCP document tools. Which architectural choice is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Share one global session across all users prioritized for simplicity, though it misses a key constraint That makes it a weaker fit against the main constraint in the prompt",
+        "es_correcta": false,
+        "explicacion": "Privacy disaster."
+      },
+      {
+        "texto_opcion": "Rely on full chat history as the database — context limits and inconsistency applied across environments for operational consistency configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Context limits and inconsistency."
+      },
+      {
+        "texto_opcion": "Keep ephemeral conversation state per session; persist canonical case facts in a store the tools read/write—not unbounded chat logs",
+        "es_correcta": true,
+        "explicacion": "Architects separate conversational state from system-of-record data."
+      },
+      {
+        "texto_opcion": "Store PII only in prompts never persisted — breaks continuity for legitimate support adopted as the standard pattern for the team applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Breaks continuity for legitimate support."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Session vs shared state"
+    ]
+  },
+  {
+    "pregunta": "ten client apps call Claude capabilities with different scopes. Scenario: a Claude Code code-generation workflow across a multi-repo monorepo. Which architectural choice is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Skip request logging at the edge as the default production choice in this scenario That makes it a weaker fit against the main constraint in the prompt",
+        "es_correcta": false,
+        "explicacion": "Hard to trace incidents."
+      },
+      {
+        "texto_opcion": "Implement rate limits differently in each app prioritized for simplicity, though it misses a key constraint often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Inconsistent protection."
+      },
+      {
+        "texto_opcion": "Expose raw agent endpoints publicly without auth as the default production choice in this scenario configured end-to-end for the stated workload prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Abuse and data leaks."
+      },
+      {
+        "texto_opcion": "Place an API gateway for auth, rate limits, routing, and request logging before internal agent services",
+        "es_correcta": true,
+        "explicacion": "Gateways enforce cross-cutting controls consistently for all AI entry points."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "API gateway"
+    ]
+  },
+  {
+    "pregunta": "system prompt and policy docs repeat on every call. Context: a developer productivity assistant using built-in tools plus MCP servers. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Cache stable prompt prefixes with prompt caching; cache retrieval results separately with TTL keyed by query/doc version",
+        "es_correcta": true,
+        "explicacion": "Caching belongs at prompt and retrieval layers with explicit invalidation on content changes."
+      },
+      {
+        "texto_opcion": "Cache entire responses including user PII forever — privacy and staleness issues used as the main path in this architecture often seen in legacy designs but not ideal for this case selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Privacy and staleness issues."
+      },
+      {
+        "texto_opcion": "Disable caching because debugging is harder — throws away major cost/latency wins applied across environments for operational consistency plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Throws away major cost/latency wins."
+      },
+      {
+        "texto_opcion": "Invalidate cache only on model version changes selected to meet the constraints described here That makes it a weaker fit against the main constraint in the prompt applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Misses document updates."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Cache layer placement"
+    ]
+  },
+  {
+    "pregunta": "SRE needs traces across model, tools, and retrieval. Scenario: an enterprise RAG assistant over policy PDFs with MCP document tools. Which architectural choice is best? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Emit structured traces/spans per component with correlation IDs shared across services",
+        "es_correcta": true,
+        "explicacion": "Unified tracing across decoupled AI microservices speeds incident response."
+      },
+      {
+        "texto_opcion": "Use unrelated trace ids per service — breaks end-to-end analysis used as the main path in this architecture applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Breaks end-to-end analysis."
+      },
+      {
+        "texto_opcion": "Log only final assistant text — cannot pinpoint tool vs model failures used as the main path in this architecture used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Cannot pinpoint tool vs model failures."
+      },
+      {
+        "texto_opcion": "Disable spans to save 1% CPU applied across environments for operational consistency adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Blind during outages."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Observability split"
+    ]
+  },
+  {
+    "pregunta": "workloads mix cheap classification and deep reasoning. Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Always route to Opus — wastes budget on trivial tasks prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Wastes budget on trivial tasks."
+      },
+      {
+        "texto_opcion": "Let end users pick model names — most users lack context; support burden rises used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Most users lack context; support burden rises."
+      },
+      {
+        "texto_opcion": "Introduce a routing service that classifies intent and selects model tier before the main agent loop",
+        "es_correcta": true,
+        "explicacion": "Routing decouples policy from every caller and centralizes cost/latency tradeoffs."
+      },
+      {
+        "texto_opcion": "Hard-code model choice in each client app — inconsistent upgrades and tuning adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Inconsistent upgrades and tuning."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Model router layer"
+    ]
+  },
+  {
+    "pregunta": "new agent tool rollout must be reversible within minutes. Production context: a production Agent SDK service handling tool loops and stop_reason control flow. What should the architect do? Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Maintain separate prod clones per experiment manually used as the main path in this architecture That makes it a weaker fit against the main constraint in the prompt used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Error-prone and slow."
+      },
+      {
+        "texto_opcion": "Deploy prompt changes directly to 100% traffic — no fast rollback on regressions used as the main path in this architecture plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "No fast rollback on regressions."
+      },
+      {
+        "texto_opcion": "Wrap tool enablement and prompt variants in feature flags with per-cohort targeting and automatic rollback hooks",
+        "es_correcta": true,
+        "explicacion": "Feature flags decouple deployment from release for AI behavior changes."
+      },
+      {
+        "texto_opcion": "Never experiment in production — misses real traffic learning; use controlled flags instead used as the main path in this architecture often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Misses real traffic learning; use controlled flags instead."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Feature flags"
+    ]
+  },
+  {
+    "pregunta": "legal must approve prompt changes affecting disclosures. Context: an enterprise RAG assistant over policy PDFs with MCP document tools. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Edit production prompts in the dashboard without history configured end-to-end for the stated workload often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "No audit trail."
+      },
+      {
+        "texto_opcion": "Store prompts in version control with semver, change tickets, and pinned production versions per environment",
+        "es_correcta": true,
+        "explicacion": "Prompt versioning is configuration management, not informal doc edits."
+      },
+      {
+        "texto_opcion": "Version models but not prompts — cannot reproduce incidents used as the main path in this architecture configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Cannot reproduce incidents."
+      },
+      {
+        "texto_opcion": "Reuse staging prompts in prod accidentally — compliance and behavior mismatches prioritized for simplicity, though it misses a key constraint as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Compliance and behavior mismatches."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Versioning prompts"
+    ]
+  },
+  {
+    "pregunta": "document ingestion includes OCR, PII redaction, and chunking before vectors. Design review for a developer productivity assistant using built-in tools plus MCP servers. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Skip PII redaction in ingestion — compliance violation in indexes as a primary design for this requirement as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Compliance violation in indexes."
+      },
+      {
+        "texto_opcion": "Combine ingestion and chat in one serverless function with no queue — poor scalability and failure isolation selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Poor scalability and failure isolation."
+      },
+      {
+        "texto_opcion": "OCR every upload synchronously before answering as a primary design for this requirement selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Blocks user latency."
+      },
+      {
+        "texto_opcion": "Keep heavy ETL/ingestion pipelines off the online inference path in dedicated workers",
+        "es_correcta": true,
+        "explicacion": "Data prep and inference scale differently and should not share runtime pools."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Data vs inference pipeline"
+    ]
+  },
+  {
+    "pregunta": "team proposes one microservice per tool endpoint (40 services). Design review for a developer productivity assistant using built-in tools plus MCP servers. Select the most appropriate approach. Constraint set #2.",
+    "opciones": [
+      {
+        "texto_opcion": "Monolith all domains in one deploy with shared admin keys — blast radius and coupling often seen in legacy designs but not ideal for this case as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Blast radius and coupling."
+      },
+      {
+        "texto_opcion": "Ignore shared auth and duplicate secrets per nano-service selected to meet the constraints described here often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Secret sprawl."
+      },
+      {
+        "texto_opcion": "Split by individual prompt lines as a primary design for this requirement That makes it a weaker fit against the main constraint in the prompt configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Absurd ops cost."
+      },
+      {
+        "texto_opcion": "Group tools by domain boundary and shared auth domain; avoid nano-services that multiply operational overhead",
+        "es_correcta": true,
+        "explicacion": "Decomposition should follow domain cohesion, not one-service-per-tool dogma."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Microservice granularity"
+    ]
+  },
+  {
+    "pregunta": "order support and fraud investigation share Claude but have different data rules. Production context: a developer productivity assistant using built-in tools plus MCP servers. What should the architect do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Merge audit logs across contexts without labels — impossible to investigate per domain adopted as the standard pattern for the team applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Impossible to investigate per domain."
+      },
+      {
+        "texto_opcion": "Split into separate services/contexts with distinct tool sets, indexes, prompts, and auth—not one mega-assistant",
+        "es_correcta": true,
+        "explicacion": "Bounded contexts reduce coupling and enforce different policies per domain."
+      },
+      {
+        "texto_opcion": "One shared agent with all tools for simplicity — fraud investigators get unnecessary order refund tools applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Fraud investigators get unnecessary order refund tools."
+      },
+      {
+        "texto_opcion": "Differentiate only by changing the user greeting — does not enforce authorization boundaries used as the main path in this architecture adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Does not enforce authorization boundaries."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Bounded context"
+    ]
+  },
+  {
+    "pregunta": "each tool should map to one backend capability with validated inputs. Design review for a Claude Code CI pipeline that must run non-interactively on every PR. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Skip input validation because the model is smart — malformed calls still hit backends often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Malformed calls still hit backends."
+      },
+      {
+        "texto_opcion": "Tools that return entire database dumps selected to meet the constraints described here applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Excessive data exposure."
+      },
+      {
+        "texto_opcion": "One mega-tool that accepts raw SQL strings — injection and over-broad access as the default production choice in this scenario selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Injection and over-broad access."
+      },
+      {
+        "texto_opcion": "Design small, composable tools with strict JSON schemas and server-side authorization checks",
+        "es_correcta": true,
+        "explicacion": "Clear tool boundaries improve reliability, testing, and least privilege."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Tool boundary design"
+    ]
+  },
+  {
+    "pregunta": "embedding pipeline changes weekly; chat API must stay stable. Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Ship embedding changes without version pins — silent retrieval regressions adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Silent retrieval regressions."
+      },
+      {
+        "texto_opcion": "Rebuild indexes inside the chat request path — latency spikes and coupling often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Latency spikes and coupling."
+      },
+      {
+        "texto_opcion": "Decouple ingestion/indexing services from online retrieval API and version indexes independently",
+        "es_correcta": true,
+        "explicacion": "Separating retrieval ingestion from query path enables safe reindexing and rollbacks."
+      },
+      {
+        "texto_opcion": "Store vectors only in the model context — not scalable for large corpora selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Not scalable for large corpora."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retrieval separation"
+    ]
+  },
+  {
+    "pregunta": "product teams tweak prompts daily; eval must not run in production traffic. Design review for a developer productivity assistant using built-in tools plus MCP servers. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Judge quality only by random user thumbs-up plausible at first glance, yet weaker than the best option used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Noisy and delayed signal."
+      },
+      {
+        "texto_opcion": "Skip regression tests on prompt changes — regressions reach users first plausible at first glance, yet weaker than the best option plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Regressions reach users first."
+      },
+      {
+        "texto_opcion": "Run offline eval pipelines and CI gates on golden sets separate from live inference services",
+        "es_correcta": true,
+        "explicacion": "Evaluation is its own service with datasets, metrics, and release gates."
+      },
+      {
+        "texto_opcion": "Run eval queries against production without isolation — skews metrics and risks data leaks selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Skews metrics and risks data leaks."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Eval service split"
+    ]
+  },
+  {
+    "pregunta": "multiple teams contribute instructions to one assistant. Scenario: a developer productivity assistant using built-in tools plus MCP servers. Which architectural choice is best? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Let each team paste instructions into production via chat applied across environments for operational consistency as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Uncontrolled drift."
+      },
+      {
+        "texto_opcion": "Ban all customization — ignores legitimate team needs; use modules instead prioritized for simplicity, though it misses a key constraint as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Ignores legitimate team needs; use modules instead."
+      },
+      {
+        "texto_opcion": "Centralize prompt templates with ownership tags, version control, and review gates; compose via structured modules",
+        "es_correcta": true,
+        "explicacion": "Prompt ownership prevents conflicting instructions and enables audited changes."
+      },
+      {
+        "texto_opcion": "Hard-code prompts in three repos without sync — inconsistent behavior by channel prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Inconsistent behavior by channel."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Prompt ownership"
+    ]
+  },
+  {
+    "pregunta": "agents need user session memory but also shared case records. Production context: a production Agent SDK service handling tool loops and stop_reason control flow. What should the architect do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Store PII only in prompts never persisted — breaks continuity for legitimate support as a primary design for this requirement applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Breaks continuity for legitimate support."
+      },
+      {
+        "texto_opcion": "Keep ephemeral conversation state per session; persist canonical case facts in a store the tools read/write—not unbounded chat logs",
+        "es_correcta": true,
+        "explicacion": "Architects separate conversational state from system-of-record data."
+      },
+      {
+        "texto_opcion": "Rely on full chat history as the database — context limits and inconsistency often seen in legacy designs but not ideal for this case configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Context limits and inconsistency."
+      },
+      {
+        "texto_opcion": "Share one global session across all users as the default production choice in this scenario That makes it a weaker fit against the main constraint in the prompt as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Privacy disaster."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Session vs shared state"
+    ]
+  },
+  {
+    "pregunta": "ten client apps call Claude capabilities with different scopes. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Implement rate limits differently in each app adopted as the standard pattern for the team That makes it a weaker fit against the main constraint in the prompt used as the main path in this architecture That makes it a weaker fit against the main constraint in the prompt.",
+        "es_correcta": false,
+        "explicacion": "Inconsistent protection."
+      },
+      {
+        "texto_opcion": "Expose raw agent endpoints publicly without auth often seen in legacy designs but not ideal for this case used as the main path in this architecture That makes it a weaker fit against the main constraint in the prompt",
+        "es_correcta": false,
+        "explicacion": "Abuse and data leaks."
+      },
+      {
+        "texto_opcion": "Skip request logging at the edge selected to meet the constraints described here That makes it a weaker fit against the main constraint in the prompt often seen in legacy designs but not ideal for this case That makes it a weaker fit against the main constraint in the prompt.",
+        "es_correcta": false,
+        "explicacion": "Hard to trace incidents."
+      },
+      {
+        "texto_opcion": "Place an API gateway for auth, rate limits, routing, and request logging before internal agent services",
+        "es_correcta": true,
+        "explicacion": "Gateways enforce cross-cutting controls consistently for all AI entry points."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "API gateway"
+    ]
+  },
+  {
+    "pregunta": "system prompt and policy docs repeat on every call. Design review for a customer support resolution agent with order lookup, refund, and escalate tools. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable caching because debugging is harder — throws away major cost/latency wins as the default production choice in this scenario selected to meet the constraints described here as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Throws away major cost/latency wins."
+      },
+      {
+        "texto_opcion": "Cache stable prompt prefixes with prompt caching; cache retrieval results separately with TTL keyed by query/doc version",
+        "es_correcta": true,
+        "explicacion": "Caching belongs at prompt and retrieval layers with explicit invalidation on content changes."
+      },
+      {
+        "texto_opcion": "Cache entire responses including user PII forever — privacy and staleness issues plausible at first glance, yet weaker than the best option applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Privacy and staleness issues."
+      },
+      {
+        "texto_opcion": "Invalidate cache only on model version changes selected to meet the constraints described here That makes it a weaker fit against the main constraint in the prompt as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Misses document updates."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Cache layer placement"
+    ]
+  },
+  {
+    "pregunta": "SRE needs traces across model, tools, and retrieval. Production context: a structured data extraction service that emits validated JSON for downstream systems. What should the architect do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable spans to save 1% CPU adopted as the standard pattern for the team That makes it a weaker fit against the",
+        "es_correcta": false,
+        "explicacion": "Blind during outages."
+      },
+      {
+        "texto_opcion": "Use unrelated trace ids per service — breaks end-to-end analysis applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Breaks end-to-end analysis."
+      },
+      {
+        "texto_opcion": "Emit structured traces/spans per component with correlation IDs shared across services",
+        "es_correcta": true,
+        "explicacion": "Unified tracing across decoupled AI microservices speeds incident response."
+      },
+      {
+        "texto_opcion": "Log only final assistant text — cannot pinpoint tool vs model failures configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Cannot pinpoint tool vs model failures."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Observability split"
+    ]
+  },
+  {
+    "pregunta": "workloads mix cheap classification and deep reasoning. Context: a structured data extraction service that emits validated JSON for downstream systems. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Hard-code model choice in each client app — inconsistent upgrades and tuning often seen in legacy designs but not ideal for this case applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Inconsistent upgrades and tuning."
+      },
+      {
+        "texto_opcion": "Let end users pick model names — most users lack context; support burden rises adopted as the standard pattern for the team often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Most users lack context; support burden rises."
+      },
+      {
+        "texto_opcion": "Introduce a routing service that classifies intent and selects model tier before the main agent loop",
+        "es_correcta": true,
+        "explicacion": "Routing decouples policy from every caller and centralizes cost/latency tradeoffs."
+      },
+      {
+        "texto_opcion": "Always route to Opus — wastes budget on trivial tasks applied across environments for operational consistency as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Wastes budget on trivial tasks."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Model router layer"
+    ]
+  },
+  {
+    "pregunta": "new agent tool rollout must be reversible within minutes. Context: a Claude Code code-generation workflow across a multi-repo monorepo. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Never experiment in production — misses real traffic learning; use controlled flags instead adopted as the standard pattern for the team often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Misses real traffic learning; use controlled flags instead."
+      },
+      {
+        "texto_opcion": "Wrap tool enablement and prompt variants in feature flags with per-cohort targeting and automatic rollback hooks",
+        "es_correcta": true,
+        "explicacion": "Feature flags decouple deployment from release for AI behavior changes."
+      },
+      {
+        "texto_opcion": "Maintain separate prod clones per experiment manually used as the main path in this architecture That makes it a weaker fit against the main constraint in the prompt adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Error-prone and slow."
+      },
+      {
+        "texto_opcion": "Deploy prompt changes directly to 100% traffic — no fast rollback on regressions selected to meet the constraints described here adopted as the standard pattern for the team used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "No fast rollback on regressions."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Feature flags"
+    ]
+  },
+  {
+    "pregunta": "legal must approve prompt changes affecting disclosures. Context: an enterprise RAG assistant over policy PDFs with MCP document tools. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Store prompts in version control with semver, change tickets, and pinned production versions per environment",
+        "es_correcta": true,
+        "explicacion": "Prompt versioning is configuration management, not informal doc edits."
+      },
+      {
+        "texto_opcion": "Edit production prompts in the dashboard without history adopted as the standard pattern for the team often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "No audit trail."
+      },
+      {
+        "texto_opcion": "Reuse staging prompts in prod accidentally — compliance and behavior mismatches adopted as the standard pattern for the team adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Compliance and behavior mismatches."
+      },
+      {
+        "texto_opcion": "Version models but not prompts — cannot reproduce incidents used as the main path in this architecture adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Cannot reproduce incidents."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Versioning prompts"
+    ]
+  },
+  {
+    "pregunta": "document ingestion includes OCR, PII redaction, and chunking before vectors. Design review for a developer productivity assistant using built-in tools plus MCP servers. Select the most appropriate approach. Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "OCR every upload synchronously before answering applied across environments for operational consistency used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Blocks user latency."
+      },
+      {
+        "texto_opcion": "Keep heavy ETL/ingestion pipelines off the online inference path in dedicated workers",
+        "es_correcta": true,
+        "explicacion": "Data prep and inference scale differently and should not share runtime pools."
+      },
+      {
+        "texto_opcion": "Skip PII redaction in ingestion — compliance violation in indexes often seen in legacy designs but not ideal for this case used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Compliance violation in indexes."
+      },
+      {
+        "texto_opcion": "Combine ingestion and chat in one serverless function with no queue — poor scalability and failure isolation applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Poor scalability and failure isolation."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Data vs inference pipeline"
+    ]
+  },
+  {
+    "pregunta": "team proposes one microservice per tool endpoint (40 services). Production context: a customer support resolution agent with order lookup, refund, and escalate tools. What should the architect do? Constraint set #3.",
+    "opciones": [
+      {
+        "texto_opcion": "Split by individual prompt lines adopted as the standard pattern for the team That makes it a weaker fit against the main constraint in the prompt configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Absurd ops cost."
+      },
+      {
+        "texto_opcion": "Monolith all domains in one deploy with shared admin keys — blast radius and coupling often seen in legacy designs but not ideal for this case used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Blast radius and coupling."
+      },
+      {
+        "texto_opcion": "Group tools by domain boundary and shared auth domain; avoid nano-services that multiply operational overhead",
+        "es_correcta": true,
+        "explicacion": "Decomposition should follow domain cohesion, not one-service-per-tool dogma."
+      },
+      {
+        "texto_opcion": "Ignore shared auth and duplicate secrets per nano-service as a primary design for this requirement That makes it a weaker fit against the main constraint in the prompt configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Secret sprawl."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Microservice granularity"
+    ]
+  },
+  {
+    "pregunta": "order support and fraud investigation share Claude but have different data rules. Context: an enterprise RAG assistant over policy PDFs with MCP document tools. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Merge audit logs across contexts without labels — impossible to investigate per domain prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Impossible to investigate per domain."
+      },
+      {
+        "texto_opcion": "Differentiate only by changing the user greeting — does not enforce authorization boundaries selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Does not enforce authorization boundaries."
+      },
+      {
+        "texto_opcion": "Split into separate services/contexts with distinct tool sets, indexes, prompts, and auth—not one mega-assistant",
+        "es_correcta": true,
+        "explicacion": "Bounded contexts reduce coupling and enforce different policies per domain."
+      },
+      {
+        "texto_opcion": "One shared agent with all tools for simplicity — fraud investigators get unnecessary order refund tools used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Fraud investigators get unnecessary order refund tools."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Bounded context"
+    ]
+  },
+  {
+    "pregunta": "each tool should map to one backend capability with validated inputs. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Tools that return entire database dumps often seen in legacy designs but not ideal for this case as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Excessive data exposure."
+      },
+      {
+        "texto_opcion": "One mega-tool that accepts raw SQL strings — injection and over-broad access prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Injection and over-broad access."
+      },
+      {
+        "texto_opcion": "Skip input validation because the model is smart — malformed calls still hit backends adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Malformed calls still hit backends."
+      },
+      {
+        "texto_opcion": "Design small, composable tools with strict JSON schemas and server-side authorization checks",
+        "es_correcta": true,
+        "explicacion": "Clear tool boundaries improve reliability, testing, and least privilege."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Tool boundary design"
+    ]
+  },
+  {
+    "pregunta": "embedding pipeline changes weekly; chat API must stay stable. Context: a Claude Code CI pipeline that must run non-interactively on every PR. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Store vectors only in the model context — not scalable for large corpora as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Not scalable for large corpora."
+      },
+      {
+        "texto_opcion": "Ship embedding changes without version pins — silent retrieval regressions applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Silent retrieval regressions."
+      },
+      {
+        "texto_opcion": "Decouple ingestion/indexing services from online retrieval API and version indexes independently",
+        "es_correcta": true,
+        "explicacion": "Separating retrieval ingestion from query path enables safe reindexing and rollbacks."
+      },
+      {
+        "texto_opcion": "Rebuild indexes inside the chat request path — latency spikes and coupling selected to meet the constraints described here",
+        "es_correcta": false,
+        "explicacion": "Latency spikes and coupling."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Retrieval separation"
+    ]
+  },
+  {
+    "pregunta": "product teams tweak prompts daily; eval must not run in production traffic. Scenario: a customer support resolution agent with order lookup, refund, and escalate tools. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Judge quality only by random user thumbs-up adopted as the standard pattern for the team configured end-to-end for the stated workload",
+        "es_correcta": false,
+        "explicacion": "Noisy and delayed signal."
+      },
+      {
+        "texto_opcion": "Run offline eval pipelines and CI gates on golden sets separate from live inference services",
+        "es_correcta": true,
+        "explicacion": "Evaluation is its own service with datasets, metrics, and release gates."
+      },
+      {
+        "texto_opcion": "Skip regression tests on prompt changes — regressions reach users first prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Regressions reach users first."
+      },
+      {
+        "texto_opcion": "Run eval queries against production without isolation — skews metrics and risks data leaks as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Skews metrics and risks data leaks."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Eval service split"
+    ]
+  },
+  {
+    "pregunta": "multiple teams contribute instructions to one assistant. Design review for a Claude Code code-generation workflow across a multi-repo monorepo. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Centralize prompt templates with ownership tags, version control, and review gates; compose via structured modules",
+        "es_correcta": true,
+        "explicacion": "Prompt ownership prevents conflicting instructions and enables audited changes."
+      },
+      {
+        "texto_opcion": "Hard-code prompts in three repos without sync — inconsistent behavior by channel as the default production choice in this scenario as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Inconsistent behavior by channel."
+      },
+      {
+        "texto_opcion": "Let each team paste instructions into production via chat selected to meet the constraints described here as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Uncontrolled drift."
+      },
+      {
+        "texto_opcion": "Ban all customization — ignores legitimate team needs; use modules instead as a primary design for this requirement used as the main path in this architecture",
+        "es_correcta": false,
+        "explicacion": "Ignores legitimate team needs; use modules instead."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Prompt ownership"
+    ]
+  },
+  {
+    "pregunta": "agents need user session memory but also shared case records. Scenario: an enterprise RAG assistant over policy PDFs with MCP document tools. Which architectural choice is best? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Share one global session across all users applied across environments for operational consistency That makes it a weaker fit against the main constraint in the prompt as the default production choice in this scenario",
+        "es_correcta": false,
+        "explicacion": "Privacy disaster."
+      },
+      {
+        "texto_opcion": "Rely on full chat history as the database — context limits and inconsistency prioritized for simplicity, though it misses a key constraint often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Context limits and inconsistency."
+      },
+      {
+        "texto_opcion": "Keep ephemeral conversation state per session; persist canonical case facts in a store the tools read/write—not unbounded chat logs",
+        "es_correcta": true,
+        "explicacion": "Architects separate conversational state from system-of-record data."
+      },
+      {
+        "texto_opcion": "Store PII only in prompts never persisted — breaks continuity for legitimate support as a primary design for this requirement often seen in legacy designs but not ideal for this case",
+        "es_correcta": false,
+        "explicacion": "Breaks continuity for legitimate support."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Session vs shared state"
+    ]
+  },
+  {
+    "pregunta": "ten client apps call Claude capabilities with different scopes. Production context: a developer productivity assistant using built-in tools plus MCP servers. What should the architect do? Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Implement rate limits differently in each app applied across environments for operational consistency plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Inconsistent protection."
+      },
+      {
+        "texto_opcion": "Expose raw agent endpoints publicly without auth applied across environments for operational consistency adopted as the standard pattern for the team",
+        "es_correcta": false,
+        "explicacion": "Abuse and data leaks."
+      },
+      {
+        "texto_opcion": "Place an API gateway for auth, rate limits, routing, and request logging before internal agent services",
+        "es_correcta": true,
+        "explicacion": "Gateways enforce cross-cutting controls consistently for all AI entry points."
+      },
+      {
+        "texto_opcion": "Skip request logging at the edge adopted as the standard pattern for the team That makes it a weaker fit against the main constraint in the prompt",
+        "es_correcta": false,
+        "explicacion": "Hard to trace incidents."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "API gateway"
+    ]
+  },
+  {
+    "pregunta": "system prompt and policy docs repeat on every call. Design review for a production Agent SDK service handling tool loops and stop_reason control flow. Select the most appropriate approach. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Cache entire responses including user PII forever — privacy and staleness issues configured end-to-end for the stated workload prioritized for simplicity, though it misses a key constraint prioritized for simplicity, though it misses a key constraint",
+        "es_correcta": false,
+        "explicacion": "Privacy and staleness issues."
+      },
+      {
+        "texto_opcion": "Cache stable prompt prefixes with prompt caching; cache retrieval results separately with TTL keyed by query/doc version",
+        "es_correcta": true,
+        "explicacion": "Caching belongs at prompt and retrieval layers with explicit invalidation on content changes."
+      },
+      {
+        "texto_opcion": "Invalidate cache only on model version changes prioritized for simplicity, though it misses a key constraint That makes it a weaker fit against the main constraint in the prompt plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Misses document updates."
+      },
+      {
+        "texto_opcion": "Disable caching because debugging is harder — throws away major cost/latency wins used as the main path in this architecture adopted as the standard pattern for the team That makes it a weaker fit against the main constraint in the prompt",
+        "es_correcta": false,
+        "explicacion": "Throws away major cost/latency wins."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Cache layer placement"
+    ]
+  },
+  {
+    "pregunta": "SRE needs traces across model, tools, and retrieval. Context: a structured data extraction service that emits validated JSON for downstream systems. Constraint set #4.",
+    "opciones": [
+      {
+        "texto_opcion": "Disable spans to save 1% CPU plausible at first glance, yet weaker than the best option applied across environments for operational consistency",
+        "es_correcta": false,
+        "explicacion": "Blind during outages."
+      },
+      {
+        "texto_opcion": "Use unrelated trace ids per service — breaks end-to-end analysis plausible at first glance, yet weaker than the best option as a primary design for this requirement",
+        "es_correcta": false,
+        "explicacion": "Breaks end-to-end analysis."
+      },
+      {
+        "texto_opcion": "Log only final assistant text — cannot pinpoint tool vs model failures used as the main path in this architecture plausible at first glance, yet weaker than the best option",
+        "es_correcta": false,
+        "explicacion": "Cannot pinpoint tool vs model failures."
+      },
+      {
+        "texto_opcion": "Emit structured traces/spans per component with correlation IDs shared across services",
+        "es_correcta": true,
+        "explicacion": "Unified tracing across decoupled AI microservices speeds incident response."
+      }
+    ],
+    "tags": [
+      "1.3",
+      "Observability split"
+    ]
+  }
+]
